@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block content %}
+
+<div id="bundle-app" data-id="{{ bundle.pk }}"></div>
+
+{{ bundle_display|json_script:"bundle-app-data" }}
+
+{% endblock %}
+
+
+{% block script %}
+<script src="{% static "assets/js/bundle/detail.js" %}"></script>
+{% endblock %}

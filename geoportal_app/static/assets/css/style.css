@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+
+
+
+.gp-bg-primary{
+    background-color: #034ea2;
+    color:#fff;
+}
+.gp-bg-dark{
+    background-color: #373f50 !important;
+    color:#fff;
+}
+
+.gp-bg-darker{
+    background-color: #2b3445 !important;
+    color: #fff;
+}
+
+.gp-btn-primary {
+    color: #fff;
+    background-color: #034ea2;
+    border-color: #034ea2;
+}
+.gp-btn-primary:hover {
+    color: #fff;
+    background-color: #1969c3;
+    border-color: #1969c3;
+}
+
+
+.gp-text-primary{
+    color: #034ea2;
+}
+.gp-text-light-primary{
+    color: #428ce0 !important;
+}
+.gp-outline-primary{
+    color: #034ea2;
+    background-color: transparent;
+    background-image: none;
+    border-color: #034ea2;
+}
+
+/*bootstrap color change*/
+
+.btn{
+    font-size: 12px;
+    border-radius: .18rem;
+}
+
+.form-control{
+    font-size: .8rem;
+}
+
+
+body{
+    font-family: 'Roboto', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #484848;
+}
+
+
+a{
+    color: #484848;
+}
+/*slider*/
+.owl-item .item{
+    position: relative;
+}
+.owl-item .item .caption{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/*pages*/
+.page-container{
+    min-height: 500px;
+}
+
+
+/*subs*/
+.sub .icon {
+    width: 100px;
+}
+/*.sub::before{*/
+/*    content: '';*/
+/*    background-color: red;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*}*/
+
+.sub:hover{
+  background-color: #fff;
+  color: white;
+}
+
+/*header*/
+.logo-top{
+    width: 190px;
+}
+
+.search-input{
+    border: 1px solid #034ea2;
+}
+
+.navbar-nav .active{
+    border-bottom: 3px solid #fff;
+}
+
+.navbar-brand{
+    font-size: 14px;
+}
+
+
+
+
+
+
+/*footer*/
+
+.logo-bottom{
+    width: 137px;
+}
+
+
+/*login*/
+
+.login-container{
+    min-height: 550px;
+    background-image: url("../image/login-back.jpg");
+    background-repeat:no-repeat;
+    background-size:cover;
+}
+
+.dan-logo{
+    height: 50px;
+}

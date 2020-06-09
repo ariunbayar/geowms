@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block content %}
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-md-9">
+                <img class="img-fluid" src="{% static 'assets/image/serv/serv-1.jpg' %}">
+            </div>
+            <div class="col-md-3">
+            <form>
+                <div class="form-group">
+                    <label class="font-weight-bold" for="formGroupInput">Нэрэлбэрээр хайх</label>
+                    <div class="input-group mb-3">
+
+                        <input type="text" class="form-control" placeholder="хайх утга" aria-label="" aria-describedby="">
+                        <div class="input-group-append">
+                            <button class="btn gp-outline-primary" type="button"><i class="fa fa-search mr-1" aria-hidden="true"></i>Хайх</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold" for="formGroupInput">Байрлалаар хайх</label>
+                    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Уртраг">
+                    <input type="text" class="form-control mt-2" id="formGroupExampleInput2" placeholder="Өргөрөг">
+                    <input type="text" class="form-control mt-2" id="formGroupExampleInput2" placeholder="Радиус">
+                    <button type="submit" class="btn gp-outline-primary mt-2 float-right"><i class="fa fa-search mr-1" aria-hidden="true"></i>Хайх</button>
+                </div>
+                <div class="tanih mt-5">
+                    <label class="font-weight-bold" for="formGroupInput">Таних тэмдэг</label>
+                    <p class="my-1">GPS- ийн сүлжээний цэг</p>
+                    <p class="my-1">Гравиметрийн сүлжээний цэг</p>
+                    <p class="my-1">Өндрийн сүлжээний цэг</p>
+                    <p class="my-1">Триангуляцийн сүлжээний цэг</p>
+                    <p class="my-1">Зураглалын сүлжээний цэг</p>
+                </div>
+                <div class="davhar">
+                    <label class="font-weight-bold" for="formGroupInput">Давхаргууд</label>
+                    <p class="my-1">FALSE Аймгууд</p>
+                    <p class="my-1">FALSE Сумдууд</p>
+                    <p class="my-1">FALSE Дэвсгэр зургийн загвар сан</p>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
