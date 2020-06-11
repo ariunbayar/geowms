@@ -5,6 +5,7 @@ import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
+import {defaults as FullScreen} from 'ol/control';
 
 import "./styles.css";
 import {service} from './service'
@@ -81,6 +82,9 @@ export default class BundleMap extends Component {
 
         const map = new Map({
             target: 'map',
+            controls: defaultControls().extend([
+                new FullScreen()
+              ]),
             layers: [
                 layer_osm,
                 ...map_wms_list.map((wms) => wms.tile),
@@ -121,7 +125,7 @@ export default class BundleMap extends Component {
     render() {
         return (
 
-            <div className="container my-4">
+            <div className="container-fluid">
                 <button onClick={this.showDetail} style={{display: 'none'}}>click here</button>
                 <div className="row">
 
