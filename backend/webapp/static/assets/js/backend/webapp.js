@@ -11238,7 +11238,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".img {\n    margin-right: 1rem;\n    max-width: 5%;\n}", ""]);
+exports.push([module.i, ".img {\n    margin-right: 1rem;\n    max-width: 5%;\n}\n\n.fileContainer {\n\tmargin: 0;\n\tpadding: 0;\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -46681,6 +46681,10 @@ var BundlePage = /*#__PURE__*/function (_Component) {
         scope: "col"
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
         scope: "col"
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+        scope: "col"
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+        scope: "col"
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.bundle_list.map(function (values) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Bundle__WEBPACK_IMPORTED_MODULE_3__["default"], {
           key: values.id,
@@ -47634,7 +47638,7 @@ Object(react_dom__WEBPACK_IMPORTED_MODULE_1__["render"])( /*#__PURE__*/react__WE
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");
-module.exports = __webpack_require__(/*! /home/baigalaa/Documents/project/geoportal/backend/webapp/src/index.js */"./src/index.js");
+module.exports = __webpack_require__(/*! /home/baigalaa/Documents/project/geoWMS/backend/webapp/src/index.js */"./src/index.js");
 
 
 /***/ })

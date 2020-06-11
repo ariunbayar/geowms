@@ -32,7 +32,6 @@ export class BundlePage extends Component {
         this.handleEdit = this.handleEdit.bind(this)
         this.handleAdd = this.handleAdd.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
-
     }
 
     componentDidMount() {
@@ -109,6 +108,8 @@ export class BundlePage extends Component {
                                             <th scope="col"> # </th>
                                             <th scope="col"> Сангийн нэр </th>
                                             <th scope="col"> WMS сервис </th>
+                                            <th scope="col"></th>
+                                            <th scope="col"></th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
                                         </tr>
