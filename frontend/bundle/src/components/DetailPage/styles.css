@@ -23,3 +23,14 @@
     top: .6rem;
     right: .8rem;
 }
+
+
+.ol-full-screen {
+    right: .5em;
+    top: 28px;
+}
+.ol-zoom {
+    left: unset;
+    right: .5em;
+    top: 52px;
+}
