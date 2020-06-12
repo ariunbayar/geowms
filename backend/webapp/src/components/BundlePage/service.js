@@ -98,10 +98,10 @@ function remove(id) {
 }
 
 
-function move(id) {
+function move(id, move) {
     const opts = {
         ..._getPostOptions(),
-        body: JSON.stringify({id}),
+        body: JSON.stringify({id, move}),
     }
 
     return fetch(`${prefix}/bundle/move/`, opts).then(handleResponse)

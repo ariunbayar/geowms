@@ -40,13 +40,13 @@ export default class Bundle extends Component {
                     }
                 </td>
                 <td>
-                    <a href="#" onClick={this.props.handleMove}>
-                        дээш
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
+                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
                     </a>
                 </td>
                 <td>
-                    <a href="#" onClick={this.props.handleMove}>
-                        доош
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'down')}>
+                        <i className="fa fa-chevron-down" aria-hidden="true"></i>
                     </a>
                 </td>
             </tr>

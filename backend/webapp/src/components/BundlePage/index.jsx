@@ -88,11 +88,13 @@ export class BundlePage extends Component {
         this.setState({is_form_open: false})
     }
 
-    handleMove(id) {
-        service.move(id).then(({bundle_list, success}) => {
-            if (success) this.setState({bundle_list: bundle_list})
+    handleMove(event, id, direction) {
+        event.preventDefault()
+        service.move(id, direction).then(({bundle_list, success}) => {
+            if (success) this.setState({bundle_list})
         })
     }
+
     render() {
         return (
             <div className="container my-4">
@@ -126,8 +128,7 @@ export class BundlePage extends Component {
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
-                                                handleMove={() => this.handleMove(values.id)}
-                                                handleMove={() => this.handleMove(values.id)}
+                                                handleMove={this.handleMove}
                                             />
                                         )}
                                     </tbody>
