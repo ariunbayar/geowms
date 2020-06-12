@@ -124,6 +124,21 @@ def remove(request, payload):
 
 @require_POST
 @ajax_required
+def move(request, payload):
+
+    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
+    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
+
+    rsp = {
+        'bundle_list': bundle_list,
+        'success': True
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
 def wms_layers(request, payload):
 
     bundle = get_object_or_404(Bundle, pk=payload.get('id'))

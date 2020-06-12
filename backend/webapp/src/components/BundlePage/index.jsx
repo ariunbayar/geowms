@@ -4,7 +4,6 @@ import {service} from './service'
 import BundleForm from './BundleForm'
 import Bundle from './Bundle'
 
-
 export class BundlePage extends Component {
 
 
@@ -31,6 +30,7 @@ export class BundlePage extends Component {
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleEdit = this.handleEdit.bind(this)
         this.handleAdd = this.handleAdd.bind(this)
+        this.handleMove = this.handleMove.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
     }
 
@@ -88,6 +88,11 @@ export class BundlePage extends Component {
         this.setState({is_form_open: false})
     }
 
+    handleMove(id) {
+        service.move(id).then(({bundle_list, success}) => {
+            if (success) this.setState({bundle_list: bundle_list})
+        })
+    }
     render() {
         return (
             <div className="container my-4">
@@ -121,6 +126,8 @@ export class BundlePage extends Component {
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
+                                                handleMove={() => this.handleMove(values.id)}
+                                                handleMove={() => this.handleMove(values.id)}
                                             />
                                         )}
                                     </tbody>

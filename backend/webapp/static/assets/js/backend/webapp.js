@@ -46246,7 +46246,13 @@ var Bundle = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
         className: "fa fa-trash-o",
         "aria-hidden": "true"
-      }))));
+      }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+        href: "#",
+        onClick: this.props.handleMove
+      }, "\u0434\u044D\u044D\u0448")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+        href: "#",
+        onClick: this.props.handleMove
+      }, "\u0434\u043E\u043E\u0448")));
     }
   }]);
 
@@ -46568,6 +46574,7 @@ var BundlePage = /*#__PURE__*/function (_Component) {
     _this.handleListUpdated = _this.handleListUpdated.bind(_assertThisInitialized(_this));
     _this.handleEdit = _this.handleEdit.bind(_assertThisInitialized(_this));
     _this.handleAdd = _this.handleAdd.bind(_assertThisInitialized(_this));
+    _this.handleMove = _this.handleMove.bind(_assertThisInitialized(_this));
     _this.handleFormCancel = _this.handleFormCancel.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -46654,9 +46661,22 @@ var BundlePage = /*#__PURE__*/function (_Component) {
       });
     }
   }, {
+    key: "handleMove",
+    value: function handleMove(id) {
+      var _this5 = this;
+
+      _service__WEBPACK_IMPORTED_MODULE_1__["service"].move(id).then(function (_ref5) {
+        var bundle_list = _ref5.bundle_list,
+            success = _ref5.success;
+        if (success) _this5.setState({
+          bundle_list: bundle_list
+        });
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "container my-4"
@@ -46686,16 +46706,21 @@ var BundlePage = /*#__PURE__*/function (_Component) {
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
         scope: "col"
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.bundle_list.map(function (values) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Bundle__WEBPACK_IMPORTED_MODULE_3__["default"], {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Bundle__WEBPACK_IMPORTED_MODULE_3__["default"], _defineProperty({
           key: values.id,
           values: values,
           handleRemove: function handleRemove() {
-            return _this5.handleRemove(values.id);
+            return _this6.handleRemove(values.id);
           },
           handleEdit: function handleEdit() {
-            return _this5.handleEdit(values);
+            return _this6.handleEdit(values);
+          },
+          handleMove: function handleMove() {
+            return _this6.handleMove(values.id);
           }
-        });
+        }, "handleMove", function handleMove() {
+          return _this6.handleMove(values.id);
+        }));
       })))), this.state.is_form_open && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_BundleForm__WEBPACK_IMPORTED_MODULE_2__["default"], {
         handleSave: this.handleSave,
         handleCancel: this.handleFormCancel,
@@ -46730,7 +46755,8 @@ var service = {
   getAll: getAll,
   create: create,
   update: update,
-  remove: remove
+  remove: remove,
+  move: move
 };
 var prefix = '/back';
 
@@ -46820,6 +46846,16 @@ function remove(id) {
   });
 
   return fetch("".concat(prefix, "/bundle/remove/"), opts).then(handleResponse);
+}
+
+function move(id) {
+  var opts = _objectSpread(_objectSpread({}, _getPostOptions()), {}, {
+    body: JSON.stringify({
+      id: id
+    })
+  });
+
+  return fetch("".concat(prefix, "/bundle/move/"), opts).then(handleResponse);
 }
 
 /***/ }),

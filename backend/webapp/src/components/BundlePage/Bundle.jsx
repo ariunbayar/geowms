@@ -39,6 +39,16 @@ export default class Bundle extends Component {
                         </a>
                     }
                 </td>
+                <td>
+                    <a href="#" onClick={this.props.handleMove}>
+                        дээш
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onClick={this.props.handleMove}>
+                        доош
+                    </a>
+                </td>
             </tr>
         )
     }

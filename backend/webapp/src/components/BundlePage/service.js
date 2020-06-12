@@ -3,6 +3,7 @@ export const service = {
     create,
     update,
     remove,
+    move
 }
 
 const prefix = '/back'
@@ -94,4 +95,14 @@ function remove(id) {
     }
 
     return fetch(`${prefix}/bundle/remove/`, opts).then(handleResponse)
+}
+
+
+function move(id) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+
+    return fetch(`${prefix}/bundle/move/`, opts).then(handleResponse)
 }
