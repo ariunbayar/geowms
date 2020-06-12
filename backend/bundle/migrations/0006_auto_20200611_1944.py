@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_bundle', '0004_bundle_icon'),
+        ('backend_bundle', '0005_auto_20200611_1940'),
     ]
 
     operations = [

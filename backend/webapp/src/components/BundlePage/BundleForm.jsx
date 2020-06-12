@@ -25,7 +25,6 @@ export default class BundleForm extends Component {
 
     }
 
-
     componentDidMount() {
     }
 
