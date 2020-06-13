@@ -28,13 +28,13 @@ export default class App extends Component {
                         <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
                             <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" to={"/back/"}>Дэд Сан</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/"}>Дэд Сан</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" to={"/back/wms/"}>WMS</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" to={"/back/dev/"}>Хөгжүүлэлт</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>Хөгжүүлэлт</NavLink>
                                 </li>
                             </ul>
                         </div>
