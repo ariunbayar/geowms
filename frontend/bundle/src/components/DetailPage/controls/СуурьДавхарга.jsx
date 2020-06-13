@@ -3,6 +3,9 @@ import {Control} from 'ol/control'
 import {CLASS_CONTROL, CLASS_UNSELECTABLE} from 'ol/css.js'
 
 
+const CLASS_ACTIVE = 'active'
+
+
 export class СуурьДавхарга extends Control {
 
     constructor(opt_options) {
@@ -14,21 +17,16 @@ export class СуурьДавхарга extends Control {
             target: options.target,
         })
 
-        this.last_layer_callback = null
 
-        const base_layers = options.layers.map(({thumbnail, handler, is_active}, idx) => {
+        this.toggleLayer = this.toggleLayer.bind(this)
+        this.initLayer = this.initLayer.bind(this)
+        this.handleClick = this.handleClick.bind(this)
 
-            const base_layer = document.createElement('a')
-            base_layer.setAttribute('href', '#')
-            base_layer.className = 'суурь-давхарга'
-            base_layer.style.backgroundImage = `url(${thumbnail})`
-            base_layer.addEventListener('click', this.handleClick.bind(this, handler))
+        this.last_layer = null
+        this.last_layer_el = null
+        this.last_active = null
 
-            handler(is_active === true)
-
-            return base_layer
-
-        })
+        const base_layers = options.layers.map(this.initLayer)
 
         const cssClasses = `суурь-давхаргууд ${CLASS_UNSELECTABLE} ${CLASS_CONTROL}`
 
@@ -38,12 +36,42 @@ export class СуурьДавхарга extends Control {
 
     }
 
-    handleClick(current_layer_callback, event) {
-        event.preventDefault()
-        if (this.last_layer_callback)
-            this.last_layer_callback(false)
-        current_layer_callback(true)
-        this.last_layer_callback = current_layer_callback
+    initLayer({thumbnail, layer, is_active}) {
+
+        const el = document.createElement('a')
+        el.setAttribute('href', '#')
+        el.className = 'суурь-давхарга' + (is_active ? ' ' + CLASS_ACTIVE : '')
+        el.style.backgroundImage = `url(${thumbnail})`
+        el.addEventListener('click', (event) => {
+            event.preventDefault()
+            this.handleClick(el, layer)
+        })
+
+        this.toggleLayer(is_active === true, el, layer)
+
+        return el
+
+    }
+
+    toggleLayer(is_active, el, layer) {
+
+        if (this.last_active && is_active) {
+            console.log(this.last_active);
+            this.last_active.layer.setVisible(false)
+            this.last_active.el.classList.toggle(CLASS_ACTIVE, false)
+        }
+
+        layer.setVisible(is_active)
+        el.classList.toggle(CLASS_ACTIVE, is_active)
+
+        if (is_active)
+            this.last_active = {el, layer}
+    }
+
+    handleClick(el, layer) {
+        if (this.last_active && this.last_active.el === el)
+            return
+        this.toggleLayer(true, el, layer)
     }
 
 }

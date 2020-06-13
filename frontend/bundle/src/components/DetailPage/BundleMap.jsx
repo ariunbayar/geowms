@@ -95,15 +95,11 @@ export default class BundleMap extends Component {
                         {
                             is_active: true,
                             thumbnail: '/media/дэд-сан/icon_40eb3gu.png',
-                            handler: (is_visible) => {
-                                layer_osm.setVisible(is_visible)
-                            },
+                            layer: layer_osm,
                         },
                         {
                             thumbnail: '/media/дэд-сан/icon_fOSGhXt.png',
-                            handler: (is_visible) => {
-                                layer_google_satellite.setVisible(is_visible)
-                            },
+                            layer: layer_google_satellite,
                         },
                     ],
                 }),

@@ -35,11 +35,16 @@
     margin: 1px;
     border-radius: 2px;
     float: right;
-    opacity: .7;
     transition: opacity .15s ease-out;
 }
+.суурь-давхаргууд > .суурь-давхарга.active,
+.суурь-давхаргууд:hover > .суурь-давхарга.active:hover,
 .суурь-давхаргууд > .суурь-давхарга:hover {
     opacity: 1;
+}
+.суурь-давхаргууд > .суурь-давхарга,
+.суурь-давхаргууд:hover > .суурь-давхарга.active {
+    opacity: .7;
 }
 
 
