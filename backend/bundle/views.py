@@ -140,7 +140,7 @@ def move(request, payload):
         return JsonResponse({'success': False})
 
     bundle1.sort_order, bundle2.sort_order = bundle2.sort_order, bundle1.sort_order
-    Bundle.objects.bulk_update([bundle1, bundle_sort], ['sort_order'])
+    Bundle.objects.bulk_update([bundle1, bundle2], ['sort_order'])
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
 
