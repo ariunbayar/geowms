@@ -80,9 +80,11 @@ def _resize_b64_to_sizes(src_b64):
 @ajax_required
 def create(request, payload):
 
+    сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
     form = BundleForm(payload)
     if form.is_valid():
         form.instance.created_by = request.user
+        form.instance.sort_order = сүүлийн_дэд_сан.sort_order + 1
         form.instance.is_removeable = True
         image_x2 = _resize_b64_to_sizes(payload.get('icon'))
         form.instance.icon = SimpleUploadedFile('icon.png', image_x2)
@@ -120,6 +122,34 @@ def remove(request, payload):
     bundle.delete()
 
     return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def move(request, payload):
+
+    bundle1 = get_object_or_404(Bundle, pk=payload.get('id'))
+
+    if payload.get('move') == 'down':
+        bundle2 = Bundle.objects.filter(sort_order__gt=bundle1.sort_order).order_by('sort_order').first()
+
+    else:
+        bundle2 = Bundle.objects.filter(sort_order__lt=bundle1.sort_order).order_by('sort_order').last()
+
+    if bundle2 is None:
+        return JsonResponse({'success': False})
+
+    bundle1.sort_order, bundle2.sort_order = bundle2.sort_order, bundle1.sort_order
+    Bundle.objects.bulk_update([bundle1, bundle_sort], ['sort_order'])
+
+    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
+
+    rsp = {
+        'success': True,
+        'bundle_list': bundle_list,
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_POST

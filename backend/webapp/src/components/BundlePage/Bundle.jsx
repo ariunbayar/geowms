@@ -39,6 +39,16 @@ export default class Bundle extends Component {
                         </a>
                     }
                 </td>
+                <td>
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
+                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'down')}>
+                        <i className="fa fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                </td>
             </tr>
         )
     }
