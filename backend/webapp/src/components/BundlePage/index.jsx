@@ -4,7 +4,6 @@ import {service} from './service'
 import BundleForm from './BundleForm'
 import Bundle from './Bundle'
 
-
 export class BundlePage extends Component {
 
 
@@ -16,6 +15,8 @@ export class BundlePage extends Component {
             id: null,
             name: '',
             price: 0,
+            icon: '',
+            icon_url: '',
             layers: [],
         }
 
@@ -31,8 +32,8 @@ export class BundlePage extends Component {
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleEdit = this.handleEdit.bind(this)
         this.handleAdd = this.handleAdd.bind(this)
+        this.handleMove = this.handleMove.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
-
     }
 
     componentDidMount() {
@@ -89,6 +90,13 @@ export class BundlePage extends Component {
         this.setState({is_form_open: false})
     }
 
+    handleMove(event, id, direction) {
+        event.preventDefault()
+        service.move(id, direction).then(({bundle_list, success}) => {
+            if (success) this.setState({bundle_list})
+        })
+    }
+
     render() {
         return (
             <div className="container my-4">
@@ -111,6 +119,8 @@ export class BundlePage extends Component {
                                             <th scope="col"> WMS сервис </th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
+                                            <th scope="col"></th>
+                                            <th scope="col"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -120,6 +130,7 @@ export class BundlePage extends Component {
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
+                                                handleMove={this.handleMove}
                                             />
                                         )}
                                     </tbody>

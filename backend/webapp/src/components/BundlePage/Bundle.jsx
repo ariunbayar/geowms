@@ -5,7 +5,7 @@ import "./styles.css";
 export default class Bundle extends Component {
 
     render() {
-        const {id, name, price, is_removeable, icon, wms_list} = this.props.values
+        const {id, name, price, is_removeable, icon_url, wms_list} = this.props.values
         return (
             <tr>
 
@@ -14,7 +14,7 @@ export default class Bundle extends Component {
                 </th>
 
                 <td>
-                    <img className="img" src={icon}/>
+                    <img className="img" src={icon_url}/>
                     {name}
                 </td>
 
@@ -38,6 +38,16 @@ export default class Bundle extends Component {
                             <i className="fa fa-trash-o" aria-hidden="true"></i>
                         </a>
                     }
+                </td>
+                <td>
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
+                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'down')}>
+                        <i className="fa fa-chevron-down" aria-hidden="true"></i>
+                    </a>
                 </td>
             </tr>
         )

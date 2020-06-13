@@ -4,11 +4,14 @@ __pycache__
 
 backend/webapp/package-lock.json
 backend/webapp/node_modules/
+backend/webapp/static/assets/js/backend/webapp.js
 backend/webapp/static/assets/js/backend/webapp.js.map
+backend/webapp/static/assets/js/backend/webapp.js
 
 frontend/bundle/package-lock.json
 frontend/bundle/node_modules/
 frontend/bundle/static/assets/js/bundle/detail.js.map
+frontend/bundle/static/assets/js/bundle/detail.js
 
 geoportal/settings/dev.py
 geoportal/settings/prod.py

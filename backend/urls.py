@@ -21,6 +21,7 @@ urlpatterns = [
         path('create/', bundle_views.create, name='create'),
         path('update/', bundle_views.update, name='update'),
         path('remove/', bundle_views.remove, name='remove'),
+        path('move/', bundle_views.move, name='move'),
         path('wms-layers/', bundle_views.wms_layers),
     ], 'bundle'))),
 

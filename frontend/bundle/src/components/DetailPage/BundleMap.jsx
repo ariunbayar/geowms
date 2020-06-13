@@ -5,7 +5,7 @@ import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
-import {defaults as FullScreen} from 'ol/control';
+import {defaults as defaultControls, FullScreen} from 'ol/control';
 
 import "./styles.css";
 import {service} from './service'
