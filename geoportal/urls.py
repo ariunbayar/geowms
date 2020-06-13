@@ -14,7 +14,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('login/', secure.views.login, name='login'),
-    path('login/dan/', secure.views.login_api, name='login-api'),
+    path('login/dan/', secure.views.login_dan, name='login-dan'),
     path('logout/', secure.views.logout, name='logout'),
     path('register', views.register, name='register'),
     path('service', views.service, name='service'),

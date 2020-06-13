@@ -5,9 +5,9 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_GET
-from backend.user.models import User
+from geoportal_app.models import User
 
-from geoportal.auth_api import MohsAuth
+from geoportal.auth_api import GeoAuth
 
 
 def _get_user_redir(request, user):
@@ -37,12 +37,12 @@ def login(request):
     return render(request, 'secure/login.html', context)
 
 
-def login_api(request):
+def login_dan(request):
 
-    mohs_auth = MohsAuth(request)
+    geo_auth = GeoAuth(request)
 
 
-    if mohs_auth.is_step1():
+    if geo_auth.is_step1():
 
         payload = [
             {
@@ -65,19 +65,19 @@ def login_api(request):
             # }
         ]
 
-        mohs_auth.step1_generate_state()
-        mohs_auth.step1_set_scope(payload)
-        url = mohs_auth.step1_build_redirect_uri()
+        geo_auth.step1_generate_state()
+        geo_auth.step1_set_scope(payload)
+        url = geo_auth.step1_build_redirect_uri()
         return redirect(url)
 
-    if mohs_auth.is_step2():
+    if geo_auth.is_step2():
         print("is_step2")
-        if not mohs_auth.step2_is_state_valid():
+        if not geo_auth.step2_is_state_valid():
             raise Http404
-        mohs_auth.step2_fetch_access_token()
+        geo_auth.step2_fetch_access_token()
 
-    if mohs_auth.is_step3():
-        data = mohs_auth.step3_fetch_scope_data()
+    if geo_auth.is_step3():
+        data = geo_auth.step3_fetch_scope_data()
 
         services_data = data[1]
 
@@ -101,10 +101,11 @@ def login_api(request):
                     first_name=firstname,
                     last_name=lastname,
                     gender=gender,
+                    is_superuser=True,
                 )
 
             auth.login(request, user)
-            return redirect('bundle:all')
+            return redirect(settings.LOGIN_REDIRECT_URL)
 
     raise Http404
 

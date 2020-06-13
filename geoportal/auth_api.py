@@ -9,9 +9,9 @@ from django.utils import timezone
 from django.conf import settings
 
 
-class MohsAuth():
+class GeoAuth():
 
-    SESSION_STATE_NAME = 'mohs_sso_state'
+    SESSION_STATE_NAME = 'geo_sso_state'
     BASE_HEADERS = {
             'User-Agent': 'tz.mohs.mn 1.0'
         }
@@ -33,12 +33,12 @@ class MohsAuth():
 
     def step1_build_redirect_uri(self):
         params = {
-                'client_key': settings.MOHS_SSO['CLIENT_KEY'],
-                'redirect_uri': settings.MOHS_SSO['REDIRECT_URI'],
+                'client_key': settings.GEO_SSO['CLIENT_KEY'],
+                'redirect_uri': settings.GEO_SSO['REDIRECT_URI'],
                 'state': self.request.session[self.SESSION_STATE_NAME],
                 'scope': self.scope,
             }
-        url = settings.MOHS_SSO['ENDPOINTS']['LOGIN'] + urlencode(params)
+        url = settings.GEO_SSO['ENDPOINTS']['LOGIN'] + urlencode(params)
         return url
 
     def is_step2(self):
@@ -53,12 +53,12 @@ class MohsAuth():
 
     def step2_fetch_access_token(self):
         params = {
-                'client_key': settings.MOHS_SSO['CLIENT_KEY'],
-                'client_secret': settings.MOHS_SSO['CLIENT_SECRET'],
-                'redirect_uri': settings.MOHS_SSO['REDIRECT_URI'],
+                'client_key': settings.GEO_SSO['CLIENT_KEY'],
+                'client_secret': settings.GEO_SSO['CLIENT_SECRET'],
+                'redirect_uri': settings.GEO_SSO['REDIRECT_URI'],
                 'auth_code': self.request.GET.get('auth_code'),
             }
-        url = settings.MOHS_SSO['ENDPOINTS']['AUTHORIZE'] + urlencode(params)
+        url = settings.GEO_SSO['ENDPOINTS']['AUTHORIZE'] + urlencode(params)
         rsp = requests.post(url, data={}, headers=self.BASE_HEADERS)
         if rsp.status_code == 200:
             token_info = rsp.json()
@@ -78,7 +78,7 @@ class MohsAuth():
     def step3_fetch_scope_data(self):
         is_expired = timezone.now() > self.access_token_expire_at
         if not is_expired:
-            url = settings.MOHS_SSO['ENDPOINTS']['SERVICE']
+            url = settings.GEO_SSO['ENDPOINTS']['SERVICE']
             headers = {
                     **self.BASE_HEADERS,
                     'Authorization': 'Bearer %s' % self.access_token
