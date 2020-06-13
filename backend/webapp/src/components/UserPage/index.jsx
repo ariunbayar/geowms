@@ -18,14 +18,12 @@ export class UserPage extends Component {
     }
 
     componentDidMount() {
-        console.log("componentDidMount")
         this.handleListUpdated()
     }
 
     handleListUpdated() {
 
         service.getAll().then(({user_list}) => {
-            console.log(user_list)
             this.setState({user_list})
         })
 
