@@ -3,6 +3,7 @@ from django.urls import re_path, path, include
 from backend.bundle import views as bundle_views
 from backend.webapp import views as webapp_views
 from backend.wms import views as wms_views
+from backend.user import views as user_views
 
 
 app_name = 'backend'
@@ -24,6 +25,10 @@ urlpatterns = [
         path('move/', bundle_views.move, name='move'),
         path('wms-layers/', bundle_views.wms_layers),
     ], 'bundle'))),
+
+    path('user/', include(([
+        path('all/', user_views.all, name='all'),
+    ], 'user'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 
