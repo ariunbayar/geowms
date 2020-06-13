@@ -3,9 +3,11 @@ import React, { Component, Fragment } from "react"
 import 'ol/ol.css'
 import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
+import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
-import {defaults as defaultControls, FullScreen} from 'ol/control';
+import {defaults as defaultControls, FullScreen} from 'ol/control'
+import {СуурьДавхарга} from './controls/СуурьДавхарга'
 
 import "./styles.css";
 import {service} from './service'
@@ -79,14 +81,32 @@ export default class BundleMap extends Component {
             })
         })
 
+        const layer_google_satellite = new Tile({
+            source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}'}),
+        })
+
 
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
-                new FullScreen()
-              ]),
+                new FullScreen(),
+                new СуурьДавхарга({
+                    layers: [
+                        {
+                            is_active: true,
+                            thumbnail: '/media/дэд-сан/icon_40eb3gu.png',
+                            layer: layer_osm,
+                        },
+                        {
+                            thumbnail: '/media/дэд-сан/icon_fOSGhXt.png',
+                            layer: layer_google_satellite,
+                        },
+                    ],
+                }),
+            ]),
             layers: [
                 layer_osm,
+                layer_google_satellite,
                 ...map_wms_list.map((wms) => wms.tile),
             ],
             view: new View({
