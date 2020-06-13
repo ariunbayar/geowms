@@ -16,6 +16,7 @@ export default class BundleForm extends Component {
             price: props.values.price,
             layers: props.values.layers,
             icon: props.values.icon,
+            icon_url: props.values.icon_url,
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -24,7 +25,6 @@ export default class BundleForm extends Component {
         this.onDrop = this.onDrop.bind(this)
 
     }
-
 
     componentDidMount() {
     }
@@ -124,6 +124,9 @@ export default class BundleForm extends Component {
 
                 <div className="form-group">
                     <label htmlFor="id_icon"> Icon: </label>
+                    {!this.state.icon &&
+                        <img src={this.state.icon_url} className="uploadPicture"/>
+                    }
                     <ImageUploader
                         withPreview={true}
                         withIcon={false}
