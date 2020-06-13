@@ -24,13 +24,31 @@
     right: .8rem;
 }
 
+.суурь-давхаргууд{
+    right: .5rem;
+    bottom: .5rem;
+}
+.суурь-давхаргууд > .суурь-давхарга{
+    display: block;
+    width: 8rem;
+    height: 4.5rem;
+    margin: 1px;
+    border-radius: 2px;
+    float: right;
+    opacity: .7;
+    transition: opacity .15s ease-out;
+}
+.суурь-давхаргууд > .суурь-давхарга:hover {
+    opacity: 1;
+}
+
 
 .ol-full-screen {
-    right: .5em;
+    right: .5rem;
     top: 28px;
 }
 .ol-zoom {
     left: unset;
-    right: .5em;
+    right: .5rem;
     top: 52px;
 }
