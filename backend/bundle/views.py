@@ -80,11 +80,11 @@ def _resize_b64_to_sizes(src_b64):
 @ajax_required
 def create(request, payload):
 
-    sort = Bundle.objects.all().order_by('sort_order').last()
+    сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
     form = BundleForm(payload)
     if form.is_valid():
         form.instance.created_by = request.user
-        form.instance.sort_order = sort.sort_order + 1
+        form.instance.sort_order = сүүлийн_дэд_сан.sort_order + 1
         form.instance.is_removeable = True
         image_x2 = _resize_b64_to_sizes(payload.get('icon'))
         form.instance.icon = SimpleUploadedFile('icon.png', image_x2)
