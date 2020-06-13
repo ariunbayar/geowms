@@ -15,6 +15,8 @@ export class BundlePage extends Component {
             id: null,
             name: '',
             price: 0,
+            icon: '',
+            icon_url: '',
             layers: [],
         }
 
