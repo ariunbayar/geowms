@@ -118,7 +118,7 @@ def remove(request, payload):
 
     bundle = get_object_or_404(Bundle, pk=pk, is_removeable=True)
 
-    bundle.layers.all().delete()
+    bundle.layers.clear()
     bundle.delete()
 
     return JsonResponse({'success': True})
