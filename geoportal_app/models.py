@@ -32,7 +32,7 @@ class Role(models.Model):
 
 class User(AbstractUser):
   roles = models.ManyToManyField(Role)
-  register = models.CharField(max_length=10, null=True, blank=True)
+  register = models.CharField(max_length=10, null=True)
   gender = models.CharField(max_length=10, null=True)
 
 class Page(models.Model):

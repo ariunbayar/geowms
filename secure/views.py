@@ -2,45 +2,16 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from geoportal_app.models import User
 
 from geoportal.auth_api import GeoAuth
 
 
-def _get_user_redir(request, user):
-
-    return redirect('bundle')
-
-
-@csrf_protect
-def login(request):
-    context = {}
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        if username and password:
-            user = auth.authenticate(request, username=username, password=password)
-            if user:  # Login is success
-                auth.login(request, user)
-                track_stat('login_success')
-                return _get_user_redir(request, user)
-            else:
-                # login fails
-                context['error'] = 'Нэвтрэх нэр, нууц үг буруу байна'
-        else:
-            context['error'] = 'Нэвтрэх нэр, нууц үгээ оруулна уу'
-        context['username'] = username
-        track_stat('login_fail')
-    return render(request, 'secure/login.html', context)
-
-
 def login_dan(request):
 
     geo_auth = GeoAuth(request)
-
 
     if geo_auth.is_step1():
 
@@ -52,17 +23,6 @@ def login_dan(request):
                 ],
                 'wsdl' : "https://xyp.gov.mn/citizen-1.3.0/ws?WSDL",                    # wsdl зам
             },
-            # {
-                # 'services' : [
-                    # "WS100201_getPropertyInfo",                                         # сервис код
-                # ],
-                # 'wsdl' : "https://xyp.gov.mn/property-1.2.0/ws?WSDL",                   # wsdl зам
-                # 'params': {                                                             # Оролтын параметртэй дуудагддаг сервис бол
-                    # "WS100201_getPropertyInfo": {                                       # сервис код
-                        # 'propertyNumber': 'value',                                      # Оролтын параметрууд
-                    # },
-                # }
-            # }
         ]
 
         geo_auth.step1_generate_state()
@@ -71,7 +31,6 @@ def login_dan(request):
         return redirect(url)
 
     if geo_auth.is_step2():
-        print("is_step2")
         if not geo_auth.step2_is_state_valid():
             raise Http404
         geo_auth.step2_fetch_access_token()
