@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'backend.wms.apps.WMSConfig',
     'backend.wmslayer.apps.WMSLayerConfig',
     'backend.bundle.apps.BundleConfig',
+    'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
 
 ]
 
