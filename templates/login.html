@@ -15,7 +15,21 @@
                     <form method="post" class="from-group">
                         {% csrf_token %}
                         {{form|crispy}}
-                        <button type="submit" class="btn gp-bg-primary">Нэвтрэх1</button>
+
+                        <div class="row mb-3">
+                            <div class="offset-3 col-6">
+                                <button type="submit" class="btn gp-bg-primary full-width">Нэвтрэх</button>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="offset-3 col-6 text-center">
+                                <a href="{% url 'login-dan' %}" class="full-width btn gp-outline-primary">
+                                    <img class="dan-logo" src="{% static 'assets/image/logo/dan-logo.png' %}">
+                                </a>
+                            </div>
+                        </div>
+
                     </form>
 {#                    <form action="" class="">#}
 {#                        <div class="form-group">#}
@@ -26,13 +40,7 @@
 {#                            <label class="sr-only">Нууц үг</label>#}
 {#                            <input type="text" class="form-control form-control-sm" placeholder="Нууц үг">#}
 {#                        </div>#}
-{#                        <button type="submit" class="btn gp-bg-primary">Нэвтрэх</button>#}
-{#                        <div class="dan-login mt-3">#}
-{#                            <a href="https://sso.gov.mn/login/">#}
-{#                                <img class="dan-logo" src="{% static 'assets/image/logo/dan-logo.png' %}">#}
-{#                            </a>#}
-{#                        </div>#}
-{##}
+<!-- {#                        <button type="submit" class="btn gp-bg-primary">Нэвтрэх</button> -->
 {#                    </form>#}
                 </div>
             </div>

@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     'backend.wms.apps.WMSConfig',
     'backend.wmslayer.apps.WMSLayerConfig',
     'backend.bundle.apps.BundleConfig',
+    'backend.user.apps.UserConfig',
+
+
+    # secure
+    'secure.apps.SecureConfig',
+
 
 ]
 
@@ -115,6 +121,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'bundle:all'
+LOGOUT_REDIRECT_URL = 'bundle:all'
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = 'pillow'
