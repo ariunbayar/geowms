@@ -4,15 +4,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from geoportal_app import views, sub_url
+import secure.views
 import backend.urls
 import frontend.urls
+
 
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
-    path('login', views.login, name='login'),
-    path('logout', views.logout, name='logout'),
+    path('login/', views.login, name='login'),
+    path('login/dan/', secure.views.login_dan, name='login-dan'),
+    path('logout/', secure.views.logout, name='logout'),
     path('register', views.register, name='register'),
     path('service', views.service, name='service'),
     path('meta-data', views.metaData, name='meta-data'),

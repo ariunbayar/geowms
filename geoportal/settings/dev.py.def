@@ -23,3 +23,13 @@ DATABASES = {
     }
 }
 
+XYP_DAN = {
+   'ENDPOINTS': {
+       'LOGIN': 'https://<site>/api/login/?',
+       'AUTHORIZE': 'https://<site>/api/auth/?',
+       'SERVICE': 'https://<site>/api/service/?',
+   },
+   'CLIENT_KEY': '',
+   'CLIENT_SECRET': '',
+   'REDIRECT_URI': 'https://<this_site>/login-api/',
+}
