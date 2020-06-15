@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
     'geoportal_app.apps.GeoportalAppConfig',
     'frontend.bundle.apps.BundleConfig',
+    'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
 
     # Backend apps
 

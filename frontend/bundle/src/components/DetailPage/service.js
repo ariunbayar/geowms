@@ -1,5 +1,6 @@
 export const service = {
     loadWMSLayers,
+    loadBaseLayers,
 }
 
 function getCookie(name) {
@@ -58,4 +59,11 @@ function loadWMSLayers(id) {
         ..._getGetOptions(),
     }
     return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
+}
+
+function loadBaseLayers() {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }
