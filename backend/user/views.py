@@ -16,12 +16,12 @@ def _get_bundle_display(user):
         'is_superuser': '',
      }
 
+
 @require_GET
 @ajax_required
 def all(request):
 
     user_list = [_get_bundle_display(user) for user in User.objects.all()]
-    print(user_list)
 
     rsp = {
             'user_list': user_list,
