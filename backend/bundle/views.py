@@ -1,8 +1,4 @@
-from io import BytesIO
 from itertools import groupby
-import PIL
-import base64
-import json
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
@@ -10,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
 from geoportal.decorators import ajax_required
+from geoportal.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 
@@ -60,23 +57,6 @@ def all(request):
     return JsonResponse(rsp)
 
 
-def _resize_b64_to_sizes(src_b64):
-
-    src_bytes = base64.b64decode(src_b64)
-    src_io = BytesIO(src_bytes)
-
-    def _resize(image, width, height):
-        dst = BytesIO()
-        image.thumbnail((width, height))
-        image.save(dst, format='PNG')
-        return dst
-
-    image = PIL.Image.open(src_io)
-    image_x2_data = _resize(image, 200, 200).getvalue()
-
-    return image_x2_data
-
-
 @require_POST
 @ajax_required
 def create(request, payload):
@@ -90,7 +70,7 @@ def create(request, payload):
         form.instance.created_by = request.user
         form.instance.sort_order = сүүлийн_дэд_сан.sort_order + 1
         form.instance.is_removeable = True
-        image_x2 = _resize_b64_to_sizes(icon_data)
+        [image_x2] = resize_b64_to_sizes(icon_data, [(200, 200)])
         form.instance.icon = SimpleUploadedFile('icon.png', image_x2)
         form.save()
         return JsonResponse({'success': True})
@@ -110,7 +90,7 @@ def update(request, payload):
     if form.is_valid():
         if icon_data:
             form.instance.icon.delete(save=False)
-            image_x2 = _resize_b64_to_sizes(icon_data)
+            [image_x2] = resize_b64_to_sizes(icon_data, [(200, 200)])
             form.instance.icon = SimpleUploadedFile('icon.png', image_x2)
         form.save()
         return JsonResponse({'success': True})

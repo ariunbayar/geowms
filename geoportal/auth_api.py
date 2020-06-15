@@ -11,9 +11,9 @@ from django.conf import settings
 
 class GeoAuth():
 
-    SESSION_STATE_NAME = 'geo_sso_state'
+    SESSION_STATE_NAME = 'xyp_dan_state'
     BASE_HEADERS = {
-            'User-Agent': 'tz.mohs.mn 1.0'
+            'User-Agent': 'geoportal 1.0'
         }
 
     def __init__(self, request):

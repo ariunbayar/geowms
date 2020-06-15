@@ -24,13 +24,36 @@
     right: .8rem;
 }
 
+.суурь-давхаргууд{
+    right: .5rem;
+    bottom: .5rem;
+}
+.суурь-давхаргууд > .суурь-давхарга{
+    display: block;
+    width: 8rem;
+    height: 4.5rem;
+    margin: 1px;
+    border-radius: 2px;
+    float: right;
+    transition: opacity .15s ease-out;
+}
+.суурь-давхаргууд > .суурь-давхарга.active,
+.суурь-давхаргууд:hover > .суурь-давхарга.active:hover,
+.суурь-давхаргууд > .суурь-давхарга:hover {
+    opacity: 1;
+}
+.суурь-давхаргууд > .суурь-давхарга,
+.суурь-давхаргууд:hover > .суурь-давхарга.active {
+    opacity: .7;
+}
+
 
 .ol-full-screen {
-    right: .5em;
+    right: .5rem;
     top: 28px;
 }
 .ol-zoom {
     left: unset;
-    right: .5em;
+    right: .5rem;
     top: 52px;
 }

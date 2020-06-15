@@ -117,11 +117,6 @@ a{
     font-size: 14px;
 }
 
-
-
-
-
-
 /*footer*/
 
 .logo-bottom{
@@ -140,4 +135,12 @@ a{
 
 .dan-logo{
     height: 50px;
+}
+
+.full-width{
+    width: 100%
+}
+
+.gp-outline-primary:hover{
+    background-color: #edf2f7;
 }
