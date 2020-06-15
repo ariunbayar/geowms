@@ -29,8 +29,7 @@ export class Item extends Component {
                         <div className="col-md-4">
                             <img
                                 className="card-img"
-                                src={thumbnail_1x}
-                                srcSet={thumbnail_2x + ' 2x'}
+                                src={thumbnail_2x}
                             />
                         </div>
                     </div>
