@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'secure.apps.SecureConfig',
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
 
+    # secure
+    'secure.apps.SecureConfig',
+
 ]
 
 MIDDLEWARE = [

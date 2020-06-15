@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom"
 import {WMSPage} from "./WMSPage"
 import {BundlePage} from "./BundlePage"
 import {DevPage} from "./DevPage"
+import {UserPage} from "./UserPage"
 import {СуурьДавхаргаХуудас} from './СуурьДавхаргаХуудас'
 
 
@@ -40,6 +41,9 @@ export default class App extends Component {
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>Хөгжүүлэлт</NavLink>
                                 </li>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/user"}>Хэрэглэгч</NavLink>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -50,6 +54,7 @@ export default class App extends Component {
                         <Route exact path={"/back/"} component={BundlePage}/>
                         <Route path={"/back/суурь-давхарга/"} component={СуурьДавхаргаХуудас}/>
                         <Route exact path={"/back/dev/"} component={DevPage}/>
+                        <Route exact path={"/back/user/"} component={UserPage}/>
                     </Switch>
                 </div>
             </BrowserRouter>
