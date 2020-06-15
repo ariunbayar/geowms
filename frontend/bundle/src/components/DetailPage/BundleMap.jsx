@@ -3,9 +3,11 @@ import React, { Component, Fragment } from "react"
 import 'ol/ol.css'
 import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
+import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
-import {defaults as defaultControls, FullScreen} from 'ol/control';
+import {defaults as defaultControls, FullScreen} from 'ol/control'
+import {СуурьДавхарга} from './controls/СуурьДавхарга'
 
 import "./styles.css";
 import {service} from './service'
@@ -24,16 +26,14 @@ export default class BundleMap extends Component {
         }
 
         this.handleToggle = this.handleToggle.bind(this)
-        this.handleWMSLayersLoaded = this.handleWMSLayersLoaded.bind(this)
+        this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.showDetail = this.showDetail.bind(this)
         this.toggleSidebar = this.toggleSidebar.bind(this)
+        this.loadMapData = this.loadMapData.bind(this)
     }
 
     componentDidMount() {
-
-        service.loadWMSLayers(this.state.bundle.id).then(({wms_list}) => {
-            this.handleWMSLayersLoaded(wms_list)
-        })
+        this.loadMapData(this.state.bundle.id)
     }
 
     componentDidUpdate(prevProps) {
@@ -43,13 +43,22 @@ export default class BundleMap extends Component {
         const {bundle} = this.props
         this.setState({bundle})
 
-        service.loadWMSLayers(bundle.id).then(({wms_list}) => {
-            this.handleWMSLayersLoaded(wms_list)
+        this.loadMapData(bundle.id)
+
+    }
+
+    loadMapData(bundle_id) {
+
+        Promise.all([
+            service.loadBaseLayers(),
+            service.loadWMSLayers(bundle_id),
+        ]).then(([{base_layer_list}, {wms_list}]) => {
+            this.handleMapDataLoaded(base_layer_list, wms_list)
         })
 
     }
 
-    handleWMSLayersLoaded(wms_list) {
+    handleMapDataLoaded(base_layer_list, wms_list) {
 
         const map_wms_list = wms_list.map(({name, url, layers}) => {
 
@@ -73,20 +82,43 @@ export default class BundleMap extends Component {
 
         this.setState({map_wms_list})
 
-        const layer_osm = new Tile({
-            source: new OSM({
-                attributions: '',
-            })
-        })
+        const {base_layers, base_layer_controls} =
+            base_layer_list.reduce(
+                (acc, base_layer_info, idx) => {
+
+                    const layer = new Tile({
+                        source: new TileImage({
+                            crossOrigin: 'Anonymous',
+                            url: base_layer_info.url,
+                        }),
+                    })
+
+                    acc.base_layers.push(layer)
+                    acc.base_layer_controls.push({
+                        is_active: idx == 0,
+                        thumbnail_1x: base_layer_info.thumbnail_1x,
+                        thumbnail_2x: base_layer_info.thumbnail_2x,
+                        layer: layer,
+                    })
+
+                    return acc
+
+                },
+                {
+                    base_layers: [],
+                    base_layer_controls: []
+                }
+            )
 
 
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
-                new FullScreen()
-              ]),
+                new FullScreen(),
+                new СуурьДавхарга({layers: base_layer_controls}),
+            ]),
             layers: [
-                layer_osm,
+                ...base_layers,
                 ...map_wms_list.map((wms) => wms.tile),
             ],
             view: new View({
