@@ -49,7 +49,7 @@ module.exports = {
             }
         ],
     },
-    devtool: "source-map",
+    devtool: "inline-source-map",
     resolve: {
         extensions: ['.js', '.jsx'],
         alias: {
@@ -57,4 +57,7 @@ module.exports = {
         }
     },
     watch: true,
+    watchOptions: {
+        ignored: /node_modules/
+    }
 }
