@@ -8,5 +8,10 @@
 
 
 {% block script %}
-<script src="{% static "assets/js/backend/webapp.js" %}"></script>
+
+    {% if DEBUG %}
+        <script src="{% static "assets/js/backend/webapp.js" %}"></script>
+    {% else %}
+        <script src="{% static "assets/js/backend/webapp.min.js" %}"></script>
+    {% endif %}
 {% endblock %}
