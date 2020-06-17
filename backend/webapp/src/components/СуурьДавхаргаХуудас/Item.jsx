@@ -16,7 +16,7 @@ export class Item extends Component {
                         <div className="col-md-8">
                             <div className="card-body">
                                 <p className="card-text">
-                                    <NavLink className="stretched-link" to={"/back/суурь-давхарга/дэлгэрэнгүй/"}>
+                                    <NavLink className="stretched-link" to={`/back/суурь-давхарга/${id}/дэлгэрэнгүй/`}>
                                         <strong>{name}</strong>
                                     </NavLink>
                                 </p>

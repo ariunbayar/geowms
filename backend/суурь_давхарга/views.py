@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from geoportal.utils import resize_b64_to_sizes
 from .models import СуурьДавхарга

@@ -19,7 +19,7 @@ export class СуурьДавхаргаХуудас extends Component {
         return (
             <Switch>
                 <Route exact path={"/back/суурь-давхарга/"} component={Жагсаалт}/>
-                <Route exact path={"/back/суурь-давхарга/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
+                <Route path={"/back/суурь-давхарга/:id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
                 <Route exact path={"/back/суурь-давхарга/үүсгэх/"} component={Үүсгэх}/>
             </Switch>
         )
