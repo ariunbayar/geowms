@@ -63,11 +63,28 @@ def үүсгэх(request):
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def устгах(request):
+def detail(request, pk):
 
-    # TODO
-    rsp = {
-            'success': False,
-        }
+    base_layer = get_object_or_404(СуурьДавхарга, pk=pk)
+    display_item = _get_base_layer_display(base_layer)
+
+    return JsonResponse(display_item)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def устгах(request, pk):
+
+    base_layer = get_object_or_404(СуурьДавхарга, pk=pk)
+
+    try:
+        base_layer.thumbnail_1x.delete(save=False)
+        base_layer.thumbnail_2x.delete(save=False)
+        base_layer.delete()
+
+    except Exception as e:
+        raise e
+        rsp = {'success': False}
+    else:
+        rsp = {'success': True}
 
     return JsonResponse(rsp)
