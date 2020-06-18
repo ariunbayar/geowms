@@ -157,7 +157,7 @@ export default class BundleMap extends Component {
     render() {
         return (
 
-            <div className="container-fluid">
+            <div>
                 <button onClick={this.showDetail} style={{display: 'none'}}>click here</button>
                 <div className="row">
 

@@ -22,8 +22,7 @@
     <section class="subs py-5">
         <div class="container">
             <div class="section-title text-center mb-4">
-                <h4 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i> ДЭД САН</h4>
-                <span class="">{{ bundles | length }} дэд сан</span>
+                <h2 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i> ДЭД САН</h2>
             </div>
 
             <div class="row mt-4 justify-content-md-center">
@@ -31,7 +30,7 @@
                 <div class="col-md-2 text-center sub">
                     <a href="{% url "bundle:detail" bundle.pk %}">
                         <img class="icon mb-3" src="{{ MEDIA_URL }}{{ bundle.icon }}">
-                        <p>{{ bundle.name }}</p>
+                        <h6 class="gp-text-primary text-uppercase">{{ bundle.name }}</h6>
                     </a>
                 </div>
                 {% endfor %}

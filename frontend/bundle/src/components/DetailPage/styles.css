@@ -4,13 +4,13 @@
 
 .🌍 > #map{
      width: 100%;
-     height: 600px;
+     height: 1000px;
  }
 
 .🌍 > .⚙ {
     position: absolute;
     top: .4rem;
-    right: .4rem;
+    right: 55px;
     bottom: .4rem;
     background-color: #ffffff;
     padding-top: 1rem;
@@ -21,12 +21,18 @@
 .🌍 > .⚙-toggle{
     position: absolute;
     top: .6rem;
-    right: .8rem;
+    right: .1rem;
+    width: 47px;
+    height: 47px;
 }
-
+.fa-lg{
+    font-size: 40px;
+}
 .суурь-давхаргууд{
     right: .5rem;
     bottom: .5rem;
+    width: 40px;
+    height: 40px;
 }
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
@@ -50,10 +56,30 @@
 
 .ol-full-screen {
     right: .5rem;
-    top: 28px;
+    top: 42px;
+    width: 47px;
+    height: 47px;
+}
+.ol-full-screen .ol-full-screen-false{
+    width: 40px;
+    height: 40px;
+}
+.ol-full-screen .ol-full-screen-true{
+    width: 40px;
+    height: 40px;
 }
 .ol-zoom {
+    width: 47px;
+    height: 87px;
     left: unset;
     right: .5rem;
-    top: 52px;
+    top: 84px;
+}
+.ol-zoom  .ol-zoom-out{
+    width: 40px;
+    height: 40px;
+}
+.ol-zoom .ol-zoom-in{
+    width: 40px;
+    height: 40px;
 }

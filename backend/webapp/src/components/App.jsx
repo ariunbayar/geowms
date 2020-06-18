@@ -30,19 +30,19 @@ export default class App extends Component {
                         <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
                             <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/"}>Дэд Сан</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/"}>ДЭД САН</NavLink>
                                 </li>
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}>Суурь давхарга</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}>СУУРЬ ДАВХРАГА</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>Хөгжүүлэлт</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/user"}>Хэрэглэгч</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
                                 </li>
                             </ul>
                         </div>
