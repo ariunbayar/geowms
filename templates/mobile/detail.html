@@ -1,0 +1,20 @@
+{% extends "mobileHeader.html" %}
+{% load static %}
+{% block content %}
+
+<div id="mobile-app" data-id="{{ bundle.pk }}"></div>
+
+{{ bundle_display|json_script:"mobile-app-data" }}
+
+{% endblock %}
+
+
+{% block script %}
+
+    {% if DEBUG %}
+        <script src="{% static "assets/js/mobile/detail.js" %}"></script>
+    {% else %}
+        <script src="{% static "assets/js/mobile/detail.min.js" %}"></script>
+    {% endif %}
+
+{% endblock %}

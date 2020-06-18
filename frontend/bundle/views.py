@@ -20,7 +20,6 @@ def all(request):
 
     return render(request, 'bundle/all.html', context)
 
-
 def detail(request, pk):
 
     bundle = get_object_or_404(Bundle, pk=pk)
@@ -63,3 +62,4 @@ def wms_layers(request, pk):
     }
 
     return JsonResponse(rsp)
+    

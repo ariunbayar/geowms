@@ -1,0 +1,28 @@
+.wmsIconConteiner {
+    bottom: 0px,
+}
+
+/* .tabBarInfoContainer {
+    position: 'absolute',
+   borderTopLeftRadius: 20px,
+    borderTopRightRadius: 20px, 
+    bottom: 0px,
+    top: 150px,
+    left: 0px,
+    right: 0px,
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingVertical: 0px,
+}
+*/
+/* ...Platform.select({
+    ios: {
+      shadowColor: 'black',
+      shadowOffset: { width: 0, height: -3 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+    },
+    android: {
+      elevation: 20,
+    },
+  }), */
