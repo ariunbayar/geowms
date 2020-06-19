@@ -10,15 +10,25 @@ from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 
 
+def _get_bundles_display(request, bundle):
+    return {
+        'id': bundle.id,
+        'name': bundle.name,
+        'price': bundle.price,
+        'is_removeable': bundle.is_removeable,
+        'created_at': bundle.created_at,
+        'updated_at': bundle.updated_at,
+        'created_by_id': bundle.created_by_id,
+        'icon': bundle.icon.url,
+        'sort_order': bundle.sort_order,
+    }
+
+
 def all(request):
 
-    bundles = Bundle.objects.all()
+    bundles = [_get_bundles_display(request, ob) for ob in Bundle.objects.all()]
+    return render(request, 'mobile/detail.html', {'bundles': bundles})
 
-    context = {
-            'bundles': bundles,
-        }
-
-    return render(request, 'mobile/all.html', context)
 
 def detail(request, pk):
 
@@ -34,8 +44,7 @@ def detail(request, pk):
     context = {
             'bundle_display': bundle_display,
         }
-
-    return render(request, 'mobile/detail.html', context)
+    return JsonResponse(context)
 
 
 @require_GET

@@ -7,11 +7,11 @@ export class Sidebar extends Component {
 
     render() {
         return (
-            <form>
+            <div class="row">
                 {this.props.map_wms_list.map((wms, idx) =>
                     <WMSItem wms={wms} key={idx}/>
                 )}
-            </form>
+            </div>
         )
     }
 }

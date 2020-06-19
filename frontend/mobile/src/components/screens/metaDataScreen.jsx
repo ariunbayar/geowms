@@ -5,7 +5,9 @@ import {DetailPage} from '../DetailPage'
 export class MetaDataScreen extends Component {
     render() {
         return (
-            <DetailPage bundle={this.props.bundle}/>
+            <div style={{overflow: "hidden"}}>
+                <DetailPage bundle={this.props.bundle}></DetailPage>
+            </div>
         )
 
     }

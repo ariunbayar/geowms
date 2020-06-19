@@ -31,18 +31,15 @@ export default class WMSItem extends Component {
         return (
             <Fragment>
 
-                <div className="davhar">
-                    <label className="font-weight-bold" htmlFor="formGroupInput">{name}</label>
-                </div>
                 <p className="my-1">
-                    <label>
+                    <div class="col-12">
                         <input
                             type="checkbox"
                             onChange={this.toggle}
                             checked={is_visible}
                         />
-                        {name}
-                    </label>
+                        <span>{name}</span>
+                    </div>
                 </p>
 
                 <WMSLayerItems

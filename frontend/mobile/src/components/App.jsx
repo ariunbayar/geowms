@@ -10,7 +10,7 @@ import {ServiceScreen} from './screens/serviceScreen'
 import {StatisticsScreen} from './screens/statisticsScreen'
 import { set } from 'ol/transform';
 import {LoginDanScreen} from './screens/loginDanScreen'
-//alert(JSON.stringify(this.props.bundle))
+//alert(JSON.stringify(this.props.bundles))
 export class App extends Component {
     constructor(props) {
         super(props)
@@ -24,6 +24,9 @@ export class App extends Component {
             statisticsScreenIsload: false,
             wmsLayerScreenIsload: false,
             loginScreenIsload: false,
+            bundleName: 'Хил зааг',
+            bundleId: 2,
+            bundle: {"id":2,"name":"Хил зааг","layers":[128,129,130,131,132,125,126,127],"wms_list":["Хил, зааг"]},
         }
 
         this.screenRouter = this.screenRouter.bind(this)
@@ -75,26 +78,38 @@ export class App extends Component {
             this.setState({loginScreenIsload:true})
         }
     }
+    wmsLayerId(id, name){
+        this.setState({bundleId:id, bundleName: name})
+        Promise.all([
+            service.wmsLayerOneDatas(id)]).then((data) => {
+            this.setState({bundle: data[0].bundle_display})
+        })
+    
+            
+        
+    }
     render() {
+        const bundles = this.props.bundle
         return (
             
             <view>
                 {this.state.loginScreenIsload ? <div ><h1>asdas</h1><i onClick={() => this.loginScreen()}  class="fa fa-arrow-left" aria-hidden="true" ></i><LoginDanScreen></LoginDanScreen></div> :
                 <div>
                     <div class="header">
-                        <div class="row">
+                        <div class="row center">
                             <div class="col-11">
+                                <h1>{this.state.bundleName}</h1>
+                            </div>
+                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
                                 <div class="input-group input-group-lg">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-sizing-lg">Large</span>
-                                    </div>
                                     <input type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm-5"></input>
                                 </div>
 
 
                             </div>
-                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user" aria-hidden="true"></i></div>
-
                         </div>
                     </div>
                     <div>
@@ -102,7 +117,7 @@ export class App extends Component {
                         {this.state.serviceScreenIsload ? <ServiceScreen></ServiceScreen> : null}
                         {this.state.metaDataScreenIsload ? 
                             <div class="metaDataScreen">
-                                <MetaDataScreen bundle={this.props.bundle}></MetaDataScreen> 
+                                <MetaDataScreen bundle={this.state.bundle}></MetaDataScreen> 
                                 {this.state.wmsLayerScreenIsload ? 
                                 <i onClick={() => this.wmsLayerName()} class="fas fa-layer-group wmsLayerButton" aria-hidden="true" style={{color:"blue"}}></i>:
                                 <i onClick={() => this.wmsLayerName()} class="fas fa-layer-group wmsLayerButton" aria-hidden="true" style={{color:"black"}}></i>
@@ -113,8 +128,15 @@ export class App extends Component {
                         {this.state.statisticsScreenIsload ? <StatisticsScreen></StatisticsScreen> : null}
                         {this.state.wmsLayerScreenIsload ? 
                         <div class="wmsLayerScreen">
-                            <div class="icons">
-                                asdasd
+                            <div class="row ">
+                            {bundles.map((bundle, i) => 
+                                    <div class="col-4 text-center sub">
+                                        <a onClick={() => this.wmsLayerId(bundle.id, bundle.name)}>
+                                            <img src={bundle.icon} />
+                                            <p>{ bundle.name }</p>
+                                        </a>
+                                    </div>
+                            )}
                             </div>
                         </div> : null
                         }

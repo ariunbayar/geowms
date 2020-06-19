@@ -2,6 +2,7 @@ export const service = {
     loadWMSLayers,
     loadBaseLayers,
     wmsLayerAll,
+    wmsLayerOneDatas,
 }
 
 function getCookie(name) {
@@ -74,4 +75,10 @@ function wmsLayerAll() {
         ..._getGetOptions(),
     }
     return fetch('/m/', requestOptions).then(handleResponse)
+}
+function wmsLayerOneDatas(id) {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch(('/m/дэд-сан/'+id), requestOptions).then(handleResponse)
 }
