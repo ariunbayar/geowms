@@ -18,9 +18,9 @@ frontend/bundle/static/assets/js/bundle/detail.js.map
 frontend/bundle/static/assets/js/bundle/detail.js
 
 geoportal/settings/dev.py
-geoportal/settings/mydev.py
-geoportal/settings/mydev.py
+geoportal/settings/dev.py.def
 geoportal/settings/prod.py
+geoportal/settings/prod.py.def
 geoportal_app/media/дэд-сан/*
 geoportal_app/media/суурь_давхарга/thumbnail_1x/*
 geoportal_app/media/суурь_давхарга/thumbnail_2x/*
@@ -29,3 +29,4 @@ geoportal_app/media/суурь_давхарга/thumbnail_2x/*
 !geoportal_app/media/суурь_давхарга/thumbnail_2x/.keep
 
 venv
+

@@ -28,6 +28,9 @@ def register(response):
 #     form = LoginForm()
 #     return render(request, 'login.html', {"form": form})
 
+def loginUser(request):
+    return render(request, 'loginUser.html')
+
 def login(request):
     if request.method == 'POST':
         email = request.POST.get('email', None)
@@ -53,7 +56,7 @@ def login(request):
             messages.warning(request, 'Буруу и-мэйл оруулсан байна!!!')
             return HttpResponseRedirect(reverse('login'))
     form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'webapp.html', {'form': form})
 
 def logout(request):
     auth_logout(request)

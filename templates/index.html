@@ -1,133 +1,210 @@
-{% extends 'layout.html' %}
-{% load static %}
-{% block content %}
-    <section class="slider shadow">
-        <div class="owl-carousel owl-theme">
-            <div class="item">
-                <img src="{% static 'assets/image/slide-2.jpg' %}">
-                <div class="caption text-center">
-                    <h1 class="animate__animated animate__backInUp"><i class="fa fa-map-o mr-3" aria-hidden="true"></i><span >ГЕОПОРТАЛ САЙТ</span></h1>
-                    <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h6>
-                </div>
-            </div>
-            <div class="item">
-                <img src="{% static 'assets/image/slide-2.jpg' %}">
-                <div class="caption text-center">
-                    <h1 class="animate__animated animate__bounce animate__delay-2s">ГЕОПОРТАЛ</h1>
-                    <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h6>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="subs py-5">
-        <div class="container">
-            <div class="section-title text-center mb-4">
-                <h4 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i> ДЭД САН</h4>
-                <span class="">16 дэд сан</span>
-            </div>
+{% extends 'layout.html' %} {% load static %} {% block content %}
+<section class="slider shadow">
+  <div class="owl-carousel owl-theme">
+    <div class="item">
+      <img src="{% static 'assets/image/slide-1.jpg' %}" />
+      <div class="caption text-center">
+        <h1 class="animate__animated animate__backInUp">
+          <i class="fa fa-map-o mr-3" aria-hidden="true"></i
+          ><span>ГЕОПОРТАЛ САЙТ</span>
+        </h1>
+        <h6 class="animate__animated animate__fadeInUp gp-text-primary">
+          ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР
+        </h6>
+      </div>
+    </div>
+    <div class="item">
+      <img src="{% static 'assets/image/slide-2.jpg' %}" />
+      <div class="caption text-center">
+        <h1 class="animate__animated animate__bounce animate__delay-2s">
+          ГЕОПОРТАЛ
+        </h1>
+        <h6 class="animate__animated animate__fadeInUp gp-text-primary">
+          ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР
+        </h6>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="subs py-5">
+  <div class="container">
+    <div class="section-title text-center mb-4">
+      <h4 class="gp-text-primary">
+        <i class="fa fa-database mr-2" aria-hidden="true"></i> ДЭД САН
+      </h4>
+      <span class="">16 дэд сан</span>
+    </div>
 
-            <div class="row">
-                <div class="col-md-2 text-center sub">
-                    <a href="{% url 'sub1' %}">
-                        <img class="icon mb-3" src="{% static 'assets/image/sub/sub-1.png' %}">
-                        <p class="">Геодезийн тулгуур сүлжээ</p>
-                    </a>
-                </div>
-                 <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}">
-                         <img class="icon mb-3" src="{% static 'assets/image/sub/sub-2.png' %}">
-                        <p class="">Байр зүйн зураг</p>
-                     </a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-3.png' %}">
-                    <p class="">Орто зураг</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-4.png' %}">
-                    <p class="">Газар зүйн нэр</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-5.png' %}">
-                    <p class="">Барилга, суурин газар</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-6.png' %}">
-                    <p class="">Хүн ам зүйн мэдээлэл</p></a>
-                </div>
-            </div>
-            <div class="row mt-4">
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-7.png' %}">
-                    <p class="">Газрын бүрхэвч, газар ашиглалт</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-8.png' %}">
-                    <p class="">Геологи, хөрс</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-9.png' %}">
-                    <p class="">Хил, зааг</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-10.png' %}">
-                    <p class="">Ус зүй</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-11.png' %}">
-                    <p class="">Өндөржилт, гүн</p></a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-12.png' %}">
-                    <p class="">Нэгж талбар</p></a>
-                </div>
-            </div>
-             <div class="row mt-4 justify-content-md-center">
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}">
-                         <img class="icon mb-3" src="{% static 'assets/image/sub/sub-13.png' %}">
-                        <p class="">Тээврийн сүлжээ</p>
-                     </a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}">
-                         <img class="icon mb-3" src="{% static 'assets/image/sub/sub-14.png' %}">
-                         <p class="">Хаяг</p>
-                     </a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}">
-                        <img class="icon mb-3" src="{% static 'assets/image/sub/sub-15.png' %}">
-                        <p class="">Дэд бүтэц</p>
-                     </a>
-                </div>
-                <div class="col-md-2 text-center sub">
-                     <a href="{% url 'sub1' %}"><img class="icon mb-3" src="{% static 'assets/image/sub/sub-16.png' %}">
-                    <p class="">Түүх, соёлын өв</p></a>
-                </div>
-            </div>
-        </div>
-    </section>
-{% endblock %}
-
-{% block script %}
-    <script>
-        $('.owl-carousel').owlCarousel({
-            loop:true,
-            margin:10,
-            nav:false,
-            dots:false,
-            responsive:{
-                0:{
-                    items:1
-                },
-                600:{
-                    items:1
-                },
-                1000:{
-                    items:1
-                }
-            }
-        })
-    </script>
+    <div class="row">
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}">
+          <img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-1.png' %}"
+          />
+          <p class="">Геодезийн тулгуур сүлжээ</p>
+        </a>
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}">
+          <img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-2.png' %}"
+          />
+          <p class="">Байр зүйн зураг</p>
+        </a>
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-3.png' %}"
+          />
+          <p class="">Орто зураг</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-4.png' %}"
+          />
+          <p class="">Газар зүйн нэр</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-5.png' %}"
+          />
+          <p class="">Барилга, суурин газар</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-6.png' %}"
+          />
+          <p class="">Хүн ам зүйн мэдээлэл</p></a
+        >
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-7.png' %}"
+          />
+          <p class="">Газрын бүрхэвч, газар ашиглалт</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-8.png' %}"
+          />
+          <p class="">Геологи, хөрс</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-9.png' %}"
+          />
+          <p class="">Хил, зааг</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-10.png' %}"
+          />
+          <p class="">Ус зүй</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-11.png' %}"
+          />
+          <p class="">Өндөржилт, гүн</p></a
+        >
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-12.png' %}"
+          />
+          <p class="">Нэгж талбар</p></a
+        >
+      </div>
+    </div>
+    <div class="row mt-4 justify-content-md-center">
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}">
+          <img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-13.png' %}"
+          />
+          <p class="">Тээврийн сүлжээ</p>
+        </a>
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}">
+          <img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-14.png' %}"
+          />
+          <p class="">Хаяг</p>
+        </a>
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}">
+          <img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-15.png' %}"
+          />
+          <p class="">Дэд бүтэц</p>
+        </a>
+      </div>
+      <div class="col-md-2 text-center sub">
+        <a href="{% url 'sub1' %}"
+          ><img
+            class="icon mb-3"
+            src="{% static 'assets/image/sub/sub-16.png' %}"
+          />
+          <p class="">Түүх, соёлын өв</p></a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block script %}
+<script>
+  $(".owl-carousel").owlCarousel({
+    loop: true,
+    margin: 10,
+    nav: false,
+    dots: false,
+    responsive: {
+      0: {
+        items: 1,
+      },
+      600: {
+        items: 1,
+      },
+      1000: {
+        items: 1,
+      },
+    },
+  });
+</script>
 {% endblock %}

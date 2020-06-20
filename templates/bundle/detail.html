@@ -1,9 +1,8 @@
-{% extends "layout.html" %}
+{% extends "layoutDetail.html" %}
 {% load static %}
 {% block content %}
 
-<div id="bundle-app" data-id="{{ bundle.pk }}"></div>
-
+<div id="bundle-app" class="content" data-id="{{ bundle.pk }}"></div>
 {{ bundle_display|json_script:"bundle-app-data" }}
 
 {% endblock %}
