@@ -120,6 +120,7 @@ export default class BundleMap extends Component {
                 new MousePosition({
                     projection: 'EPSG:4326',
                     coordinateFormat: createStringXY(6),
+                    undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
