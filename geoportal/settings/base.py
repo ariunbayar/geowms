@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'geoportal_app.apps.GeoportalAppConfig',
     'frontend.bundle.apps.BundleConfig',
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
+    'frontend.secure.apps.SecureConfig',
 
     # Backend apps
 
@@ -42,9 +43,6 @@ INSTALLED_APPS = [
     'backend.wmslayer.apps.WMSLayerConfig',
     'backend.bundle.apps.BundleConfig',
     'backend.user.apps.UserConfig',
-
-    # secure
-    'secure.apps.SecureConfig',
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
 
 ]
