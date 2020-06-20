@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
     'geoportal_app.apps.GeoportalAppConfig',
     'frontend.bundle.apps.BundleConfig',
+    'frontend.mobile.apps.MobileConfig',
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
 
     # Backend apps
@@ -121,7 +122,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'bundle:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
