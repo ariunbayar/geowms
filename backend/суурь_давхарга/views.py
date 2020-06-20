@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 
 from geoportal.utils import resize_b64_to_sizes
-from .models import СуурьДавхарга
+from .models import BaseLayer
 
 
 def _get_base_layer_display(base_layer):
@@ -22,7 +22,7 @@ def _get_base_layer_display(base_layer):
 @user_passes_test(lambda u: u.is_superuser)
 def жагсаалт(request):
 
-    display_items = [_get_base_layer_display(o) for o in СуурьДавхарга.objects.all()]
+    display_items = [_get_base_layer_display(o) for o in BaseLayer.objects.all()]
 
     rsp = {
         'items': display_items,
@@ -37,7 +37,7 @@ def үүсгэх(request):
     try:
         payload = json.loads(request.body)
 
-        base_layer = СуурьДавхарга()
+        base_layer = BaseLayer()
 
         sizes = [
             (128 * 2, 72 * 2),
@@ -65,7 +65,7 @@ def үүсгэх(request):
 @user_passes_test(lambda u: u.is_superuser)
 def detail(request, pk):
 
-    base_layer = get_object_or_404(СуурьДавхарга, pk=pk)
+    base_layer = get_object_or_404(BaseLayer, pk=pk)
     display_item = _get_base_layer_display(base_layer)
 
     return JsonResponse(display_item)
@@ -74,7 +74,7 @@ def detail(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def устгах(request, pk):
 
-    base_layer = get_object_or_404(СуурьДавхарга, pk=pk)
+    base_layer = get_object_or_404(BaseLayer, pk=pk)
 
     try:
         base_layer.thumbnail_1x.delete(save=False)

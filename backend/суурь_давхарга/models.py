@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class СуурьДавхарга(models.Model):
+class BaseLayer(models.Model):
 
     class Meta:
         db_table = 'суурь_давхарга'
