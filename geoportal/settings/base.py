@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'frontend.bundle.apps.BundleConfig',
     'frontend.mobile.apps.MobileConfig',
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
+    'frontend.secure.apps.SecureConfig',
 
     # Backend apps
 
@@ -43,9 +44,6 @@ INSTALLED_APPS = [
     'backend.wmslayer.apps.WMSLayerConfig',
     'backend.bundle.apps.BundleConfig',
     'backend.user.apps.UserConfig',
-
-    # secure
-    'secure.apps.SecureConfig',
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
 
 ]

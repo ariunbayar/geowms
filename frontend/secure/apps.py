@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class SecureConfig(AppConfig):
-    name = 'secure'
-    label = 'secure'
+    name = 'frontend.secure'
+    label = 'frontend_secure'
