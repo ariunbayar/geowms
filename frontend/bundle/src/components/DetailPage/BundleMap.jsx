@@ -7,7 +7,7 @@ import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
 import {createStringXY} from 'ol/coordinate';
-import {defaults as defaultControls, FullScreen, MousePosition} from 'ol/control'
+import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 
@@ -122,6 +122,7 @@ export default class BundleMap extends Component {
                     coordinateFormat: createStringXY(6),
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
+                new ScaleLine(),
             ]),
             layers: [
                 ...base_layers,
