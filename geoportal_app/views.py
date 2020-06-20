@@ -36,9 +36,7 @@ def login(request):
         email = request.POST.get('email', None)
         password = request.POST.get('password')
         try:
-            print(email,password)
             b_user = User.objects.get(email=email)
-            print(b_user)
             username = b_user.username
 
             user = authenticate(request, username=username, password=password)
@@ -56,7 +54,7 @@ def login(request):
             messages.warning(request, 'Буруу и-мэйл оруулсан байна!!!')
             return HttpResponseRedirect(reverse('login'))
     form = LoginForm()
-    return render(request, 'webapp.html', {'form': form})
+    return render(request, 'login.html', {'form': form})
 
 def logout(request):
     auth_logout(request)
