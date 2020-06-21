@@ -95,3 +95,11 @@
     width: 8.8rem;
     min-height: 1rem;
 }
+
+.coordinate-copy-control {
+    background-color: red;
+    width: 10rem;
+    height: 1rem;
+    left: calc(50% - 5rem);
+    top: 1rem;
+}

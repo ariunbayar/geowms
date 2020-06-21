@@ -2,6 +2,8 @@ import React, { Component, Fragment } from "react"
 
 import 'ol/ol.css'
 import {Map, View} from 'ol'
+import {transform as transformCoordinate} from 'ol/proj'
+
 import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
@@ -10,6 +12,7 @@ import {createStringXY} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
+import {CoordinateCopy} from './controls/CoordinateCopy'
 
 import "./styles.css";
 import {service} from './service'
@@ -124,6 +127,7 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
+                new CoordinateCopy(),
             ]),
             layers: [
                 ...base_layers,
@@ -134,6 +138,13 @@ export default class BundleMap extends Component {
                 center: [11461613.630815497, 5878656.0228370065],
                 zoom: 5.041301562246971,
             })
+        })
+
+        map.on('click', (event) => {
+            const projection = event.map.getView().getProjection()
+            const map_coord = transformCoordinate(event.coordinate, projection, 'EPSG:4326')
+            const coord = (createStringXY(6))(map_coord)
+            document.querySelector('.coordinate-copy-control').innerHTML = coord
         })
 
         this.map = map
