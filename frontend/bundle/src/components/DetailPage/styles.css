@@ -1,16 +1,19 @@
+element.style {
+    position: relative;
+}
 .🌍 {
     position: relative;
 }
 
 .🌍 > #map{
      width: 100%;
-     height: 600px;
+     height: 1200px;
  }
 
 .🌍 > .⚙ {
     position: absolute;
     top: .4rem;
-    right: .4rem;
+    right: 55px;
     bottom: .4rem;
     background-color: #ffffff;
     padding-top: 1rem;
@@ -21,12 +24,17 @@
 .🌍 > .⚙-toggle{
     position: absolute;
     top: .6rem;
-    right: .8rem;
+    right: .1rem;
+    width: 47px;
+    height: 47px;
 }
-
+.fa-lg{
+    font-size: 40px;
+}
 .суурь-давхаргууд{
     right: .5rem;
-    bottom: .5rem;
+    bottom: 70px;
+    position: fixed;
 }
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
@@ -50,10 +58,50 @@
 
 .ol-full-screen {
     right: .5rem;
-    top: 28px;
+    top: 42px;
+    width: 47px;
+    height: 47px;
+}
+.ol-full-screen .ol-full-screen-false{
+    width: 40px;
+    height: 40px;
+}
+.ol-full-screen .ol-full-screen-true{
+    width: 40px;
+    height: 40px;
 }
 .ol-zoom {
+    width: 47px;
+    height: 87px;
     left: unset;
     right: .5rem;
-    top: 52px;
+    top: 84px;
+}
+.ol-zoom  .ol-zoom-out{
+    width: 40px;
+    height: 40px;
+}
+.ol-zoom .ol-zoom-in{
+    width: 40px;
+    height: 40px;
+}
+
+.ol-mouse-position {
+    right: 4rem;
+    background: rgba(0,60,136,0.3);
+    border-radius: 4px;
+    padding: 2px .2rem;
+    font-size: smaller;
+    color: #eee;
+    text-align: center;
+    width: 8.8rem;
+    min-height: 1rem;
+}
+
+.coordinate-copy-control {
+    background-color: red;
+    width: 10rem;
+    height: 1rem;
+    left: calc(50% - 5rem);
+    top: 1rem;
 }

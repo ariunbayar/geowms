@@ -4,7 +4,7 @@ from django.views.decorators.http import require_GET
 
 from geoportal.decorators import ajax_required
 
-from backend.суурь_давхарга.models import СуурьДавхарга
+from backend.суурь_давхарга.models import BaseLayer
 
 
 @require_GET
@@ -13,7 +13,7 @@ def all(request):
 
     base_layer_list = []
 
-    for base_layer in СуурьДавхарга.objects.all():
+    for base_layer in BaseLayer.objects.all():
         base_layer_list.append({
             'url': base_layer.url,
             'thumbnail_1x': base_layer.thumbnail_1x.url,

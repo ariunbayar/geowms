@@ -5,13 +5,28 @@
     <meta charset="UTF-8">
     <title>ГЕОПОРТАЛ САЙТ</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static "assets/css/style.css" %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
+<style>
+</style>
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary py-0">
+    <div class="container">
+        <div class="ml-auto mt-2 mt-lg-0">
+                {% if user.is_authenticated %}
+                    
+                    <span class="btn gp-btn-primary" >Нэвтэрсэн хэрэглэгч: {{user.username}}</span>
+                    <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                {% endif %}
+        </div>
+    </div>
+</nav>
 <div class="container py-3">
 
     <div class="row h-100">
@@ -30,12 +45,16 @@
         </div>
         <div class="col-md-4 align-self-center">
             <div class="login-reg float-right">
-              {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
-              {% else %}
-                <a href="{% url 'register' %}" class="btn gp-outline-primary">БҮРТГҮҮЛЭХ</a>
-                <a href="{% url 'login' %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
-              {% endif %}
+                <div class="ml-auto mt-2 mt-lg-0">
+                    {% if user.is_authenticated and user.is_superuser%}
+                       {% if not user.is_superuser %}
+                       <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
+                       {% endif %}
+                     {% else %}
+                       <a href="{% url 'loginUser' %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
+                       <a href="{% url 'loginUser' %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
+                     {% endif %}
+           </div>
 {#              <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a>#}
 
             </div>
@@ -56,7 +75,7 @@
               {% with request.resolver_match.url_name as url_name %}
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                   <li class="nav-item {% if url_name == "bundle:all" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a>
+                    <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a> 
                   </li>
                   <li class="nav-item {% if url_name == 'service' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'service' %}">ҮЙЛЧИЛГЭЭ</a>
@@ -73,8 +92,7 @@
 
                   {% if user.is_authenticated and user.is_superuser %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url "backend:webapp" %}">
-                        <i class="fa fa-cog" aria-hidden="true"></i>
+                    <a class="nav-link" href="{% url "backend:webapp" %}"><i class="fa fa-cog" ></i> УДИРДАГЧИЙН ХЭСЭГ</i></a>
                     </a>
                   </li>
                   {% endif %}
@@ -89,7 +107,7 @@
     {% endblock %}
 </div>
 
-<footer>
+<footer class="footer">
     <div class="top gp-bg-dark">
         <div class="container">
             <div class="row py-4">

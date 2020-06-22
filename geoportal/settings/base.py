@@ -33,7 +33,9 @@ INSTALLED_APPS = [
 
     'geoportal_app.apps.GeoportalAppConfig',
     'frontend.bundle.apps.BundleConfig',
+    'frontend.mobile.apps.MobileConfig',
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
+    'frontend.secure.apps.SecureConfig',
 
     # Backend apps
 
@@ -46,7 +48,6 @@ INSTALLED_APPS = [
     # secure
     'secure.apps.SecureConfig',
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
-
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'geoportal.context_processors.context_processor',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -120,7 +122,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'bundle:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'

@@ -1,10 +1,10 @@
 from django.db import models
 
 
-class СуурьДавхарга(models.Model):
+class BaseLayer(models.Model):
 
     class Meta:
-        db_table = 'суурь_давхарга'
+        db_table = 'base_layer'
         ordering = ('created_at',)
 
     name = models.CharField(max_length=250)

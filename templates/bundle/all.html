@@ -4,7 +4,7 @@
     <section class="slider shadow">
         <div class="owl-carousel owl-theme">
             <div class="item">
-                <img src="{% static 'assets/image/slide-2.jpg' %}">
+                <img src="{% static 'assets/image/slide-1.jpg' %}">
                 <div class="caption text-center">
                     <h1 class="animate__animated animate__backInUp"><i class="fa fa-map-o mr-3" aria-hidden="true"></i><span >ГЕОПОРТАЛ САЙТ</span></h1>
                     <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h6>
@@ -22,8 +22,7 @@
     <section class="subs py-5">
         <div class="container">
             <div class="section-title text-center mb-4">
-                <h4 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i> ДЭД САН</h4>
-                <span class="">{{ bundles | length }} дэд сан</span>
+                <h2 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i> ДЭД САН</h2>
             </div>
 
             <div class="row mt-4 justify-content-md-center">
@@ -31,7 +30,7 @@
                 <div class="col-md-2 text-center sub">
                     <a href="{% url "bundle:detail" bundle.pk %}">
                         <img class="icon mb-3" src="{{ MEDIA_URL }}{{ bundle.icon }}">
-                        <p>{{ bundle.name }}</p>
+                        <h6 class="gp-text-primary text-uppercase">{{ bundle.name }}</h6>
                     </a>
                 </div>
                 {% endfor %}

@@ -28,14 +28,15 @@ def register(response):
 #     form = LoginForm()
 #     return render(request, 'login.html', {"form": form})
 
+def loginUser(request):
+    return render(request, 'loginUser.html')
+
 def login(request):
     if request.method == 'POST':
         email = request.POST.get('email', None)
         password = request.POST.get('password')
         try:
-            print(email,password)
             b_user = User.objects.get(email=email)
-            print(b_user)
             username = b_user.username
 
             user = authenticate(request, username=username, password=password)

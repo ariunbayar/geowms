@@ -33,12 +33,12 @@ class GeoAuth():
 
     def step1_build_redirect_uri(self):
         params = {
-                'client_key': settings.GEO_SSO['CLIENT_KEY'],
-                'redirect_uri': settings.GEO_SSO['REDIRECT_URI'],
+                'client_key': settings.XYP_DAN['CLIENT_KEY'],
+                'redirect_uri': settings.XYP_DAN['REDIRECT_URI'],
                 'state': self.request.session[self.SESSION_STATE_NAME],
                 'scope': self.scope,
             }
-        url = settings.GEO_SSO['ENDPOINTS']['LOGIN'] + urlencode(params)
+        url = settings.XYP_DAN['ENDPOINTS']['LOGIN'] + urlencode(params)
         return url
 
     def is_step2(self):
@@ -53,12 +53,12 @@ class GeoAuth():
 
     def step2_fetch_access_token(self):
         params = {
-                'client_key': settings.GEO_SSO['CLIENT_KEY'],
-                'client_secret': settings.GEO_SSO['CLIENT_SECRET'],
-                'redirect_uri': settings.GEO_SSO['REDIRECT_URI'],
+                'client_key': settings.XYP_DAN['CLIENT_KEY'],
+                'client_secret': settings.XYP_DAN['CLIENT_SECRET'],
+                'redirect_uri': settings.XYP_DAN['REDIRECT_URI'],
                 'auth_code': self.request.GET.get('auth_code'),
             }
-        url = settings.GEO_SSO['ENDPOINTS']['AUTHORIZE'] + urlencode(params)
+        url = settings.XYP_DAN['ENDPOINTS']['AUTHORIZE'] + urlencode(params)
         rsp = requests.post(url, data={}, headers=self.BASE_HEADERS)
         if rsp.status_code == 200:
             token_info = rsp.json()
@@ -78,7 +78,7 @@ class GeoAuth():
     def step3_fetch_scope_data(self):
         is_expired = timezone.now() > self.access_token_expire_at
         if not is_expired:
-            url = settings.GEO_SSO['ENDPOINTS']['SERVICE']
+            url = settings.XYP_DAN['ENDPOINTS']['SERVICE']
             headers = {
                     **self.BASE_HEADERS,
                     'Authorization': 'Bearer %s' % self.access_token
