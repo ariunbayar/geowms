@@ -9,6 +9,7 @@ from geoportal.decorators import ajax_required
 from geoportal.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
+from geoportal_app.models import Role
 
 from .forms import BundleForm
 from .models import Bundle, BundleLayer
@@ -29,7 +30,90 @@ def _get_bundle_options():
     return form_options
 
 
+@require_POST
+@ajax_required
+def roleCreate(request, payload):
+
+    bundleId = payload.get('bundleId')
+    roleId = payload.get('roleId')
+    layerId = payload.get('layerId')
+    sav = BundleLayer.objects.filter(bundle_id=bundleId, layer_id=layerId, role_id=roleId)
+    if sav:
+        return JsonResponse({'success': True})
+    else:
+        saves = BundleLayer(bundle_id=bundleId, layer_id=layerId, role_id=roleId, defaultCheck=0)
+        saves.save()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def roleRemove(request, payload):
+
+    bundleId = payload.get('bundleId')
+    roleId = payload.get('roleId')
+    layerId = payload.get('layerId')
+    sav = BundleLayer(bundle_id=bundleId, layer_id=layerId, role_id=roleId)
+    if sav == None:
+        return JsonResponse({'success': True})
+    else:
+        saves = BundleLayer.objects.filter(bundle_id=bundleId, layer_id=layerId, role_id=roleId)
+        saves.delete()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def defaultCheckUpdate(request, payload):
+
+    bundleId = payload.get('bundleId')
+    check = payload.get('check')
+    layerId = payload.get('layerId')
+    BundleLayer.objects.filter(bundle_id=bundleId, layer_id=layerId).update(defaultCheck=check)
+
+    return JsonResponse({'success': True})
+
+
+def _get_role_options():
+
+    form_options = []
+
+    for role in Role.objects.all():
+        role_display = {
+                'id': role.id,
+            }
+        form_options.append(role_display)
+
+    return form_options
+
+
+def _get_form_check_options(bundleId):
+
+    bundleLayer = BundleLayer.objects.filter(bundle_id=bundleId).order_by('layer_id')
+
+    roleOptions = []
+    for name, layers in groupby(bundleLayer, lambda ob: ob.layer_id):
+        roles = []
+        check = 0
+        for role in layers:
+            roles.append(role.role_id)
+            check = role.defaultCheck
+        role_display = {
+                'layer_id': name,
+                'roles': roles,
+                'checks': check
+
+        }
+        roleOptions.append(role_display)
+    return roleOptions
+
+
 def _get_bundle_display(bundle):
+    roles = _get_form_check_options(bundle.id)
     return {
         'id': bundle.id,
         'name': bundle.name,
@@ -39,6 +123,7 @@ def _get_bundle_display(bundle):
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
         'wms_list': [(WMS.objects.get(pk=wms[0]).name ) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'roles': roles
     }
 
 
@@ -48,10 +133,12 @@ def all(request):
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
     form_options = _get_bundle_options()
+    form_options_role = _get_role_options()
 
     rsp = {
             'bundle_list': bundle_list,
             'form_options': form_options,
+            'form_options_role': form_options_role,
         }
 
     return JsonResponse(rsp)
