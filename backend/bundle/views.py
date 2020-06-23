@@ -37,11 +37,12 @@ def roleCreate(request, payload):
     bundleId = payload.get('bundleId')
     roleId = payload.get('roleId')
     layerId = payload.get('layerId')
+    check = payload.get('check')
     sav = BundleLayer.objects.filter(bundle_id=bundleId, layer_id=layerId, role_id=roleId)
     if sav:
         return JsonResponse({'success': True})
     else:
-        saves = BundleLayer(bundle_id=bundleId, layer_id=layerId, role_id=roleId, defaultCheck=0)
+        saves = BundleLayer(bundle_id=bundleId, layer_id=layerId, role_id=roleId, defaultCheck=check)
         saves.save()
         return JsonResponse({'success': True})
 

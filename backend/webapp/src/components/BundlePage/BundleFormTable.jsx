@@ -22,12 +22,13 @@ export default class BundleFormTable extends Component {
     }
     handleLayerToggle(e) {
         let roles = this.state.roles
+        const check = this.state.check
         const bundleId = this.props.wmsId
         const roleId = parseInt(e.target.value)
         const layerId = this.props.values.id
         if (e.target.checked) {
             roles.push(roleId)
-            const data = {"bundleId":bundleId, "roleId":roleId, "layerId":layerId}
+            const data = {"bundleId":bundleId, "roleId":roleId, "layerId":layerId, "check": check}
             service.roleCreate(data).then(({success, item}) => {
             })
         } 
@@ -69,9 +70,9 @@ export default class BundleFormTable extends Component {
         return (
             <tr>
 
-                <th >
-                   {this.props.wmsId} + {id} + {name}
-                </th>
+                <td >
+                   {name}
+                </td>
 
                 <td>
                     <input
