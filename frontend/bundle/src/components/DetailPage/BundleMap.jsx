@@ -13,6 +13,7 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
+import {Modal} from './controls/Modal'
 
 import "./styles.css";
 import {service} from './service'
@@ -137,6 +138,7 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
+                new Modal(),
                 this.controls.coordinateCopy,
             ]),
             layers: [
@@ -189,6 +191,7 @@ export default class BundleMap extends Component {
     }
 
     render() {
+
         return (
 
             <div>
