@@ -28,10 +28,16 @@ export default class BundleMap extends Component {
             bundle: props.bundle,
             map_wms_list: [],
             is_sidebar_open: false,
+            coordinate_clicked: null,
+        }
+
+        this.controls = {
+            coordinateCopy: new CoordinateCopy(),
         }
 
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
+        this.handleMapClick = this.handleMapClick.bind(this)
         this.showDetail = this.showDetail.bind(this)
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
@@ -41,7 +47,11 @@ export default class BundleMap extends Component {
         this.loadMapData(this.state.bundle.id)
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
+
+        if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
+            this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        }
 
         if (this.props.bundle.id === prevProps.bundle.id) return
 
@@ -127,7 +137,7 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
-                new CoordinateCopy(),
+                this.controls.coordinateCopy,
             ]),
             layers: [
                 ...base_layers,
@@ -140,14 +150,19 @@ export default class BundleMap extends Component {
             })
         })
 
-        map.on('click', (event) => {
-            const projection = event.map.getView().getProjection()
-            const map_coord = transformCoordinate(event.coordinate, projection, 'EPSG:4326')
-            const coord = (createStringXY(6))(map_coord)
-            document.querySelector('.coordinate-copy-control').innerHTML = coord
-        })
+        map.on('click', this.handleMapClick)
 
         this.map = map
+
+    }
+
+    handleMapClick(event) {
+
+        const projection = event.map.getView().getProjection()
+        const map_coord = transformCoordinate(event.coordinate, projection, 'EPSG:4326')
+        const coordinate_clicked = (createStringXY(6))(map_coord)
+
+        this.setState({coordinate_clicked})
 
     }
 
