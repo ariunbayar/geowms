@@ -1,10 +1,13 @@
+element.style {
+    position: relative;
+}
 .🌍 {
     position: relative;
 }
 
 .🌍 > #map{
      width: 100%;
-     height: 1000px;
+     height: 1200px;
  }
 
 .🌍 > .⚙ {
@@ -30,9 +33,8 @@
 }
 .суурь-давхаргууд{
     right: .5rem;
-    bottom: .5rem;
-    width: 40px;
-    height: 40px;
+    bottom: 70px;
+    position: fixed;
 }
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
@@ -82,4 +84,24 @@
 .ol-zoom .ol-zoom-in{
     width: 40px;
     height: 40px;
+}
+
+.ol-mouse-position {
+    right: 4rem;
+    background: rgba(0,60,136,0.3);
+    border-radius: 4px;
+    padding: 2px .2rem;
+    font-size: smaller;
+    color: #eee;
+    text-align: center;
+    width: 8.8rem;
+    min-height: 1rem;
+}
+
+.coordinate-copy-control {
+    background-color: red;
+    width: 10rem;
+    height: 1rem;
+    left: calc(50% - 5rem);
+    top: 1rem;
 }
