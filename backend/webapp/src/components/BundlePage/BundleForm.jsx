@@ -112,7 +112,7 @@ export default class BundleForm extends Component {
                                             onChange={this.handleLayerToggle}
                                             value={layer.id}
                                         />
-                                        {layer.name}
+                                        <a> {layer.name}</a>
                                     </label>
                                 </div>
                             )}
