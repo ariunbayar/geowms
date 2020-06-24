@@ -99,9 +99,13 @@ element.style {
 }
 
 .coordinate-copy-control {
-    background-color: red;
     width: 10rem;
-    height: 1rem;
     left: calc(50% - 5rem);
     top: 1rem;
+    opacity: 1;
+}
+.coordinate-copy-control.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s linear, visibility 0s linear .25s;
 }
