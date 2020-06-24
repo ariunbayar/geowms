@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponse,HttpResponseRedirect
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
 from django.shortcuts import render, redirect
@@ -8,10 +9,6 @@ from .models import *
 from geoportal_app.models import User
 
 # Create your views here.
-
-
-def index(request):
-    return render(request, 'index.html')
 
 def register(response):
     if response.method == "POST":
@@ -43,7 +40,7 @@ def login(request):
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)
-                    return HttpResponseRedirect(reverse('index'))
+                    return redirect(settings.LOGIN_REDIRECT_URL)
                 else:
                     messages.warning(request, 'Таны хаяг идэвхгүй байна.')
                     return HttpResponseRedirect(reverse('login'))
@@ -55,6 +52,7 @@ def login(request):
             return HttpResponseRedirect(reverse('login'))
     form = LoginForm()
     return render(request, 'login.html', {'form': form})
+
 
 def logout(request):
     auth_logout(request)
