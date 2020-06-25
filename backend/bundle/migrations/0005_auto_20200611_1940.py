@@ -10,6 +10,14 @@ def create_bundles(apps, schema_editor):
 
     user = User.objects.all().first()
 
+    if user is None:
+          user = User.objects.create(
+                    username='geoportal',
+                    email='geoportal',
+                    password='pbkdf2_sha256$180000$wSZZCPrIfajE$aad4UuJnQchViy74dw9NP1wxToUD38NJF48z0usBwRQ=',
+                    is_superuser=True,
+               )
+
     bundle_values = [
             (
                 'Геодезийн тулгуур сүлжээ',

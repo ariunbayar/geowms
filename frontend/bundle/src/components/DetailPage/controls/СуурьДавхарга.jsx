@@ -57,7 +57,6 @@ export class СуурьДавхарга extends Control {
     toggleLayer(is_active, el, layer) {
 
         if (this.last_active && is_active) {
-            console.log(this.last_active);
             this.last_active.layer.setVisible(false)
             this.last_active.el.classList.toggle(CLASS_ACTIVE, false)
         }

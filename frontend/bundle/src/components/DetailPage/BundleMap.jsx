@@ -2,6 +2,8 @@ import React, { Component, Fragment } from "react"
 
 import 'ol/ol.css'
 import {Map, View} from 'ol'
+import {transform as transformCoordinate} from 'ol/proj'
+
 import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
@@ -10,6 +12,7 @@ import {createStringXY} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
+import {CoordinateCopy} from './controls/CoordinateCopy'
 
 import "./styles.css";
 import {service} from './service'
@@ -25,10 +28,16 @@ export default class BundleMap extends Component {
             bundle: props.bundle,
             map_wms_list: [],
             is_sidebar_open: false,
+            coordinate_clicked: null,
+        }
+
+        this.controls = {
+            coordinateCopy: new CoordinateCopy(),
         }
 
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
+        this.handleMapClick = this.handleMapClick.bind(this)
         this.showDetail = this.showDetail.bind(this)
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
@@ -38,7 +47,11 @@ export default class BundleMap extends Component {
         this.loadMapData(this.state.bundle.id)
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
+
+        if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
+            this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        }
 
         if (this.props.bundle.id === prevProps.bundle.id) return
 
@@ -124,6 +137,7 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
+                this.controls.coordinateCopy,
             ]),
             layers: [
                 ...base_layers,
@@ -136,7 +150,19 @@ export default class BundleMap extends Component {
             })
         })
 
+        map.on('click', this.handleMapClick)
+
         this.map = map
+
+    }
+
+    handleMapClick(event) {
+
+        const projection = event.map.getView().getProjection()
+        const map_coord = transformCoordinate(event.coordinate, projection, 'EPSG:4326')
+        const coordinate_clicked = (createStringXY(6))(map_coord)
+
+        this.setState({coordinate_clicked})
 
     }
 
