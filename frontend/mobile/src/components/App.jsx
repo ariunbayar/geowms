@@ -24,33 +24,33 @@ export class App extends Component {
             statisticsScreenIsload: false,
             wmsLayerScreenIsload: false,
             loginScreenIsload: false,
-            bundleName: 'Хил зааг',
-            bundleId: 2,
-            bundle: {"id":2,"name":"Хил зааг","layers":[128,129,130,131,132,125,126,127],"wms_list":["Хил, зааг"]},
+            bundleName: 'Геодезийн тулгуур сүлжээ',
+            bundleId: 5,
+            bundle: {"id":5,"name":"Геодезийн тулгуур сүлжээ","layers":[83,84,85,88,91,78,78,83,83,84,88,79,79,88,91,88,83,84],"wms_list":["Хил, зааг"]},
         }
 
         this.screenRouter = this.screenRouter.bind(this)
     }
     componentDidMount(){
     }
-    screenRouter(screenNAme) {
-        if(screenNAme == "homeScreen")
+    screenRouter(screenName) {
+        if(screenName == "homeScreen")
         {
             this.setState({homeScreenIsload: true , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
         }
-        else if(screenNAme == "serviceScreen")
+        else if(screenName == "serviceScreen")
         {
             this.setState({homeScreenIsload: false , serviceScreenIsload: true, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
         }
-        else if(screenNAme == "metaDataScreen")
+        else if(screenName == "metaDataScreen")
         {
             this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
         }
-        else if(screenNAme == "helpScreen")
+        else if(screenName == "helpScreen")
         {
             this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:true, statisticsScreenIsload:false})
         }
-        else if(screenNAme == "statisticsScreen")
+        else if(screenName == "statisticsScreen")
         {
             this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:true})
         }
@@ -82,10 +82,16 @@ export class App extends Component {
         this.setState({bundleId:id, bundleName: name})
         Promise.all([
             service.wmsLayerOneDatas(id)]).then((data) => {
-            this.setState({bundle: data[0].bundle_display})
+                if(data){
+                    console.log(JSON.stringify(data))
+                    this.setState({bundle: data[0].bundle_display, metaDataScreenIsload: false})
+                    this.setState({metaDataScreenIsload: true})
+            }
         })
+    }
     
-            
+
+    componentDidUpdate(prevProps, prevState) {
         
     }
     render() {
@@ -93,14 +99,15 @@ export class App extends Component {
         return (
             
             <view>
-                {this.state.loginScreenIsload ? <div ><h1>asdas</h1><i onClick={() => this.loginScreen()}  class="fa fa-arrow-left" aria-hidden="true" ></i><LoginDanScreen></LoginDanScreen></div> :
+                {this.state.loginScreenIsload ? <div ><i onClick={() => this.loginScreen()}  class="fa fa-arrow-left backarrow" aria-hidden="true" ></i><LoginDanScreen></LoginDanScreen></div> :
                 <div>
+                    {this.state.metaDataScreenIsload ? 
                     <div class="header">
                         <div class="row center">
                             <div class="col-11">
                                 <h1>{this.state.bundleName}</h1>
                             </div>
-                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user" aria-hidden="true"></i></div>
+                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user-circle" aria-hidden="true"></i></div>
                         </div>
                         <div class="row">
                             <div class="col-12">
@@ -111,17 +118,30 @@ export class App extends Component {
 
                             </div>
                         </div>
+                    </div> :
+
+                    <div class="header">
+                        <div class="row center">
+                            <div class="col-11">
+                                <h1>Гео портал</h1>
+                            </div>
+                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user-circle-o" aria-hidden="true"></i></div>
+                        </div>
                     </div>
+                    }
+
+
+
+
                     <div>
                         {this.state.homeScreenIsload ? <HomeScreen></HomeScreen> : null}
                         {this.state.serviceScreenIsload ? <ServiceScreen></ServiceScreen> : null}
                         {this.state.metaDataScreenIsload ? 
                             <div class="metaDataScreen">
-                                <MetaDataScreen bundle={this.state.bundle}></MetaDataScreen> 
-                                {this.state.wmsLayerScreenIsload ? 
-                                <i onClick={() => this.wmsLayerName()} class="fas fa-layer-group wmsLayerButton" aria-hidden="true" style={{color:"blue"}}></i>:
-                                <i onClick={() => this.wmsLayerName()} class="fas fa-layer-group wmsLayerButton" aria-hidden="true" style={{color:"black"}}></i>
-                                }
+                                <MetaDataScreen bundle={this.state.bundle}></MetaDataScreen>
+                                <a class="wmsLayerButtonBack" onClick={() => this.wmsLayerName()}>
+                                    <i class="fas fa-layer-group wmsLayerButton" aria-hidden="true"></i>
+                                </a>
                             </div> :
                         null}
                         {this.state.helpScreenIsload ? <HelpScreen></HelpScreen> : null}

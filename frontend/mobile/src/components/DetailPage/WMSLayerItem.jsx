@@ -32,7 +32,7 @@ export default class WMSLayerItem extends Component {
                         onChange={(e) => this.toggle(e.target.checked)}
                         checked={is_visible}
                     />
-                    {name}
+                    <a>&nbsp;{name}</a>
                 </label>
             </li>
         )

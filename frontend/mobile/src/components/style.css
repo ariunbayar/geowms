@@ -2,12 +2,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
+
 body{
     font-family: 'Roboto', sans-serif;
     font-size: 19px;
     font-weight: 400;
     color: black;
 }
+
 .mnav__item{
     width: 20%;
 }
@@ -27,7 +29,7 @@ body{
 
 }
 
-
+/* footer menu */
  .mnav {
   overflow: hidden;
   background-color:white;
@@ -67,31 +69,50 @@ a .footerButton{
     font-size: 8px;
 }
 
+.wmsLayerButtonBack{
+    background-color: rgba(0, 60, 136, 0.5);
+    border-radius: 4px;
+    padding: 2px;
+    width: 40px;
+    height: 40px;
+    top: 140px;
+    right: 11px;
+    position: absolute;
+    overflow-y: auto;
+
+
+}
+.wmsLayerButtonBack:active{
+  background-color: rgba(0, 60, 136, 0.7);
+}
+.wmsLayerButtonBack:hover {
+  background-color: rgba(0, 60, 136, 0.7);
+}
 
 .wmsLayerButton{
-    position: absolute;
-    top: 150px;
-    right: 15px;
-    overflow-y: auto;
-    width: 36px;
-    height: 36px;
+    width: 35px;
+    height: 35px;
+    color: white;
 
 }
+
 .fas{
-    font-size: 35px;
+    font-size: 33px;
 
 }
+/* bundle layer screen */
 .wmsLayerScreen{
-    position: absolute;
-    top: 350px;
+    position: fixed;
     right: 0px;
     left: 0px;
-    bottom: 0px;
-    padding-top: 50px;
-    padding-bottom: 270px;
+    bottom: 20px;
+    padding-top: 25px;
+    padding-bottom: 45px;
+    padding-right: 20px;
+    padding-left: 20px;
     overflow-y: auto;
     width: 100%;
-    height: 400px;
+    height: 510px;
     background-color: whitesmoke;
     border-top-right-radius: 40px;
     border-top-left-radius: 40px;
@@ -116,4 +137,17 @@ a .footerButton{
 }
 .wmsLayerScreen p{
   font-size: 10px;
+}
+
+/* back arrow style*/
+.backarrow{
+  font-size: 35px;
+  position: fixed;
+  left: 30px;
+  top:50px;
+  color: rgba(0, 60, 136, 0.5);
+}
+.backarrow:active{
+  color: rgba(0, 60, 136, 0.7);
+
 }

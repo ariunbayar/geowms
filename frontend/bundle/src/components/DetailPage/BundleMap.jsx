@@ -9,7 +9,7 @@ import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
 import {createStringXY} from 'ol/coordinate';
-import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
+import {defaults as defaultControls, MousePosition, ScaleLine} from 'ol/control'
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
@@ -129,7 +129,6 @@ export default class BundleMap extends Component {
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
-                new FullScreen(),
                 new MousePosition({
                     projection: 'EPSG:4326',
                     coordinateFormat: createStringXY(6),

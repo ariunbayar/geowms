@@ -38,7 +38,7 @@ export default class WMSItem extends Component {
                             onChange={this.toggle}
                             checked={is_visible}
                         />
-                        <span>{name}</span>
+                        <span>&nbsp;{name}</span>
                     </div>
                 </p>
 
