@@ -41,6 +41,7 @@ export default class BundleMap extends Component {
 
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
+                modal:new Modal(),
         }
 
         this.handleToggle = this.handleToggle.bind(this)
@@ -49,6 +50,7 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.showModal = this.showModal.bind(this)
     }
 
     componentDidMount() {
@@ -68,6 +70,10 @@ export default class BundleMap extends Component {
 
         this.loadMapData(bundle.id)
 
+    }
+
+    showModal(){
+        this.controls.modal.showModal()
     }
 
     loadMapData(bundle_id) {
@@ -159,7 +165,7 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
-                new Modal(),
+                this.controls.modal,
                 this.controls.coordinateCopy,
             ]),
             layers: [
@@ -189,6 +195,7 @@ export default class BundleMap extends Component {
         this.setState({coordinate_clicked})
 
         this.showFeaturesAt(event.coordinate)
+        this.showModal()
 
     }
 
