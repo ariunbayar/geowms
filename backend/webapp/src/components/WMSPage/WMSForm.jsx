@@ -126,7 +126,7 @@ export default class WMSForm extends Component {
                                         onChange={this.handleLayerToggle}
                                         value={layer.code}
                                     />
-                                    {layer.name} ({layer.code})
+                                    <span>&nbsp;{layer.name}&nbsp; ({layer.code})</span>
                                 </label>
                             </div>
                         )}

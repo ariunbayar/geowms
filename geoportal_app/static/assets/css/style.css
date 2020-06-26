@@ -168,12 +168,12 @@ body {
 }
 
 /* help table */
-tbody {
+.serviceDiv tbody {
     display: table-row-group;
     vertical-align: middle;
     border-color: inherit;
 }
-table {
+.serviceDiv table {
     border-collapse: collapse;
     border-spacing: 0;
     border: 10px;
@@ -182,15 +182,15 @@ table {
     border-top: #034ea2 2px solid;
     border-left: #ccc 1px solid;
 }
-.uk-text-left {
+.serviceDiv .uk-text-left {
     text-align: left !important;
 }
-tr {
+.serviceDiv tr {
     display: table-row;
     vertical-align: inherit;
     border-color: inherit;
 }
-table td {
+.serviceDiv table td {
     padding: 16px 12px;
     vertical-align: top;
     display: table-cell;
