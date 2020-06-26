@@ -36,27 +36,27 @@ export class App extends Component {
     screenRouter(screenName) {
         if(screenName == "homeScreen")
         {
-            this.setState({homeScreenIsload: true , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
+            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: true , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
         }
         else if(screenName == "serviceScreen")
         {
-            this.setState({homeScreenIsload: false , serviceScreenIsload: true, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
+            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: true, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
         }
         else if(screenName == "metaDataScreen")
         {
-            this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
+            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
         }
         else if(screenName == "helpScreen")
         {
-            this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:true, statisticsScreenIsload:false})
+            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:true, statisticsScreenIsload:false})
         }
         else if(screenName == "statisticsScreen")
         {
-            this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:true})
+            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:true})
         }
         else
         {
-            this.setState({homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
+            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
         }
         
     }

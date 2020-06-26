@@ -75,9 +75,9 @@ a .footerButton{
     padding: 2px;
     width: 40px;
     height: 40px;
-    top: 140px;
+    top: 120px;
     right: 11px;
-    position: absolute;
+    position: fixed;
     overflow-y: auto;
 
 
@@ -112,7 +112,7 @@ a .footerButton{
     padding-left: 20px;
     overflow-y: auto;
     width: 100%;
-    height: 510px;
+    height: 50%;
     background-color: whitesmoke;
     border-top-right-radius: 40px;
     border-top-left-radius: 40px;
@@ -122,6 +122,9 @@ a .footerButton{
 }
 
 .header {
+    position: fixed;
+    z-index: 10;
+    width: 100%;
     padding: 20px;
     background-color: #0066cc;
     color: white;
