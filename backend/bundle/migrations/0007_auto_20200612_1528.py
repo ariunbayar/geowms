@@ -15,7 +15,7 @@ def update_sort_order(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_bundle', '0007_auto_20200623_1517'),
+        ('backend_bundle', '0006_auto_20200611_1944'),
     ]
 
     operations = [

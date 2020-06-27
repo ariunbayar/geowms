@@ -7,8 +7,8 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('geoportal_app', '0006_auto_20200614_1338'),
-        ('backend_bundle', '0006_auto_20200611_1944'),
+        ('geoportal_app', '0007_auto_20200627_1806'),
+        ('backend_bundle', '0007_auto_20200612_1528'),
     ]
 
     operations = [
