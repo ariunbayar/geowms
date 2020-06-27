@@ -33,7 +33,7 @@ export default class WMSItem extends Component {
 
                 <p className="my-1">
                     <label>
-                        <input className="font-weight-bold" 
+                        <input className="font-weight-bold"
                             type="checkbox"
                             onChange={this.toggle}
                             checked={is_visible}

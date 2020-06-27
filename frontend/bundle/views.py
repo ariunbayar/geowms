@@ -64,4 +64,3 @@ def wms_layers(request, pk):
     }
 
     return JsonResponse(rsp)
-    

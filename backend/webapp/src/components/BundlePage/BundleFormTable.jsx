@@ -31,7 +31,7 @@ export default class BundleFormTable extends Component {
             const data = {"bundleId":bundleId, "roleId":roleId, "layerId":layerId, "check": check}
             service.roleCreate(data).then(({success, item}) => {
             })
-        } 
+        }
         else {
             if(roleId != 5)
             {
@@ -63,7 +63,7 @@ export default class BundleFormTable extends Component {
         }
     }
     componentDidMount(){
-        
+
     }
     render() {
         const {id, name, price} = this.props.values
