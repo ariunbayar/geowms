@@ -57,7 +57,7 @@ export class CoordinateCopy extends Control {
         const cssClasses = `coordinate-copy-control ${CLASS_CONTROL} ${CLASS_HIDDEN}`
         this.element.className = cssClasses
 
-        this.render = this.render.bind(this)
+        this.renderComponent = this.renderComponent.bind(this)
         this.toggleControl = this.toggleControl.bind(this)
 
     }

@@ -3,6 +3,7 @@ import React, { Component } from "react"
 import {service} from './service'
 import BundleForm from './BundleForm'
 import Bundle from './Bundle'
+import BundleAdminRights from './BundleAdminRights'
 
 export class BundlePage extends Component {
 
@@ -23,6 +24,7 @@ export class BundlePage extends Component {
         this.state = {
             bundle_list: [],
             form_options: {},
+            form_options_role: {},
             is_form_open: false,
             form_values: {...this.initial_form_values},
         }
@@ -41,9 +43,8 @@ export class BundlePage extends Component {
     }
 
     handleListUpdated() {
-
-        service.getAll().then(({bundle_list, form_options}) => {
-            this.setState({bundle_list, form_options})
+        service.getAll().then(({bundle_list, form_options, form_options_role}) => {
+            this.setState({bundle_list, form_options, form_options_role})
         })
 
     }
@@ -139,12 +140,25 @@ export class BundlePage extends Component {
                         }
 
                         {this.state.is_form_open &&
-                            <BundleForm
-                                handleSave={this.handleSave}
-                                handleCancel={this.handleFormCancel}
-                                formOptions={this.state.form_options}
-                                values={this.state.form_values}
-                            />
+                            <div class="row">
+                                <div class="col-4">
+                                <BundleForm
+                                    handleSave={this.handleSave}
+                                    handleCancel={this.handleFormCancel}
+                                    formOptions={this.state.form_options}
+                                    values={this.state.form_values}
+                                />
+                                </div>
+                                <div class="col-8">
+                                <BundleAdminRights
+                                    handleSave={this.handleSave}
+                                    handleCancel={this.handleFormCancel}
+                                    formOptions={this.state.form_options}
+                                    formOptionsRole={this.state.form_options_role}
+                                    values={this.state.form_values}
+                                />
+                                </div>
+                            </div>
                         }
 
                     </div>
