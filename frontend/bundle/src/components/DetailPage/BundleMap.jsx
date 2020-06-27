@@ -73,7 +73,7 @@ export default class BundleMap extends Component {
     }
 
     showModal(){
-        this.controls.modal.showModal()
+        this.controls.modal.showModal('lakjsdflkajsdflk')
     }
 
     loadMapData(bundle_id) {
