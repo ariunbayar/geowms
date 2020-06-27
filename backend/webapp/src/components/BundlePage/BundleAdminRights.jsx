@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import BundleFormTable from "./BundleFormTable"
 
+
 export default class BundleAdminRights extends Component {
 
     constructor(props) {
@@ -31,11 +32,9 @@ export default class BundleAdminRights extends Component {
     }
 
     render() {
-        console.log(JSON.stringify( this.props.values.roles.indexOf(155)))
         return (
             <div className="shadow-lg p-3 mb-5 bg-white rounded">
 
-                
                 {this.props.formOptions.map(({id, name, layers}, idx) =>
                     <div>
                         <dt> {name} </dt>
@@ -51,17 +50,16 @@ export default class BundleAdminRights extends Component {
                             </thead>
                                 <tbody>
                                     {layers.map((layer) =>
-                                        (this.state.layers.indexOf(layer.id) > -1) && 
-                                                    
+                                        (this.state.layers.indexOf(layer.id) > -1) &&
+
                                             this.props.values.roles.map((roleChecks) =>
 
                                                 (roleChecks.layer_id == layer.id &&
-                                                    <BundleFormTable 
+                                                    <BundleFormTable
                                                         values = {layer}
                                                         wmsId = {this.state.id}
                                                         role={this.props.formOptionsRole}
                                                         roleChecks = {roleChecks}
-                                                        
                                                     />
                                                 )
 
