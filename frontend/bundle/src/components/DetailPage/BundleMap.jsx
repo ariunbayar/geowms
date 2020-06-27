@@ -35,7 +35,6 @@ export default class BundleMap extends Component {
             map_wms_list: [],
             is_sidebar_open: false,
             coordinate_clicked: null,
-            feature_info: null,
             vector_layer: null,
         }
 
@@ -50,7 +49,6 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
-        this.showModal = this.showModal.bind(this)
     }
 
     componentDidMount() {
@@ -70,10 +68,6 @@ export default class BundleMap extends Component {
 
         this.loadMapData(bundle.id)
 
-    }
-
-    showModal(){
-        this.controls.modal.showModal('lakjsdflkajsdflk')
     }
 
     loadMapData(bundle_id) {
@@ -195,7 +189,6 @@ export default class BundleMap extends Component {
         this.setState({coordinate_clicked})
 
         this.showFeaturesAt(event.coordinate)
-        this.showModal()
 
     }
 
@@ -221,17 +214,29 @@ export default class BundleMap extends Component {
             )
 
             if (url) {
+
+                this.controls.modal.showModal(null, false)
+
                 fetch(url)
                     .then((response) => response.text())
                     .then((text) => {
-                        //this.setState({feature_info: text})
-
                         const parser = new WMSGetFeatureInfo()
                         const features = parser.readFeatures(text)
                         const source = new VectorSource({
                             features: features
                         });
                         this.state.vector_layer.setSource(source)
+
+                        const feature_info = features.map((feature) => {
+                            console.log(feature);
+                            const geometry_name = feature.getGeometryName()
+                            const values =
+                                feature.getKeys()
+                                .filter((key) => key != geometry_name)
+                                .map((key) => [key, feature.get(key)])
+                            return [feature.getId(), values]
+                        })
+                        this.controls.modal.showModal(feature_info, true)
                     })
             } else {
                 /* TODO */
@@ -273,28 +278,6 @@ export default class BundleMap extends Component {
                                     <i className="fa fa-bars fa-lg" aria-hidden="true"></i>
                                 </a>
                             </div>
-
-                            {this.state.feature_info &&
-                                <div className="modal fade show" tabIndex="-1" role="dialog" style={{display: 'block'}}>
-                                    <div className="modal-dialog">
-                                        <div className="modal-content">
-                                            <div className="modal-header">
-                                                <h5 className="modal-title">Modal title</h5>
-                                                <button type="button" className="close">
-                                                    <span>&times;</span>
-                                                </button>
-                                            </div>
-                                            <div className="modal-body"
-                                                dangerouslySetInnerHTML={{__html: this.state.feature_info}}
-                                            ></div>
-                                            <div className="modal-footer">
-                                                <button type="button" className="btn btn-secondary">Close</button>
-                                                <button type="button" className="btn btn-primary">Save changes</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
                         </div>
                     </div>
 
