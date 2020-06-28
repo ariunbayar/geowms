@@ -62,6 +62,7 @@ def үүсгэх(request):
 
         base_layer.name = payload.get('name')
         base_layer.url = payload.get('url')
+        base_layer.tilename = payload.get('tilename')
 
         [thumbnail_2x, thumbnail_1x] = resize_b64_to_sizes(payload.get('thumbnail'), sizes)
         base_layer.thumbnail_1x = SimpleUploadedFile('thumbnail.png', thumbnail_1x)
