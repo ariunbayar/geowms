@@ -139,6 +139,7 @@ export class Үүсгэх extends Component {
             this.tileWMS.updateParams({'LAYERS': wms.layers.join()})
             this.tileWMS.setUrl(wms.url)
             setFieldValue('url', wms.url)
+            setFieldValue('wms', event.target.value)
         }
     }
 
@@ -232,7 +233,7 @@ export class Үүсгэх extends Component {
 
                                         {values.tilename == 'wms' &&
                                             <Fragment>
-                                                <Field name="url" as="select" className="form-control"
+                                                <Field name="wms" as="select" className="form-control"
                                                     onChange={(e) => this.handleURLChangeWMS(e, setFieldValue)}
                                                 >
                                                     <option value="" key={this.state.wms_list.length}>---------</option>
