@@ -3,7 +3,10 @@ export const service = {
     create,
     update,
     remove,
-    move
+    move,
+    roleCreate,
+    roleRemove,
+    defaultCheckUpdate,
 }
 
 const prefix = '/back'
@@ -105,4 +108,31 @@ function move(id, move) {
     }
 
     return fetch(`${prefix}/bundle/move/`, opts).then(handleResponse)
+}
+
+function roleCreate(values) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`${prefix}/bundle/roleCreate/`, opts).then(handleResponse)
+}
+
+function roleRemove(values) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`${prefix}/bundle/roleRemove/`, opts).then(handleResponse)
+}
+
+function defaultCheckUpdate(values) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`${prefix}/bundle/defaultCheckUpdate/`, opts).then(handleResponse)
 }

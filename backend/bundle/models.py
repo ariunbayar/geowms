@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 
 from backend.wmslayer.models import WMSLayer
+from geoportal_app.models import Role
 
 
 class Bundle(models.Model):
@@ -25,3 +26,6 @@ class BundleLayer(models.Model):
 
     layer = models.ForeignKey(WMSLayer, on_delete=models.PROTECT)
     bundle = models.ForeignKey(Bundle, on_delete=models.PROTECT)
+    role = models.ForeignKey(Role, on_delete=models.PROTECT, default=5)
+    defaultCheck = models.PositiveIntegerField(default=0)
+
