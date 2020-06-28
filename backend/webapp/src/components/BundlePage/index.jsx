@@ -140,8 +140,8 @@ export class BundlePage extends Component {
                         }
 
                         {this.state.is_form_open &&
-                            <div class="row">
-                                <div class="col-4">
+                            <div className="row">
+                                <div className="col-4">
                                 <BundleForm
                                     handleSave={this.handleSave}
                                     handleCancel={this.handleFormCancel}
@@ -149,7 +149,7 @@ export class BundlePage extends Component {
                                     values={this.state.form_values}
                                 />
                                 </div>
-                                <div class="col-8">
+                                <div className="col-8">
                                 <BundleAdminRights
                                     handleSave={this.handleSave}
                                     handleCancel={this.handleFormCancel}
