@@ -1,13 +1,14 @@
 import React, { Component, Fragment } from "react"
 
 import 'ol/ol.css'
-import {Map, View} from 'ol'
+import {Map, View, Feature} from 'ol'
 import {transform as transformCoordinate} from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo';
+import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
-import {Style, Stroke, Fill} from 'ol/style'
+import {Icon, Style, Stroke, Fill} from 'ol/style'
+import {Point} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
@@ -18,7 +19,7 @@ import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
 
-import "./styles.css";
+import "./styles.css"
 import {service} from './service'
 import {Sidebar} from './Sidebar'
 
@@ -43,6 +44,8 @@ export default class BundleMap extends Component {
             modal: new Modal(),
         }
 
+        this.marker = this.initMarker()
+
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
@@ -50,6 +53,27 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+    }
+
+    initMarker() {
+
+        const style = new Style({
+            image: new Icon({
+                anchor: [0.5, 86],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                scale: .25,
+                src: '/static/assets/images/bundle/marker.png'
+            })
+        })
+
+        const point = new Point([0, 0])
+
+        const feature = new Feature({geometry: point})
+        feature.setStyle(style)
+
+        return {feature: feature, point: point}
+
     }
 
     componentDidMount() {
@@ -148,6 +172,11 @@ export default class BundleMap extends Component {
         })
         this.setState({vector_layer})
 
+        const marker_layer = new VectorLayer({
+            source: new VectorSource({
+                features: [this.marker.feature],
+            })
+        })
 
         const map = new Map({
             target: 'map',
@@ -167,6 +196,7 @@ export default class BundleMap extends Component {
                 ...base_layers,
                 ...map_wms_list.map((wms) => wms.tile),
                 vector_layer,
+                marker_layer,
             ],
             view: new View({
                 projection: this.state.projection,
@@ -182,6 +212,8 @@ export default class BundleMap extends Component {
     }
 
     handleMapClick(event) {
+
+        this.marker.point.setCoordinates(event.coordinate)
 
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
@@ -262,6 +294,7 @@ export default class BundleMap extends Component {
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+        this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
 
