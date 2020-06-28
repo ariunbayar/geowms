@@ -1,0 +1,17 @@
+.loginDan{
+    background: url("/static/assets/image/paatern.jpg");
+    background-repeat: no-repeat;
+    background-size: auto;
+    height: 812px;
+    overflow-y: hidden; 
+    overflow-x: hidden;
+
+}
+.loginlogo{
+    position: fixed;
+    height: 400px;
+    top: 280px;
+    left: 24%;
+    width: 80%;
+    color:rgba(0,60,136,0.8);
+}
