@@ -221,17 +221,14 @@ export class Үүсгэх extends Component {
                                                     />
                                         }
 
-                                        {this.state.tilename == 'wms' && this.state.wms_list.map((wms, index) =>
-                                                <div key={index}>
-                                                    <label>
-                                                        <input
-                                                            type="checkbox"
-                                                            value={wms.url}
-                                                        />
-                                                        {wms.name}
-                                                    </label>
+                                        {this.state.tilename == 'wms' && 
+                                                <div>
+                                                    <select>
+                                                        {this.state.wms_list.map((wms, index) =>
+                                                            <option key={index} value={wms.url}> {wms.name} </option>
+                                                        )}
+                                                    </select>
                                                 </div>
-                                            )
                                         }
 
                                         <div className="form-group">
