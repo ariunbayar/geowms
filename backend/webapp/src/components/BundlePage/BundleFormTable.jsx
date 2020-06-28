@@ -62,14 +62,11 @@ export default class BundleFormTable extends Component {
 
         }
     }
-    componentDidMount(){
-        
-    }
+
     render() {
         const {id, name, price} = this.props.values
         return (
             <tr>
-
                 <td >
                    {name}
                 </td>
@@ -83,7 +80,7 @@ export default class BundleFormTable extends Component {
                     />
                 </td>
                 {this.props.role.map(({id}, idx) =>
-                    <td>
+                    <td key={idx}>
                         <input
                             type="checkbox"
                             onChange={this.handleLayerToggle}
