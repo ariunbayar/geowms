@@ -18,13 +18,10 @@ export class СуурьДавхарга extends Control {
             target: options.target,
         })
 
-
         this.toggleLayer = this.toggleLayer.bind(this)
         this.initLayer = this.initLayer.bind(this)
         this.handleClick = this.handleClick.bind(this)
 
-        this.last_layer = null
-        this.last_layer_el = null
         this.last_active = null
 
         const base_layers = options.layers.map(this.initLayer)

@@ -31,14 +31,10 @@ export default class WMSItem extends Component {
         return (
             <Fragment>
 
-                <p className="my-1">
+                <p className="col-11">
                     <div class="col-12">
-                        <input
-                            type="checkbox"
-                            onChange={this.toggle}
-                            checked={is_visible}
-                        />
-                        <span>{name}</span>
+                        <span> {name}</span>
+                        <hr/>
                     </div>
                 </p>
 

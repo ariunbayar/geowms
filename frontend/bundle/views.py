@@ -8,7 +8,7 @@ from geoportal.decorators import ajax_required
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
-
+from geoportal_app.models import User, Role
 
 def all(request):
 
@@ -42,11 +42,13 @@ def detail(request, pk):
 @ajax_required
 def wms_layers(request, pk):
 
+    username = request.user.username
+    users = get_object_or_404(User, username=username)
+    role = users.roles.all().values_list('id').first()
+
     bundle = get_object_or_404(Bundle, pk=pk)
-
     wms_list = []
-
-    qs_layers = bundle.layers.all().order_by('wms__created_at')
+    qs_layers = bundle.layers.filter(bundlelayer__role_id = role).order_by('wms__created_at')
     _layer_to_display = lambda ob: {'name': ob.name, 'code': ob.code}
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         wms_data = {
@@ -62,4 +64,3 @@ def wms_layers(request, pk):
     }
 
     return JsonResponse(rsp)
-    

@@ -24,6 +24,11 @@ urlpatterns = [
         path('update/', bundle_views.update, name='update'),
         path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
+
+        path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
+        path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
+        path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
+
         path('wms-layers/', bundle_views.wms_layers),
     ], 'bundle'))),
 

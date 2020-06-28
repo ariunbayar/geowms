@@ -47,7 +47,7 @@ def create(request, payload):
         form.instance.created_by = request.user
         form.save()
         return JsonResponse({
-                'wms': _get_wms_display(form.instance),
+                'wms': _get_wms_display(request, form.instance),
                 'success': True
             })
     else:
@@ -84,7 +84,7 @@ def update(request, payload):
                     )
 
         return JsonResponse({
-                'wms': _get_wms_display(form.instance),
+                'wms': _get_wms_display(request, form.instance),
                 'success': True
             })
     else:
