@@ -15,6 +15,7 @@ def all(request):
 
     for base_layer in BaseLayer.objects.all():
         base_layer_list.append({
+            'tilename': base_layer.tilename,
             'url': base_layer.url,
             'thumbnail_1x': base_layer.thumbnail_1x.url,
             'thumbnail_2x': base_layer.thumbnail_2x.url,
