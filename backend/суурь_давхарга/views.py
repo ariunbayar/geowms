@@ -35,10 +35,11 @@ def жагсаалт(request):
 
         wms_list.append({
             'name': wms.name,
-            'url': wms.url,
+            'url': 'http://localhost:8102/WMS/{}/'.format(wms.pk),
             'layers': layers,
             })
 
+    print(wms_list)
     rsp = {
         'wms_list': wms_list,
         'items': display_items,
