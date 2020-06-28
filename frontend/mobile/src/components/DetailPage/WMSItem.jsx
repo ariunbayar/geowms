@@ -33,7 +33,7 @@ export default class WMSItem extends Component {
 
                 <p className="col-11">
                     <div class="col-12">
-                        <span>&nbsp;{name}</span>
+                        <span> {name}</span>
                         <hr/>
                     </div>
                 </p>
