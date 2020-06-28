@@ -35,7 +35,7 @@ def жагсаалт(request):
 
         wms_list.append({
             'name': wms.name,
-            'url': wms.url,
+            'url': 'http://localhost:8102/WMS/{}/'.format(wms.pk),
             'layers': layers,
             })
 
