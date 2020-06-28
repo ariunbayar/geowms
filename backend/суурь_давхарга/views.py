@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, reverse
 
 from geoportal.utils import resize_b64_to_sizes
 from .models import BaseLayer
@@ -26,17 +26,17 @@ def жагсаалт(request):
 
     display_items = [_get_base_layer_display(o) for o in BaseLayer.objects.all()]
 
-    layers = []
     wms_list = []
 
     for wms in WMS.objects.all():
+        layers = []
         for layer in WMSLayer.objects.filter(wms=wms):
             layers.append(layer.code)
 
         wms_list.append({
-            'name': wms.name,
-            'url': 'http://localhost:8102/WMS/{}/'.format(wms.pk),
-            'layers': layers,
+                'name': wms.name,
+                'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+                'layers': layers,
             })
 
     rsp = {
