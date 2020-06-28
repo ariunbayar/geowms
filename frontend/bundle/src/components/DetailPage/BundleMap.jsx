@@ -11,7 +11,7 @@ import {Style, Stroke, Fill} from 'ol/style'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
-import {createStringXY} from 'ol/coordinate';
+import {format as coordinateFormat} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
@@ -40,7 +40,7 @@ export default class BundleMap extends Component {
 
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
-                modal:new Modal(),
+            modal: new Modal(),
         }
 
         this.handleToggle = this.handleToggle.bind(this)
@@ -154,7 +154,7 @@ export default class BundleMap extends Component {
                 new FullScreen(),
                 new MousePosition({
                     projection: this.state.projection_display,
-                    coordinateFormat: createStringXY(6),
+                    coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                     undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
@@ -184,7 +184,7 @@ export default class BundleMap extends Component {
 
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
-        const coordinate_clicked = (createStringXY(6))(map_coord)
+        const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
         this.setState({coordinate_clicked})
 
