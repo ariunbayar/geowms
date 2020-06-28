@@ -22,7 +22,7 @@ export class Үүсгэх extends Component {
 
         this.state = {
             snapshot_timeout: null,
-            snapshot_xyz_url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}',
+            snapshot_url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}',
             snapshot: null,
             tilename:'',
             values: {
@@ -78,7 +78,7 @@ export class Үүсгэх extends Component {
 
         this.tileImage = new TileImage({
             crossOrigin: 'Anonymous',
-            url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}',
+            url: this.state.snapshot_url,
         })
 
         this.tileWMS = new TileWMS({
@@ -86,16 +86,13 @@ export class Үүсгэх extends Component {
             url: '',
         })
 
+        this.tile = new Tile({
+            source: this.tileImage,
+        })
+
         this.map = new Map({
             target: 'map',
-            layers: [
-                new Tile({
-                    source: this.tileWMS
-                }),
-                new Tile({
-                    source: this.tileImage,
-                }),
-            ],
+            layers: [this.tile],
             view: new View({
                 projection: 'EPSG:3857',
                 center: [11461613.630815497, 5878656.0228370065],
@@ -141,23 +138,26 @@ export class Үүсгэх extends Component {
     }
 
     handleURLChange(event) {
-        const snapshot_xyz_url = event.target.value
+        const snapshot_url = event.target.value
 
-        if (this.state.tilename == 'xyz')
-        {
-            this.tileImage.setUrl(snapshot_xyz_url)
-            console.log(this.map.getLayerGroup().getLayers())
-        }
-        else{
-            this.tileWMS.setUrl(snapshot_xyz_url)
-            console.log(this.map.getLayerGroup().getLayers())
+        if (this.state.tilename == 'xyz') {
+            this.tileImage.setUrl(snapshot_url)
+        } else{
+            this.tileWMS.setUrl(snapshot_url)
         }
 
-        this.setState({snapshot_xyz_url})
+        this.setState({snapshot_url})
     }
 
     handleTileChange(event) {
-        this.setState({tilename: event.target.value})
+        const tilename = event.target.value
+        this.setState({tilename})
+        if (tilename == 'xyz') {
+            this.tile.setSource(this.tileImage)
+        }
+        if (tilename == 'wms') {
+            this.tile.setSource(this.tileWMS)
+        }
     }
 
     render() {
@@ -205,13 +205,13 @@ export class Үүсгэх extends Component {
                                         <div className="form-check">
                                             <label className="form-check-label">
                                                 <input className="form-check-input" onClick={this.handleTileChange} type="radio" name="tilename" value="xyz"/>
-                                                XYZ tile image URL:
+                                                XYZ tile image:
                                             </label>
                                         </div>
                                         <div className="form-check">
                                             <label className="form-check-label">
                                                 <input className="form-check-input" onClick={this.handleTileChange} type="radio" name="tilename" value="wms"/>
-                                                WMS tile image URL:
+                                                WMS tile service:
                                             </label>
                                         </div>
 
