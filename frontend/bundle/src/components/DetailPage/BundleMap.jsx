@@ -46,6 +46,7 @@ export default class BundleMap extends Component {
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
+        this.handleSetCenter = this.handleSetCenter.bind(this)
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
@@ -228,7 +229,6 @@ export default class BundleMap extends Component {
                         this.state.vector_layer.setSource(source)
 
                         const feature_info = features.map((feature) => {
-                            console.log(feature);
                             const geometry_name = feature.getGeometryName()
                             const values =
                                 feature.getKeys()
@@ -258,6 +258,13 @@ export default class BundleMap extends Component {
         }))
     }
 
+    handleSetCenter(coord) {
+        const view = this.map.getView()
+        const map_projection = view.getProjection()
+        const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+        view.setCenter(map_coord)
+    }
+
     render() {
 
         return (
@@ -270,7 +277,10 @@ export default class BundleMap extends Component {
                             <div id="map"></div>
 
                             <div className={'col-md-3 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
-                                <Sidebar map_wms_list={this.state.map_wms_list}/>
+                                <Sidebar
+                                    map_wms_list={this.state.map_wms_list}
+                                    handleSetCenter={this.handleSetCenter}
+                                />
                             </div>
 
                             <div className={'⚙-toggle'}>
