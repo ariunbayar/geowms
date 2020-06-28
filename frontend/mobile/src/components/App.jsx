@@ -16,7 +16,6 @@ export class App extends Component {
         super(props)
 
         this.state = {
-            screen: "props.bundle,",
             homeScreenIsload: false,
             serviceScreenIsload: false,
             metaDataScreenIsload: true,
@@ -83,14 +82,12 @@ export class App extends Component {
         Promise.all([
             service.wmsLayerOneDatas(id)]).then((data) => {
                 if(data){
-                    console.log(JSON.stringify(data))
                     this.setState({bundle: data[0].bundle_display, metaDataScreenIsload: false})
                     this.setState({metaDataScreenIsload: true})
             }
         })
     }
     
-
     componentDidUpdate(prevProps, prevState) {
         
     }
@@ -114,8 +111,6 @@ export class App extends Component {
                                 <div class="input-group input-group-lg">
                                     <input type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm-5"></input>
                                 </div>
-
-
                             </div>
                         </div>
                     </div> :
@@ -129,10 +124,6 @@ export class App extends Component {
                         </div>
                     </div>
                     }
-
-
-
-
                     <div>
                         {this.state.homeScreenIsload ? <HomeScreen></HomeScreen> : null}
                         {this.state.serviceScreenIsload ? <ServiceScreen></ServiceScreen> : null}
@@ -160,7 +151,6 @@ export class App extends Component {
                             </div>
                         </div> : null
                         }
-                        
                     </div>
                     <div class="mnav">
                         <a  onClick={() => this.screenRouter("homeScreen")} class="mnav__item">

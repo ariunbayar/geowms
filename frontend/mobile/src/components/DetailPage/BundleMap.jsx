@@ -48,11 +48,6 @@ export default class BundleMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log("wwwwsssssssssssssssssssaaaaaa")
-        console.log(JSON.stringify(prevProps))
-
-        console.log("wwwwsssssssssssssssssssaaaaaa")
-
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -178,10 +173,6 @@ export default class BundleMap extends Component {
 
         const center = this.map.getView().getCenter()
         const zoom = this.map.getView().getZoom()
-
-        console.log(center);
-        console.log(zoom);
-
     }
 
     toggleSidebar(event) {
