@@ -39,7 +39,6 @@ def жагсаалт(request):
             'layers': layers,
             })
 
-    print(wms_list)
     rsp = {
         'wms_list': wms_list,
         'items': display_items,
