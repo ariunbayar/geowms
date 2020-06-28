@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 
@@ -11,6 +11,8 @@ import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
 
+import TileWMS from 'ol/source/TileWMS';
+import ImageWMS from 'ol/source/ImageWMS';
 
 
 export class Үүсгэх extends Component {
@@ -20,17 +22,20 @@ export class Үүсгэх extends Component {
 
         this.state = {
             snapshot_timeout: null,
-            snapshot_xyz_url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}',
             snapshot: null,
             values: {
                 name: '',
                 url: '',
-            }
+                tilename: 'xyz',
+            },
+            wms_list: [],
         }
         this.map = null
 
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleURLChange = this.handleURLChange.bind(this)
+        this.handleURLChangeXYZ = this.handleURLChangeXYZ.bind(this)
+        this.handleURLChangeWMS = this.handleURLChangeWMS.bind(this)
+        this.handleTileChange = this.handleTileChange.bind(this)
         this.scheduleSnapshot = this.scheduleSnapshot.bind(this)
         this.takeSnapshot = this.takeSnapshot.bind(this)
     }
@@ -39,8 +44,11 @@ export class Үүсгэх extends Component {
         setTimeout(() => {
             this.initMap()
         }, 1000)
-    }
 
+        service.getAll().then(({wms_list}) => {
+            this.setState({wms_list})
+        })
+    }
 
     handleSubmit(values, { setStatus, setSubmitting }) {
 
@@ -48,7 +56,6 @@ export class Үүсгэх extends Component {
             ...values,
             thumbnail: this.state.snapshot.match(/,(.*$)/)[1],
         }
-
 
         setStatus('checking')
         setSubmitting(true)
@@ -62,21 +69,26 @@ export class Үүсгэх extends Component {
         })
     }
 
-
     initMap() {
 
         this.tileImage = new TileImage({
             crossOrigin: 'Anonymous',
-            url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}',
+            url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}',
         })
 
-        const map = new Map({
+        this.tileWMS = new TileWMS({
+            crossOrigin: 'Anonymous',
+            url: '',
+            params: {'FORMAT': 'image/png'},
+        })
+
+        this.tile = new Tile({
+            source: this.tileImage,
+        })
+
+        this.map = new Map({
             target: 'map',
-            layers: [
-                new Tile({
-                    source: this.tileImage,
-                }),
-            ],
+            layers: [this.tile],
             view: new View({
                 projection: 'EPSG:3857',
                 center: [11461613.630815497, 5878656.0228370065],
@@ -84,7 +96,7 @@ export class Үүсгэх extends Component {
             })
         })
 
-        map.on('rendercomplete', this.scheduleSnapshot)
+        this.map.on('rendercomplete', this.scheduleSnapshot)
 
     }
 
@@ -121,14 +133,35 @@ export class Үүсгэх extends Component {
         this.setState({snapshot_timeout})
     }
 
-    handleURLChange(event) {
-        const snapshot_xyz_url = event.target.value
-        this.tileImage.setUrl(snapshot_xyz_url)
-        this.setState({snapshot_xyz_url})
+    handleURLChangeWMS(event, setFieldValue) {
+        const wms = this.state.wms_list[event.target.value]
+        if (wms) {
+            this.tileWMS.updateParams({'LAYERS': wms.layers.join()})
+            this.tileWMS.setUrl(wms.url)
+            setFieldValue('url', wms.url)
+            setFieldValue('wms', event.target.value)
+        }
+    }
+
+    handleURLChangeXYZ(event) {
+        const snapshot_url = event.target.value
+        this.tileImage.setUrl(snapshot_url)
+    }
+
+    handleTileChange(event, tilename, setFieldValue) {
+        setFieldValue('tilename', tilename)
+
+        if (tilename == 'xyz') {
+            this.tile.setSource(this.tileImage)
+        }
+        if (tilename == 'wms') {
+            this.tile.setSource(this.tileWMS)
+        }
     }
 
     render() {
         return (
+
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
@@ -168,13 +201,49 @@ export class Үүсгэх extends Component {
                                             placeholder="Нэр"
                                         />
 
-                                        <TextField
-                                            label="XYZ tile image URL:"
-                                            name="url"
-                                            error={errors.url}
-                                            placeholder="XYZ tile image URL"
-                                            handleChange={this.handleURLChange}
-                                        />
+                                        <div className="form-check">
+                                            <label className="form-check-label">
+                                                <input className="form-check-input" type="radio" name="tilename"
+                                                    checked={values.tilename === 'xyz'}
+                                                    onBlur={handleBlur}
+                                                    onChange={e => this.handleTileChange(e, 'xyz', setFieldValue)}
+                                                />
+                                                XYZ tile image:
+                                            </label>
+                                        </div>
+                                        <div className="form-check">
+                                            <label className="form-check-label">
+                                                <input className="form-check-input" type="radio" name="tilename"
+                                                    checked={values.tilename === 'wms'}
+                                                    onBlur={handleBlur}
+                                                    onChange={e => this.handleTileChange(e, 'wms', setFieldValue)}
+                                                />
+                                                WMS tile service:
+                                            </label>
+                                        </div>
+
+                                        {values.tilename == 'xyz' &&
+                                            <TextField
+                                                name="url"
+                                                error={errors.url}
+                                                placeholder="tile image URL"
+                                                handleChange={this.handleURLChangeXYZ}
+                                            />
+                                        }
+
+                                        {values.tilename == 'wms' &&
+                                            <Fragment>
+                                                <Field name="wms" as="select" className="form-control"
+                                                    onChange={(e) => this.handleURLChangeWMS(e, setFieldValue)}
+                                                >
+                                                    <option value="" key={this.state.wms_list.length}>---------</option>
+                                                    {this.state.wms_list.map((wms, index) =>
+                                                        <option key={index} value={index}> {wms.name} ({wms.url}) </option>
+                                                    )}
+                                                </Field>
+                                                <ErrorMessage name="url" component="div" className="invalid-feedback"/>
+                                            </Fragment>
+                                        }
 
                                         <div className="form-group">
                                             <label htmlFor="id_thumbnail"> Харагдах байдал </label>

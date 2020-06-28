@@ -134,12 +134,28 @@ export default class BundleMap extends Component {
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
 
-                    const layer = new Tile({
-                        source: new TileImage({
-                            crossOrigin: 'Anonymous',
-                            url: base_layer_info.url,
-                        }),
-                    })
+                    let layer
+
+                    if (base_layer_info.tilename == "xyz") {
+                        layer = new Tile({
+                            source: new TileImage({
+                                crossOrigin: 'Anonymous',
+                                url: base_layer_info.url,
+                            }),
+                        })
+                    }
+
+                    if (base_layer_info.tilename == "wms") {
+                        layer = new Tile({
+                            source: new TileWMS({
+                                url: base_layer_info.url,
+                                params: {
+                                    'LAYERS': base_layer_info.layers,
+                                    'FORMAT': 'image/png',
+                                }
+                            }),
+                        })
+                    }
 
                     acc.base_layers.push(layer)
                     acc.base_layer_controls.push({

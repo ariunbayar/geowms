@@ -3,10 +3,12 @@ import json
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, reverse
 
 from geoportal.utils import resize_b64_to_sizes
 from .models import BaseLayer
+from backend.wms.models import WMS
+from backend.wmslayer.models import WMSLayer
 
 
 def _get_base_layer_display(base_layer):
@@ -24,7 +26,21 @@ def жагсаалт(request):
 
     display_items = [_get_base_layer_display(o) for o in BaseLayer.objects.all()]
 
+    wms_list = []
+
+    for wms in WMS.objects.all():
+        layers = []
+        for layer in WMSLayer.objects.filter(wms=wms):
+            layers.append(layer.code)
+
+        wms_list.append({
+                'name': wms.name,
+                'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+                'layers': layers,
+            })
+
     rsp = {
+        'wms_list': wms_list,
         'items': display_items,
     }
 
@@ -46,6 +62,7 @@ def үүсгэх(request):
 
         base_layer.name = payload.get('name')
         base_layer.url = payload.get('url')
+        base_layer.tilename = payload.get('tilename')
 
         [thumbnail_2x, thumbnail_1x] = resize_b64_to_sizes(payload.get('thumbnail'), sizes)
         base_layer.thumbnail_1x = SimpleUploadedFile('thumbnail.png', thumbnail_1x)

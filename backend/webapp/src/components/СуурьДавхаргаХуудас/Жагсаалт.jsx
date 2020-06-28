@@ -14,14 +14,16 @@ export class Жагсаалт extends Component {
 
         this.state = {
             items: [],
+            wms_list: [],
         }
 
     }
 
     componentDidMount() {
 
-        service.getAll().then(({items}) => {
+        service.getAll().then(({items, wms_list}) => {
             this.setState({items})
+            this.setState({wms_list})
         })
 
     }
