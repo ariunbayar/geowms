@@ -133,8 +133,11 @@ export default class BundleMap extends Component {
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
-                    if (base_layer_info.tilename == "xyz"){
-                        const layer = new Tile({
+
+                    let layer
+
+                    if (base_layer_info.tilename == "xyz") {
+                        layer = new Tile({
                             source: new TileImage({
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
@@ -142,19 +145,17 @@ export default class BundleMap extends Component {
                         })
                     }
 
-                    else {
-                        new Tile({
+                    if (base_layer_info.tilename == "wms") {
+                        layer = new Tile({
                             source: new TileWMS({
                                 url: base_layer_info.url,
                                 params: {
-                                    'LAYERS': layers[0].code,
-                                    //'FORMAT': 'image/svg+xml',
+                                    'LAYERS': base_layer_info.layers,
                                     'FORMAT': 'image/png',
                                 }
                             }),
                         })
                     }
-                    
 
                     acc.base_layers.push(layer)
                     acc.base_layer_controls.push({
