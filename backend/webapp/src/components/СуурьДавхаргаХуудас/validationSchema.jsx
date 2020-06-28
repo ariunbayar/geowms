@@ -9,6 +9,5 @@ export const validationSchema = object().shape({
 
     url: string()
             .max(500, '500-с илүүгүй урттай оруулна уу!')
-            .required('оруулна уу!')
-
+            .required('оруулна уу!'),
 })

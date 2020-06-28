@@ -11,6 +11,8 @@ import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
 
+import TileWMS from 'ol/source/TileWMS';
+import ImageWMS from 'ol/source/ImageWMS';
 
 
 export class Үүсгэх extends Component {
@@ -22,15 +24,20 @@ export class Үүсгэх extends Component {
             snapshot_timeout: null,
             snapshot_xyz_url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}',
             snapshot: null,
+            tilename:'',
             values: {
                 name: '',
                 url: '',
-            }
+            },
+            wms_list: [],
+            is_xyz: false,
+            is_wms: false,
         }
         this.map = null
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleURLChange = this.handleURLChange.bind(this)
+        this.handleTileChange = this.handleTileChange.bind(this)
         this.scheduleSnapshot = this.scheduleSnapshot.bind(this)
         this.takeSnapshot = this.takeSnapshot.bind(this)
     }
@@ -39,6 +46,10 @@ export class Үүсгэх extends Component {
         setTimeout(() => {
             this.initMap()
         }, 1000)
+
+        service.getAll().then(({wms_list}) => {
+            this.setState({wms_list})
+        })
     }
 
 
@@ -70,9 +81,17 @@ export class Үүсгэх extends Component {
             url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}',
         })
 
-        const map = new Map({
+        this.tileWMS = new TileWMS({
+            crossOrigin: 'Anonymous',
+            url: '',
+        })
+
+        this.map = new Map({
             target: 'map',
             layers: [
+                new Tile({
+                    source: this.tileWMS
+                }),
                 new Tile({
                     source: this.tileImage,
                 }),
@@ -84,7 +103,7 @@ export class Үүсгэх extends Component {
             })
         })
 
-        map.on('rendercomplete', this.scheduleSnapshot)
+        this.map.on('rendercomplete', this.scheduleSnapshot)
 
     }
 
@@ -123,12 +142,28 @@ export class Үүсгэх extends Component {
 
     handleURLChange(event) {
         const snapshot_xyz_url = event.target.value
-        this.tileImage.setUrl(snapshot_xyz_url)
+
+        if (this.state.tilename == 'xyz')
+        {
+            this.tileImage.setUrl(snapshot_xyz_url)
+            console.log(this.map.getLayerGroup().getLayers())
+        }
+        else{
+            this.tileWMS.setUrl(snapshot_xyz_url)
+            console.log(this.map.getLayerGroup().getLayers())
+        }
+
         this.setState({snapshot_xyz_url})
+    }
+
+    handleTileChange(event, tile) {
+
+        this.setState({tilename: tile})
     }
 
     render() {
         return (
+
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
@@ -168,13 +203,37 @@ export class Үүсгэх extends Component {
                                             placeholder="Нэр"
                                         />
 
+                                        <div className="form-check">
+                                          <label className="form-check-label">
+                                          <input className="form-check-input" onClick={event => this.handleTileChange(event, 'xyz')} type="radio" name="tilename" id="exampleRadios1" value="option1" />
+                                            XYZ tile image URL:
+                                          </label>
+                                        </div>
+                                        <div className="form-check">
+                                          <label className="form-check-label">
+                                          <input className="form-check-input" onClick={event => this.handleTileChange(event, 'wms')} type="radio" name="tilename" id="exampleRadios2" value="option2" />
+                                            WMS tile image URL:
+                                          </label>
+                                        </div>
+
                                         <TextField
-                                            label="XYZ tile image URL:"
                                             name="url"
                                             error={errors.url}
-                                            placeholder="XYZ tile image URL"
+                                            placeholder="tile image URL"
                                             handleChange={this.handleURLChange}
                                         />
+
+                                         {this.state.wms_list.map((wms, index) =>
+                                            <div key={index}>
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        value={wms.url}
+                                                    />
+                                                    {wms.name}
+                                                </label>
+                                            </div>
+                                        )}
 
                                         <div className="form-group">
                                             <label htmlFor="id_thumbnail"> Харагдах байдал </label>
