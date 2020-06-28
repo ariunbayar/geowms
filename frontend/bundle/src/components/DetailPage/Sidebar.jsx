@@ -7,7 +7,7 @@ export class Sidebar extends Component {
 
     render() {
         return (
-            <form>
+            <div>
                 <div className="form-group">
                     <label className="font-weight-bold" htmlFor="formGroupInput">Нэрэлбэрээр хайх</label>
                     <div className="input-group mb-3">
@@ -21,9 +21,12 @@ export class Sidebar extends Component {
 
                 <div className="form-group">
                     <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
-                    <input type="text" className="form-control" id="formGroupExampleInput" placeholder="Уртраг"/>
-                    <input type="text" className="form-control mt-2" id="formGroupExampleInput2" placeholder="Өргөрөг"/>
-                    <button type="submit" className="btn gp-outline-primary mt-2 float-right"><i className="fa fa-search mr-1" aria-hidden="true"></i>Хайх</button>
+                    <div className="input-group mb-3">
+                        <input type="text" className="form-control" placeholder="өргөрөг, уртраг"/>
+                        <div className="input-group-append">
+                            <button className="btn gp-outline-primary" type="button"><i className="fa fa-search mr-1"></i>Хайх</button>
+                        </div>
+                    </div>
                 </div>
                 <div className="tanih mt-5">
                     <label className="font-weight-bold" htmlFor="formGroupInput">Таних тэмдэг</label>
@@ -36,7 +39,7 @@ export class Sidebar extends Component {
                 {this.props.map_wms_list.map((wms, idx) =>
                     <WMSItem wms={wms} key={idx}/>
                 )}
-            </form>
+            </div>
         )
     }
 }
