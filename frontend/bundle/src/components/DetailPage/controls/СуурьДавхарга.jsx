@@ -9,7 +9,6 @@ const CLASS_ACTIVE = 'active'
 export class СуурьДавхарга extends Control {
 
     constructor(opt_options) {
-        console.log(opt_options)
 
         const options = opt_options || {}
 

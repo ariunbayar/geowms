@@ -30,8 +30,6 @@ export class Үүсгэх extends Component {
                 url: '',
             },
             wms_list: [],
-            is_xyz: false,
-            is_wms: false,
         }
         this.map = null
 
@@ -214,25 +212,27 @@ export class Үүсгэх extends Component {
                                                 WMS tile service:
                                             </label>
                                         </div>
-
-                                        <TextField
-                                            name="url"
-                                            error={errors.url}
-                                            placeholder="tile image URL"
-                                            handleChange={this.handleURLChange}
-                                        />
-
-                                         {this.state.wms_list.map((wms, index) =>
-                                            <div key={index}>
-                                                <label>
-                                                    <input
-                                                        type="checkbox"
-                                                        value={wms.url}
+                                        {this.state.tilename == 'xyz' &&
+                                                    <TextField
+                                                        name="url"
+                                                        error={errors.url}
+                                                        placeholder="tile image URL"
+                                                        handleChange={this.handleURLChange}
                                                     />
-                                                    {wms.name}
-                                                </label>
-                                            </div>
-                                        )}
+                                        }
+
+                                        {this.state.tilename == 'wms' && this.state.wms_list.map((wms, index) =>
+                                                <div key={index}>
+                                                    <label>
+                                                        <input
+                                                            type="checkbox"
+                                                            value={wms.url}
+                                                        />
+                                                        {wms.name}
+                                                    </label>
+                                                </div>
+                                            )
+                                        }
 
                                         <div className="form-group">
                                             <label htmlFor="id_thumbnail"> Харагдах байдал </label>
