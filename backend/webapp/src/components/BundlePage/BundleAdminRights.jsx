@@ -34,9 +34,8 @@ export default class BundleAdminRights extends Component {
     render() {
         return (
             <div className="shadow-lg p-3 mb-5 bg-white rounded">
-
                 {this.props.formOptions.map(({id, name, layers}, idx) =>
-                    <div>
+                    <div key={idx}>
                         <dt> {name} </dt>
                         <table className="table">
                             <thead>
@@ -44,7 +43,7 @@ export default class BundleAdminRights extends Component {
                                     <th scope="col"> Давхаргын нэр </th>
                                     <th scope="col"> Харагдах чек </th>
                                     {this.props.formOptionsRole.map(({id}, idx) =>
-                                        <th scope="col">Эрх {id}</th>
+                                        <th key={idx} scope="col">Эрх {id}</th>
                                     )}
                                 </tr>
                             </thead>
@@ -56,6 +55,7 @@ export default class BundleAdminRights extends Component {
 
                                                 (roleChecks.layer_id == layer.id &&
                                                     <BundleFormTable
+                                                        key={layer.id}
                                                         values = {layer}
                                                         wmsId = {this.state.id}
                                                         role={this.props.formOptionsRole}
