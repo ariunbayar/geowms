@@ -50,7 +50,6 @@ export default class BundleForm extends Component {
     handleLayerToggle(e) {
         let layers = this.state.layers
         const value = parseInt(e.target.value)
-
         if (e.target.checked) {
             layers.push(value)
         } else {
@@ -73,7 +72,7 @@ export default class BundleForm extends Component {
 
     render() {
         return (
-            <div className="col-md-4 offset-md-4 shadow-lg p-3 mb-5 bg-white rounded">
+            <div className="shadow-lg p-3 mb-5 bg-white rounded">
 
                 <div className="form-group">
                     <label htmlFor="id_name"> Сангийн нэр: </label>
@@ -113,7 +112,7 @@ export default class BundleForm extends Component {
                                             onChange={this.handleLayerToggle}
                                             value={layer.id}
                                         />
-                                        {layer.name}
+                                        <a> {layer.name}</a>
                                     </label>
                                 </div>
                             )}

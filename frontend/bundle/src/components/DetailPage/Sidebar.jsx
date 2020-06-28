@@ -52,6 +52,7 @@ export class Sidebar extends Component {
                         </div>
                     </div>
                 </form>
+
                 <div className="tanih mt-5">
                     <label className="font-weight-bold" htmlFor="formGroupInput">Таних тэмдэг</label>
                     <p className="my-1">GPS- ийн сүлжээний цэг</p>
@@ -60,6 +61,7 @@ export class Sidebar extends Component {
                     <p className="my-1">Триангуляцийн сүлжээний цэг</p>
                     <p className="my-1">Зураглалын сүлжээний цэг</p>
                 </div>
+
                 {this.props.map_wms_list.map((wms, idx) =>
                     <WMSItem wms={wms} key={idx}/>
                 )}

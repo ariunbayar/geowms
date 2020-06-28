@@ -8,7 +8,7 @@ class ModalComponent extends Component{
     render() {
         const {content, is_complete} = this.props
         return (
-            <div className="modal-dialog modal-dialog-scrollable">
+            <div className="modal-dialog modal-dialog-scrollable" style={{zIndex:"5"}}>
                 <div className="modal-content">
                     <div className="modal-header" onClick={this.props.handleClose}>
                         <h5 className="modal-title">Дэлгэрэнгүй мэдээлэл</h5>

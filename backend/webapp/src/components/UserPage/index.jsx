@@ -31,7 +31,7 @@ export class UserPage extends Component {
 
     render() {
         return (
-            <div className="container my-4">
+            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12">
                         <table className="table">
