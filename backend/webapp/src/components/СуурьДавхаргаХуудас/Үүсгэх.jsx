@@ -156,9 +156,8 @@ export class Үүсгэх extends Component {
         this.setState({snapshot_xyz_url})
     }
 
-    handleTileChange(event, tile) {
-
-        this.setState({tilename: tile})
+    handleTileChange(event) {
+        this.setState({tilename: event.target.value})
     }
 
     render() {
@@ -204,16 +203,16 @@ export class Үүсгэх extends Component {
                                         />
 
                                         <div className="form-check">
-                                          <label className="form-check-label">
-                                          <input className="form-check-input" onClick={event => this.handleTileChange(event, 'xyz')} type="radio" name="tilename" id="exampleRadios1" value="option1" />
-                                            XYZ tile image URL:
-                                          </label>
+                                            <label className="form-check-label">
+                                                <input className="form-check-input" onClick={this.handleTileChange} type="radio" name="tilename" value="xyz"/>
+                                                XYZ tile image URL:
+                                            </label>
                                         </div>
                                         <div className="form-check">
-                                          <label className="form-check-label">
-                                          <input className="form-check-input" onClick={event => this.handleTileChange(event, 'wms')} type="radio" name="tilename" id="exampleRadios2" value="option2" />
-                                            WMS tile image URL:
-                                          </label>
+                                            <label className="form-check-label">
+                                                <input className="form-check-input" onClick={this.handleTileChange} type="radio" name="tilename" value="wms"/>
+                                                WMS tile image URL:
+                                            </label>
                                         </div>
 
                                         <TextField
