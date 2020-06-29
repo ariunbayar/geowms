@@ -10,6 +10,8 @@ from .models import BaseLayer
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 
+from django.views.decorators.http import require_POST, require_GET
+from geoportal.decorators import ajax_required
 
 def _get_base_layer_display(base_layer):
     return {
@@ -24,7 +26,7 @@ def _get_base_layer_display(base_layer):
 @user_passes_test(lambda u: u.is_superuser)
 def жагсаалт(request):
 
-    display_items = [_get_base_layer_display(o) for o in BaseLayer.objects.all()]
+    display_items = [_get_base_layer_display(o) for o in BaseLayer.objects.all().order_by('sort_order')]
 
     wms_list = []
 
@@ -42,6 +44,28 @@ def жагсаалт(request):
     rsp = {
         'wms_list': wms_list,
         'items': display_items,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def move(request, payload):
+    baseLayer = get_object_or_404(BaseLayer, pk=payload.get('id'))
+    if payload.get('move') == 'down':
+        temp_sort_order = BaseLayer.objects.filter(sort_order__gt=baseLayer.sort_order).order_by('sort_order').first()
+        if temp_sort_order != None:
+            BaseLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=baseLayer.sort_order)
+            BaseLayer.objects.filter(pk=baseLayer.id).update(sort_order=temp_sort_order.sort_order)
+    else:
+        temp_sort_order = BaseLayer.objects.filter(sort_order__lt=baseLayer.sort_order).order_by('sort_order').last()
+        if temp_sort_order != None:
+            BaseLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=baseLayer.sort_order)
+            BaseLayer.objects.filter(pk=baseLayer.id).update(sort_order=temp_sort_order.sort_order)
+
+    rsp = {
+        'success': True,
     }
 
     return JsonResponse(rsp)

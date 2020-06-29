@@ -6,6 +6,7 @@ export const service = {
     getDetail,
     create,
     remove,
+    move,
 }
 
 const prefix = '/back/api/суурь-давхарга'
@@ -30,6 +31,15 @@ function create(values) {
     return fetch(`${prefix}/үүсгэх/`, opts).then(handleResponse)
 }
 
+
+function move(id, move) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id, move}),
+    }
+
+    return fetch(`${prefix}/move/`, opts).then(handleResponse)
+}
 
 function remove(id) {
     const opts = {

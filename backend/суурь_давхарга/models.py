@@ -19,3 +19,4 @@ class BaseLayer(models.Model):
     thumbnail_2x = models.ImageField(upload_to='суурь_давхарга/thumbnail_2x/')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    sort_order = models.PositiveIntegerField(default=1)
