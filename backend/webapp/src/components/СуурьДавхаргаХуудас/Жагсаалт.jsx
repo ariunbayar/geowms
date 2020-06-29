@@ -75,8 +75,6 @@ export class Жагсаалт extends Component {
                         {items}
                     </div>
                 )}
-                <button onClick={() => this.handleMove(1,"down")}>down</button>
-                <button onClick={() => this.handleMove(1,"up")}>up</button>
             </div>
         )
     }
