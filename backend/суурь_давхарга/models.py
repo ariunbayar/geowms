@@ -19,3 +19,7 @@ class BaseLayer(models.Model):
     thumbnail_2x = models.ImageField(upload_to='суурь_давхарга/thumbnail_2x/')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    sort_order = models.PositiveIntegerField()
+    def save(self, *args, **kwargs):
+        self.sort_order = BaseLayer.objects.count() + 1
+        super(BaseLayer, self).save(*args, **kwargs)

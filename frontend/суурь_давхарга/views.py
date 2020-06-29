@@ -14,7 +14,7 @@ def all(request):
 
     base_layer_list = []
 
-    for base_layer in BaseLayer.objects.all():
+    for base_layer in BaseLayer.objects.all().order_by('sort_order'):
         wms_args = {}
         if base_layer.tilename == 'wms':
             try:

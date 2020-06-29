@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/суурь-давхарга/', include(([
         path('', суурь_давхарга.жагсаалт, name=''),
         path('үүсгэх/', суурь_давхарга.үүсгэх, name='үүсгэх'),
+        path('move/', суурь_давхарга.move, name='move'),
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),

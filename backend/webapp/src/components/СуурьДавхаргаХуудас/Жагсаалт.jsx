@@ -16,6 +16,7 @@ export class Жагсаалт extends Component {
             items: [],
             wms_list: [],
         }
+        this.handleMove = this.handleMove.bind(this)
 
     }
 
@@ -37,6 +38,17 @@ export class Жагсаалт extends Component {
             return acc
         }, [])
     }
+    handleMove(event, id) {
+        service.move(event, id).then(({bundle_list, success}) => {
+            if (success) 
+            {
+                service.getAll().then(({items, wms_list}) => {
+                    this.setState({items})
+                    this.setState({wms_list})
+                })
+            }
+        })
+    }
 
     render() {
 
@@ -45,6 +57,7 @@ export class Жагсаалт extends Component {
                 className="col-sm-6"
                 values={item}
                 key={idx}
+                handleMove={this.handleMove}
             />
         ).concat(
             <ItemCreate
