@@ -14,7 +14,7 @@
     {% if DEBUG %}
         <script src="{% static "assets/js/mobile/detail.js" %}"></script>
     {% else %}
-        <script src="{% static "assets/js/mobile/detail.min.js" %}"></script>
+        <script src="{% static "assets/js/mobile/detail.min.js" %}?v={{STATIC_VERSION}}"></script>
     {% endif %}
 
 {% endblock %}
