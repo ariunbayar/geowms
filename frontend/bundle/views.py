@@ -43,11 +43,11 @@ def detail(request, pk):
 def wms_layers(request, pk):
 
     if request.user.is_authenticated:
-        print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
         userObject = request.user
         role = userObject.roles.all().values_list('id').first()
     else:
         role = 1
+
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
     qs_layers = bundle.layers.filter(bundlelayer__role_id = role).order_by('wms__created_at')
