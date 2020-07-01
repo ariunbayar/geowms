@@ -15,6 +15,7 @@ def create_bundles(apps, schema_editor):
                     username='geoportal',
                     email='geoportal',
                     password='pbkdf2_sha256$180000$wSZZCPrIfajE$aad4UuJnQchViy74dw9NP1wxToUD38NJF48z0usBwRQ=',
+                    is_staff=True,
                     is_superuser=True,
                )
 
