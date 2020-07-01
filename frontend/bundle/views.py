@@ -42,9 +42,11 @@ def detail(request, pk):
 @ajax_required
 def wms_layers(request, pk):
 
-    username = request.user.username
-    users = get_object_or_404(User, username=username)
-    role = users.roles.all().values_list('id').first()
+    if request.user.is_authenticated:
+        userObject = request.user
+        role = userObject.roles.all().values_list('id').first()
+    else:
+        role = 1
 
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
