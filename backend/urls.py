@@ -15,6 +15,8 @@ urlpatterns = [
         path('create/', wms_views.create, name='create'),
         path('update/', wms_views.update, name='update'),
         path('delete/', wms_views.delete, name='delete'),
+        path('wmsLayerall/', wms_views.wmsLayerall, name='wmsLayerall'),
+        path('move/', wms_views.move, name='move'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
     ], 'wms'))),
 

@@ -20,6 +20,7 @@ export class WMSPage extends Component {
         this.state = {
             is_form_open: false,
             wms_list: [],
+            layers_all: [],
             form_values: {...this.initial_form_values},
         }
 
@@ -29,6 +30,7 @@ export class WMSPage extends Component {
         this.handleEdit = this.handleEdit.bind(this)
         this.handleAdd = this.handleAdd.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
+        this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
 
     }
 
@@ -72,9 +74,23 @@ export class WMSPage extends Component {
             if (success) this.handleSaveSuccess()
         })
     }
+    
+    handleWmsLayerRefresh(id) {
+        service.wmsLayerall(id).then(({layers_all}) => {
+            if (layers_all) 
+            {
+                this.setState({layers_all})
+            }
+        })
+    }
 
     handleEdit(form_values) {
-        this.setState({form_values, is_form_open: true})
+        service.wmsLayerall(form_values.id).then(({layers_all}) => {
+            if (layers_all) 
+            {
+                this.setState({layers_all, form_values, is_form_open: true})
+            }
+        })
     }
 
     handleAdd() {
@@ -131,6 +147,8 @@ export class WMSPage extends Component {
                                     handleSave={this.handleSave}
                                     handleCancel={this.handleFormCancel}
                                     values={this.state.form_values}
+                                    layers_all={this.state.layers_all}
+                                    handleWmsLayerRefresh={this.handleWmsLayerRefresh}
                                 />
                         }
                     </div>

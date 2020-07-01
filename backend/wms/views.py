@@ -32,8 +32,49 @@ def _get_wms_display(request, wms):
 def all(request):
 
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
-
     return JsonResponse({'wms_list': wms_list})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def wmsLayerall(request, payload):
+    wmsid = payload.get('id')
+    layers_all = []
+    for layer in WMSLayer.objects.filter(wms_id=wmsid).order_by('sort_order'):
+        wmslayer_display = {
+                'id': layer.id,
+                'name': layer.name,
+                'code': layer.code,
+                'title': layer.title,
+            }
+        layers_all.append(wmslayer_display)
+    return JsonResponse({'layers_all': layers_all})
+
+
+@require_POST
+@ajax_required
+def move(request, payload):
+
+    wmsId = payload.get('wmsId')
+    wmsLayer = get_object_or_404(WMSLayer, pk=payload.get('id'))
+
+    if payload.get('move') == 'down':
+        temp_sort_order = WMSLayer.objects.filter(sort_order__gt=wmsLayer.sort_order, wms_id=wmsId).order_by('sort_order').first()
+        if temp_sort_order != None:
+            WMSLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=wmsLayer.sort_order)
+            WMSLayer.objects.filter(pk=wmsLayer.id).update(sort_order=temp_sort_order.sort_order)
+    else:
+        temp_sort_order = WMSLayer.objects.filter(sort_order__lt=wmsLayer.sort_order, wms_id=wmsId).order_by('sort_order').last()
+        if temp_sort_order != None:
+            WMSLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=wmsLayer.sort_order)
+            WMSLayer.objects.filter(pk=wmsLayer.id).update(sort_order=temp_sort_order.sort_order)
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_POST

@@ -7,6 +7,8 @@ export const service = {
     update,
     remove,
     getLayers,
+    wmsLayerall,
+    move,
 }
 
 const prefix = '/back'
@@ -62,9 +64,28 @@ function _getGetOptions() {
     }
 }
 
+
 function getAll() {
     const requestOptions = {..._getGetOptions()}
     return fetch(`${prefix}/wms/all/`, requestOptions).then(handleResponse)
+}
+
+function wmsLayerall(id) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+
+    return fetch(`${prefix}/wms/wmsLayerall/`, opts).then(handleResponse)
+}
+
+function move(id, move, wmsId) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, move, wmsId}),
+    }
+
+    return fetch(`${prefix}/wms/move/`, opts).then(handleResponse)
 }
 
 function create(values) {
@@ -115,6 +136,7 @@ function getLayers(wms_url) {
                 const reader = new FileReader()
                 reader.onloadend = () => {
                     const layers = (new Capabilities(reader.result)).getLayers()
+                    //console.log(JSON.stringify(layers))
                     resolve(layers)
                 }
                 reader.readAsText(data)
