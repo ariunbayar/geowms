@@ -62,7 +62,7 @@ export default class BundleMap extends Component {
                 anchor: [0.5, 86],
                 anchorXUnits: 'fraction',
                 anchorYUnits: 'pixels',
-                scale: .25,
+                scale: 0.4,
                 src: '/static/assets/images/bundle/marker.png'
             })
         })
@@ -325,7 +325,7 @@ export default class BundleMap extends Component {
                         <div className="🌍">
                             <div id="map"></div>
 
-                            <div className={'col-md-3 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
+                            <div className={'col-md-2 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
                                 <Sidebar
                                     map_wms_list={this.state.map_wms_list}
                                     handleSetCenter={this.handleSetCenter}
