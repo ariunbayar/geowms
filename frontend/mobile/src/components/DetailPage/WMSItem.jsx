@@ -32,7 +32,7 @@ export default class WMSItem extends Component {
             <Fragment>
 
                 <p className="col-11">
-                    <div class="col-12">
+                    <div className="col-12">
                         <span> {name}</span>
                         <hr/>
                     </div>

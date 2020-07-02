@@ -5,9 +5,26 @@ import React, {Component} from 'react'
 export class HomeScreen extends Component {
     render() {
         return (
-            <view>
+            <div>
                 HomeScreen
-            </view>
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+                HomeScreen
+            </div>
         )
 
     }

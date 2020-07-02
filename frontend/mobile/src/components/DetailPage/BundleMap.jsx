@@ -176,15 +176,11 @@ export default class BundleMap extends Component {
     }
 
     toggleSidebar(event) {
-        event.preventDefault()
-        this.setState(prevState => ({
-            is_sidebar_open: !prevState.is_sidebar_open,
-        }))
+        this.setState({is_sidebar_open: event})
     }
 
     render() {
         return (
-
             <div>
                 <button onClick={this.showDetail} style={{display: 'none'}}>click here</button>
                 <div className="row">
@@ -194,11 +190,11 @@ export default class BundleMap extends Component {
                             <div id="map"></div>
 
                             <div className={'col-md-3 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
-                                <Sidebar map_wms_list={this.state.map_wms_list}/>
+                                <Sidebar map_wms_list={this.state.map_wms_list} toggleSidebar={this.toggleSidebar}/>
                             </div>
 
                             <div className={'⚙-toggle'}>
-                                <a href="#" onClick={this.toggleSidebar}>
+                                <a href="#" onClick={() =>this.toggleSidebar(true)}>
                                     <i className="fa fa-bars fa-lg" aria-hidden="true"></i>
                                 </a>
                             </div>
