@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {service} from './service'
-
+import WMSCheckFormTable from './WMSCheckFormTable'
 export default class WMSCheckFormSort extends Component {
 
     constructor(props) {
@@ -11,7 +11,6 @@ export default class WMSCheckFormSort extends Component {
             wmsId: props.wmsId,
         }
         this.handleMove = this.handleMove.bind(this)
-        this.titleSave = this.titleSave.bind(this)
     }
 
     componentDidMount() {
@@ -33,9 +32,6 @@ export default class WMSCheckFormSort extends Component {
             }
         })
     }
-    titleSave(title){
-        alert(title)
-    }
 
 
     render() {
@@ -43,43 +39,22 @@ export default class WMSCheckFormSort extends Component {
         return (
             <div >
                 <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Code</th>
-                                    <th scope="col">Title</th>
-                                    <th scope="col">save</th>
-                                    <th scope="col">down</th>
-                                    <th scope="col">up</th>
+                    <thead>
+                        <tr>
+                            <th scope="col">Код</th>
+                            <th scope="col">Нэршил</th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
                                     
-                                </tr>
-                            </thead>
-                                <tbody>
-                                    {wmslayers.map((layer) =>
-                                    <tr key={layer.id}>
-                                        <td >
-                                            {layer.name}
-                                        </td>
-                                        <td >
-                                            <input className="form-control" type="text" value={layer.title + "A"} />
-                                        </td>
-                                         <td >
-                                            <button onClick={() => this.titleSave(layer.title)}>asdas</button>
-                                        </td>
-                                        <td >
-                                            <a href="#" onClick={() => this.handleMove(layer.id, 'up', wmsId)}>
-                                                <i className="fa fa-chevron-up" aria-hidden="true"></i>
-                                            </a>
-                                        </td>
-                                        <td >
-                                            <a href="#" onClick={() => this.handleMove(layer.id, 'down', wmsId)}>
-                                                <i className="fa fa-chevron-down" aria-hidden="true"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    )}
-                                </tbody>
-                        </table>
-
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {wmslayers.map((layer) =>
+                            <WMSCheckFormTable  key={layer.id} layer={layer} wmsId={wmsId} handleMove={this.handleMove}></WMSCheckFormTable>
+                        )}
+                    </tbody>
+                </table>
             </div>
         )
     }

@@ -20,7 +20,7 @@ def _get_bundle_options():
     form_options = []
 
     for wms in WMS.objects.all():
-        layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name'))
+        layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
         wms_display = {
                 'name': wms.name,
                 'layers': layers,

@@ -46,17 +46,25 @@ export class WMSPage extends Component {
 
     }
 
-    handleSaveSuccess() {
-        this.handleListUpdated()
-        this.setState({is_form_open: false})
+    handleSaveSuccess(id) {
+        if(id)
+        {
+            this.handleListUpdated()
+            this.handleWmsLayerRefresh(id)
+        }else{
+            this.handleListUpdated()
+            this.setState({is_form_open:false})
+        }
     }
 
     handleSave(values) {
 
         if (values.id) {
-
-            service.update(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
+            const wmsId = values.id
+            const name = values.name
+            const url = values.url
+            service.update(wmsId, name, url).then(({success, item}) => {
+                if (success) this.handleSaveSuccess(values.id)
             })
 
         } else {
@@ -95,7 +103,7 @@ export class WMSPage extends Component {
 
     handleAdd() {
         const form_values = this.initial_form_values
-        this.setState({form_values, is_form_open: true})
+        this.setState({form_values, is_form_open: true, layers_all: []})
     }
 
     handleFormCancel() {

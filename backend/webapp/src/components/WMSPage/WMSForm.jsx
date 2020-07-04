@@ -64,12 +64,34 @@ export default class WMSForm extends Component {
 
     handleLayerToggle(e) {
         let layers = this.state.layers
-
+        const wmsId = this.state.id
         if (e.target.checked) {
+            const layerName = e.target.value
+
+            service.layerAdd(layerName, wmsId).then(({success}) => {
+                if (success) 
+                {
+                    this.props.handleWmsLayerRefresh(wmsId)
+                }
+            })
+
             layers.push(e.target.value)
+
         } else {
+            const layerName = e.target.value
+
+            service.layerRemove(layerName, wmsId).then(({success}) => {
+                if (success) 
+                {
+                    this.props.handleWmsLayerRefresh(wmsId)
+                }
+            })
+
             layers = layers.filter((layer) => layer != e.target.value)
+
+
         }
+        
         this.setState({layers})
     }
 
