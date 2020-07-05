@@ -47,7 +47,7 @@ function remove(id) {
         ...getPostOptions(),
     }
 
-    return fetch(`${prefix}/${id}/усгах/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${id}/устгах/`, opts).then(handleResponse)
 }
 
 

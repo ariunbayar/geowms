@@ -36,11 +36,6 @@ export default class Govorg extends Component {
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
                 </td>
-                <td>
-                    <a href="#" onClick={this.props.handleDetail}>
-                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
-                    </a>
-                </td>
             </tr>
         )
     }
