@@ -125,13 +125,8 @@ def layerRemove(request, payload):
     wmsId = payload.get('wmsId')
     layerName = payload.get('id')
 
-    sav = WMSLayer(name=layerName, code=layerName, wms_id=wmsId)
-    if sav == None:
-
-        return JsonResponse({'success': True})
-    else:
-        WMSLayer.objects.filter(name=layerName, code=layerName, wms_id=wmsId).delete()
-        return JsonResponse({'success': True})
+    wms_layer = get_object_or_404(WMSLayer, name=layerName, code=layerName, wms_id=wmsId)
+    wms_layer.delete()
 
     return JsonResponse({'success': True})
 

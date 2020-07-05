@@ -162,7 +162,6 @@ function getLayers(wms_url) {
                 const reader = new FileReader()
                 reader.onloadend = () => {
                     const layers = (new Capabilities(reader.result)).getLayers()
-                    //console.log(JSON.stringify(layers))
                     resolve(layers)
                 }
                 reader.readAsText(data)
