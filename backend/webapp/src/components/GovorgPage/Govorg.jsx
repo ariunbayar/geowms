@@ -1,0 +1,55 @@
+import React, { Component } from "react"
+import "./styles.css";
+
+
+export default class Govorg extends Component {
+
+    render() {
+        const {id, name, price, is_removeable, icon_url, wms_list} = this.props.values
+        return (
+            <tr>
+
+                <th scope="col">
+                    {id}
+                </th>
+
+                <td>
+                    <img className="img" src={icon_url}/>
+                    {name}
+                </td>
+
+                <td>
+                    <ul>
+                        {wms_list.map((wms_name, idx) =>
+                            <li key={idx}>{wms_name}</li>
+                        )}
+                    </ul>
+                </td>
+
+                <td>
+                    <a href="#" onClick={this.props.handleEdit}>
+                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </a>
+                </td>
+
+                <td>
+                    {is_removeable &&
+                        <a href="#" onClick={this.props.handleRemove}>
+                            <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        </a>
+                    }
+                </td>
+                <td>
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
+                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onClick={event => this.props.handleMove(event, id, 'down')}>
+                        <i className="fa fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        )
+    }
+}
