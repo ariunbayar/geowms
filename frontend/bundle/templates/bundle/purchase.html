@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ГЕОПОРТАЛ САЙТ</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://test1.nsdi.gov.mn/static/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <style>
+    </style>
+</head>
+
+<body class="nimbus-is-editor">
+    <nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary py-0">
+        <div class="container">
+            <div class="ml-auto mt-2 mt-lg-0">
+                <span class="btn gp-btn-primary">
+                    Нэвтэрсэн хэрэглэгч: Ц. Түвшинтөгс
+                </span>
+                <a href="https://test1.nsdi.gov.mn/logout/" class="btn gp-btn-primary">ГАРАХ</a>
+
+            </div>
+        </div>
+    </nav>
+    <div class="container py-3">
+
+        <div class="row h-100">
+            <div class="col-md-4">
+                <a href="/">
+                    <img class="logo-top" src="https://test1.nsdi.gov.mn/static/assets/image/logo/logo.png" alt="">
+                </a>
+            </div>
+            <div class="col-md-4 align-self-center">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control search-input" placeholder="Хайх үг">
+                    <div class="input-group-append">
+                        <button class="btn gp-outline-primary" type="submit">Хайх</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 align-self-center">
+                <div class="login-reg float-right">
+                    <div class="ml-auto mt-2 mt-lg-0">
+
+
+
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary py-0">
+        <div class="container">
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03"
+                aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/"><i class="fa fa-map mr-2" aria-hidden="true"></i>ГЕОПОРТАЛ</a>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/">НҮҮР</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/service">ҮЙЛЧИЛГЭЭ</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link"
+                            href="http://192.168.10.95:8080/geonetwork/srv/eng/catalog.search#/home">МЕТА ДАТА</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/help">ТУСЛАМЖ</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/statistics">СТАТИСТИК</a>
+                    </li>
+                    <li>
+                        <a class="nav-link active" href="/buy">ЛАВЛАХ</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/back/"><i class="fa fa-cog"></i> УДИРДАГЧИЙН ХЭСЭГ</a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+    <div class="main-content">
+        <div class="container">
+            <form action="failed.html" method="POST" onsubmit="return validateForm()" name="myForm">
+                <div class="row">
+                    <div class="col-md-12 py-0 my-3">
+                        <h5 class="mb-3">Лавлах</h5>
+
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td><i class="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
+                                    <td>Газрын бүрхэвч, газар ашиглалт</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
+                                    <td>Дорноговь</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Сум</td>
+                                    <td>Даланжаргалан</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Планшет</td>
+                                    <td>G0012</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Уртраг</td>
+                                    <td>109 03 43.83379</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өргөрөг</td>
+                                    <td>45 55 24.90433</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>N_UTM</td>
+                                    <td>5087383.048</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>E_UTM</td>
+                                    <td>349744.265</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өндөр</td>
+                                    <td>1113.268</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
+                                    <td>3000₮</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+                <div class="row py-3">
+                    <div class="col-md-12">
+                        <div class="">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="exampleFormControlSelect1"><i class="fa fa-university mr-2"
+                                                aria-hidden="true"></i>ТӨЛБӨР ТӨЛӨХ ХЭРЭГСЭЛ</label>
+                                        <select class="form-control" id="selectBank">
+                                            <option value="">Банк сонгоно уу?</option>
+                                            <option value="tdbm">Худалдаа Хөгжлийн Банк</option>
+                                            <option value="khanbank">Хаан Банк</option>
+                                            <option value="golomt">Голомт Банк</option>
+                                            <option value="statebank">Төрийн Банк</option>
+                                            <option value="xacbank">Хас банк</option>
+                                            <option value="capitronbank">Капитрон банк</option>
+                                            <option value="creditbank">Кредит банк</option>
+                                            <option value="ubbank">Улаанбаатар хотын банк</option>
+                                            <option value="erelbank">Ариг банк</option>
+                                            <option value="nibank">Үндэсний хөрөнгө оруулалтын банк</option>
+                                            <option value="chinggisbank">Чингис хаан банк</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+
+                                        <label for="exampleFormControlSelect1"><i class="fa fa-credit-card mr-2"
+                                                aria-hidden="true"></i>КАРТНЫ ДУГААР</label>
+                                        <input name="cardNumber" id="cardNumber" class="form-control"
+                                            placeholder="КАРТНЫ ДУГААР" />
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+
+                                        <label for="exampleFormControlSelect1"><i class="fa fa-user mr-2"
+                                                aria-hidden="true"></i>КАРТНЫ НЭР</label>
+                                        <input name="cardName" id="cardName" class="form-control"
+                                            placeholder="КАРТНЫ НЭР" />
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleFormControlSelect1"><i class="fa fa-calendar mr-2"
+                                                aria-hidden="true"></i>ДУУСАХ ОГНОО</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <select class="form-control" id="selectMonth">
+                                                    <option value="">САР сонгоно уу?</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7">7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                    <option value="11">11</option>
+                                                    <option value="12">12</option>
+                                                </select>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select class="form-control" id="selectYear">
+                                                    <option value="">ЖИЛ сонгоно уу?</option>
+                                                    <option value="2020">2020</option>
+                                                    <option value="2021">2021</option>
+                                                    <option value="2022">2022</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+
+                                        <label for="exampleFormControlSelect1"><i class="fa fa-key mr-2"
+                                                aria-hidden="true"></i>CVC/CVV</label>
+
+                                        <input name="aaa" class="form-control" id="cvvInput" placeholder="CVC/CVV" />
+                                        <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+
+
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <a href="#" class="text-center mt-3" data-toggle="modal" data-target="#CVV"><i
+                                            class="fa fa-question-circle mt-4" style="font-size: 28px;"
+                                            aria-hidden="true"></i></a>
+                                    <div class="modal fade" id="CVV" tabindex="-1" role="dialog"
+                                        aria-labelledby="CVVLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h6 class="modal-title" id="exampleModalLabel"><i
+                                                            class="fa fa-shopping-cart mr-2"
+                                                            aria-hidden="true"></i>CVC/CVV</h6>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <img src="https://m.egolomt.mn/billingnew/Styles/img/cvvnumber.png">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="exampleFormControlTextarea1"><i class="fa fa-info-circle mr-2"
+                                                aria-hidden="true"></i>ОНЛАЙН ХУДАЛДАА ҮЙЛЧИЛГЭЭНИЙ НӨХЦӨЛ</label>
+                                        <div
+                                            style="border: 1px solid #eaeaea;padding: 25px;background-color: #fff;margin-bottom: 1.25rem;border-radius: 8px;">
+                                            <div class="container ng-binding" ng-bind-html="ctrl.term"
+                                                style="height: 370px; overflow-y: auto;">
+                                                <p><strong>ҮЙЛЧИЛГЭЭНИЙ НӨХЦӨЛ</strong></p>
+                                                <p><strong>Ерөнхий заалт</strong></p>
+                                                <ul>
+                                                    <li>ГЗБГЗЗГ-ийн бүтээгдэхүүн үйлчилгээ, худалдааны албан ёсны
+                                                        вэбсайт бөгөөд энэхүү журам нь уг
+                                                        вэбсайтаас үйлчилгээ авах, худалдаа хийхэд үүсэх харилцааг
+                                                        зохицуулахад оршино.</li>
+                                                    <li>Энэхүү журам нь Монгол улсын иргэн ГЗБГЗЗГ-ийн вэбсайтаар
+                                                        үйлчилгээ
+                                                        авах,
+                                                        худалдаа хийхээс өмнө хүлээн зөвшөөрч, баталгаажуулсны үндсэн
+                                                        дээр
+                                                        хэрэгжинэ.</li>
+                                                </ul>
+                                                <p><strong>Вэбсайт түүний үйл ажиллагаа</strong></p>
+                                                <p><strong><u>Ерөнхий</u></strong></p>
+                                                <ul>
+                                                    <li>Геопортал вэбсайт нь тогтмол үйл ажиллагаатай байж, байнга
+                                                        шинэчлэгдэн, ГЗБГЗЗГ-ийн сүүлийн үеийн өгөгдлөөр
+                                                        онлайнаар үйлчилгээг иргэнд үзүүлэхэд
+                                                        чиглэсэн зорилго, бүтэцтэй байна.</li>
+                                                    <li>Геопортал&nbsp;нь өдөр бүр 24 цагаар олон нийтэд нээлттэй
+                                                        ажиллана.</li>
+                                                    <li>Вэбсайттай холбоотой болон шинэ үйлчилгээ, бараа бүтээгдэхүүний
+                                                        талаарх санал гомдлоо&nbsp;<a
+                                                            href="mailto:contact@gazar.gov.mn">contact@gazar.gov.mn</a>-рүү
+                                                        и-мэйл илгээн шийдвэрлүүлж болно.</li>
+                                                    <li>Хэрэглэгчээс гарсан гомдол, маргаантай
+                                                        асуудлыг&nbsp;Геопортал&nbsp;вэбсайтын үйлчилгээний журам болон
+                                                        компанийн дотоод журам, Монгол улсын хууль тогтоомжийн дагуу
+                                                        шийдвэрлэнэ.</li>
+
+                                                    <li>Хэрэглэгч нэвтрэх нэр, нэвтрэх нууц үгээ бусдад алдсанаас үүсэх
+                                                        аливаа хариуцлагыг Геопортал хариуцахгүй.</li>
+                                                    <li>Иргэн төлбөрөө зөвхөн&nbsp;Геопортал&nbsp;вэб хуудсаар санал
+                                                        болгосон&nbsp;банкны картаар
+                                                        шилжүүлэн&nbsp;үйлчилгээ авах, худалдаа хийх боломжтой байна.
+                                                    </li>
+                                                </ul>
+
+                                                <p>ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1"
+                                            data-com.dwl.browser.user-edited="yes">
+                                        <label class="form-check-label" for="defaultCheck1">
+                                            Үйлчилгээний нөхцөлийг зөвшөөрч байна
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button  href="http://localhost:8000/success" class="btn gp-btn-primary text-center mt-3">
+                                <a class="fa fa-shopping-cart mr-2" style="color: white" aria-hidden="true" href="/failed/"> Худалдаж авах</a>
+                            </button>
+                            <script>
+                                function validateForm() {
+
+
+                                    if (document.getElementById("selectBank").value == '') {
+                                        alert("Банкаа сонгоно уу");
+                                        return false;
+                                    }
+                                    if (document.getElementById("cardNumber").value == '') {
+                                        alert("Картны дугаараа оруулна уу");
+                                        return false;
+                                    }
+                                    if (document.getElementById("cardName").value == '') {
+                                        alert("Картны нэрээ оруулна уу");
+                                        return false;
+                                    }
+                                    if (document.getElementById("selectMonth").value == '') {
+                                        alert("Дуусах сарыг сонгоно уу");
+                                        return false;
+                                    }
+                                    if (document.getElementById("selectYear").value == '') {
+                                        alert("Дуусах жилийг сонгоно уу");
+                                        return false;
+                                    }
+                                    if (document.getElementById("cvvInput").value == '') {
+                                        alert("CVC/CVV кодоо оруулна уу");
+                                        return false;
+                                    }
+
+                                    if (document.getElementById("defaultCheck1").checked == false) {
+                                        alert("Үйлчилгээний нөхцөлийг зөвшөөрөөгүй байна");
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="top gp-bg-dark">
+            <div class="container">
+                <div class="row py-4">
+                    <div class="col-md-5 text-center">
+                        <img class="logo-bottom" src="https://test1.nsdi.gov.mn/static/assets/image/logo/logo-2.png">
+                        <p class="mt-2 text-white-50">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="mb-3 gp-text-light-primary">Цэс</h6>
+                        <ul class="footer-nav list-unstyled">
+                            <li class="f-nav-item mb-2">
+                                <a class="f-nav-link text-white-50" href="/service">ҮЙЛЧИЛГЭЭ</a>
+                            </li>
+                            <li class="f-nav-item mb-2">
+                                <a class="f-nav-link text-white-50" href="/meta-data">МЕТА ДАТА</a>
+                            </li>
+                            <li class="f-nav-item mb-2">
+                                <a class="f-nav-link text-white-50" href="/help">ТУСЛАМЖ</a>
+                            </li>
+                            <li class="f-nav-item mb-2">
+                                <a class="f-nav-link text-white-50" href="/statistics">СТАТИСТИК</a>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="mb-3 gp-text-light-primary">Холбоо барих</h6>
+                        <ul class="list-unstyled text-white-50">
+                            <li class="mb-2">
+                                <span><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Хаяг: Хаяг байршил</span>
+                            </li>
+                            <li class="mb-2">
+                                <span><i class="fa fa-phone mr-2" aria-hidden="true"></i>Утас: 976 99999999</span>
+                            </li>
+                            <li class="mb-2">
+                                <span><i class="fa fa-envelope mr-2" aria-hidden="true"></i>Е-Мэйл: mailhayag.gmail.com
+                                </span>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom py-3 gp-bg-darker">
+            <div class="container text-center">
+                <span class="">© Бүх эрх хуулиар хамгаалагдсан ГЕОПОРТАЛ</span>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous">
+    </script>
+    <!-- owl -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

@@ -66,3 +66,33 @@ def wms_layers(request, pk):
     }
 
     return JsonResponse(rsp)
+
+def purchase(request):
+
+    bundles = Bundle.objects.all()
+
+    context = {
+        'bundles': bundles,
+    }
+
+    return render(request, 'bundle/purchase.html', context)
+
+def success(request):
+
+    bundles = Bundle.objects.all()
+
+    context = {
+        'bundles': bundles,
+    }
+
+    return render(request, 'bundle/success.html', context)
+
+def failed(request):
+
+    bundles = Bundle.objects.all()
+
+    context = {
+        'bundles': bundles,
+    }
+
+    return render(request, 'bundle/failed.html', context)
