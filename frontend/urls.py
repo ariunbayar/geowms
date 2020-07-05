@@ -3,6 +3,7 @@ from django.urls import re_path, path, include
 from frontend.bundle import views as bundle_views
 from frontend.mobile import views as mobile_views
 from frontend.суурь_давхарга import views as суурь_давхарга
+from frontend.page import views as page_views
 
 
 urlpatterns = [
@@ -22,5 +23,12 @@ urlpatterns = [
     path('суурь-давхарга/', include(([
         path('', суурь_давхарга.all, name='all'),
     ], 'суурь-давхарга'))),
+
+
+    path('p/', include(([
+        path('үйлчилгээ/', page_views.service, name='service'),
+        path('тусламж/', page_views.help, name='help'),
+        path('статистик/', page_views.statistics, name='statistics'),
+    ], 'page'))),
 
 ]

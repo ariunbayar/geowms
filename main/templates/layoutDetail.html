@@ -21,7 +21,6 @@
     <div class="container">
         <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
-                    
                     <span class="btn gp-btn-primary" >Нэвтэрсэн хэрэглэгч: {{user.username}}</span>
                     <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
@@ -29,7 +28,7 @@
                 {% endif %}
         </div>
     </div>
-</nav>  
+</nav>
 <div class="container py-3">
 
     <div class="row h-100">
@@ -80,19 +79,19 @@
               {% with request.resolver_match.url_name as url_name %}
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                   <li class="nav-item {% if url_name == "bundle:all" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a> 
+                    <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'service' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'service' %}">ҮЙЛЧИЛГЭЭ</a>
+                  <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'meta-data' %}active{% endif %}">
+                  <li class="nav-item {% if url_name == "meta-data" %}active{% endif %}">
                     <a class="nav-link" href="http://192.168.13.95:8080/geonetwork/srv/eng/catalog.search#/home">МЕТА ДАТА</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'help' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'help' %}">ТУСЛАМЖ</a>
+                  <li class="nav-item {% if url_name == "page:help" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "page:help" %}">ТУСЛАМЖ</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'statistics' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'statistics' %}">СТАТИСТИК</a>
+                  <li class="nav-item {% if url_name == "page:statistics" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "page:statistics" %}">СТАТИСТИК</a>
                   </li>
 
                   {% if user.is_authenticated and user.is_superuser %}

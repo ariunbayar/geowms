@@ -18,13 +18,12 @@
     <div class="container">
         <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
-                    
-                    <span class="btn gp-btn-primary" > 
+                    <span class="btn gp-btn-primary" >
                       Нэвтэрсэн хэрэглэгч: {{user.last_name | first}}. {{user.first_name}}
                     </span>
-                    <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
+                    <a href="{% url "logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                    <a href="{% url "login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
                 {% endif %}
         </div>
     </div>
@@ -34,7 +33,7 @@
     <div class="row h-100">
         <div class="col-md-4">
             <a href="{% url "bundle:all" %}">
-                <img class="logo-top" src="{% static 'assets/image/logo/logo.png' %}" alt="">
+                <img class="logo-top" src="{% static "assets/image/logo/logo.png" %}" alt="">
             </a>
         </div>
         <div class="col-md-4 align-self-center">
@@ -50,11 +49,11 @@
                 <div class="ml-auto mt-2 mt-lg-0">
                     {% if user.is_authenticated and user.is_superuser%}
                        {% if not user.is_superuser %}
-                       <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
+                       <a href="{% url "logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                        {% endif %}
                      {% else %}
-                       <a href="{% url 'loginUser' %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
-                       <a href="{% url 'loginUser' %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
+                       <a href="{% url "loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
+                       <a href="{% url "loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
                      {% endif %}
            </div>
 {#              <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a>#}
@@ -77,19 +76,19 @@
               {% with request.resolver_match.url_name as url_name %}
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                   <li class="nav-item {% if url_name == "bundle:all" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a> 
+                    <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'service' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'service' %}">ҮЙЛЧИЛГЭЭ</a>
+                  <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'meta-data' %}active{% endif %}">
+                  <li class="nav-item {% if url_name == "meta-data" %}active{% endif %}">
                     <a class="nav-link" href="http://192.168.13.95:8080/geonetwork/srv/eng/catalog.search#/home">МЕТА ДАТА</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'help' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'help' %}">ТУСЛАМЖ</a>
+                  <li class="nav-item {% if url_name == "page:help" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "page:help" %}">ТУСЛАМЖ</a>
                   </li>
-                  <li class="nav-item {% if url_name == 'statistics' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'statistics' %}">СТАТИСТИК</a>
+                  <li class="nav-item {% if url_name == "page:statistics" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "page:statistics" %}">СТАТИСТИК</a>
                   </li>
 
                   {% if user.is_authenticated and user.is_superuser %}
@@ -114,23 +113,23 @@
         <div class="container">
             <div class="row py-4">
                 <div class="col-md-5 text-center">
-                    <img class="logo-bottom" src="{% static 'assets/image/logo/logo-2.png' %}">
+                    <img class="logo-bottom" src="{% static "assets/image/logo/logo-2.png" %}">
                     <p class="mt-2 text-white-50">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="mb-3 gp-text-light-primary">Цэс</h6>
                     <ul class="footer-nav list-unstyled">
                         <li class="f-nav-item mb-2">
-                            <a class="f-nav-link text-white-50" href="{% url 'service' %}">ҮЙЛЧИЛГЭЭ</a>
+                            <a class="f-nav-link text-white-50" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                         </li>
                         <li class="f-nav-item mb-2">
-                            <a class="f-nav-link text-white-50" href="{% url 'meta-data' %}">МЕТА ДАТА</a>
+                            <a class="f-nav-link text-white-50" href="http://192.168.13.95:8080/geonetwork/srv/eng/catalog.search#/home">МЕТА ДАТА</a>
                         </li>
                         <li class="f-nav-item mb-2">
-                            <a class="f-nav-link text-white-50" href="{% url 'help' %}">ТУСЛАМЖ</a>
+                            <a class="f-nav-link text-white-50" href="{% url "page:help" %}">ТУСЛАМЖ</a>
                         </li>
                         <li class="f-nav-item mb-2">
-                            <a class="f-nav-link text-white-50" href="{% url 'statistics' %}">СТАТИСТИК</a>
+                            <a class="f-nav-link text-white-50" href="{% url "page:statistics" %}">СТАТИСТИК</a>
                         </li>
                     </ul>
 

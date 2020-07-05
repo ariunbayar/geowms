@@ -3,17 +3,15 @@
     <div class="container">
         <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
-                    
                     <span class="btn gp-btn-primary" >Нэвтэрсэн хэрэглэгч: {{user.username}}</span>
-                    <a href="{% url 'logout' %}" class="btn gp-btn-primary">ГАРАХ</a>
+                    <a href="{% url "logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                    <a href="{% url "login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
                 {% endif %}
         </div>
     </div>
 </nav>
 <div class="container py-3">
-    
     <div class="row h-100">
         <div class="col-md-4">
             <a href="/">

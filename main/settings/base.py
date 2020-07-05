@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'frontend.mobile.apps.MobileConfig',
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
     'frontend.secure.apps.SecureConfig',
+    'frontend.page.apps.PageConfig',
 
     # Backend apps
 

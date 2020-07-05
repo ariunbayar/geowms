@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class PageConfig(AppConfig):
-    name = 'page'
+    name = 'frontend.page'
+    label = 'frontend_page'

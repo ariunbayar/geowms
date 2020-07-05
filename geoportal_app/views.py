@@ -59,19 +59,6 @@ def logout(request):
     return redirect('login')
 
 
-# pages
-def service(request):
-    return render(request, 'page/service.html')
-
-def metaData(request):
-    return render(request, 'page/meta-data.html')
-
-def help(request):
-    return render(request, 'page/help.html')
-
-def statistics(request):
-    return render(request, 'page/statistics.html')
-
 
 
 # subs
