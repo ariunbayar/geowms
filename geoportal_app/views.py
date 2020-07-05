@@ -8,7 +8,6 @@ from django.contrib import messages
 from .models import *
 from geoportal_app.models import User
 
-# Create your views here.
 
 def register(response):
     if response.method == "POST":
@@ -57,55 +56,3 @@ def login(request):
 def logout(request):
     auth_logout(request)
     return redirect('login')
-
-
-
-
-# subs
-def sub1(request):
-    return render(request, "sub/sub1.html")
-
-def sub2(request):
-    return render(request, "sub/sub2.html")
-
-def sub3(request):
-    return render(request, "sub/sub3.html")
-
-def sub4(request):
-    return render(request, "sub/sub4.html")
-
-def sub5(request):
-    return render(request, "sub/sub5.html")
-
-def sub6(request):
-    return render(request, "sub/sub6.html")
-
-def sub7(request):
-    return render(request, "sub/sub7.html")
-
-def sub8(request):
-    return render(request, "sub/sub9.html")
-
-def sub9(request):
-    return render(request, "sub/sub9.html")
-
-def sub10(request):
-    return render(request, "sub/sub10.html")
-
-def sub11(request):
-    return render(request, "sub/sub11.html")
-
-def sub12(request):
-    return render(request, "sub/sub12.html")
-
-def sub13(request):
-    return render(request, "sub/sub13.html")
-
-def sub14(request):
-    return render(request, "sub/sub14.html")
-
-def sub15(request):
-    return render(request, "sub/sub15.html")
-
-def sub16(request):
-    return render(request, "sub/sub16.html")

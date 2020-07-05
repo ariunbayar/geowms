@@ -4,11 +4,10 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from geoportal_app import views, sub_url
+from geoportal_app import views
 import frontend.secure.views
 import backend.urls
 import frontend.urls
-
 
 
 urlpatterns = [
@@ -21,7 +20,6 @@ urlpatterns = [
     path('register', views.register, name='register'),
     path('', include(frontend.urls)),
     path('back/', include(backend.urls)),
-    path('sub/', include(sub_url)),
 
     re_path(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
