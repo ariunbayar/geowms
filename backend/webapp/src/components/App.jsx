@@ -5,6 +5,7 @@ import {WMSPage} from "./WMSPage"
 import {BundlePage} from "./BundlePage"
 import {DevPage} from "./DevPage"
 import {UserPage} from "./UserPage"
+import {GovorgPage} from "./GovorgPage"
 import {СуурьДавхаргаХуудас} from './СуурьДавхаргаХуудас'
 
 
@@ -35,6 +36,9 @@ export default class App extends Component {
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                                 </li>
+                                 <li className="nav-item">
+                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/govorg"}>БАЙГУУЛЛАГА</NavLink>
+                                </li>
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}>СУУРЬ ДАВХРАГА</NavLink>
                                 </li>
@@ -51,6 +55,7 @@ export default class App extends Component {
                 <div className="main-content">
                     <Switch>
                         <Route exact path={"/back/wms/"} component={WMSPage}/>
+                        <Route exact path={"/back/govorg/"} component={GovorgPage}/>
                         <Route exact path={"/back/"} component={BundlePage}/>
                         <Route path={"/back/суурь-давхарга/"} component={СуурьДавхаргаХуудас}/>
                         <Route exact path={"/back/dev/"} component={DevPage}/>
