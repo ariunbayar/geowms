@@ -109,7 +109,7 @@ def шинэ_токен(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def усгах(request, pk):
+def устгах(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
     govorg.delete()
