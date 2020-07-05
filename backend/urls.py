@@ -4,6 +4,7 @@ from backend.bundle import views as bundle_views
 from backend.webapp import views as webapp_views
 from backend.wms import views as wms_views
 from backend.user import views as user_views
+from backend.govorg import views as govorg_views
 from backend.суурь_давхарга import views as суурь_давхарга
 
 
@@ -46,6 +47,14 @@ urlpatterns = [
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
+
+    path('govorg/', include(([
+        path('', govorg_views.жагсаалт, name=''),
+        path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
+        path('<int:pk>/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
+        path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
+        path('<int:pk>/усгах/', govorg_views.усгах, name='усгах'),
+    ], 'govorg'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 

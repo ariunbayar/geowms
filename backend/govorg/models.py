@@ -3,6 +3,10 @@ from django.db import models
 
 class GovOrg(models.Model):
 
+    class Meta:
+        ordering = ('created_at',)
+        db_table = 'govorg'
+
     name = models.CharField(max_length=250)
     token = models.CharField(max_length=250)
 
