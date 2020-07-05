@@ -5,13 +5,14 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, reverse
 
-from geoportal.utils import resize_b64_to_sizes
+from main.utils import resize_b64_to_sizes
 from .models import BaseLayer
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 
 from django.views.decorators.http import require_POST, require_GET
-from geoportal.decorators import ajax_required
+from main.decorators import ajax_required
+
 
 def _get_base_layer_display(base_layer):
     return {

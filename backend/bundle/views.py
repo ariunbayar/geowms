@@ -5,8 +5,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
-from geoportal.decorators import ajax_required
-from geoportal.utils import resize_b64_to_sizes
+from main.decorators import ajax_required
+from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role

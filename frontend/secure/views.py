@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from geoportal_app.models import User
 
-from geoportal.auth_api import GeoAuth
+from main.auth_api import GeoAuth
 
 
 def login_dan(request):

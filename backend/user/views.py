@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from django.views.decorators.http import require_POST, require_GET
 
-from geoportal.decorators import ajax_required
+from main.decorators import ajax_required
 from django.http import JsonResponse
 from geoportal_app.models import User
 

@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
-from geoportal.decorators import ajax_required
+from main.decorators import ajax_required
 
 from backend.суурь_давхарга.models import BaseLayer
 from backend.wms.models import WMS

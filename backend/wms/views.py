@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST, require_GET
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wmslayer.models import WMSLayer
-from geoportal.decorators import ajax_required
+from main.decorators import ajax_required
 
 from .models import WMS
 from .forms import WMSForm
