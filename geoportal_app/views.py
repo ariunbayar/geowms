@@ -1,11 +1,10 @@
 from django.conf import settings
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from .form import RegisterForm, LoginForm
 from django.contrib import messages
-from .models import *
 from geoportal_app.models import User
 
 
@@ -19,13 +18,11 @@ def register(response):
     else:
         form = RegisterForm()
     return render(response, "register.html", {"form": form})
-#
-# def login(request):
-#     form = LoginForm()
-#     return render(request, 'login.html', {"form": form})
+
 
 def loginUser(request):
     return render(request, 'loginUser.html')
+
 
 def login(request):
     if request.method == 'POST':
@@ -46,7 +43,7 @@ def login(request):
             else:
                 messages.warning(request, 'Нэвтрэх оролдлого амжилтгүй боллоо.')
                 return HttpResponseRedirect(reverse('login'))
-        except:
+        except Exception:
             messages.warning(request, 'Буруу и-мэйл оруулсан байна!!!')
             return HttpResponseRedirect(reverse('login'))
     form = LoginForm()

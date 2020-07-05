@@ -18,10 +18,10 @@ def login_dan(request):
         payload = [
             {
                 # Оролтын параметргүй дуудагддаг сервис
-                'services' : [
+                'services': [
                     "WS100101_getCitizenIDCardInfo",                                    # сервис код
                 ],
-                'wsdl' : "https://xyp.gov.mn/citizen-1.3.0/ws?WSDL",                    # wsdl зам
+                'wsdl': "https://xyp.gov.mn/citizen-1.3.0/ws?WSDL",                    # wsdl зам
             },
         ]
 
