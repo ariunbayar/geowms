@@ -48,10 +48,10 @@ urlpatterns = [
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
 
-    path('govorg/', include(([
+    path('api/байгууллага/', include(([
         path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
-        path('<int:pk>/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
+        path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/усгах/', govorg_views.усгах, name='усгах'),

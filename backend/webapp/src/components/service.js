@@ -9,5 +9,5 @@ const prefix = '/back'
 
 function getGovOrgCount() {
     const opts = {...getGetOptions()}
-    return fetch(`${prefix}/govorg/тоо/`, opts).then(handleResponse)
+    return fetch(`${prefix}/api/байгууллага/тоо/`, opts).then(handleResponse)
 }
