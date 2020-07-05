@@ -45,10 +45,9 @@ function update(values) {
 function remove(id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id}),
     }
 
-    return fetch(`${prefix}/remove/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${id}/усгах/`, opts).then(handleResponse)
 }
 
 
