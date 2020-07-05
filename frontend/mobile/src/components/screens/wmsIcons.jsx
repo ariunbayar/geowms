@@ -5,7 +5,7 @@ import "./wmsIcon.css";
 export class WmsIcons extends Component {
     render() {
         return (
-            <view class="wmsIconConteiner">
+            <div className="wmsIconConteiner">
                 <a>asdasd</a><br></br>
                 <a>asdasd</a><br></br>
                 <a>asdasd</a><br></br>
@@ -23,7 +23,7 @@ export class WmsIcons extends Component {
                 <a>asdasd</a><br></br>
                 <a>asdasd</a><br></br>
                 <a>asdasd</a><br></br>
-            </view>
+            </div>
         )
 
     }

@@ -1,12 +1,26 @@
 from django.conf import settings
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
+
+from main.auth_api import GeoAuth
 from geoportal_app.models import User
 
-from geoportal.auth_api import GeoAuth
+from .form import RegisterForm, LoginForm
+
+
+def register(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+
+        return redirect('secure:login')
+    else:
+        form = RegisterForm()
+    return render(request, 'secure/register.html', {"form": form})
 
 
 def login_dan(request):
@@ -18,10 +32,10 @@ def login_dan(request):
         payload = [
             {
                 # Оролтын параметргүй дуудагддаг сервис
-                'services' : [
+                'services': [
                     "WS100101_getCitizenIDCardInfo",                                    # сервис код
                 ],
-                'wsdl' : "https://xyp.gov.mn/citizen-1.3.0/ws?WSDL",                    # wsdl зам
+                'wsdl': "https://xyp.gov.mn/citizen-1.3.0/ws?WSDL",                    # wsdl зам
             },
         ]
 
@@ -60,13 +74,42 @@ def login_dan(request):
                     first_name=firstname,
                     last_name=lastname,
                     gender=gender,
-                    is_superuser=True,
                 )
 
             auth.login(request, user)
             return redirect(settings.LOGIN_REDIRECT_URL)
 
     raise Http404
+
+
+def loginUser(request):
+    return render(request, 'secure/loginUser.html')
+
+
+def login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email', None)
+        password = request.POST.get('password')
+        try:
+            b_user = User.objects.get(email=email)
+            username = b_user.username
+
+            user = auth.authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    auth.login(request, user)
+                    return redirect(settings.LOGIN_REDIRECT_URL)
+                else:
+                    messages.warning(request, 'Таны хаяг идэвхгүй байна.')
+                    return redirect('secure:login')
+            else:
+                messages.warning(request, 'Нэвтрэх оролдлого амжилтгүй боллоо.')
+                return redirect('secure:login')
+        except Exception:
+            messages.warning(request, 'Буруу и-мэйл оруулсан байна!!!')
+            return redirect('secure:login')
+    form = LoginForm()
+    return render(request, 'secure/login.html', {'form': form})
 
 
 @require_GET

@@ -1,15 +1,14 @@
-import json
 import requests
 
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, reverse, redirect, get_object_or_404
+from django.shortcuts import reverse, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
-from backend.bundle.models import Bundle, BundleLayer
+from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
-from geoportal.decorators import ajax_required
+from main.decorators import ajax_required
 
 from .models import WMS
 from .forms import WMSForm
@@ -137,9 +136,9 @@ def create(request, payload):
         form.instance.created_by = request.user
         form.save()
         return JsonResponse({
-                'wms': _get_wms_display(request, form.instance),
-                'success': True
-            })
+            'wms': _get_wms_display(request, form.instance),
+            'success': True
+        })
     else:
         return JsonResponse({'success': False})
 
@@ -153,9 +152,8 @@ def update(request, payload):
     name = payload.get('name')
     url = payload.get('url')
     WMS.objects.filter(pk=wmsId).update(name=name, url=url)
-    
-    return JsonResponse({'success': True})
 
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -178,8 +176,8 @@ def delete(request, payload):
 def proxy(request, wms_id):
 
     BASE_HEADERS = {
-            'User-Agent': 'geo 1.0',
-        }
+        'User-Agent': 'geo 1.0',
+    }
 
     base_url = get_object_or_404(WMS, pk=wms_id).url
 

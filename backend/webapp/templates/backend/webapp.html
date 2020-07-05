@@ -1,0 +1,17 @@
+{% extends "backend/layout/index.html" %}
+{% load static %}
+{% block content %}
+
+<div class="content" id="webapp"></div>
+
+{% endblock %}
+
+
+{% block script %}
+
+    {% if DEBUG %}
+        <script src="{% static "assets/js/backend/webapp.js" %}"></script>
+    {% else %}
+        <script src="{% static "assets/js/backend/webapp.min.js" %}?v={{STATIC_VERSION}}"></script>
+    {% endif %}
+{% endblock %}

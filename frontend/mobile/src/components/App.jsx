@@ -10,7 +10,6 @@ import {ServiceScreen} from './screens/serviceScreen'
 import {StatisticsScreen} from './screens/statisticsScreen'
 import { set } from 'ol/transform';
 import {LoginDanScreen} from './screens/loginDanScreen'
-//alert(JSON.stringify(this.props.bundles))
 export class App extends Component {
     constructor(props) {
         super(props)
@@ -94,33 +93,37 @@ export class App extends Component {
     render() {
         const bundles = this.props.bundle
         return (
-            
-            <view>
-                {this.state.loginScreenIsload ? <div ><i onClick={() => this.loginScreen()}  class="fa fa-arrow-left backarrow" aria-hidden="true" ></i><LoginDanScreen></LoginDanScreen></div> :
+            <div>
+                {this.state.loginScreenIsload ? <div ><i onClick={() => this.loginScreen()}  className="fa fa-arrow-left backarrow loginBack" aria-hidden="true" ></i><LoginDanScreen></LoginDanScreen></div> :
                 <div>
                     {this.state.metaDataScreenIsload ? 
-                    <div class="header">
-                        <div class="row center">
-                            <div class="col-11">
+                    <div className="header">
+                        <div className="row center">
+                            <div className="col-2">
+                                <img src={"/static/assets/image/logo/logo-2.png"} className="geoIconNoText"/> 
+                            </div>
+                            <div className="col-8">
                                 <h1>{this.state.bundleName}</h1>
                             </div>
-                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user-circle" aria-hidden="true"></i></div>
+                            <div className="col-2"><i onClick={() => this.loginScreen()} className="fa fa-user-circle" aria-hidden="true"></i></div>
                         </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="input-group input-group-lg">
-                                    <input type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm-5"></input>
+                        <div className="row">
+                            <div className="col-12">
+                                <div className="input-group input-group-lg">
+                                    <input type="text" className="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm-5"></input>
                                 </div>
                             </div>
                         </div>
                     </div> :
 
-                    <div class="header">
-                        <div class="row center">
-                            <div class="col-11">
-                                <h1>Гео портал</h1>
+                    <div className="header">
+                        <div className="row center">
+                            <div className="col-7">
+                                <img src={"/static/assets/image/logo/logo.png"}className="geoIcon"/> 
                             </div>
-                            <div ><i onClick={() => this.loginScreen()} class="fa fa-user-circle-o" aria-hidden="true"></i></div>
+                            <div className="col-3">
+                            </div>
+                            <div className="col-2"><i onClick={() => this.loginScreen()} className="fa fa-user-circle" aria-hidden="true"></i></div>
                         </div>
                     </div>
                     }
@@ -128,55 +131,60 @@ export class App extends Component {
                         {this.state.homeScreenIsload ? <HomeScreen></HomeScreen> : null}
                         {this.state.serviceScreenIsload ? <ServiceScreen></ServiceScreen> : null}
                         {this.state.metaDataScreenIsload ? 
-                            <div class="metaDataScreen">
+                            <div className="metaDataScreen">
                                 <MetaDataScreen bundle={this.state.bundle}></MetaDataScreen>
-                                <a class="wmsLayerButtonBack" onClick={() => this.wmsLayerName()}>
-                                    <i class="fas fa-layer-group wmsLayerButton" aria-hidden="true"></i>
+                                <a className="wmsLayerButtonBack" onClick={() => this.wmsLayerName()}>
+                                    <i className="fas fa-layer-group wmsLayerButton" aria-hidden="true"></i>
                                 </a>
                             </div> :
                         null}
                         {this.state.helpScreenIsload ? <HelpScreen></HelpScreen> : null}
                         {this.state.statisticsScreenIsload ? <StatisticsScreen></StatisticsScreen> : null}
                         {this.state.wmsLayerScreenIsload ? 
-                        <div class="wmsLayerScreen">
-                            <div class="row ">
-                            {bundles.map((bundle, i) => 
-                                    <div class="col-4 text-center sub">
-                                        <a onClick={() => this.wmsLayerId(bundle.id, bundle.name)}>
-                                            <img src={bundle.icon} />
-                                            <p>{ bundle.name }</p>
-                                        </a>
-                                    </div>
-                            )}
+                        <div className="wmsLayerScreen">
+                            <div className="row ">
+                                <div className="col-10">
+                                    <a>ДЭД САН</a>
+                                    <hr/>
+                                </div>
+                                <div className="col-2 xButton">
+                                    <a onClick={() => this.wmsLayerName()}>X</a>
+                                </div>
+                            </div>
+                            <div className="row ">
+                                {bundles.map((bundle, i) => 
+                                        <div className="col-4 text-center sub" key={i}>
+                                            <a onClick={() => this.wmsLayerId(bundle.id, bundle.name)}>
+                                                <img src={bundle.icon} />
+                                                <p>{ bundle.name }</p>
+                                            </a>
+                                        </div>
+                                )}
                             </div>
                         </div> : null
                         }
                     </div>
-                    <div class="mnav">
-                        <a  onClick={() => this.screenRouter("homeScreen")} class="mnav__item">
-                            <i class="fa fa-home" aria-hidden="true"></i>
-                            <p class="footerButton">Нүүр</p>
-                        </a> 
-                        <a  onClick={() => this.screenRouter("serviceScreen")} class="mnav__item nuxt-link-exact-active nuxt-link-active">
-                            <i class="fa fa-map-marker" aria-hidden="true"></i>
-                            <p class="footerButton" >Үзвэр</p>
-                        </a> 
-                        <a  onClick={() => this.screenRouter("metaDataScreen")} class="mnav__item">
-                            <i class="fa fa-database" aria-hidden="true"></i>
-                            <p class="footerButton" >Мета дата</p>
-                        </a> 
-                        <a  onClick={() => this.screenRouter("helpScreen")} class="mnav__item">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                            <p class="footerButton" >Тусламж</p>
+                    <div className="mnav">
+                        <a  onClick={() => this.screenRouter("serviceScreen")} className="mnav__item nuxt-link-exact-active nuxt-link-active">
+                            <i className="fa fa-tasks" aria-hidden="true"></i>
+                            <p className="footerButton" >Үйлчилгээ</p>
                         </a>
-                        <a  onClick={() => this.screenRouter("statisticsScreen")} class="mnav__item">
-                        <i class="fa fa-bar-chart"></i>
-                            <p class="footerButton" >Статик</p>
+                        <a  onClick={() => this.screenRouter("metaDataScreen")} className="mnav__item">
+                            <i className="fa fa-map" aria-hidden="true"></i>
+                            <p className="footerButton" >Газрын зураг</p>
+                        </a> 
+                        <a  onClick={() => this.screenRouter("helpScreen")} className="mnav__item">
+                            <i className="fa fa-info-circle" aria-hidden="true"></i>
+                            <p className="footerButton" >Тусламж</p>
+                        </a>
+                        <a  onClick={() => this.screenRouter("statisticsScreen")} className="mnav__item">
+                        <i className="fa fa-bar-chart"></i>
+                            <p className="footerButton" >Статистик</p>
                         </a>
                     </div>
                 </div>
                 }
-            </view>
+            </div>
         )
 
     }

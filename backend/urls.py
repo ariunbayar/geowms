@@ -33,8 +33,6 @@ urlpatterns = [
         path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
         path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
         path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
-
-        path('wms-layers/', bundle_views.wms_layers),
     ], 'bundle'))),
 
     path('user/', include(([

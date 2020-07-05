@@ -2,11 +2,11 @@ from itertools import groupby
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
-from geoportal.decorators import ajax_required
-from geoportal.utils import resize_b64_to_sizes
+from main.decorators import ajax_required
+from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
@@ -22,9 +22,9 @@ def _get_bundle_options():
     for wms in WMS.objects.all():
         layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
         wms_display = {
-                'name': wms.name,
-                'layers': layers,
-            }
+            'name': wms.name,
+            'layers': layers,
+        }
         form_options.append(wms_display)
 
     return form_options
@@ -57,7 +57,7 @@ def roleRemove(request, payload):
     roleId = payload.get('roleId')
     layerId = payload.get('layerId')
     sav = BundleLayer(bundle_id=bundleId, layer_id=layerId, role_id=roleId)
-    if sav == None:
+    if sav is None:
         return JsonResponse({'success': True})
     else:
         saves = BundleLayer.objects.filter(bundle_id=bundleId, layer_id=layerId, role_id=roleId)
@@ -85,8 +85,8 @@ def _get_role_options():
 
     for role in Role.objects.all():
         role_display = {
-                'id': role.id,
-            }
+            'id': role.id,
+        }
         form_options.append(role_display)
 
     return form_options
@@ -104,10 +104,9 @@ def _get_form_check_options(bundleId):
             roles.append(role.role_id)
             check = role.defaultCheck
         role_display = {
-                'layer_id': name,
-                'roles': roles,
-                'checks': check
-
+            'layer_id': name,
+            'roles': roles,
+            'checks': check
         }
         roleOptions.append(role_display)
     return roleOptions
@@ -123,7 +122,7 @@ def _get_bundle_display(bundle):
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
-        'wms_list': [(WMS.objects.get(pk=wms[0]).name ) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': [(WMS.objects.get(pk=wms[0]).name) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
         'roles': roles
     }
 
@@ -137,10 +136,10 @@ def all(request):
     form_options_role = _get_role_options()
 
     rsp = {
-            'bundle_list': bundle_list,
-            'form_options': form_options,
-            'form_options_role': form_options_role,
-        }
+        'bundle_list': bundle_list,
+        'form_options': form_options,
+        'form_options_role': form_options_role,
+    }
 
     return JsonResponse(rsp)
 
@@ -224,32 +223,6 @@ def move(request, payload):
     rsp = {
         'success': True,
         'bundle_list': bundle_list,
-    }
-
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-def wms_layers(request, payload):
-
-    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
-
-    wms_list = []
-
-    qs_layers = bundle.layers.all().order_by('wms__created_at')
-    _layer_to_display = lambda ob: {'name': ob.name, 'code': ob.code}
-    for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
-        wms_data = {
-                'name': wms.name,
-                'url': 'http://localhost:8102/WMS/{}/'.format(wms.pk),
-                'layers': [_layer_to_display(l) for l in layers],
-            }
-        wms_list.append(wms_data)
-
-
-    rsp = {
-        'wms_list': wms_list,
     }
 
     return JsonResponse(rsp)
