@@ -1,21 +1,23 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+import {TextField} from '@/helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 
-
-export default class GovorgForm extends Component {
+export class GovorgForm extends Component {
 
     constructor(props) {
 
         super(props)
 
         this.state = {
-            name: '',
+            values: {
+                name: '',
+            },
         }
 
         this.handleChange = this.handleChange.bind(this)
-        this.handleSave = this.handleSave.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
 
     }
 
@@ -30,43 +32,93 @@ export default class GovorgForm extends Component {
         this.setState({[field]: e.target.value})
     }
 
-    handleSave() {
-        this.props.handleSave(this.state)
-    }
+
+    handleSubmit(values, { setStatus, setSubmitting }) {
+
+            const data = {
+                ...values
+            }
+
+            setStatus('checking')
+            setSubmitting(true)
+
+            service.create(data).then(({success}) => {
+                setTimeout(() => {
+                    setStatus('saved')
+                    setSubmitting(false)
+                    this.props.history.push( '/back/байгууллага/')
+                }, 800)
+            })
+        }
 
     render() {
         return (
-            <div className="shadow-lg p-3 mb-5 bg-white rounded">
-
-                <div className="form-group">
-                    <label htmlFor="id_name"> Байгууллагын нэр: </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="id_name"
-                        placeholder="байгууллагын нэр"
-                        onChange={(e) => this.handleChange('name', e)}
-                        value={this.state.name}
-                    />
+            <div className="container my-4">
+                <div className="row">
+                    <div className="col-md-12 mb-4">
+                        <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
+                            <i className="fa fa-angle-double-left"></i> Буцах
+                        </a>
+                    </div>
                 </div>
+                <div className="row">
 
-                <div className="form-group">
-                    <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
-                        Хадгал
-                    </button>
+                    <div className="col-md-4">
+                        <Formik
+                            enableReinitialize
+                            initialValues={this.state.values}
+                            validationSchema={validationSchema}
+                            onSubmit={this.handleSubmit}
+                        >
+                            {({
+                                errors,
+                                status,
+                                touched,
+                                isSubmitting,
+                                setFieldValue,
+                                handleBlur,
+                                values,
+                                isValid,
+                                dirty,
+                            }) => {
+                                const has_error = Object.keys(errors).length > 0
+                                return (
+                                    <Form>
+                                        <TextField
+                                            label="Байгууллагын нэр:"
+                                            name="name"
+                                            error={errors.name}
+                                            placeholder="байгууллагын нэр"
+                                        />
+
+                                        <div></div>
+                                        <div className="span3">
+                                            {has_error
+                                                ?
+                                                    <p> </p>
+                                                : status == 'saved' && !dirty &&
+                                                    <p>
+                                                        Амжилттай нэмэгдлээ
+                                                    </p>
+                                            }
+                                            <div>
+                                                <button type="submit" className="btn gp-bg-primary" disabled={isSubmitting || has_error}>
+                                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                                    {isSubmitting && ' Шалгаж байна.'}
+                                                    {!isSubmitting && 'Нэмэх' }
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </Form>
+                                )
+                            }}
+                        </Formik>
+                    </div>
+                    <div className="col-md-8">
+                    </div>
                 </div>
-
-                <div className="form-group">
-                    <button className="btn btn-block gp-outline-primary" onClick={this.props.handleCancel} >
-                        <i className="fa fa-chevron-left" aria-hidden="true"></i>
-                        &nbsp; Буцах
-                    </button>
-                </div>
-
-
-                <dl>
-                </dl>
             </div>
+
         )
     }
 }

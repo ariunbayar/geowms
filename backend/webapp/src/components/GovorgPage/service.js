@@ -48,7 +48,7 @@ function remove(id) {
         body: JSON.stringify({id}),
     }
 
-    return fetch(`${prefix}/remove/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${id}/устгах/`, opts).then(handleResponse)
 }
 
 

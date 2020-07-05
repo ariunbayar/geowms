@@ -3,7 +3,7 @@ import React, { Component } from "react"
 import {service} from './service'
 import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
-
+import {NavLink} from "react-router-dom"
 
 export class Жагсаалт extends Component {
 
@@ -17,15 +17,10 @@ export class Жагсаалт extends Component {
 
         this.state = {
             govorg_list: [],
-            is_form_open: false,
         }
 
-        this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
-        this.handleSave = this.handleSave.bind(this)
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.handleEdit = this.handleEdit.bind(this)
-        this.handleAdd = this.handleAdd.bind(this)
-        this.handleDetail = this.handleDetail.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
     componentDidMount() {
@@ -39,46 +34,10 @@ export class Жагсаалт extends Component {
 
     }
 
-    handleSaveSuccess() {
-        this.handleListUpdated()
-        this.setState({is_form_open: false})
-    }
-
-    handleSave(values) {
-
-        if (values.id) {
-
-            service.update(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
-            })
-
-        } else {
-
-            service.create(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
-            })
-
-        }
-
-    }
-
     handleRemove(id) {
         service.remove(id).then(({success}) => {
-            if (success) this.handleSaveSuccess()
+            if (success) this.handleListUpdated()
         })
-    }
-
-    handleEdit(form_values) {
-        this.setState({form_values, is_form_open: true})
-    }
-
-    handleAdd() {
-        this.setState({is_form_open: true})
-    }
-
-    handleDetail() {
-        const form_values = this.initial_form_values
-        this.setState({form_values, is_form_open: true})
     }
 
     render() {
@@ -90,9 +49,9 @@ export class Жагсаалт extends Component {
                         {!this.state.is_form_open &&
                             <>
                                 <div className="text-right">
-                                    <button className="btn gp-bg-primary" onClick={this.handleAdd} >
+                                    <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/үүсгэх/`}>
                                         Нэмэх
-                                    </button>
+                                    </NavLink>
                                 </div>
 
                                 <table className="table">
@@ -114,23 +73,11 @@ export class Жагсаалт extends Component {
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
-                                                handleDetail={() => this.handleDetail(values)}
-                                            />
+                                               />
                                         )}
                                     </tbody>
                                 </table>
                             </>
-                        }
-
-                        {this.state.is_form_open &&
-                            <div className="row">
-                                <div className="col-4">
-                                <GovorgForm
-                                    handleSave={this.handleSave}
-                                    handleCancel={this.handleFormCancel}
-                                />
-                                </div>
-                            </div>
                         }
 
                     </div>
