@@ -227,29 +227,3 @@ def move(request, payload):
     }
 
     return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-def wms_layers(request, payload):
-
-    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
-
-    wms_list = []
-
-    qs_layers = bundle.layers.all().order_by('wms__created_at')
-    _layer_to_display = lambda ob: {'name': ob.name, 'code': ob.code}
-    for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
-        wms_data = {
-                'name': wms.name,
-                'url': 'http://localhost:8102/WMS/{}/'.format(wms.pk),
-                'layers': [_layer_to_display(l) for l in layers],
-            }
-        wms_list.append(wms_data)
-
-
-    rsp = {
-        'wms_list': wms_list,
-    }
-
-    return JsonResponse(rsp)
