@@ -37,18 +37,28 @@ def all(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def wmsLayerall(request, payload):
-    wmsid = payload.get('id')
-    layers_all = []
-    for layer in WMSLayer.objects.filter(wms_id=wmsid).order_by('sort_order'):
-        wmslayer_display = {
-                'id': layer.id,
-                'name': layer.name,
-                'code': layer.code,
-                'title': layer.title,
+def wms_layer_all(request, payload):
+
+    pk = payload.get('id')
+
+    wms_layers = WMSLayer.objects.filter(wms_id=pk).order_by('sort_order')
+
+    def _wms_layer_display(wms_layer):
+        return {
+                'id': wms_layer.id,
+                'name': wms_layer.name,
+                'code': wms_layer.code,
+                'title': wms_layer.title,
             }
-        layers_all.append(wmslayer_display)
-    return JsonResponse({'layers_all': layers_all})
+
+    layers_all = [
+        _wms_layer_display(wms_layer)
+        for wms_layer in wms_layers
+    ]
+
+    return JsonResponse({
+        'layers_all': layers_all,
+    })
 
 
 @require_POST
