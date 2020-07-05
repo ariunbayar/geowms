@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import "./styles.css";
+import {NavLink} from "react-router-dom"
 
 
 export default class Govorg extends Component {
@@ -14,7 +14,9 @@ export default class Govorg extends Component {
                 </th>
 
                 <td>
-                    {name}
+                    <NavLink to={`/back/байгууллага/${id}/дэлгэрэнгүй/`}>
+                        <strong>{name}</strong>
+                    </NavLink>
                 </td>
 
                 <td>

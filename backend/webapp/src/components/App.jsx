@@ -50,7 +50,7 @@ export default class App extends Component {
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                                 </li>
                                  <li className="nav-item">
-                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/байгууллага/"}>
+                                     <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/"}>
                                          БАЙГУУЛЛАГА
                                          {this.state.govorg_count > 0 && ' (' + this.state.govorg_count + ')'}
                                      </NavLink>
@@ -71,7 +71,7 @@ export default class App extends Component {
                 <div className="main-content">
                     <Switch>
                         <Route exact path={"/back/wms/"} component={WMSPage}/>
-                        <Route exact path={"/back/байгууллага/"} component={GovorgPage}/>
+                        <Route path={"/back/байгууллага/"} component={GovorgPage}/>
                         <Route exact path={"/back/"} component={BundlePage}/>
                         <Route path={"/back/суурь-давхарга/"} component={СуурьДавхаргаХуудас}/>
                         <Route exact path={"/back/dev/"} component={DevPage}/>

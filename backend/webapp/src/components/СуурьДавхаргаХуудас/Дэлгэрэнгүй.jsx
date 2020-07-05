@@ -35,7 +35,7 @@ export class Дэлгэрэнгүй extends Component {
 
         return (
             <div className="container my-4">
-            <div className="row">
+                <div className="row">
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
                             <i className="fa fa-angle-double-left"></i> Буцах

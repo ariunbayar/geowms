@@ -12,6 +12,7 @@ from .models import GovOrg
 def _get_govorg_display(govorg):
 
     return {
+        'id': govorg.pk,
         'name': govorg.name,
         'token': govorg.token,
     }
