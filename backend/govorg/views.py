@@ -1,8 +1,9 @@
 import uuid
 
 from django.contrib.auth.decorators import user_passes_test
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from main.decorators import ajax_required
 from .models import GovOrg
@@ -20,7 +21,7 @@ def _generate_govorg_token():
     return uuid.uuid4().hex[:32]
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def жагсаалт(request):
@@ -57,7 +58,7 @@ def үүсгэх(request):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def дэлгэрэнгүй(request, pk):
@@ -119,7 +120,7 @@ def усгах(request, pk):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def тоо(request):
