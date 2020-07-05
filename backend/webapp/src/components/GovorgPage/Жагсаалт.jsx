@@ -73,8 +73,7 @@ export class Жагсаалт extends Component {
     }
 
     handleAdd() {
-        const form_values = this.initial_form_values
-        this.setState({form_values, is_form_open: true})
+        this.setState({is_form_open: true})
     }
 
     handleDetail() {
@@ -129,8 +128,6 @@ export class Жагсаалт extends Component {
                                 <GovorgForm
                                     handleSave={this.handleSave}
                                     handleCancel={this.handleFormCancel}
-                                    formOptions={this.state.form_options}
-                                    values={this.state.form_values}
                                 />
                                 </div>
                             </div>

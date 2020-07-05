@@ -4,6 +4,7 @@ import {Switch, Route} from "react-router-dom"
 import {Жагсаалт} from './Жагсаалт'
 import {Govorg} from './Govorg'
 import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
+import {GovorgForm} from './GovorgForm'
 
 
 export class GovorgPage extends Component {
@@ -18,6 +19,7 @@ export class GovorgPage extends Component {
             <Switch>
                 <Route exact path={"/back/байгууллага/"} component={Жагсаалт}/>
                 <Route exact path={"/back/байгууллага/:id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
+                <Route exact path={"/back/байгууллага/:үүсгэх/"} component={GovorgForm}/>
             </Switch>
         )
 

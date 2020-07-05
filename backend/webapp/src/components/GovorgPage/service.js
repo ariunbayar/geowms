@@ -27,7 +27,7 @@ function create(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/create/`, opts).then(handleResponse)
+    return fetch(`${prefix}/үүсгэх/`, opts).then(handleResponse)
 }
 
 

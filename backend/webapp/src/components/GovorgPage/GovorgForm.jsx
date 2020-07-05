@@ -1,7 +1,7 @@
 import React, { Component } from "react"
-import FlipMove from 'react-flip-move'
-import ImageUploader from 'react-images-upload'
+import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {service} from "./service"
+import {validationSchema} from './validationSchema'
 
 
 export default class GovorgForm extends Component {
@@ -11,12 +11,11 @@ export default class GovorgForm extends Component {
         super(props)
 
         this.state = {
+            name: '',
         }
 
         this.handleChange = this.handleChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
-        this.handleLayerToggle = this.handleLayerToggle.bind(this)
-        this.onDrop = this.onDrop.bind(this)
 
     }
 
@@ -24,11 +23,6 @@ export default class GovorgForm extends Component {
     }
 
     componentDidUpdate(prevProps) {
-
-        if (this.props.values.id !== prevProps.values.id) {
-            const {id, name, price, layers} = this.props.values
-            this.setState({id, name, price, layers})
-        }
 
     }
 

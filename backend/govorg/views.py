@@ -45,7 +45,7 @@ def жагсаалт(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def үүсгэх(request):
+def үүсгэх(request, payload):
 
     govorg = GovOrg.objects.create(
         name=payload.get('name'),
