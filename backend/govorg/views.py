@@ -117,3 +117,15 @@ def усгах(request, pk):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def тоо(request):
+
+    rsp = {
+        'count': GovOrg.objects.count(),
+    }
+
+    return JsonResponse(rsp)

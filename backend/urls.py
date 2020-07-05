@@ -55,6 +55,7 @@ urlpatterns = [
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/усгах/', govorg_views.усгах, name='усгах'),
+        path('тоо/', govorg_views.тоо, name='тоо'),
     ], 'govorg'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
