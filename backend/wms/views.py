@@ -31,8 +31,104 @@ def _get_wms_display(request, wms):
 def all(request):
 
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
-
     return JsonResponse({'wms_list': wms_list})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def wms_layer_all(request, payload):
+
+    pk = payload.get('id')
+
+    wms_layers = WMSLayer.objects.filter(wms_id=pk).order_by('sort_order')
+
+    def _wms_layer_display(wms_layer):
+        return {
+                'id': wms_layer.id,
+                'name': wms_layer.name,
+                'code': wms_layer.code,
+                'title': wms_layer.title,
+            }
+
+    layers_all = [
+        _wms_layer_display(wms_layer)
+        for wms_layer in wms_layers
+    ]
+
+    return JsonResponse({
+        'layers_all': layers_all,
+    })
+
+
+@require_POST
+@ajax_required
+def move(request, payload):
+
+    wms = get_object_or_404(WMS, pk=payload.get('wmsId'))
+    current_layer = get_object_or_404(WMSLayer, pk=payload.get('id'))
+
+    wms_layers = wms.wmslayer_set.all().order_by('sort_order')
+
+    if payload.get('move') == 'down':
+        other_layer = wms_layers.filter(sort_order__gt=current_layer.sort_order).first()
+    else:
+        other_layer = wms_layers.filter(sort_order__lt=current_layer.sort_order).last()
+
+    if other_layer:
+        (other_layer.sort_order, current_layer.sort_order) = (current_layer.sort_order, other_layer.sort_order)
+        other_layer.save()
+        current_layer.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def titleUpdate(request, payload):
+
+    title = payload.get('title')
+    layerId = payload.get('id')
+    WMSLayer.objects.filter(pk=layerId).update(title=title)
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def layerAdd(request, payload):
+
+    wmsId = payload.get('wmsId')
+    layerName = payload.get('id')
+
+    sav = WMSLayer.objects.filter(name=layerName, code=layerName, wms_id=wmsId)
+    if sav:
+        return JsonResponse({'success': True})
+    else:
+        WMSLayer(name=layerName, code=layerName, wms_id = wmsId, title=layerName).save()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def layerRemove(request, payload):
+
+    wmsId = payload.get('wmsId')
+    layerName = payload.get('id')
+
+    wms_layer = get_object_or_404(WMSLayer, name=layerName, code=layerName, wms_id=wmsId)
+    wms_layer.delete()
+
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -58,36 +154,12 @@ def create(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def update(request, payload):
 
-    wms = get_object_or_404(WMS, pk=payload.get('id'))
-    layers = payload.get('layers')
-    layer_choices = payload.get('layer_choices')
-    form = WMSForm(payload, instance=wms)
+    wmsId = payload.get('wmsId')
+    name = payload.get('name')
+    url = payload.get('url')
+    WMS.objects.filter(pk=wmsId).update(name=name, url=url)
 
-    if form.is_valid():
-
-        with transaction.atomic():
-
-            form.save()
-            wms = form.instance
-
-            # cleanup wms relations
-            BundleLayer.objects.filter(layer__wms_id=wms.pk).delete()
-            wms.wmslayer_set.all().delete()
-
-            for layer_choices in layer_choices:
-                if layer_choices.get('code') in layers:
-                    WMSLayer.objects.create(
-                        wms=form.instance,
-                        name=layer_choices.get('name'),
-                        code=layer_choices.get('code'),
-                    )
-
-        return JsonResponse({
-            'wms': _get_wms_display(request, form.instance),
-            'success': True
-        })
-    else:
-        return JsonResponse({'success': False})
+    return JsonResponse({'success': True})
 
 
 @require_POST

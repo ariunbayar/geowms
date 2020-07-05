@@ -7,6 +7,11 @@ export const service = {
     update,
     remove,
     getLayers,
+    wmsLayerall,
+    move,
+    titleUpdate,
+    layerAdd,
+    layerRemove
 }
 
 const prefix = '/back'
@@ -62,9 +67,52 @@ function _getGetOptions() {
     }
 }
 
+
 function getAll() {
     const requestOptions = {..._getGetOptions()}
     return fetch(`${prefix}/wms/all/`, requestOptions).then(handleResponse)
+}
+
+function wmsLayerall(id) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+
+    return fetch(`${prefix}/wms/wmsLayerall/`, opts).then(handleResponse)
+}
+function titleUpdate(title, id) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({title, id}),
+    }
+
+    return fetch(`${prefix}/wms/titleUpdate/`, opts).then(handleResponse)
+}
+
+function move(id, move, wmsId) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, move, wmsId}),
+    }
+
+    return fetch(`${prefix}/wms/move/`, opts).then(handleResponse)
+}
+function layerAdd(id, wmsId) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, wmsId}),
+    }
+
+    return fetch(`${prefix}/wms/layerAdd/`, opts).then(handleResponse)
+}
+function layerRemove(id, wmsId) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, wmsId}),
+    }
+
+    return fetch(`${prefix}/wms/layerRemove/`, opts).then(handleResponse)
 }
 
 function create(values) {
@@ -78,11 +126,10 @@ function create(values) {
 }
 
 
-function update(values) {
-
+function update(wmsId, name, url) {
     const opts = {
         ..._getPostOptions(),
-        body: JSON.stringify(values),
+        body: JSON.stringify({wmsId, name, url}),
     }
 
     return fetch(`${prefix}/wms/update/`, opts).then(handleResponse)
