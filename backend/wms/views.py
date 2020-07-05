@@ -65,19 +65,20 @@ def wms_layer_all(request, payload):
 @ajax_required
 def move(request, payload):
 
-    wmsId = payload.get('wmsId')
-    wmsLayer = get_object_or_404(WMSLayer, pk=payload.get('id'))
+    wms = get_object_or_404(WMS, pk=payload.get('wmsId'))
+    current_layer = get_object_or_404(WMSLayer, pk=payload.get('id'))
+
+    wms_layers = wms.wmslayer_set.all().order_by('sort_order')
 
     if payload.get('move') == 'down':
-        temp_sort_order = WMSLayer.objects.filter(sort_order__gt=wmsLayer.sort_order, wms_id=wmsId).order_by('sort_order').first()
-        if temp_sort_order != None:
-            WMSLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=wmsLayer.sort_order)
-            WMSLayer.objects.filter(pk=wmsLayer.id).update(sort_order=temp_sort_order.sort_order)
+        other_layer = wms_layers.filter(sort_order__gt=current_layer.sort_order).first()
     else:
-        temp_sort_order = WMSLayer.objects.filter(sort_order__lt=wmsLayer.sort_order, wms_id=wmsId).order_by('sort_order').last()
-        if temp_sort_order != None:
-            WMSLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=wmsLayer.sort_order)
-            WMSLayer.objects.filter(pk=wmsLayer.id).update(sort_order=temp_sort_order.sort_order)
+        other_layer = wms_layers.filter(sort_order__lt=current_layer.sort_order).last()
+
+    if other_layer:
+        (other_layer.sort_order, current_layer.sort_order) = (current_layer.sort_order, other_layer.sort_order)
+        other_layer.save()
+        current_layer.save()
 
     rsp = {
         'success': True,
