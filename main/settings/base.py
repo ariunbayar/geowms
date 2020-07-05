@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'backend.bundle.apps.BundleConfig',
     'backend.user.apps.UserConfig',
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
+    'backend.govorg.apps.GovOrgConfig',
 ]
 
 MIDDLEWARE = [
