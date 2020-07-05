@@ -20,6 +20,7 @@ class BaseLayer(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     sort_order = models.PositiveIntegerField()
+
     def save(self, *args, **kwargs):
         self.sort_order = BaseLayer.objects.count() + 1
         super(BaseLayer, self).save(*args, **kwargs)

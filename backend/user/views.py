@@ -1,8 +1,6 @@
-from django.shortcuts import render
+from django.views.decorators.http import require_GET
 
-from django.views.decorators.http import require_POST, require_GET
-
-from geoportal.decorators import ajax_required
+from main.decorators import ajax_required
 from django.http import JsonResponse
 from geoportal_app.models import User
 
@@ -14,7 +12,7 @@ def _get_bundle_display(user):
         'first_name': user.first_name,
         'gender': user.gender,
         'is_superuser': '',
-     }
+    }
 
 
 @require_GET
@@ -24,7 +22,7 @@ def all(request):
     user_list = [_get_bundle_display(user) for user in User.objects.all()]
 
     rsp = {
-            'user_list': user_list,
-        }
+        'user_list': user_list,
+    }
 
     return JsonResponse(rsp)

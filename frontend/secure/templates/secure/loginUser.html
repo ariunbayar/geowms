@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+<div class="login-container">
+    <div class="container">
+        <div class="row">
+            <div class="shadow-lg col-xl-4 col-lg-5 col-md-6 col-sm-10 mx-auto form p-4 bg-light" style="margin-top: 110px ">
+                <div class="aaasd py-2 text-center">
+                    <i class="fa fa-user-circle fa-4x gp-text-primary" aria-hidden="true"></i>
+                    <h5 class="login name gp-text-primary mt-3">НЭВТРЭХ ХЭСЭГ</h5>
+                </div>
+
+                <div class="px-2" style="margin-bottom: 20px ">
+                    <form method="post" class="from-group">
+                        {% csrf_token %}
+                        {{form|crispy}}
+
+
+                        <div class="row">
+                            <div class="offset-3 col-6 ">
+                                <a href="{% url "secure:login-dan" %}" class="full-width btn gp-outline-primary">
+                                    <img class="dan-logo" src="{% static 'assets/image/logo/dan-logo.png' %}">
+                                </a>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

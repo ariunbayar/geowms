@@ -3,24 +3,25 @@ import json
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, reverse
+from django.shortcuts import get_object_or_404, reverse
 
-from geoportal.utils import resize_b64_to_sizes
+from main.utils import resize_b64_to_sizes
 from .models import BaseLayer
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 
-from django.views.decorators.http import require_POST, require_GET
-from geoportal.decorators import ajax_required
+from django.views.decorators.http import require_POST
+from main.decorators import ajax_required
+
 
 def _get_base_layer_display(base_layer):
     return {
-            'id': base_layer.pk,
-            'name': base_layer.name,
-            'url': base_layer.url,
-            'thumbnail_1x': base_layer.thumbnail_1x.url,
-            'thumbnail_2x': base_layer.thumbnail_2x.url,
-        }
+        'id': base_layer.pk,
+        'name': base_layer.name,
+        'url': base_layer.url,
+        'thumbnail_1x': base_layer.thumbnail_1x.url,
+        'thumbnail_2x': base_layer.thumbnail_2x.url,
+    }
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -36,10 +37,10 @@ def жагсаалт(request):
             layers.append(layer.code)
 
         wms_list.append({
-                'name': wms.name,
-                'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
-                'layers': layers,
-            })
+            'name': wms.name,
+            'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+            'layers': layers,
+        })
 
     rsp = {
         'wms_list': wms_list,
@@ -55,12 +56,12 @@ def move(request, payload):
     baseLayer = get_object_or_404(BaseLayer, pk=payload.get('id'))
     if payload.get('move') == 'down':
         temp_sort_order = BaseLayer.objects.filter(sort_order__gt=baseLayer.sort_order).order_by('sort_order').first()
-        if temp_sort_order != None:
+        if temp_sort_order is not None:
             BaseLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=baseLayer.sort_order)
             BaseLayer.objects.filter(pk=baseLayer.id).update(sort_order=temp_sort_order.sort_order)
     else:
         temp_sort_order = BaseLayer.objects.filter(sort_order__lt=baseLayer.sort_order).order_by('sort_order').last()
-        if temp_sort_order != None:
+        if temp_sort_order is not None:
             BaseLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=baseLayer.sort_order)
             BaseLayer.objects.filter(pk=baseLayer.id).update(sort_order=temp_sort_order.sort_order)
 
