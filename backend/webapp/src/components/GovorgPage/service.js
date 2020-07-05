@@ -63,7 +63,7 @@ function getAll() {
     const requestOptions = {
         ..._getGetOptions(),
     }
-    return fetch(`${prefix}/govorg/all/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/govorg/`, requestOptions).then(handleResponse)
 }
 
 function create(values) {

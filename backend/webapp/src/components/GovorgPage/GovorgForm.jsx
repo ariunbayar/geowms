@@ -32,7 +32,6 @@ export default class GovorgForm extends Component {
 
     }
 
-
     handleChange(field, e) {
         this.setState({[field]: e.target.value})
     }
@@ -41,32 +40,27 @@ export default class GovorgForm extends Component {
         this.props.handleSave(this.state)
     }
 
-    handleLayerToggle(e) {
-        let layers = this.state.layers
-        const value = parseInt(e.target.value)
-        if (e.target.checked) {
-            layers.push(value)
-        } else {
-            layers = layers.filter((id) => id != value)
-        }
-        this.setState({layers})
-    }
-
-    onDrop([icon]) {
-        if(icon){
-            let reader = new FileReader();
-            reader.onload = (upload) => {
-                this.setState({
-                    icon: btoa(upload.target.result)
-                })
-            }
-            reader.readAsBinaryString(icon)
-        }
-    }
-
     render() {
         return (
             <div className="shadow-lg p-3 mb-5 bg-white rounded">
+
+                <div className="form-group">
+                    <label htmlFor="id_name"> Байгууллагын нэр: </label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="id_name"
+                        placeholder="байгууллагын нэр"
+                        onChange={(e) => this.handleChange('name', e)}
+                        value={this.state.name}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
+                        Хадгал
+                    </button>
+                </div>
 
                 <div className="form-group">
                     <button className="btn btn-block gp-outline-primary" onClick={this.props.handleCancel} >

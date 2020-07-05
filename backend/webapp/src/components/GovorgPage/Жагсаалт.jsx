@@ -15,6 +15,8 @@ export class GovorgPage extends Component {
         }
 
         this.state = {
+            govorg_list: [],
+            is_form_open: false,
         }
 
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -22,6 +24,7 @@ export class GovorgPage extends Component {
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleEdit = this.handleEdit.bind(this)
         this.handleAdd = this.handleAdd.bind(this)
+        this.handleDetail = this.handleDetail.bind(this)
     }
 
     componentDidMount() {
@@ -29,8 +32,8 @@ export class GovorgPage extends Component {
     }
 
     handleListUpdated() {
-        service.getAll().then(({bundle_list, form_options, form_options_role}) => {
-            this.setState({bundle_list, form_options, form_options_role})
+        service.getAll().then(({govorg_list}) => {
+            this.setState({govorg_list})
         })
 
     }
@@ -73,6 +76,11 @@ export class GovorgPage extends Component {
         this.setState({form_values, is_form_open: true})
     }
 
+    handleDetail() {
+        const form_values = this.initial_form_values
+        this.setState({form_values, is_form_open: true})
+    }
+
     render() {
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
@@ -92,15 +100,23 @@ export class GovorgPage extends Component {
                                         <tr>
                                             <th scope="col"> # </th>
                                             <th scope="col"> Байгууллагын нэр</th>
-                                            <th scope="col"> WMS сервис </th>
-                                            <th scope="col"></th>
+                                            <th scope="col"> Токен </th>
+                                            <th scope="col"> Үүсгэсэн огноо </th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        
+                                        {this.state.govorg_list.map((values) =>
+                                            <Govorg
+                                                key={values.id}
+                                                values={values}
+                                                handleRemove={() => this.handleRemove(values.id)}
+                                                handleEdit={() => this.handleEdit(values)}
+                                                handleDetail={() => this.handleDetail(values)}
+                                            />
+                                        )}
                                     </tbody>
                                 </table>
                             </>
