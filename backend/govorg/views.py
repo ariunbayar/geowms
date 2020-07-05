@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
@@ -12,6 +14,10 @@ def _get_govorg_display(govorg):
         'name': govorg.name,
         'token': govorg.token,
     }
+
+
+def _generate_govorg_token():
+    return uuid.uuid4().hex[:32]
 
 
 @require_POST
@@ -41,10 +47,8 @@ def үүсгэх(request):
 
     govorg = GovOrg.objects.create(
         name=payload.get('name'),
+        token=_generate_govorg_token(),
     )
-
-    govorg.name = payload.get('name')
-    govorg.save()
 
     rsp = {
         'success': True,
@@ -75,6 +79,22 @@ def хадгалах(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
     govorg.name = payload.get('name')
+    govorg.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def шинэ_токен(request, pk):
+
+    govorg = get_object_or_404(GovOrg, pk=pk)
+    govorg.token = _generate_govorg_token()
     govorg.save()
 
     rsp = {

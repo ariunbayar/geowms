@@ -53,6 +53,7 @@ urlpatterns = [
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
+        path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/усгах/', govorg_views.усгах, name='усгах'),
     ], 'govorg'))),
 
