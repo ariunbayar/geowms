@@ -4,7 +4,8 @@ import {service} from './service'
 import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
 
-export class GovorgPage extends Component {
+
+export class Жагсаалт extends Component {
 
 
     constructor(props) {
