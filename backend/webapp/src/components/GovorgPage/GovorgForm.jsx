@@ -12,6 +12,7 @@ export class GovorgForm extends Component {
 
         this.state = {
             govorg: {},
+            wms_list: [],
             values: {
                 id: '',
                 name: '',
@@ -23,8 +24,12 @@ export class GovorgForm extends Component {
     }
 
     componentDidMount() {
-        service.detail(this.props.match.params.id).then(({govorg}) => {
-            this.setState({govorg})
+
+        Promise.all([
+            service.getWMSList(),
+            service.detail(this.props.match.params.id),
+        ]).then(([{wms_list}, {govorg}]) => {
+            this.setState({govorg, wms_list})
         })
     }
 
@@ -82,7 +87,7 @@ export class GovorgForm extends Component {
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
-                            initialValues={this.state.values}
+                            initialValues={this.state.govorg}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -122,7 +127,7 @@ export class GovorgForm extends Component {
                                                 <button type="submit" className="btn gp-bg-primary" disabled={isSubmitting || has_error}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                     {isSubmitting && ' Шалгаж байна.'}
-                                                    {!isSubmitting && 'Нэмэх' }
+                                                    {!isSubmitting && 'Хадгалах' }
                                                 </button>
                                             </div>
                                         </div>
@@ -132,6 +137,19 @@ export class GovorgForm extends Component {
                         </Formik>
                     </div>
                     <div className="col-md-8">
+                    {this.state.wms_list.map((wms) =>
+                        <div className="col-md-12 mb-4" key={wms.id}>
+                            <p><strong>{wms.name}</strong> {wms.public_url}</p>
+                            {wms.layers.map((layer, idx) =>
+                                <div key={idx}>
+                                    <label>
+                                        <input type="checkbox"/> {}
+                                        {layer}
+                                    </label>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     </div>
                 </div>
             </div>
