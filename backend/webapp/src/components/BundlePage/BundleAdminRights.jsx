@@ -43,7 +43,10 @@ export default class BundleAdminRights extends Component {
                                     <th scope="col"> Давхаргын нэр </th>
                                     <th scope="col"> Харагдах чек </th>
                                     {this.props.formOptionsRole.map(({id}, idx) =>
+                                        (id == 1 ? 
+                                        <th key={idx} scope="col">Нээлтэй өгөгдөл</th>:
                                         <th key={idx} scope="col">Эрх {id}</th>
+                                        )
                                     )}
                                 </tr>
                             </thead>
