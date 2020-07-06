@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 
 import backend.urls
 import frontend.urls
+import api.urls
 
 
 urlpatterns = [
@@ -13,6 +14,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(frontend.urls)),
     path('back/', include(backend.urls)),
+    path('api/', include(api.urls)),
 
     re_path(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
