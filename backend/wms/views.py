@@ -20,6 +20,7 @@ def _get_wms_display(request, wms):
         'name': wms.name,
         'url': wms.url,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
+        'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }

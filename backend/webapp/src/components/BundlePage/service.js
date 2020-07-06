@@ -82,6 +82,7 @@ function create(values) {
 
 function update(values) {
 
+    console.log(values)
     const opts = {
         ..._getPostOptions(),
         body: JSON.stringify(values),

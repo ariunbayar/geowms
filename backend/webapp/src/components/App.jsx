@@ -5,13 +5,27 @@ import {WMSPage} from "./WMSPage"
 import {BundlePage} from "./BundlePage"
 import {DevPage} from "./DevPage"
 import {UserPage} from "./UserPage"
+import {GovorgPage} from "./GovorgPage"
 import {СуурьДавхаргаХуудас} from './СуурьДавхаргаХуудас'
+import {service} from './service'
 
 
 export default class App extends Component {
 
     constructor(props) {
         super(props)
+
+        this.state = {
+            govorg_count: 0,
+        }
+    }
+
+    componentDidMount() {
+
+        service.getGovOrgCount().then(({count}) => {
+            this.setState({govorg_count: count})
+        })
+
     }
 
     render() {
@@ -45,6 +59,12 @@ export default class App extends Component {
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                                 </li>
+                                 <li className="nav-item">
+                                     <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/"}>
+                                         БАЙГУУЛЛАГА
+                                         {this.state.govorg_count > 0 && ' (' + this.state.govorg_count + ')'}
+                                     </NavLink>
+                                </li>
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}>СУУРЬ ДАВХРАГА</NavLink>
                                 </li>
@@ -61,6 +81,7 @@ export default class App extends Component {
                 <div className="main-content">
                     <Switch>
                         <Route exact path={"/back/wms/"} component={WMSPage}/>
+                        <Route path={"/back/байгууллага/"} component={GovorgPage}/>
                         <Route exact path={"/back/"} component={BundlePage}/>
                         <Route path={"/back/суурь-давхарга/"} component={СуурьДавхаргаХуудас}/>
                         <Route exact path={"/back/dev/"} component={DevPage}/>
