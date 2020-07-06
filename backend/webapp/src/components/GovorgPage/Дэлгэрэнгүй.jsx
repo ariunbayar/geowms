@@ -53,11 +53,11 @@ export class Дэлгэрэнгүй extends Component {
                     {this.state.wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
                             <p><strong>{wms.name}</strong> {wms.public_url}</p>
-                            {wms.layers.map((layer, idx) =>
+                            {wms.layer_list.map((layer, idx) =>
                                 <div key={idx}>
                                     <label>
                                         <input type="checkbox"/> {}
-                                        {layer}
+                                        {layer.name} ({layer.code})
                                     </label>
                                 </div>
                             )}
