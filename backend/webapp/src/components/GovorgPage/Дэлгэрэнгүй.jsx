@@ -57,7 +57,7 @@ export class Дэлгэрэнгүй extends Component {
                                 <div key={idx}>
                                     <label>
                                         <input type="checkbox"/> {}
-                                        {layer.name} ({layer.code})
+                                        {layer.title} ({layer.code})
                                     </label>
                                 </div>
                             )}
