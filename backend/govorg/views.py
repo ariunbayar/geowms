@@ -5,7 +5,9 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
+
 from main.decorators import ajax_required
+from backend.wmslayer.models import WMSLayer
 from .models import GovOrg
 
 
@@ -52,6 +54,9 @@ def үүсгэх(request, payload):
         token=_generate_govorg_token(),
     )
 
+    layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
+    govorg.wms_layers.set(layers)
+
     rsp = {
         'success': True,
     }
@@ -80,8 +85,12 @@ def дэлгэрэнгүй(request, pk):
 def хадгалах(request, payload, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
+
     govorg.name = payload.get('name')
     govorg.save()
+
+    layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
+    govorg.wms_layers.set(layers)
 
     rsp = {
         'success': True,
