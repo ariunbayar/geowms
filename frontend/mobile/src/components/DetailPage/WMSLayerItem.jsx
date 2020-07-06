@@ -15,6 +15,13 @@ export default class WMSLayerItem extends Component {
 
         this.toggle = this.toggle.bind(this)
     }
+    componentDidMount(){
+        const is_visible = this.state.is_visible
+        if(is_visible === 1){
+            this.props.handleToggle(true)
+        }
+
+    }
 
     toggle(is_visible) {
         if(is_visible)
