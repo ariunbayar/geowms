@@ -38,7 +38,7 @@ function update(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/update/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${values.id}/хадгалах/`, opts).then(handleResponse)
 }
 
 

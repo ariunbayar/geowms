@@ -19,6 +19,7 @@ export class GovorgPage extends Component {
                 <Route exact path={"/back/байгууллага/"} component={Жагсаалт}/>
                 <Route exact path={"/back/байгууллага/:id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
                 <Route exact path={"/back/байгууллага/үүсгэх/"} component={GovorgForm}/>
+                <Route exact path={"/back/байгууллага/:id/засах/"} component={GovorgForm}/>
             </Switch>
         )
 

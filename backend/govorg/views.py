@@ -77,7 +77,7 @@ def дэлгэрэнгүй(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def хадгалах(request, pk):
+def хадгалах(request, pk, payload):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
     govorg.name = payload.get('name')

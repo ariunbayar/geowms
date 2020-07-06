@@ -26,9 +26,9 @@ export default class Govorg extends Component {
                     {created_at}
                 </td>
                 <td>
-                    <a href="#" onClick={this.props.handleEdit}>
+                    <NavLink to={`/back/байгууллага/${id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    </a>
+                    </NavLink>
                 </td>
 
                 <td>

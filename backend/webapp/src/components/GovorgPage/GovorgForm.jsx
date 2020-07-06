@@ -11,36 +11,47 @@ export class GovorgForm extends Component {
         super(props)
 
         this.state = {
+            govorg: {},
             values: {
+                id: '',
                 name: '',
             },
         }
 
-        this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
     }
 
     componentDidMount() {
+        service.detail(this.props.match.params.id).then(({govorg}) => {
+            this.setState({govorg})
+        })
     }
 
     componentDidUpdate(prevProps) {
 
     }
 
-    handleChange(field, e) {
-        this.setState({[field]: e.target.value})
-    }
-
-
     handleSubmit(values, { setStatus, setSubmitting }) {
 
-            const data = {
-                ...values
-            }
+        const data = {
+            ...values
+        }
 
-            setStatus('checking')
-            setSubmitting(true)
+        setStatus('checking')
+        setSubmitting(true)
+
+        if(this.state.govorg.id){
+            data.id = this.state.govorg.id
+            service.update(data).then(({success}) => {
+                setTimeout(() => {
+                    setStatus('saved')
+                    setSubmitting(false)
+                    this.props.history.push( '/back/байгууллага/')
+                }, 800)
+            })
+        }
+        else{
 
             service.create(data).then(({success}) => {
                 setTimeout(() => {
@@ -51,8 +62,13 @@ export class GovorgForm extends Component {
             })
         }
 
+
+        }
+
     render() {
+        const {name, token} = this.state.govorg
         return (
+
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
@@ -89,6 +105,7 @@ export class GovorgForm extends Component {
                                             name="name"
                                             error={errors.name}
                                             placeholder="байгууллагын нэр"
+                                            value={name}
                                         />
 
                                         <div></div>
