@@ -15,7 +15,7 @@ urlpatterns = [
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
         path('purchase/', bundle_views.purchase, name='purchase'),
         path('success/', bundle_views.success, name='success'),
-        path('failed/', bundle_views.failed, name='success'),
+        path('failed/', bundle_views.failed, name='failed'),
     ], 'bundle'))),
 
     path('', include(([
