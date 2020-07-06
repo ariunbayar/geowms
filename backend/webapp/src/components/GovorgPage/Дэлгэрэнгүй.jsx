@@ -11,7 +11,7 @@ export class Дэлгэрэнгүй extends Component {
 
         this.state = {
             govorg: {},
-            wms_list: [],
+            govorg_wms_list: [],
         }
     }
 
@@ -21,7 +21,18 @@ export class Дэлгэрэнгүй extends Component {
             service.getWMSList(),
             service.detail(this.props.match.params.id),
         ]).then(([{wms_list}, {govorg}]) => {
-            this.setState({govorg, wms_list})
+            const govorg_wms_list =
+                wms_list
+                .map((wms) => {
+                    return {
+                        ...wms,
+                        layer_list: wms.layer_list.filter((layer) => {
+                            return govorg.layers.indexOf(layer.id) > -1
+                        })
+                    }
+                })
+                .filter((wms) => wms.layer_list.length)
+            this.setState({govorg, govorg_wms_list})
         })
     }
 
@@ -50,17 +61,16 @@ export class Дэлгэрэнгүй extends Component {
                         <p> {token} </p>
                     </div>
 
-                    {this.state.wms_list.map((wms) =>
+                    {this.state.govorg_wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
                             <p><strong>{wms.name}</strong> {wms.public_url}</p>
-                            {wms.layer_list.map((layer, idx) =>
-                                <div key={idx}>
-                                    <label>
-                                        <input type="checkbox"/> {}
+                            <ul>
+                                {wms.layer_list.map((layer, idx) =>
+                                    <li key={idx}>
                                         {layer.title} ({layer.code})
-                                    </label>
-                                </div>
-                            )}
+                                    </li>
+                                )}
+                            </ul>
                         </div>
                     )}
 

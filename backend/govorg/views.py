@@ -1,3 +1,4 @@
+from itertools import groupby
 import uuid
 
 from django.contrib.auth.decorators import user_passes_test
@@ -13,10 +14,13 @@ from .models import GovOrg
 
 def _get_govorg_display(govorg):
 
+    layers = list(govorg.wms_layers.all().values_list('pk', flat=True))
+
     return {
         'id': govorg.pk,
         'name': govorg.name,
         'token': govorg.token,
+        'layers': layers,
     }
 
 
