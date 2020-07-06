@@ -17,6 +17,7 @@ export class GovorgForm extends Component {
                 id: '',
                 name: '',
             },
+            layers: [],
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -37,10 +38,22 @@ export class GovorgForm extends Component {
 
     }
 
-    handleSubmit(values, { setStatus, setSubmitting }) {
+    handleLayerToggle(e) {
+        let layers = this.state.layers
+        const value = parseInt(e.target.value)
+        if (e.target.checked) {
+            layers.push(value)
+        } else {
+            layers = layers.filter((id) => id != value)
+        }
+        this.setState({layers})
+    }
+
+    handleSubmit(values, layers, { setStatus, setSubmitting }) {
 
         const data = {
-            ...values
+            ...values,
+            ...layers
         }
 
         setStatus('checking')
@@ -137,14 +150,14 @@ export class GovorgForm extends Component {
                         </Formik>
                     </div>
                     <div className="col-md-8">
-                    {this.state.wms_list.map((wms) =>
+                     {this.state.wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
                             <p><strong>{wms.name}</strong> {wms.public_url}</p>
-                            {wms.layers.map((layer, idx) =>
+                            {wms.layer_list.map((layer, idx) =>
                                 <div key={idx}>
                                     <label>
-                                        <input type="checkbox"/> {}
-                                        {layer}
+                                        <input type="checkbox" value={layer.id} onChange={this.handleLayerToggle}/> {}
+                                        {layer.title} ({layer.code})
                                     </label>
                                 </div>
                             )}
