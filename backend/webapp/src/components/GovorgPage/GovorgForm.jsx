@@ -20,6 +20,7 @@ export class GovorgForm extends Component {
             layers: [],
         }
 
+        this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
     }
@@ -30,7 +31,7 @@ export class GovorgForm extends Component {
             service.getWMSList(),
             service.detail(this.props.match.params.id),
         ]).then(([{wms_list}, {govorg}]) => {
-            this.setState({govorg, wms_list})
+            this.setState({govorg, layers: govorg.layers, wms_list})
         })
     }
 
@@ -40,7 +41,9 @@ export class GovorgForm extends Component {
 
     handleLayerToggle(e) {
         let layers = this.state.layers
+
         const value = parseInt(e.target.value)
+
         if (e.target.checked) {
             layers.push(value)
         } else {
@@ -49,11 +52,11 @@ export class GovorgForm extends Component {
         this.setState({layers})
     }
 
-    handleSubmit(values, layers, { setStatus, setSubmitting }) {
+    handleSubmit(values, {setStatus, setSubmitting}) {
 
         const data = {
             ...values,
-            ...layers
+            layers: this.state.layers,
         }
 
         setStatus('checking')
@@ -80,8 +83,7 @@ export class GovorgForm extends Component {
             })
         }
 
-
-        }
+    }
 
     render() {
         const {name, token} = this.state.govorg
@@ -118,13 +120,23 @@ export class GovorgForm extends Component {
                                 const has_error = Object.keys(errors).length > 0
                                 return (
                                     <Form>
-                                        <TextField
-                                            label="Байгууллагын нэр:"
-                                            name="name"
-                                            error={errors.name}
-                                            placeholder="байгууллагын нэр"
-                                            value={name}
-                                        />
+
+                                        <div className="form-group">
+
+                                            <label htmlFor="id_name">
+                                                Байгууллагын нэр:
+                                            </label>
+
+                                            <Field
+                                                className={'form-control ' + (errors.name ? 'is-invalid' : '')}
+                                                name="name"
+                                                placeholder="байгууллагын нэр"
+                                                id="id_name"
+                                                type="text"
+                                            />
+
+                                            <ErrorMessage name="name" component="div" className="invalid-feedback"/>
+                                        </div>
 
                                         <div></div>
                                         <div className="span3">
@@ -156,8 +168,12 @@ export class GovorgForm extends Component {
                             {wms.layer_list.map((layer, idx) =>
                                 <div key={idx}>
                                     <label>
-                                        <input type="checkbox" value={layer.id} onChange={this.handleLayerToggle}/> {}
-                                        {layer.title} ({layer.code})
+                                        <input type="checkbox"
+                                            value={layer.id}
+                                            onChange={this.handleLayerToggle}
+                                            checked={this.state.layers.indexOf(layer.id) > -1}
+                                        />
+                                        {} {layer.title} ({layer.code})
                                     </label>
                                 </div>
                             )}
