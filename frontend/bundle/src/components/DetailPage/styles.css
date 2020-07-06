@@ -135,8 +135,8 @@ element.style {
 
 .coordinate-copy-control {
     width: 10rem;
-    left: calc(50% - 5rem);
-    top: 1rem;
+    left: 2%;
+    top: 0.5rem;
     opacity: 1;
 }
 .coordinate-copy-control.ol-hidden {
