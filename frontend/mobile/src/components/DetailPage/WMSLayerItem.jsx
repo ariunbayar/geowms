@@ -9,14 +9,22 @@ export default class WMSLayerItem extends Component {
         this.state = {
             name: props.layer.name,
             code: props.layer.code,
-            is_visible: false,
+            is_visible: props.layer.defaultCheck,
+
         }
 
         this.toggle = this.toggle.bind(this)
     }
 
     toggle(is_visible) {
-        this.setState({is_visible})
+        if(is_visible)
+        {
+            this.setState({is_visible: 1})
+        }
+        else
+        {
+            this.setState({is_visible:0})
+        }
         this.props.handleToggle(is_visible)
     }
 
@@ -30,7 +38,7 @@ export default class WMSLayerItem extends Component {
                     <input
                         type="checkbox"
                         onChange={(e) => this.toggle(e.target.checked)}
-                        checked={is_visible}
+                        checked={is_visible > 0 ? true : false}
                     />
                     <a> {name}</a>
                 </label>

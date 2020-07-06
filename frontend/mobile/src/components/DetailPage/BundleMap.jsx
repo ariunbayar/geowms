@@ -143,7 +143,7 @@ export default class BundleMap extends Component {
             ],
             view: new View({
                 projection: 'EPSG:3857',
-                center: [11461613.630815497, 4078656.0228370065],
+                center: [11861613.630815497, 5678656.0228370065],
                 zoom: 4.041301562246971,
             })
         })
