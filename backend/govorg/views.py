@@ -3,11 +3,12 @@ import uuid
 
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 
 
 from main.decorators import ajax_required
+from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from .models import GovOrg
 
@@ -68,6 +69,25 @@ def үүсгэх(request, payload):
     return JsonResponse(rsp)
 
 
+
+def _get_govorg_detail_display(request, govorg):
+    wms_list = [
+        {
+            'id': wms.id,
+            'name': wms.name,
+            'url': wms.url,
+            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+            'public_url': request.build_absolute_uri(reverse('api:govorg:proxy', args=[govorg.token, wms.pk])),
+        }
+        for wms in WMS.objects.all()
+    ]
+
+    return {
+        **_get_govorg_display(govorg),
+        'wms_list': wms_list,
+    }
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -76,7 +96,7 @@ def дэлгэрэнгүй(request, pk):
     govorg = get_object_or_404(GovOrg, pk=pk)
 
     rsp = {
-        'govorg': _get_govorg_display(govorg),
+        'govorg': _get_govorg_detail_display(request, govorg),
         'success': True,
     }
 

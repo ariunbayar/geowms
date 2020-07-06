@@ -8,7 +8,7 @@ class GovOrg(models.Model):
         db_table = 'govorg'
 
     name = models.CharField(max_length=250)
-    token = models.CharField(max_length=250)
+    token = models.CharField(max_length=250, db_index=True)
 
     wms_layers = models.ManyToManyField(
         'backend_wmslayer.WMSLayer',

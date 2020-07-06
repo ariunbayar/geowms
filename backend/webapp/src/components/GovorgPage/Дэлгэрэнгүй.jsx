@@ -17,23 +17,22 @@ export class Дэлгэрэнгүй extends Component {
 
     componentDidMount() {
 
-        Promise.all([
-            service.getWMSList(),
-            service.detail(this.props.match.params.id),
-        ]).then(([{wms_list}, {govorg}]) => {
-            const govorg_wms_list =
-                wms_list
-                .map((wms) => {
-                    return {
-                        ...wms,
-                        layer_list: wms.layer_list.filter((layer) => {
-                            return govorg.layers.indexOf(layer.id) > -1
+        service
+            .detail(this.props.match.params.id)
+            .then(({govorg}) => {
+                const govorg_wms_list =
+                    govorg.wms_list
+                        .map((wms) => {
+                            return {
+                                ...wms,
+                                layer_list: wms.layer_list.filter((layer) => {
+                                    return govorg.layers.indexOf(layer.id) > -1
+                                })
+                            }
                         })
-                    }
-                })
-                .filter((wms) => wms.layer_list.length)
-            this.setState({govorg, govorg_wms_list})
-        })
+                        .filter((wms) => wms.layer_list.length)
+                this.setState({govorg, govorg_wms_list})
+            })
     }
 
     render() {
@@ -52,18 +51,14 @@ export class Дэлгэрэнгүй extends Component {
                 <div className="row">
 
                     <div className="col-md-12 mb-4">
-                        <strong>Нэр</strong>
-                        <p> {name} </p>
-                    </div>
-
-                    <div className="col-md-12 mb-4">
-                        <strong>Токен</strong>
-                        <p> {token} </p>
+                        <h1>{name}</h1>
+                        <p><strong>Token</strong>: {token} </p>
                     </div>
 
                     {this.state.govorg_wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
-                            <p><strong>{wms.name}</strong> {wms.public_url}</p>
+                            <h1> {wms.name} </h1>
+                            <input type="text" className="form-control" disabled value={wms.public_url}/>
                             <ul>
                                 {wms.layer_list.map((layer, idx) =>
                                     <li key={idx}>
