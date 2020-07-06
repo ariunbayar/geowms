@@ -11,12 +11,17 @@ export class Дэлгэрэнгүй extends Component {
 
         this.state = {
             govorg: {},
+            wms_list: [],
         }
     }
 
     componentDidMount() {
-        service.detail(this.props.match.params.id).then(({govorg}) => {
-            this.setState({govorg})
+
+        Promise.all([
+            service.getWMSList(),
+            service.detail(this.props.match.params.id),
+        ]).then(([{wms_list}, {govorg}]) => {
+            this.setState({govorg, wms_list})
         })
     }
 
@@ -44,6 +49,20 @@ export class Дэлгэрэнгүй extends Component {
                         <strong>Токен</strong>
                         <p> {token} </p>
                     </div>
+
+                    {this.state.wms_list.map((wms) =>
+                        <div className="col-md-12 mb-4" key={wms.id}>
+                            <p><strong>{wms.name}</strong> {wms.public_url}</p>
+                            {wms.layers.map((layer, idx) =>
+                                <div key={idx}>
+                                    <label>
+                                        <input type="checkbox"/> {}
+                                        {layer}
+                                    </label>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                 </div>
             </div>

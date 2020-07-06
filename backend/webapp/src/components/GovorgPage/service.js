@@ -6,6 +6,7 @@ export const service = {
     update,
     remove,
     detail,
+    getWMSList,
 }
 
 
@@ -57,4 +58,13 @@ function detail(id) {
     }
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
+}
+
+
+function getWMSList() {
+    const opts = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`/back/wms/all/`, opts).then(handleResponse)
 }
