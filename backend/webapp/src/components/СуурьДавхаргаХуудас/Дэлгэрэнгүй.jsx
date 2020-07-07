@@ -47,9 +47,9 @@ export class Дэлгэрэнгүй extends Component {
         const {showModal, modalText, modalTitle} = this.state
 
         return (
-            <div className="container my-4">
-                <Modal 
-                    showModal={showModal} 
+            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
+                <Modal
+                    showModal={showModal}
                     modalClose={() => this.modalClose()}
                     modalAction={() => this.handleDelete()}
                     text={modalText}
