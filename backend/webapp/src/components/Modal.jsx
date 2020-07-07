@@ -1,34 +1,33 @@
 import React, {Component} from "react"
-import ReactModal from 'react-modal';
-import "./modalStyle.css";
 
 export default class Modal extends Component {
-    constructor (props) {
-        super(props);
-        this.state = {
-            title: '',
-            text: '',
-  
-        };
-        
-      }
-        render () {
-            return (
-                <div>
-                    <ReactModal 
-                        isOpen={this.props.showModal}
-                        className="Modal"
-                        overlayClassName="Overlay"
-                        ariaHideApp={false}
-                    >
-                        <h4>{this.props.title}</h4>
-                        <hr></hr>
-                        <a>{this.props.text}</a>
-                        <hr></hr>
-                        <button className="btn gp-outline-primary" onClick={this.props.modalClose}>Буцах</button>
-                        <button className="btn gp-outline-primary" onClick={this.props.modalAction}>Устгах</button>
-                    </ReactModal>
+
+    render () {
+        return (
+            <>
+            {this.props.showModal &&
+                <div className="modal fade show d-block">
+                    <div className="modal-dialog modal-dialog-scrollable">
+                        <div className="modal-content">
+                            <div className="modal-header" >
+                                <h5 className="modal-title">{this.props.title}</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <h6>{this.props.text}</h6>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" onClick={this.props.modalClose} className="btn gp-bg-primary text-white" data-dismiss="modal">Буцах</button>
+                                <button type="button" onClick={this.props.modalAction} className="btn gp-bg-primary text-white" data-dismiss="modal">Устгах</button>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            }
+            </>
         );
     }
 }
