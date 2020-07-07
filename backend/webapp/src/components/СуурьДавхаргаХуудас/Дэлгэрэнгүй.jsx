@@ -34,7 +34,7 @@ export class Дэлгэрэнгүй extends Component {
         const {id, name, url, thumbnail_1x, thumbnail_2x} = this.state.values
 
         return (
-            <div className="container my-4">
+            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>

@@ -162,7 +162,7 @@ export class Үүсгэх extends Component {
     render() {
         return (
 
-            <div className="container my-4">
+            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
