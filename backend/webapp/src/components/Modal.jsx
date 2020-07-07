@@ -17,7 +17,6 @@ export default class Modal extends Component {
                 <div>
                     <ReactModal 
                         isOpen={this.props.showModal}
-                        contentLabel="Дүнгийн график"
                         className="Modal"
                         overlayClassName="Overlay"
                     >
