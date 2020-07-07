@@ -8,7 +8,6 @@ import {HomeScreen} from './screens/homeScreen'
 import {MetaDataScreen} from './screens/metaDataScreen'
 import {ServiceScreen} from './screens/serviceScreen'
 import {StatisticsScreen} from './screens/statisticsScreen'
-import { set } from 'ol/transform';
 import {LoginDanScreen} from './screens/loginDanScreen'
 export class App extends Component {
     constructor(props) {
@@ -22,15 +21,14 @@ export class App extends Component {
             statisticsScreenIsload: false,
             wmsLayerScreenIsload: false,
             loginScreenIsload: false,
-            bundleName: 'Геодезийн тулгуур сүлжээ',
-            bundleId: 5,
-            bundle: {"id":5,"name":"Геодезийн тулгуур сүлжээ","layers":[83,84,85,88,91,78,78,83,83,84,88,79,79,88,91,88,83,84],"wms_list":["Хил, зааг"]},
+            bundleName: 'Гэо дата',
+            bundleId: null,
+            bundle: [],
         }
 
         this.screenRouter = this.screenRouter.bind(this)
     }
-    componentDidMount(){
-    }
+
     screenRouter(screenName) {
         if(screenName == "homeScreen")
         {
@@ -85,6 +83,10 @@ export class App extends Component {
                     this.setState({metaDataScreenIsload: true})
             }
         })
+    }
+    componentDidMount(){
+        const {id, name } = this.props.bundle[0]
+        this.wmsLayerId(id, name)
     }
     
     componentDidUpdate(prevProps, prevState) {

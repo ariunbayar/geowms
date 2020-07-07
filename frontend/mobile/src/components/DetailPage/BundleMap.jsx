@@ -62,13 +62,15 @@ export default class BundleMap extends Component {
     }
 
     loadMapData(bundle_id) {
+        if(bundle_id){
 
-        Promise.all([
-            service.loadBaseLayers(),
-            service.loadWMSLayers(bundle_id),
-        ]).then(([{base_layer_list}, {wms_list}]) => {
-            this.handleMapDataLoaded(base_layer_list, wms_list)
-        })
+            Promise.all([
+                service.loadBaseLayers(),
+                service.loadWMSLayers(bundle_id),
+            ]).then(([{base_layer_list}, {wms_list}]) => {
+                this.handleMapDataLoaded(base_layer_list, wms_list)
+            })
+        }
 
     }
 

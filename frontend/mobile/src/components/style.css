@@ -48,7 +48,7 @@ body{
   display: block;
   color: white;
   text-align: center;
-  padding: 2% 16px;
+  padding: 4% 16px;
   text-decoration: none;
   font-size: 17px;
 }
@@ -145,10 +145,10 @@ a .footerButton:hover{
   font-size: 18px;
 }
 .header .input-group {
-  top: 0%;
+  top: 16%;
 }
 .header .geoIconNoText{
-  width: 150%;
+  width: 50px;
 }
 
 .metaDataScreen{
