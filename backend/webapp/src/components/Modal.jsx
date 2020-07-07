@@ -19,15 +19,14 @@ export default class Modal extends Component {
                         isOpen={this.props.showModal}
                         className="Modal"
                         overlayClassName="Overlay"
+                        ariaHideApp={false}
                     >
-                    <h4>{this.props.title}</h4>
-                    <hr></hr>
-
-                    <a>{this.props.text}</a>
-
-                    <hr></hr>
-                    <button className="btn gp-outline-primary" onClick={this.props.modalClose}>Буцах</button>
-                    <button className="btn gp-outline-primary" onClick={this.props.modalAction}>Устгах</button>
+                        <h4>{this.props.title}</h4>
+                        <hr></hr>
+                        <a>{this.props.text}</a>
+                        <hr></hr>
+                        <button className="btn gp-outline-primary" onClick={this.props.modalClose}>Буцах</button>
+                        <button className="btn gp-outline-primary" onClick={this.props.modalAction}>Устгах</button>
                     </ReactModal>
                 </div>
         );
