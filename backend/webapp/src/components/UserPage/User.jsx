@@ -4,22 +4,28 @@ import React, { Component } from "react"
 export default class User extends Component {
 
     render() {
-        const {id, last_name, first_name, gender, is_sso} = this.props.values
+        const {id, last_name, first_name, is_superuser, email, is_active, is_sso} = this.props.values
 
         return (
             <tr>
-                <th scope="col">
+                <td scope="col">
                     {this.props.index}
-                </th>
-                <td>
-                    {last_name}
+                </td>
+                <td scope="col">
+                    #{id}
+                </td>
+                <td scope="col">
+                    {last_name.charAt(0).toUpperCase()}.{first_name}
                 </td>
                 <td>
-                     {first_name}
+                    {email}
                 </td>
                 <td>
-                    {gender}
+                    {is_superuser ? 'Тийм' : 'Үгүй'}
                 </td>
+                <td>
+                    {is_active ? 'Тийм' : 'Үгүй'}
+                </td>     
                 <td>
                     { is_sso && 
                         <img class="dan-logo-icon" src='/static/assets/image/logo/dan-logo2.png' />

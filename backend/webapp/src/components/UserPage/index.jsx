@@ -38,9 +38,11 @@ export class UserPage extends Component {
                             <thead>
                                 <tr>
                                     <th scope="col"> # </th>
-                                    <th scope="col"> Овог </th>
+                                    <th scope="col"> Id </th>
                                     <th scope="col"> Нэр </th>
-                                    <th scope="col">Хүйс</th>
+                                    <th scope="col">Цахим шуудан</th>
+                                    <th scope="col">Админ эсэх</th>
+                                    <th scope="col">Идвэхтэй эсэх</th>
                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
                                 </tr>
                             </thead>
