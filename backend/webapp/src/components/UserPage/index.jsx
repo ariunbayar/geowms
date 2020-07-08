@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-
+import "./style.css"
 import {service} from './service'
 import User from './User'
 
@@ -41,11 +41,13 @@ export class UserPage extends Component {
                                     <th scope="col"> Овог </th>
                                     <th scope="col"> Нэр </th>
                                     <th scope="col">Хүйс</th>
+                                    <th scope="col">ДАН системээр баталгаажсан эсэх</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {this.state.user_list.map((values) =>
+                                {this.state.user_list.map((values, index) =>
                                     <User
+                                        index={index +1 }
                                         key={values.id}
                                         values={values}
                                     />

@@ -32,6 +32,7 @@ class User(AbstractUser):
   roles = models.ManyToManyField(Role)
   register = models.CharField(max_length=10, null=True)
   gender = models.CharField(max_length=10, null=True)
+  is_sso = models.BooleanField(default=False)
 
 class Page(models.Model):
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
