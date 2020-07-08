@@ -126,10 +126,10 @@ function create(values) {
 }
 
 
-function update(wmsId, name, url) {
+function update(values) {
     const opts = {
         ..._getPostOptions(),
-        body: JSON.stringify({wmsId, name, url}),
+        body: JSON.stringify(values),
     }
 
     return fetch(`${prefix}/wms/update/`, opts).then(handleResponse)

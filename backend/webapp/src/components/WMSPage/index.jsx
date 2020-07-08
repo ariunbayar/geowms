@@ -65,11 +65,8 @@ export class WMSPage extends Component {
     handleSave(values) {
 
         if (values.id) {
-            const wmsId = values.id
-            const name = values.name
-            const url = values.url
-            service.update(wmsId, name, url).then(({success, item}) => {
-                if (success) this.handleSaveSuccess(values.id)
+            service.update(values).then(({success, item}) => {
+                if (success) this.handleSaveSuccess()
             })
 
         } else {
