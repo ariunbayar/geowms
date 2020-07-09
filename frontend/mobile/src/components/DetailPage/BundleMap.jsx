@@ -62,13 +62,15 @@ export default class BundleMap extends Component {
     }
 
     loadMapData(bundle_id) {
+        if(bundle_id){
 
-        Promise.all([
-            service.loadBaseLayers(),
-            service.loadWMSLayers(bundle_id),
-        ]).then(([{base_layer_list}, {wms_list}]) => {
-            this.handleMapDataLoaded(base_layer_list, wms_list)
-        })
+            Promise.all([
+                service.loadBaseLayers(),
+                service.loadWMSLayers(bundle_id),
+            ]).then(([{base_layer_list}, {wms_list}]) => {
+                this.handleMapDataLoaded(base_layer_list, wms_list)
+            })
+        }
 
     }
 
@@ -143,7 +145,7 @@ export default class BundleMap extends Component {
             ],
             view: new View({
                 projection: 'EPSG:3857',
-                center: [11461613.630815497, 4078656.0228370065],
+                center: [11561613.630815497, 5678656.0228370065],
                 zoom: 4.041301562246971,
             })
         })

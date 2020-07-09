@@ -31,12 +31,12 @@ export default class WMSItem extends Component {
         return (
             <Fragment>
 
-                <p className="col-11">
+                <div className="col-11">
                     <div className="col-12">
                         <span> {name}</span>
-                        <hr/>
+                        <hr></hr>
                     </div>
-                </p>
+                </div>
 
                 <WMSLayerItems
                     layers={layers}
