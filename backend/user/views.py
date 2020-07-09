@@ -28,3 +28,17 @@ def all(request):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def дэлгэрэнгүй(request, pk):
+
+    user = get_object_or_404(User, pk=pk)
+
+    rsp = {
+        'user_detail': _get_user_display(user),
+        'success': True,
+    }
+
+    return JsonResponse(rsp)

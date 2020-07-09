@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import {NavLink} from "react-router-dom"
 
 
 export default class User extends Component {
@@ -15,7 +16,9 @@ export default class User extends Component {
                     #{id}
                 </td>
                 <td scope="col">
-                    {last_name.charAt(0).toUpperCase()}.{first_name}
+                    <NavLink to={`/back/user/${id}/дэлгэрэнгүй/`}>
+                        <strong>{last_name.charAt(0).toUpperCase()}.{first_name}</strong>
+                    </NavLink>
                 </td>
                 <td>
                     {email}

@@ -35,3 +35,12 @@ function getAll() {
     }
     return fetch(`${prefix}/user/all/`, requestOptions).then(handleResponse)
 }
+
+
+function detail(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
+}

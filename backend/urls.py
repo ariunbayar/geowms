@@ -38,6 +38,7 @@ urlpatterns = [
 
     path('user/', include(([
         path('all/', user_views.all, name='all'),
+        path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
     ], 'user'))),
 
     path('api/суурь-давхарга/', include(([
