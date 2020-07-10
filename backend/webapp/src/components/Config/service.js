@@ -1,12 +1,10 @@
+
+
 export const service = {
     getAll,
-    create,
     update,
-    remove,
-    move,
-    roleCreate,
-    roleRemove,
-    defaultCheckUpdate,
+    create,
+    remove
 }
 
 const prefix = '/back'
@@ -43,15 +41,6 @@ function handleResponse(response) {
     })
 }
 
-function _getGetOptions() {
-    return {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    }
-}
-
 function _getPostOptions() {
     return {
         method: 'POST',
@@ -62,23 +51,20 @@ function _getPostOptions() {
     }
 }
 
+function _getGetOptions() {
+    return {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    }
+}
+
+
 function getAll() {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch(`${prefix}/bundle/all/`, requestOptions).then(handleResponse)
+    const requestOptions = {..._getGetOptions()}
+    return fetch(`${prefix}/config/all/`, requestOptions).then(handleResponse)
 }
-
-function create(values) {
-
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify(values),
-    }
-
-    return fetch(`${prefix}/bundle/create/`, opts).then(handleResponse)
-}
-
 
 function update(values) {
 
@@ -87,52 +73,26 @@ function update(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/bundle/update/`, opts).then(handleResponse)
+    return fetch(`${prefix}/config/update/`, opts).then(handleResponse)
 }
 
 
+function create(values) {
+
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`${prefix}/config/create/`, opts).then(handleResponse)
+}
+
 function remove(id) {
+
     const opts = {
         ..._getPostOptions(),
         body: JSON.stringify({id}),
     }
 
-    return fetch(`${prefix}/bundle/remove/`, opts).then(handleResponse)
-}
-
-
-function move(id, move) {
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify({id, move}),
-    }
-
-    return fetch(`${prefix}/bundle/move/`, opts).then(handleResponse)
-}
-
-function roleCreate(values) {
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify(values),
-    }
-
-    return fetch(`${prefix}/bundle/roleCreate/`, opts).then(handleResponse)
-}
-
-function roleRemove(values) {
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify(values),
-    }
-
-    return fetch(`${prefix}/bundle/roleRemove/`, opts).then(handleResponse)
-}
-
-function defaultCheckUpdate(values) {
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify(values),
-    }
-
-    return fetch(`${prefix}/bundle/defaultCheckUpdate/`, opts).then(handleResponse)
+    return fetch(`${prefix}/config/delete/`, opts).then(handleResponse)
 }

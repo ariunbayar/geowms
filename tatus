@@ -1,0 +1,42 @@
+[33mcommit d95fb566f444f5caeda8ae82d0450b61e59eea81[m[33m ([m[1;36mHEAD -> [m[1;32m127_wmsLayer_form[m[33m, [m[1;31morigin/127_wmsLayer_form[m[33m)[m
+Author: Tuguldur88 <tooktogi@gmail.com>
+Date:   Wed Jul 8 13:51:08 2020 +0800
+
+    input Алдаа засав issue 126
+
+[33mcommit c3fc55a0be963affa8d80148563d20b03d0c67c5[m
+Author: Tuguldur88 <tooktogi@gmail.com>
+Date:   Wed Jul 8 13:39:43 2020 +0800
+
+    WMS Layer Create and update засвар
+
+[33mcommit 43ed15b70f8d0e2a264b8d20c468a1dc3e3e8a52[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Merge: 4663feef 4b498580
+Author: Ariunbayar Baterdene <ariunbayar.b@gmail.com>
+Date:   Tue Jul 7 19:36:35 2020 +0800
+
+    Merge pull request #136 from byambatsogt/120_frontend_mobile_error_400
+    
+    400 Алдааг засав
+
+[33mcommit 4b49858060ec28d42ece99600f64b591e4e18bc6[m
+Merge: 08a47cdf 4663feef
+Author: Ariunbayar B <ariunbayar.b@gmail.com>
+Date:   Tue Jul 7 19:29:02 2020 +0800
+
+    Merge branch 'master' into 120_frontend_mobile_error_400
+
+[33mcommit 4663feefdae68ab8da8fdaa03948c162c77e3b5b[m
+Merge: 0d9ec61c addce449
+Author: Ariunbayar Baterdene <ariunbayar.b@gmail.com>
+Date:   Tue Jul 7 19:06:28 2020 +0800
+
+    Merge pull request #138 from byambatsogt/137_role2_dan
+    
+    Дангаар нэвтэрсэн үед role2 эрхийг шууд өгдөг болгов.
+
+[33mcommit 08a47cdf70361864de0f4401d9d8aa0183df2182[m[33m ([m[1;31morigin/120_frontend_mobile_error_400[m[33m, [m[1;32m120_frontend_mobile_error_400[m[33m)[m
+Author: Tuguldur88 <tooktogi@gmail.com>
+Date:   Tue Jul 7 19:02:23 2020 +0800
+
+    detail.js ustgaj gitignore nemj ogov

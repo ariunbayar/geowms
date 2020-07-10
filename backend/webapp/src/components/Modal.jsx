@@ -12,7 +12,7 @@ export default class Modal extends Component {
                             <div className="modal-header" >
                                 <h5 className="modal-title">{this.props.title}</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
+                                    <span aria-hidden="true" onClick={this.props.modalClose} >&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'backend.user.apps.UserConfig',
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
     'backend.govorg.apps.GovOrgConfig',
+    'backend.config.apps.ConfigConfig',
 
     # API apps
 
@@ -74,6 +75,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'main.context_processors.context_processor',
+                'main.context_processors.context_config',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

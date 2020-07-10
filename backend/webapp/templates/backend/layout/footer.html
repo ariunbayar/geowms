@@ -5,7 +5,7 @@
             <div class="row py-4">
                 <div class="col-md-5 text-center">
                     <img class="logo-bottom" src="{% static "assets/image/logo/logo-2.png" %}">
-                    <p class="mt-2 text-white-50">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</p>
+                    <p class="mt-2 text-white-50">{{agency_name}}</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="mb-3 gp-text-light-primary">Цэс</h6>
@@ -29,13 +29,13 @@
                     <h6 class="mb-3 gp-text-light-primary">Холбоо барих</h6>
                     <ul class="list-unstyled text-white-50">
                         <li class="mb-2">
-                            <span><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Хаяг: Хаяг байршил</span>
+                            <span><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Хаяг: {{agency_contact_address}}</span>
                         </li>
                         <li class="mb-2">
-                            <span><i class="fa fa-phone mr-2" aria-hidden="true"></i>Утас: 976 99999999</span>
+                            <span><i class="fa fa-phone mr-2" aria-hidden="true"></i>Утас: 976 {{agency_contact_phone}}</span>
                         </li>
                         <li class="mb-2">
-                            <span><i class="fa fa-envelope mr-2" aria-hidden="true"></i>Е-Мэйл: mailhayag.gmail.com </span>
+                            <span><i class="fa fa-envelope mr-2" aria-hidden="true"></i>Е-Мэйл: {{agency_contact_email}}</span>
                         </li>
 
                     </ul>
@@ -45,7 +45,7 @@
     </div>
     <div class="bottom py-3 gp-bg-darker">
         <div class="container text-center">
-            <span class="">© Бүх эрх хуулиар хамгаалагдсан ГЕОПОРТАЛ</span>
+            <span class="">{{footer_text}}</span>
         </div>
     </div>
 </footer>
