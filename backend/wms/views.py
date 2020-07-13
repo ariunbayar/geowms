@@ -50,6 +50,7 @@ def wms_layer_all(request, payload):
                 'name': wms_layer.name,
                 'code': wms_layer.code,
                 'title': wms_layer.title,
+                'sort_order': wms_layer.sort_order
             }
 
     layers_all = [
@@ -64,6 +65,7 @@ def wms_layer_all(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def move(request, payload):
 
     wms = get_object_or_404(WMS, pk=payload.get('wmsId'))
@@ -90,6 +92,7 @@ def move(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def titleUpdate(request, payload):
 
     title = payload.get('title')
@@ -104,23 +107,24 @@ def titleUpdate(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def layerAdd(request, payload):
 
     wmsId = payload.get('wmsId')
     layerName = payload.get('id')
 
-    sav = WMSLayer.objects.filter(name=layerName, code=layerName, wms_id=wmsId)
-    if sav:
-        return JsonResponse({'success': True})
+    wms = get_object_or_404(WMS, pk=wmsId)
+    wms_layer = WMSLayer.objects.filter(code=layerName, wms_id=wms.id)
+    if wms_layer:
+        return JsonResponse({'success': False})
     else:
-        WMSLayer(name=layerName, code=layerName, wms_id = wmsId, title=layerName).save()
+        WMSLayer.objects.create(name=layerName, code=layerName, wms = wms, title=layerName)
         return JsonResponse({'success': True})
-
-    return JsonResponse({'success': True})
 
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def layerRemove(request, payload):
 
     wmsId = payload.get('wmsId')
@@ -155,12 +159,21 @@ def create(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def update(request, payload):
 
-    wmsId = payload.get('wmsId')
-    name = payload.get('name')
-    url = payload.get('url')
-    WMS.objects.filter(pk=wmsId).update(name=name, url=url)
+    wms = get_object_or_404(WMS, pk=payload.get('id'))
+    layers = payload.get('layers')
+    layer_choices = payload.get('layer_choices')
+    form = WMSForm(payload, instance=wms)
+    if form.is_valid():
 
-    return JsonResponse({'success': True})
+        with transaction.atomic():
+
+            form.save()
+
+        return JsonResponse({
+                'success': True
+            })
+    else:
+        return JsonResponse({'success': False})
 
 
 @require_POST
