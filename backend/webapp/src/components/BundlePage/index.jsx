@@ -4,6 +4,7 @@ import {service} from './service'
 import BundleForm from './BundleForm'
 import Bundle from './Bundle'
 import BundleAdminRights from './BundleAdminRights'
+import Modal from "../Modal"
 
 export class BundlePage extends Component {
 
@@ -27,6 +28,11 @@ export class BundlePage extends Component {
             form_options_role: {},
             is_form_open: false,
             form_values: {...this.initial_form_values},
+            showModal: false,
+            modalTitle: null,
+            modalText: null,
+            modalId: null,
+
         }
 
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -71,11 +77,20 @@ export class BundlePage extends Component {
         }
 
     }
+    modalClose() {
+        this.setState({showModal: false})
+    }
 
-    handleRemove(id) {
+    handleRemove() {
+        const id = this.state.modalId
         service.remove(id).then(({success}) => {
             if (success) this.handleSaveSuccess()
         })
+        this.modalClose()
+    }
+
+    modalTrue(id, text) {
+        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     handleEdit(form_values) {
@@ -99,9 +114,19 @@ export class BundlePage extends Component {
     }
 
     render() {
+        const {showModal, modalText, modalTitle} = this.state
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
+                <Modal 
+                    showModal={showModal} 
+                    modalClose={() => this.modalClose()}
+                    modalAction={() => this.handleRemove()}
+                    text={modalText}
+                    title={modalTitle}
+                    >
+                </Modal>
+                    
                     <div className="col-md-12">
 
                         {!this.state.is_form_open &&
@@ -129,7 +154,7 @@ export class BundlePage extends Component {
                                             <Bundle
                                                 key={values.id}
                                                 values={values}
-                                                handleRemove={() => this.handleRemove(values.id)}
+                                                handleRemove={() => this.modalTrue(values.id, values.name)}
                                                 handleEdit={() => this.handleEdit(values)}
                                                 handleMove={this.handleMove}
                                             />
