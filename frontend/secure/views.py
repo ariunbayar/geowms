@@ -74,6 +74,7 @@ def login_dan(request):
                     first_name=firstname,
                     last_name=lastname,
                     gender=gender,
+                    is_sso=True,
                 )
                 user.roles.add(2)
 
