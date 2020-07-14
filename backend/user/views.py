@@ -5,13 +5,14 @@ from django.http import JsonResponse
 from geoportal_app.models import User
 
 
-def _get_bundle_display(user):
+def _get_user_display(user):
     return {
-        'is': user.id,
+        'id': user.id,
         'last_name': user.last_name,
         'first_name': user.first_name,
         'gender': user.gender,
         'is_superuser': '',
+        'is_sso': user.is_sso,
     }
 
 
@@ -19,7 +20,7 @@ def _get_bundle_display(user):
 @ajax_required
 def all(request):
 
-    user_list = [_get_bundle_display(user) for user in User.objects.all()]
+    user_list = [_get_user_display(user) for user in User.objects.all()]
 
     rsp = {
         'user_list': user_list,
