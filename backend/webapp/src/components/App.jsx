@@ -8,7 +8,7 @@ import {UserPage} from "./UserPage"
 import {GovorgPage} from "./GovorgPage"
 import {СуурьДавхаргаХуудас} from './СуурьДавхаргаХуудас'
 import {service} from './service'
-import {Config} from './Config'
+import {ConfigPage} from './ConfigPage'
 
 export default class App extends Component {
 
@@ -75,7 +75,7 @@ export default class App extends Component {
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" activeClassName="active" exact to={"/back/config"}>ТОХИРГОО</NavLink>
+                                    <NavLink className="nav-link" activeClassName="active" to={"/back/тохиргоо/"}>ТОХИРГОО</NavLink>
                                 </li>
                             </ul>
                         </div>
@@ -89,7 +89,7 @@ export default class App extends Component {
                         <Route path={"/back/суурь-давхарга/"} component={СуурьДавхаргаХуудас}/>
                         <Route exact path={"/back/dev/"} component={DevPage}/>
                         <Route exact path={"/back/user/"} component={UserPage}/>
-                        <Route exact path={"/back/config/"} component={Config}/>
+                        <Route path={"/back/тохиргоо/"} component={ConfigPage}/>
                     </Switch>
                 </div>
             </BrowserRouter>

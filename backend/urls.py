@@ -65,10 +65,11 @@ urlpatterns = [
         path('тоо/', govorg_views.тоо, name='тоо'),
     ], 'govorg'))),
 
-    path('config/', include(([
+    path('api/config/', include(([
         path('all/', config_views.all, name='all'),
-        path('update/', config_views.update, name='update'),
-        path('delete/', config_views.delete, name='delete'),
+        path('<int:pk>/detail/', config_views.detail, name='detail'),
+        path('<int:pk>/update/', config_views.update, name='update'),
+        path('<int:pk>/delete/', config_views.delete, name='delete'),
         path('create/', config_views.create, name='create'),
     ], 'config'))),
 
