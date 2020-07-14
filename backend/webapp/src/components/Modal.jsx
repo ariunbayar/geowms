@@ -1,33 +1,77 @@
-import React, {Component} from "react"
+import React, {Component, Fragment} from "react"
 
 export default class Modal extends Component {
 
+    constructor(props) {
+        super(props)
+        this.state = {
+            status: 'initial',
+        }
+        this.handleClose = this.handleClose.bind(this)
+        this.handleProceed = this.handleProceed.bind(this)
+    }
+
+    componentDidMount() {
+        setTimeout(() => {
+            this.setState({status: 'open'})
+        }, 0)
+    }
+
+    handleClose(callback) {
+        this.setState({status: 'closing'})
+        setTimeout(() => {
+            this.setState({status: 'closed'})
+            if (callback) {
+                callback()
+            } else {
+                this.props.modalClose()
+            }
+        }, 150)
+    }
+
+    handleProceed() {
+        this.handleClose(this.props.modalAction)
+    }
+
     render () {
+        const {status} = this.state
+
+        const className =
+            "modal fade" +
+            (status == 'initial' ? ' d-block' : '') +
+            (status == 'open' ? ' show d-block' : '') +
+            (status == 'closing' ? ' d-block' : '') +
+            (status == 'closed' ? ' d-none' : '')
+
+        const classNameBackdrop =
+            "modal-backdrop fade" +
+            (status == 'open' ? ' show' : '') +
+            (status == 'closed' ? ' d-none' : '')
+
         return (
-            <>
-            {this.props.showModal &&
-                <div className="modal fade show d-block">
+            <Fragment>
+                <div className={className}>
                     <div className="modal-dialog modal-dialog-scrollable">
                         <div className="modal-content">
                             <div className="modal-header" >
                                 <h5 className="modal-title">{this.props.title}</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
+                                    <span aria-hidden="true" onClick={this.props.modalClose} >&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <h6>{this.props.text}</h6>
+                                {this.props.text}
                             </div>
                             <div className="modal-footer">
-                                <button type="button" onClick={this.props.modalClose} className="btn gp-bg-primary text-white" data-dismiss="modal">Буцах</button>
-                                <button type="button" onClick={this.props.modalAction} className="btn gp-bg-primary text-white" data-dismiss="modal">Устгах</button>
-
+                                <button type="button" onClick={this.handleClose} className="btn btn-outline-primary">Буцах</button>
+                                <button type="button" onClick={this.handleProceed} className="btn gp-bg-primary text-white">Устгах</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            }
-            </>
-        );
+                <div className={classNameBackdrop}></div>
+            </Fragment>
+        )
     }
+
 }

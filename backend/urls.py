@@ -6,6 +6,7 @@ from backend.wms import views as wms_views
 from backend.user import views as user_views
 from backend.govorg import views as govorg_views
 from backend.суурь_давхарга import views as суурь_давхарга
+from backend.config import views as config_views
 
 
 app_name = 'backend'
@@ -63,6 +64,14 @@ urlpatterns = [
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('тоо/', govorg_views.тоо, name='тоо'),
     ], 'govorg'))),
+
+    path('api/config/', include(([
+        path('all/', config_views.all, name='all'),
+        path('<int:pk>/detail/', config_views.detail, name='detail'),
+        path('<int:pk>/update/', config_views.update, name='update'),
+        path('<int:pk>/delete/', config_views.delete, name='delete'),
+        path('create/', config_views.create, name='create'),
+    ], 'config'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 
