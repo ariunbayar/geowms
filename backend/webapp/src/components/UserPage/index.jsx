@@ -37,11 +37,12 @@ export class UserPage extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th scope="col"> # </th>
-                                    <th scope="col"> Овог </th>
+                                    <th scope="col"> ID </th>
                                     <th scope="col"> Нэр </th>
-                                    <th scope="col">Хүйс</th>
-                                    <th scope="col">ДАН системээр баталгаажсан эсэх</th>
+                                    <th scope="col">Мэйл</th>
+                                    <th scope="col">Эрх</th>
+                                    <th scope="col"></th>
+                                    <th scope="col">Баталгаажилт</th>
                                 </tr>
                             </thead>
                             <tbody>

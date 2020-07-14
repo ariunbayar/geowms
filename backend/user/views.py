@@ -10,8 +10,9 @@ def _get_user_display(user):
         'id': user.id,
         'last_name': user.last_name,
         'first_name': user.first_name,
-        'gender': user.gender,
-        'is_superuser': '',
+        'is_superuser': user.is_superuser,
+        'email': user.email,
+        'is_active': user.is_active,
         'is_sso': user.is_sso,
     }
 
