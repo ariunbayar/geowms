@@ -3,7 +3,7 @@
 <head>
     {% load static %}
     <meta charset="UTF-8">
-    <title>ГЕОПОРТАЛ САЙТ</title>
+    <title>{{ CONFIGS.site_title }}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static "assets/css/style.css" %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
@@ -114,7 +114,7 @@
             <div class="row py-4">
                 <div class="col-md-5 text-center">
                     <img class="logo-bottom" src="{% static "assets/image/logo/logo-2.png" %}">
-                    <p class="mt-2 text-white-50">{{agency_name}}</p>
+                    <p class="mt-2 text-white-50">{{ CONFIGS.agency_name }}</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="mb-3 gp-text-light-primary">Цэс</h6>
@@ -138,13 +138,13 @@
                     <h6 class="mb-3 gp-text-light-primary">Холбоо барих</h6>
                     <ul class="list-unstyled text-white-50">
                         <li class="mb-2">
-                            <span><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Хаяг: {{agency_contact_address}}</span>
+                            <span><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>{{ CONFIGS.agency_contact_address }}</span>
                         </li>
                         <li class="mb-2">
-                            <span><i class="fa fa-phone mr-2" aria-hidden="true"></i>Утас: 976 {{agency_contact_phone}}</span>
+                            <span><i class="fa fa-phone mr-2" aria-hidden="true"></i>{{ CONFIGS.agency_contact_phone }}</span>
                         </li>
                         <li class="mb-2">
-                            <span><i class="fa fa-envelope mr-2" aria-hidden="true"></i>Е-Мэйл: {{agency_contact_email}}</span>
+                            <span><i class="fa fa-envelope mr-2" aria-hidden="true"></i>{{ CONFIGS.agency_contact_email }}</span>
                         </li>
 
                     </ul>
@@ -154,7 +154,7 @@
     </div>
     <div class="bottom py-3 gp-bg-darker">
         <div class="container text-center">
-            <span class="">{{footer_text}}</span>
+            <span class="">{{ CONFIGS.site_footer_text }}</span>
         </div>
     </div>
 </footer>
