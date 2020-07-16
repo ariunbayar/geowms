@@ -8,7 +8,7 @@ import {UserPage} from "./UserPage"
 import {GovorgPage} from "./GovorgPage"
 import {СуурьДавхаргаХуудас} from './СуурьДавхаргаХуудас'
 import {service} from './service'
-
+import {ConfigPage} from './ConfigPage'
 
 export default class App extends Component {
 
@@ -44,13 +44,13 @@ export default class App extends Component {
                         <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
                             <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                                 <li className="nav-item">
-                                    <a className="nav-link" activeClassName="active" href="/back/access/">ACCESS</a>
+                                    <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>ACCESS</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <a className="nav-link" activeClassName="active" href="/back/huulga/">ХУУЛГА</a>
+                                    <NavLink className="nav-link" activeClassName="active" to={"/back/huulga/"}>ХУУЛГА</NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <a className="nav-link" activeClassName="active" href="/back/log/">ЛОГ</a>
+                                    <NavLink className="nav-link" activeClassName="active" to={"/back/log/"}>ЛОГ</NavLink>
                                 </li>
 
                                 <li className="nav-item">
@@ -74,6 +74,9 @@ export default class App extends Component {
                                 <li className="nav-item">
                                     <NavLink className="nav-link" activeClassName="active" exact to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
                                 </li>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" activeClassName="active" to={"/back/тохиргоо/"}>ТОХИРГОО</NavLink>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -86,6 +89,7 @@ export default class App extends Component {
                         <Route path={"/back/суурь-давхарга/"} component={СуурьДавхаргаХуудас}/>
                         <Route exact path={"/back/dev/"} component={DevPage}/>
                         <Route exact path={"/back/user/"} component={UserPage}/>
+                        <Route path={"/back/тохиргоо/"} component={ConfigPage}/>
                     </Switch>
                 </div>
             </BrowserRouter>

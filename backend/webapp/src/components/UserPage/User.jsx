@@ -10,10 +10,7 @@ export default class User extends Component {
         return (
             <tr>
                 <td scope="col">
-                    {this.props.index}
-                </td>
-                <td scope="col">
-                    #{id}
+                    {id}
                 </td>
                 <td scope="col">
                     <NavLink to={`/back/user/${id}/дэлгэрэнгүй/`}>
@@ -24,14 +21,14 @@ export default class User extends Component {
                     {email}
                 </td>
                 <td>
-                    {is_superuser ? 'Тийм' : 'Үгүй'}
+                    {is_superuser ? 'Админ' : '-'}
                 </td>
                 <td>
-                    {is_active ? 'Тийм' : 'Үгүй'}
-                </td>     
+                    {is_active ? '-' : 'Идэвхигүй'}
+                </td>
                 <td>
-                    { is_sso && 
-                        <img class="dan-logo-icon" src='/static/assets/image/logo/dan-logo2.png' />
+                    {is_sso &&
+                        <img className="dan-logo-icon" src="/static/assets/image/logo/dan-logo2.png"/>
                     }
                 </td>
             </tr>

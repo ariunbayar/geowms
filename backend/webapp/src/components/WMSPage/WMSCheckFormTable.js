@@ -61,7 +61,7 @@ export default class WMSCheckFormTable extends Component {
                     {layer.name}
                 </td>
                 <td >
-                    <input type="text" value={title}  onChange={this.handleChange} disabled = {(this.state.titleDisabled)? "" : "disabled"}/>
+                    <input type="text" name={name} value={title}  onChange={this.handleChange} disabled = {(this.state.titleDisabled)? "" : "disabled"}/>
                 </td>
                 <td >
                     {titleDisabled ? 
