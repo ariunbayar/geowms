@@ -1,62 +1,66 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block content %}
-    <section class="slider shadow">
-        <div class="owl-carousel owl-theme">
-            <div class="item">
-                <img src="{% static 'assets/image/slide-1.jpg' %}">
-                <div class="caption text-center">
-                    <h1 class="animate__animated animate__backInUp"><i class="fa fa-map-o mr-3" aria-hidden="true"></i><span >ГЕОПОРТАЛ САЙТ</span></h1>
-                    <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h6>
-                </div>
-            </div>
-            <div class="item">
-                <img src="{% static 'assets/image/slide-2.jpg' %}">
-                <div class="caption text-center">
-                    <h1 class="animate__animated animate__bounce animate__delay-2s">ГЕОПОРТАЛ</h1>
-                    <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h6>
-                </div>
+<section class="slider shadow">
+    <div class="owl-carousel owl-theme">
+        <div class="item">
+            <img src="{% static 'assets/image/slide-1.jpg' %}">
+            <div class="caption text-center">
+                <h1 class="animate__animated animate__backInUp"><i class="fa fa-map-o mr-3"
+                        aria-hidden="true"></i><span>ГЕОПОРТАЛ САЙТ</span></h1>
+                <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ
+                    ЗҮЙН ГАЗАР</h6>
             </div>
         </div>
-    </section>
-    <section class="subs py-5">
-        <div class="container">
-            <div class="section-title text-center mb-4">
-                <h2 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i>Оронзайн суурь өгөгдлийн сан</h2>
+        <div class="item">
+            <img src="{% static 'assets/image/slide-2.jpg' %}">
+            <div class="caption text-center">
+                <h1 class="animate__animated animate__bounce animate__delay-2s">ГЕОПОРТАЛ</h1>
+                <h6 class="animate__animated animate__fadeInUp gp-text-primary">ГАЗАР ЗОХИОН БАЙГУУЛАЛТ, ГЕОДЕЗИ, ЗУРАГ
+                    ЗҮЙН ГАЗАР</h6>
             </div>
+        </div>
+    </div>
+</section>
+<section class="subs py-5">
+    <div class="container">
+        <div class="section-title text-center mb-4">
+            <h2 class="gp-text-primary"><i class="fa fa-database mr-2" aria-hidden="true"></i>Оронзайн суурь өгөгдлийн
+                сан</h2>
+        </div>
 
-            <div class="row mt-4 justify-content-md-center">
-                {% for bundle in bundles %}
-                <div class="col-md-2 text-center sub">
-                    <a href="{% url "bundle:detail" bundle.pk %}">
-                        <img class="icon mb-3" src="{{ MEDIA_URL }}{{ bundle.icon }}">
-                        <h6 class="gp-text-primary text-uppercase">{{ bundle.name }}</h6>
-                    </a>
-                </div>
-                {% endfor %}
+        <div class="row mt-4 justify-content-md-center">
+            {% for bundle in bundles %}
+            <div class="col-md-2 text-center sub">
+                <a href="{% url "bundle:detail" bundle.pk %}">
+                    <img class="icon mb-3" src="{{ MEDIA_URL }}{{ bundle.icon }}">
+                    <h6 class="gp-text-primary text-uppercase">{{ bundle.name }}</h6>
+                </a>
             </div>
+            {% endfor %}
         </div>
-    </section>
+    </div>
+</section>
 {% endblock %}
 
 {% block script %}
-    <script>
-        $('.owl-carousel').owlCarousel({
-            loop:true,
-            margin:10,
-            nav:false,
-            dots:false,
-            responsive:{
-                0:{
-                    items:1
-                },
-                600:{
-                    items:1
-                },
-                1000:{
-                    items:1
-                }
+<script>
+    $('.owl-carousel').owlCarousel({
+        loop: true,
+        margin: 10,
+        nav: false,
+        dots: false,
+        responsive: {
+            0: {
+                items: 1
+            },
+            600: {
+                items: 1
+            },
+            1000: {
+                items: 1
             }
-        })
-    </script>
+        }
+    })
+</script>
 {% endblock %}
