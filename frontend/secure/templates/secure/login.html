@@ -21,6 +21,11 @@
                                 <button type="submit" class="btn gp-bg-primary full-width">Нэвтрэх</button>
                             </div>
                         </div>
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-danger" role="alert" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
 
                     </form>
 {#                    <form action="" class="">#}
