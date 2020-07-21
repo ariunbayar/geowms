@@ -6,6 +6,7 @@
   background-color: #034ea2;
   color: #fff;
 }
+
 .gp-bg-dark {
   background-color: #373f50 !important;
   color: #fff;
@@ -14,7 +15,6 @@
 .gp-bg-darker {
   background-color: #2b3445 !important;
   color: #fff;
-}
 
 .gp-btn-primary {
   color: #fff;
@@ -102,9 +102,9 @@ a {
   border: 1px solid #034ea2;
 }
 
+
 .navbar-nav .active {
   border-bottom: 3px solid #fff;
-}
 
 .navbar-brand {
   font-size: 14px;
