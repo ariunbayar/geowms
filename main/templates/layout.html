@@ -18,12 +18,18 @@
     <div class="container">
         <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
-                    <span class="btn gp-btn-primary" >
-                      Нэвтэрсэн хэрэглэгч: {{user.last_name | first}}. {{user.first_name}}
+                    {% if user.is_superuser %}
+                    <span class="btn gp-btn-primary">
+                        Нэвтэрсэн хэрэглэгч :&nbsp;{{user.username}}
                     </span>
+                    {% else %}
+                    <span class="btn gp-btn-primary">
+                        Нэвтэрсэн хэрэглэгч:&nbsp;{{user.last_name|first}}.{{user.first_name}}
+                    </span>
+                    {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
-                    <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                    <a href="{% url "secure:login" %}" class="btn gp-btn-primary ">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
                 {% endif %}
         </div>
     </div>
