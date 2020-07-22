@@ -10,7 +10,7 @@ export default class User extends Component {
         return (
             <tr>
                 <td scope="col">
-                    {id}
+                    #{id}
                 </td>
                 <td scope="col">
                     <NavLink to={`/back/user/${id}/дэлгэрэнгүй/`}>

@@ -1,8 +1,9 @@
 export const service = {
     getAll,
+    detail,
 }
 
-const prefix = '/back'
+const prefix = '/back/api/user'
 
 function handleResponse(response) {
     return response.text().then(text => {
@@ -33,13 +34,13 @@ function getAll() {
     const requestOptions = {
         ..._getGetOptions(),
     }
-    return fetch(`${prefix}/user/all/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
 }
 
 
 function detail(id) {
     const opts = {
-        ...getGetOptions(),
+        ..._getGetOptions(),
     }
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)

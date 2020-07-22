@@ -37,7 +37,7 @@ urlpatterns = [
         path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
     ], 'bundle'))),
 
-    path('user/', include(([
+    path('api/user/', include(([
         path('all/', user_views.all, name='all'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
     ], 'user'))),

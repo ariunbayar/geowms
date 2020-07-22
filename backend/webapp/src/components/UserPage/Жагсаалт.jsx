@@ -37,19 +37,17 @@ export class Жагсаалт extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th scope="col"> # </th>
                                     <th scope="col"> Id </th>
                                     <th scope="col"> Нэр </th>
                                     <th scope="col">Цахим шуудан</th>
                                     <th scope="col">Админ эсэх</th>
-                                    <th scope="col">Идвэхтэй эсэх</th>
+                                    <th scope="col">Идэвхтэй эсэх</th>
                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {this.state.user_list.map((values, index) =>
                                     <User
-                                        index={index +1 }
                                         key={values.id}
                                         values={values}
                                     />

@@ -12,6 +12,7 @@ export class UserPage extends Component {
     }
 
     render() {
+        console.log(this.props)
         return (
             <Switch>
                 <Route exact path={"/back/user/"} component={Жагсаалт}/>
