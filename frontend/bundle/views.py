@@ -53,7 +53,7 @@ def wms_layers(request, pk):
     wms_list = []
     qs_layers = bundle.layers.filter(bundlelayer__role_id=role).order_by(
         'wms__created_at').order_by('sort_order')
-    def _layer_to_display(ob): return {'name': ob.name, 'code': ob.code, 'defaultCheck': BundleLayer.objects.filter(
+    def _layer_to_display(ob): return {'name': ob.name, 'code': ob.code, 'legendURL': ob.LegendURL, 'defaultCheck': BundleLayer.objects.filter(
         bundle_id=pk, layer_id=ob.id, role_id=role).values('defaultCheck')[0]['defaultCheck']}
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         wms_data = {

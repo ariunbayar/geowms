@@ -62,23 +62,23 @@ export default class WMSForm extends Component {
         this.props.handleSave(this.state)
     }
 
-    handleLayerToggle(e) {
+    handleLayerToggle(e, layer) {
         let layers = this.state.layers
         const wmsId = this.state.id
+        const layerName = layer.code
+        const legendURL = layer.legendurl
         if (e.target.checked) {
-            const layerName = e.target.value
 
-            service.layerAdd(layerName, wmsId).then(({success}) => {
+            service.layerAdd(layerName, wmsId, legendURL).then(({success}) => {
                 if (success) 
                 {
                     this.props.handleWmsLayerRefresh(wmsId)
                 }
             })
 
-            layers.push(e.target.value)
+            layers.push(layerName)
 
         } else {
-            const layerName = e.target.value
 
             service.layerRemove(layerName, wmsId).then(({success}) => {
                 if (success) 
@@ -87,7 +87,7 @@ export default class WMSForm extends Component {
                 }
             })
 
-            layers = layers.filter((layer) => layer != e.target.value)
+            layers = layers.filter((layer) => layer != layerName)
 
 
         }
@@ -151,7 +151,7 @@ export default class WMSForm extends Component {
                                         <input
                                             type="checkbox"
                                             checked={this.state.layers.indexOf(layer.code) > -1}
-                                            onChange={this.handleLayerToggle}
+                                            onChange={(e) => this.handleLayerToggle(e, layer)}
                                             value={layer.code}
                                         />
                                         <span> {layer.name} ({layer.code})</span>
