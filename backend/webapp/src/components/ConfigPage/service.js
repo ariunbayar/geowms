@@ -3,6 +3,7 @@ import {getGetOptions, getPostOptions, handleResponse} from '@/helpers/service'
 
 export const service = {
     getAll,
+    getDisk,
     getDetail,
     update,
     create,
@@ -16,6 +17,11 @@ const prefix = '/back/api/config'
 function getAll() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
+}
+
+function getDisk() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/disk/`, requestOptions).then(handleResponse)
 }
 
 

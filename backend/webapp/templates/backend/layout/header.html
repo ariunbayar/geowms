@@ -5,11 +5,11 @@
                 {% if user.is_authenticated %}
                     {% if user.is_superuser %}
                     <span class="btn gp-btn-primary">
-                        <pre>Нэвтэрсэн хэрэглэгч </pre> :&nbsp;  {{user.username}}
+                        Нэвтэрсэн хэрэглэгч: {{user.username}}
                     </span>
                     {% else %}
                     <span class="btn gp-btn-primary">
-                        Нэвтэрсэн хэрэглэгч:&nbsp;{{user.last_name|first}}.{{user.first_name}}
+                        Нэвтэрсэн хэрэглэгч: {{user.last_name|first}}.{{user.first_name}}
                        </span>
                     {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
