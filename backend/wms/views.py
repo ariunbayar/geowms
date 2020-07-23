@@ -112,14 +112,14 @@ def layerAdd(request, payload):
 
     wmsId = payload.get('wmsId')
     layerName = payload.get('id')
-    legendURL = payload.get('legendURL')
+    legend_url = payload.get('legendURL')
 
     wms = get_object_or_404(WMS, pk=wmsId)
     wms_layer = WMSLayer.objects.filter(code=layerName, wms_id=wms.id)
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        WMSLayer.objects.create(name=layerName, code=layerName, wms = wms, title=layerName, LegendURL=legendURL)
+        WMSLayer.objects.create(name=layerName, code=layerName, wms = wms, title=layerName, legend_url=legend_url)
         return JsonResponse({'success': True})
 
 
