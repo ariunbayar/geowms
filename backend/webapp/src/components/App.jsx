@@ -1,14 +1,13 @@
-import React, { Component } from "react";
-import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-
-import { WMSPage } from "./WMSPage";
-import { BundlePage } from "./BundlePage";
-import { DevPage } from "./DevPage";
-import { UserPage } from "./UserPage";
-import { GovorgPage } from "./GovorgPage";
-import { СуурьДавхаргаХуудас } from "./СуурьДавхаргаХуудас";
-import { service } from "./service";
-import { ConfigPage } from "./ConfigPage";
+import React, {Component} from "react";
+import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
+import {WMSPage} from "./WMSPage";
+import {BundlePage} from "./BundlePage";
+import {DevPage} from "./DevPage";
+import {UserPage} from "./UserPage";
+import {GovorgPage} from "./GovorgPage";
+import {СуурьДавхаргаХуудас} from "./СуурьДавхаргаХуудас";
+import {service} from "./service";
+import {ConfigPage} from "./ConfigPage";
 
 export default class App extends Component {
   constructor(props) {
