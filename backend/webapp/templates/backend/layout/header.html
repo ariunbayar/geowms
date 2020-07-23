@@ -5,7 +5,7 @@
                 {% if user.is_authenticated %}
                     {% if user.is_superuser %}
                     <span class="btn gp-btn-primary">
-                        <pre>Нэвтэрсэн хэрэглэгч </pre> :&nbsp;  {{user.username}}
+                        Нэвтэрсэн хэрэглэгч:&nbsp;  {{user.username}}
                     </span>
                     {% else %}
                     <span class="btn gp-btn-primary">

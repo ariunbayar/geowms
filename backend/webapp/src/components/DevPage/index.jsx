@@ -28,7 +28,7 @@ export class DevPage extends Component {
 
             <h1>Координатын формат</h1>
 
-            <p>
+            <div>
               <ul>
                 <li>
                   Хэрэглэгчид координатын форматыг үзүүлэхэд энэ форматаар
@@ -63,9 +63,9 @@ export class DevPage extends Component {
                   байдаг
                 </li>
               </ul>
-            </p>
+            </div>
             <h1>Өнгөний код </h1>
-            <p>
+            <div>
               <ul>
                 <li>
                   Хөгжүүлэгчид үндсэн логоний 8 өнгөний кодыг танилцуулж байна.
@@ -104,7 +104,7 @@ export class DevPage extends Component {
                   Цэнхэр <code>&lt;#2587C8&gt;</code>
                 </li>
               </ul>
-            </p>
+            </div>
           </div>
         </div>
       </div>
