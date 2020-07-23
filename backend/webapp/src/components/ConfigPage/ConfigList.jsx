@@ -13,6 +13,7 @@ export class ConfigList extends Component {
         super(props)
         this.state = {
             config_list: [],
+            disk: {},
             is_form_open: true,
         }
 
@@ -27,6 +28,9 @@ export class ConfigList extends Component {
         service.getAll().then(({config_list}) => {
             this.setState({config_list})
         })
+        service.getDisk().then(({disk}) => {
+            this.setState({disk})
+        })
     }
 
     handleRemoved(id) {
@@ -36,8 +40,7 @@ export class ConfigList extends Component {
 
     render() {
 
-        const {config_list, is_form_open, showModal, modalText, modalTitle} = this.state
-
+        const {config_list, is_form_open, showModal, modalText, modalTitle, disk} = this.state
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
@@ -67,7 +70,37 @@ export class ConfigList extends Component {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-12">
 
+                        <h3>Дискийн хэмжээ</h3>
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Диск</th>
+                                    <th scope="col">Ашиглалт</th>
+                                    <th scope="col">Ашигласан</th>
+                                    <th scope="col">Нийт</th>
+                                    <th scope="col">Файл систем</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td>{disk.name}</td>
+                                    <td>
+                                        <progress max={disk.size_total} value={disk.size_used}></progress>
+                                    </td>
+                                    <td>{disk.size_used}</td>
+                                    <td>{disk.size_total}</td>
+                                    <td>{disk.mount_point}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>Дискийн хэмжээний өөрчлөлтийн мэдээллийг 5 минут тутамд шинэчилнэ.</p>
                     </div>
                 </div>
             </div>
