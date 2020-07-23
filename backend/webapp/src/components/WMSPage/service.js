@@ -98,10 +98,10 @@ function move(id, move, wmsId) {
 
     return fetch(`${prefix}/wms/move/`, opts).then(handleResponse)
 }
-function layerAdd(id, wmsId) {
+function layerAdd(id, wmsId, legendURL, code) {
     const opts = {
         ..._getPostOptions(),
-        body: JSON.stringify({id, wmsId}),
+        body: JSON.stringify({id, wmsId, legendURL, code}),
     }
 
     return fetch(`${prefix}/wms/layerAdd/`, opts).then(handleResponse)
