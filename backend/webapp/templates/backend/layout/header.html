@@ -9,7 +9,7 @@
                     </span>
                     {% else %}
                     <span class="btn gp-btn-primary">
-                        Нэвтэрсэн хэрэглэгч:&nbsp;{{user.last_name|first}}.{{user.first_name}}
+                        Нэвтэрсэн хэрэглэгч: {{user.last_name|first}}.{{user.first_name}}
                        </span>
                     {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
