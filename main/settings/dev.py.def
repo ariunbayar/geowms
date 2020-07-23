@@ -1,0 +1,47 @@
+from .base import *  # noqa
+
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = ''
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = ['*']
+
+# Database
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
+
+INSTALLED_APPS += [
+    'debug_toolbar',
+]
+
+MIDDLEWARE += [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda v: DEBUG == True,
+}
+
+XYP_DAN = {
+    'ENDPOINTS': {
+        'LOGIN': 'https://tz.mohs.mn/api/login/?',
+        'AUTHORIZE': 'https://tz.mohs.mn/api/auth/?',
+        'SERVICE': 'https://tz.mohs.mn/api/service/?',
+    },
+    'CLIENT_KEY': '',
+    'CLIENT_SECRET': '',
+    'REDIRECT_URI': 'http://localhost:8000/login/dan/',
+}

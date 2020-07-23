@@ -1,10 +1,37 @@
+import re
+import subprocess
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.cache import cache_page
 
 from main.decorators import ajax_required
 from .models import Config
+
+CACHE_TIMEOUT_DISK_INFO = 5
+
+
+def _get_disk_info():
+
+    disk_info = {}
+
+    try:
+        command = ['/bin/df', '-k', '--type=ext4', '--output=source,used,avail,target']
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        stdout = proc.communicate()[0]
+        lines = stdout.decode().splitlines()[1:]
+        for line in lines:
+            source, used, avail, target = re.split(' +', line)
+            disk_info[source] = {
+                    'used': int(used) * 1024,
+                    'avail': int(avail) * 1024,
+                    'target': target,
+                }
+    except:
+        pass
+
+    return disk_info
 
 
 def _get_config_display(config):
@@ -70,3 +97,18 @@ def delete(request, pk):
     config = get_object_or_404(Config, pk=pk)
     config.delete()
     return JsonResponse({'success': True})
+
+
+@ajax_required
+@cache_page(60 * CACHE_TIMEOUT_DISK_INFO)
+@user_passes_test(lambda u: u.is_superuser)
+def disk(request):
+    disk_info = _get_disk_info()
+    for name, info in disk_info.items():
+       disk = {
+            'name': name,
+            'size_used': info['used'],
+            'size_total': info['used'] + info['avail'],
+            'mount_point': info['target'],
+        }
+    return JsonResponse({'success': True, 'disk': disk})
