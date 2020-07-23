@@ -91,7 +91,9 @@ export class ConfigList extends Component {
                                 <tr>
                                     <td></td>
                                     <td>{disk.name}</td>
-                                    <td></td>
+                                    <td>
+                                        <progress max={disk.size_total} value={disk.size_used}></progress>
+                                    </td>
                                     <td>{disk.size_used}</td>
                                     <td>{disk.size_total}</td>
                                     <td>{disk.mount_point}</td>
