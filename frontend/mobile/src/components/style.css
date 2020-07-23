@@ -10,59 +10,6 @@ body{
     color: black;
 }
 
-.mnav__item{
-    width: 25%;
-}
-.header .fa{
-  font-size: 23px;
-}
-.header h1{
-  font-size: 20px;
-}
-.header .form-control{
-  font-size: 12px;
-}
-.header .col-12{
-  padding-right: 8px;
-  padding-left: 8px;
-  font-size: 9px;
-
-}
-
-/* footer menu */
- .mnav {
-   z-index: 3;
-  overflow: hidden;
-  background-color:rgba(0,60,136,1);
-  position: fixed;
-  bottom: -1px;
-  height: 10%;
-  width: 100%;
-  -webkit-box-shadow: 0px -3px 12px -1px rgba(0,0,0,0.62);
-  -moz-box-shadow: 0px -3px 12px -1px rgba(0,0,0,0.62);
-  box-shadow: 0px -3px 12px -1px rgba(0,0,0,0.62);
-}
-
-.mnav a {
-  float: left;
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 4% 16px;
-  text-decoration: none;
-  font-size: 17px;
-}
-
-.mnav a:hover {
-  background: white;
-  color: #0066cc;
-}
-
-.mnav a.active {
-  background-color: white;
-  color: #7c8083;
-}
-
 a .fa{
     font-size: 20px;
 }
@@ -111,7 +58,7 @@ a .footerButton:hover{
     position: fixed;
     right: 0px;
     left: 0px;
-    bottom: 20px;
+    bottom: 0px;
     padding-top: 25px;
     padding-bottom: 45px;
     padding-right: 20px;

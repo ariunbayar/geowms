@@ -75,14 +75,14 @@
     left: 1px;
     width: 99%;
     height: 7%;
-    bottom: 10%;
+    bottom: 0.2%;
     overflow: hidden;
     position: fixed;
 }
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
     width: 33.333%;
-    height: 97%;
+    height: 100%;
     margin: 0px;
     border-radius: 3px;
     float: right;
@@ -128,7 +128,7 @@
 }
 .ol-mouse-position {
     position: fixed;
-    top: 114px;
+    top: 2%;
     left: 1rem;
     background: rgba(0,60,136,0.3);
     border-radius: 4px;
@@ -140,7 +140,7 @@
     min-height: 1rem;
 }
 .ol-scale-line  {
-    bottom: 128px;
+    bottom: 7%;
     position: fixed;
 }
 .coordinate-copy-control {
