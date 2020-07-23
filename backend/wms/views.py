@@ -112,14 +112,14 @@ def layerAdd(request, payload):
 
     wmsId = payload.get('wmsId')
     layerName = payload.get('id')
+    layerCode = payload.get('code')
     legendURL = payload.get('legendURL')
-
     wms = get_object_or_404(WMS, pk=wmsId)
-    wms_layer = WMSLayer.objects.filter(code=layerName, wms_id=wms.id)
+    wms_layer = WMSLayer.objects.filter(code=layerCode, wms_id=wms.id)
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        WMSLayer.objects.create(name=layerName, code=layerName, wms = wms, title=layerName, LegendURL=legendURL)
+        WMSLayer.objects.create(name=layerName, code=layerCode, wms = wms, title=layerName, LegendURL=legendURL)
         return JsonResponse({'success': True})
 
 
@@ -131,7 +131,7 @@ def layerRemove(request, payload):
     wmsId = payload.get('wmsId')
     layerName = payload.get('id')
 
-    wms_layer = get_object_or_404(WMSLayer, name=layerName, code=layerName, wms_id=wmsId)
+    wms_layer = get_object_or_404(WMSLayer, code=layerName, wms=wmsId)
     wms_layer.delete()
 
     return JsonResponse({'success': True})
@@ -169,6 +169,8 @@ def update(request, payload):
         with transaction.atomic():
 
             form.save()
+            for layer_choice in layer_choices:
+                WMSLayer.objects.filter(code=layer_choice.get('code')).update(name=layer_choice.get('name'), code=layer_choice.get('code'), LegendURL=layer_choice.get('legendurl'))
 
         return JsonResponse({
                 'success': True
