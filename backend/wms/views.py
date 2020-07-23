@@ -171,7 +171,7 @@ def update(request, payload):
 
             form.save()
             for layer_choice in layer_choices:
-                WMSLayer.objects.filter(code=layer_choice.get('code')).update(name=layer_choice.get('name'), code=layer_choice.get('code'), LegendURL=layer_choice.get('legendurl'))
+                WMSLayer.objects.filter(code=layer_choice.get('code')).update(name=layer_choice.get('name'), code=layer_choice.get('code'), legend_url=layer_choice.get('legendurl'))
 
         return JsonResponse({
                 'success': True
