@@ -1,0 +1,33 @@
+.colordiv li{
+    height: 46px;
+    text-align: center;    
+    padding: 10px;
+    color: white;
+}
+.colordiv ul{
+    padding-left: 30px;
+}
+.colordiv .li1{
+    background-color: #00A3CF;
+}
+.colordiv .li2{
+    background-color: #FFD24A;
+}
+.colordiv .li3{
+    background-color: #FF4748;
+}
+.colordiv .li4{
+    background-color: #A11445;
+}
+.colordiv .li5{
+    background-color: #4E3395;
+}
+.colordiv .li6{
+    background-color: #0B3A7D;
+}
+.colordiv .li7{
+    background-color: #006CB6;
+}
+.colordiv .li8{
+    background-color: #0088CA;
+}
