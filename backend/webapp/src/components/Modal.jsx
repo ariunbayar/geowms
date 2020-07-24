@@ -21,7 +21,7 @@ export default class Modal extends Component {
     }
 
     handleClose(callback) {
-        this.setState({status: 'closing'})
+        this.setState({status: 'closed'})
         setTimeout(() => {
             if (callback) {
                 callback()

@@ -140,7 +140,7 @@ export class WMSPage extends Component {
                             <>
                                 <div className="text-right">
                                     <button className="btn gp-bg-primary" onClick={this.handleAdd} >
-                                        Нэмэх.hoo
+                                        Нэмэх
                                     </button>
                                 </div>
 
