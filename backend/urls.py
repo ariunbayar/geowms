@@ -72,6 +72,7 @@ urlpatterns = [
         path('<int:pk>/update/', config_views.update, name='update'),
         path('<int:pk>/delete/', config_views.delete, name='delete'),
         path('create/', config_views.create, name='create'),
+        path('disk/', config_views.disk, name='disk'),
     ], 'config'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

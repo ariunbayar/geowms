@@ -16,7 +16,8 @@ class Bundle(models.Model):
     is_removeable = models.BooleanField()
     icon = models.ImageField(upload_to='дэд-сан/')
 
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sort_order = models.PositiveIntegerField()
@@ -28,4 +29,3 @@ class BundleLayer(models.Model):
     bundle = models.ForeignKey(Bundle, on_delete=models.PROTECT)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, default=5)
     defaultCheck = models.PositiveIntegerField(default=0)
-

@@ -14,7 +14,7 @@
                             <a class="f-nav-link text-white-50" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                         </li>
                         <li class="f-nav-item mb-2">
-                            <a class="f-nav-link text-white-50" href="http://192.168.10.95:8080/geonetwork/srv/eng/catalog.search#/home">МЕТА ДАТА</a>
+                            <a class="f-nav-link text-white-50" href="http://192.168.10.95:8080/geonetwork/srv/mon/catalog.search#/home">МЕТА ДАТА</a>
                         </li>
                         <li class="f-nav-item mb-2">
                             <a class="f-nav-link text-white-50" href="{% url "page:help" %}">ТУСЛАМЖ</a>
@@ -29,13 +29,19 @@
                     <h6 class="mb-3 gp-text-light-primary">Холбоо барих</h6>
                     <ul class="list-unstyled text-white-50">
                         <li class="mb-2">
-                            <span><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>{{ CONFIGS.agency_contact_address }}</span>
+                            <div class="row">
+                                <div class="col-md-1"><i class="fa fa-map-marker mr-2" aria-hidden="true"></i></div><div class="col-md-11"><span>{{ CONFIGS.agency_contact_address }}</span></div>
+                            </div>
                         </li>
                         <li class="mb-2">
-                            <span><i class="fa fa-phone mr-2" aria-hidden="true"></i>{{ CONFIGS.agency_contact_phone }}</span>
+                            <div class="row">
+                                <div class="col-md-1"><i class="fa fa-phone mr-2" aria-hidden="true"></i></div><div class="col-md-11"><span>{{ CONFIGS.agency_contact_phone }}</span></div>
+                            </div>
                         </li>
                         <li class="mb-2">
-                            <span><i class="fa fa-envelope mr-2" aria-hidden="true"></i>{{ CONFIGS.agency_contact_email }}</span>
+                            <div class="row">
+                                <div class="col-md-1"><i class="fa fa-envelope mr-2" aria-hidden="true"></i></div><div class="col-md-11"><span>{{ CONFIGS.agency_contact_email }}</span></div>
+                            </div>
                         </li>
                     </ul>
                 </div>

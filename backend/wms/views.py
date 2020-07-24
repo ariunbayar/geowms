@@ -96,8 +96,8 @@ def move(request, payload):
 def titleUpdate(request, payload):
 
     title = payload.get('title')
-    layerId = payload.get('id')
-    WMSLayer.objects.filter(pk=layerId).update(title=title)
+    layer_id = payload.get('id')
+    WMSLayer.objects.filter(pk=layer_id).update(title=title)
     rsp = {
         'success': True,
     }
@@ -111,14 +111,17 @@ def titleUpdate(request, payload):
 def layerAdd(request, payload):
 
     wmsId = payload.get('wmsId')
-    layerName = payload.get('id')
+    layer_name = payload.get('id')
+    layer_code = payload.get('code')
+    legend_url = payload.get('legendURL')
 
     wms = get_object_or_404(WMS, pk=wmsId)
-    wms_layer = WMSLayer.objects.filter(code=layerName, wms_id=wms.id)
+    wms_layer = WMSLayer.objects.filter(code=layer_code, wms_id=wms.id)
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        WMSLayer.objects.create(name=layerName, code=layerName, wms = wms, title=layerName)
+        WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, legend_url=legend_url)
+
         return JsonResponse({'success': True})
 
 
@@ -128,9 +131,9 @@ def layerAdd(request, payload):
 def layerRemove(request, payload):
 
     wmsId = payload.get('wmsId')
-    layerName = payload.get('id')
+    layer_name = payload.get('id')
 
-    wms_layer = get_object_or_404(WMSLayer, name=layerName, code=layerName, wms_id=wmsId)
+    wms_layer = get_object_or_404(WMSLayer, code=layer_name, wms=wmsId)
     wms_layer.delete()
 
     return JsonResponse({'success': True})
@@ -160,7 +163,6 @@ def create(request, payload):
 def update(request, payload):
 
     wms = get_object_or_404(WMS, pk=payload.get('id'))
-    layers = payload.get('layers')
     layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
     if form.is_valid():
@@ -168,6 +170,13 @@ def update(request, payload):
         with transaction.atomic():
 
             form.save()
+            wms = form.instance
+
+            for layer_choice in layer_choices:
+                WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(
+                        name=layer_choice.get('name'),
+                        code=layer_choice.get('code'),
+                        legend_url=layer_choice.get('legendurl'))
 
         return JsonResponse({
                 'success': True

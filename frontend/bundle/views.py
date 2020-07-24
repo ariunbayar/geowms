@@ -25,11 +25,16 @@ def detail(request, pk):
 
     bundle = get_object_or_404(Bundle, pk=pk)
 
+    bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
+
     bundle_display = {
         'id': bundle.id,
         'name': bundle.name,
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
-        'wms_list': [(WMS.objects.get(pk=wms[0]).name) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': [
+            (WMS.objects.get(pk=wms[0]).name)
+            for wms in bundle_layers
+        ],
     }
 
     context = {
@@ -51,8 +56,21 @@ def wms_layers(request, pk):
 
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
-    qs_layers = bundle.layers.filter(bundlelayer__role_id = role).order_by('wms__created_at').order_by('sort_order')
-    _layer_to_display = lambda ob: {'name': ob.name, 'code': ob.code, 'defaultCheck': BundleLayer.objects.filter(bundle_id=pk, layer_id=ob.id, role_id=role).values('defaultCheck')[0]['defaultCheck']}
+    qs_layers = bundle.layers.filter(bundlelayer__role_id=role).order_by('wms__created_at', 'sort_order')
+
+    def _layer_to_display(ob):
+        bundle_layers = BundleLayer.objects.filter(
+                bundle_id=pk,
+                layer_id=ob.id,
+                role_id=role
+            )
+        return {
+                'name': ob.name,
+                'code': ob.code,
+                'legendURL': ob.legend_url,
+                'defaultCheck': bundle_layers.values('defaultCheck')[0]['defaultCheck']
+            }
+
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         wms_data = {
             'name': wms.name,
@@ -67,13 +85,16 @@ def wms_layers(request, pk):
 
     return JsonResponse(rsp)
 
+
 def purchase(request):
 
     return render(request, 'bundle/purchase.html')
 
+
 def success(request):
 
     return render(request, 'bundle/success.html')
+
 
 def failed(request):
 
