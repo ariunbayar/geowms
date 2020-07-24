@@ -18,7 +18,7 @@ export class Жагсаалт extends Component {
 
         this.state = {
             govorg_list: [],
-            showModal: "closed",
+            showModal: false,
             modalTitle: null,
             modalText: null,
             modalId: null,
@@ -39,7 +39,7 @@ export class Жагсаалт extends Component {
 
     }
     modalClose() {
-        this.setState({showModal: 'closed'})
+        this.setState({showModal: false})
     }
 
     handleRemove() {
@@ -52,7 +52,7 @@ export class Жагсаалт extends Component {
     }
 
     modalTrue(id, text) {
-        this.setState({showModal: "open", modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
+        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     render() {
@@ -61,14 +61,7 @@ export class Жагсаалт extends Component {
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
-                <Modal 
-                    showModal={showModal} 
-                    modalClose={() => this.modalClose()}
-                    modalAction={() => this.handleRemove()}
-                    text={modalText}
-                    title={modalTitle}
-                    >
-                </Modal>
+
                     <div className="col-md-12">
 
                         {!this.state.is_form_open &&

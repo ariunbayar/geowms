@@ -28,7 +28,7 @@ export class BundlePage extends Component {
             form_options_role: {},
             is_form_open: false,
             form_values: {...this.initial_form_values},
-            showModal: 'closed',
+            showModal: false,
             modalTitle: null,
             modalText: null,
             modalId: null,
@@ -57,7 +57,7 @@ export class BundlePage extends Component {
 
     handleSaveSuccess() {
         this.handleListUpdated()
-        this.setState({is_form_open: 'closed'})
+        this.setState({is_form_open: false})
     }
 
     handleSave(values) {
@@ -78,7 +78,7 @@ export class BundlePage extends Component {
 
     }
     modalClose() {
-        this.setState({showModal: 'closed'})
+        this.setState({showModal: false})
     }
 
     handleRemove() {
@@ -90,7 +90,7 @@ export class BundlePage extends Component {
     }
 
     modalTrue(id, text) {
-        this.setState({showModal: 'open', modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
+        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     handleEdit(form_values) {
@@ -118,7 +118,6 @@ export class BundlePage extends Component {
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
-                
                 <Modal 
                     showModal={showModal} 
                     modalClose={() => this.modalClose()}
@@ -127,7 +126,7 @@ export class BundlePage extends Component {
                     title={modalTitle}
                     >
                 </Modal>
-    
+                    
                     <div className="col-md-12">
 
                         {!this.state.is_form_open &&
@@ -164,7 +163,6 @@ export class BundlePage extends Component {
                                 </table>
                             </>
                         }
-
                         {this.state.is_form_open &&
                             <div className="row">
                                 <div className="col-4">

@@ -23,7 +23,7 @@ export class WMSPage extends Component {
             wms_list: [],
             layers_all: [],
             form_values: {...this.initial_form_values},
-            showModal: 'closed',
+            showModal: false,
             modalTitle: null,
             modalText: null,
             modalId: null,
@@ -79,7 +79,7 @@ export class WMSPage extends Component {
 
     }
     modalClose() {
-        this.setState({showModal: 'closed'})
+        this.setState({showModal: false})
     }
     handleRemove() {
         const id = this.state.modalId
@@ -90,7 +90,7 @@ export class WMSPage extends Component {
     }
 
     modalTrue(id, text) {
-        this.setState({showModal:"open", modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
+        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     
@@ -169,7 +169,6 @@ export class WMSPage extends Component {
                                 </table>
                             </>
                         }
-
                         {this.state.is_form_open &&
                                 <WMSForm
                                     handleSave={this.handleSave}

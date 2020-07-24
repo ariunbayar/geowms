@@ -2,8 +2,6 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
 import Modal from "@/components/Modal"
-import {service} from './service'
-
 
 export default class Config extends Component {
 
