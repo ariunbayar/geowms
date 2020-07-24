@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import "./style.css";
 
 export class DevPage extends Component {
   render() {
@@ -28,7 +29,7 @@ export class DevPage extends Component {
 
             <h1>Координатын формат</h1>
 
-            <div>
+            <p>
               <ul>
                 <li>
                   Хэрэглэгчид координатын форматыг үзүүлэхэд энэ форматаар
@@ -63,46 +64,18 @@ export class DevPage extends Component {
                   байдаг
                 </li>
               </ul>
-            </div>
-            <h1>Өнгөний код </h1>
-            <div>
+            </p>
+            <h1>Өнгөний код</h1>
+            <div className="col-md-3 colordiv">
               <ul>
-                <li>
-                  Хөгжүүлэгчид үндсэн логоний 8 өнгөний кодыг танилцуулж байна.
-                </li>
-
-                <li style={{ color: "#4EA2CE" }}>
-                  {" "}
-                  Усан цэнхэр <code>&lt;#4EA2CE&gt;</code>
-                </li>
-                <li style={{ color: "#FDD252" }}>
-                  {" "}
-                  Шар <code>&lt;#FDD252&gt;</code>
-                </li>
-                <li style={{ color: "#ED504D" }}>
-                  {" "}
-                  Улаан <code>&lt;#ED504D&gt;</code>
-                </li>
-                <li style={{ color: "#931F46" }}>
-                  {" "}
-                  Хүрэн <code>&lt;#931F46&gt;</code>
-                </li>
-                <li style={{ color: "#4F3694" }}>
-                  {" "}
-                  Чирнээлэн ягаан<code>&lt;#4F3694&gt;</code>
-                </li>
-                <li style={{ color: "#233B7C" }}>
-                  {" "}
-                  Хөх <code>&lt;#233B7C&gt;</code>
-                </li>
-                <li style={{ color: "#196CB5" }}>
-                  {" "}
-                  Гүн цэнхэр <code>&lt;#196CB5&gt;</code>
-                </li>
-                <li style={{ color: "#2587C8" }}>
-                  {" "}
-                  Цэнхэр <code>&lt;#2587C8&gt;</code>
-                </li>
+                <li className="li1"> #00A3CF </li>
+                <li className="li2"> #FFD24A </li>
+                <li className="li3"> #FF4748 </li>
+                <li className="li4"> #A11445 </li>
+                <li className="li5"> #4E3395 </li>
+                <li className="li6"> #0B3A7D </li>
+                <li className="li7"> #006CB6 </li>
+                <li className="li8"> #0088CA </li>
               </ul>
             </div>
           </div>
