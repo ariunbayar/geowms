@@ -28,7 +28,7 @@ export class BundlePage extends Component {
             form_options_role: {},
             is_form_open: false,
             form_values: {...this.initial_form_values},
-            showModal: false,
+            showModal: 'closed',
             modalTitle: null,
             modalText: null,
             modalId: null,
@@ -78,11 +78,12 @@ export class BundlePage extends Component {
 
     }
     modalClose() {
-        this.setState({showModal: false})
+        this.setState({showModal: 'closed'})
     }
 
     handleRemove() {
         const id = this.state.modalId
+        //alert(id)
         service.remove(id).then(({success}) => {
             if (success) this.handleSaveSuccess()
         })
@@ -90,7 +91,9 @@ export class BundlePage extends Component {
     }
 
     modalTrue(id, text) {
-        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
+        //alert(id)
+        //list vvsgeh vydee showModal-iig "open" bolgoh heregtei
+        this.setState({showModal: 'open', modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     handleEdit(form_values) {
@@ -118,6 +121,7 @@ export class BundlePage extends Component {
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
+                
                 <Modal 
                     showModal={showModal} 
                     modalClose={() => this.modalClose()}
@@ -126,7 +130,7 @@ export class BundlePage extends Component {
                     title={modalTitle}
                     >
                 </Modal>
-                    
+    
                     <div className="col-md-12">
 
                         {!this.state.is_form_open &&

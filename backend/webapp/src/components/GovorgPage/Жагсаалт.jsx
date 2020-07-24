@@ -18,7 +18,7 @@ export class Жагсаалт extends Component {
 
         this.state = {
             govorg_list: [],
-            showModal: false,
+            showModal: "closed",
             modalTitle: null,
             modalText: null,
             modalId: null,
@@ -52,7 +52,7 @@ export class Жагсаалт extends Component {
     }
 
     modalTrue(id, text) {
-        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
+        this.setState({showModal: "open", modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     render() {

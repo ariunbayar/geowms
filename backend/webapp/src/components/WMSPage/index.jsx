@@ -23,7 +23,7 @@ export class WMSPage extends Component {
             wms_list: [],
             layers_all: [],
             form_values: {...this.initial_form_values},
-            showModal: false,
+            showModal: 'closed',
             modalTitle: null,
             modalText: null,
             modalId: null,
@@ -90,7 +90,7 @@ export class WMSPage extends Component {
     }
 
     modalTrue(id, text) {
-        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
+        this.setState({showModal:"open", modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 
     
@@ -140,7 +140,7 @@ export class WMSPage extends Component {
                             <>
                                 <div className="text-right">
                                     <button className="btn gp-bg-primary" onClick={this.handleAdd} >
-                                        Нэмэх
+                                        Нэмэх.hoo
                                     </button>
                                 </div>
 
