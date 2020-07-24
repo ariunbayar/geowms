@@ -8,6 +8,7 @@ import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
+import Geolocation from 'ol/Geolocation';
 import {createStringXY} from 'ol/coordinate';
 import {defaults as defaultControls, MousePosition, ScaleLine} from 'ol/control'
 
