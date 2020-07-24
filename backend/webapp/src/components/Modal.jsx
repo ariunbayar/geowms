@@ -5,24 +5,22 @@ export default class Modal extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            status: this.props.showModal,
+            status: 'initial',
         }
         this.handleClose = this.handleClose.bind(this)
         this.handleProceed = this.handleProceed.bind(this)
     }
 
-    componentDidUpdate(prevProps){
-        if(prevProps.showModal !== this.props.showModal)
-        {   
-            const showModal = this.props.showModal
-            this.setState({status: showModal})
-        }
-
+    componentDidMount() {
+        setTimeout(() => {
+            this.setState({status: 'open'})
+        }, 0)
     }
 
     handleClose(callback) {
-        this.setState({status: 'closed'})
+        this.setState({status: 'closing'})
         setTimeout(() => {
+            this.setState({status: 'closed'})
             if (callback) {
                 callback()
             } else {
@@ -52,7 +50,7 @@ export default class Modal extends Component {
 
         return (
             <Fragment>
-                <div className={className} >
+                <div className={className}>
                     <div className="modal-dialog modal-dialog-scrollable">
                         <div className="modal-content">
                             <div className="modal-header" >
