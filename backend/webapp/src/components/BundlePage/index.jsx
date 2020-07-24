@@ -57,7 +57,7 @@ export class BundlePage extends Component {
 
     handleSaveSuccess() {
         this.handleListUpdated()
-        this.setState({is_form_open: false})
+        this.setState({is_form_open: 'closed'})
     }
 
     handleSave(values) {
@@ -83,7 +83,6 @@ export class BundlePage extends Component {
 
     handleRemove() {
         const id = this.state.modalId
-        //alert(id)
         service.remove(id).then(({success}) => {
             if (success) this.handleSaveSuccess()
         })
@@ -91,8 +90,6 @@ export class BundlePage extends Component {
     }
 
     modalTrue(id, text) {
-        //alert(id)
-        //list vvsgeh vydee showModal-iig "open" bolgoh heregtei
         this.setState({showModal: 'open', modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
     }
 

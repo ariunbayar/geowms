@@ -79,7 +79,7 @@ export class WMSPage extends Component {
 
     }
     modalClose() {
-        this.setState({showModal: false})
+        this.setState({showModal: 'closed'})
     }
     handleRemove() {
         const id = this.state.modalId

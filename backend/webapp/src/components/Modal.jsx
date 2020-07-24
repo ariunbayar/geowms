@@ -14,7 +14,6 @@ export default class Modal extends Component {
     componentDidUpdate(prevProps){
         if(prevProps.showModal !== this.props.showModal)
         {   
-            //alert(this.props.showModal)
             const showModal = this.props.showModal
             this.setState({status: showModal})
         }
@@ -24,7 +23,6 @@ export default class Modal extends Component {
     handleClose(callback) {
         this.setState({status: 'closing'})
         setTimeout(() => {
-            this.setState({status: 'closed'})
             if (callback) {
                 callback()
             } else {
@@ -67,15 +65,15 @@ export default class Modal extends Component {
                                 {this.props.text}
                             </div>
                             <div className="modal-footer">
-                                <button type="button" onClick={this.props.modalClose} className="btn btn-outline-primary">Буцах</button>
+                                <button type="button" onClick={this.handleClose} className="btn btn-outline-primary">Буцах</button>
                                 <button type="button" onClick={this.handleProceed} className="btn gp-bg-primary text-white">Устгах</button>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div className={classNameBackdrop}></div>
             </Fragment>
         )
-        // ene baigaa vyd Modal ajilsani daraa busad tsesrvv shiljij bolohgvi bsn  <div className={classNameBackdrop}></div>
     }
 
 }

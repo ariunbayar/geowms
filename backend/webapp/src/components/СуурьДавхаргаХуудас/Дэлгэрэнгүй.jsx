@@ -11,7 +11,7 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             id: this.props.match.params.id,
             values: {},
-            showModal: false,
+            showModal: "closed",
             modalTitle: null,
             modalText: null,
         }
@@ -38,7 +38,7 @@ export class Дэлгэрэнгүй extends Component {
 
     modalTrue(event) {
         event.preventDefault()
-        this.setState({showModal: true,  modalTitle: "Та итгэлтэй байна уу? ", modalText: this.state.values.name })
+        this.setState({showModal: "open",  modalTitle: "Та итгэлтэй байна уу? ", modalText: this.state.values.name })
     }
 
     render() {
