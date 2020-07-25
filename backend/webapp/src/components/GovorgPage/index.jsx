@@ -14,7 +14,6 @@ export class GovorgPage extends Component {
 
     render() {
         
-        console.log(this.props)
         return (
             <Switch>
                 <Route exact path={"/back/байгууллага/"} component={Жагсаалт}/>
