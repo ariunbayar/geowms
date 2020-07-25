@@ -79,7 +79,10 @@ def login_dan(request):
                 user.roles.add(2)
 
             auth.login(request, user)
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            if request.user_agent.is_mobile:
+                return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
+            else:
+                return redirect(settings.LOGIN_REDIRECT_URL)
 
     raise Http404
 

@@ -10,6 +10,7 @@ export default class WMSLayerItem extends Component {
             name: props.layer.name,
             code: props.layer.code,
             is_visible: props.layer.defaultCheck,
+            legendURL: props.layer.legendURL,
 
         }
 
@@ -37,7 +38,7 @@ export default class WMSLayerItem extends Component {
 
     render() {
 
-        const { name, code, is_visible } = this.state
+        const { name, code, is_visible, legendURL} = this.state
 
         return (
             <li>
@@ -49,6 +50,11 @@ export default class WMSLayerItem extends Component {
                     />
                     <a> {name}</a>
                 </label>
+                <li>
+                    <ul>
+                        <img className="img" src={legendURL}/>
+                    </ul>
+                </li>
             </li>
         )
     }
