@@ -3,12 +3,14 @@ from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_GET
-
+from django.views.decorators.http import require_GET, require_POST
+from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from main.auth_api import GeoAuth
 from geoportal_app.models import User, Role
 
 from .form import RegisterForm, LoginForm
+from .MBUtil import *
 
 
 def register(request):
@@ -119,3 +121,70 @@ def login(request):
 def logout(request):
     auth.logout(request)
     return redirect(settings.LOGOUT_REDIRECT_URL)
+
+class Orders():
+    pass
+
+def dictionaryRequest(request):
+    if request.method == 'POST':
+        amount = request.POST.get("amount")
+        orderID = request.POST.get("transectionId")
+        userId = request.POST.get("userId")
+        #saves = Orders(bank= 910000, accountId=900012408, accountName="Tuguldur", description="Газар зарсан", amount=amount )
+        #saves.save()
+        allLesson = Orders()
+        allLesson.bank= 910000
+        allLesson.accountId=900012408
+        allLesson.accountName="Tuguldur"
+        allLesson.description="Газар зарсан"
+        allLesson.amount=amount
+        # Account xml 
+        account = objectToXmlAccount(allLesson)
+        # Accounts xml 
+        accounts = objectToXmlAccounts(account)
+        print("dfjsdfkljsdklfjsdklfjl")
+        #encrypt accounts and convert to hex
+        encryptedAccounts = encrypts(accounts)
+        encAccounts = bytesToHex(encryptedAccounts)
+        print("dfjsdfkljsdklfjsdklfjl")
+
+        #encrypt Desede key of payment request and convert to hex
+        encryptedKey = signKey("encAccounts")
+        encKey = bytesToHex(encryptedKey)
+
+        #create request xml
+        finalRequest = PaymentVerifyRequestMB(allLesson.amount, encAccounts, encKey)
+        for i in finalRequest:
+            print(tostring(i))
+        
+        return render(request, 'secure/dictionary.html')
+
+    return render(request, 'secure/dictionary.html')
+
+def dictionary(request):
+    return render(request, 'secure/dictionary.html')
+
+
+
+def dictionaryResponse(request):
+
+    if request.method == 'POST':
+        mail = request.POST.get("mail")
+        print(mail)
+
+        htmly = get_template('sendMail.html')
+        html_content = htmly.render({"mail":mail})
+
+        mail_subject = 'Өдрийн мэнд.'
+        message = "amjilt husiidaa"
+
+
+
+
+        email = EmailMultiAlternatives(mail_subject, message, to=[mail])
+        email.attach_file('/home/pc1/work/geoWMS/templates/sendMail.html')
+        email.send()
+        return render(request, 'secure/sendMail.html')
+
+
+    return render(request, 'sendMail.html')
