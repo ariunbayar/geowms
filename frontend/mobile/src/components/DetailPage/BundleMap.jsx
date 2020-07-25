@@ -300,9 +300,7 @@ export default class BundleMap extends Component {
     handleSetCenter(coord) {
         const view = this.map.getView()
         const map_projection = view.getProjection()
-        console.log(JSON.stringify(map_projection))
         const zoom = 4
-        console.log(this.state)
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
