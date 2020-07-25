@@ -174,8 +174,8 @@ def update(request, payload):
 
             for layer_choice in layer_choices:
                 WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(
-                        name=layer_choice.get('name'), 
-                        code=layer_choice.get('code'), 
+                        name=layer_choice.get('name'),
+                        code=layer_choice.get('code'),
                         legend_url=layer_choice.get('legendurl'))
 
         return JsonResponse({
