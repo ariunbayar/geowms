@@ -37,10 +37,14 @@ export class ConfigList extends Component {
         const config_list = this.state.config_list.filter(config => config.id != id)
         this.setState({config_list})
     }
-
+    handleRemove(id){
+        service.remove(id).then(({success}) => {
+            success && this.handleListUpdated()
+        })
+    }
     render() {
 
-        const {config_list, is_form_open, showModal, modalText, modalTitle, disk} = this.state
+        const {config_list, disk} = this.state
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
@@ -66,6 +70,7 @@ export class ConfigList extends Component {
                                 {config_list.map((config, idx) =>
                                     <Config key={config.id} values={config}
                                     handleUpdated={() => this.handleRemoved(config.id)}
+                                    handleRemove={()=>this.handleRemove(config.id)}
                                     />
                                 )}
                             </tbody>

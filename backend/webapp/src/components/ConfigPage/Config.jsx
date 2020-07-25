@@ -15,7 +15,6 @@ export default class Config extends Component {
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
 
-        this.handleRemove = this.handleRemove.bind(this);
     }
 
     handleModalDeleteOpen(event) {
@@ -26,14 +25,7 @@ export default class Config extends Component {
     handleModalDeleteClose() {
         this.setState({is_modal_delete_open: false})
     }
-
-    handleRemove(){
-        const {id} = this.props.values
-        service.remove(id).then(({success}) => {
-            success && this.props.handleUpdated()
-        })
-    }
-
+    
     render() {
 
         const {id, name, value, updated_at} = this.props.values
@@ -54,11 +46,10 @@ export default class Config extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
-
                     {is_modal_delete_open &&
                         <Modal
                             modalClose={this.handleModalDeleteClose}
-                            modalAction={this.handleRemove}
+                            modalAction={this.props.handleRemove}
                             text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
                         />

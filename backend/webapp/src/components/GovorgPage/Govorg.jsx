@@ -69,7 +69,7 @@ export default class Govorg extends Component {
                     {is_modal_delete_open &&
                         <Modal
                             modalClose={this.handleModalDeleteClose}
-                            modalAction={this.handleRemove}
+                            modalAction={this.props.handleRemove}
                             text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
                         />

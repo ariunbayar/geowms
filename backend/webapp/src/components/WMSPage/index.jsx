@@ -23,10 +23,6 @@ export class WMSPage extends Component {
             wms_list: [],
             layers_all: [],
             form_values: {...this.initial_form_values},
-            showModal: false,
-            modalTitle: null,
-            modalText: null,
-            modalId: null,
         }
 
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -81,18 +77,12 @@ export class WMSPage extends Component {
     modalClose() {
         this.setState({showModal: false})
     }
-    handleRemove() {
-        const id = this.state.modalId
+    handleRemove(id) {
         service.remove(id).then(({success}) => {
             if (success) this.handleSaveSuccess()
         })
         this.modalClose()
     }
-
-    modalTrue(id, text) {
-        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
-    }
-
     
     handleWmsLayerRefresh(id) {
         service.wmsLayerall(id).then(({layers_all}) => {
@@ -122,18 +112,9 @@ export class WMSPage extends Component {
     }
 
     render() {
-        const {showModal, modalText, modalTitle} = this.state
         return (
             <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
-                    <Modal 
-                        showModal={showModal} 
-                        modalClose={() => this.modalClose()}
-                        modalAction={() => this.handleRemove()}
-                        text={modalText}
-                        title={modalTitle}
-                        >
-                    </Modal>
                     <div className="col-md-12">
 
                         {!this.state.is_form_open &&
@@ -161,7 +142,7 @@ export class WMSPage extends Component {
                                             <WMS
                                                 key={values.id}
                                                 values={values}
-                                                handleRemove={() => this.modalTrue(values.id, values.name)}
+                                                handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                             />
                                         )}
