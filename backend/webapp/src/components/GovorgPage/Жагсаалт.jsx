@@ -83,7 +83,7 @@ export class Жагсаалт extends Component {
                                     <thead>
                                         <tr>
                                             <th scope="col"> # </th>
-                                            <th scope="col"> Байгууллагын нэр</th>
+                                            <th scope="col"> Системүүдийн нэр</th>
                                             <th scope="col"> Токен </th>
                                             <th scope="col"> Үүсгэсэн огноо </th>
                                             <th scope="col"></th>

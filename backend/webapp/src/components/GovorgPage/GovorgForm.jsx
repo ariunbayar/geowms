@@ -124,13 +124,13 @@ export class GovorgForm extends Component {
                                         <div className="form-group">
 
                                             <label htmlFor="id_name">
-                                                Байгууллагын нэр:
+                                                Системүүдийн нэр:
                                             </label>
 
                                             <Field
                                                 className={'form-control ' + (errors.name ? 'is-invalid' : '')}
                                                 name="name"
-                                                placeholder="байгууллагын нэр"
+                                                placeholder="Системүүдийн нэр"
                                                 id="id_name"
                                                 type="text"
                                             />
@@ -186,4 +186,3 @@ export class GovorgForm extends Component {
         )
     }
 }
-
