@@ -135,6 +135,8 @@ LOGOUT_REDIRECT_URL = 'bundle:all'
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 
+ORDER_SUCCESS = 'bundle:success'
+ORDER_FAIL = 'bundle:failed'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
@@ -146,3 +148,9 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
     },
 }
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'geoportalmn@gmail.com'
+EMAIL_HOST_PASSWORD = 'Geoportal123'
+EMAIL_PORT = 587
