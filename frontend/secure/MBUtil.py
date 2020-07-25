@@ -71,10 +71,10 @@ def bytesToHex(array):
 def encrypts(data):
     dataString = tostring(data, encoding='utf-8')
     key = b'0123456789abcdef'
-    
     datas = bytearray(dataString)
     cipher = DES3.new(key, DES3.MODE_CFB)
     msg = cipher.encrypt(datas)
+    
     return msg
 
 def signKey(data):

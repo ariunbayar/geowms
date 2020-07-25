@@ -26,7 +26,6 @@ urlpatterns = [
         path('logout/', secure_views.logout, name='logout'),
         path('dictionaryRequest', secure_views.dictionaryRequest, name='dictionaryRequest'),
         path('dictionaryResponse', secure_views.dictionaryResponse, name='dictionaryResponse'),
-        path('dictionary', secure_views.dictionary, name='dictionary'),
     ], 'secure'))),
 
     path('m/', include(([

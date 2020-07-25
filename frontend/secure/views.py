@@ -8,6 +8,10 @@ from django.core.mail import EmailMessage
 from django.core.mail import EmailMultiAlternatives
 from main.auth_api import GeoAuth
 from geoportal_app.models import User, Role
+from django.template.loader import get_template
+from django.template.loader import render_to_string
+import requests
+from django.http import JsonResponse, HttpResponse
 
 from .form import RegisterForm, LoginForm
 from .MBUtil import *
@@ -126,65 +130,53 @@ class Orders():
     pass
 
 def dictionaryRequest(request):
-    if request.method == 'POST':
-        amount = request.POST.get("amount")
-        orderID = request.POST.get("transectionId")
-        userId = request.POST.get("userId")
-        #saves = Orders(bank= 910000, accountId=900012408, accountName="Tuguldur", description="Газар зарсан", amount=amount )
-        #saves.save()
+    if request.method == 'GET':
         allLesson = Orders()
         allLesson.bank= 910000
         allLesson.accountId=900012408
         allLesson.accountName="Tuguldur"
         allLesson.description="Газар зарсан"
-        allLesson.amount=amount
+        allLesson.amount=2000
         # Account xml 
         account = objectToXmlAccount(allLesson)
         # Accounts xml 
         accounts = objectToXmlAccounts(account)
-        print("dfjsdfkljsdklfjsdklfjl")
         #encrypt accounts and convert to hex
         encryptedAccounts = encrypts(accounts)
         encAccounts = bytesToHex(encryptedAccounts)
-        print("dfjsdfkljsdklfjsdklfjl")
-
         #encrypt Desede key of payment request and convert to hex
         encryptedKey = signKey("encAccounts")
         encKey = bytesToHex(encryptedKey)
-
         #create request xml
         finalRequest = PaymentVerifyRequestMB(allLesson.amount, encAccounts, encKey)
         for i in finalRequest:
             print(tostring(i))
+        BASE_HEADERS = {
+            'User-Agent': 'geo 1.0',
+        }
+        headers = {**BASE_HEADERS}
+
+        queryargs = request.GET
+        base_url = 'http://localhost:8000/dictionaryResponse'
+
         
-        return render(request, 'secure/dictionary.html')
+        rsp = requests.get(base_url, data={"order": finalRequest}, headers=headers)
 
-    return render(request, 'secure/dictionary.html')
+        if rsp.status_code == 200:
+            # send mail
+            user = User.objects.filter(username=request.user).first()
+            mail_subject = 'Өдрийн мэнд.'
+            message = "amjilt husiidaa"
+            email = EmailMultiAlternatives(mail_subject, message, to=[user.email])
+            email.attach_file('/home/pc1/geo/geoWMS/frontend/secure/templates/secure/mongolbank.html')
 
-def dictionary(request):
-    return render(request, 'secure/dictionary.html')
-
+            email.send()
+            return redirect(settings.ORDER_SUCCESS)
+        else:
+            return redirect(settings.ORDER_FAIL)
 
 
 def dictionaryResponse(request):
 
-    if request.method == 'POST':
-        mail = request.POST.get("mail")
-        print(mail)
-
-        htmly = get_template('sendMail.html')
-        html_content = htmly.render({"mail":mail})
-
-        mail_subject = 'Өдрийн мэнд.'
-        message = "amjilt husiidaa"
-
-
-
-
-        email = EmailMultiAlternatives(mail_subject, message, to=[mail])
-        email.attach_file('/home/pc1/work/geoWMS/templates/sendMail.html')
-        email.send()
-        return render(request, 'secure/sendMail.html')
-
-
-    return render(request, 'sendMail.html')
+    if request.method == 'GET':
+        return JsonResponse({'success': True})
