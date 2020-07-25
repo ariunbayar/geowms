@@ -121,4 +121,9 @@ def login(request):
 @login_required
 def logout(request):
     auth.logout(request)
-    return redirect(settings.LOGOUT_REDIRECT_URL)
+    if request.user_agent.is_mobile:
+        return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
+    else:
+        return redirect(settings.LOGOUT_REDIRECT_URL)
+
+
