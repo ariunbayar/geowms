@@ -85,7 +85,10 @@ def login_dan(request):
                 user.roles.add(2)
 
             auth.login(request, user)
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            if request.user_agent.is_mobile:
+                return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
+            else:
+                return redirect(settings.LOGIN_REDIRECT_URL)
 
     raise Http404
 
@@ -124,7 +127,12 @@ def login(request):
 @login_required
 def logout(request):
     auth.logout(request)
-    return redirect(settings.LOGOUT_REDIRECT_URL)
+
+    if request.user_agent.is_mobile:
+        return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
+    else:
+        return redirect(settings.LOGOUT_REDIRECT_URL)
+
 
 class Orders():
     pass
@@ -180,3 +188,4 @@ def dictionaryResponse(request):
 
     if request.method == 'GET':
         return JsonResponse({'success': True})
+

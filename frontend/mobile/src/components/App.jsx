@@ -26,36 +26,8 @@ export class App extends Component {
             bundle: [],
         }
 
-        this.screenRouter = this.screenRouter.bind(this)
     }
 
-    screenRouter(screenName) {
-        if(screenName == "homeScreen")
-        {
-            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: true , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
-        }
-        else if(screenName == "serviceScreen")
-        {
-            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: true, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:false})
-        }
-        else if(screenName == "metaDataScreen")
-        {
-            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
-        }
-        else if(screenName == "helpScreen")
-        {
-            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:true, statisticsScreenIsload:false})
-        }
-        else if(screenName == "statisticsScreen")
-        {
-            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: false, helpScreenIsload:false, statisticsScreenIsload:true})
-        }
-        else
-        {
-            this.setState({wmsLayerScreenIsload: false, homeScreenIsload: false , serviceScreenIsload: false, metaDataScreenIsload: true, helpScreenIsload:false, statisticsScreenIsload:false})
-        }
-        
-    }
     wmsLayerName(){
         if(this.state.wmsLayerScreenIsload)
         {
@@ -96,42 +68,8 @@ export class App extends Component {
         const bundles = this.props.bundle
         return (
             <div>
-                {this.state.loginScreenIsload ? <div ><i onClick={() => this.loginScreen()}  className="fa fa-arrow-left backarrow loginBack" aria-hidden="true" ></i><LoginDanScreen></LoginDanScreen></div> :
                 <div>
-                    {this.state.metaDataScreenIsload ? 
-                    <div className="header">
-                        <div className="row center">
-                            <div className="col-2">
-                                <img src={"/static/assets/image/logo/logo-2.png"} className="geoIconNoText"/> 
-                            </div>
-                            <div className="col-8">
-                                <h1>{this.state.bundleName}</h1>
-                            </div>
-                            <div className="col-2"><i onClick={() => this.loginScreen()} className="fa fa-user-circle" aria-hidden="true"></i></div>
-                        </div>
-                        <div className="row">
-                            <div className="col-12">
-                                <div className="input-group input-group-lg">
-                                    <input type="text" className="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm-5"></input>
-                                </div>
-                            </div>
-                        </div>
-                    </div> :
-
-                    <div className="header">
-                        <div className="row center">
-                            <div className="col-7">
-                                <img src={"/static/assets/image/logo/logo.png"}className="geoIcon"/> 
-                            </div>
-                            <div className="col-3">
-                            </div>
-                            <div className="col-2"><i onClick={() => this.loginScreen()} className="fa fa-user-circle" aria-hidden="true"></i></div>
-                        </div>
-                    </div>
-                    }
                     <div>
-                        {this.state.homeScreenIsload ? <HomeScreen></HomeScreen> : null}
-                        {this.state.serviceScreenIsload ? <ServiceScreen></ServiceScreen> : null}
                         {this.state.metaDataScreenIsload ? 
                             <div className="metaDataScreen">
                                 <MetaDataScreen bundle={this.state.bundle}></MetaDataScreen>
@@ -140,8 +78,6 @@ export class App extends Component {
                                 </a>
                             </div> :
                         null}
-                        {this.state.helpScreenIsload ? <HelpScreen></HelpScreen> : null}
-                        {this.state.statisticsScreenIsload ? <StatisticsScreen></StatisticsScreen> : null}
                         {this.state.wmsLayerScreenIsload ? 
                         <div className="wmsLayerScreen">
                             <div className="row ">
@@ -166,26 +102,8 @@ export class App extends Component {
                         </div> : null
                         }
                     </div>
-                    <div className="mnav">
-                        <a  onClick={() => this.screenRouter("serviceScreen")} className="mnav__item nuxt-link-exact-active nuxt-link-active">
-                            <i className="fa fa-tasks" aria-hidden="true"></i>
-                            <p className="footerButton" >Үйлчилгээ</p>
-                        </a>
-                        <a  onClick={() => this.screenRouter("metaDataScreen")} className="mnav__item">
-                            <i className="fa fa-map" aria-hidden="true"></i>
-                            <p className="footerButton" >Газрын зураг</p>
-                        </a> 
-                        <a  onClick={() => this.screenRouter("helpScreen")} className="mnav__item">
-                            <i className="fa fa-info-circle" aria-hidden="true"></i>
-                            <p className="footerButton" >Тусламж</p>
-                        </a>
-                        <a  onClick={() => this.screenRouter("statisticsScreen")} className="mnav__item">
-                        <i className="fa fa-bar-chart"></i>
-                            <p className="footerButton" >Статистик</p>
-                        </a>
-                    </div>
+                    
                 </div>
-                }
             </div>
         )
 
