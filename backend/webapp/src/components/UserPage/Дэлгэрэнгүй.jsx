@@ -12,14 +12,15 @@ export class Дэлгэрэнгүй extends Component {
 
         this.state = {
             user_detail: [],
+            roles: [],
         }
     }
 
     componentDidMount() {
         service
             .detail(this.props.match.params.id)
-            .then(({user_detail}) => {
-                this.setState({user_detail})
+            .then(({user_detail,roles}) => {
+                this.setState({user_detail, roles})
             })
     }
 
@@ -35,7 +36,7 @@ export class Дэлгэрэнгүй extends Component {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-md-12 mb-4">
+                    <div className="col-md-4 mb-4">
                         <p><strong>Системийн ID</strong>: {id} </p>
                         <p><strong>Нэр</strong>: {last_name} {first_name} </p>
                         <p><strong>Хүйс</strong>: {gender} </p>
@@ -45,6 +46,14 @@ export class Дэлгэрэнгүй extends Component {
                         <p><strong>Идэвхитэй эсэх</strong>: {is_active ? 'Идэвхитэй' : '-'} </p>
                         <p><strong>Бүртгүүлсэн огноо</strong>: {date_joined} </p>
                         <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>
+                    </div>
+                    <div className="col-md-8 mb-4">
+                        <h4>Эрхийн түвшин</h4>
+                        <ul>
+                        {this.state.roles.map( role =>
+                            <li key={role.id}>{role.name}</li>
+                        )}
+                        </ul>
                     </div>
                 </div>
             </div>

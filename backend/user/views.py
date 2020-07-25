@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from geoportal_app.models import User
+from geoportal_app.models import Role
 
 
 def _get_user_display(user):
@@ -34,6 +35,11 @@ def _get_user_detail(user):
     }
 
 
+def _get_role_display(role):
+    return {
+        'id': role.id,
+        'name': role.get_id_display(),
+    }
 
 @require_GET
 @ajax_required
@@ -54,8 +60,11 @@ def дэлгэрэнгүй(request, pk):
 
     user = get_object_or_404(User, pk=pk)
 
+    roles = [_get_role_display(role) for role in user.roles.all()]
+
     rsp = {
         'user_detail': _get_user_detail(user),
+        'roles': roles,
         'success': True,
     }
 
