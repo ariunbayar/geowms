@@ -15,7 +15,7 @@ export default class Govorg extends Component {
 
                 <td>
                     <NavLink to={`/back/байгууллага/${id}/дэлгэрэнгүй/`}>
-                        <strong>{name}</strong>
+                        {name}
                     </NavLink>
                 </td>
 

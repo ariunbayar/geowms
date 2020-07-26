@@ -60,7 +60,7 @@ export default class App extends Component {
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/"}>
-                    БАЙГУУЛЛАГА
+                  СИСТЕМҮҮД
                    {this.state.govorg_count > 0 && " (" + this.state.govorg_count + ")"}</NavLink>
                 </li>
                 <li className="nav-item">
