@@ -70,7 +70,7 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" exact to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/тохиргоо/"}>ТОХИРГОО</NavLink>
@@ -89,7 +89,7 @@ export default class App extends Component {
               component={СуурьДавхаргаХуудас}
             />
             <Route exact path={"/back/dev/"} component={DevPage} />
-            <Route exact path={"/back/user/"} component={UserPage} />
+            <Route path={"/back/user/"} component={UserPage} />
             <Route path={"/back/тохиргоо/"} component={ConfigPage} />
           </Switch>
         </div>

@@ -13,7 +13,7 @@ export class GovorgPage extends Component {
     }
 
     render() {
-
+        
         return (
             <Switch>
                 <Route exact path={"/back/байгууллага/"} component={Жагсаалт}/>
