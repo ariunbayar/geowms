@@ -83,11 +83,10 @@ export class WMSPage extends Component {
         })
         this.modalClose()
     }
-    
+
     handleWmsLayerRefresh(id) {
         service.wmsLayerall(id).then(({layers_all}) => {
-            if (layers_all) 
-            {
+            if (layers_all) {
                 this.setState({layers_all})
             }
         })
@@ -95,8 +94,7 @@ export class WMSPage extends Component {
 
     handleEdit(form_values) {
         service.wmsLayerall(form_values.id).then(({layers_all}) => {
-            if (layers_all) 
-            {
+            if (layers_all) {
                 this.setState({layers_all, form_values, is_form_open: true})
             }
         })

@@ -1,17 +1,37 @@
 import React, {Component, Fragment} from "react"
 
+
 export default class Modal extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            status: 'initial',
+            status: this.props.status || 'initial',
         }
+        this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleProceed = this.handleProceed.bind(this)
     }
 
     componentDidMount() {
+        if (this.state.status == 'initial') {
+            this.handleOpen()
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.status != prevProps.status) {
+            if (['initial', 'open'].includes(this.props.status)) {
+                this.handleOpen()
+            }
+            if (['closing', 'closed'].includes(this.props.status)) {
+                this.handleClose()
+            }
+        }
+    }
+
+    handleOpen() {
+        this.setState({status: 'initial'})
         setTimeout(() => {
             this.setState({status: 'open'})
         }, 0)
@@ -24,7 +44,7 @@ export default class Modal extends Component {
             if (callback) {
                 callback()
             } else {
-                this.props.modalClose()
+                this.props.modalClose && this.props.modalClose()
             }
         }, 150)
     }
@@ -63,7 +83,7 @@ export default class Modal extends Component {
                                 {this.props.text}
                             </div>
                             <div className="modal-footer">
-                                <button type="button" onClick={this.handleClose} className="btn btn-outline-primary">Буцах</button>
+                                <button type="button" onClick={() => this.handleClose()} className="btn btn-outline-primary">Буцах</button>
                                 <button type="button" onClick={this.handleProceed} className="btn gp-bg-primary text-white">Устгах</button>
                             </div>
                         </div>
