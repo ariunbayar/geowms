@@ -4,7 +4,7 @@ import {service} from './service'
 import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
 import {NavLink} from "react-router-dom"
-import Modal from "../Modal"
+
 
 export class Жагсаалт extends Component {
 
@@ -18,10 +18,6 @@ export class Жагсаалт extends Component {
 
         this.state = {
             govorg_list: [],
-            showModal: false,
-            modalTitle: null,
-            modalText: null,
-            modalId: null,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -38,37 +34,18 @@ export class Жагсаалт extends Component {
         })
 
     }
-    modalClose() {
-        this.setState({showModal: false})
-    }
-
-    handleRemove() {
-        const id = this.state.modalId
+    handleRemove(id) {
         service.remove(id).then(({success}) => {
             if (success) this.handleListUpdated()
         })
-        this.modalClose()
 
     }
-
-    modalTrue(id, text) {
-        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
-    }
-
     render() {
-        const {showModal, modalText, modalTitle} = this.state
 
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
-                <Modal 
-                    showModal={showModal} 
-                    modalClose={() => this.modalClose()}
-                    modalAction={() => this.handleRemove()}
-                    text={modalText}
-                    title={modalTitle}
-                    >
-                </Modal>
+
                     <div className="col-md-12">
 
                         {!this.state.is_form_open &&
@@ -83,7 +60,7 @@ export class Жагсаалт extends Component {
                                     <thead>
                                         <tr>
                                             <th scope="col"> # </th>
-                                            <th scope="col"> Байгууллагын нэр</th>
+                                            <th scope="col"> Системүүдийн нэр</th>
                                             <th scope="col"> Токен </th>
                                             <th scope="col"> Үүсгэсэн огноо </th>
                                             <th scope="col"></th>
@@ -96,7 +73,7 @@ export class Жагсаалт extends Component {
                                             <Govorg
                                                 key={values.id}
                                                 values={values}
-                                                handleRemove={() => this.modalTrue(values.id, values.name)}
+                                                handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                                />
                                         )}

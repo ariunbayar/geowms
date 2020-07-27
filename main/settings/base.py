@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_user_agents',
 
     # Dependencies
 
@@ -55,6 +56,16 @@ INSTALLED_APPS = [
     'api.govorg.apps.GovOrgConfig',
 ]
 
+# Cache backend is optional, but recommended to speed up user agent parsing
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
+USER_AGENTS_CACHE = 'default'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -63,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'main.urls'
@@ -130,11 +142,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 LOGIN_URL = 'secure:login'
 LOGIN_REDIRECT_URL = 'bundle:all'
+LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 
+ORDER_SUCCESS = 'bundle:success'
+ORDER_FAIL = 'bundle:failed'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
@@ -146,3 +161,9 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
     },
 }
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'geoportalmn@gmail.com'
+EMAIL_HOST_PASSWORD = 'Geoportal123'
+EMAIL_PORT = 587
