@@ -50,12 +50,6 @@ urlpatterns = [
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
 
-    path('', include(([
-        path('access/', webapp_views.access, name='access'),
-        path('huulga/', webapp_views.huulga, name='huulga'),
-        path('log/', webapp_views.log, name='log'),
-    ], 'back'))),
-
     path('api/байгууллага/', include(([
         path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
