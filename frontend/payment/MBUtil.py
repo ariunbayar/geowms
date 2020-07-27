@@ -1,9 +1,8 @@
 
-from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+from xml.etree.ElementTree import Element, SubElement, tostring
 from Crypto.Cipher import DES3, PKCS1_v1_5
 import binascii
 import datetime
-import base64
 from Crypto.PublicKey import RSA
 
 def objectToXmlAccount(data):
@@ -23,18 +22,14 @@ def objectToXmlAccount(data):
     DescriptionXml.text = AccountName
     AmountXml = SubElement(root, 'Amount')
     AmountXml.text = AccountName
-
     return root
 
 def objectToXmlAccounts(data):
     roots = Element('Accounts')
     roots.extend(data)
-
     return roots
 
-
 def PaymentVerifyRequestMB(amount, encAccounts, encKey):
-    
     generated_on = str(datetime.datetime.now())
     root = Element('Request', {'MsgTime':generated_on})
     OrderID = SubElement(root, 'Bank')
@@ -61,9 +56,7 @@ def PaymentVerifyRequestMB(amount, encAccounts, encKey):
     DeclineURL.text = "localhost:8000/api"
     CancelURL = SubElement(root, 'CancelURL')
     CancelURL.text = "localhost:8000/api"
-
     return root
-
 
 def bytesToHex(array):
     return str(binascii.hexlify(array))
@@ -74,16 +67,12 @@ def encrypts(data):
     datas = bytearray(dataString)
     cipher = DES3.new(key, DES3.MODE_CFB)
     msg = cipher.encrypt(datas)
-    
     return msg
 
 def signKey(data):
-    pemLink = '/home/pc1/Desktop/bankApiTest/LandAdministration_GeoPortal_test.pem'
+    pemLink = '/home/pc1/Desktop/bankApiTest/key.pem'
     f = open(pemLink, 'rb')
     key = RSA.importKey(f.read())
     cipher = PKCS1_v1_5.new(key)
     encrypted_message = cipher.encrypt(data.encode())
     return encrypted_message
-
-def printss():
-    print("sdfklsdnfsdjklfbhsdjkfhsdjkfhsjkdfhsdjkfh")
