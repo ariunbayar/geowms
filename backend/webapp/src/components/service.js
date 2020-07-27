@@ -1,4 +1,4 @@
-import {handleResponse, getGetOptions} from '@/helpers/service'
+import {handleResponse, getGetOptions} from '../helpers/service'
 
 
 export const service = {
