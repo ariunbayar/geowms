@@ -9,7 +9,9 @@ import {GovorgPage} from "./GovorgPage";
 import { СуурьДавхаргаХуудас } from "./СуурьДавхаргаХуудас";
 import {service} from "./service";
 import {ConfigPage} from "./ConfigPage";
-
+import {Log} from "./Log"
+import {Access} from "./Access"
+import {Huulga} from "./Huulga"
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -83,6 +85,9 @@ export default class App extends Component {
           <Switch>
             <Route exact path={"/back/wms/"} component={WMSPage} />
             <Route path={"/back/байгууллага/"} component={GovorgPage} />
+            <Route exact path={"/back/log/"} component={Log} />
+            <Route exact path={"/back/access/"} component={Access} />
+            <Route exact path={"/back/huulga/"} component={Huulga} />
             <Route exact path={"/back/"} component={BundlePage} />
             <Route
               path={"/back/суурь-давхарга/"}

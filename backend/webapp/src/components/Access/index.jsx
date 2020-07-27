@@ -3,7 +3,7 @@ import {Switch, Route} from "react-router-dom"
 
 
 
-export class Log extends Component {
+export class Access extends Component {
 
     constructor(props) {
         super(props)

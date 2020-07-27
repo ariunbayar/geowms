@@ -23,6 +23,7 @@ geoportal_app/media/суурь_давхарга/thumbnail_2x/*
 
 package-lock.json
 node_modules/
+yarn.lock
 
 venv
 node_modules/
