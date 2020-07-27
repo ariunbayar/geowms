@@ -15,7 +15,6 @@ export class ConfigList extends Component {
         this.state = {
             config_list: [],
             disk: {},
-            is_form_open: true,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -47,7 +46,7 @@ export class ConfigList extends Component {
 
     render() {
 
-        const {config_list, is_form_open, showModal, modalText, modalTitle, disk} = this.state
+        const {config_list, disk} = this.state
 
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">

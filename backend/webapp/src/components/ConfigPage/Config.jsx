@@ -25,7 +25,7 @@ export default class Config extends Component {
     handleModalDeleteClose() {
         this.setState({is_modal_delete_open: false})
     }
-    
+
     render() {
 
         const {id, name, value, updated_at} = this.props.values
