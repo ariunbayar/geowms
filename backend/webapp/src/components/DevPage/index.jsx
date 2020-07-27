@@ -29,7 +29,7 @@ export class DevPage extends Component {
 
             <h1>Координатын формат</h1>
 
-            <p>
+            <div>
               <ul>
                 <li>
                   Хэрэглэгчид координатын форматыг үзүүлэхэд энэ форматаар
@@ -64,7 +64,7 @@ export class DevPage extends Component {
                   байдаг
                 </li>
               </ul>
-            </p>
+            </div>
             <h1>Өнгөний код</h1>
             <div className="col-md-3 colordiv">
               <ul>
