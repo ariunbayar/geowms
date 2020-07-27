@@ -27,11 +27,7 @@ export class BundlePage extends Component {
             form_options: {},
             form_options_role: {},
             is_form_open: false,
-            form_values: {...this.initial_form_values},
-            showModal: false,
-            modalTitle: null,
-            modalText: null,
-            modalId: null,
+            form_values: {...this.initial_form_values}
 
         }
 
@@ -77,21 +73,13 @@ export class BundlePage extends Component {
         }
 
     }
-    modalClose() {
-        this.setState({showModal: false})
-    }
 
-    handleRemove() {
-        const id = this.state.modalId
+    handleRemove(id) {
         service.remove(id).then(({success}) => {
             if (success) this.handleSaveSuccess()
         })
-        this.modalClose()
     }
 
-    modalTrue(id, text) {
-        this.setState({showModal: true, modalText: text, modalTitle: "Та итгэлтэй байна уу? ", modalId: id})
-    }
 
     handleEdit(form_values) {
         this.setState({form_values, is_form_open: true})
@@ -114,18 +102,9 @@ export class BundlePage extends Component {
     }
 
     render() {
-        const {showModal, modalText, modalTitle} = this.state
         return (
             <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
-                <Modal 
-                    showModal={showModal} 
-                    modalClose={() => this.modalClose()}
-                    modalAction={() => this.handleRemove()}
-                    text={modalText}
-                    title={modalTitle}
-                    >
-                </Modal>
                     
                     <div className="col-md-12">
 
@@ -154,7 +133,7 @@ export class BundlePage extends Component {
                                             <Bundle
                                                 key={values.id}
                                                 values={values}
-                                                handleRemove={() => this.modalTrue(values.id, values.name)}
+                                                handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                                 handleMove={this.handleMove}
                                             />
@@ -163,7 +142,6 @@ export class BundlePage extends Component {
                                 </table>
                             </>
                         }
-
                         {this.state.is_form_open &&
                             <div className="row">
                                 <div className="col-4">

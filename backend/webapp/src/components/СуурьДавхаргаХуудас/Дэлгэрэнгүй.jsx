@@ -48,14 +48,15 @@ export class Дэлгэрэнгүй extends Component {
 
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
+            {showModal &&               
                 <Modal
-                    showModal={showModal}
                     modalClose={() => this.modalClose()}
                     modalAction={() => this.handleDelete()}
                     text={modalText}
                     title={modalTitle}
                     >
-                </Modal>
+                </Modal>}
+ 
                 <div className="row">
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
@@ -74,7 +75,7 @@ export class Дэлгэрэнгүй extends Component {
                     </div>
 
                     <div className="col-md-12 mb-4">
-                        <img src={thumbnail_1x} srcset={thumbnail_2x + ' 2x'}/>
+                        <img src={thumbnail_1x} srcSet={thumbnail_2x + ' 2x'}/>
                     </div>
 
                     <div className="col-md-12 mb-4">
