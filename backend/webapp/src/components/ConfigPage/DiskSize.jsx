@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import Modal from "@/components/Modal"
+import Modal from "../Modal"
 
 
 export default class DiskSize extends Component {

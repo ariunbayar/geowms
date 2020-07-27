@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import "./styles.css";
 
 
-import Modal from "@/components/Modal"
+import Modal from "../Modal"
 export default class Bundle extends Component {
     constructor(props) {
         super(props)
