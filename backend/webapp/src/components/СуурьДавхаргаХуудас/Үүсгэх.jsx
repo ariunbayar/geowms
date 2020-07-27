@@ -3,7 +3,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 
 import {service} from './service'
-import {TextField} from '@/helpers/forms'
+import {TextField} from '../../helpers/forms'
 
 import 'ol/ol.css'
 

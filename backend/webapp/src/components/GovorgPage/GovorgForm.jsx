@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {TextField} from '@/helpers/forms'
+import {TextField} from '../../helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 

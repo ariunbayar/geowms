@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
-import Modal from "@/components/Modal"
+import Modal from "../Modal"
 import {service} from './service'
 
 
