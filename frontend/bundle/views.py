@@ -48,21 +48,19 @@ def detail(request, pk):
 @ajax_required
 def wms_layers(request, pk):
 
+    roles = {1}
     if request.user.is_authenticated:
-        userObject = request.user
-        role = userObject.roles.all().values_list('id').first()
-    else:
-        role = 1
+        roles |= set(request.user.roles.all().values_list('id', flat=True))
 
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
-    qs_layers = bundle.layers.filter(bundlelayer__role_id=role).order_by('wms__created_at', 'sort_order')
+    qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order')
 
     def _layer_to_display(ob):
         bundle_layers = BundleLayer.objects.filter(
                 bundle_id=pk,
                 layer_id=ob.id,
-                role_id=role
+                role_id__in=roles
             )
         return {
                 'name': ob.name,
