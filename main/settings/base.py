@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'frontend.mobile.apps.MobileConfig',
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
     'frontend.secure.apps.SecureConfig',
+    'frontend.payment.apps.PaymentConfig',
     'frontend.page.apps.PageConfig',
 
     # Backend apps
@@ -148,9 +149,10 @@ LOGOUT_REDIRECT_URL = 'bundle:all'
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 
-ORDER_SUCCESS = 'bundle:success'
-ORDER_FAIL = 'bundle:failed'
+PAYMENT_SUCCESS_REDIRECT_URL = 'bundle:success'
+PAYMENT_FAIL_REDIRECT_URL = 'bundle:failed'
 
+MONGOL_BANK_SUCCESS_HTML = os.path.join(BASE_DIR, 'frontend/payment/templates/payment/mongolbank.html')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
 
@@ -161,9 +163,3 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
     },
 }
-
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'geoportalmn@gmail.com'
-EMAIL_HOST_PASSWORD = 'Geoportal123'
-EMAIL_PORT = 587
