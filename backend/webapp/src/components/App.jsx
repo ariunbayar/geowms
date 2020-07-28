@@ -83,7 +83,7 @@ export default class App extends Component {
         </nav>
         <div className="main-content">
           <Switch>
-            <Route exact path={"/back/wms/"} component={WMSPage} />
+            <Route path={"/back/wms/"} component={WMSPage} />
             <Route path={"/back/байгууллага/"} component={GovorgPage} />
             <Route exact path={"/back/log/"} component={Log} />
             <Route exact path={"/back/access/"} component={Access} />

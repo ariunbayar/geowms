@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import Modal from "../Modal"
+import {NavLink} from "react-router-dom"
 
 export default class WMS extends Component {
 
@@ -41,9 +42,9 @@ export default class WMS extends Component {
                     {created_at}
                 </td>
                 <td>
-                    <a href="#" onClick={this.props.handleEdit}>
+                    <NavLink to={`/back/wms/${id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    </a>
+                    </NavLink>
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
