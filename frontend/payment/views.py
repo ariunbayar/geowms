@@ -1,18 +1,18 @@
 import requests
-
+from xml.etree.ElementTree import tostring
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
 from django.http import JsonResponse
 
 from geoportal_app.models import User
-
 from .MBUtil import (
         objectToXmlAccount,
         objectToXmlAccounts,
         PaymentVerifyRequestMB,
         bytesToHex,
         encrypts,
+        signKey
     )
 
 
@@ -37,8 +37,8 @@ def dictionaryRequest(request):
         encAccounts = bytesToHex(encryptedAccounts)
         #encrypt Desede key of payment request and convert to hex
 
-        ##encryptedKey = signKey("encAccounts")
-        ##encKey = bytesToHex(encryptedKey)
+        #encryptedKey = signKey(encAccounts)
+        #encKey = bytesToHex(encryptedKey)
         encKey = encAccounts
         #create request xml
         finalRequest = PaymentVerifyRequestMB(allLesson.amount, encAccounts, encKey)
