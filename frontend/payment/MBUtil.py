@@ -1,9 +1,9 @@
-
 from xml.etree.ElementTree import Element, SubElement, tostring
 from Crypto.Cipher import DES3, PKCS1_v1_5
 import binascii
 import datetime
 from Crypto.PublicKey import RSA
+
 
 def objectToXmlAccount(data):
     Bank = data.bank
@@ -24,10 +24,12 @@ def objectToXmlAccount(data):
     AmountXml.text = AccountName
     return root
 
+
 def objectToXmlAccounts(data):
     roots = Element('Accounts')
     roots.extend(data)
     return roots
+
 
 def PaymentVerifyRequestMB(amount, encAccounts, encKey):
     generated_on = str(datetime.datetime.now())
@@ -58,8 +60,10 @@ def PaymentVerifyRequestMB(amount, encAccounts, encKey):
     CancelURL.text = "localhost:8000/api"
     return root
 
+
 def bytesToHex(array):
     return str(binascii.hexlify(array))
+
 
 def encrypts(data):
     dataString = tostring(data, encoding='utf-8')
@@ -68,6 +72,7 @@ def encrypts(data):
     cipher = DES3.new(key, DES3.MODE_CFB)
     msg = cipher.encrypt(datas)
     return msg
+
 
 def signKey(data):
     pemLink = '/home/pc1/Desktop/bankApiTest/key.pem'

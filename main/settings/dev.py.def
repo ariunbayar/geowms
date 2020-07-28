@@ -37,9 +37,9 @@ DEBUG_TOOLBAR_CONFIG = {
 
 XYP_DAN = {
     'ENDPOINTS': {
-        'LOGIN': 'https://tz.mohs.mn/api/login/?',
-        'AUTHORIZE': 'https://tz.mohs.mn/api/auth/?',
-        'SERVICE': 'https://tz.mohs.mn/api/service/?',
+        'LOGIN': 'https://<domain>/api/login/?',
+        'AUTHORIZE': 'https://<domain>/api/auth/?',
+        'SERVICE': 'https://<domain>/api/service/?',
     },
     'CLIENT_KEY': '',
     'CLIENT_SECRET': '',
@@ -47,7 +47,7 @@ XYP_DAN = {
 }
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = ''
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587

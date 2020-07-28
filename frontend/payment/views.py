@@ -1,40 +1,42 @@
-from django.shortcuts import render
-from django.conf import settings
-from django.contrib import auth, messages
-from django.http import Http404
-from django.shortcuts import render, redirect
-from django.views.decorators.http import require_GET, require_POST
-from django.core.mail import EmailMessage
-from django.core.mail import EmailMultiAlternatives
-from geoportal_app.models import User, Role
-from django.template.loader import get_template
-from django.template.loader import render_to_string
 import requests
-from django.http import JsonResponse, HttpResponse
 
-from .MBUtil import *
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import redirect
+from django.http import JsonResponse
+
+from geoportal_app.models import User
+
+from .MBUtil import (
+        objectToXmlAccount,
+        objectToXmlAccounts,
+        PaymentVerifyRequestMB,
+        bytesToHex,
+        encrypts,
+    )
 
 
 class Orders():
     pass
 
+
 def dictionaryRequest(request):
     if request.method == 'GET':
         allLesson = Orders()
-        allLesson.bank= 910000
-        allLesson.accountId=900012408
-        allLesson.accountName="Tuguldur"
-        allLesson.description="Газар зарсан"
-        allLesson.amount=2000
-        # Account xml 
+        allLesson.bank = 910000
+        allLesson.accountId = 900012408
+        allLesson.accountName = "Tuguldur"
+        allLesson.description = "Газар зарсан"
+        allLesson.amount = 2000
+        # Account xml
         account = objectToXmlAccount(allLesson)
-        # Accounts xml 
+        # Accounts xml
         accounts = objectToXmlAccounts(account)
         #encrypt accounts and convert to hex
         encryptedAccounts = encrypts(accounts)
         encAccounts = bytesToHex(encryptedAccounts)
         #encrypt Desede key of payment request and convert to hex
-        
+
         ##encryptedKey = signKey("encAccounts")
         ##encKey = bytesToHex(encryptedKey)
         encKey = encAccounts
@@ -47,10 +49,8 @@ def dictionaryRequest(request):
         }
         headers = {**BASE_HEADERS}
 
-        queryargs = request.GET
         base_url = 'http://localhost:8000/dictionaryResponse'
 
-        
         rsp = requests.get(base_url, data={"order": finalRequest}, headers=headers)
 
         if rsp.status_code == 200:
@@ -71,4 +71,3 @@ def dictionaryResponse(request):
 
     if request.method == 'GET':
         return JsonResponse({'success': True})
-
