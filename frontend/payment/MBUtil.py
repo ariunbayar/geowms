@@ -3,6 +3,7 @@ from Crypto.Cipher import DES3, PKCS1_v1_5
 import binascii
 import datetime
 from Crypto.PublicKey import RSA
+from django.conf import settings
 
 
 def objectToXmlAccount(data):
@@ -13,15 +14,15 @@ def objectToXmlAccount(data):
     Amount = data.amount
     root = Element('Account')
     BankXml = SubElement(root, 'Bank')
-    BankXml.text = AccountName
+    BankXml.text = Bank
     AccountIdXml = SubElement(root, 'AccountId')
-    AccountIdXml.text = AccountName
+    AccountIdXml.text = AccountId
     AccountNameXml = SubElement(root, 'AccountName')
     AccountNameXml.text = AccountName
     DescriptionXml = SubElement(root, 'Description')
-    DescriptionXml.text = AccountName
+    DescriptionXml.text = Description
     AmountXml = SubElement(root, 'Amount')
-    AmountXml.text = AccountName
+    AmountXml.text = Amount
     return root
 
 
@@ -33,7 +34,7 @@ def objectToXmlAccounts(data):
 
 def PaymentVerifyRequestMB(amount, encAccounts, encKey):
     generated_on = str(datetime.datetime.now())
-    root = Element('Request', {'MsgTime':generated_on})
+    root = Element('Request', {'MsgTime': generated_on})
     OrderID = SubElement(root, 'Bank')
     OrderID.text = "1405085651"
     MerchantID = SubElement(root, 'MerchantID')
@@ -67,7 +68,7 @@ def bytesToHex(array):
 
 def encrypts(data):
     dataString = tostring(data, encoding='utf-8')
-    key = b'0123456789abcdef'
+    key = settings.PAYMENT['DES3_ENCRYPTION_KEY']
     datas = bytearray(dataString)
     cipher = DES3.new(key, DES3.MODE_CFB)
     msg = cipher.encrypt(datas)
@@ -75,7 +76,7 @@ def encrypts(data):
 
 
 def signKey(data):
-    pemLink = '/home/pc1/Desktop/bankApiTest/key.pem'
+    pemLink = settings.PAYMENT['SIGN_KEY_LOCATION']
     f = open(pemLink, 'rb')
     key = RSA.importKey(f.read())
     cipher = PKCS1_v1_5.new(key)
