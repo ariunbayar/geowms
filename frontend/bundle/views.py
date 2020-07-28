@@ -91,9 +91,9 @@ def purchase(request):
 
 def success(request):
 
-    return render(request, 'bundle/success.html')
+    return render(request, 'bundle/purchase_success.html')
 
 
 def failed(request):
 
-    return render(request, 'bundle/failed.html')
+    return render(request, 'bundle/purchase_failed.html')
