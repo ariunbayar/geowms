@@ -21,8 +21,7 @@ import {Modal} from './controls/Modal'
 
 import "./styles.css"
 import {service} from './service'
-import {Sidebar} from './Sidebar'
-
+import {SidebarButton} from './Sidebar'
 
 export default class BundleMap extends Component {
 
@@ -204,6 +203,7 @@ export default class BundleMap extends Component {
                     undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
+                new SidebarButton({map_wms_list: this.state.map_wms_list, handleSetCenter: this.handleSetCenter}),
                 new ScaleLine(),
                 this.controls.modal,
                 this.controls.coordinateCopy,
@@ -325,18 +325,6 @@ export default class BundleMap extends Component {
                         <div className="🌍">
                             <div id="map"></div>
 
-                            <div className={'col-md-3 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
-                                <Sidebar
-                                    map_wms_list={this.state.map_wms_list}
-                                    handleSetCenter={this.handleSetCenter}
-                                />
-                            </div>
-
-                            <div className={'⚙-toggle'}>
-                                <a href="#" onClick={this.toggleSidebar}>
-                                    <i className="fa fa-bars fa-lg" aria-hidden="true"></i>
-                                </a>
-                            </div>
                         </div>
                     </div>
 
