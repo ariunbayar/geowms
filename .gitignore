@@ -3,13 +3,7 @@ activate
 __pycache__
 
 backend/webapp/static/assets/js/backend/webapp.js
-backend/webapp/static/assets/js/backend/webapp.js.map
-backend/webapp/static/assets/js/backend/webapp.js
-
-frontend/mobile/static/assets/js/mobile/detail.js.map
 frontend/mobile/static/assets/js/frontend/mobile.js
-
-frontend/bundle/static/assets/js/bundle/detail.js.map
 frontend/bundle/static/assets/js/frontend/bundle.js
 
 main/settings/dev.py
@@ -23,6 +17,6 @@ geoportal_app/media/суурь_давхарга/thumbnail_2x/*
 
 package-lock.json
 node_modules/
+yarn.lock
 
 venv
-node_modules/
