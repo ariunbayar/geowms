@@ -1,6 +1,21 @@
 import React, { Component } from "react";
 import "./style.css";
 
+
+class LinkExternal extends Component {
+
+    render() {
+        return (
+            <a href={this.props.href} target="_blank">
+                {this.props.text || this.props.href}
+                {} <i className="fa fa-external-link" aria-hidden="true"></i>
+            </a>
+        )
+    }
+
+}
+
+
 export class DevPage extends Component {
   render() {
     return (
@@ -10,21 +25,23 @@ export class DevPage extends Component {
             <h1>Libraries</h1>
 
             <p>
-              <strong>Fontawesome 4.7.0: </strong>
-              <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">
-                {"https://fontawesome.com/v4.7.0/icons/ "}
-                <i className="fa fa-external-link" aria-hidden="true"></i>
-              </a>
+                <strong>Fontawesome 4.7.0: </strong>
+                <LinkExternal href="https://fontawesome.com/v4.7.0/icons/"/>
             </p>
             <p>
-              <strong>Bootstrap 4.5.0: </strong>
-              <a
-                href="https://getbootstrap.com/docs/4.5/components/alerts/"
-                target="_blank"
-              >
-                {"https://getbootstrap.com/docs/4.5/components/alerts/ "}
-                <i className="fa fa-external-link" aria-hidden="true"></i>
-              </a>
+                <strong>Bootstrap 4.5.0: </strong>
+                <LinkExternal href="https://getbootstrap.com/docs/4.5/components/alerts/"/>
+            </p>
+            <p>
+                <strong>react-chartjs-2 (2.9.0): </strong><br/>
+                <ul>
+                    <li>
+                        <LinkExternal href="http://jerairrest.github.io/react-chartjs-2/"/>
+                        {} is a react wrapper for
+                        {} <LinkExternal href="https://www.chartjs.org/docs/latest/" text="Chart.js 2"/>
+                    </li>
+                    <li>NPM: <LinkExternal href="https://www.npmjs.com/package/react-chartjs-2"/></li>
+                </ul>
             </p>
 
             <h1>Координатын формат</h1>
