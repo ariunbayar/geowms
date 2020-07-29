@@ -1,4 +1,5 @@
 from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 
 from main.decorators import ajax_required
@@ -69,3 +70,11 @@ def дэлгэрэнгүй(request, pk):
     }
 
     return JsonResponse(rsp)
+@require_POST
+@ajax_required
+def userdetailChange(request):
+    user=request.user
+    user({'is_active':False})
+    user.save()
+    print("success")
+    return JsonResponse({'success': True})
