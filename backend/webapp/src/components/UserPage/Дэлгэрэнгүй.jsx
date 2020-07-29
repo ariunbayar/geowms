@@ -13,19 +13,53 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             user_detail: [],
             roles: [],
+            all_role:[],
+            role_id:'',
+            roleId: null,
+            check:false
         }
+        this.handleOnClick=this.handleOnClick.bind(this)
+        this.getRole=this.getRole.bind(this)
+        this.handleSaveSuccess=this.handleSaveSuccess.bind(this)
+    }
+    
+    componentDidMount() {
+        this.handleSaveSuccess()
+    }
+    handleSaveSuccess(){
+        service
+        .detail(this.props.match.params.id)
+        .then(({user_detail,roles, all_role}) => {
+            this.setState({user_detail, roles,all_role})
+            roles.map(role => this.setState({roleId: role.id}))
+        })
+    }
+    getRole(){
+        const id =this.props.match.params.id
+        const roleId =this.state.role_id
+        const value={'roleId':roleId, 'id':id}
+        service.roleCreate(value).then(({success, item}) => {
+            if (success) 
+            {
+                this.handleSaveSuccess()
+                this.setState({check:false})
+
+            }
+        })
     }
 
-    componentDidMount() {
-        service
-            .detail(this.props.match.params.id)
-            .then(({user_detail,roles}) => {
-                this.setState({user_detail, roles})
-            })
+    handleOnClick(id){
+       this.setState({
+           role_id:id,
+           check:true,
+           roleId: id
+       })
     }
+
 
     render() {
         const {id, first_name, email, is_active, is_sso, is_superuser, last_name, gender, username, last_login, date_joined} = this.state.user_detail
+        const check=this.state.check
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
@@ -48,13 +82,32 @@ export class Дэлгэрэнгүй extends Component {
                         <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>
                     </div>
                     <div className="col-md-8 mb-4">
-                        <h4>Эрхийн түвшин</h4>
-                        <ul>
-                        {this.state.roles.map( role =>
-                            <li key={role.id}>{role.name}</li>
-                        )}
-                        </ul>
-                    </div>
+                        <h5>Хэрэглэгчийн одоогийн эрхийн түвшин </h5>
+                          <ul>{this.state.roles.map(bla => <li key={bla.id} style={{listStyleType:"none"}}>{bla.name}</li>)}</ul>
+                          <h4>Хэрэглэгчийн Эрхийн түвшинүүд </h4>
+                          <table>
+                              <tbody>
+                                     {this.state.all_role.map(role => 
+                                     <tr key={role.id}>
+                                         <td>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={role.id === this.state.roleId} 
+                                                    name="input" 
+                                                    onChange={() => this.handleOnClick(role.id)}/>
+                                                &nbsp; {role.name}
+                                        </td>
+                                     </tr>)
+                                      }
+                              </tbody>
+                          </table>
+                           
+                          <br/> 
+                            {check && <button type="button" className="btn btn-outline-primary" onClick={this.getRole}>Хадгалах</button>}
+                    </div> 
+                <div>
+
+                </div>
                 </div>
             </div>
         )
