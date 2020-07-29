@@ -11,9 +11,9 @@ element.style {
     position: fixed;
  }
 
-.🌍 > .⚙ {
-    position: fixed;
-    top: 180px;
+.⚙ {
+    position: absolute;
+    top: 1%;
     right: 70px;
     bottom: 150px;
     padding-top: 1rem;
@@ -23,10 +23,17 @@ element.style {
     -webkit-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
     -moz-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
     box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    opacity: 1;
+
 
 }
+.⚙.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .1s linear, visibility 0s linear .1s;
+}
 
-.🌍 > .⚙-toggle{
+.⚙-toggle{
     position: absolute;
     top: 7px;
     right: 12px;
