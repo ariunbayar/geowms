@@ -7,6 +7,7 @@ export const service = {
     roleCreate,
     roleRemove,
     defaultCheckUpdate,
+    detail
 }
 
 const prefix = '/back'
@@ -77,6 +78,13 @@ function create(values) {
     }
 
     return fetch(`${prefix}/bundle/create/`, opts).then(handleResponse)
+}
+
+
+function detail(id) {
+    const requestOptions = {..._getGetOptions()}
+
+    return fetch(`${prefix}/bundle/${id}/updatemore/`, requestOptions).then(handleResponse)
 }
 
 

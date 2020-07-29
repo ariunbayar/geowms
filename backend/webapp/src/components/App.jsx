@@ -83,12 +83,11 @@ export default class App extends Component {
         </nav>
         <div className="main-content">
           <Switch>
-            <Route exact path={"/back/wms/"} component={WMSPage} />
+            <Route path={"/back/wms/"} component={WMSPage} />
             <Route path={"/back/байгууллага/"} component={GovorgPage} />
             <Route exact path={"/back/log/"} component={Log} />
             <Route exact path={"/back/access/"} component={Access} />
             <Route exact path={"/back/huulga/"} component={Huulga} />
-            <Route exact path={"/back/"} component={BundlePage} />
             <Route
               path={"/back/суурь-давхарга/"}
               component={СуурьДавхаргаХуудас}
@@ -96,6 +95,7 @@ export default class App extends Component {
             <Route exact path={"/back/dev/"} component={DevPage} />
             <Route path={"/back/user/"} component={UserPage} />
             <Route path={"/back/тохиргоо/"} component={ConfigPage} />
+            <Route path={"/back/"} component={BundlePage} />
           </Switch>
         </div>
       </BrowserRouter>
