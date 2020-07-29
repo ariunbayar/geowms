@@ -19,6 +19,7 @@ def _get_wms_display(request, wms):
         'id': wms.id,
         'name': wms.name,
         'url': wms.url,
+        'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
@@ -97,6 +98,21 @@ def move(request, payload):
         'success': True,
     }
 
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def activeUpdate(request, payload):
+
+    wms_id = payload.get('id')
+    is_active = payload.get('is_active')
+
+    WMS.objects.filter(pk=wms_id).update(is_active=is_active)
+    rsp = {
+        'success': True,
+    }
     return JsonResponse(rsp)
 
 

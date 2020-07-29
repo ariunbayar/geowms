@@ -22,6 +22,7 @@ urlpatterns = [
         path('layerAdd/', wms_views.layerAdd, name='layerAdd'),
         path('layerRemove/', wms_views.layerRemove, name='layerRemove'),
         path('move/', wms_views.move, name='move'),
+        path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
     ], 'wms'))),
