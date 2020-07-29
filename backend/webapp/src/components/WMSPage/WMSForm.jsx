@@ -11,10 +11,10 @@ export class WMSForm extends Component {
         super(props)
 
         this.state = {
-            id: 1,
-            name: null,
-            url: null,
-            public_url: null,
+            id: props.match.params.id,
+            name: '',
+            url: '',
+            public_url: '',
             layers: [],
             layers_all: [],
             layer_choices: [],
@@ -24,12 +24,68 @@ export class WMSForm extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.loadLayers = this.loadLayers.bind(this)
+        this.loadData = this.loadData.bind(this)
+        this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
 
     }
 
 
     componentDidMount() {
-        //this.state.id && this.loadLayers(this.state.public_url)
+        const id = this.props.match.params.id
+        if(id)
+        {
+            this.loadData()
+        }
+        
+        
+    }
+
+    componentDidUpdate(prevState) {
+
+
+    }
+
+
+    handleSave() {
+        const id = this.props.match.params.id
+        const values = this.state
+        if (id) {
+            service.update(values).then(({success, item}) => {
+                if (success) {this.props.history.push( '/back/wms/')}
+            })
+
+        } else {
+
+            service.create(values).then(({success, item}) => {
+                if (success) {this.props.history.push( '/back/wms/')}
+            })
+
+        }
+
+    }
+
+    loadData(){
+        const id = this.props.match.params.id
+        service.detail(id).then(({wms_list}) => {
+            if (wms_list) 
+            {
+                {wms_list.map((wms, idx) =>
+                    this.setState({name: wms.name ,url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: []})
+                )}
+                this.loadLayers(this.state.public_url)
+                this.handleWmsLayerRefresh()
+            }
+        })
+
+    }
+
+    handleWmsLayerRefresh() {
+        const id = this.props.match.params.id
+        service.wmsLayerall(id).then(({layers_all}) => {
+            if (layers_all) {
+                this.setState({layers_all})
+            }
+        })
     }
 
     loadLayers(public_url) {
@@ -43,9 +99,6 @@ export class WMSForm extends Component {
         this.setState({[field]: e.target.value})
     }
 
-    handleSave() {
-    }
-
     handleLayerToggle(e, layer) {
         let layers = this.state.layers
         const wmsId = this.state.id
@@ -57,7 +110,7 @@ export class WMSForm extends Component {
             service.layerAdd(layerName, wmsId, legendURL, layerCode).then(({success}) => {
                 if (success) 
                 {
-                    //this.props.handleWmsLayerRefresh(wmsId)
+                    this.handleWmsLayerRefresh()
                 }
             })
 
@@ -68,7 +121,7 @@ export class WMSForm extends Component {
             service.layerRemove(layerCode, wmsId).then(({success}) => {
                 if (success) 
                 {
-                    //this.props.handleWmsLayerRefresh(wmsId)
+                    this.handleWmsLayerRefresh()
                 }
             })
 
@@ -156,7 +209,7 @@ export class WMSForm extends Component {
                                     <WMSCheckFormSort 
                                         wmslayers={layers_all} 
                                         wmsId={id}
-                                        handleWmsLayerRefresh={this.props.handleWmsLayerRefresh}>
+                                        handleWmsLayerRefresh={this.handleWmsLayerRefresh}>
 
                                     </WMSCheckFormSort>
                                     <div className="form-group">

@@ -143,6 +143,20 @@ def all(request):
 
     return JsonResponse(rsp)
 
+@require_GET
+@ajax_required
+def updateMore(request, pk):
+    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
+    form_options = _get_bundle_options()
+    form_options_role = _get_role_options()
+
+    rsp = {
+        'bundle_list': bundle_list,
+        'form_options': form_options,
+        'form_options_role': form_options_role,
+    }
+    return JsonResponse(rsp)
+
 
 @require_POST
 @ajax_required

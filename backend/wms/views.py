@@ -35,6 +35,16 @@ def all(request):
     return JsonResponse({'wms_list': wms_list})
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def updateMore(request, pk):
+
+    print("sadsad")
+    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.filter(id=pk)]
+    return JsonResponse({'wms_list': wms_list})
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)

@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import "./styles.css";
-
-
 import Modal from "../Modal"
+import {NavLink} from "react-router-dom"
+
 export default class Bundle extends Component {
     constructor(props) {
         super(props)
@@ -48,9 +48,9 @@ export default class Bundle extends Component {
                 </td>
 
                 <td>
-                    <a href="#" onClick={this.props.handleEdit}>
+                <NavLink to={`/back/${id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    </a>
+                </NavLink>
                 </td>
 
                 <td>
