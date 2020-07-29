@@ -141,6 +141,14 @@ export class WMSForm extends Component {
                     <div className="col-md-12">
                         <div className="row">
                             <div className="col-4 shadow-lg p-3 mb-5 bg-white rounded">
+
+                            <div className="form-group">
+                                        <NavLink to={`/back/wms/`}>
+                                            <button className="btn btn-block gp-outline-primary"  >
+                                                    Буцах
+                                            </button>
+                                        </NavLink>
+                                    </div>
                                 <div className="form-group">
                                     <label htmlFor="id_name">Нэр</label>
                                     <input
@@ -170,13 +178,6 @@ export class WMSForm extends Component {
                                         </button>
                                     </div>
 
-                                    <div className="form-group">
-                                        <NavLink to={`/back/wms/`}>
-                                            <button className="btn btn-block gp-outline-primary"  >
-                                                    Буцах
-                                            </button>
-                                        </NavLink>
-                                    </div>
 
                                     <dl>
                                         <dt> Endpoint </dt>
@@ -212,14 +213,7 @@ export class WMSForm extends Component {
                                         handleWmsLayerRefresh={this.handleWmsLayerRefresh}>
 
                                     </WMSCheckFormSort>
-                                    <div className="form-group">
-                                        <NavLink to={`/back/wms/`}>
-
-                                            <button className="btn btn-block gp-outline-primary" >
-                                                    Буцах
-                                            </button>
-                                        </NavLink>
-                                    </div>
+                                
                                 </div>
                             </div>
                         </div>
