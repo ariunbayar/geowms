@@ -74,7 +74,9 @@ def дэлгэрэнгүй(request, pk):
 @ajax_required
 def userdetailChange(request):
     user=request.user
-    user({'is_active':False})
+    user=user({'is_active':True})
     user.save()
+    print("success")
+    print("success")
     print("success")
     return JsonResponse({'success': True})
