@@ -27,6 +27,7 @@
         "@toast-ui/editor": "^2.1.2",
         "@toast-ui/react-editor": "^2.1.2",
         "axios": "^0.19.2",
+        "chart.js": "^2.9.3",
         "codemirror": "^5.53.2",
         "formik": "^2.1.4",
         "ol": "^6.3.1",
