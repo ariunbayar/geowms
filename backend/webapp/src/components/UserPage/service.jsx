@@ -1,6 +1,7 @@
 export const service = {
     getAll,
     detail,
+    roleCreate,
 }
 
 const prefix = '/back/api/user'
@@ -20,12 +21,36 @@ function handleResponse(response) {
         return data
     })
 }
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 function _getGetOptions() {
     return {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
+        },
+    }
+}
+function _getPostOptions() {
+    return {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken'),
         },
     }
 }
@@ -44,4 +69,11 @@ function detail(id) {
     }
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
+}
+function roleCreate(payload){
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(payload),
+    }
+    return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
 }
