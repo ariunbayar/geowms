@@ -14,8 +14,8 @@ export class Item extends Component {
                 <div className="card shadow-sm">
                     <div className="row no-gutters">
                         <div className="col-md-7">
-                            <div className="card-body">
-                                <p className="card-text">
+                            <div className="card-body pb-0">
+                                <p className="card-text mb-0">
                                     <NavLink className="stretched-link" to={`/back/суурь-давхарга/${id}/дэлгэрэнгүй/`}>
                                         <strong>{name}</strong>
                                     </NavLink>
@@ -26,7 +26,7 @@ export class Item extends Component {
 
                             </div>
                         </div>
-                        
+
                         <div className="col-md-1 d-flex align-items-center d-flex justify-content-center">
                             <div className="row no-gutters">
                                 <a href="#" onClick={event => this.props.handleMove(id, 'up')}>
