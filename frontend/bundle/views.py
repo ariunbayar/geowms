@@ -70,12 +70,13 @@ def wms_layers(request, pk):
             }
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
-        wms_data = {
-            'name': wms.name,
-            'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
-            'layers': [_layer_to_display(layer) for layer in layers],
-        }
-        wms_list.append(wms_data)
+        if wms.is_active:
+            wms_data = {
+                'name': wms.name,
+                'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+                'layers': [_layer_to_display(layer) for layer in layers],
+            }
+            wms_list.append(wms_data)
 
     rsp = {
         'wms_list': wms_list,

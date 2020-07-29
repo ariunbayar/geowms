@@ -12,7 +12,8 @@ export const service = {
     titleUpdate,
     layerAdd,
     layerRemove,
-    detail
+    detail,
+    wmsIsActiveUpdate
 }
 
 const prefix = '/back'
@@ -142,6 +143,15 @@ function update(values) {
     }
 
     return fetch(`${prefix}/wms/update/`, opts).then(handleResponse)
+}
+
+function wmsIsActiveUpdate(id, is_active) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, is_active}),
+    }
+
+    return fetch(`${prefix}/wms/activeUpdate/`, opts).then(handleResponse)
 }
 
 

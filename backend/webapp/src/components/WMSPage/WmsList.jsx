@@ -129,6 +129,7 @@ export class WmsList extends Component {
                                             <th scope="col"> Url </th>
                                             <th scope="col"> Endpoint </th>
                                             <th scope="col"> Огноо</th>
+                                            <th scope="col"> Эрх</th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
                                         </tr>
