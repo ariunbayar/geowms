@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {NavLink} from 'react-router-dom'
-import Modal from "../Modal"
+import Modal from "./Modal_l"
 
 
 
@@ -14,14 +14,16 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             user_detail: [],
             roles: [],   
-            active:false,
-            is_modal_limit_open:false     
+            user_active:'True',
+            is_modal_limit_open:false   
+
         }
         this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
         this.handleModalLimitOpen=this.handleModalLimitOpen.bind(this)
-        this.handleLimit=this.handleLimit.bind(this)
         this.handleActivate=this.handleActivate.bind(this)
         this.handleUpdate=this.handleUpdate.bind(this)
+        this.ChangeActive=this.ChangeActive.bind(this)
+        this.handleDisActive=this.handleDisActive.bind(this)
 
     }
 
@@ -29,16 +31,24 @@ export class Дэлгэрэнгүй extends Component {
         this.handleUpdate()
     }
     handleModalLimitOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_limit_open: true})
+       this.setState({
+        is_modal_limit_open:true
+       })
+        
     }
     handleModalLimitClose() {
         this.setState({is_modal_delete_open: false})
     }
-    handleLimit(){
-        service.userdetailChange(this.props.match.params.id).then(({success, item}) => {
-            if(success) this.handleUpdate()
-        })
+    ChangeActive(){
+        const active=this.state.user_active
+        console.log(active)
+        const value={'status':active}
+        service.userdetailChange(value).then(({success, item}) => {
+        if(success) this.handleUpdate()
+        })   
+
+            
+
     }
     handleUpdate(){
         service
@@ -48,7 +58,16 @@ export class Дэлгэрэнгүй extends Component {
         })
     }
     handleActivate(){
-        alert("idevhjvvleh")
+        this.setState({
+            user_active:"True"
+        })
+        this.ChangeActive()
+    }
+    handleDisActive(){
+        this.setState({
+            user_active:"False"
+        })
+        this.ChangeActive()
     }
     render() {
         const {id, first_name, email, is_active, is_sso, is_superuser, last_name, gender, username, last_login, date_joined} = this.state.user_detail
@@ -80,8 +99,8 @@ export class Дэлгэрэнгүй extends Component {
                         <div>
                         {is_modal_limit_open &&
                         <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.handleLimit}
+                            modalClose={this.handleModalLimitClose}
+                            modalAction={this.handleDisActive}
                             text={"Та хэрэглэгчийн системд нэвтрэх эрхийг хязгаарлах гэж байна. Хязгаарлагдсан хэрэглэгч систем нэвтрэх эрхгүй болохыг анхаарна уу!"}
                             title="Тохиргоог хязгаарлах"
                         />

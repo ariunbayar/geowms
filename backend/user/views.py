@@ -72,11 +72,12 @@ def дэлгэрэнгүй(request, pk):
     return JsonResponse(rsp)
 @require_POST
 @ajax_required
-def userdetailChange(request):
+def userdetailChange(request,paylaod):
     user=request.user
-    user=user({'is_active':True})
-    user.save()
-    print("success")
-    print("success")
-    print("success")
-    return JsonResponse({'success': True})
+    active=paylaod.get("status")
+    active=user.is_active
+    print(active)
+    print(active)
+    print(active)
+    print(active)
+   

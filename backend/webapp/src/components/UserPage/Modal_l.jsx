@@ -1,5 +1,4 @@
 import React, {Component, Fragment} from "react"
-import Modal from "./Modal_l"
 
 export default class Modal extends Component {
 
