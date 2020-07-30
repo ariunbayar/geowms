@@ -44,7 +44,7 @@ export default class Govorg extends Component {
                 </th>
 
                 <td>
-                    <NavLink to={`/back/байгууллага/${id}/дэлгэрэнгүй/`}>
+                    <NavLink to={`/back/систем/${id}/дэлгэрэнгүй/`}>
                         {name}
                     </NavLink>
                 </td>
@@ -56,7 +56,7 @@ export default class Govorg extends Component {
                     {created_at}
                 </td>
                 <td>
-                    <NavLink to={`/back/байгууллага/${id}/засах/`}>
+                    <NavLink to={`/back/систем/${id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </td>

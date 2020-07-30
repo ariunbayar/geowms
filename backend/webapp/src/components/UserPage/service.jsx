@@ -1,7 +1,8 @@
 export const service = {
     getAll,
     detail,
-    userDetailChange
+    userDetailChange,
+    roleCreate,
 }
 
 const prefix = '/back/api/user'
@@ -45,7 +46,6 @@ function _getGetOptions() {
         },
     }
 }
-
 function _getPostOptions() {
     return {
         method: 'POST',
@@ -55,6 +55,7 @@ function _getPostOptions() {
         },
     }
 }
+
 
 function getAll() {
     const requestOptions = {
@@ -71,6 +72,7 @@ function detail(id) {
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
 }
+
 function userDetailChange(id, is_active){
     const opts = {
     ..._getPostOptions(),
@@ -78,3 +80,11 @@ function userDetailChange(id, is_active){
     }
     return fetch(`${prefix}/userDetailChange/`, opts).then(handleResponse)
     }
+
+function roleCreate(payload){
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(payload),
+    }
+    return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
+}

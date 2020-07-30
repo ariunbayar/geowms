@@ -43,7 +43,7 @@ export class Дэлгэрэнгүй extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <NavLink className="btn btn-outline-primary" exact to={'/back/байгууллага/'}>
+                        <NavLink className="btn btn-outline-primary" exact to={'/back/систем/'}>
                             <i className="fa fa-angle-double-left"></i> Буцах
                         </NavLink>
                     </div>

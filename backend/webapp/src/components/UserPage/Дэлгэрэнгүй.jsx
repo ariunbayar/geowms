@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {NavLink} from 'react-router-dom'
-import Modal from "./Modal_l"
+import Modal from "./ModalLimit"
 
 
 
@@ -14,6 +14,10 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             user_detail: [],
             roles: [],   
+            all_role:[],
+            role_id:'',
+            roleId: null,
+            check:false,
             is_active: false,
             is_modal_limit_open:false   
 
@@ -22,23 +26,59 @@ export class Дэлгэрэнгүй extends Component {
         this.handleModalLimitOpen=this.handleModalLimitOpen.bind(this)
         this.handleIsActiveTrue=this.handleIsActiveTrue.bind(this)
         this.handleIsActiveFalse=this.handleIsActiveFalse.bind(this)
-        
+        this.handleOnClick=this.handleOnClick.bind(this)
+        this.getRole=this.getRole.bind(this)
+        this.handleSaveSuccess=this.handleSaveSuccess.bind(this)
+    }
+    
+    componentDidMount() {
+        this.handleSaveSuccess()
     }
 
-    componentDidMount() {
+    handleSaveSuccess(){
         service
         .detail(this.props.match.params.id)
-        .then(({user_detail,roles}) => {
-            this.setState({user_detail, roles, is_active: user_detail.is_active})
+        .then(({user_detail,roles,all_role}) => {
+            this.setState({user_detail, roles, all_role,is_active: user_detail.is_active})
         })
     }
     handleModalLimitOpen() {
        this.setState({is_modal_limit_open: !this.state.is_modal_limit_open})
-        
     }
     handleModalLimitClose() {
         this.setState({is_modal_delete_open: false})
 
+    }
+
+    handleIsActiveFalse(){
+
+        service.userDetailChange(this.props.match.params.id, false)
+        .then(({success}) => {
+            if(success){this.setState({is_active: false, is_modal_limit_open: false})}
+        })
+
+    }
+    getRole(){
+        const id =this.props.match.params.id
+        const roleId =this.state.role_id
+        const value={'roleId':roleId, 'id':id}
+        service.roleCreate(value).then(({success, item}) => {
+            if (success) 
+            {
+                this.handleSaveSuccess()
+                this.setState({check:false})
+
+            }
+        })
+    }
+
+
+    handleOnClick(id){
+       this.setState({
+           role_id:id,
+           check:true,
+           roleId: id
+       })
     }
 
     handleIsActiveFalse(){
@@ -58,8 +98,8 @@ export class Дэлгэрэнгүй extends Component {
     }
     render() {
         const {id, first_name, email,is_sso, is_superuser, last_name, gender, username, last_login, date_joined} = this.state.user_detail
-        const is_modal_limit_open=this.state.is_modal_limit_open
-        const is_active = this.state.is_active
+        const {is_modal_limit_open, check, is_active, roles}=this.state
+
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
@@ -96,14 +136,29 @@ export class Дэлгэрэнгүй extends Component {
                         </div>
                     </div>
                     <div className="col-md-8 mb-4">
-                        <h4>Эрхийн түвшин</h4>
-                        <ul>
-                        {this.state.roles.map( role =>
-                            <li key={role.id}>{role.name}</li>
-                        )}
-
-                        </ul>
-                    </div>
+                        <h5>Хэрэглэгчийн одоогийн эрхийн түвшин </h5>
+                          <ul>{this.state.roles.map(bla => <li key={bla.id} style={{listStyleType:"none"}}>{bla.name}</li>)}</ul>
+                          <h4>Хэрэглэгчийн Эрхийн түвшинүүд </h4>
+                          <table>
+                              <tbody>
+                                     {this.state.all_role.map(role => 
+                                     <tr key={role.id}>
+                                         <td>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={role.id === this.state.roleId} 
+                                                    name="input" 
+                                                    onChange={() => this.handleOnClick(role.id)}/>
+                                                &nbsp; {role.name}
+                                        </td>
+                                     </tr>)
+                                      }
+                              </tbody>
+                          </table>
+                           
+                          <br/> 
+                            {check && <button type="button" className="btn btn-outline-primary" onClick={this.getRole}>Хадгалах</button>}
+                    </div> 
                 </div>
             </div>
         )

@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import BundleFormTable from "./BundleFormTable"
+import {NavLink} from "react-router-dom"
 
 
 export default class BundleAdminRights extends Component {
@@ -74,10 +75,13 @@ export default class BundleAdminRights extends Component {
                 )}
 
                 <div className="form-group">
-                    <button className="btn btn-block gp-outline-primary" onClick={this.props.handleCancel} >
-                        <i className="fa fa-chevron-left" aria-hidden="true"></i>
-                        &nbsp; Буцах
-                    </button>
+                    <div className="form-group">
+                        <NavLink to={`/back/`}>
+                            <button className="btn btn-block gp-outline-primary"  >
+                                Буцах
+                            </button>
+                        </NavLink>
+                    </div>
                 </div>
             </div>
         )

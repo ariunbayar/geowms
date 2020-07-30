@@ -68,7 +68,7 @@ export class GovorgForm extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push( '/back/байгууллага/')
+                    this.props.history.push( '/back/систем/')
                 }, 800)
             })
         }
@@ -78,7 +78,7 @@ export class GovorgForm extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push( '/back/байгууллага/')
+                    this.props.history.push( '/back/систем/')
                 }, 800)
             })
         }

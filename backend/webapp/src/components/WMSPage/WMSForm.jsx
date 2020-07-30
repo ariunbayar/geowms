@@ -1,22 +1,22 @@
 import React, { Component } from "react"
-import {Link} from "react-router-dom"
+import {NavLink} from "react-router-dom"
 
 import {service} from "./service"
 import WMSCheckFormSort from './WMSCheckFormSort'
 
-export default class WMSForm extends Component {
+export class WMSForm extends Component {
 
     constructor(props) {
 
         super(props)
 
         this.state = {
-            id: props.values.id,
-            name: props.values.name,
-            url: props.values.url,
-            public_url: props.values.public_url,
-            layers: props.values.layers,
-            layers_all: props.layers_all,
+            id: props.match.params.id,
+            name: '',
+            url: '',
+            public_url: '',
+            layers: [],
+            layers_all: [],
             layer_choices: [],
         }
 
@@ -24,27 +24,68 @@ export default class WMSForm extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.loadLayers = this.loadLayers.bind(this)
+        this.loadData = this.loadData.bind(this)
+        this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
 
     }
 
 
     componentDidMount() {
-        this.state.id && this.loadLayers(this.state.public_url)
+        const id = this.props.match.params.id
+        if(id)
+        {
+            this.loadData()
+        }
+        
+        
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevState) {
 
-        if (this.props.values.id !== prevProps.values.id) {
-            const {id, name, url, public_url, layers} = this.props.values
-            this.setState({id, name, url, public_url, layers, layer_choices: []})
 
-            this.state.id && this.loadLayers(public_url)
+    }
+
+
+    handleSave() {
+        const id = this.props.match.params.id
+        const values = this.state
+        if (id) {
+            service.update(values).then(({success, item}) => {
+                if (success) {this.props.history.push( '/back/wms/')}
+            })
+
+        } else {
+
+            service.create(values).then(({success, item}) => {
+                if (success) {this.props.history.push( '/back/wms/')}
+            })
+
         }
-        if (this.props.layers_all !== prevProps.layers_all) {
-            const {layers_all} = this.props
-            this.setState({layers_all})
-        }
 
+    }
+
+    loadData(){
+        const id = this.props.match.params.id
+        service.detail(id).then(({wms_list}) => {
+            if (wms_list) 
+            {
+                {wms_list.map((wms, idx) =>
+                    this.setState({name: wms.name ,url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: []})
+                )}
+                this.loadLayers(this.state.public_url)
+                this.handleWmsLayerRefresh()
+            }
+        })
+
+    }
+
+    handleWmsLayerRefresh() {
+        const id = this.props.match.params.id
+        service.wmsLayerall(id).then(({layers_all}) => {
+            if (layers_all) {
+                this.setState({layers_all})
+            }
+        })
     }
 
     loadLayers(public_url) {
@@ -58,10 +99,6 @@ export default class WMSForm extends Component {
         this.setState({[field]: e.target.value})
     }
 
-    handleSave() {
-        this.props.handleSave(this.state)
-    }
-
     handleLayerToggle(e, layer) {
         let layers = this.state.layers
         const wmsId = this.state.id
@@ -73,7 +110,7 @@ export default class WMSForm extends Component {
             service.layerAdd(layerName, wmsId, legendURL, layerCode).then(({success}) => {
                 if (success) 
                 {
-                    this.props.handleWmsLayerRefresh(wmsId)
+                    this.handleWmsLayerRefresh()
                 }
             })
 
@@ -84,7 +121,7 @@ export default class WMSForm extends Component {
             service.layerRemove(layerCode, wmsId).then(({success}) => {
                 if (success) 
                 {
-                    this.props.handleWmsLayerRefresh(wmsId)
+                    this.handleWmsLayerRefresh()
                 }
             })
 
@@ -99,83 +136,86 @@ export default class WMSForm extends Component {
     render() {
         const {layers_all, id} = this.state
         return (
-            <div className="row">
-                <div className="col-4 shadow-lg p-3 mb-5 bg-white rounded">
-                    <div className="form-group">
-                        <label htmlFor="id_name">Нэр</label>
-                        <input
-                                type="text"
-                                className="form-control"
-                                id="id_name"
-                                placeholder="Нэр"
-                                onChange={(e) => this.handleChange('name', e)}
-                                value={this.state.name}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="id_url">WMS URL</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="id_url"
-                                placeholder="WMS URL"
-                                onChange={(e) => this.handleChange('url', e)}
-                                value={this.state.url}
-                            />
-                        </div>
+            <div className="container my-4">
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="row">
+                            <div className="col-4 shadow-lg p-3 mb-5 bg-white rounded">
 
-                        <div className="form-group">
-                            <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
-                                Хадгал
-                            </button>
-                        </div>
-
-                        <div className="form-group">
-                            <button className="btn btn-block gp-outline-primary" onClick={this.props.handleCancel} >
-                                <i className="fa fa-chevron-left" aria-hidden="true"></i>
-                                &nbsp; Буцах
-                            </button>
-                        </div>
-
-                        <dl>
-                            <dt> Endpoint </dt>
-                        <dd>
-                            {this.state.id && this.state.public_url}
-                            {!this.state.id && 'Хадгалсаны дараагаар Endpoint URL үүснэ!'}
-                        </dd>
-
-                        <dt> Давхаргууд </dt>
-                        <dd>
-                            {this.state.id && this.state.layer_choices.map((layer, idx) =>
-                                <div key={idx}>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            checked={this.state.layers.indexOf(layer.code) > -1}
-                                            onChange={(e) => this.handleLayerToggle(e, layer)}
-                                            value={layer.code}
+                            <div className="form-group">
+                                        <NavLink to={`/back/wms/`}>
+                                            <button className="btn btn-block gp-outline-primary"  >
+                                                    Буцах
+                                            </button>
+                                        </NavLink>
+                                    </div>
+                                <div className="form-group">
+                                    <label htmlFor="id_name">Нэр</label>
+                                    <input
+                                            type="text"
+                                            className="form-control"
+                                            id="id_name"
+                                            placeholder="Нэр"
+                                            onChange={(e) => this.handleChange('name', e)}
+                                            value={this.state.name}
                                         />
-                                        <span> {layer.name} ({layer.code})</span>
-                                    </label>
-                                </div>
-                            )}
-                            {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'}
-                        </dd>
-                    </dl>
-                </div>
-                <div className="col-8">
-                    <div className="shadow-lg p-3 mb-5 bg-white rounded">
-                        <WMSCheckFormSort 
-                            wmslayers={layers_all} 
-                            wmsId={id}
-                            handleWmsLayerRefresh={this.props.handleWmsLayerRefresh}>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="id_url">WMS URL</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="id_url"
+                                            placeholder="WMS URL"
+                                            onChange={(e) => this.handleChange('url', e)}
+                                            value={this.state.url}
+                                        />
+                                    </div>
 
-                        </WMSCheckFormSort>
-                        <div className="form-group">
-                            <button className="btn btn-block gp-outline-primary" onClick={this.props.handleCancel} >
-                                <i className="fa fa-chevron-left" aria-hidden="true"></i>
-                                &nbsp; Буцах
-                            </button>
+                                    <div className="form-group">
+                                        <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
+                                            Хадгал
+                                        </button>
+                                    </div>
+
+
+                                    <dl>
+                                        <dt> Endpoint </dt>
+                                    <dd>
+                                        {this.state.id && this.state.public_url}
+                                        {!this.state.id && 'Хадгалсаны дараагаар Endpoint URL үүснэ!'}
+                                    </dd>
+
+                                    <dt> Давхаргууд </dt>
+                                    <dd>
+                                        {this.state.id && this.state.layer_choices.map((layer, idx) =>
+                                            <div key={idx}>
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={this.state.layers.indexOf(layer.code) > -1}
+                                                        onChange={(e) => this.handleLayerToggle(e, layer)}
+                                                        value={layer.code}
+                                                    />
+                                                    <span> {layer.name} ({layer.code})</span>
+                                                </label>
+                                            </div>
+                                        )}
+                                        {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'}
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div className="col-8">
+                                <div className="shadow-lg p-3 mb-5 bg-white rounded">
+                                    <WMSCheckFormSort 
+                                        wmslayers={layers_all} 
+                                        wmsId={id}
+                                        handleWmsLayerRefresh={this.handleWmsLayerRefresh}>
+
+                                    </WMSCheckFormSort>
+                                
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -183,4 +223,3 @@ export default class WMSForm extends Component {
         )
     }
 }
-

@@ -60,12 +60,14 @@ def all(request):
 def дэлгэрэнгүй(request, pk):
 
     user = get_object_or_404(User, pk=pk)
-
+    all_role= Role.objects.all()
+    all_roles=[ _get_role_display(q)for q in all_role]
     roles = [_get_role_display(role) for role in user.roles.all()]
 
     rsp = {
         'user_detail': _get_user_detail(user),
         'roles': roles,
+        'all_role':all_roles,
         'success': True,
     }
 
@@ -82,3 +84,18 @@ def userDetailChange(request, payload):
     User.objects.filter(pk=user_id).update(is_active=is_active)
     return JsonResponse({'success': True})
     
+
+@require_POST
+@ajax_required
+def roleCreate(request, payload):
+    user = get_object_or_404(User, pk=payload.get('id'))
+    roleId = payload.get('roleId')
+    role = user.roles.first()
+    if role:
+        user.roles.remove(role.id)
+        user.roles.add(roleId)
+        return JsonResponse({'success': True})
+
+    else:
+        user.roles.add(roleId)
+        return JsonResponse({'success': True})

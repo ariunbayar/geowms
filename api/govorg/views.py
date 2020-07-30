@@ -59,19 +59,22 @@ def proxy(request, token, pk):
     govorg = get_object_or_404(GovOrg, token=token)
     wms = get_object_or_404(WMS, pk=pk)
     base_url = wms.url
+    is_active = wms.is_active
+    if is_active:
+        queryargs = request.GET
+        headers = {**BASE_HEADERS}
+        rsp = requests.get(base_url, queryargs, headers=headers)
 
-    queryargs = request.GET
-    headers = {**BASE_HEADERS}
-    rsp = requests.get(base_url, queryargs, headers=headers)
+        content = rsp.content
 
-    content = rsp.content
+        allowed_layers = [layer.code for layer in govorg.wms_layers.filter(wms=wms)]
 
-    allowed_layers = [layer.code for layer in govorg.wms_layers.filter(wms=wms)]
+        if request.GET.get('REQUEST') == 'GetCapabilities':
 
-    if request.GET.get('REQUEST') == 'GetCapabilities':
+            content = _filter_layers(content, allowed_layers)
 
-        content = _filter_layers(content, allowed_layers)
+        content_type = rsp.headers.get('content-type')
 
-    content_type = rsp.headers.get('content-type')
-
-    return HttpResponse(content, content_type=content_type)
+        return HttpResponse(content, content_type=content_type)
+    else:
+        return render(request, "backend/404.html", {})

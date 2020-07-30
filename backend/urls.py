@@ -22,6 +22,8 @@ urlpatterns = [
         path('layerAdd/', wms_views.layerAdd, name='layerAdd'),
         path('layerRemove/', wms_views.layerRemove, name='layerRemove'),
         path('move/', wms_views.move, name='move'),
+        path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
+        path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
     ], 'wms'))),
 
@@ -31,7 +33,7 @@ urlpatterns = [
         path('update/', bundle_views.update, name='update'),
         path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
-
+        path('<int:pk>/updatemore/', bundle_views.updateMore, name='updatemore'),
         path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
         path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
         path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
@@ -40,6 +42,7 @@ urlpatterns = [
     path('api/user/', include(([
         path('all/', user_views.all, name='all'),
         path('userDetailChange/', user_views.userDetailChange, name='userDetailChange'),
+        path('roleCreate/', user_views.roleCreate, name='roleCreate'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
     ], 'user'))),
 
@@ -51,7 +54,7 @@ urlpatterns = [
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
 
-    path('api/байгууллага/', include(([
+    path('api/систем/', include(([
         path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),

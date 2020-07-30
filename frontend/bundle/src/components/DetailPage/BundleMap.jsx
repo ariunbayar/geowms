@@ -21,8 +21,8 @@ import {Modal} from './controls/Modal'
 
 import "./styles.css"
 import {service} from './service'
+import {SidebarButton} from './SidebarButton'
 import {Sidebar} from './Sidebar'
-
 
 export default class BundleMap extends Component {
 
@@ -34,7 +34,7 @@ export default class BundleMap extends Component {
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
-            is_sidebar_open: false,
+            is_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
         }
@@ -42,6 +42,7 @@ export default class BundleMap extends Component {
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
             modal: new Modal(),
+            sidebar: new Sidebar(),
         }
 
         this.marker = this.initMarker()
@@ -204,9 +205,11 @@ export default class BundleMap extends Component {
                     undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
+                new SidebarButton({toggleSidebar: this.toggleSidebar}),
                 new ScaleLine(),
                 this.controls.modal,
                 this.controls.coordinateCopy,
+                this.controls.sidebar,
             ]),
             layers: [
                 ...base_layers,
@@ -299,13 +302,6 @@ export default class BundleMap extends Component {
         layer.setVisible(!layer.getVisible())
     }
 
-    toggleSidebar(event) {
-        event.preventDefault()
-        this.setState(prevState => ({
-            is_sidebar_open: !prevState.is_sidebar_open,
-        }))
-    }
-
     handleSetCenter(coord) {
         const view = this.map.getView()
         const map_projection = view.getProjection()
@@ -313,7 +309,17 @@ export default class BundleMap extends Component {
         this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
-
+    
+    toggleSidebar(event) {
+        this.setState(prevState => ({
+            is_sidebar_open: !prevState.is_sidebar_open,
+        }))
+        if(this.state.is_sidebar_open){
+            this.controls.sidebar.showSideBar(null, null, true)
+        }else{
+            this.controls.sidebar.showSideBar(this.state.map_wms_list, this.handleSetCenter, false)
+        }
+    }
     render() {
 
         return (
@@ -324,19 +330,6 @@ export default class BundleMap extends Component {
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
-
-                            <div className={'col-md-3 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
-                                <Sidebar
-                                    map_wms_list={this.state.map_wms_list}
-                                    handleSetCenter={this.handleSetCenter}
-                                />
-                            </div>
-
-                            <div className={'⚙-toggle'}>
-                                <a href="#" onClick={this.toggleSidebar}>
-                                    <i className="fa fa-bars fa-lg" aria-hidden="true"></i>
-                                </a>
-                            </div>
                         </div>
                     </div>
 

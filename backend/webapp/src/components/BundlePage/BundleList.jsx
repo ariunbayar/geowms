@@ -1,27 +1,22 @@
 import React, { Component } from "react"
-
 import {service} from './service'
-import GovorgForm from './GovorgForm'
-import Govorg from './Govorg'
+import Bundle from './Bundle'
 import {NavLink} from "react-router-dom"
 
-
-export class Жагсаалт extends Component {
-
+export class BundleList extends Component {
 
     constructor(props) {
 
         super(props)
-
-        this.initial_form_values = {
-        }
-
         this.state = {
-            govorg_list: [],
+            bundle_list: [],
+            form_options: {},
+            form_options_role: {},
         }
 
+        this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
+        this.handleMove = this.handleMove.bind(this)
     }
 
     componentDidMount() {
@@ -29,59 +24,65 @@ export class Жагсаалт extends Component {
     }
 
     handleListUpdated() {
-        service.getAll().then(({govorg_list}) => {
-            this.setState({govorg_list})
+        service.getAll().then(({bundle_list, form_options, form_options_role}) => {
+            this.setState({bundle_list, form_options, form_options_role})
         })
 
     }
+
+    handleSaveSuccess() {
+        this.handleListUpdated()
+    }
+
     handleRemove(id) {
         service.remove(id).then(({success}) => {
-            if (success) this.handleListUpdated()
+            if (success) this.handleSaveSuccess()
         })
-
     }
+
+    handleMove(event, id, direction) {
+        event.preventDefault()
+        service.move(id, direction).then(({bundle_list, success}) => {
+            if (success) this.setState({bundle_list})
+        })
+    }
+
     render() {
-
         return (
-            <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
+            <div  className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
-
+                    
                     <div className="col-md-12">
-
-                        {!this.state.is_form_open &&
-                            <>
                                 <div className="text-right">
-                                    <NavLink className="btn gp-bg-primary" to={`/back/систем/үүсгэх/`}>
+                                    <NavLink className="btn gp-bg-primary" to={`/back/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
                                 </div>
 
                                 <table className="table">
+                                    
                                     <thead>
                                         <tr>
                                             <th scope="col"> # </th>
-                                            <th scope="col"> Системүүдийн нэр</th>
-                                            <th scope="col"> Токен </th>
-                                            <th scope="col"> Үүсгэсэн огноо </th>
+                                            <th scope="col"> Сангийн нэр </th>
+                                            <th scope="col"> WMS сервис </th>
+                                            <th scope="col"></th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.govorg_list.map((values) =>
-                                            <Govorg
+                                        {this.state.bundle_list.map((values) =>
+                                            <Bundle
                                                 key={values.id}
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id)}
-                                                handleEdit={() => this.handleEdit(values)}
-                                               />
+                                                handleMove={this.handleMove}
+                                            />
                                         )}
                                     </tbody>
                                 </table>
-                            </>
-                        }
-
                     </div>
                 </div>
             </div>
