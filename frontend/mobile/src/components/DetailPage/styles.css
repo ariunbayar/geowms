@@ -182,5 +182,8 @@
     box-shadow: -2px 10px 6px -10px rgba(0,0,0,0.75);
     z-index: 2;
 }
-
+.sidebarFooter{
+    top: 35%;
+    position: fixed;
+}
 

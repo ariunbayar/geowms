@@ -47,7 +47,7 @@ export class Sidebar extends Component {
                         <a onClick={() => this.props.toggleSidebar(false)}>X</a>
                     </div>
                 </div>
-                <div className="row">
+                <div className="row sidebarFooter">
                     {this.props.map_wms_list.map((wms, idx) =>
                         <WMSItem wms={wms} key={idx}/>
                     )}
