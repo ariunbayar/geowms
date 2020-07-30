@@ -40,23 +40,30 @@ export default class Bundle extends Component {
                 </td>
 
                 <td>
-                <div class="col-md-12">
+                <div className="col-md-12">
                     {wms_list.map((wms, idx) =>
-                            <div key={idx} class="row">
-                                <div class="col-md-1">
-                                    {wms.is_active ?
-                                        <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>:
-                                        <i className="fa fa-times-circle" style={{color: "#FF4748"}} aria-hidden="false"></i>
-                                    }
+                        (wms.is_active ?
+                            <div key={idx} className="row">
+                                <div className="col-md-1">
+                                        <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
                                 </div>
                                 <div class="col-md-10">
                                     <a> {wms.name}</a>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            </div> :
 
-                </td>
+                            <div key={idx} className="row">
+                                <div className="col-md-1">
+                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
+                                </div>
+                                <div class="col-md-10 text-muted">
+                                    <a><del> {wms.name}</del></a>
+                                </div>
+                            </div>
+                        )
+                    )}
+                    </div>
+                   </td>
 
                 <td>
                 <NavLink to={`/back/${id}/засах/`}>
