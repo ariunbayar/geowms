@@ -10,8 +10,6 @@ export class BundleList extends Component {
         super(props)
         this.state = {
             bundle_list: [],
-            form_options: {},
-            form_options_role: {},
         }
 
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -24,8 +22,8 @@ export class BundleList extends Component {
     }
 
     handleListUpdated() {
-        service.getAll().then(({bundle_list, form_options, form_options_role}) => {
-            this.setState({bundle_list, form_options, form_options_role})
+        service.getAll().then(({bundle_list}) => {
+            this.setState({bundle_list})
         })
 
     }

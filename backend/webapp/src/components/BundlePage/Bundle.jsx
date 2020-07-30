@@ -40,11 +40,22 @@ export default class Bundle extends Component {
                 </td>
 
                 <td>
-                    <ul>
-                        {wms_list.map((wms_name, idx) =>
-                            <li key={idx}>{wms_name}</li>
-                        )}
-                    </ul>
+                  
+                    {wms_list.map((wms, idx) =>
+                            
+                            <div class="row">
+ 
+                            {!wms.is_active &&
+                           
+                              <div class="column">     
+                              <i className="fa fa-times-circle"   style={{color: "#FF4748"}} ></i></div>
+                      
+                            }
+
+                            <a key={idx}> {wms.name}</a>
+
+                            </div>
+                            )}
                 </td>
 
                 <td>

@@ -122,7 +122,7 @@ def _get_bundle_display(bundle):
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
-        'wms_list': [(WMS.objects.get(pk=wms[0]).name) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': [{'name': (WMS.objects.get(pk=wms[0]).name), 'is_actve':(WMS.objects.get(pk=wms[0]).is_active)} for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
         'roles': roles
     }
 
@@ -132,15 +132,10 @@ def _get_bundle_display(bundle):
 def all(request):
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
-    form_options = _get_bundle_options()
-    form_options_role = _get_role_options()
 
     rsp = {
         'bundle_list': bundle_list,
-        'form_options': form_options,
-        'form_options_role': form_options_role,
     }
-
     return JsonResponse(rsp)
 
 @require_GET
