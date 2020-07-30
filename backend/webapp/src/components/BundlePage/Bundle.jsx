@@ -40,22 +40,22 @@ export default class Bundle extends Component {
                 </td>
 
                 <td>
-                  
+                <div class="col-md-12">
                     {wms_list.map((wms, idx) =>
-                            
-                            <div class="row">
- 
-                            {!wms.is_active &&
-                           
-                              <div class="column">     
-                              <i className="fa fa-times-circle"   style={{color: "#FF4748"}} ></i></div>
-                      
-                            }
-
-                            <a key={idx}> {wms.name}</a>
-
+                            <div key={idx} class="row">
+                                <div class="col-md-1">
+                                    {wms.is_active ?
+                                        <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>:
+                                        <i className="fa fa-times-circle" style={{color: "#FF4748"}} aria-hidden="false"></i>
+                                    }
+                                </div>
+                                <div class="col-md-10">
+                                    <a> {wms.name}</a>
+                                </div>
                             </div>
-                            )}
+                        )}
+                    </div>
+
                 </td>
 
                 <td>

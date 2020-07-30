@@ -122,7 +122,7 @@ def _get_bundle_display(bundle):
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
-        'wms_list': [{'name': (WMS.objects.get(pk=wms[0]).name), 'is_actve':(WMS.objects.get(pk=wms[0]).is_active)} for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': [{'name': (WMS.objects.get(pk=wms[0]).name), 'is_active':(WMS.objects.get(pk=wms[0]).is_active)} for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
         'roles': roles
     }
 
