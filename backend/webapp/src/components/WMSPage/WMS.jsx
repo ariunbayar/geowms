@@ -49,13 +49,15 @@ export default class WMS extends Component {
             <tr>
                 <th>
                     {id}
+                    
                 </th>
                 <td>
                     {name}
+                    <br/>
+                    <a className="text-muted"> {url}</a>
+                   
                 </td>
-                <td>
-                    {url}
-                </td>
+
                 <td>
                     {public_url}
                 </td>
@@ -64,8 +66,8 @@ export default class WMS extends Component {
                 </td>
                 <td>
                     {is_active ? 
-                    <a href="#" onClick={() => this.wmsIsActiveFalse(id)} className="p-3 mb-2 bg-danger text-white">Хязгаарлах </a> :
-                    <a href="#" onClick={() => this.wmsIsActiveTrue(id)} className="p-3 mb-2 bg-success text-white">Идэвхжүүлэх</a>}
+                    <button  onClick={() => this.wmsIsActiveFalse(id)} className="btn btn-danger" style={{width:"100%"}}>Хязгаарлах</button> :
+                    <button  onClick={() => this.wmsIsActiveTrue(id)} className="btn btn-success">Идэвхжүүлэх</button>}
                 </td>
                 <td>
                     <NavLink to={`/back/wms/${id}/засах/`}>
