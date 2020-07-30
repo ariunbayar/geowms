@@ -35,9 +35,26 @@ export default class BundleAdminRights extends Component {
     render() {
         return (
             <div className="shadow-lg p-3 mb-5 bg-white rounded">
-                {this.props.formOptions.map(({id, name, layers}, idx) =>
+                {this.props.formOptions.map(({id, name, layers, is_active}, idx) =>
                     <div key={idx}>
-                        <dt> {name} </dt>
+                        <div className="col-md-1"></div>
+                        <div className="col-md-11">
+                         {is_active ?
+                            <div key={idx} className="row">
+                                <a>
+                                    <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
+                                    <span> {name}</span>
+                                </a>
+                            </div> :
+
+                            <div key={idx} className="row" >
+                                <a>
+                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
+                                    <del> {name}</del>
+                                </a>
+                            </div>
+                            }
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
