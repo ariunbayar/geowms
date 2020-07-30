@@ -22,6 +22,7 @@ urlpatterns = [
         path('layerAdd/', wms_views.layerAdd, name='layerAdd'),
         path('layerRemove/', wms_views.layerRemove, name='layerRemove'),
         path('move/', wms_views.move, name='move'),
+        path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
     ], 'wms'))),
@@ -52,7 +53,7 @@ urlpatterns = [
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
 
-    path('api/байгууллага/', include(([
+    path('api/систем/', include(([
         path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),

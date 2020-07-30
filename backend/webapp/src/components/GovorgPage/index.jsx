@@ -16,10 +16,10 @@ export class GovorgPage extends Component {
         
         return (
             <Switch>
-                <Route exact path={"/back/байгууллага/"} component={Жагсаалт}/>
-                <Route exact path={"/back/байгууллага/:id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
-                <Route exact path={"/back/байгууллага/үүсгэх/"} component={GovorgForm}/>
-                <Route exact path={"/back/байгууллага/:id/засах/"} component={GovorgForm}/>
+                <Route exact path={"/back/систем/"} component={Жагсаалт}/>
+                <Route exact path={"/back/систем/:id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
+                <Route exact path={"/back/систем/үүсгэх/"} component={GovorgForm}/>
+                <Route exact path={"/back/систем/:id/засах/"} component={GovorgForm}/>
             </Switch>
         )
 

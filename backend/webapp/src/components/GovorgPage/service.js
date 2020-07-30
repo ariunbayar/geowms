@@ -10,7 +10,7 @@ export const service = {
 }
 
 
-const prefix = '/back/api/байгууллага'
+const prefix = '/back/api/систем'
 
 
 function getAll() {

@@ -2,8 +2,8 @@ import requests
 
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import reverse, get_object_or_404
+from django.http import JsonResponse, HttpResponse, Http404
+from django.shortcuts import reverse, get_object_or_404, render
 from django.views.decorators.http import require_POST, require_GET
 
 from backend.bundle.models import BundleLayer
@@ -19,6 +19,7 @@ def _get_wms_display(request, wms):
         'id': wms.id,
         'name': wms.name,
         'url': wms.url,
+        'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
@@ -97,6 +98,21 @@ def move(request, payload):
         'success': True,
     }
 
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def activeUpdate(request, payload):
+
+    wms_id = payload.get('id')
+    is_active = payload.get('is_active')
+
+    WMS.objects.filter(pk=wms_id).update(is_active=is_active)
+    rsp = {
+        'success': True,
+    }
     return JsonResponse(rsp)
 
 
@@ -217,13 +233,18 @@ def proxy(request, wms_id):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
+    is_active = get_object_or_404(WMS, pk=wms_id).is_active
+    if is_active:
 
-    base_url = get_object_or_404(WMS, pk=wms_id).url
+        base_url = get_object_or_404(WMS, pk=wms_id).url
 
-    queryargs = request.GET
-    headers = {**BASE_HEADERS}
-    rsp = requests.get(base_url, queryargs, headers=headers)
+        queryargs = request.GET
+        headers = {**BASE_HEADERS}
+        rsp = requests.get(base_url, queryargs, headers=headers)
 
-    content_type = rsp.headers.get('content-type')
+        content_type = rsp.headers.get('content-type')
 
-    return HttpResponse(rsp.content, content_type=content_type)
+        return HttpResponse(rsp.content, content_type=content_type)
+    
+    else:
+        return render(request, "backend/404.html", {})
