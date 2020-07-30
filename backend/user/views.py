@@ -63,7 +63,6 @@ def дэлгэрэнгүй(request, pk):
     all_role= Role.objects.all()
     all_roles=[ _get_role_display(q)for q in all_role]
     roles = [_get_role_display(role) for role in user.roles.all()]
-
     rsp = {
         'user_detail': _get_user_detail(user),
         'roles': roles,
@@ -73,17 +72,36 @@ def дэлгэрэнгүй(request, pk):
 
     return JsonResponse(rsp)
 
+    
+@require_POST
+@ajax_required
+def userDetailChange(request, payload):
+    
+    user_id = payload.get('id')
+    is_active = payload.get('is_active')
+    user = get_object_or_404(User, pk=user_id)
+    User.objects.filter(pk=user_id).update(is_active=is_active)
+    return JsonResponse({'success': True})
+    
 
 @require_POST
 @ajax_required
 def roleCreate(request, payload):
     user = get_object_or_404(User, pk=payload.get('id'))
+    user_id=payload.get('id')
     roleId = payload.get('roleId')
     role = user.roles.first()
     if role:
-        user.roles.remove(role.id)
-        user.roles.add(roleId)
-        return JsonResponse({'success': True})
+        if(roleId==5):
+            User.objects.filter(pk=user_id).update(is_superuser=True)
+            user.roles.remove(role.id)
+            user.roles.add(roleId)
+            return JsonResponse({'success': True})
+        else:
+            User.objects.filter(pk=user_id).update(is_superuser=False)
+            user.roles.remove(role.id)
+            user.roles.add(roleId) 
+            return JsonResponse({'success': True})
 
     else:
         user.roles.add(roleId)

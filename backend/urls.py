@@ -41,6 +41,7 @@ urlpatterns = [
 
     path('api/user/', include(([
         path('all/', user_views.all, name='all'),
+        path('userDetailChange/', user_views.userDetailChange, name='userDetailChange'),
         path('roleCreate/', user_views.roleCreate, name='roleCreate'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
     ], 'user'))),

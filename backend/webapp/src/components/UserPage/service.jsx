@@ -1,6 +1,7 @@
 export const service = {
     getAll,
     detail,
+    userDetailChange,
     roleCreate,
 }
 
@@ -21,6 +22,7 @@ function handleResponse(response) {
         return data
     })
 }
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -36,7 +38,6 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
 function _getGetOptions() {
     return {
         method: 'GET',
@@ -55,6 +56,7 @@ function _getPostOptions() {
     }
 }
 
+
 function getAll() {
     const requestOptions = {
         ..._getGetOptions(),
@@ -70,6 +72,15 @@ function detail(id) {
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
 }
+
+function userDetailChange(id, is_active){
+    const opts = {
+    ..._getPostOptions(),
+    body: JSON.stringify({id, is_active}),
+    }
+    return fetch(`${prefix}/userDetailChange/`, opts).then(handleResponse)
+    }
+
 function roleCreate(payload){
     const opts = {
         ..._getPostOptions(),
