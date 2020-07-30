@@ -204,6 +204,8 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
+                this.controls.modal,
+
             ]),
             layers: [
                 ...base_layers,
