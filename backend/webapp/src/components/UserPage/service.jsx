@@ -1,7 +1,7 @@
 export const service = {
     getAll,
     detail,
-    userdetailChange
+    userDetailChange
 }
 
 const prefix = '/back/api/user'
@@ -71,10 +71,10 @@ function detail(id) {
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
 }
-function userdetailChange(id) {
+function userDetailChange(id, is_active){
     const opts = {
-        ..._getPostOptions(id),
+    ..._getPostOptions(),
+    body: JSON.stringify({id, is_active}),
     }
-
-    return fetch(`${prefix}/userdetailChange/`, opts).then(handleResponse)
-}
+    return fetch(`${prefix}/userDetailChange/`, opts).then(handleResponse)
+    }

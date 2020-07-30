@@ -70,14 +70,15 @@ def дэлгэрэнгүй(request, pk):
     }
 
     return JsonResponse(rsp)
+
+    
 @require_POST
 @ajax_required
-def userdetailChange(request,paylaod):
-    user=request.user
-    active=paylaod.get("status")
-    active=user.is_active
-    print(active)
-    print(active)
-    print(active)
-    print(active)
-   
+def userDetailChange(request, payload):
+    
+    user_id = payload.get('id')
+    is_active = payload.get('is_active')
+    user = get_object_or_404(User, pk=user_id)
+    User.objects.filter(pk=user_id).update(is_active=is_active)
+    return JsonResponse({'success': True})
+    

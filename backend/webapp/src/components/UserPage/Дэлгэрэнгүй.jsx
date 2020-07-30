@@ -14,64 +14,52 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             user_detail: [],
             roles: [],   
-            user_active:'True',
+            is_active: false,
             is_modal_limit_open:false   
 
         }
         this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
         this.handleModalLimitOpen=this.handleModalLimitOpen.bind(this)
-        this.handleActivate=this.handleActivate.bind(this)
-        this.handleUpdate=this.handleUpdate.bind(this)
-        this.ChangeActive=this.ChangeActive.bind(this)
-        this.handleDisActive=this.handleDisActive.bind(this)
-
+        this.handleIsActiveTrue=this.handleIsActiveTrue.bind(this)
+        this.handleIsActiveFalse=this.handleIsActiveFalse.bind(this)
+        
     }
 
     componentDidMount() {
-        this.handleUpdate()
+        service
+        .detail(this.props.match.params.id)
+        .then(({user_detail,roles}) => {
+            this.setState({user_detail, roles, is_active: user_detail.is_active})
+        })
     }
-    handleModalLimitOpen(event) {
-       this.setState({
-        is_modal_limit_open:true
-       })
+    handleModalLimitOpen() {
+       this.setState({is_modal_limit_open: !this.state.is_modal_limit_open})
         
     }
     handleModalLimitClose() {
         this.setState({is_modal_delete_open: false})
-    }
-    ChangeActive(){
-        const active=this.state.user_active
-        console.log(active)
-        const value={'status':active}
-        service.userdetailChange(value).then(({success, item}) => {
-        if(success) this.handleUpdate()
-        })   
-
-            
 
     }
-    handleUpdate(){
-        service
-        .detail(this.props.match.params.id)
-        .then(({user_detail,roles}) => {
-            this.setState({user_detail, roles})
+
+    handleIsActiveFalse(){
+        
+        service.userDetailChange(this.props.match.params.id, false)
+        .then(({success}) => {
+            if(success){this.setState({is_active: false, is_modal_limit_open: false})}
         })
+
     }
-    handleActivate(){
-        this.setState({
-            user_active:"True"
+    handleIsActiveTrue(){
+        service.userDetailChange(this.props.match.params.id, true)
+        .then(({success}) => {
+            if(success){this.setState({is_active: true})}
         })
-        this.ChangeActive()
-    }
-    handleDisActive(){
-        this.setState({
-            user_active:"False"
-        })
-        this.ChangeActive()
+
     }
     render() {
-        const {id, first_name, email, is_active, is_sso, is_superuser, last_name, gender, username, last_login, date_joined} = this.state.user_detail
+        const {id, first_name, email,is_sso, is_superuser, last_name, gender, username, last_login, date_joined} = this.state.user_detail
         const is_modal_limit_open=this.state.is_modal_limit_open
+        const is_active = this.state.is_active
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
@@ -89,10 +77,10 @@ export class Дэлгэрэнгүй extends Component {
                         <p><strong>Цахим хаяг</strong>: {email} </p>
                         <p><strong>Хэрэглэгчийн нэр</strong>: {username} </p>
                         <p><strong>Админ эсэх</strong>: {is_superuser ? 'Админ' : '-'}  </p>
-                        <p><strong>Идэвхитэй эсэх</strong>: {is_active ?  'Идэвхитэй' : '-'}
+                        <p><strong>Идэвхитэй эсэх</strong>: {is_active ?  'Идэвхитэй': '-'}
                            &nbsp; {is_active ? 
                                 <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button> : 
-                                <button  className="btn btn-outline-primary" onClick={this.handleActivate} >Идэвхжүүлэх</button>}     
+                                <button  className="btn btn-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхижүүлэх</button>}     
                        </p>
                         <p><strong>Бүртгүүлсэн огноо</strong>: {date_joined} </p>
                         <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>
@@ -100,7 +88,7 @@ export class Дэлгэрэнгүй extends Component {
                         {is_modal_limit_open &&
                         <Modal
                             modalClose={this.handleModalLimitClose}
-                            modalAction={this.handleDisActive}
+                            modalAction={this.handleIsActiveFalse}
                             text={"Та хэрэглэгчийн системд нэвтрэх эрхийг хязгаарлах гэж байна. Хязгаарлагдсан хэрэглэгч систем нэвтрэх эрхгүй болохыг анхаарна уу!"}
                             title="Тохиргоог хязгаарлах"
                         />
@@ -113,6 +101,7 @@ export class Дэлгэрэнгүй extends Component {
                         {this.state.roles.map( role =>
                             <li key={role.id}>{role.name}</li>
                         )}
+
                         </ul>
                     </div>
                 </div>
