@@ -97,9 +97,27 @@ export default class BundleForm extends Component {
                     />
                 </div>
 
-                {this.props.formOptions.map(({name, layers}, idx) =>
+                {this.props.formOptions.map(({name, layers,is_active}, idx) =>
                     <div className="form-group" key={idx}>
-                        <dt> {name} </dt>
+                        
+                        <div className="col-md-1"></div>
+                        <div className="col-md-11">
+                         {is_active ?
+                            <div key={idx} className="row">
+                                <a>
+                                    <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
+                                    <span> {name}</span>
+                                </a>
+                            </div> :
+
+                            <div key={idx} className="row" >
+                                <a>
+                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
+                                    <del> {name}</del>
+                                </a>
+                            </div>
+                            }
+                        </div>
                         <dd>
 
                             {layers.map((layer) =>
