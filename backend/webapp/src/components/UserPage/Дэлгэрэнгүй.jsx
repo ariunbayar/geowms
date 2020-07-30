@@ -18,6 +18,7 @@ export class Дэлгэрэнгүй extends Component {
             role_id:'',
             roleId: null,
             check:false,
+            is_superuser:false,
             is_active: false,
             is_modal_limit_open:false   
 
@@ -39,7 +40,8 @@ export class Дэлгэрэнгүй extends Component {
         service
         .detail(this.props.match.params.id)
         .then(({user_detail,roles,all_role}) => {
-            this.setState({user_detail, roles, all_role,is_active: user_detail.is_active})
+            this.setState({user_detail, roles, all_role,is_active: user_detail.is_active, is_superuser:user_detail.is_superuser})
+            roles.map(role=>this.setState({roleId:role.id}))
         })
     }
     handleModalLimitOpen() {
@@ -97,8 +99,8 @@ export class Дэлгэрэнгүй extends Component {
 
     }
     render() {
-        const {id, first_name, email,is_sso, is_superuser, last_name, gender, username, last_login, date_joined} = this.state.user_detail
-        const {is_modal_limit_open, check, is_active, roles}=this.state
+        const {id, first_name, email,is_sso, last_name, gender, username, last_login, date_joined} = this.state.user_detail
+        const {is_modal_limit_open, check, is_active, is_superuser}=this.state
 
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
@@ -136,16 +138,14 @@ export class Дэлгэрэнгүй extends Component {
                         </div>
                     </div>
                     <div className="col-md-8 mb-4">
-                        <h5>Хэрэглэгчийн одоогийн эрхийн түвшин </h5>
-                          <ul>{this.state.roles.map(bla => <li key={bla.id} style={{listStyleType:"none"}}>{bla.name}</li>)}</ul>
-                          <h4>Хэрэглэгчийн Эрхийн түвшинүүд </h4>
+                          <h4>Хэрэглэгчийн эрхийн түвшинүүд </h4>
                           <table>
                               <tbody>
                                      {this.state.all_role.map(role => 
                                      <tr key={role.id}>
                                          <td>
                                                 <input 
-                                                    type="checkbox" 
+                                                    type="radio" 
                                                     checked={role.id === this.state.roleId} 
                                                     name="input" 
                                                     onChange={() => this.handleOnClick(role.id)}/>
