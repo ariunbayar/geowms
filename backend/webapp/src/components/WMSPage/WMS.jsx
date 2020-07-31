@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
-import ModalL from "../UserPage/ModalLimit"
+import ModalLimit from "../UserPage/ModalLimit"
 export default class WMS extends Component {
 
     constructor(props) {
@@ -83,10 +83,10 @@ export default class WMS extends Component {
                     <button  onClick={this.handleModalLimitOpen} className="btn btn-danger" style={{width:"100%"}}>Хязгаарлах</button> :
                     <button  onClick={() => this.wmsIsActiveTrue(id)} className="btn btn-success">Идэвхжүүлэх</button>}
                     {is_modal_limit_open &&
-                        <ModalL
+                        <ModalLimit
                         modalClose={this.handleModalLimitClose}
                         modalAction={this.wmsIsActiveFalse(id)}
-                        text={"Та хэрэглэгчийн системд нэвтрэх эрхийг хязгаарлах гэж байна. Хязгаарлагдсан хэрэглэгч систем нэвтрэх эрхгүй болохыг анхаарна уу!"}
+                        text={"Та WMS-ийн системд нэвтрэх эрхийг хязгаарлах гэж байна !"}
                         title="Тохиргоог хязгаарлах"/>
                     }
                 </td>
