@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from "react"
 
-export default class Modal extends Component {
+export default class ModalL extends Component {
 
     constructor(props) {
         super(props)
