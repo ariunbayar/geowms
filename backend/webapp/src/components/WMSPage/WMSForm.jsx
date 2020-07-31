@@ -19,7 +19,7 @@ export class WMSForm extends Component {
             layers_all: [],
             is_active:false,
             layer_choices: [],
-            is_active_change:false
+            is_active_change:true
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -51,7 +51,6 @@ export class WMSForm extends Component {
     handleSave() {
         const id = this.props.match.params.id
         const {name,url,public_url,layers,layer_choices,is_active_change}= this.state
-        const roleId =this.state.role_id
         if(is_active_change){
             const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":true }
             if (id) {
@@ -68,7 +67,7 @@ export class WMSForm extends Component {
             }
         }
         else{
-            const value={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":false }
+            const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":false }
             if (id) {
                 service.update(values).then(({ success, item }) => {
                     if (success) { this.props.history.push('/back/wms/') }
@@ -84,10 +83,23 @@ export class WMSForm extends Component {
         }
 
     }
-    ActiveChange(){
+    ActiveChange(e){
+        const is_active=this.state.is_active
         this.setState({
-            is_active_change:true
+            [e.target.name]:e.target.checked,
+            
         })
+        if(is_active){
+            this.setState({
+                is_active_change:false
+            })
+        }
+        else{
+            this.setState({
+                is_active_change:true
+            })
+        }
+
     }
     loadData() {
         const id = this.props.match.params.id
@@ -199,10 +211,11 @@ export class WMSForm extends Component {
                                     />
                                 </div>
                                 <div>
-                                    {is_active ?<input type="checkbox" checked={is_active===true}/>:
-                                    <input type="checkbox" onChange={this.ActiveChange}/>
-                                    }
-                                    
+                                    <input 
+                                    type="checkbox"
+                                    name="is_active"
+                                    checked={this.state.is_active}
+                                    onChange={this.ActiveChange}/>
                                 </div>
                                 <div className="form-group">
                                     <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >

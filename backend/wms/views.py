@@ -40,8 +40,7 @@ def all(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateMore(request, pk):
-
-    print("sadsad")
+    
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.filter(id=pk)]
     return JsonResponse({'wms_list': wms_list})
 
@@ -195,6 +194,8 @@ def update(request, payload):
     wms_id=payload.get("id")
     if(is_active):
         wms.is_active=True
+    else:
+        wms.is_active=False
     if form.is_valid():
 
         with transaction.atomic():
