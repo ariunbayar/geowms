@@ -76,6 +76,7 @@ def _get_govorg_detail_display(request, govorg):
         {
             'id': wms.id,
             'name': wms.name,
+            'is_active': wms.is_active,
             'url': wms.url,
             'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
             'public_url': request.build_absolute_uri(reverse('api:систем:proxy', args=[govorg.token, wms.pk])),

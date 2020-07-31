@@ -164,7 +164,20 @@ export class GovorgForm extends Component {
                     <div className="col-md-8">
                      {this.state.wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
-                            <p><strong>{wms.name}</strong> {wms.public_url}</p>
+                                    {wms.is_active ?
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                <i className="fa fa-check-circle" style={{color:"green"}} aria-hidden="false"></i>
+                                                <a> &nbsp;<strong>{wms.name}</strong>{wms.public_url}</a>
+                                            </div>
+                                        </div> :
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                 <i className="fa fa-times-circle" style={{color:"#FF4748"}}></i>
+                                                 <del><a> &nbsp;<strong>{wms.name}</strong>{wms.public_url}</a></del>
+                                            </div>
+                                        </div>
+                                    }
                             {wms.layer_list.map((layer, idx) =>
                                 <div key={idx}>
                                     <label>
@@ -178,6 +191,7 @@ export class GovorgForm extends Component {
                                 </div>
                             )}
                         </div>
+                        
                     )}
                     </div>
                 </div>
