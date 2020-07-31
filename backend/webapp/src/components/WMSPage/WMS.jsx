@@ -1,8 +1,10 @@
 import React, { Component } from "react"
+
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
 import ModalLimit from "../UserPage/ModalLimit"
+
 export default class WMS extends Component {
 
     constructor(props) {
@@ -36,6 +38,7 @@ export default class WMS extends Component {
         this.setState({is_modal_delete_open: false})
 
     }
+
     wmsIsActiveTrue(id) {
         service.wmsIsActiveUpdate(id, true).then(({success}) => {
             if (success) {
@@ -51,7 +54,6 @@ export default class WMS extends Component {
             }
         })
     }
-
 
     render() {
 
@@ -87,7 +89,7 @@ export default class WMS extends Component {
                             text={`Та "${name}" нэртэй WMS-ийн эрхийн түвшинг хязгааралах гэж байна !`}
                             title="Тохиргоог хязгаарлах"
                         />
-                        }  
+                    }  
                 </td>
                 <td>
                     <NavLink to={`/back/wms/${id}/засах/`}>
