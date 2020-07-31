@@ -3,6 +3,7 @@ export const service = {
     detail,
     userDetailChange,
     roleCreate,
+    userCount
 }
 
 const prefix = '/back/api/user'
@@ -87,4 +88,11 @@ function roleCreate(payload){
         body: JSON.stringify(payload),
     }
     return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
+}
+
+function userCount(){
+    const opts = {
+        ..._getGetOptions(),
+    }
+    return fetch(`${prefix}/userCount/`, opts).then(handleResponse)
 }

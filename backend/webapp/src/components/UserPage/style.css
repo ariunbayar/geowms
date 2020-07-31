@@ -1,3 +1,7 @@
 .dan-logo-icon{
     width: 40px;
 }
+
+.list-group-horizontal-lg .active{
+    background-color: #034ea2;
+}
