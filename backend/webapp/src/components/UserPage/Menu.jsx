@@ -2,31 +2,22 @@ import React, { Component } from "react"
 import "./style.css"
 import {service} from './service'
 import {Жагсаалт} from './Жагсаалт'
-import {NavLink} from "react-router-dom"
+import {Switch , Route, Link, NavLink} from "react-router-dom"
+import {Govorg_level_1} from './Govorg_level_1/index'
+import {Govorg_level_2} from './Govorg_level_2/index'
+import {Govorg_level_3} from './Govorg_level_3/index'
+import {Govorg_level_4} from './Govorg_level_4/index'
 
 export class Menu extends Component {
-
-
     constructor(props) {
 
         super(props)
 
         this.state = {
-            page_active: true,
             user_count: 0,
         }
-        this.pageTrue=this.pageTrue.bind(this)
-        this.pageFalse=this.pageFalse.bind(this)
         this.userCount=this.userCount.bind(this)
 
-    }
-    pageTrue(){
-        this.setState({page_active: true})
-        this.userCount()
-    }
-
-    pageFalse(){
-        this.setState({page_active: false})
     }
 
     componentDidMount() {
@@ -40,41 +31,50 @@ export class Menu extends Component {
     }
 
     render() {
-        const {page_active, user_count} = this.state
+        const { user_count} = this.state
         return (
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
-                
-                <div class="list-group list-group-horizontal-lg col-md-12">
-                    <div class={"list-group-item d-flex justify-content-between align-items-center col-md-6 " + (page_active ? "active" : " ")} onClick={this.pageTrue}>
-                        Хэрэглэгч
-                        <span class={"badge " + (page_active ? "badge-light badge-pill text-primary" : "gp-bg-primary badge-pill")} >{user_count}</span>
+            <div className="container my-4 col-md-10 shadow-lg p-3 mb-5 bg-white rounded">
+                <div className="row">
+                    <div className=" col-md-2">
+                        <div className="list-group">
+                            <NavLink className="nav-link" to="/back/user/" exact activeClassName="active">
+                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 ">
+                                    Хэрэглэгч
+                                    <span className="badge badge-light badge-pill text-primary" >{user_count}</span>
+                                </div>
+                            </NavLink>
+                            <NavLink className="nav-link" to="/back/user/level/1/" activeClassName="active">
+                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                    1-р түвшин
+                                </div>
+                            </NavLink>
+                            <NavLink className="nav-link" to="/back/user/level/2/" activeClassName="active">
+                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                    2-р түвшин
+                                </div>
+                            </NavLink>
+                            <NavLink className="nav-link" to="/back/user/level/3/" activeClassName="active">
+                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                    3-р түвшин
+                                </div>
+                            </NavLink>
+                            <NavLink className="nav-link" to="/back/user/level/4/" activeClassName="active">
+                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                    4-р түвшин
+                                </div>
+                            </NavLink>
+                        </div>
                     </div>
-                    <div class={"list-group-item d-flex justify-content-between align-items-center col-md-6 " + (page_active ? " " : "active")} onClick={this.pageFalse}>
-                        Байгууллагын эрх
+                    <div className=" col-md-10">
+                        <Switch>
+                            <Route path="/back/user/" exact component={Жагсаалт} />
+                            <Route path="/back/user/level/1/" component={Govorg_level_1} />
+                            <Route path="/back/user/level/2/" component={Govorg_level_2} />
+                            <Route path="/back/user/level/3/" component={Govorg_level_3} />
+                            <Route path="/back/user/level/4/" component={Govorg_level_4} />
+                        </Switch>
                     </div>
                 </div>
-                {page_active ? 
-                <div>
-                    <Жагсаалт></Жагсаалт>
-                </div>:
-                <div>
-                    <ul class="list-group col-md-12">
-                        <NavLink exact to={'/back/user/govorg/level/1/'} className="list-group-item d-flex justify-content-between align-items-center">
-                            <h4>1-р түвшин</h4>
-                        </NavLink>
-                        <NavLink exact to={'/back/user/govorg/level/2/'} className="list-group-item d-flex justify-content-between align-items-center">
-                            <h4>2-р түвшин</h4>
-                        </NavLink>
-                        <NavLink exact to={'/back/user/govorg/level/3/'} className="list-group-item d-flex justify-content-between align-items-center">
-                            <h4>3-р түвшин</h4>
-                        </NavLink>
-                        <NavLink exact to={'/back/user/govorg/level/4/'} className="list-group-item d-flex justify-content-between align-items-center">
-                            <h4>4-р түвшин</h4>
-                        </NavLink>
-                    </ul>
-                </div>
-                }
-
             </div>
         )
     }

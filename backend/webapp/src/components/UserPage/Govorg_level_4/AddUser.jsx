@@ -32,10 +32,10 @@ export class AddUser extends Component {
         const {search_data, search_query} = this.state
         return (
             <div className="main-content">
-                <div className="container page-container my-4  shadow-lg p-3 mb-5 bg-white">
+                <div className="container page-container my-4">
                     
                     <div className="text-left">
-                        <NavLink className="btn gp-bg-primary" to={`/back/user/govorg/level/4/`}>
+                        <NavLink className="btn gp-bg-primary" to={`/back/user/level/4/`}>
                             Буцах
                         </NavLink>
                     </div>

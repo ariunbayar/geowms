@@ -27,9 +27,9 @@ export class AddUserForm extends Component {
             <div className="main-content">
                 <div className="container page-container my-4">
                     <h5 className="mb-3">Гүйлгээний хуулга</h5>
-                    <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer shadow-lg p-3 mb-5 bg-white rounded">
+                    <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer">
                     <div className="text-right">
-                        <NavLink className="btn gp-bg-primary" to={`/back/user/govorg/level/4/нэмэх/`}>
+                        <NavLink className="btn gp-bg-primary" to={`/back/user/level/4/нэмэх/`}>
                             Нэмэх
                         </NavLink>
                     </div>

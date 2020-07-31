@@ -19,8 +19,8 @@ export class Govorg_level_4 extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path={'/back/user/govorg/level/4/'} component={AddUserForm}/>
-                <Route exact path={'/back/user/govorg/level/4/нэмэх/'} component={AddUser}/>
+                <Route exact path={'/back/user/level/4/'} component={AddUserForm}/>
+                <Route exact path={'/back/user/level/4/нэмэх/'} component={AddUser}/>
             </Switch>
         )
     }
