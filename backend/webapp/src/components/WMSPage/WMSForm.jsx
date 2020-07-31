@@ -17,7 +17,9 @@ export class WMSForm extends Component {
             public_url: '',
             layers: [],
             layers_all: [],
+            is_active:false,
             layer_choices: [],
+            is_active_change:true
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -26,6 +28,7 @@ export class WMSForm extends Component {
         this.loadLayers = this.loadLayers.bind(this)
         this.loadData = this.loadData.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
+        this.ActiveChange=this.ActiveChange.bind(this)
 
     }
 
@@ -47,35 +50,73 @@ export class WMSForm extends Component {
 
     handleSave() {
         const id = this.props.match.params.id
-        const values = this.state
-        if (id) {
-            service.update(values).then(({ success, item }) => {
-                if (success) { this.props.history.push('/back/wms/') }
-            })
+        const {name,url,public_url,layers,layer_choices,is_active_change}= this.state
+        if(is_active_change){
+            const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":true }
+            if (id) {
+                service.update(values).then(({ success, item }) => {
+                    if (success) { this.props.history.push('/back/wms/') }
+                })
 
-        } else {
+            } else {
 
-            service.create(values).then(({ success, item }) => {
-                if (success) { this.props.history.push('/back/wms/') }
-            })
+                service.create(values).then(({ success, item }) => {
+                    if (success) { this.props.history.push('/back/wms/') }
+                })
 
+            }
+        }
+        else{
+            const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":false }
+            if (id) {
+                service.update(values).then(({ success, item }) => {
+                    if (success) { this.props.history.push('/back/wms/') }
+                })
+
+            } else {
+
+                service.create(values).then(({ success, item }) => {
+                    if (success) { this.props.history.push('/back/wms/') }
+                })
+
+            }
         }
 
     }
+    ActiveChange(e){
+        const is_active=this.state.is_active
+        this.setState({
+            [e.target.name]:e.target.checked,
+            
+        })
+        if(is_active){
+            this.setState({
+                is_active_change:false
+            })
+        }
+        else{
+            this.setState({
+                is_active_change:true
+            })
+        }
 
+    }
     loadData() {
         const id = this.props.match.params.id
         service.detail(id).then(({ wms_list }) => {
             if (wms_list) {
                 {
                     wms_list.map((wms, idx) =>
-                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [] })
+                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [],is_active:wms.is_active })
                     )
+
                 }
                 this.loadLayers(this.state.public_url)
                 this.handleWmsLayerRefresh()
+                
             }
         })
+        
 
     }
 
@@ -132,7 +173,7 @@ export class WMSForm extends Component {
     }
 
     render() {
-        const { layers_all, id } = this.state
+        const { layers_all, id,is_active } = this.state
         return (
             <div className="container my-4">
                 <div className="row">
@@ -169,7 +210,13 @@ export class WMSForm extends Component {
                                         value={this.state.url}
                                     />
                                 </div>
-
+                                <div>
+                                    <input 
+                                    type="checkbox"
+                                    name="is_active"
+                                    checked={this.state.is_active}
+                                    onChange={this.ActiveChange}/>
+                                </div>
                                 <div className="form-group">
                                     <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
                                         Хадгал
