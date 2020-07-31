@@ -19,8 +19,12 @@ export class Govorg_level_1 extends Component {
 
     render() {
         return (
-            <div className="container">
-                goverg1
+            <div className="container my-4">
+                <div className="row">
+                    <div className="col-md-12">
+                        <h1>1-р түвшин</h1>
+                    </div>
+                </div>
             </div>
         )
     }

@@ -50,7 +50,7 @@ export class Menu extends Component {
                         <span class={"badge " + (page_active ? "badge-light badge-pill text-primary" : "gp-bg-primary badge-pill")} >{user_count}</span>
                     </div>
                     <div class={"list-group-item d-flex justify-content-between align-items-center col-md-6 " + (page_active ? " " : "active")} onClick={this.pageFalse}>
-                        Хэрэглэгчийн түвшин
+                        Байгууллагын эрх
                     </div>
                 </div>
                 {page_active ? 
