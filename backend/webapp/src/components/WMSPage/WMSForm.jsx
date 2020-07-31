@@ -17,6 +17,7 @@ export class WMSForm extends Component {
             public_url: '',
             layers: [],
             layers_all: [],
+            is_active:false,
             layer_choices: [],
         }
 
@@ -69,19 +70,20 @@ export class WMSForm extends Component {
             if (wms_list) {
                 {
                     wms_list.map((wms, idx) =>
-                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [] })
+                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [],is_active:wms.is_active })
                     )
                 }
                 this.loadLayers(this.state.public_url)
                 this.handleWmsLayerRefresh()
             }
         })
+        
 
     }
 
     handleWmsLayerRefresh() {
         const id = this.props.match.params.id
-        service.wmsLayerall(id).then(({ layers_all }) => {
+        service.wmsLayerall(id).then(({ layers_alisl }) => {
             if (layers_all) {
                 this.setState({ layers_all })
             }
@@ -132,7 +134,7 @@ export class WMSForm extends Component {
     }
 
     render() {
-        const { layers_all, id } = this.state
+        const { layers_all, id,is_active } = this.state
         return (
             <div className="container my-4">
                 <div className="row">
@@ -169,7 +171,9 @@ export class WMSForm extends Component {
                                         value={this.state.url}
                                     />
                                 </div>
-                                <div><input/></div>
+                                {is_active ?<input type="checkbox"/> :
+                                <div>false</div>
+                                }
                                 <div className="form-group">
                                     <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
                                         Хадгал
