@@ -57,6 +57,17 @@ def all(request):
 
 @require_GET
 @ajax_required
+def userCount(request):
+
+    user_count = User.objects.all().count()
+    rsp = {
+        'user_count': user_count,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
 def дэлгэрэнгүй(request, pk):
 
     user = get_object_or_404(User, pk=pk)
