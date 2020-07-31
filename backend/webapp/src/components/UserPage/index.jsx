@@ -26,7 +26,7 @@ export class UserPage extends Component {
                 <Route exact path={"/back/user/govorg/level/1/"} component={Govorg_level_1}/>
                 <Route exact path={"/back/user/govorg/level/2/"} component={Govorg_level_2}/>
                 <Route exact path={"/back/user/govorg/level/3/"} component={Govorg_level_3}/>
-                <Route exact path={"/back/user/govorg/level/4/"} component={Govorg_level_4}/>
+                <Route path={"/back/user/govorg/level/4/"} component={Govorg_level_4}/>
             </Switch>
         )
 
