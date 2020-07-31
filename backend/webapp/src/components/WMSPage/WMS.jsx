@@ -1,7 +1,9 @@
 import React, { Component } from "react"
+
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
+import ModalLimit from "../UserPage/ModalLimit"
 
 export default class WMS extends Component {
 
@@ -10,18 +12,31 @@ export default class WMS extends Component {
 
         this.state = {
             modal_status: 'closed',
-            is_active: this.props.values.is_active
+            is_active: this.props.values.is_active,
+            is_modal_limit_open:false   
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.wmsIsActiveTrue = this.wmsIsActiveTrue.bind(this)
         this.wmsIsActiveFalse = this.wmsIsActiveFalse.bind(this)
+        this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
+        this.handleModalLimitOpen=this.handleModalLimitOpen.bind(this)
+        
 
     }
 
     handleModalDeleteOpen(event) {
         event.preventDefault()
         this.setState({modal_status: 'open'})
+    }
+
+    handleModalLimitOpen() {
+        this.setState({is_modal_limit_open: !this.state.is_modal_limit_open})
+     }
+
+    handleModalLimitClose() {
+        this.setState({is_modal_delete_open: false})
+
     }
 
     wmsIsActiveTrue(id) {
@@ -40,11 +55,10 @@ export default class WMS extends Component {
         })
     }
 
-
     render() {
 
         const {id, name, url, public_url, created_at} = this.props.values
-        const {is_active} = this.state
+        const {is_active,is_modal_limit_open} = this.state
         return (
             <tr>
                 <th>
@@ -66,8 +80,16 @@ export default class WMS extends Component {
                 </td>
                 <td>
                     {is_active ? 
-                    <button  onClick={() => this.wmsIsActiveFalse(id)} className="btn btn-danger" style={{width:"100%"}}>Хязгаарлах</button> :
+                    <button  onClick={this.handleModalLimitOpen} className="btn btn-danger" style={{width:"100%"}}>Хязгаарлах</button> :
                     <button  onClick={() => this.wmsIsActiveTrue(id)} className="btn btn-success">Идэвхжүүлэх</button>}
+                    {is_modal_limit_open &&
+                        <ModalLimit
+                            modalClose={this.handleModalLimitClose}
+                            modalAction={() => this.wmsIsActiveFalse(id)}
+                            text={`Та "${name}" нэртэй WMS-ийн эрхийн түвшинг хязгааралах гэж байна !`}
+                            title="Тохиргоог хязгаарлах"
+                        />
+                    }  
                 </td>
                 <td>
                     <NavLink to={`/back/wms/${id}/засах/`}>

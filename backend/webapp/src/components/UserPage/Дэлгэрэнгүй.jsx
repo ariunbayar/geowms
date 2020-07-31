@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {NavLink} from 'react-router-dom'
-import Modal from "./ModalLimit"
+import ModalLimit from "./ModalLimit"
 
 
 
@@ -128,7 +128,7 @@ export class Дэлгэрэнгүй extends Component {
                         <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>
                         <div>
                         {is_modal_limit_open &&
-                        <Modal
+                        <ModalLimit
                             modalClose={this.handleModalLimitClose}
                             modalAction={this.handleIsActiveFalse}
                             text={"Та хэрэглэгчийн системд нэвтрэх эрхийг хязгаарлах гэж байна. Хязгаарлагдсан хэрэглэгч систем нэвтрэх эрхгүй болохыг анхаарна уу!"}
