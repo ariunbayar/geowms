@@ -169,7 +169,7 @@ export class WMSForm extends Component {
                                         value={this.state.url}
                                     />
                                 </div>
-
+                                <div><input/></div>
                                 <div className="form-group">
                                     <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
                                         Хадгал
