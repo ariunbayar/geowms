@@ -50,7 +50,7 @@ export class Menu extends Component {
                         <span class={"badge " + (page_active ? "badge-light badge-pill text-primary" : "gp-bg-primary badge-pill")} >{user_count}</span>
                     </div>
                     <div class={"list-group-item d-flex justify-content-between align-items-center col-md-6 " + (page_active ? " " : "active")} onClick={this.pageFalse}>
-                        Хэрэглэгчийн түвшин
+                        Байгууллагын эрх
                     </div>
                 </div>
                 {page_active ? 
@@ -59,16 +59,16 @@ export class Menu extends Component {
                 </div>:
                 <div>
                     <ul class="list-group col-md-12">
-                        <NavLink exact to={''} className="list-group-item d-flex justify-content-between align-items-center">
+                        <NavLink exact to={'/back/user/govorg/level/1/'} className="list-group-item d-flex justify-content-between align-items-center">
                             <h4>1-р түвшин</h4>
                         </NavLink>
-                        <NavLink exact to={''} className="list-group-item d-flex justify-content-between align-items-center">
+                        <NavLink exact to={'/back/user/govorg/level/2/'} className="list-group-item d-flex justify-content-between align-items-center">
                             <h4>2-р түвшин</h4>
                         </NavLink>
-                        <NavLink exact to={''} className="list-group-item d-flex justify-content-between align-items-center">
+                        <NavLink exact to={'/back/user/govorg/level/3/'} className="list-group-item d-flex justify-content-between align-items-center">
                             <h4>3-р түвшин</h4>
                         </NavLink>
-                        <NavLink exact to={''} className="list-group-item d-flex justify-content-between align-items-center">
+                        <NavLink exact to={'/back/user/govorg/level/4/'} className="list-group-item d-flex justify-content-between align-items-center">
                             <h4>4-р түвшин</h4>
                         </NavLink>
                     </ul>
