@@ -1,5 +1,8 @@
 import React, { Component } from "react"
 import {service} from '../service'
+import {Switch, Route} from "react-router-dom"
+import {AddUserForm} from './AddUserForm'
+import {AddUser} from './AddUser'
 
 export class Govorg_level_4 extends Component {
 
@@ -7,10 +10,6 @@ export class Govorg_level_4 extends Component {
     constructor(props) {
 
         super(props)
-
-        this.state = {
-        }
-
     }
 
     componentDidMount() {
@@ -19,13 +18,10 @@ export class Govorg_level_4 extends Component {
 
     render() {
         return (
-            <div className="container my-4">
-                <div className="row">
-                    <div className="col-md-12">
-                        <h1>4-р түвшин</h1>
-                    </div>
-                </div>
-            </div>
+            <Switch>
+                <Route exact path={'/back/user/level/4/'} component={AddUserForm}/>
+                <Route exact path={'/back/user/level/4/нэмэх/'} component={AddUser}/>
+            </Switch>
         )
     }
 }

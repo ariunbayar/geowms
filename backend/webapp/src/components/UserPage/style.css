@@ -2,6 +2,8 @@
     width: 40px;
 }
 
-.list-group-horizontal-lg .active{
+a.active .list-group-item{
+    color: white;
     background-color: #034ea2;
+
 }

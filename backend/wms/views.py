@@ -40,8 +40,7 @@ def all(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateMore(request, pk):
-
-    print("sadsad")
+    
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.filter(id=pk)]
     return JsonResponse({'wms_list': wms_list})
 
@@ -191,6 +190,12 @@ def update(request, payload):
     wms = get_object_or_404(WMS, pk=payload.get('id'))
     layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
+    is_active=payload.get('is_active')
+    wms_id=payload.get("id")
+    if(is_active):
+        wms.is_active=True
+    else:
+        wms.is_active=False
     if form.is_valid():
 
         with transaction.atomic():
@@ -203,6 +208,7 @@ def update(request, payload):
                         name=layer_choice.get('name'),
                         code=layer_choice.get('code'),
                         legend_url=layer_choice.get('legendurl'))
+
 
         return JsonResponse({
                 'success': True
