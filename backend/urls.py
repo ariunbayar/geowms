@@ -58,6 +58,7 @@ urlpatterns = [
 
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
+        path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
     ], 'org'))),
 
     path('api/систем/', include(([

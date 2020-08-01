@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {OrgFormTable} from './OrgFormTable'
 import {NavLink} from "react-router-dom"
-
+import {service} from "./service"
 
 export class OrgForm extends Component {
 
@@ -10,19 +10,37 @@ export class OrgForm extends Component {
 
         this.state = {
             all_users: [{},{},{}],
+            orgs: []
         }
+        this.handleGetAll=this.handleGetAll.bind(this)
         this.handleUserDelete=this.handleUserDelete.bind(this)
 
     }
     componentDidMount(){
+        const org_level = this.props.match.params.level
 
+        this.handleGetAll(org_level)
+    }
+    handleGetAll(org_level){
+        service.getAll(org_level).then(({ orgs }) => {
+            if (orgs) {
+                this.setState({ orgs })
+            }
+        })
+    }
+    componentDidUpdate(prevProps) {
+        if (this.props.match.params.level !== prevProps.match.params.level) {
+            const org_level = this.props.match.params.level
+
+            this.handleGetAll(org_level)
+        }
     }
     handleUserDelete(id){
         alert(id)
     }
 
     render() {
-        const {all_users} = this.state
+        const {all_users, orgs} = this.state
         const org_level = this.props.match.params.level
 
         return (
@@ -36,20 +54,17 @@ export class OrgForm extends Component {
                     <table className="table example" id="example">
                         <thead>
                             <tr>
-                                <th scope="col">Хэрэглэгчийн нэр</th>
-                                <th scope="col">Админ болсон огноо</th>
-                                <th scope="col">Админ эрх олгосон хэрэглэгч</th >
-                                <th scope="col">Харьяат байгууллага</th >
+                                <th scope="col">№</th>
+                                <th scope="col">Байгууллага нэр</th>
+                                <th scope="col">Түвшин</th>
                                 <th scope="col">устгах</th >
                             </tr>
                         </thead>
                         <tbody>
-                            {all_users.map((users, idx) =>
+                            {orgs.map((org) =>
                                 <OrgFormTable 
-                                    key = {idx} 
                                     org_level={org_level}
-                                    org_id={idx}
-                                    values={users} 
+                                    org={org} 
                                     handleUserDelete={() => this.handleUserDelete(2)}
                                 >
                                 </OrgFormTable>
