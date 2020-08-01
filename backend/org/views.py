@@ -14,22 +14,14 @@ from backend.bundle.models import Bundle
 @user_passes_test(lambda u: u.is_superuser)
 def all(request, level):
 
-    level_display = dict((
-        (1, '1-р түвшин'),
-        (2, '2-р түвшин'),
-        (3, '3-р түвшин'),
-        (4, '4-р түвшин'),
-    ))[int(level)]
-
-    from random import randint
-
     orgs_display = []
-    for i in range(1, randint(2, 13)):
+
+    for org in Org.objects.filter(level=level):
         orgs_display.append({
-            'id': i,
-            'name': 'Нийслэлийн хот байгуулалт, хөгжлийн газар %s' % i,
-            'level': level,
-            'level_display': level_display,
+            'id': org.id,
+            'name': org.name,
+            'level': org.level,
+            'level_display': org.get_level_display(),
         })
 
     return JsonResponse({'orgs': orgs_display})
@@ -179,5 +171,33 @@ def employee_remove(request, payload, level, pk):
     user_id = payload.get('user_id')
 
     # user = get_object_or_404(User, pk=user_id)
+
+    return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def org_add(request, payload, level):
+
+    org_name = payload.get('org_name')
+    org_check = Org.objects.filter(name=org_name)
+    if org_check:
+        return JsonResponse({'success': False})
+    else:
+        Org.objects.create(name=org_name, level=level)
+
+        return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def org_remove(request, payload, level):
+
+    org_id = payload.get('org_id')
+    org = get_object_or_404(Org, pk=org_id, level=level)
+    org.orgrole_set.all().delete()
+    org.delete()
 
     return JsonResponse({'success': True})
