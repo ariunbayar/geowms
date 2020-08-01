@@ -19,7 +19,7 @@ export class OrgFormTable extends Component {
                     {org.id}
                 </td>
                 <td>
-                    <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org.id}/`}>
+                    <NavLink className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org.id}/`}>
                         {org.name}
                     </NavLink>
                 </td>

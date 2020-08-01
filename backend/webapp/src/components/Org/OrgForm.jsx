@@ -36,7 +36,13 @@ export class OrgForm extends Component {
         }
     }
     handleUserDelete(id){
-        alert(id)
+        const org_level = this.props.match.params.level
+        const org_name = this.state.org_name
+        service.org_remove(org_level,id).then(({ success }) => {
+            if (success) {
+                this.handleGetAll(org_level)
+            }
+        })
     }
 
     render() {
@@ -65,7 +71,7 @@ export class OrgForm extends Component {
                                 <OrgFormTable 
                                     org_level={org_level}
                                     org={org} 
-                                    handleUserDelete={() => this.handleUserDelete(2)}
+                                    handleUserDelete={() => this.handleUserDelete(org.id)}
                                 >
                                 </OrgFormTable>
                             )}

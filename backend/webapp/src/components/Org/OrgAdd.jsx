@@ -13,7 +13,6 @@ export class OrgAdd extends Component {
             
         }
         this.handleUserSearch=this.handleUserSearch.bind(this)
-        this.handleUserAdd=this.handleUserAdd.bind(this)
         this.handleSave=this.handleSave.bind(this)
         
     }
@@ -24,17 +23,15 @@ export class OrgAdd extends Component {
         this.setState({[field]: e.target.value})
     }
 
-    handleUserAdd(id){
-
-        alert(id)
-    }
     handleSave(){
         const org_level = this.props.match.params.level
         const org_name = this.state.org_name
-        service.org_create(org_level,org_name).then(({ success }) => {
+        service.org_add(org_level,org_name).then(({ success }) => {
             if (success) {
-                this.setState({ orgs })
                 this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+            }
+            else{
+                alert("Давхацаж байна.")
             }
         })
     }
@@ -49,7 +46,7 @@ export class OrgAdd extends Component {
                     <div className="row">
                         <div className="col-md-6">
                             <div className="text-left">
-                                <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/${org_level}/түвшин/`}>
+                                <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/`}>
                                     Буцах
                                 </NavLink>
                             </div>
