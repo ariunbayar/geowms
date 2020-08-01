@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import "./style.css"
 import {service} from './service'
 import {Switch , Route, Link, NavLink} from "react-router-dom"
 import {OrgForm} from './OrgForm'
