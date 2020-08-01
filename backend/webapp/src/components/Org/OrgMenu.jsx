@@ -35,11 +35,11 @@ export class OrgMenu extends Component {
                 <div className="row">
                     <div className=" col-md-2">
                         <div className="list-group">
-                            <Link className="menu" to={`/back/байгууллага/түвшин/${org_level}/`} activeClassName="active">
+                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     Буцах
                                 </div>
-                            </Link>
+                            </NavLink>
                             <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     эрх
