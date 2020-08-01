@@ -40,12 +40,12 @@ export class OrgMenu extends Component {
                                     Буцах
                                 </div>
                             </Link>
-                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/`} activeClassName="active">
+                            <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     эрх
                                 </div>
                             </NavLink>
-                            <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
+                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/байгуулга/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     хэрэглэгч
                                 </div>
@@ -59,9 +59,10 @@ export class OrgMenu extends Component {
                     </div>
                         <div className="col-md-10">
                             <Switch>
-                                <Route path="/back/байгууллага/түвшин/:level/:id/" component={OrgRole}/>
-                                <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
+                                <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
+                                <Route path="/back/байгууллага/түвшин/:level/:id/байгуулга/" component={OrgUser}/>
+
                             </Switch>
                         </div>
                 </div>

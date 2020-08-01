@@ -1,5 +1,11 @@
 import React, { Component } from "react"
 import {service} from '../service'
+import {Switch , Route, Link, NavLink} from "react-router-dom"
+import {UserForm } from './UserForm'
+import {Useradd } from './Useradd'
+import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
+
+
 
 export class OrgUser extends Component {
 
@@ -19,13 +25,11 @@ export class OrgUser extends Component {
 
     render() {
         return (
-            <div className="container my-4">
-                <div className="row">
-                    <div className="col-md-12">
-                        <h1>3-р түвшин</h1>
-                    </div>
-                </div>
-            </div>
+            <Switch>
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/байгуулга/" component={UserForm}/>
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/нэмэх/" component={Useradd}/>
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/Дэлгэрэнгүй/" component={Дэлгэрэнгүй}/>
+            </Switch>
         )
     }
 }
