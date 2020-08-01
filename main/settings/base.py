@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'backend.суурь_давхарга.apps.СуурьДавхаргаConfig',
     'backend.govorg.apps.GovOrgConfig',
     'backend.config.apps.ConfigConfig',
+    'backend.org.apps.OrgConfig',
 
     # API apps
 
