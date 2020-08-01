@@ -7,6 +7,7 @@ from backend.user import views as user_views
 from backend.govorg import views as govorg_views
 from backend.суурь_давхарга import views as суурь_давхарга
 from backend.config import views as config_views
+from backend.org import views as org_views
 
 
 app_name = 'backend'
@@ -54,6 +55,10 @@ urlpatterns = [
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
+
+    path('api/org/', include(([
+        path('level-<int:level>/', org_views.all, name='all'),
+    ], 'org'))),
 
     path('api/систем/', include(([
         path('', govorg_views.жагсаалт, name=''),
