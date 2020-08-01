@@ -25,23 +25,23 @@ export class Org extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                         <div className="col-md-12 list-group list-group-horizontal">
-                            <NavLink className="nav-link col-md-3" to="/back/байгууллага/түвшин/1/" activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center">
+                            <NavLink className="col-md-3" to="/back/байгууллага/түвшин/1/" activeClassName="active">
+                                <div className="list-group-item">
                                     1-р түвшин
                                 </div>
                             </NavLink>
-                            <NavLink className="nav-link col-md-3" to="/back/байгууллага/түвшин/2/" activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center">
+                            <NavLink className="col-md-3" to="/back/байгууллага/түвшин/2/" activeClassName="active">
+                                <div className="list-group-item">
                                     2-р түвшин
                                 </div>
                             </NavLink>
-                            <NavLink className="nav-link col-md-3" to="/back/байгууллага/түвшин/3/" activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center">
+                            <NavLink className="col-md-3" to="/back/байгууллага/түвшин/3/" activeClassName="active">
+                                <div className="list-group-item">
                                     3-р түвшин
                                 </div>
                             </NavLink>
-                            <NavLink className="nav-link col-md-3" to="/back/байгууллага/түвшин/4/" activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center">
+                            <NavLink className="col-md-3" to="/back/байгууллага/түвшин/4/" activeClassName="active">
+                                <div className="list-group-item">
                                     4-р түвшин
                                 </div>
                             </NavLink>
