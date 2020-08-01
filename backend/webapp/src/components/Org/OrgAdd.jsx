@@ -10,15 +10,15 @@ export class OrgAdd extends Component {
 
         this.state = {
             org_name: '',
-            
         }
-        this.handleUserSearch=this.handleUserSearch.bind(this)
-        this.handleSave=this.handleSave.bind(this)
-        
+        this.handleUserSearch = this.handleUserSearch.bind(this)
+        this.handleSave = this.handleSave.bind(this)
     }
+
     componentDidMount(){
 
     }
+
     handleUserSearch(field, e){
         this.setState({[field]: e.target.value})
     }
@@ -29,9 +29,6 @@ export class OrgAdd extends Component {
         service.org_add(org_level,org_name).then(({ success }) => {
             if (success) {
                 this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-            }
-            else{
-                alert("Давхацаж байна.")
             }
         })
     }
@@ -65,9 +62,7 @@ export class OrgAdd extends Component {
                     </div>
 
                     <div className="row">
-                    
                         <div className="col-md-2">
-                        
                             <div className="form-group">
                                 <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
                                     Хадгал
@@ -78,7 +73,6 @@ export class OrgAdd extends Component {
                 </div>
             </div>
         )
-
     }
 
 }

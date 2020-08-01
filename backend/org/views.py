@@ -13,12 +13,7 @@ from backend.bundle.models import Bundle
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request, level):
-    level_display = dict((
-        (1, '1-р түвшин'),
-        (2, '2-р түвшин'),
-        (3, '3-р түвшин'),
-        (4, '4-р түвшин'),
-    ))[int(level)]
+
     orgs_display = []
 
     for org in Org.objects.filter(level=level):
@@ -26,7 +21,7 @@ def all(request, level):
             'id': org.id,
             'name': org.name,
             'level': org.level,
-            'level_display': level_display
+            'level_display': org.get_level_display(),
         })
 
     return JsonResponse({'orgs': orgs_display})
@@ -202,7 +197,7 @@ def org_remove(request, payload, level):
 
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
-    org_check = Org.objects.filter(pk=org_id, level=level)
-    org_check.delete()
+    org.orgrole_set.all().delete()
+    org.delete()
 
     return JsonResponse({'success': True})
