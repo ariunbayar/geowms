@@ -9,10 +9,6 @@ export class Дэлгэрэнгүй extends Component {
 
     componentDidMount(){
     }
-/*
-                <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/:level/:id/Дэлгэрэнгүй/`}>
-                                Буцах
-                </NavLink>*/
     render() {
             
         return (

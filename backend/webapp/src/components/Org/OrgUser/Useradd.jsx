@@ -8,12 +8,13 @@ export class Useradd extends Component {
     componentDidMount(){
     }
     render() {
-        alert("jsafe")
-
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
         return (
+            
             <div>
-                <NavLink className="btn gp-bg-primary" to={`back/байгууллага/түвшин/:level/:id/Дэлгэрэнгүй/`}>
-                    delgerengvi
+                <NavLink className="btn gp-bg-primary" to={`back/байгууллага/түвшин/${org_level}/${org_id}/Дэлгэрэнгүй/`}>
+                    
                 </NavLink>
             </div>
         )

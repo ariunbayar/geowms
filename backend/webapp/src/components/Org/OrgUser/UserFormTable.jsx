@@ -11,11 +11,12 @@ export class UserFormTable extends Component {
     componentDidMount(){
     }
     render() {
-        const { } = this.props.values
+        const org_id = this.props.org_id
+        const org_level = this.props.org_level
         return (
             <tr>
                 <td>
-                <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/1/0/дэлгэрэнгүй/`}>
+                <NavLink className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/дэлгэрэнгүй/`}>
                     {"Хэрэглэгчийн нэр"}
                 </NavLink>
                 </td>

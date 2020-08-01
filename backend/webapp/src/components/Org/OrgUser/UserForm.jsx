@@ -26,31 +26,32 @@ export class UserForm extends Component {
     render() {
         const {govorg_list} = this.state
         const id=this.props.values
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
         return (
             <div className="container">
                 <div className="row">
                     <div className="col-md-12">
                         <div className="text-right">
-                            <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/:level/:id/нэмэх/`}>
+                            <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/нэмэх/`}>
                                 Нэмэх
-                            </NavLink>
-                            <NavLink className="btn gp-bg-primary" to={`back/байгууллага/түвшин/${id}/${1}/Дэлгэрэнгүй/`}>
-                                Дэлгэрэнгүй
                             </NavLink>
                         </div>
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th scope="col">Байгууллагын нэр </th>
-                                    <th scope="col">Хэн ажиллах</th>
-                                    <th scope="col">Устгах icon</th>
-                                    <th scope="col">Засах icon</th>
-                                    <th scope="col">дэлгэрэнгүйг харах</th>
+                                    <th scope="col">Ажилтны нэр </th>
+                                    <th scope="col">Албан тушаал</th>
+                                    <th scope="col">Үүссэн огноо</th>
+                                    <th scope="col">Зассан огноо</th>
+                                    <th scope="col">Устгах</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {govorg_list.map((govorg, idx) =>
                                     <UserFormTable 
+                                        org_level={org_level}
+                                        org_id={org_id}
                                         key = {idx} 
                                         values={govorg} 
                                         handleGovorgDelete={() => this.handleGovorgDelete(2)}
