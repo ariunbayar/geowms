@@ -23,6 +23,7 @@ export class OrgSystem extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <h1>3-р түвшин</h1>
+                        <h2>blabla</h2>
                     </div>
                 </div>
             </div>
