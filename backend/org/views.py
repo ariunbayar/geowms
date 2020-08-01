@@ -7,22 +7,6 @@ from main.decorators import ajax_required
 from .models import Org
 
 
-def _get_org_options():
-
-    form_options = []
-
-    for wms in WMS.objects.filter():
-        layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
-        wms_display = {
-            'name': wms.name,
-            'is_active': wms.is_active,
-            'layers': layers,
-        }
-        form_options.append(wms_display)
-
-    return form_options
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
