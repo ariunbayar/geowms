@@ -1,31 +1,28 @@
 import React, { Component } from "react"
-import {service} from '../service'
+import {Switch, Route} from "react-router-dom"
+
+import {Жагсаалт} from './Жагсаалт'
+import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
+import {GovorgForm} from './GovorgForm'
+
 
 export class OrgSystem extends Component {
 
-
     constructor(props) {
-
         super(props)
-
-        this.state = {
-        }
-
     }
-
-    componentDidMount() {
-    }
-
 
     render() {
+        
         return (
-            <div className="container my-4">
-                <div className="row">
-                    <div className="col-md-12">
-                        <h1>3-р түвшин</h1>
-                    </div>
-                </div>
-            </div>
+            <Switch>
+                <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/"} component={Жагсаалт}/>
+                <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/:system_id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
+                <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/үүсгэх/"} component={GovorgForm}/>
+                <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/:system_id/засах/"} component={GovorgForm}/>
+            </Switch>
         )
+
     }
+
 }

@@ -6,7 +6,6 @@ import {BundlePage} from "./BundlePage";
 import {DevPage} from "./DevPage";
 import {Org} from "./Org";
 import {UserPage} from "./UserPage";
-import {GovorgPage} from "./GovorgPage";
 import { СуурьДавхаргаХуудас } from "./СуурьДавхаргаХуудас";
 import {service} from "./service";
 import {ConfigPage} from "./ConfigPage";

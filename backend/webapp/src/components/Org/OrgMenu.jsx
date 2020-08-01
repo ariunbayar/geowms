@@ -35,12 +35,12 @@ export class OrgMenu extends Component {
                 <div className="row">
                     <div className=" col-md-2">
                         <div className="list-group">
-                            <Link className="menu" to={`/back/байгууллага/түвшин/${org_level}/`} activeClassName="active">
+                            <Link className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     Буцах
                                 </div>
                             </Link>
-                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/`} activeClassName="active">
+                            <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     эрх
                                 </div>
@@ -59,7 +59,7 @@ export class OrgMenu extends Component {
                     </div>
                         <div className="col-md-10">
                             <Switch>
-                                <Route path="/back/байгууллага/түвшин/:level/:id/" component={OrgRole}/>
+                                <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
                             </Switch>
