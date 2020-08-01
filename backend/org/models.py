@@ -6,7 +6,8 @@ class Org(models.Model):
     LEVEL_CHOICES = [
         (1, '1-р түвшин'),
         (2, '2-р түвшин'),
-        (3, '3-р түвшин')
+        (3, '3-р түвшин'),
+        (4, '4-р түвшин'),
     ]
 
     name = models.CharField(max_length=250)
