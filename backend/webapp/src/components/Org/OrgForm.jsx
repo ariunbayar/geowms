@@ -1,9 +1,9 @@
 import React, { Component } from "react"
-import {AddUserFormTable} from './AddUserFormTable'
+import {OrgFormTable} from './OrgFormTable'
 import {NavLink} from "react-router-dom"
 
 
-export class AddUserForm extends Component {
+export class OrgForm extends Component {
 
     constructor(props) {
         super(props)
@@ -23,13 +23,13 @@ export class AddUserForm extends Component {
 
     render() {
         const {all_users} = this.state
+        const org_level = this.props.match.params.level
+
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
-                    <h5 className="mb-3">Гүйлгээний хуулга</h5>
-                    <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer">
                     <div className="text-right">
-                        <NavLink className="btn gp-bg-primary" to={`/back/user/level/4/нэмэх/`}>
+                        <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/нэмэх/`}>
                             Нэмэх
                         </NavLink>
                     </div>
@@ -45,16 +45,17 @@ export class AddUserForm extends Component {
                         </thead>
                         <tbody>
                             {all_users.map((users, idx) =>
-                                <AddUserFormTable 
+                                <OrgFormTable 
                                     key = {idx} 
+                                    org_level={org_level}
+                                    org_id={idx}
                                     values={users} 
                                     handleUserDelete={() => this.handleUserDelete(2)}
                                 >
-                                </AddUserFormTable>
+                                </OrgFormTable>
                             )}
                         </tbody>
                     </table>
-                    </div>
                 </div>
             </div>
         )

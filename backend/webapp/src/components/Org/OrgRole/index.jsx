@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 
-export class Govorg_level_1 extends Component {
+export class OrgRole extends Component {
 
 
     constructor(props) {

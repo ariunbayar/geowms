@@ -230,3 +230,19 @@ body {
 }
 
 /*  Loading style ................... end*/
+
+/* backend user dan logo*/
+.dan-logo-icon{
+  width: 40px;
+}
+/* backend user dan logo end .......*/
+
+
+/* backend user govorg menu*/
+
+a.active .list-group-item{
+  color: white;
+  background-color: #034ea2;
+
+}
+/* backend user govorg menu end .......*/
