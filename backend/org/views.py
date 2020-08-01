@@ -46,6 +46,45 @@ def all(request, level):
     return JsonResponse({'orgs': orgs_display})
 
 
+def _get_org_role_display(org_role):
+
+    bundle = org_role.bundle
+
+    return {
+        'org_id': org_role.org_id,
+        'bundle': {
+            'id': bundle.id,
+            'name': bundle.name,
+            'icon_url': bundle.icon.url if bundle.icon else '',
+        },
+        'perm_view': org_role.perm_view,
+        'perm_create': org_role.perm_create,
+        'perm_remove': org_role.perm_remove,
+        'perm_revoke': org_role.perm_revoke,
+        'perm_review': org_role.perm_review,
+        'perm_approve': org_role.perm_approve,
+        'created_at': org_role.created_at.strftime('%Y-%m-%d'),
+        'updated_at': org_role.updated_at.strftime('%Y-%m-%d'),
+    }
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def roles(request, level, pk):
+
+    org = get_object_or_404(Org, pk=pk)
+
+    org_roles = org.orgrole_set.all()
+
+    org_roles_display = [
+        _get_org_role_display(org_role)
+        for org_role in org_roles
+    ]
+
+    return JsonResponse({'org_roles': org_roles_display})
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
