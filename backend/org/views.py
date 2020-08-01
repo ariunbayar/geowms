@@ -70,21 +70,16 @@ def employee_add(request, payload, level, pk):
 
     # user = get_object_or_404(User, pk=user_id)
 
-    employees_display = []
+    return JsonResponse({'success': True})
 
-    from random import randint
 
-    for i in range(100, randint(105, 120)):
-        employees_display.append({
-            'id': i,
-            'last_name': 'Telmuun%s' % i,
-            'first_name': 'Telmuun%s' % i,
-            'email': 'user_%s@example.com' % i,
-            'is_active': [True, False][randint(0, 1)],
-            'is_sso': [True, False][randint(0, 1)],
-            'position': 'Газар зохион байгуулалт, төлөвлөлт, газар өмчлөлийн асуудал хариуцсан ахлах мэргэжилтэн %s' % i,
-            'created_at': '2020-01-01',
-            'updated_at': '2020-04-17',
-        })
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_remove(request, payload, level, pk):
+
+    user_id = payload.get('user_id')
+
+    # user = get_object_or_404(User, pk=user_id)
 
     return JsonResponse({'success': True})
