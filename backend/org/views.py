@@ -1,10 +1,12 @@
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET, require_POST
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import localtime, now
+from django.views.decorators.http import require_GET, require_POST
 
 from main.decorators import ajax_required
-from .models import Org
+from .models import Org, OrgRole
+from backend.bundle.models import Bundle
 
 
 @require_GET
@@ -70,6 +72,63 @@ def roles(request, level, pk):
     ]
 
     return JsonResponse({'org_roles': org_roles_display})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def roles_save(request, payload, level, pk):
+
+    org = get_object_or_404(Org, pk=pk)
+
+    org_roles_new = []
+    org_roles_existing = org.orgrole_set.all()
+    mapped_org_roles_existing = dict([
+        (org_role.bundle_id, org_role)
+        for org_role in org_roles_existing
+    ])
+
+    bundle_ids = [
+        org_role['bundle']['id']
+        for org_role in payload['org_roles']
+    ]
+    bundles_mapped = dict([
+        (bundle.id, bundle)
+        for bundle in Bundle.objects.filter(pk__in=bundle_ids)
+    ])
+
+    def _set_org_role_perms(org_role, bundle_permission):
+        org_role.perm_view = bundle_permission.get('perm_view') is True
+        org_role.perm_create = bundle_permission.get('perm_create') is True
+        org_role.perm_remove = bundle_permission.get('perm_remove') is True
+        org_role.perm_revoke = bundle_permission.get('perm_revoke') is True
+        org_role.perm_review = bundle_permission.get('perm_review') is True
+        org_role.perm_approve = bundle_permission.get('perm_approve') is True
+
+    for bundle_permission in payload.get('org_roles'):
+
+        bundle_id = bundle_permission.get('bundle', {}).get('id')
+
+        if bundle_id not in bundles_mapped:
+            continue
+
+        if bundle_id in mapped_org_roles_existing:
+            org_role = mapped_org_roles_existing[bundle_id]
+            org_role.updated_at = localtime(now())
+        else:
+            org_role = OrgRole(org=org, bundle=bundles_mapped[bundle_id])
+            org_roles_new.append(org_role)
+
+        _set_org_role_perms(org_role, bundle_permission)
+
+    OrgRole.objects.bulk_create(org_roles_new)
+
+    OrgRole.objects.bulk_update(
+        org_roles_existing,
+        ['perm_view', 'perm_create', 'perm_remove', 'perm_revoke', 'perm_review', 'perm_approve', 'updated_at']
+    )
+
+    return JsonResponse({'success': True})
 
 
 @require_GET
