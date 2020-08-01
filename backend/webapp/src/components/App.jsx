@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import {WMSPage} from "./WMSPage";
 import {BundlePage} from "./BundlePage";
 import {DevPage} from "./DevPage";
+import {Org} from "./Org";
 import {UserPage} from "./UserPage";
 import {GovorgPage} from "./GovorgPage";
 import { СуурьДавхаргаХуудас } from "./СуурьДавхаргаХуудас";
@@ -61,9 +62,7 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/систем/"}>
-                  СИСТЕМ
-                   {this.state.govorg_count > 0 && " (" + this.state.govorg_count + ")"}</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/түвшин/1/"}>БАЙГУУЛЛАГА</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}> СУУРЬ ДАВХРАГА</NavLink>
@@ -84,7 +83,7 @@ export default class App extends Component {
         <div className="main-content">
           <Switch>
             <Route path={"/back/wms/"} component={WMSPage} />
-            <Route path={"/back/систем/"} component={GovorgPage} />
+            <Route path={"/back/байгууллага/"} component={Org} />
             <Route exact path={"/back/log/"} component={Log} />
             <Route exact path={"/back/access/"} component={Access} />
             <Route exact path={"/back/huulga/"} component={Huulga} />

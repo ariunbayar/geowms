@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
 
-export class AddUser extends Component {
+export class OrgAdd extends Component {
 
     constructor(props) {
         super(props)
@@ -30,12 +30,14 @@ export class AddUser extends Component {
 
     render() {
         const {search_data, search_query} = this.state
+        const org_level = this.props.match.params.level
+
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
                     
                     <div className="text-left">
-                        <NavLink className="btn gp-bg-primary" to={`/back/user/level/4/`}>
+                        <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/${org_level}/түвшин/`}>
                             Буцах
                         </NavLink>
                     </div>
