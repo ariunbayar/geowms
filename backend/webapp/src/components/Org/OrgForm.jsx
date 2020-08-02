@@ -68,9 +68,9 @@ export class OrgForm extends Component {
                         </thead>
                         <tbody>
                             {orgs.map((org) =>
-                                <OrgFormTable 
+                                <OrgFormTable
                                     org_level={org_level}
-                                    org={org} 
+                                    org={org}
                                     handleUserDelete={() => this.handleUserDelete(org.id)}
                                 >
                                 </OrgFormTable>

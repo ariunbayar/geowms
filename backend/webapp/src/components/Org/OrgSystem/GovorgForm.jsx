@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {TextField} from '../../helpers/forms'
+import {TextField} from '../../../helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 
@@ -29,7 +29,7 @@ export class GovorgForm extends Component {
 
         Promise.all([
             service.getWMSList(),
-            service.detail(this.props.match.params.id),
+            service.detail(this.props.match.params.system_id),
         ]).then(([{wms_list}, {govorg}]) => {
             this.setState({govorg, layers: govorg.layers, wms_list})
         })
@@ -53,7 +53,8 @@ export class GovorgForm extends Component {
     }
 
     handleSubmit(values, {setStatus, setSubmitting}) {
-
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
         const data = {
             ...values,
             layers: this.state.layers,
@@ -68,7 +69,7 @@ export class GovorgForm extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push( '/back/систем/')
+                    this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
                 }, 800)
             })
         }
@@ -78,7 +79,8 @@ export class GovorgForm extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push( '/back/систем/')
+                    this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
+
                 }, 800)
             })
         }
@@ -89,7 +91,7 @@ export class GovorgForm extends Component {
         const {name, token} = this.state.govorg
         return (
 
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
+            <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
@@ -191,7 +193,7 @@ export class GovorgForm extends Component {
                                 </div>
                             )}
                         </div>
-                        
+
                     )}
                     </div>
                 </div>

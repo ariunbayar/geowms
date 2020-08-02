@@ -25,10 +25,13 @@ export class Жагсаалт extends Component {
     }
 
     componentDidMount() {
-        this.handleListUpdated()
+        const org_level = this.props.match.params.level
+        const id = this.props.match.params.id
+        this.handleListUpdated(org_level)
     }
 
-    handleListUpdated() {
+    handleListUpdated(org_level, org_id) {
+
         service.getAll().then(({govorg_list}) => {
             this.setState({govorg_list})
         })
@@ -41,9 +44,10 @@ export class Жагсаалт extends Component {
 
     }
     render() {
-
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
         return (
-            <div  className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
+            <div  className="container my-4">
                 <div className="row">
 
                     <div className="col-md-12">
@@ -51,7 +55,7 @@ export class Жагсаалт extends Component {
                         {!this.state.is_form_open &&
                             <>
                                 <div className="text-right">
-                                    <NavLink className="btn gp-bg-primary" to={`/back/систем/үүсгэх/`}>
+                                    <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
                                 </div>
@@ -71,6 +75,8 @@ export class Жагсаалт extends Component {
                                     <tbody>
                                         {this.state.govorg_list.map((values) =>
                                             <Govorg
+                                                org_level={org_level}
+                                                org_id={org_id}
                                                 key={values.id}
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id)}
