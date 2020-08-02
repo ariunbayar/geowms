@@ -20,7 +20,7 @@ export default class Govorg extends Component {
     handleModalDeleteOpen(event) {
         event.preventDefault()
         this.setState({is_modal_delete_open: true})
-   
+
     }
 
     handleModalDeleteClose() {
@@ -44,7 +44,7 @@ export default class Govorg extends Component {
                 <th scope="col">
                     {id}
                 </th>
-                
+
                 <td>
                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${id}/дэлгэрэнгүй/`}>
                         {name}
@@ -67,7 +67,7 @@ export default class Govorg extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
-                                            
+
                     {is_modal_delete_open &&
                         <Modal
                             modalClose={this.handleModalDeleteClose}
