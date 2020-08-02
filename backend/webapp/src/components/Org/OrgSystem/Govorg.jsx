@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../Modal"
+import Modal from "../../Modal"
 
 export default class Govorg extends Component {
 
@@ -20,7 +20,7 @@ export default class Govorg extends Component {
     handleModalDeleteOpen(event) {
         event.preventDefault()
         this.setState({is_modal_delete_open: true})
-   
+
     }
 
     handleModalDeleteClose() {
@@ -36,6 +36,8 @@ export default class Govorg extends Component {
     render() {
         const {id, name, token, created_at} = this.props.values
         const {is_modal_delete_open} = this.state
+        const org_level = this.props.org_level
+        const org_id = this.props.org_id
         return (
             <tr>
 
@@ -44,7 +46,7 @@ export default class Govorg extends Component {
                 </th>
 
                 <td>
-                    <NavLink to={`/back/систем/${id}/дэлгэрэнгүй/`}>
+                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${id}/дэлгэрэнгүй/`}>
                         {name}
                     </NavLink>
                 </td>
@@ -56,7 +58,7 @@ export default class Govorg extends Component {
                     {created_at}
                 </td>
                 <td>
-                    <NavLink to={`/back/систем/${id}/засах/`}>
+                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </td>
@@ -65,7 +67,7 @@ export default class Govorg extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
-                                            
+
                     {is_modal_delete_open &&
                         <Modal
                             modalClose={this.handleModalDeleteClose}

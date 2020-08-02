@@ -18,7 +18,7 @@ export class Дэлгэрэнгүй extends Component {
     componentDidMount() {
 
         service
-            .detail(this.props.match.params.id)
+            .detail(this.props.match.params.system_id)
             .then(({govorg}) => {
                 const govorg_wms_list =
                     govorg.wms_list
@@ -38,12 +38,13 @@ export class Дэлгэрэнгүй extends Component {
     render() {
 
         const {name, token} = this.state.govorg
-
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
         return (
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
+            <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <NavLink className="btn btn-outline-primary" exact to={'/back/систем/'}>
+                        <NavLink className="btn btn-outline-primary" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`}>
                             <i className="fa fa-angle-double-left"></i> Буцах
                         </NavLink>
                     </div>
