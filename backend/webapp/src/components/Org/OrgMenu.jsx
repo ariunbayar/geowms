@@ -7,6 +7,7 @@ import {OrgRole} from './OrgRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 
+
 export class OrgMenu extends Component {
     constructor(props) {
 
@@ -42,7 +43,7 @@ export class OrgMenu extends Component {
                             </NavLink>
                             <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                    эрх
+                                    Эрх
                                 </div>
                             </NavLink>
                             <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
@@ -50,7 +51,7 @@ export class OrgMenu extends Component {
                                     хэрэглэгч
                                 </div>
                             </NavLink>
-                            <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
+                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
                                 <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                     систем
                                 </div>

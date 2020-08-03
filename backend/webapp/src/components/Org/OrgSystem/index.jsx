@@ -13,7 +13,6 @@ export class OrgSystem extends Component {
     }
 
     render() {
-
         return (
             <Switch>
                 <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/"} component={Жагсаалт}/>
@@ -22,7 +21,6 @@ export class OrgSystem extends Component {
                 <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/:system_id/засах/"} component={GovorgForm}/>
             </Switch>
         )
-
     }
 
 }
