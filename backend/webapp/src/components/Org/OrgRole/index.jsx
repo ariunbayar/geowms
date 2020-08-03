@@ -1,98 +1,86 @@
 import React, { Component } from "react"
-import {service} from '../../BundlePage/service'
+import {service} from '../service'
+
+import {Item} from './Item'
+
+
 export class OrgRole extends Component {
 
-  
     constructor(props) {
-
         super(props)
 
         this.state = {
-            bundle_list:[],
-            view:false,
-            create:false,
-            remove:false,
-            revoke:false,
-            review:false,
-            approve:false,
-            pass_view:false,    
-            bundleId:null,
+            org_roles: [],
             list:[],
             changedName:''
-
         }
-        this.handleListUpdated=this.handleListUpdated.bind(this)
-        this.handleSaveChanges=this.handleSaveChanges.bind(this)
+        this.handleListUpdated = this.handleListUpdated.bind(this)
+        this.handleSave = this.handleSave.bind(this)
     }
 
     componentDidMount() {
         this.handleListUpdated()
     }
+
     handleListUpdated() {
-        service.getAll().then(({bundle_list}) => {
-            this.setState({bundle_list})
+        const {level, id} = this.props.match.params
+        service.roles(level, id).then(({org_roles}) => {
+            this.setState({org_roles})
         })
-       
-      }
+    }
 
     handleOnChange(e,id){
         const listArray=this.state.list
+
         this.setState({
-            [e.target.name]:e.target.checked,
+            [e.target.name]: e.target.checked,
             bundleId:id,
             changedName:e.target.name
         })
-        console.log(id)
-        if(this.state.veiw){
-            this.setState({
-             pass_view:false
-            })
-        }
-        else{
-            this.setState({
-                pass_view:true
-               })
-        }
-
     }
-handleSaveChanges(){
-    console.log("blabla")
-}
+
+    handleSave(){
+        const {level, id} = this.props.match.params
+        service.rolesSave(level, id, this.state.org_roles).then(({success}) => {
+            if (success) {
+                this.handleListUpdated()
+            }
+        })
+    }
+
+    handleChange(idx, org_role_updated) {
+        this.setState({
+            org_roles: this.state.org_roles.map((org_role, _idx) =>
+                idx == _idx ? org_role_updated : org_role
+            ),
+        })
+    }
 
     render() {
         return (
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12">
-                    <div className="container mb-3 mt-3">
-                        <table className="table table-bordered">
-                        <thead>
-                            <tr>
-                            <th scope="col"> Байгуулагын нэр</th>
-                            <th scope="col">харах</th>
-                            <th scope="col">нэмэх</th>
-                            <th scope="col">хасах</th>
-                            <th scope="col">цуцлах</th>
-                            <th scope="col">хянах</th>
-                            <th scope="col">батлах</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {this.state.bundle_list.map(bundles => 
-                            <tr key={bundles.id}> 
-                                <td>{bundles.name}</td>
-                                <td> <input type="checkbox" name="veiw" checked={this.state.veiw} onChange={(e)=>this.handleOnChange(e,bundles.id)}/></td>
-                                <td> <input type="checkbox" name="create" checked={this.state.create} onChange={(e)=>this.handleOnChange(e,bundles.id)}/></td>
-                                <td> <input type="checkbox" name="remove" checked={this.state.remove} onChange={(e)=>this.handleOnChange(e,bundles.id)}/></td>
-                                <td> <input type="checkbox" name="revoke" checked={this.state.revoke} onChange={(e)=>this.handleOnChange(e,bundles.id)}/></td>
-                                <td> <input type="checkbox" name="review" checked={this.state.review} onChange={(e)=>this.handleOnChange(e,bundles.id)}/></td>
-                                <td> <input type="checkbox" name="approve" checked={this.state.approve} onChange={(e)=>this.handleOnChange(e,bundles.id)}/></td>
-                            </tr>
- 
-                        )}
-                        </tbody>
-                        </table>
-                             <button className="btn gp-bg-primary" onClick={this.handleSaveChanges}>Хадгалах</button>
+                        <div className="container mb-3 mt-3">
+                            <table className="table table-bordered">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">Байгуулагын нэр</th>
+                                    <th scope="col">харах</th>
+                                    <th scope="col">нэмэх</th>
+                                    <th scope="col">хасах</th>
+                                    <th scope="col">цуцлах</th>
+                                    <th scope="col">хянах</th>
+                                    <th scope="col">батлах</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.state.org_roles.map((org_role, idx) =>
+                                        <Item key={idx} org_role={org_role} handleChange={org_role => this.handleChange(idx, org_role)}/>
+                                    )}
+                                </tbody>
+                            </table>
+                             <button className="btn gp-bg-primary" onClick={this.handleSave}>Хадгалах</button>
                         </div>
                     </div>
                 </div>

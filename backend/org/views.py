@@ -49,6 +49,21 @@ def _get_org_role_display(org_role):
     }
 
 
+def _get_default_org_role(org, bundle):
+    org_role = OrgRole()
+    org_role.org = org
+    org_role.bundle = bundle
+    org_role.perm_view = False
+    org_role.perm_create = False
+    org_role.perm_remove = False
+    org_role.perm_revoke = False
+    org_role.perm_review = False
+    org_role.perm_approve = False
+    org_role.created_at = localtime(now())
+    org_role.updated_at = localtime(now())
+    return org_role
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -56,12 +71,21 @@ def roles(request, level, pk):
 
     org = get_object_or_404(Org, pk=pk)
 
-    org_roles = org.orgrole_set.all()
+    bundles = Bundle.objects.all()
+    mapped_org_roles = dict([
+        (org_role.bundle_id, org_role)
+        for org_role in org.orgrole_set.all()
+    ])
 
-    org_roles_display = [
-        _get_org_role_display(org_role)
-        for org_role in org_roles
-    ]
+    org_roles_display = []
+    for bundle in bundles:
+        if bundle.id not in mapped_org_roles:
+            org_role = _get_default_org_role(org, bundle)
+        else:
+            org_role = mapped_org_roles[bundle.id]
+        org_roles_display.append(
+            _get_org_role_display(org_role)
+        )
 
     return JsonResponse({'org_roles': org_roles_display})
 
@@ -82,7 +106,7 @@ def roles_save(request, payload, level, pk):
 
     bundle_ids = [
         org_role['bundle']['id']
-        for org_role in payload['org_roles']
+        for org_role in payload
     ]
     bundles_mapped = dict([
         (bundle.id, bundle)
@@ -97,7 +121,7 @@ def roles_save(request, payload, level, pk):
         org_role.perm_review = bundle_permission.get('perm_review') is True
         org_role.perm_approve = bundle_permission.get('perm_approve') is True
 
-    for bundle_permission in payload.get('org_roles'):
+    for bundle_permission in payload:
 
         bundle_id = bundle_permission.get('bundle', {}).get('id')
 
