@@ -47,7 +47,7 @@ export default class Bundle extends Component {
                                 <div className="col-md-1">
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
                                 </div>
-                                <div class="col-md-10">
+                                <div className="col-md-10">
                                     <a> {wms.name}</a>
                                 </div>
                             </div> :
@@ -56,7 +56,7 @@ export default class Bundle extends Component {
                                 <div className="col-md-1">
                                     <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
                                 </div>
-                                <div class="col-md-10 text-muted">
+                                <div classNamelo="col-md-10 text-muted">
                                     <a><del> {wms.name}</del></a>
                                 </div>
                             </div>
