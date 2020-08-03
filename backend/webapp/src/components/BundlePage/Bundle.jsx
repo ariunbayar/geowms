@@ -56,7 +56,7 @@ export default class Bundle extends Component {
                                 <div className="col-md-1">
                                     <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
                                 </div>
-                                <div classNamelo="col-md-10 text-muted">
+                                <div className="col-md-10 text-muted">
                                     <a><del> {wms.name}</del></a>
                                 </div>
                             </div>
