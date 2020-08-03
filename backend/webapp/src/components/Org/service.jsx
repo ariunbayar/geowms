@@ -18,10 +18,10 @@ function getAll(level) {
 }
 
 
-function org_add(level, org_name) {
+function org_add(level, values) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({org_name}),
+        body: JSON.stringify(values),
     }
 
     return fetch(`${prefix}/level-${level}/org-add/`, opts).then(handleResponse)

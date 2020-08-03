@@ -205,13 +205,23 @@ def employee_remove(request, payload, level, pk):
 def org_add(request, payload, level):
 
     org_name = payload.get('org_name')
+    org_id=payload.get('id')
     org_check = Org.objects.filter(name=org_name)
-    if org_check:
-        return JsonResponse({'success': False})
-    else:
-        Org.objects.create(name=org_name, level=level)
 
-        return JsonResponse({'success': True})
+    org_id_check=Org.objects.filter(id=org_id)
+    if(org_id):
+        if org_check:
+            return JsonResponse({'success': False})
+        else:
+            Org.objects.filter(id=org_id).update(name=org_name)
+            return JsonResponse({'success': True})
+    else:
+        if org_check:
+            return JsonResponse({'success': False})
+        else:
+            Org.objects.create(name=org_name, level=level)
+
+            return JsonResponse({'success': True})
 
 
 @require_POST

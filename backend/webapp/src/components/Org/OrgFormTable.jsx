@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import {OrgMenu} from './OrgMenu'
 import {NavLink} from "react-router-dom"
 
 
@@ -28,6 +27,11 @@ export class OrgFormTable extends Component {
                     <a href="#" onClick={this.props.handleUserDelete}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
+                </td>
+                <td>
+                    <NavLink  className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org.id}/засах`}>
+                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </NavLink>
                 </td>
             </tr>
         )

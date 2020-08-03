@@ -64,8 +64,10 @@ export class Org extends Component {
                     <div className="col-md-12">
                         <Switch>
                             <Route exact path="/back/байгууллага/түвшин/:level/" component={OrgForm}/>
-                            <Route exact path="/back/байгууллага/түвшин/:level/нэмэх/" component={OrgAdd}/>
+                            <Route exact path="/back/байгууллага/түвшин/:level/нэмэх/" component={OrgAdd} />
+                            <Route exact path="/back/байгууллага/түвшин/:level/:id/засах/" component={OrgAdd}/>
                             <Route path="/back/байгууллага/түвшин/:level/:id/" component={OrgMenu}/>
+                           
                         </Switch>
                     </div>
                 </div>
