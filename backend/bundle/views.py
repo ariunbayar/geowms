@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-
+from django.contrib.auth.decorators import user_passes_test
 from main.decorators import ajax_required
 from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
@@ -14,7 +14,7 @@ from geoportal_app.models import Role
 from .forms import BundleForm
 from .models import Bundle, BundleLayer
 
-
+@user_passes_test(lambda u: u.is_superuser)
 def _get_bundle_options():
 
     form_options = []
@@ -33,6 +33,7 @@ def _get_bundle_options():
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def roleCreate(request, payload):
 
     bundleId = payload.get('bundleId')
@@ -52,6 +53,7 @@ def roleCreate(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def roleRemove(request, payload):
 
     bundleId = payload.get('bundleId')
@@ -70,6 +72,7 @@ def roleRemove(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def defaultCheckUpdate(request, payload):
 
     bundleId = payload.get('bundleId')
@@ -156,6 +159,7 @@ def updateMore(request, pk):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def create(request, payload):
 
     сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
@@ -177,6 +181,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def update(request, payload):
 
     bundle = get_object_or_404(Bundle, pk=payload.get('id'))
@@ -197,6 +202,7 @@ def update(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def remove(request, payload):
 
     pk = payload.get('id')
@@ -212,6 +218,7 @@ def remove(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def move(request, payload):
 
     bundle1 = get_object_or_404(Bundle, pk=payload.get('id'))
