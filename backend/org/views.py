@@ -25,7 +25,17 @@ def all(request, level):
         })
 
     return JsonResponse({'orgs': orgs_display})
+def OrgAll(request,level,pk):
+    orgs_display=[]
+    for org in Org.objects.filter(level=level,pk=pk):
+        orgs_display.append({
+            'id': org.id,
+            'name': org.name,
+            'level': org.level,
+            'level_display': org.get_level_display(),
+        })
 
+    return JsonResponse({'orgs': orgs_display})
 
 def _get_org_role_display(org_role):
 

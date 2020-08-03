@@ -6,6 +6,7 @@ export const service = {
     org_remove,
     roles,
     rolesSave,
+    OrgAll,
 }
 
 
@@ -15,6 +16,10 @@ const prefix = '/back/api/org'
 function getAll(level) {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/level-${level}/`, requestOptions).then(handleResponse)
+}
+function OrgAll(level,id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
 }
 
 
