@@ -34,27 +34,24 @@ export class OrgMenu extends Component {
             <div className="">
                 <div className="row">
                     <div className=" col-md-2">
-                        <div className="list-group">
-                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/`} activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                    Буцах
-                                </div>
-                            </NavLink>
-                            <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                    Эрх
-                                </div>
-                            </NavLink>
-                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                    хэрэглэгч
-                                </div>
-                            </NavLink>
-                            <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
-                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                    систем
-                                </div>
-                            </NavLink>
+                        <div className="container my-4">
+                            <div className="list-group">
+                                <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
+                                    <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                        Эрх
+                                    </div>
+                                </NavLink>
+                                <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
+                                    <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                        хэрэглэгч
+                                    </div>
+                                </NavLink>
+                                <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
+                                    <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
+                                        систем
+                                    </div>
+                                </NavLink>
+                            </div>
                         </div>
                     </div>
                         <div className="col-md-10">

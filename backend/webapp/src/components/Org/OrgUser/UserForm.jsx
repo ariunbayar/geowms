@@ -31,35 +31,44 @@ export class UserForm extends Component {
         return (
             <div className="container">
                 <div className="row">
-                    <div className="col-md-12">
-                        <div className="text-right">
-                            <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/нэмэх/`}>
-                                Нэмэх
-                            </NavLink>
+                    <div  className="container my-4">
+                        <div className="col-md-12">
+                            <div className="text-left">
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                    <a className="btn btn-outline-primary">
+                                        <i className="fa fa-angle-double-left"></i> Буцах
+                                    </a>
+                                </NavLink>
+                            </div>
+                            <div className="text-right">
+                                <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/нэмэх/`}>
+                                    Нэмэх
+                                </NavLink>
+                            </div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Ажилтны нэр </th>
+                                        <th scope="col">Албан тушаал</th>
+                                        <th scope="col">Үүссэн огноо</th>
+                                        <th scope="col">Зассан огноо</th>
+                                        <th scope="col">Устгах</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {govorg_list.map((govorg, idx) =>
+                                        <UserFormTable 
+                                            org_level={org_level}
+                                            org_id={org_id}
+                                            key = {idx} 
+                                            values={govorg} 
+                                            handleGovorgDelete={() => this.handleGovorgDelete(2)}
+                                        >
+                                        </UserFormTable>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Ажилтны нэр </th>
-                                    <th scope="col">Албан тушаал</th>
-                                    <th scope="col">Үүссэн огноо</th>
-                                    <th scope="col">Зассан огноо</th>
-                                    <th scope="col">Устгах</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {govorg_list.map((govorg, idx) =>
-                                    <UserFormTable 
-                                        org_level={org_level}
-                                        org_id={org_id}
-                                        key = {idx} 
-                                        values={govorg} 
-                                        handleGovorgDelete={() => this.handleGovorgDelete(2)}
-                                    >
-                                    </UserFormTable>
-                                )}
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>

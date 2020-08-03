@@ -43,8 +43,10 @@ export class OrgAdd extends Component {
                     <div className="row">
                         <div className="col-md-6">
                             <div className="text-left">
-                                <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                    Буцах
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                    <a className="btn btn-outline-primary">
+                                        <i className="fa fa-angle-double-left"></i> Буцах
+                                    </a>
                                 </NavLink>
                             </div>
                             <h5 className="mb-3">Хэрэглэгч хайх</h5>

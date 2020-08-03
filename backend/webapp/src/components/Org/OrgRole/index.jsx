@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import {service} from '../service'
+import {NavLink} from "react-router-dom"
 
 import {Item} from './Item'
 
@@ -44,6 +45,7 @@ export class OrgRole extends Component {
         service.rolesSave(level, id, this.state.org_roles).then(({success}) => {
             if (success) {
                 this.handleListUpdated()
+                
             }
         })
     }
@@ -57,15 +59,24 @@ export class OrgRole extends Component {
     }
 
     render() {
+        const org_level = this.props.match.params.level
+
         return (
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12">
+                        <div className="text-left">
+                            <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                <a className="btn btn-outline-primary">
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                                </a>
+                            </NavLink>
+                        </div>
                         <div className="container mb-3 mt-3">
                             <table className="table table-bordered">
                                 <thead>
                                     <tr>
-                                    <th scope="col">Байгуулагын нэр</th>
+                                    <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
                                     <th scope="col">харах</th>
                                     <th scope="col">нэмэх</th>
                                     <th scope="col">хасах</th>
