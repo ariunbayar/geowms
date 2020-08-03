@@ -17,14 +17,14 @@ export default class App extends Component {
     super(props);
 
        this.state = {
-      govorg_count: 0,
+        user_count: 0,
     };
   }
 
-  componentDidMount() {
+   componentDidMount() {
 
-    service.getGovOrgCount().then(({ count }) => {
-      this.setState({ govorg_count: count });
+   service.userCount().then(({ user_count }) => {
+      this.setState({ user_count: user_count });
     });
 
   }
@@ -70,7 +70,7 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/user"}>ХЭРЭГЛЭГЧ ({this.state.user_count})</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/тохиргоо/"}>ТОХИРГОО</NavLink>
