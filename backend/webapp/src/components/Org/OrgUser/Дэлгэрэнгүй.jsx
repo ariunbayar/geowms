@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
+
 export class Дэлгэрэнгүй extends Component {
 
     constructor(props) {
@@ -9,14 +10,13 @@ export class Дэлгэрэнгүй extends Component {
 
     componentDidMount(){
     }
+
     render() {
-            
         return (
             <div>
-            <p>dlkfjlkdjflskd</p>
+                <p>User</p>
             </div>
         )
-
     }
 
 }

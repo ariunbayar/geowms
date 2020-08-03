@@ -26,7 +26,7 @@ export class OrgUser extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path="/back/байгууллага/түвшин/:level/:id/байгуулга/" component={UserForm}/>
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={UserForm}/>
                 <Route exact path="/back/байгууллага/түвшин/:level/:id/нэмэх/" component={Useradd}/>
                 <Route exact path="/back/байгууллага/түвшин/:level/:id/Дэлгэрэнгүй/" component={Дэлгэрэнгүй}/>
             </Switch>

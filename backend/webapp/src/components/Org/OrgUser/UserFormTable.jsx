@@ -24,7 +24,6 @@ export class UserFormTable extends Component {
                 <td>{"Админ эрх олгосон хэрэглэгч"}</td>
                 <td>{"Харьяат байгууллага"}</td>
                 <button type="button" onClick={this.handleProceed} className="btn gp-bg-primary text-white">Устгах</button>
-               
             </tr>
         )
 
