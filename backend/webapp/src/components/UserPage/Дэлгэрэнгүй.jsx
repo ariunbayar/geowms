@@ -13,16 +13,16 @@ export class Дэлгэрэнгүй extends Component {
 
         this.state = {
             user_detail: [],
-            roles: [],   
+            roles: [],
             all_role:[],
             role_id:'',
             roleId: null,
             check:false,
             is_superuser:false,
             is_active: false,
-            is_modal_limit_open:false   
-
+            is_modal_limit_open:false,
         }
+
         this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
         this.handleModalLimitOpen=this.handleModalLimitOpen.bind(this)
         this.handleIsActiveTrue=this.handleIsActiveTrue.bind(this)
@@ -31,7 +31,7 @@ export class Дэлгэрэнгүй extends Component {
         this.getRole=this.getRole.bind(this)
         this.handleSaveSuccess=this.handleSaveSuccess.bind(this)
     }
-    
+
     componentDidMount() {
         this.handleSaveSuccess()
     }
@@ -65,8 +65,7 @@ export class Дэлгэрэнгүй extends Component {
         const roleId =this.state.role_id
         const value={'roleId':roleId, 'id':id}
         service.roleCreate(value).then(({success, item}) => {
-            if (success) 
-            {
+            if (success) {
                 this.handleSaveSuccess()
                 this.setState({check:false})
 
@@ -84,7 +83,7 @@ export class Дэлгэрэнгүй extends Component {
     }
 
     handleIsActiveFalse(){
-        
+
         service.userDetailChange(this.props.match.params.id, false)
         .then(({success}) => {
             if(success){this.setState({is_active: false, is_modal_limit_open: false})}

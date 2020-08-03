@@ -24,7 +24,7 @@ export class OrgFormTable extends Component {
                     </NavLink>
                 </td>
                 <td>{org.level_display}</td>
-                <td> 
+                <td>
                     <a href="#" onClick={this.props.handleUserDelete}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
