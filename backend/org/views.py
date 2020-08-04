@@ -317,6 +317,13 @@ def org_remove(request, payload, level):
 
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
+    org_users = Employee.objects.filter(org = org_id)
+    for org_user in org_users:
+
+        user = User.objects.filter(pk=org_user.user_id)
+        org_user.delete()
+        user.delete()
+
     org.orgrole_set.all().delete()
     org.delete()
 

@@ -92,7 +92,7 @@ export class UserAdd extends Component {
         else{
             service.employee_add(org_level, org_id, paylaod).then(({ success, user_name }) => {
                 if (user_name) {
-                    this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна."})
+                    this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна.", handleSaveIsLoad: false})
                 }
                 if (success) {
                     setTimeout(() => {
@@ -121,7 +121,6 @@ export class UserAdd extends Component {
             if(!username){ 
                 this.setState({usernameError: true, usernameErrorMessege: "Хоосон байна."})
                 fromState = false
-
             }
             if(!password) {
                 fromState = false
@@ -225,7 +224,7 @@ export class UserAdd extends Component {
                                             onChange={(e) => this.handleChange('username', e)}
                                             value={this.state.username}
                                         />
-                                        {this.state.usernameError && <a className="text-danger">{this.state.usernameErrorMessege}</a>}
+                                        {this.state.usernameErrorMessege && <a className="text-danger">{this.state.usernameErrorMessege}</a>}
                                     </div>
                                 </div>
                                 }
