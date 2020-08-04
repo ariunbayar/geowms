@@ -34,6 +34,7 @@ export default class BundleMap extends Component {
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
+            map_layer_list: [],
             is_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
@@ -109,6 +110,8 @@ export default class BundleMap extends Component {
 
     handleMapDataLoaded(base_layer_list, wms_list) {
 
+        const layers = wms_list.map(({layers}) => {return { layers}})
+
         const map_wms_list = wms_list.map(({name, url, layers}) => {
 
             return {
@@ -124,12 +127,33 @@ export default class BundleMap extends Component {
                             'FORMAT': 'image/png',
                         }
                     }),
-                }),
+                })
             }
+        })
 
+        const map_layer_list = wms_list.map(({name, url, layers}) => {
+            return {
+                tiles: layers.map(({code}) => {
+                    return {
+                        tile: new Tile({
+                            source: new TileWMS({
+                                projection: this.state.projection,
+                                url: url,
+                                params: {
+                                    'LAYERS': code,
+                                    //'FORMAT': 'image/svg+xml',
+                                    'FORMAT': 'image/png',
+                                }
+                            }),
+                        }),
+                    }
+                })
+            }
         })
 
         this.setState({map_wms_list})
+        this.setState({map_layer_list})
+
 
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(

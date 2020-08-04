@@ -28,6 +28,8 @@ export default class WMSItem extends Component {
     render() {
 
         const {tile, name, layers, is_visible} = this.state
+        console.log("layers")
+        console.log(layers)
         return (
             <Fragment>
 
@@ -41,7 +43,6 @@ export default class WMSItem extends Component {
                     </label>
                     <label className="font-weight-bold" htmlFor="formGroupInput">&nbsp;{name}</label>
                 </p>
-
                 <WMSLayerItems
                     layers={layers}
                     tileWMS={tile.getSource()}
