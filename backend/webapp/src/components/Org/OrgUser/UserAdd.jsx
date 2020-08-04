@@ -95,14 +95,12 @@ export class UserAdd extends Component {
                     this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна."})
                 }
                 if (success) {
-                    if (success) {
-                        setTimeout(() => {
-                            this.setState({handleSaveIsLoad:false})
-                            this.handleListUpdated()
-                        }, 1000)
+                    setTimeout(() => {
+                        this.setState({handleSaveIsLoad:false})
+                        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
+
+                    }, 1200)
                         
-                    }
-                    this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
                 }
             })
         }
@@ -234,30 +232,29 @@ export class UserAdd extends Component {
                                 <div class="form-row">
 
                                     <div className="form-group col-md-4">
-                                        <label htmlFor="first_name">Овог:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="first_name"
-                                            placeholder="Овог"
-                                            onChange={(e) => this.handleChange('first_name', e)}
-                                            value={this.state.first_name}
-                                        />
-                                        {this.state.first_nameError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="last_name">Нэр:</label>
+                                        <label htmlFor="last_name">Овог:</label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             id="last_name"
-                                            placeholder="Нэр"
+                                            placeholder="Овог"
                                             onChange={(e) => this.handleChange('last_name', e)}
                                             value={this.state.last_name}
                                         />
                                         {this.state.last_nameError && <a className="text-danger">Хоосон байна.</a>}
+
+                                    </div>
+                                    <div className="form-group col-md-4">
+                                        <label htmlFor="first_name">Нэр:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="first_name"
+                                            placeholder="Нэр"
+                                            onChange={(e) => this.handleChange('first_name', e)}
+                                            value={this.state.first_name}
+                                        />
+                                        {this.state.first_nameError && <a className="text-danger">Хоосон байна.</a>}
 
                                     </div>
                                 </div>
