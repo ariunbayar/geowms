@@ -80,16 +80,9 @@ export default class WMS extends Component {
                 </td>
                 <td>
                     {is_active ? 
-                    <button  onClick={this.handleModalLimitOpen} className="btn btn-danger" style={{width:"100%"}}>Хязгаарлах</button> :
-                    <button  onClick={() => this.wmsIsActiveTrue(id)} className="btn btn-success">Идэвхжүүлэх</button>}
-                    {is_modal_limit_open &&
-                        <ModalLimit
-                            modalClose={this.handleModalLimitClose}
-                            modalAction={() => this.wmsIsActiveFalse(id)}
-                            text={`Та "${name}" нэртэй WMS-ийн эрхийн түвшинг хязгааралах гэж байна !`}
-                            title="Тохиргоог хязгаарлах"
-                        />
-                    }  
+                    <a className="text-success">Идэвхгүй</a>:
+                    <a className="text-danger">Идэвхтэй</a>
+                    }
                 </td>
                 <td>
                     <NavLink to={`/back/wms/${id}/засах/`}>
