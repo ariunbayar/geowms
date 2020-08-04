@@ -1,19 +1,32 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-
+import Modal from '../../Modal'
 
 
 export class UserFormTable extends Component {
 
     constructor(props) {
         super(props)
+        this.state={
+            is_modal_delete_open: false,
+        }
+        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
+        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
     componentDidMount(){
+    }
+    handleModalDeleteOpen() {
+        this.setState({is_modal_delete_open: true})
+    }
+
+    handleModalDeleteClose() {
+        this.setState({is_modal_delete_open: false})
     }
     render() {
         const org_id = this.props.org_id
         const org_level = this.props.org_level
         const employee = this.props.values
+        const is_modal_delete_open=this.state.is_modal_delete_open
         return (
             <tr>
                 <td>{employee.id}</td>
@@ -29,9 +42,17 @@ export class UserFormTable extends Component {
                     </NavLink>
                 </td>
                 <td>
-                    <a href="#" onClick={this.props.handleGovorgDelete}>
+                    <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
+                    {is_modal_delete_open &&
+                        <Modal
+                            modalClose={this.handleModalDeleteClose}
+                            modalAction={this.props.handleGovorgDelete}
+                            text={`Та "${employee.first_name}" нэртэй хэрэглэгчийг устгахдаа итгэлтэй байна уу?`}
+                            title="Хэрэглэгч устгах"
+                        />
+                    }
                 </td>
             </tr>
         )
