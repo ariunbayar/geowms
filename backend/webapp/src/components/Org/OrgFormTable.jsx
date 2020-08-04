@@ -23,21 +23,21 @@ export class OrgFormTable extends Component {
     }
     render() {
         const org = this.props.org
+        const idx = this.props.idx
         const org_level = this.props.org_level
         const is_modal_delete_open=this.state.is_modal_delete_open
         return (
             <tr>
                 <td>
-                    {org.id}
+                    {idx}
                 </td>
                 <td>
-                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org.id}/эрх/`}>
+                    <NavLink className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org.id}/эрх/`}>
                         {org.name}
                     </NavLink>
                 </td>
-                <td>{org.level_display}</td>
                 <td>
-                    <NavLink  to={`/back/байгууллага/түвшин/${org_level}/${org.id}/засах`}>
+                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org.id}/засах`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </td>

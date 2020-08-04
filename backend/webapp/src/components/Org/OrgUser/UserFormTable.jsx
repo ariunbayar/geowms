@@ -24,12 +24,13 @@ export class UserFormTable extends Component {
     }
     render() {
         const org_id = this.props.org_id
+        const idx = this.props.idx
         const org_level = this.props.org_level
         const employee = this.props.values
         const is_modal_delete_open=this.state.is_modal_delete_open
         return (
             <tr>
-                <td>{employee.id}</td>
+                <td>{idx + 1}</td>
                 <td>{employee.last_name + ". " + employee.first_name}</td>
                 <td>{employee.email}</td>
                 <td>{employee.is_sso}</td>
