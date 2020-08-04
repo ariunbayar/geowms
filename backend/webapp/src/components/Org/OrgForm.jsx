@@ -63,15 +63,15 @@ export class OrgForm extends Component {
                                 <tr>
                                     <th scope="col">№</th>
                                     <th scope="col">Байгууллага нэр</th>
-                                    <th scope="col">Түвшин</th>
-                                    <th scope="col"></th >
-                                    <th scope="col"></th >
+                                    <th scope="col">Засах</th >
+                                    <th scope="col">Устгах</th >
                                 </tr>
                             </thead>
                             <tbody>
-                                {orgs.map((org) =>
+                                {orgs.map((org, idx) =>
                                     <OrgFormTable
-                                        key={org.id}
+                                        key={idx}
+                                        idx={idx + 1}
                                         org_level={org_level}
                                         org={org}
                                         handleUserDelete={() => this.handleUserDelete(org.id)}
