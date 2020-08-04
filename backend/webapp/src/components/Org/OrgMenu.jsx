@@ -14,20 +14,34 @@ export class OrgMenu extends Component {
 
         this.state = {
             user_count: 0,
+            org_name:''
         }
         this.userCount=this.userCount.bind(this)
+        this.GetOrgName=this.GetOrgName.bind(this)
 
     }
 
     componentDidMount() {
-        this.userCount()
+        const level=this.props.match.params.level
+        const id=this.props.match.params.id
+        this.GetOrgName(level,id)
     }
 
     userCount() {
+
+    }
+    GetOrgName(org_level,id){
+        service.OrgAll(org_level,id).then(({ orgs }) => {
+            if (orgs) {
+                orgs.map(org=>this.setState({
+                    org_name:org.name
+                }))
+            }
+        })
     }
 
     render() {
-        const { user_count} = this.state
+        const { user_count, org_name} = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
