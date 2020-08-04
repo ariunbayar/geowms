@@ -63,7 +63,7 @@ export class Жагсаалт extends Component {
                                 </div>
 
                                 <div className="text-right">
-                                    <NavLink className="" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
+                                    <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
                                 </div>
