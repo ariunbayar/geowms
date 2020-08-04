@@ -44,7 +44,7 @@ export class OrgForm extends Component {
             }
         })
     }
-
+    
     render() {
         const {all_users, orgs} = this.state
         const org_level = this.props.match.params.level
@@ -64,14 +64,17 @@ export class OrgForm extends Component {
                                 <th scope="col">Байгууллага нэр</th>
                                 <th scope="col">Түвшин</th>
                                 <th scope="col">устгах</th >
+                                <th scope="col">засах</th >
                             </tr>
                         </thead>
                         <tbody>
                             {orgs.map((org) =>
                                 <OrgFormTable
+                                    key={org.id}
                                     org_level={org_level}
                                     org={org}
                                     handleUserDelete={() => this.handleUserDelete(org.id)}
+                                    
                                 >
                                 </OrgFormTable>
                             )}

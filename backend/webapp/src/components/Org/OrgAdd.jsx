@@ -10,13 +10,17 @@ export class OrgAdd extends Component {
 
         this.state = {
             org_name: '',
+            edit:false
         }
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
+        this.handleGetAll=this.handleGetAll.bind(this)
     }
 
     componentDidMount(){
-
+        const org_level=this.props.match.params.level
+        const id=this.props.match.params.id
+        this.handleGetAll(org_level,id)
     }
 
     handleUserSearch(field, e){
@@ -25,18 +29,34 @@ export class OrgAdd extends Component {
 
     handleSave(){
         const org_level = this.props.match.params.level
+        const org_id=this.props.match.params.id
         const org_name = this.state.org_name
-        service.org_add(org_level,org_name).then(({ success }) => {
+        const values={"org_name":org_name,"id": org_id}
+        service.org_add(org_level,values).then(({ success }) => {
             if (success) {
                 this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
             }
         })
     }
 
-    render() {
-        const {search_data, org_name} = this.state
-        const org_level = this.props.match.params.level
+    handleGetAll(org_level,id){
+        if(id){
+            service.OrgAll(org_level,id).then(({ orgs }) => {
+                if (orgs) {
+                    orgs.map(org=>this.setState({
+                        org_name:org.name
+                    }))
+                }
+                this.setState({
+                    edit:true
+                })
+            })
+        }
+    }
 
+    render() {
+        const {org_name,edit} = this.state
+        const org_level=this.props.match.params.level
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -49,8 +69,8 @@ export class OrgAdd extends Component {
                                     </a>
                                 </NavLink>
                             </div>
-                            <h5 className="mb-3">Хэрэглэгч хайх</h5>
-
+                            <br/>
+                             {edit ? <h5 className="mb-3">Байгууллагын мэдээлэл засах</h5> : <h5 className="mb-3">Байгууллага нэмэх</h5> }
                             <div className="form-group">
                                 <input
                                     type="text"

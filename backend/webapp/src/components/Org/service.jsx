@@ -6,6 +6,7 @@ export const service = {
     org_remove,
     roles,
     rolesSave,
+    OrgAll,
     employeesGetAll,
     employee_add,
     employee_remove,
@@ -21,12 +22,16 @@ function getAll(level) {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/level-${level}/`, requestOptions).then(handleResponse)
 }
+function OrgAll(level,id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
+}
 
 
-function org_add(level, org_name) {
+function org_add(level, values) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({org_name}),
+        body: JSON.stringify(values),
     }
 
     return fetch(`${prefix}/level-${level}/org-add/`, opts).then(handleResponse)
