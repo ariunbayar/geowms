@@ -110,6 +110,7 @@ export class UserAdd extends Component {
     handleFormCheck() {
         this.setState({handleSaveIsLoad: true})
         const org_emp = this.props.match.params.emp
+        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
         const { username, first_name, last_name,  email,  register,  password,  re_password , position} = this.state
         var fromState = true
@@ -154,7 +155,7 @@ export class UserAdd extends Component {
             this.setState({emailError: true} )
             fromState = false
         }
-        if(email.toUpperCase().indexOf('@') > -1)
+        if(re.test(email))
         {
             this.setState({emailErrorMessege:''})
         }
