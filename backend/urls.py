@@ -64,6 +64,8 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/employees/', org_views.employees, name='employees'),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('level-<int:level>/<int:pk>/employee-remove/', org_views.employee_remove, name='employee-remove'),
+        path('level-<int:level>/<int:pk>/employee-more-<int:emp>/', org_views.employee_more, name='employee-more'),
+        path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
     ], 'org'))),

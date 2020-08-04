@@ -5,9 +5,9 @@ from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 
 from main.decorators import ajax_required
-from .models import Org, OrgRole
+from .models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
-
+from geoportal_app.models import User
 
 @require_GET
 @ajax_required
@@ -162,26 +162,79 @@ def roles_save(request, payload, level, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def employees(request, level, pk):
 
-    # org = get_object_or_404(Org, pk=pk)
-
+    org = get_object_or_404(Org, pk=pk, level=level)
+    
     employees_display = []
 
-    from random import randint
-
-    for i in range(100, randint(105, 120)):
+    for employe in User.objects.filter(employee__org=org):
         employees_display.append({
-            'id': i,
-            'last_name': 'Telmuun%s' % i,
-            'first_name': 'Telmuun%s' % i,
-            'email': 'user_%s@example.com' % i,
-            'is_active': [True, False][randint(0, 1)],
-            'is_sso': [True, False][randint(0, 1)],
-            'position': 'Газар зохион байгуулалт, төлөвлөлт, газар өмчлөлийн асуудал хариуцсан ахлах мэргэжилтэн %s' % i,
-            'created_at': '2020-01-01',
-            'updated_at': '2020-04-17',
+            'id': employe.id,
+            'last_name': employe.last_name,
+            'first_name': employe.first_name,
+            'email': employe.email,
+            'is_active': employe.is_active,
+            'is_sso': employe.is_sso,
+            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
+            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
+            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-
     return JsonResponse({'employees': employees_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_more(request, level, pk, emp):
+
+    org = get_object_or_404(Org, pk=pk, level=level)
+    employees_display = []
+
+    for employe in User.objects.filter(employee__org=org, pk=emp):
+        employees_display.append({
+            'id': employe.id,
+            'last_name': employe.last_name,
+            'username': employe.username,
+            'first_name': employe.first_name,
+            'email': employe.email,
+            'register': employe.register,
+            'gender': employe.gender,
+            'is_active': employe.is_active,
+            'is_sso': employe.is_sso,
+            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
+            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
+            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
+        })
+    return JsonResponse({'employee': employees_display})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_update(request, payload, level, pk):
+    username = payload.get('username')
+    user_id = payload.get('id')
+    position = payload.get('position')
+    first_name = payload.get('first_name')
+    last_name = payload.get('last_name')
+    email = payload.get('email')
+    gender = payload.get('gender')
+    register = payload.get('register')
+    password = payload.get('password')
+    re_password = payload.get('re_password')
+
+    get_object_or_404(User, pk=user_id)
+    
+    User.objects.filter(pk=user_id).update(
+                            first_name=first_name,
+                            last_name=last_name,
+                            email=email,
+                            gender=gender,
+                            register=register
+                        )
+
+    Employee.objects.filter(user_id=user_id).update(position=position)
+   
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -189,12 +242,38 @@ def employees(request, level, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
 
-    user_id = payload.get('user_id')
+    username = payload.get('username')
     position = payload.get('position')
+    first_name = payload.get('first_name')
+    last_name = payload.get('last_name')
+    email = payload.get('email')
+    gender = payload.get('gender')
+    register = payload.get('register')
+    password = payload.get('password')
+    re_password = payload.get('re_password')
 
-    # user = get_object_or_404(User, pk=user_id)
+    user = User.objects.filter(username=username).first()
+    if user:
+        return JsonResponse({'user_name': True})
 
-    return JsonResponse({'success': True})
+    else:
+        if level == 4:
+            is_superuser = True
+        else:
+            is_superuser = False
+
+        user = User.objects.create(password=password,
+                                is_superuser=is_superuser,
+                                username=username, 
+                                first_name=first_name, 
+                                last_name=last_name, 
+                                email=email,
+                                gender=gender,
+                                register=register,
+                                )
+        Employee.objects.create(position=position, org_id=pk, user_id=user.id)
+            
+        return JsonResponse({'success': True})
 
 
 @require_POST
@@ -203,8 +282,12 @@ def employee_add(request, payload, level, pk):
 def employee_remove(request, payload, level, pk):
 
     user_id = payload.get('user_id')
+    get_object_or_404(User, pk=user_id)
 
-    # user = get_object_or_404(User, pk=user_id)
+    user = User.objects.filter(pk=user_id)
+    employee=Employee.objects.filter(user_id=user_id)
+    employee.delete()
+    user.delete()
 
     return JsonResponse({'success': True})
 

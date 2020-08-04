@@ -75,7 +75,7 @@ export class Sidebar extends Control {
         })
 
         this.is_component_initialized = false
-        const cssClasses = `col-md-3 ⚙  ${CLASS_HIDDEN}`
+        const cssClasses = `col-md-2 ⚙  ${CLASS_HIDDEN}`
 
         this.element.className = cssClasses
         this.renderComponent = this.renderComponent.bind(this)

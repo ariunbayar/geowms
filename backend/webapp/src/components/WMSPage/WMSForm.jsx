@@ -211,6 +211,10 @@ export class WMSForm extends Component {
                                     />
                                 </div>
                                 <div>
+                                    {this.state.is_active ? 
+                                    <a className="text-danger">Хязгаарлах </a> :
+                                    <a className="text-success">Идэвхжүүлэх </a>
+                                    }
                                     <input 
                                     type="checkbox"
                                     name="is_active"
