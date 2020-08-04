@@ -72,9 +72,9 @@ export class OrgRole extends Component {
                     <div className="col-md-12">
                         <div className="text-left">
                             <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                <a className="btn btn-outline-primary">
+                                <p className="btn btn-outline-primary">
                                     <i className="fa fa-angle-double-left"></i> Буцах
-                                </a>
+                                </p>
                             </NavLink>
                         </div>
                         <div className="mb-3 mt-3">

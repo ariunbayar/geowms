@@ -10,7 +10,7 @@ export class OrgForm extends Component {
 
         this.state = {
             all_users: [{},{},{}],
-            orgs: []
+            orgs: [],
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.handleUserDelete=this.handleUserDelete.bind(this)
@@ -37,7 +37,6 @@ export class OrgForm extends Component {
     }
     handleUserDelete(id){
         const org_level = this.props.match.params.level
-        const org_name = this.state.org_name
         service.org_remove(org_level,id).then(({ success }) => {
             if (success) {
                 this.handleGetAll(org_level)

@@ -44,7 +44,7 @@ export class Org extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row container">
                     
-                    <div class="col-md-12">
+                    <div className="col-md-12">
                         <ul className="list-group list-group-horizontal col-md-12">
                             <NavLink to="/back/байгууллага/түвшин/1/" className="list-group-item col-md-3" activeClassName="text-white gp-bg-primary">
                                 1-р түвшин
