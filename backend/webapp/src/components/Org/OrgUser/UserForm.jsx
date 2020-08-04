@@ -50,6 +50,13 @@ export class UserForm extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="text-right">
+                            <div className="text-left">
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                    <a className="btn btn-outline-primary">
+                                        <i className="fa fa-angle-double-left"></i> Буцах
+                                    </a>
+                                </NavLink>
+                            </div>
                             <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
                                 Нэмэх
                             </NavLink>

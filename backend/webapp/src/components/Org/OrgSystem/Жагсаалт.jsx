@@ -54,6 +54,14 @@ export class Жагсаалт extends Component {
 
                         {!this.state.is_form_open &&
                             <>
+                                <div className="text-left">
+                                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                        <a className="btn btn-outline-primary">
+                                            <i className="fa fa-angle-double-left"></i> Буцах
+                                        </a>
+                                    </NavLink>
+                                </div>
+
                                 <div className="text-right">
                                     <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
                                         Нэмэх
