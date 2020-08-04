@@ -71,8 +71,8 @@ export class UserForm extends Component {
                                     <th scope="col"> Албан тушаал</th>
                                     <th scope="col"> Үүссэн огноо</th>
                                     <th scope="col"> Зассан огноо</th>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
+                                    <th scope="col"> Засах</th>
+                                    <th scope="col"> Устгах</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,6 +81,7 @@ export class UserForm extends Component {
                                         org_level={org_level}
                                         org_id={org_id}
                                         key = {idx} 
+                                        idx = {idx} 
                                         values={employe} 
                                         handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
                                     >

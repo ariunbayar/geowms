@@ -13,7 +13,8 @@ export class OrgRole extends Component {
         this.state = {
             org_roles: [],
             list:[],
-            changedName:''
+            changedName:'',
+            handleSaveIsLoad: false,
         }
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleSave = this.handleSave.bind(this)
@@ -41,10 +42,14 @@ export class OrgRole extends Component {
     }
 
     handleSave(){
+        this.setState({handleSaveIsLoad:true})
         const {level, id} = this.props.match.params
         service.rolesSave(level, id, this.state.org_roles).then(({success}) => {
             if (success) {
-                this.handleListUpdated()
+                setTimeout(() => {
+                    this.setState({handleSaveIsLoad:false})
+                    this.handleListUpdated()
+                }, 1000)
                 
             }
         })
@@ -91,7 +96,17 @@ export class OrgRole extends Component {
                                     )}
                                 </tbody>
                             </table>
-                             <button className="btn gp-bg-primary" onClick={this.handleSave}>Хадгалах</button>
+                            {this.state.handleSaveIsLoad ?
+                                <button className="btn gp-bg-primary">
+                                    <a class="spinner-border text-light" role="status">
+                                        <span class="sr-only">Loading...</span> 
+                                    </a>
+                                    <span> Шалгаж байна. </span>
+                                </button>:
+                                <button className="btn gp-bg-primary" onClick={this.handleSave} >
+                                    Хадгалах
+                                </button>
+                            }
                         </div>
                     </div>
                 </div>
