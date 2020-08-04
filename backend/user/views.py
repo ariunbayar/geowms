@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 
 from main.decorators import ajax_required
+from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
@@ -86,6 +87,7 @@ def дэлгэрэнгүй(request, pk):
     
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def userDetailChange(request, payload):
     
     user_id = payload.get('id')
@@ -97,6 +99,7 @@ def userDetailChange(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def roleCreate(request, payload):
     user = get_object_or_404(User, pk=payload.get('id'))
     user_id=payload.get('id')
