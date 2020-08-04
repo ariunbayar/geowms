@@ -13,25 +13,35 @@ export class OrgMenu extends Component {
         super(props)
 
         this.state = {
-            user_count: 0,
+            org_name:''
         }
-        this.userCount=this.userCount.bind(this)
+        this.getOrgName=this.getOrgName.bind(this)
 
     }
 
     componentDidMount() {
-        this.userCount()
+        const level=this.props.match.params.level
+        const id=this.props.match.params.id
+        this.getOrgName(level,id)
     }
 
-    userCount() {
+    getOrgName(org_level,id){
+        service.OrgAll(org_level,id).then(({ orgs }) => {
+            if (orgs) {
+                orgs.map(org=>this.setState({
+                    org_name:org.name
+                }))
+            }
+        })
     }
 
     render() {
-        const { user_count} = this.state
+        const { org_name} = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
             <div className="">
+
                 <div className="row">
                     <div className=" col-md-2">
                         <div className="container my-4">
@@ -55,6 +65,9 @@ export class OrgMenu extends Component {
                         </div>
                     </div>
                         <div className="col-md-10">
+                            <div className="text-center mt-4">
+                                <h4 className="text-dark ">{org_name}</h4>
+                            </div>
                             <Switch>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
