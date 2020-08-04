@@ -24,14 +24,14 @@ export class UserFormTable extends Component {
                 <td>{employee.created_at}</td>
                 <td>{employee.updated_at}</td>
                 <td>
-                    <a href="#" onClick={this.props.handleGovorgDelete}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
-                    </a>
-                </td>
-                <td>
                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${employee.id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
+                </td>
+                <td>
+                    <a href="#" onClick={this.props.handleGovorgDelete}>
+                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                    </a>
                 </td>
             </tr>
         )

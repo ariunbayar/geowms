@@ -24,14 +24,14 @@ export class OrgFormTable extends Component {
                 </td>
                 <td>{org.level_display}</td>
                 <td>
-                    <a href="#" onClick={this.props.handleUserDelete}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
-                    </a>
-                </td>
-                <td>
                     <NavLink  className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org.id}/засах`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
+                </td>
+                <td>
+                    <a href="#" onClick={this.props.handleUserDelete}>
+                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                    </a>
                 </td>
             </tr>
         )
