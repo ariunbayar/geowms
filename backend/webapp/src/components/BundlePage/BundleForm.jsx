@@ -99,7 +99,6 @@ export default class BundleForm extends Component {
 
                 {this.props.formOptions.map(({name, layers,is_active}, idx) =>
                     <div className="form-group" key={idx}>
-                        
                         <div className="col-md-1"></div>
                         <div className="col-md-11">
                          {is_active ?
@@ -109,10 +108,9 @@ export default class BundleForm extends Component {
                                     <span> {name}</span>
                                 </a>
                             </div> :
-
-                            <div key={idx} className="row" >
+                            <div key={idx} className="row">
                                 <a>
-                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
+                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}></i>
                                     <del> {name}</del>
                                 </a>
                             </div>

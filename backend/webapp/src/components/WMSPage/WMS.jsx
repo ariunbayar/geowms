@@ -80,8 +80,9 @@ export default class WMS extends Component {
                 </td>
                 <td>
                     {is_active ? 
-                    <a className="text-success">Идэвхгүй</a>:
-                    <a className="text-danger">Идэвхтэй</a>
+                    <a className="text-success">Идэвхтэй</a>:
+                    <a    className="text"style={{color: "grey"}}>Идэвхгүй</a>
+                 
                     }
                 </td>
                 <td>
