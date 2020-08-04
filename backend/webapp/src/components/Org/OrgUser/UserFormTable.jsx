@@ -13,20 +13,28 @@ export class UserFormTable extends Component {
     render() {
         const org_id = this.props.org_id
         const org_level = this.props.org_level
+        const employee = this.props.values
         return (
             <tr>
+                <td>{employee.id}</td>
+                <td>{employee.last_name + ". " + employee.first_name}</td>
+                <td>{employee.email}</td>
+                <td>{employee.is_sso}</td>
+                <td>{employee.position}</td>
+                <td>{employee.created_at}</td>
+                <td>{employee.updated_at}</td>
                 <td>
-                <NavLink className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/дэлгэрэнгүй/`}>
-                    {"Хэрэглэгчийн нэр"}
-                </NavLink>
+                    <a href="#" onClick={this.props.handleGovorgDelete}>
+                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                    </a>
                 </td>
-                <td>{"Админ болсон огноо"}</td>
-                <td>{"Админ эрх олгосон хэрэглэгч"}</td>
-                <td>{"Харьяат байгууллага"}</td>
-                <button type="button" onClick={this.handleProceed} className="btn gp-bg-primary text-white">Устгах</button>
+                <td>
+                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${employee.id}/засах/`}>
+                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </NavLink>
+                </td>
             </tr>
         )
-
     }
 
 }
