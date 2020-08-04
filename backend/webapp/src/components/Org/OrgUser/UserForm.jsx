@@ -25,7 +25,6 @@ export class UserForm extends Component {
     }
 
     handleGovorgDelete(id) {
-        alert(id)
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         service.employee_remove(org_level, org_id, id).then(({ success }) => {
@@ -46,17 +45,18 @@ export class UserForm extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="container">
+            <div className="container my-4">
                 <div className="row">
+
                     <div className="col-md-12">
+                        <div className="text-left">
+                            <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                <a className="btn btn-outline-primary">
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                                </a>
+                            </NavLink>
+                        </div>
                         <div className="text-right">
-                            <div className="text-left">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                    <a className="btn btn-outline-primary">
-                                        <i className="fa fa-angle-double-left"></i> Буцах
-                                    </a>
-                                </NavLink>
-                            </div>
                             <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
                                 Нэмэх
                             </NavLink>
@@ -71,8 +71,8 @@ export class UserForm extends Component {
                                     <th scope="col"> Албан тушаал</th>
                                     <th scope="col"> Үүссэн огноо</th>
                                     <th scope="col"> Зассан огноо</th>
-                                    <th scope="col"> Устгах</th>
-                                    <th scope="col"> Засах</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody>

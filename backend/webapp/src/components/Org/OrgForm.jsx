@@ -57,29 +57,31 @@ export class OrgForm extends Component {
                             Нэмэх
                         </NavLink>
                     </div>
-                    <table className="table example" id="example">
-                        <thead>
-                            <tr>
-                                <th scope="col">№</th>
-                                <th scope="col">Байгууллага нэр</th>
-                                <th scope="col">Түвшин</th>
-                                <th scope="col">устгах</th >
-                                <th scope="col">засах</th >
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orgs.map((org) =>
-                                <OrgFormTable
-                                    key={org.id}
-                                    org_level={org_level}
-                                    org={org}
-                                    handleUserDelete={() => this.handleUserDelete(org.id)}
-                                    
-                                >
-                                </OrgFormTable>
-                            )}
-                        </tbody>
-                    </table>
+                    <div className="mb-3 mt-3">
+                        <table className="table example" id="example">
+                            <thead>
+                                <tr>
+                                    <th scope="col">№</th>
+                                    <th scope="col">Байгууллага нэр</th>
+                                    <th scope="col">Түвшин</th>
+                                    <th scope="col"></th >
+                                    <th scope="col"></th >
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orgs.map((org) =>
+                                    <OrgFormTable
+                                        key={org.id}
+                                        org_level={org_level}
+                                        org={org}
+                                        handleUserDelete={() => this.handleUserDelete(org.id)}
+                                        
+                                    >
+                                    </OrgFormTable>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         )

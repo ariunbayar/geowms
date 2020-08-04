@@ -72,7 +72,7 @@ export class OrgRole extends Component {
                                 </a>
                             </NavLink>
                         </div>
-                        <div className="container mb-3 mt-3">
+                        <div className="mb-3 mt-3">
                             <table className="table table-bordered">
                                 <thead>
                                     <tr>
