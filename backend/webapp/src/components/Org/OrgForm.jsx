@@ -37,6 +37,7 @@ export class OrgForm extends Component {
     }
     handleUserDelete(id){
         const org_level = this.props.match.params.level
+
         service.org_remove(org_level,id).then(({ success }) => {
             if (success) {
                 this.handleGetAll(org_level)
@@ -62,15 +63,15 @@ export class OrgForm extends Component {
                                 <tr>
                                     <th scope="col">№</th>
                                     <th scope="col">Байгууллага нэр</th>
-                                    <th scope="col">Засах</th >
-                                    <th scope="col">Устгах</th >
+                                    <th scope="col">Түвшин</th>
+                                    <th scope="col"></th >
+                                    <th scope="col"></th >
                                 </tr>
                             </thead>
                             <tbody>
-                                {orgs.map((org, idx) =>
+                                {orgs.map((org) =>
                                     <OrgFormTable
-                                        key={idx}
-                                        idx={idx + 1}
+                                        key={org.id}
                                         org_level={org_level}
                                         org={org}
                                         handleUserDelete={() => this.handleUserDelete(org.id)}
