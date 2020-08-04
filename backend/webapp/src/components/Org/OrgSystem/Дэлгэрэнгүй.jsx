@@ -52,13 +52,13 @@ export class Дэлгэрэнгүй extends Component {
                 <div className="row">
 
                     <div className="col-md-12 mb-4">
-                        <h1>{name}</h1>
+                        <h4>{name}</h4>
                         <p><strong>Token</strong>: {token} </p>
                     </div>
 
                     {this.state.govorg_wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
-                            <h1> {wms.name} </h1>
+                            <h4> {wms.name} </h4>
                             <input type="text" className="form-control" disabled value={wms.public_url}/>
                             <ul>
                                 {wms.layer_list.map((layer, idx) =>

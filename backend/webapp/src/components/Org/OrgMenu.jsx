@@ -66,7 +66,7 @@ export class OrgMenu extends Component {
                     </div>
                         <div className="col-md-10">
                             <div className="text-center mt-4">
-                                <h4 className="text-dark ">{org_name}</h4>
+                                <h3 className="text-dark " >{org_name}</h3>
                             </div>
                             <Switch>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
