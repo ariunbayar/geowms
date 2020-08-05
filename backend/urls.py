@@ -8,6 +8,7 @@ from backend.govorg import views as govorg_views
 from backend.суурь_давхарга import views as суурь_давхарга
 from backend.config import views as config_views
 from backend.org import views as org_views
+from backend.log import views as log_views
 
 
 app_name = 'backend'
@@ -69,6 +70,12 @@ urlpatterns = [
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
     ], 'org'))),
+
+    path('api/log/', include(([
+        path('', log_views.all, name=''),
+        path('browser-count/', log_views.browser_count, name='browser-count'),
+        path('browser-login/', log_views.browser_login, name='browser-login'),
+    ], 'log'))),
 
     path('api/систем/', include(([
         path('', govorg_views.жагсаалт, name=''),

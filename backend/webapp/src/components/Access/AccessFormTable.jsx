@@ -10,14 +10,17 @@ export class AccessFormTable extends Component {
     componentDidMount(){
     }
     render() {
-        const {ip_address, web, date, status, url} = this.props.values
+        const {username, ip_address, browser_name, browser_version, device_name, created_at} = this.props.values
+        const idx = this.props.idx
         return (
-            <tr className="odd">
-                <td className="sorting_1">{ip_address}</td>
-                <td>{web}</td>
-                <td>{date}</td>
-                <td>{status}</td>
-                <td>{url}</td>
+            <tr>
+                <td>{idx}</td>
+                <td>{username}</td>
+                <td>{ip_address}</td>
+                <td>{browser_name}</td>
+                <td>{browser_version}</td>
+                <td>{device_name}</td>
+                <td>{created_at}</td>
             </tr>
         )
     }
