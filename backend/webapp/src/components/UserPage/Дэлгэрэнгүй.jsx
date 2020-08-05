@@ -21,6 +21,7 @@ export class Дэлгэрэнгүй extends Component {
             is_superuser:false,
             is_active: false,
             is_modal_limit_open:false,
+            role_name:''
         }
 
         this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
@@ -41,7 +42,7 @@ export class Дэлгэрэнгүй extends Component {
         .detail(this.props.match.params.id)
         .then(({user_detail,roles,all_role}) => {
             this.setState({user_detail, roles, all_role,is_active: user_detail.is_active, is_superuser:user_detail.is_superuser})
-            roles.map(role=>this.setState({roleId:role.id}))
+            roles.map(role=>this.setState({roleId:role.id, role_name:role.name}))
         })
     }
     handleModalLimitOpen() {
@@ -99,7 +100,7 @@ export class Дэлгэрэнгүй extends Component {
     }
     render() {
         const {id, first_name, email,is_sso, last_name, gender, username, last_login, date_joined} = this.state.user_detail
-        const {is_modal_limit_open, check, is_active, is_superuser}=this.state
+        const {is_modal_limit_open, check, is_active, role_name}=this.state
 
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
@@ -116,12 +117,12 @@ export class Дэлгэрэнгүй extends Component {
                         <p><strong>Нэр</strong>: {last_name} {first_name} </p>
                         <p><strong>Хүйс</strong>: {gender} </p>
                         <p><strong>Цахим хаяг</strong>: {email} </p>
-                        <p><strong>Хэрэглэгчийн нэр</strong>: {username} </p>
-                        <p><strong>Админ эсэх</strong>: {is_superuser ? 'Админ' : '-'}  </p>
-                        <p><strong>Идэвхитэй эсэх</strong>: {is_active ?  'Идэвхитэй': '-'}
+                        <p><strong>Хэрэглэгчийн нэр</strong>: {is_sso ? <a>{first_name}</a> : <a> {username}</a>} </p>
+                        <p><strong>Хэрэглэгчийн эрх</strong>:{role_name} </p>
+                        <p><strong>Идэвхитэй эсэх</strong>: {is_active ?  'Идэвхтэй': '-'}
                            &nbsp; {is_active ? 
                                 <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button> : 
-                                <button  className="btn btn-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхижүүлэх</button>}     
+                                <button  className="btn btn-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхжүүлэх</button>}     
                        </p>
                         <p><strong>Бүртгүүлсэн огноо</strong>: {date_joined} </p>
                         <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>

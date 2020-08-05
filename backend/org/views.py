@@ -234,7 +234,7 @@ def employee_update(request, payload, level, pk):
 
     Employee.objects.filter(user_id=user_id).update(position=position)
    
-    return JsonResponse({'success': True})
+    return JsonResponse({'success': True})    
 
 
 @require_POST
@@ -271,6 +271,7 @@ def employee_add(request, payload, level, pk):
                                 gender=gender,
                                 register=register,
                                 )
+        user.roles.add(1)                                
         Employee.objects.create(position=position, org_id=pk, user_id=user.id)
             
         return JsonResponse({'success': True})

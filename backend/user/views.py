@@ -10,6 +10,7 @@ from geoportal_app.models import Role
 
 
 def _get_user_display(user):
+    roles = [_get_role_display(role) for role in user.roles.all()]
     return {
         'id': user.id,
         'last_name': user.last_name,
@@ -18,6 +19,7 @@ def _get_user_display(user):
         'email': user.email,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
+        'roles':roles
     }
 
 def _get_user_detail(user):
@@ -48,7 +50,7 @@ def _get_role_display(role):
 def all(request):
 
     user_list = [_get_user_display(user) for user in User.objects.all()]
-
+    
     rsp = {
         'user_list': user_list,
     }

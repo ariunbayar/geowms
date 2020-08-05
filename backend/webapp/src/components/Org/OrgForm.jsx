@@ -69,12 +69,13 @@ export class OrgForm extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orgs.map((org) =>
+                                {orgs.map((org,index) =>
                                     <OrgFormTable
                                         key={org.id}
                                         org_level={org_level}
                                         org={org}
                                         handleUserDelete={() => this.handleUserDelete(org.id)}
+                                        idx={index+1}
                                         
                                     >
                                     </OrgFormTable>
