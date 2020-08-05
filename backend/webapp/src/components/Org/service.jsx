@@ -11,12 +11,17 @@ export const service = {
     employee_add,
     employee_remove,
     employeeMore,
-    employee_update
+    employee_update,
+    sistemCount
 }
 
 
 const prefix = '/back/api/org'
 
+function sistemCount() {
+    const opts = {...getGetOptions()}
+    return fetch(`/back/api/систем/тоо/`, opts).then(handleResponse)
+}
 
 function getAll(level) {
     const requestOptions = {...getGetOptions()}

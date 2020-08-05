@@ -6,25 +6,25 @@ import {OrgRole} from './OrgRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 
-
 export class OrgMenu extends Component {
     constructor(props) {
 
         super(props)
-
         this.state = {
-            org_name:''
+            org_name:'',
+            sistemCount: 0
         }
         this.getOrgName=this.getOrgName.bind(this)
 
     }
-
     componentDidMount() {
         const level=this.props.match.params.level
         const id=this.props.match.params.id
         this.getOrgName(level,id)
+        service.sistemCount().then(({ count }) => {
+            this.setState({ sistemCount: count });
+          });
     }
-
     getOrgName(org_level,id){
         service.OrgAll(org_level,id).then(({ orgs }) => {
             if (orgs) {
@@ -58,7 +58,7 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Систем
+                                        Систем ({this.state.sistemCount})
                                     </div>
                                 </NavLink>
                             </div>
