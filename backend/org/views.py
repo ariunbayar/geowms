@@ -271,7 +271,7 @@ def employee_add(request, payload, level, pk):
                                 gender=gender,
                                 register=register,
                                 )
-        user.roles.add(1)                                
+        user.roles.add(2)                                
         Employee.objects.create(position=position, org_id=pk, user_id=user.id)
             
         return JsonResponse({'success': True})
