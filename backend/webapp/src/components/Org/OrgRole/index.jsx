@@ -27,12 +27,7 @@ export class OrgRole extends Component {
    
 
     componentDidMount() {
-
-        service.userCount().then(({ user_count }) => {
-           this.setState({ user_count: user_count });
-         });
-     
-       }
+    }
     handleListUpdated() {
         const {level, id} = this.props.match.params
         service.roles(level, id).then(({org_roles}) => {
