@@ -1,15 +1,15 @@
 import React, { Component } from "react"
-import {AccessFormTable} from './AccessFormTable'
+import {PageLogTable} from './PageLogTable'
 import {Charts} from './Chart'
 import {RadarChart} from './Radar'
 import {service} from "../service"
 
-export class AccessForm extends Component {
+export class PageLog extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            user_log: [],
+            page_logs: [],
         }
         this.handleGetAll=this.handleGetAll.bind(this)
     }
@@ -20,16 +20,16 @@ export class AccessForm extends Component {
     }
 
     handleGetAll(){
-        service.getAll().then(({ user_log }) => {
-            if(user_log){
-                this.setState({user_log})
+        service.pageAll().then(({ page_logs }) => {
+            if(page_logs){
+                this.setState({page_logs})
             }
         })
 
     }
 
     render() {
-        const { user_log } = this.state
+        const { page_logs } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -56,17 +56,16 @@ export class AccessForm extends Component {
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>
-                                        <th scope="col">Хэрэглэгчийн id</th>
-                                        <th scope="col">IP Хаяг</th>
-                                        <th scope="col">object_id</th>
-                                        <th scope="col">object_repr</th>
-                                        <th scope="col">content_type_id</th>
+                                        <th scope="col">Хаяг</th>
+                                        <th scope="col">Metod</th>
+                                        <th scope="col">IP Хаяг</th >
+                                        <th scope="col">Хэрэглэгчийн дугаар</th >
                                         <th scope="col">Огноо</th >
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {user_log.map((users, idx) =>
-                                        <AccessFormTable key = {idx} idx = {idx} values={users}></AccessFormTable>
+                                    {page_logs.map((page, idx) =>
+                                        <PageLogTable key = {idx} idx = {idx} values={page}></PageLogTable>
                                     )}
                                 </tbody>
                             </table>

@@ -69,22 +69,19 @@ def browser_login(request):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def all(request):
+def pageAll(request):
     log_display = []
 
-    for log in Log.objects.all():
+    for log in RequestEvent.objects.all():
         log_display.append({
             'id':log.id,
-            'event_type': log.event_type,
-            'object_id': log.object_id,
-            'object_repr': log.object_repr,
-            'object_json_repr': log.object_json_repr,
-            'datetime': log.datetime('%Y-%m-%d'),
-            'content_type_id': log.content_type_id,
+            'url': log.url,
+            'method': log.method,
+            'query_string': log.query_string,
+            'remote_ip': log.remote_ip,
             'user_id': log.user_id,
-            'user_pk_as_string': log.user_pk_as_string,
-            'changed_fields': log.changed_fields
+            'datetime': log.datetime.strftime('%Y-%m-%d'),
 
         })
-
-    return JsonResponse({'log':  log_display.append})
+    print(log_display)
+    return JsonResponse({'page_logs':  log_display})
