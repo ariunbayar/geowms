@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'backend.govorg.apps.GovOrgConfig',
     'backend.config.apps.ConfigConfig',
     'backend.org.apps.OrgConfig',
-
+    'backend.log.apps.LogConfig',
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
