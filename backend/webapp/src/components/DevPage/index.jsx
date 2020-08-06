@@ -32,7 +32,8 @@ export class DevPage extends Component {
                 <strong>Bootstrap 4.5.0: </strong>
                 <LinkExternal href="https://getbootstrap.com/docs/4.5/components/alerts/"/>
             </p>
-            <p>
+            <div>
+              
                 <strong>react-chartjs-2 (2.9.0): </strong><br/>
                 <ul>
                     <li>
@@ -42,7 +43,7 @@ export class DevPage extends Component {
                     </li>
                     <li>NPM: <LinkExternal href="https://www.npmjs.com/package/react-chartjs-2"/></li>
                 </ul>
-            </p>
+            </div>
 
             <h1>Координатын формат</h1>
 
