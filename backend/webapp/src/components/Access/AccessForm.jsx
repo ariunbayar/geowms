@@ -35,7 +35,7 @@ export class AccessForm extends Component {
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
-                    <div className="row shadow-lg p-3 mb-5 bg-white rounded">
+                    <div className="row rounded">
                         <div className="col-md-6">
                             <h5 className="mb-3">Хандалтын тоогоор</h5>
                             <Charts></Charts>
@@ -52,7 +52,7 @@ export class AccessForm extends Component {
                     </div>
 
                     <h5 className="mb-3">Нэвтэрч орсон мэдээлэл</h5>
-                    <div className="row shadow-lg p-3 mb-5 bg-white rounded">
+                    <div className="row rounded">
                         <div className="col-md-12">
                         <table className="table example" id="example">
                                 <thead>

@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import {Switch, Route} from "react-router-dom"
+import {Switch, Route, Link, NavLink} from "react-router-dom"
 
 import {AccessForm} from './AccessForm'
 
@@ -13,10 +13,33 @@ export class Access extends Component {
     render() {
         
         return (
-            <Switch>
-                <Route exact path={"/back/access/"} component={AccessForm}/>
-            </Switch>
-        )
+            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
+                <div className="row container">
+                    <div className="col-md-12">
+                        <ul className="list-group list-group-horizontal col-md-12">
+                            <NavLink to="/back/access/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
+                                Хэрэглэгчийн нэвтэрсэн тэмдэглэл
+                            </NavLink>
+                            <NavLink to="/back/access/logout/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
+                                Хэрэглэгчийн гарсан тэмдэглэл
+                            </NavLink>
+                            <NavLink to="/back/access/page/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
+                                Хуудас хандалт
+                            </NavLink>
+                        </ul>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <Switch>
+                            <Route exact path={"/back/access/"} component={AccessForm}/>
+                            <Route exact path={"/back/access/logout/"} component={AccessForm}/>
+                            <Route exact path={"/back/access/page/"} component={AccessForm}/>
+                        </Switch>
+                    </div>
+                </div>
+            </div>
+    )
 
     }
 
