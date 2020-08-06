@@ -65,3 +65,26 @@ def browser_login(request):
 
 
 
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def all(request):
+    log_display = []
+
+    for log in Log.objects.all():
+        log_display.append({
+            'id':log.id,
+            'event_type': log.event_type,
+            'object_id': log.object_id,
+            'object_repr': log.object_repr,
+            'object_json_repr': log.object_json_repr,
+            'datetime': log.datetime('%Y-%m-%d'),
+            'content_type_id': log.content_type_id,
+            'user_id': log.user_id,
+            'user_pk_as_string': log.user_pk_as_string,
+            'changed_fields': log.changed_fields
+
+        })
+
+    return JsonResponse({'log':  log_display.append})

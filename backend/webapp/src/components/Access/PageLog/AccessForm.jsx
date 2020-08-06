@@ -56,11 +56,11 @@ export class AccessForm extends Component {
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>
-                                        <th scope="col">Хэрэглэгчийн нэр</th>
+                                        <th scope="col">Хэрэглэгчийн id</th>
                                         <th scope="col">IP Хаяг</th>
-                                        <th scope="col">Вэб броузер</th>
-                                        <th scope="col">Вэб броузер version</th>
-                                        <th scope="col">device name</th>
+                                        <th scope="col">object_id</th>
+                                        <th scope="col">object_repr</th>
+                                        <th scope="col">content_type_id</th>
                                         <th scope="col">Огноо</th >
                                     </tr>
                                 </thead>
