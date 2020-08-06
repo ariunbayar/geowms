@@ -9,15 +9,6 @@ from .models import UserLog
 from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 
 
-
-print(RequestEvent.objects.all())
-
-
-
-
-
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
