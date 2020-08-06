@@ -12,19 +12,25 @@ export class OrgMenu extends Component {
         super(props)
         this.state = {
             org_name:'',
-            sistemCount: 0
+            sistem_count: 0
         }
         this.getOrgName=this.getOrgName.bind(this)
+        this.handleSistemCount=this.handleSistemCount.bind(this)
 
     }
     componentDidMount() {
         const level=this.props.match.params.level
         const id=this.props.match.params.id
         this.getOrgName(level,id)
+        this.handleSistemCount()
+    }
+
+    handleSistemCount(){
         service.sistemCount().then(({ count }) => {
-            this.setState({ sistemCount: count });
+            this.setState({ sistem_count: count });
           });
     }
+
     getOrgName(org_level,id){
         service.OrgAll(org_level,id).then(({ orgs }) => {
             if (orgs) {
@@ -58,7 +64,7 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Систем ({this.state.sistemCount})
+                                        Систем ({this.state.sistem_count})
                                     </div>
                                 </NavLink>
                             </div>
