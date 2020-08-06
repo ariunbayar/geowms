@@ -100,6 +100,7 @@ def pageAll(request):
             'datetime': log.datetime.strftime('%Y-%m-%d'),
 
         })
+    print(log_display)
     return JsonResponse({'page_logs':  log_display})
 
  
@@ -137,6 +138,7 @@ def login_date_count(request):
         'user_log_date': user_login_date,
         'user_log_date_count': user_login_date_count,
     }
+    print(rsp)
     return JsonResponse(rsp)
 
 
@@ -155,4 +157,5 @@ def logout_date_count(request):
         'user_log_date': user_login_date,
         'user_log_date_count': user_login_date_count,
     }
+    print(rsp)
     return JsonResponse(rsp)
