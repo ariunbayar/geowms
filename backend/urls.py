@@ -81,6 +81,8 @@ urlpatterns = [
         path('browser-login/', log_views.browser_login, name='browser-login'),
         path('browser-login/', log_views.browser_login, name='browser-login'),
         path('page-all/', log_views.pageAll, name='page-all'),
+        path('page-date-count/', log_views.page_date_count, name='page-date-count'),
+        path('page-user-count/', log_views.page_user_count, name='page-user-count'),
     ], 'log'))),
 
     path('api/систем/', include(([
