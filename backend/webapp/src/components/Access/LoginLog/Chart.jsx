@@ -7,8 +7,8 @@ export class Charts extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            user_login_date: [],
-            user_login_date_count: []
+            user_log_date: [],
+            user_log_date_count: []
         }
         this.handleBrowserCount=this.handleBrowserCount.bind(this)
     }
@@ -18,18 +18,18 @@ export class Charts extends Component {
     }
 
     handleBrowserCount(){
-        service.browserLoginCount().then(({ user_login_date , user_login_date_count}) => {
-            if(user_login_date_count){
-                this.setState({user_login_date, user_login_date_count})
+        service.loginDateCount().then(({ user_log_date , user_log_date_count}) => {
+            if(user_log_date_count){
+                this.setState({user_log_date, user_log_date_count})
             }
         })
 
     }
 
     render() {
-        const {user_login_date , user_login_date_count } = this.state
+        const {user_log_date , user_log_date_count } = this.state
         const dataLine = {
-            labels:user_login_date,
+            labels:user_log_date,
             datasets: [
                 {
                     label: "Хандалтын тоогоор",
@@ -50,7 +50,7 @@ export class Charts extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: user_login_date_count
+                    data: user_log_date_count
                 },
             ]
         }

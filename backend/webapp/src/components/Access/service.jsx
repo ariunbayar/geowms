@@ -5,6 +5,10 @@ export const service = {
     browserCount,
     browserLoginCount,
     pageAll
+    loginAll,
+    logoutAll,
+    loginDateCount,
+    logoutDateCount
 }
 
 
@@ -28,4 +32,24 @@ function browserLoginCount() {
 function pageAll() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
+}
+
+function loginDateCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
+}
+
+function logoutDateCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
+}
+
+function loginAll() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
+}
+
+function logoutAll() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/logout-all/`, requestOptions).then(handleResponse)
 }

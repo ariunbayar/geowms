@@ -74,6 +74,11 @@ urlpatterns = [
     path('api/log/', include(([
         path('', log_views.all, name=''),
         path('browser-count/', log_views.browser_count, name='browser-count'),
+        path('login-all/', log_views.login_all, name='login-all'),
+        path('logout-all/', log_views.logout_all, name='logout-all'),
+        path('login-date-count/', log_views.login_date_count, name='login-date-count'),
+        path('logout-date-count/', log_views.logout_date_count, name='logout-date-count'),
+        path('browser-login/', log_views.browser_login, name='browser-login'),
         path('browser-login/', log_views.browser_login, name='browser-login'),
         path('page-all/', log_views.pageAll, name='page-all'),
     ], 'log'))),

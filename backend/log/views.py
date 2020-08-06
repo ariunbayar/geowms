@@ -64,6 +64,23 @@ def browser_login(request):
 
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def login_all(request):
+
+    login_log_all_display = []
+
+    for login_log_all in LoginEvent.objects.filter(login_type=0):
+        login_log_all_display.append({
+            'id': login_log_all.id,
+            'login_type': login_log_all.login_type,
+            'username': login_log_all.username,
+            'datetime': login_log_all.datetime.strftime('%Y-%m-%d'),
+            'user_id': login_log_all.user_id,
+            'remote_ip': login_log_all.remote_ip,
+        })
+    return JsonResponse({'login_log_all': login_log_all_display})
 
 
 @require_GET
@@ -85,3 +102,60 @@ def pageAll(request):
         })
     print(log_display)
     return JsonResponse({'page_logs':  log_display})
+
+ 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def logout_all(request):
+
+    logout_log_all_display = []
+
+    for logout_log_all in LoginEvent.objects.filter(login_type=1):
+        logout_log_all_display.append({
+            'id': logout_log_all.id,
+            'login_type': logout_log_all.login_type,
+            'username': logout_log_all.username,
+            'datetime': logout_log_all.datetime.strftime('%Y-%m-%d'),
+            'user_id': logout_log_all.user_id,
+            'remote_ip': logout_log_all.remote_ip,
+        })
+    return JsonResponse({'logout_log_all': logout_log_all_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def login_date_count(request):
+    user_login_date_all = LoginEvent.objects.filter(login_type=1).order_by('datetime__date').distinct('datetime__date') 
+    user_login_date = []
+    user_login_date_count = []
+    for login_date in user_login_date_all:
+        user_login_date.append(login_date.datetime.strftime('%Y-%m-%d'))
+        user_login_date_count.append(LoginEvent.objects.filter(datetime__date=login_date.datetime).count())
+
+    rsp = {
+        'user_log_date': user_login_date,
+        'user_log_date_count': user_login_date_count,
+    }
+    print(rsp)
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def logout_date_count(request):
+    user_login_date_all = LoginEvent.objects.filter(login_type=1).order_by('datetime__date').distinct('datetime__date') 
+    user_login_date = []
+    user_login_date_count = []
+    for login_date in user_login_date_all:
+        user_login_date.append(login_date.datetime.strftime('%Y-%m-%d'))
+        user_login_date_count.append(LoginEvent.objects.filter(datetime__date=login_date.datetime).count())
+
+    rsp = {
+        'user_log_date': user_login_date,
+        'user_log_date_count': user_login_date_count,
+    }
+    print(rsp)
+    return JsonResponse(rsp)
