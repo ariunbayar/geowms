@@ -7,6 +7,17 @@ import datetime
 
 from main.decorators import ajax_required
 from .models import UserLog
+from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
+
+
+
+print(RequestEvent.objects.all())
+
+
+
+
+
+
 
 @require_GET
 @ajax_required
@@ -60,4 +71,7 @@ def browser_login(request):
         'user_login_date_count': user_login_date_count,
     }
     return JsonResponse(rsp)
+
+
+
 

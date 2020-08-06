@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { Radar } from "react-chartjs-2";
-import {service} from "./service"
+import {service} from "../service"
 
 
 export class RadarChart extends Component {
