@@ -38,6 +38,7 @@ export default class Govorg extends Component {
         const {is_modal_delete_open} = this.state
         const org_level = this.props.org_level
         const org_id = this.props.org_id
+        const idx=this.props.idx
         return (
             <tr>
 

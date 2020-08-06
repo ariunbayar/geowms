@@ -30,7 +30,7 @@ export class UserFormTable extends Component {
         const is_modal_delete_open=this.state.is_modal_delete_open
         return (
             <tr>
-                <td>{idx + 1}</td>
+                <td>{idx}</td>
                 <td>{employee.last_name + ". " + employee.first_name}</td>
                 <td>{employee.email}</td>
                 <td>{employee.is_sso}</td>

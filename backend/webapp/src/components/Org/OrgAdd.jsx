@@ -108,8 +108,8 @@ export class OrgAdd extends Component {
                             <div className="form-group">
                                 {this.state.handleSaveIsLoad ?
                                     <button className="btn btn-block gp-bg-primary">
-                                        <a class="spinner-border text-light" role="status">
-                                            <span class="sr-only">Loading...</span> 
+                                        <a className="spinner-border text-light" role="status">
+                                            <span className="sr-only">Loading...</span> 
                                         </a>
                                         <span> Шалгаж байна. </span>
                                     </button>:
