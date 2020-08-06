@@ -14,7 +14,7 @@ from geoportal_app.models import Role
 from .forms import BundleForm
 from .models import Bundle, BundleLayer
 
-@user_passes_test(lambda u: u.is_superuser)
+
 def _get_bundle_options():
 
     form_options = []
