@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import {Switch, Route, Link, NavLink} from "react-router-dom"
 import {Charts} from './Chart'
 import {RadarChart} from './Radar'
 import {service} from "../service"
@@ -12,7 +11,7 @@ export class LogOutLog extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            user_log: [],
+            logout_log_all: [],
         }
         this.handleGetAll=this.handleGetAll.bind(this)
     }
@@ -23,28 +22,23 @@ export class LogOutLog extends Component {
     }
 
     handleGetAll(){
-        service.getAll().then(({ user_log }) => {
-            if(user_log){
-                this.setState({user_log})
+        service.logoutAll().then(({ logout_log_all }) => {
+            if(logout_log_all){
+                this.setState({logout_log_all})
             }
         })
 
     }
 
     render() {
-        const { user_log } = this.state
+        const { logout_log_all } = this.state
         return (
             <div className="main-content">
-                logout heseg
                 <div className="container page-container my-4">
                     <div className="row rounded">
                         <div className="col-md-6">
                             <h5 className="mb-3">Хандалтын тоогоор</h5>
                             <Charts></Charts>
-                        </div>
-                        <div className="col-md-6">
-                            <h5 className="mb-3">Хандалтын төхөөрөмжийн тоогоор</h5>
-                            <RadarChart></RadarChart>
                         </div>
                     </div>
                     <div className="row">
@@ -53,7 +47,7 @@ export class LogOutLog extends Component {
                         </div>
                     </div>
 
-                    <h5 className="mb-3">Нэвтэрч орсон мэдээлэл</h5>
+                    <h5 className="mb-3">Гарсан мэдээлэл</h5>
                     <div className="row rounded">
                         <div className="col-md-12">
                         <table className="table example" id="example">
@@ -61,16 +55,14 @@ export class LogOutLog extends Component {
                                     <tr>
                                         <th scope="col">№</th>
                                         <th scope="col">Хэрэглэгчийн нэр</th>
+                                        <th scope="col">Хэрэглэгчийн дугаар</th>
                                         <th scope="col">IP Хаяг</th>
-                                        <th scope="col">Вэб броузер</th>
-                                        <th scope="col">Вэб броузер version</th>
-                                        <th scope="col">device name</th>
-                                        <th scope="col">Огноо</th >
+                                        <th scope="col">Гарсан огноо</th >
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {user_log.map((users, idx) =>
-                                        <LogOutLogTable key = {idx} idx = {idx} values={users}></LogOutLogTable>
+                                    {logout_log_all.map((logout, idx) =>
+                                        <LogOutLogTable key = {idx} idx = {idx} values={logout}></LogOutLogTable>
                                     )}
                                 </tbody>
                             </table>

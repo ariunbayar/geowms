@@ -10,17 +10,15 @@ export class LoginLogTable extends Component {
     componentDidMount(){
     }
     render() {
-        const {username, ip_address, browser_name, browser_version, device_name, created_at} = this.props.values
+        const {id, username, datetime, user_id, remote_ip} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
-                <td>{idx}</td>
+                <td>{idx + 1}</td>
                 <td>{username}</td>
-                <td>{ip_address}</td>
-                <td>{browser_name}</td>
-                <td>{browser_version}</td>
-                <td>{device_name}</td>
-                <td>{created_at}</td>
+                <td>{user_id}</td>
+                <td>{remote_ip}</td>
+                <td>{datetime}</td>
             </tr>
         )
     }

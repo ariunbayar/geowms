@@ -3,7 +3,11 @@ import {handleResponse, getGetOptions, getPostOptions, getCookie} from '../../he
 export const service = {
     getAll,
     browserCount,
-    browserLoginCount
+    browserLoginCount,
+    loginAll,
+    logoutAll,
+    loginDateCount,
+    logoutDateCount
 }
 
 
@@ -22,4 +26,25 @@ function browserCount() {
 function browserLoginCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/browser-login/`, requestOptions).then(handleResponse)
+}
+
+
+function loginDateCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
+}
+
+function logoutDateCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
+}
+
+function loginAll() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
+}
+
+function logoutAll() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/logout-all/`, requestOptions).then(handleResponse)
 }
