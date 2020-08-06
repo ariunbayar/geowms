@@ -1,7 +1,9 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 
-import {AccessForm} from './AccessForm'
+import {LogOutLog} from './LogOutLog/LogOutLog'
+import {LoginLog} from './LoginLog/LoginLog'
+import {AccessForm} from './PageLog/AccessForm'
 
 
 export class Access extends Component {
@@ -17,7 +19,7 @@ export class Access extends Component {
                 <div className="row container">
                     <div className="col-md-12">
                         <ul className="list-group list-group-horizontal col-md-12">
-                            <NavLink to="/back/access/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
+                            <NavLink to="/back/access/login/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
                                 Хэрэглэгчийн нэвтэрсэн тэмдэглэл
                             </NavLink>
                             <NavLink to="/back/access/logout/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
@@ -32,14 +34,14 @@ export class Access extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>
-                            <Route exact path={"/back/access/"} component={AccessForm}/>
-                            <Route exact path={"/back/access/logout/"} component={AccessForm}/>
-                            <Route exact path={"/back/access/page/"} component={AccessForm}/>
+                            <Route path={"/back/access/login/"} component={LoginLog}/>
+                            <Route path={"/back/access/logout/"} component={LogOutLog}/>
+                            <Route path={"/back/access/page/"} component={AccessForm}/>
                         </Switch>
                     </div>
                 </div>
             </div>
-    )
+        )
 
     }
 
