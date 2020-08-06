@@ -213,7 +213,7 @@ export class UserAdd extends Component {
                         <div className="row">
                             <div className="col-12">
                                 {!org_emp &&
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-8">
                                         <label htmlFor="id_name">Нэвтрэх нэр:</label>
@@ -229,7 +229,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                                 }
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-4">
                                         <label htmlFor="last_name">Овог:</label>
@@ -258,7 +258,7 @@ export class UserAdd extends Component {
 
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div className="form-row">
                                     <div className="form-group col-md-8">
                                         <label htmlFor="position">Албан тушаал:</label>
                                         <input
@@ -273,7 +273,7 @@ export class UserAdd extends Component {
 
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-8">
                                         <label htmlFor="email">E-Mail</label>
@@ -291,7 +291,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
 
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-8">
                                         <label htmlFor="gender">Хүйс:</label>
@@ -302,7 +302,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
 
-                                <div class="form-row">
+                                <div className="form-row">
                                     <div className="form-group col-md-8">
                                         <label htmlFor="register">Регистер:</label>
                                         <input
@@ -318,7 +318,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
 
-                                <div class="form-row">
+                                <div className="form-row">
                                     {!org_emp &&
                                     <div className="form-group col-md-4">
                                         <label htmlFor="password">Нууц үг:</label>
@@ -357,8 +357,8 @@ export class UserAdd extends Component {
                                 <div className="form-group">
                                     {this.state.handleSaveIsLoad ?
                                         <button className="btn gp-bg-primary">
-                                            <a class="spinner-border text-light" role="status">
-                                                <span class="sr-only">Loading...</span> 
+                                            <a className="spinner-border text-light" role="status">
+                                                <span className="sr-only">Loading...</span> 
                                             </a>
                                             <span> Шалгаж байна. </span>
                                         </button>:

@@ -24,6 +24,9 @@ export class WmsList extends Component {
             wms_list: [],
             layers_all: [],
             form_values: {...this.initial_form_values},
+            currentPage:1,
+            wmsPerPage:20,
+            wms_length:null
         }
 
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -33,6 +36,8 @@ export class WmsList extends Component {
         this.handleAdd = this.handleAdd.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
+        this.nextPage=this.nextPage.bind(this)
+        this.prevPage=this.prevPage.bind(this)
 
     }
 
@@ -43,7 +48,7 @@ export class WmsList extends Component {
     handleListUpdated() {
 
         service.getAll().then(({wms_list}) => {
-            this.setState({wms_list})
+            this.setState({wms_list, wms_length:wms_list.length})
         })
 
     }
@@ -110,7 +115,26 @@ export class WmsList extends Component {
         this.setState({is_form_open: false})
     }
 
+    prevPage(){
+        if(this.state.currentPage >1){
+            this.setState({
+                currentPage:this.state.currentPage-1
+            })
+        }
+    }
+    nextPage(){
+        if(this.state.currentPage<Math.ceil(this.state.wms_length/this.state.wmsPerPage)){
+            this.setState({
+                currentPage:this.state.currentPage+1
+            })
+        }
+    }
     render() {
+        const {currentPage, wmsPerPage, wms_list, wms_length}=this.state
+        const lastIndex=currentPage*wmsPerPage
+        const firtsIndex=lastIndex-wmsPerPage 
+        const totalPages=Math.ceil( wms_length/wmsPerPage)
+        const currentWms= wms_list.slice(firtsIndex,lastIndex)
         return (
             <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
@@ -135,16 +159,42 @@ export class WmsList extends Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.wms_list.map((values) =>
+                                        {wms_length===0 ? 
+                                        <tr><td>WMS бүртгэлгүй байна</td></tr>:
+                                        currentWms.map((values, index) =>
                                             <WMS
                                                 key={values.id}
                                                 values={values}
+                                                idx={(currentPage*20)-20+index+1}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                             />
                                         )}
                                     </tbody>
                                 </table>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="float-left">
+                            <strong>Хуудас {currentPage}-{totalPages}</strong>
+                        </div>
+                        <div className="float-right">
+                            <button
+                            type=" button" 
+                            className="btn btn-outline-primary" 
+                            onClick={this.prevPage}
+                            > &laquo; өмнөх
+                            </button>
+                            <button 
+                            type="button"
+                            className="btn btn-outline-primary "
+                            onClick={this.nextPage
+                            } >
+                            дараах &raquo;
+                            </button>
+                            
+                        </div>
                     </div>
                 </div>
             </div>

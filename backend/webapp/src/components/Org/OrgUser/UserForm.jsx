@@ -12,10 +12,15 @@ export class UserForm extends Component {
         this.state = {
             govorg_list: [{},{}],
             employees: [],
+            employees_length:null,
+            currentPage:1,
+            employeesPerPage:20
 
         }
         this.handleGovorgDelete = this.handleGovorgDelete.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
+        this.nextPage=this.nextPage.bind(this)
+        this.prevPage=this.prevPage.bind(this)
     }
 
     componentDidMount() {
@@ -35,15 +40,33 @@ export class UserForm extends Component {
     handleGetAll(org_level, org_id){
         service.employeesGetAll(org_level, org_id).then(({ employees }) => {
             if (employees) {
-                this.setState({ employees })
+                this.setState({ employees , employees_length:employees.length})
             }
         })
     }
+    prevPage(){
+        if(this.state.currentPage >1){
+            this.setState({
+                currentPage:this.state.currentPage-1
+            })
+        }
+    }
+    nextPage(){
+        if(this.state.currentPage<Math.ceil(this.state.employees_length/this.state.employeesPerPage)){
+            this.setState({
+                currentPage:this.state.currentPage+1
+            })
+        }
+    }
     render() {
-        const {employees} = this.state
+        const {employees, currentPage, employeesPerPage, employees_length} = this.state
         const id=this.props.values
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
+        const lastIndex=currentPage*employeesPerPage
+        const firtsIndex=lastIndex-employeesPerPage 
+        const totalPages=Math.ceil( employees_length/employeesPerPage)
+        const currentEmployees= employees.slice(firtsIndex,lastIndex)
         return (
             <div className="container my-4">
                 <div className="row">
@@ -76,12 +99,14 @@ export class UserForm extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {employees.map((employe, idx) =>
+                                { employees_length === 0 ? 
+                                <tr><td>Ажилчин бүртгэлгүй байна</td></tr>:
+                                currentEmployees.map((employe, idx) =>
                                     <UserFormTable 
                                         org_level={org_level}
                                         org_id={org_id}
                                         key = {idx} 
-                                        idx = {idx} 
+                                        idx = {(currentPage*20)-20+idx+1} 
                                         values={employe} 
                                         handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
                                     >
@@ -89,6 +114,29 @@ export class UserForm extends Component {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="float-left">
+                            <strong>Хуудас {currentPage}-{totalPages}</strong>
+                        </div>
+                        <div className="float-right">
+                            <button
+                            type=" button" 
+                            className="btn btn-outline-primary" 
+                            onClick={this.prevPage}
+                            > &laquo; өмнөх
+                            </button>
+                            <button 
+                            type="button"
+                            className="btn btn-outline-primary "
+                            onClick={this.nextPage
+                            } >
+                            дараах &raquo;
+                            </button>
+                            
+                        </div>
                     </div>
                 </div>
             </div>

@@ -6,11 +6,11 @@ export default class User extends Component {
 
     render() {
         const {id, last_name, first_name, is_superuser, email, is_active, is_sso} = this.props.values
-
+        const idx=this.props.idx
         return (
             <tr>
                 <td scope="col">
-                    #{id}
+                    {idx}
                 </td>
                 <td scope="col">
                     <NavLink to={`/back/user/${id}/дэлгэрэнгүй/`}>
