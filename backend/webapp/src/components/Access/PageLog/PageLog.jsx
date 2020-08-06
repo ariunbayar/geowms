@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {PageLogTable} from './PageLogTable'
 import {Charts} from './Chart'
-import {RadarChart} from './Radar'
+import {PieChart} from './PieChart'
 import {service} from "../service"
 
 export class PageLog extends Component {
@@ -40,7 +40,7 @@ export class PageLog extends Component {
                         </div>
                         <div className="col-md-6">
                             <h5 className="mb-3">Хандалтын төхөөрөмжийн тоогоор</h5>
-                            <RadarChart></RadarChart>
+                            <PieChart></PieChart>
                         </div>
                     </div>
                     <div className="row">
