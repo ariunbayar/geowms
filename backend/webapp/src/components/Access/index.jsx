@@ -26,7 +26,7 @@ export class Access extends Component {
                                 Хэрэглэгчийн гарсан тэмдэглэл
                             </NavLink>
                             <NavLink to="/back/access/page/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
-                                Хуудас хандалт
+                                Хуудас хандалтын тэмдэглэл
                             </NavLink>
                         </ul>
                     </div>

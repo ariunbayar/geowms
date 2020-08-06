@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import {Switch, Route, Link, NavLink} from "react-router-dom"
 import {Charts} from './Chart'
 import {RadarChart} from './Radar'
 import {service} from "../service"
@@ -11,7 +10,7 @@ export class LoginLog extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            user_log: [],
+            login_log_all: [],
         }
         this.handleGetAll=this.handleGetAll.bind(this)
     }
@@ -22,28 +21,23 @@ export class LoginLog extends Component {
     }
 
     handleGetAll(){
-        service.getAll().then(({ user_log }) => {
-            if(user_log){
-                this.setState({user_log})
+        service.loginAll().then(({ login_log_all }) => {
+            if(login_log_all){
+                this.setState({login_log_all})
             }
         })
 
     }
 
     render() {
-        const { user_log } = this.state
+        const { login_log_all } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
-                    login hesgiih
-                    <div className="row rounded">
+                    <div className="row rounded container">
                         <div className="col-md-6">
                             <h5 className="mb-3">Хандалтын тоогоор</h5>
                             <Charts></Charts>
-                        </div>
-                        <div className="col-md-6">
-                            <h5 className="mb-3">Хандалтын төхөөрөмжийн тоогоор</h5>
-                            <RadarChart></RadarChart>
                         </div>
                     </div>
                     <div className="row">
@@ -60,16 +54,14 @@ export class LoginLog extends Component {
                                     <tr>
                                         <th scope="col">№</th>
                                         <th scope="col">Хэрэглэгчийн нэр</th>
+                                        <th scope="col">Хэрэглэгчийн дугаар</th>
                                         <th scope="col">IP Хаяг</th>
-                                        <th scope="col">Вэб броузер</th>
-                                        <th scope="col">Вэб броузер version</th>
-                                        <th scope="col">device name</th>
-                                        <th scope="col">Огноо</th >
+                                        <th scope="col">Нэвтэрсэн огноо</th >
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {user_log.map((users, idx) =>
-                                        <LoginLogTable key = {idx} idx = {idx} values={users}></LoginLogTable>
+                                    {login_log_all.map((login, idx) =>
+                                        <LoginLogTable key = {idx} idx = {idx} values={login}></LoginLogTable>
                                     )}
                                 </tbody>
                             </table>
