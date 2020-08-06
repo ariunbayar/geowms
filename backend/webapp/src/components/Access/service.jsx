@@ -4,7 +4,7 @@ export const service = {
     getAll,
     browserCount,
     browserLoginCount,
-    pageAll
+    pageAll,
     loginAll,
     logoutAll,
     loginDateCount,
