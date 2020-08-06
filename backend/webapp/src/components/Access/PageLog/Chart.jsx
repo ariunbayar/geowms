@@ -7,29 +7,29 @@ export class Charts extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            user_login_date: [],
-            user_login_date_count: []
+            page_date: [],
+            page_date_count: []
         }
-        this.handleBrowserCount=this.handleBrowserCount.bind(this)
+        this.handlePageCount=this.handlePageCount.bind(this)
     }
     componentDidMount(){
-        this.handleBrowserCount()
+        this.handlePageCount()
 
     }
 
-    handleBrowserCount(){
-        service.browserLoginCount().then(({ user_login_date , user_login_date_count}) => {
-            if(user_login_date_count){
-                this.setState({user_login_date, user_login_date_count})
+    handlePageCount(){
+        service.pageCount().then(({ page_date , page_date_count}) => {
+            if(page_date_count){
+                this.setState({page_date, page_date_count})
             }
         })
 
     }
 
     render() {
-        const {user_login_date , user_login_date_count } = this.state
+        const {page_date , page_date_count } = this.state
         const dataLine = {
-            labels:user_login_date,
+            labels:page_date,
             datasets: [
                 {
                     label: "Хандалтын тоогоор",
@@ -50,7 +50,7 @@ export class Charts extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: user_login_date_count
+                    data: page_date_count
                 },
             ]
         }
