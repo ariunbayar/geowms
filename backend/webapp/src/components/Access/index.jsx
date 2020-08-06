@@ -3,7 +3,7 @@ import {Switch, Route, Link, NavLink} from "react-router-dom"
 
 import {LogOutLog} from './LogOutLog/LogOutLog'
 import {LoginLog} from './LoginLog/LoginLog'
-import {AccessForm} from './PageLog/AccessForm'
+import {PageLog} from './PageLog/PageLog'
 
 
 export class Access extends Component {
@@ -36,7 +36,7 @@ export class Access extends Component {
                         <Switch>
                             <Route path={"/back/access/login/"} component={LoginLog}/>
                             <Route path={"/back/access/logout/"} component={LogOutLog}/>
-                            <Route path={"/back/access/page/"} component={AccessForm}/>
+                            <Route path={"/back/access/page/"} component={PageLog}/>
                         </Switch>
                     </div>
                 </div>

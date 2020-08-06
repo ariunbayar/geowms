@@ -86,6 +86,27 @@ def login_all(request):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
+def pageAll(request):
+    log_display = []
+
+    for log in RequestEvent.objects.all():
+        log_display.append({
+            'id':log.id,
+            'url': log.url,
+            'method': log.method,
+            'query_string': log.query_string,
+            'remote_ip': log.remote_ip,
+            'user_id': log.user_id,
+            'datetime': log.datetime.strftime('%Y-%m-%d'),
+
+        })
+    print(log_display)
+    return JsonResponse({'page_logs':  log_display})
+
+ 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def logout_all(request):
 
     logout_log_all_display = []

@@ -4,6 +4,7 @@ export const service = {
     getAll,
     browserCount,
     browserLoginCount,
+    pageAll
     loginAll,
     logoutAll,
     loginDateCount,
@@ -28,6 +29,10 @@ function browserLoginCount() {
     return fetch(`${prefix}/log/browser-login/`, requestOptions).then(handleResponse)
 }
 
+function pageAll() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
+}
 
 function loginDateCount() {
     const requestOptions = {...getGetOptions()}
