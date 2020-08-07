@@ -166,3 +166,5 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
     },
 }
+# Энд бичсэн url ийн log ийг хадгалж авахгүй.
+DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/']

@@ -41,9 +41,11 @@ export class PageLog extends Component {
         }
     }
     nextPage(){
+        const { page_logs,currentPage, logPerPage, log_length } = this.state
+        const lsa = Math.ceil( log_length/logPerPage)-1
         if(this.state.currentPage<Math.ceil(this.state.log_length/this.state.logPerPage)){
             this.setState({
-                currentPage:this.state.currentPage+1
+                currentPage:this.state.currentPage+lsa
             })
         }
     }
