@@ -6,7 +6,8 @@ export const service = {
     update,
     remove,
     detail,
-    getWMSList,
+    getWMSList
+  
 }
 
 
@@ -68,3 +69,4 @@ function getWMSList() {
 
     return fetch(`/back/wms/all/`, opts).then(handleResponse)
 }
+

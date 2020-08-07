@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'crispy_forms',
     'ckeditor_uploader',
+    'easyaudit',
 
     # Frontend apps
 
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
     'backend.govorg.apps.GovOrgConfig',
     'backend.config.apps.ConfigConfig',
     'backend.org.apps.OrgConfig',
-
+    'backend.log.apps.LogConfig',
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
@@ -77,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_user_agents.middleware.UserAgentMiddleware',
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
 ]
 
 ROOT_URLCONF = 'main.urls'

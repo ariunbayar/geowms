@@ -6,23 +6,29 @@ import {OrgRole} from './OrgRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 
-
 export class OrgMenu extends Component {
     constructor(props) {
 
         super(props)
-
         this.state = {
-            org_name:''
+            org_name:'',
+            sistem_count: 0
         }
         this.getOrgName=this.getOrgName.bind(this)
+        this.handleSistemCount=this.handleSistemCount.bind(this)
 
     }
-
     componentDidMount() {
         const level=this.props.match.params.level
         const id=this.props.match.params.id
         this.getOrgName(level,id)
+        this.handleSistemCount()
+    }
+
+    handleSistemCount(){
+        service.sistemCount().then(({ count }) => {
+            this.setState({ sistem_count: count });
+          });
     }
 
     getOrgName(org_level,id){
@@ -58,7 +64,7 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Систем
+                                        Систем ({this.state.sistem_count})
                                     </div>
                                 </NavLink>
                             </div>
@@ -66,7 +72,7 @@ export class OrgMenu extends Component {
                     </div>
                         <div className="col-md-10">
                             <div className="text-center mt-4">
-                                <h4 className="text-dark ">{org_name}</h4>
+                                <h3 className="text-dark " >{org_name}</h3>
                             </div>
                             <Switch>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>

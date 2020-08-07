@@ -38,6 +38,7 @@ export default class Govorg extends Component {
         const {is_modal_delete_open} = this.state
         const org_level = this.props.org_level
         const org_id = this.props.org_id
+        const idx=this.props.idx
         return (
             <tr>
 
@@ -46,7 +47,7 @@ export default class Govorg extends Component {
                 </th>
 
                 <td>
-                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${id}/дэлгэрэнгүй/`}>
+                    <NavLink  className="text-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${id}/дэлгэрэнгүй/`}>
                         {name}
                     </NavLink>
                 </td>

@@ -46,7 +46,7 @@ export default class App extends Component {
             <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
               <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>ACCESS</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/login/"}>ACCESS</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/huulga/"}>ХУУЛГА</NavLink>
@@ -84,7 +84,7 @@ export default class App extends Component {
             <Route path={"/back/wms/"} component={WMSPage} />
             <Route path={"/back/байгууллага/"} component={Org} />
             <Route exact path={"/back/log/"} component={Log} />
-            <Route exact path={"/back/access/"} component={Access} />
+            <Route path={"/back/access/"} component={Access} />
             <Route exact path={"/back/huulga/"} component={Huulga} />
             <Route
               path={"/back/суурь-давхарга/"}

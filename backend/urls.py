@@ -8,6 +8,7 @@ from backend.govorg import views as govorg_views
 from backend.суурь_давхарга import views as суурь_давхарга
 from backend.config import views as config_views
 from backend.org import views as org_views
+from backend.log import views as log_views
 
 
 app_name = 'backend'
@@ -69,6 +70,20 @@ urlpatterns = [
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
     ], 'org'))),
+
+    path('api/log/', include(([
+        path('', log_views.all, name=''),
+        path('browser-count/', log_views.browser_count, name='browser-count'),
+        path('login-all/', log_views.login_all, name='login-all'),
+        path('logout-all/', log_views.logout_all, name='logout-all'),
+        path('login-date-count/', log_views.login_date_count, name='login-date-count'),
+        path('logout-date-count/', log_views.logout_date_count, name='logout-date-count'),
+        path('browser-login/', log_views.browser_login, name='browser-login'),
+        path('browser-login/', log_views.browser_login, name='browser-login'),
+        path('page-all/', log_views.pageAll, name='page-all'),
+        path('page-date-count/', log_views.page_date_count, name='page-date-count'),
+        path('page-user-count/', log_views.page_user_count, name='page-user-count'),
+    ], 'log'))),
 
     path('api/систем/', include(([
         path('', govorg_views.жагсаалт, name=''),

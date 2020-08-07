@@ -92,17 +92,15 @@ export class UserAdd extends Component {
         else{
             service.employee_add(org_level, org_id, paylaod).then(({ success, user_name }) => {
                 if (user_name) {
-                    this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна."})
+                    this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна.", handleSaveIsLoad: false})
                 }
                 if (success) {
-                    if (success) {
-                        setTimeout(() => {
-                            this.setState({handleSaveIsLoad:false})
-                            this.handleListUpdated()
-                        }, 1000)
+                    setTimeout(() => {
+                        this.setState({handleSaveIsLoad:false})
+                        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
+
+                    }, 1200)
                         
-                    }
-                    this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
                 }
             })
         }
@@ -112,6 +110,7 @@ export class UserAdd extends Component {
     handleFormCheck() {
         this.setState({handleSaveIsLoad: true})
         const org_emp = this.props.match.params.emp
+        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
         const { username, first_name, last_name,  email,  register,  password,  re_password , position} = this.state
         var fromState = true
@@ -123,7 +122,6 @@ export class UserAdd extends Component {
             if(!username){ 
                 this.setState({usernameError: true, usernameErrorMessege: "Хоосон байна."})
                 fromState = false
-
             }
             if(!password) {
                 fromState = false
@@ -157,7 +155,7 @@ export class UserAdd extends Component {
             this.setState({emailError: true} )
             fromState = false
         }
-        if(email.toUpperCase().indexOf('@') > -1)
+        if(re.test(email))
         {
             this.setState({emailErrorMessege:''})
         }
@@ -215,7 +213,7 @@ export class UserAdd extends Component {
                         <div className="row">
                             <div className="col-12">
                                 {!org_emp &&
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-8">
                                         <label htmlFor="id_name">Нэвтрэх нэр:</label>
@@ -227,41 +225,40 @@ export class UserAdd extends Component {
                                             onChange={(e) => this.handleChange('username', e)}
                                             value={this.state.username}
                                         />
-                                        {this.state.usernameError && <a className="text-danger">{this.state.usernameErrorMessege}</a>}
+                                        {this.state.usernameErrorMessege && <a className="text-danger">{this.state.usernameErrorMessege}</a>}
                                     </div>
                                 </div>
                                 }
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-4">
-                                        <label htmlFor="first_name">Овог:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="first_name"
-                                            placeholder="Овог"
-                                            onChange={(e) => this.handleChange('first_name', e)}
-                                            value={this.state.first_name}
-                                        />
-                                        {this.state.first_nameError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="last_name">Нэр:</label>
+                                        <label htmlFor="last_name">Овог:</label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             id="last_name"
-                                            placeholder="Нэр"
+                                            placeholder="Овог"
                                             onChange={(e) => this.handleChange('last_name', e)}
                                             value={this.state.last_name}
                                         />
                                         {this.state.last_nameError && <a className="text-danger">Хоосон байна.</a>}
 
                                     </div>
+                                    <div className="form-group col-md-4">
+                                        <label htmlFor="first_name">Нэр:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="first_name"
+                                            placeholder="Нэр"
+                                            onChange={(e) => this.handleChange('first_name', e)}
+                                            value={this.state.first_name}
+                                        />
+                                        {this.state.first_nameError && <a className="text-danger">Хоосон байна.</a>}
+
+                                    </div>
                                 </div>
-                                <div class="form-row">
+                                <div className="form-row">
                                     <div className="form-group col-md-8">
                                         <label htmlFor="position">Албан тушаал:</label>
                                         <input
@@ -276,7 +273,7 @@ export class UserAdd extends Component {
 
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-8">
                                         <label htmlFor="email">E-Mail</label>
@@ -294,7 +291,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
 
-                                <div class="form-row">
+                                <div className="form-row">
 
                                     <div className="form-group col-md-8">
                                         <label htmlFor="gender">Хүйс:</label>
@@ -305,7 +302,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
 
-                                <div class="form-row">
+                                <div className="form-row">
                                     <div className="form-group col-md-8">
                                         <label htmlFor="register">Регистер:</label>
                                         <input
@@ -321,7 +318,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
 
-                                <div class="form-row">
+                                <div className="form-row">
                                     {!org_emp &&
                                     <div className="form-group col-md-4">
                                         <label htmlFor="password">Нууц үг:</label>
@@ -360,8 +357,8 @@ export class UserAdd extends Component {
                                 <div className="form-group">
                                     {this.state.handleSaveIsLoad ?
                                         <button className="btn gp-bg-primary">
-                                            <a class="spinner-border text-light" role="status">
-                                                <span class="sr-only">Loading...</span> 
+                                            <a className="spinner-border text-light" role="status">
+                                                <span className="sr-only">Loading...</span> 
                                             </a>
                                             <span> Шалгаж байна. </span>
                                         </button>:

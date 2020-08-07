@@ -59,10 +59,11 @@ export default class WMS extends Component {
 
         const {id, name, url, public_url, created_at} = this.props.values
         const {is_active,is_modal_limit_open} = this.state
+        const idx=this.props.idx
         return (
             <tr>
                 <th>
-                    {id}
+                    {idx}
                     
                 </th>
                 <td>
@@ -80,8 +81,9 @@ export default class WMS extends Component {
                 </td>
                 <td>
                     {is_active ? 
-                    <a className="text-success">Идэвхгүй</a>:
-                    <a className="text-danger">Идэвхтэй</a>
+                    <a className="text-success">Идэвхтэй</a>:
+                    <a    className="text"style={{color: "grey"}}>Идэвхгүй</a>
+                 
                     }
                 </td>
                 <td>

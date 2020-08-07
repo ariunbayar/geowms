@@ -10,6 +10,10 @@ export class OrgRole extends Component {
     constructor(props) {
         super(props)
 
+       this.state = {
+        user_count: 0,
+    };
+
         this.state = {
             org_roles: [],
             list:[],
@@ -20,10 +24,10 @@ export class OrgRole extends Component {
         this.handleSave = this.handleSave.bind(this)
     }
 
-    componentDidMount() {
-        this.handleListUpdated()
-    }
+   
 
+    componentDidMount() {
+    }
     handleListUpdated() {
         const {level, id} = this.props.match.params
         service.roles(level, id).then(({org_roles}) => {

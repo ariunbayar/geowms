@@ -1,23 +1,38 @@
 import React, { Component } from "react"
 import { Line } from "react-chartjs-2";
+import {service} from "../service"
 
 
 export class Charts extends Component {
-
     constructor(props) {
         super(props)
+        this.state = {
+            user_log_date: [],
+            user_log_date_count: []
+        }
+        this.handleBrowserCount=this.handleBrowserCount.bind(this)
     }
-
     componentDidMount(){
+        this.handleBrowserCount()
+
+    }
+    
+    handleBrowserCount(){
+        service.logoutDateCount().then(({ user_log_date , user_log_date_count}) => {
+            if(user_log_date_count){
+                this.setState({user_log_date, user_log_date_count})
+            }
+        })
 
     }
 
     render() {
+        const {user_log_date , user_log_date_count } = this.state
         const dataLine = {
-            labels: ["2020-07-01", "2020-07-02", "2020-07-03", "2020-07-04", "2020-07-05", "2020-07-06"],
+            labels:user_log_date,
             datasets: [
                 {
-                    label: "My First dataset",
+                    label: "Хандалтын тоогоор",
                     fill: true,
                     lineTension: 0.3,
                     backgroundColor: "rgba(184, 185, 210, .3)",
@@ -35,7 +50,7 @@ export class Charts extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: [20, 10, 5, 5, 20, 6, 3]
+                    data: user_log_date_count
                 },
             ]
         }

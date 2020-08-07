@@ -1,7 +1,5 @@
 import React, { Component } from "react"
 
-
-
 export class LogFormTable extends Component {
 
     constructor(props) {
