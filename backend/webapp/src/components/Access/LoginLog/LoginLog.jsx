@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import {Charts} from './Chart'
-import {RadarChart} from './Radar'
 import {service} from "../service"
 import {LoginLogTable} from './LoginLogTable'
 
@@ -68,7 +67,7 @@ export class LoginLog extends Component {
                         </div>
                     </div>
 
-                    <h5 className="mb-3">Нэвтэрч орсон мэдээлэл</h5>
+                    <h5 className="mb-3">Хэрэглэгчийн оролт гаралтын тэмдэглэл</h5>
                     <div className="row rounded">
                         <div className="col-md-12">
                             <table className="table example" id="example">
@@ -76,6 +75,7 @@ export class LoginLog extends Component {
                                         <tr>
                                             <th scope="col">№</th>
                                             <th scope="col">Хэрэглэгчийн нэр</th>
+                                            <th scope="col">Хэрэглэгчийн үйлдэл</th>
                                             <th scope="col">Хэрэглэгчийн дугаар</th>
                                             <th scope="col">IP Хаяг</th>
                                             <th scope="col">Нэвтэрсэн огноо</th >

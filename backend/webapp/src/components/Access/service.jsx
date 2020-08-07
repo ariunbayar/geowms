@@ -6,10 +6,13 @@ export const service = {
     pageCount,
     pageAll,
     loginAll,
-    logoutAll,
+    CrudEventAll,
     loginDateCount,
     logoutDateCount,
-    pageUserCount
+    pageUserCount,
+    crudMethodCount,
+    crudDateCount,
+
 }
 
 
@@ -55,7 +58,17 @@ function loginAll() {
     return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
 }
 
-function logoutAll() {
+function CrudEventAll() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/log/logout-all/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/log/crud-event-all/`, requestOptions).then(handleResponse)
+}
+
+function crudMethodCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/crud-method-count/`, requestOptions).then(handleResponse)
+}
+
+function crudDateCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
 }

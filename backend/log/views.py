@@ -7,6 +7,7 @@ from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from .models import UserLog
 from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
+from geoportal_app.models import User
 
 
 @require_GET
@@ -71,7 +72,7 @@ def login_all(request):
 
     login_log_all_display = []
 
-    for login_log_all in LoginEvent.objects.filter(login_type=0):
+    for login_log_all in LoginEvent.objects.all():
         login_log_all_display.append({
             'id': login_log_all.id,
             'login_type': login_log_all.login_type,
@@ -81,6 +82,24 @@ def login_all(request):
             'remote_ip': login_log_all.remote_ip,
         })
     return JsonResponse({'login_log_all': login_log_all_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def login_date_count(request):
+    user_login_date_all = LoginEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    user_login_date = []
+    user_login_date_count = []
+    for login_date in user_login_date_all:
+        user_login_date.append(login_date.datetime.strftime('%Y-%m-%d'))
+        user_login_date_count.append(LoginEvent.objects.filter(datetime__date=login_date.datetime).count())
+
+    rsp = {
+        'user_log_date': user_login_date,
+        'user_log_date_count': user_login_date_count,
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -137,36 +156,38 @@ def page_user_count(request):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def logout_all(request):
-
-    logout_log_all_display = []
-
-    for logout_log_all in LoginEvent.objects.filter(login_type=1):
-        logout_log_all_display.append({
-            'id': logout_log_all.id,
-            'login_type': logout_log_all.login_type,
-            'username': logout_log_all.username,
-            'datetime': logout_log_all.datetime.strftime('%Y-%m-%d'),
-            'user_id': logout_log_all.user_id,
-            'remote_ip': logout_log_all.remote_ip,
+def crud_event_all(request):
+    crud_event_display = []
+    for crud_event in CRUDEvent.objects.all():
+        crud_event_display.append({
+            'id': crud_event.id,
+            'event_type': crud_event.event_type,
+            'object_id': crud_event.object_id,
+            'object_repr': crud_event.object_repr,
+            'datetime': crud_event.datetime.strftime('%Y-%m-%d'),
+            'content_type_id': crud_event.content_type_id,
+            'username': User.objects.filter(id=crud_event.user_id).values('username').first()['username'],
+            'user_id': crud_event.user_id,
+            'user_pk_as_string': crud_event.user_pk_as_string,
+            'changed_fields': crud_event.changed_fields,
         })
-    return JsonResponse({'logout_log_all': logout_log_all_display})
+    return JsonResponse({'crud_event_display': crud_event_display})
 
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def login_date_count(request):
-    user_login_date_all = LoginEvent.objects.filter(login_type=1).order_by('datetime__date').distinct('datetime__date') 
-    user_login_date = []
-    user_login_date_count = []
-    for login_date in user_login_date_all:
-        user_login_date.append(login_date.datetime.strftime('%Y-%m-%d'))
-        user_login_date_count.append(LoginEvent.objects.filter(datetime__date=login_date.datetime).count())
+def crud_method_count(request):
+    method_all = CRUDEvent.objects.all().order_by('event_type').distinct('event_type') 
+    method_id = []
+    method_id_count = []
+    for login_date in method_all:
+        method_id.append(login_date.event_type)
+        method_id_count.append(CRUDEvent.objects.filter(event_type=login_date.event_type).count())
 
     rsp = {
-        'user_log_date': user_login_date,
-        'user_log_date_count': user_login_date_count,
+        'method_id': method_id,
+        'method_id_count': method_id_count,
     }
     return JsonResponse(rsp)
 
@@ -174,16 +195,16 @@ def login_date_count(request):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def logout_date_count(request):
-    user_login_date_all = LoginEvent.objects.filter(login_type=1).order_by('datetime__date').distinct('datetime__date') 
-    user_login_date = []
-    user_login_date_count = []
-    for login_date in user_login_date_all:
-        user_login_date.append(login_date.datetime.strftime('%Y-%m-%d'))
-        user_login_date_count.append(LoginEvent.objects.filter(datetime__date=login_date.datetime).count())
+def crud_date_count(request):
+    date_all = CRUDEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    crud_date = []
+    crud_date_count = []
+    for crud in date_all:
+        crud_date.append(crud.datetime.strftime('%Y-%m-%d'))
+        crud_date_count.append(CRUDEvent.objects.filter(datetime__date=crud.datetime).count())
 
     rsp = {
-        'user_log_date': user_login_date,
-        'user_log_date_count': user_login_date_count,
+        'crud_date': crud_date,
+        'crud_date_count': crud_date_count,
     }
     return JsonResponse(rsp)
