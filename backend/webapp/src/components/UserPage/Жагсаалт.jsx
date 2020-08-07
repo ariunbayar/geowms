@@ -21,6 +21,7 @@ export class Жагсаалт extends Component {
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.SearchUser=this.SearchUser.bind(this)
     }
 
     componentDidMount() {
@@ -50,16 +51,29 @@ export class Жагсаалт extends Component {
             })
         }
     }
+    SearchUser(e){
+        this.setState({
+            [e.target.value]:e.target.value
+        })
+    }
     render() {
         const {currentPage, usersPerPage, user_list, user_length}=this.state
         const lastIndex=currentPage*usersPerPage
         const firtsIndex=lastIndex-usersPerPage 
         const totalPages=Math.ceil( user_length/usersPerPage)
         const currentUsers= user_list.slice(firtsIndex,lastIndex)
+        const filter=user_list.filter(user=>{
+            return user.name.toLowerCase().includes(search.toLowerCase())
+        })
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12">
+                        <input 
+                        type="text" 
+                        placeholder="Search"
+                        onChange={e=>this.SearchUser(e)}
+                        {filter.map(user, idx)}/>
                         <table className="table table-fluid">
                         <thead>
                                 <tr>
