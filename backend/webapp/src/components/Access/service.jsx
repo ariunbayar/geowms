@@ -3,12 +3,13 @@ import {handleResponse, getGetOptions, getPostOptions, getCookie} from '../../he
 export const service = {
     getAll,
     browserCount,
-    browserLoginCount,
+    pageCount,
     pageAll,
     loginAll,
     logoutAll,
     loginDateCount,
-    logoutDateCount
+    logoutDateCount,
+    pageUserCount
 }
 
 
@@ -24,9 +25,14 @@ function browserCount() {
     return fetch(`${prefix}/log/browser-count/`, requestOptions).then(handleResponse)
 }
 
-function browserLoginCount() {
+function pageCount() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/log/browser-login/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/log/page-date-count/`, requestOptions).then(handleResponse)
+}
+
+function pageUserCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
 function pageAll() {

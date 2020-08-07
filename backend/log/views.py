@@ -100,10 +100,40 @@ def pageAll(request):
             'datetime': log.datetime.strftime('%Y-%m-%d'),
 
         })
-        
     return JsonResponse({'page_logs':  log_display})
 
- 
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def page_date_count(request):
+    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    page_date = []
+    page_date_count = []
+    for page in page_all:
+        page_date.append(page.datetime.strftime('%Y-%m-%d'))
+        page_date_count.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
+
+    rsp = {
+        'page_date': page_date,
+        'page_date_count': page_date_count,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def page_user_count(request):
+
+    rsp = {
+        'user_count': RequestEvent.objects.filter(user_id__isnull=True).count(),
+        'user_count_null':RequestEvent.objects.filter(user_id__isnull=False).count()
+    }
+
+    return JsonResponse(rsp)
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -138,7 +168,6 @@ def login_date_count(request):
         'user_log_date': user_login_date,
         'user_log_date_count': user_login_date_count,
     }
-
     return JsonResponse(rsp)
 
 
@@ -157,5 +186,4 @@ def logout_date_count(request):
         'user_log_date': user_login_date,
         'user_log_date_count': user_login_date_count,
     }
-
     return JsonResponse(rsp)
