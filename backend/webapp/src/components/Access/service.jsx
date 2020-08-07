@@ -8,10 +8,13 @@ export const service = {
     loginAll,
     CrudEventAll,
     loginDateCount,
+    loginSearch,
     logoutDateCount,
     pageUserCount,
     crudMethodCount,
     crudDateCount,
+    pageSearch,
+    crudSearch
 
 }
 
@@ -38,6 +41,14 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
+function pageSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/log/page-search/`, requestOptions).then(handleResponse)
+}
+
 function pageAll() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
@@ -46,6 +57,14 @@ function pageAll() {
 function loginDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
+}
+
+function loginSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/log/login-search/`, requestOptions).then(handleResponse)
 }
 
 function logoutDateCount() {
@@ -71,4 +90,12 @@ function crudMethodCount() {
 function crudDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
+}
+
+function crudSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/log/crud-search/`, requestOptions).then(handleResponse)
 }

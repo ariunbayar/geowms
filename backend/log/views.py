@@ -3,66 +3,10 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
-
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from main.decorators import ajax_required
-from .models import UserLog
 from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 from geoportal_app.models import User
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def all(request):
-    user_log_display = []
-
-    for user_log in UserLog.objects.all():
-        user_log_display.append({
-            'username': user_log.username,
-            'email': user_log.email,
-            'ip_address': user_log.ip_address,
-            'browser_name': user_log.browser_name,
-            'browser_version': user_log.browser_version,
-            'device_name': user_log.device_name,
-            'created_at': user_log.created_at.strftime('%Y-%m-%d')
-        })
-
-    return JsonResponse({'user_log': user_log_display})
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def browser_count(request):
-    browser_names = UserLog.objects.all().distinct('browser_name')
-    user_browser_names_counts = []
-    user_browser_count = []
-    for browser in browser_names:
-        user_browser_names_counts.append(browser.browser_name)
-        user_browser_count.append(UserLog.objects.filter(browser_name=browser.browser_name).count())
-    rsp = {
-        'user_browser_names_counts': user_browser_names_counts,
-        'user_browser_count': user_browser_count,
-    }
-    return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def browser_login(request):
-    user_login_date_all = UserLog.objects.all().distinct('created_at__date')
-    user_login_date = []
-    user_login_date_count = []
-    for login_date in user_login_date_all:
-        user_login_date.append(login_date.created_at)
-        user_login_date_count.append(UserLog.objects.filter(created_at__date=login_date.created_at).count())
-    rsp = {
-        'user_login_date': user_login_date,
-        'user_login_date_count': user_login_date_count,
-    }
-    return JsonResponse(rsp)
-
 
 
 @require_GET
@@ -82,6 +26,25 @@ def login_all(request):
             'remote_ip': login_log_all.remote_ip,
         })
     return JsonResponse({'login_log_all': login_log_all_display})
+
+
+@require_POST
+@ajax_required
+def loginSearch(request, payload):
+    query = payload.get('query')
+    login_log_all_display = []
+
+    for login_log_all in LoginEvent.objects.annotate(search=SearchVector('id', 'login_type', 'user_id', 'remote_ip') + SearchVector('username'),).filter(search__contains=query):
+        login_log_all_display.append({
+            'id': login_log_all.id,
+            'login_type': login_log_all.login_type,
+            'username': login_log_all.username,
+            'datetime': login_log_all.datetime.strftime('%Y-%m-%d'),
+            'user_id': login_log_all.user_id,
+            'remote_ip': login_log_all.remote_ip,
+        })
+    return JsonResponse({'login_log_all': login_log_all_display})
+
 
 
 @require_GET
@@ -121,6 +84,24 @@ def pageAll(request):
         })
     return JsonResponse({'page_logs':  log_display})
 
+
+@require_POST
+@ajax_required
+def pageSearch(request, payload):
+    query = payload.get('query')
+    log_display = []
+    for log in RequestEvent.objects.annotate(search=SearchVector('url','id', 'method', 'remote_ip', 'user_id') + SearchVector('url'),).filter(search__contains=query):
+        log_display.append({
+            'id':log.id,
+            'url': log.url,
+            'method': log.method,
+            'query_string': log.query_string,
+            'remote_ip': log.remote_ip,
+            'user_id': log.user_id,
+            'datetime': log.datetime.strftime('%Y-%m-%d'),
+
+        })
+    return JsonResponse({'page_logs':  log_display})
 
 @require_GET
 @ajax_required
@@ -173,6 +154,26 @@ def crud_event_all(request):
         })
     return JsonResponse({'crud_event_display': crud_event_display})
 
+
+@require_POST
+@ajax_required
+def crudSearch(request, payload):
+    query = payload.get('query')
+    crud_event_display = []
+    for crud_event in CRUDEvent.objects.annotate(search=SearchVector('event_type', 'object_id', 'content_type_id', 'user_id', 'changed_fields') + SearchVector('object_repr'),).filter(search__contains=query):
+        crud_event_display.append({
+            'id': crud_event.id,
+            'event_type': crud_event.event_type,
+            'object_id': crud_event.object_id,
+            'object_repr': crud_event.object_repr,
+            'datetime': crud_event.datetime.strftime('%Y-%m-%d'),
+            'content_type_id': crud_event.content_type_id,
+            'username': User.objects.filter(id=crud_event.user_id).values('username').first()['username'],
+            'user_id': crud_event.user_id,
+            'user_pk_as_string': crud_event.user_pk_as_string,
+            'changed_fields': crud_event.changed_fields,
+        })
+    return JsonResponse({'crud_event_display': crud_event_display})
 
 @require_GET
 @ajax_required

@@ -12,11 +12,15 @@ export class LoginLog extends Component {
             login_log_all: [],
             login_length:null,
             currentPage:1,
-            loginPerPage:30
+            loginPerPage:30,
+            searchQuery: '',
+            query_min: false,
+            search_load: false,
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
     }
     
     componentDidMount(){
@@ -46,8 +50,26 @@ export class LoginLog extends Component {
             })
         }
     }
+
+    handleSearch(field, e) {
+        if(e.target.value.length > 0)
+        {
+            this.setState({ [field]: e.target.value, search_load:true})
+            service.loginSearch(e.target.value).then(({ login_log_all }) => {
+                if(login_log_all){
+                    this.setState({login_log_all, login_length:login_log_all.length, search_load:false})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            this.handleGetAll()
+        }
+    }
+
     render() {
-        const { login_log_all,currentPage, loginPerPage, login_length } = this.state
+        const { login_log_all,currentPage, loginPerPage, login_length, search_load } = this.state
         const lastIndex=currentPage*loginPerPage
         const firtsIndex=lastIndex-loginPerPage 
         const totalPages=Math.ceil( login_length/loginPerPage)
@@ -68,6 +90,23 @@ export class LoginLog extends Component {
                     </div>
 
                     <h5 className="mb-3">Хэрэглэгчийн оролт гаралтын тэмдэглэл</h5>
+                    <div className="form-row text-right">
+                        <div className="form-group col-md-8">
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+                        </div>
+                        {search_load && 
+                            <a className="spinner-border text-light" role="status">
+                                <span className="sr-only">Loading...</span> 
+                            </a>
+                        }
+                    </div>
                     <div className="row rounded">
                         <div className="col-md-12">
                             <table className="table example" id="example">
