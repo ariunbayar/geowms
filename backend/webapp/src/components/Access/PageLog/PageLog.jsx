@@ -12,12 +12,15 @@ export class PageLog extends Component {
             page_logs: [],
             log_length:null,
             currentPage:1,
-            logPerPage:30
+            logPerPage:30,
+            searchQuery: '',
+            query_min: false
 
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
     }
     
     componentDidMount(){
@@ -49,6 +52,29 @@ export class PageLog extends Component {
             })
         }
     }
+
+    handleSearch(field, e) {
+        if(e.target.value.length > 2)
+        {
+            this.setState({ [field]: e.target.value , query_min: true})
+            service.pageSearch(e.target.value).then(({ page_logs }) => {
+                if(page_logs){
+                    this.setState({page_logs, log_length:page_logs.length})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            if(this.state.query_min){
+                this.setState({ query_min:false })
+
+                this.handleGetAll()
+            }
+        }
+    }
+
+
     render() {
         const { page_logs,currentPage, logPerPage, log_length } = this.state
         const lastIndex=currentPage*logPerPage
@@ -75,6 +101,19 @@ export class PageLog extends Component {
                     </div>
 
                     <h5 className="mb-3">Нэвтэрч орсон мэдээлэл</h5>
+                    <div className="form-row text-right">
+                        <div className="form-group col-md-8">
+                            <label htmlFor="searchQuery">Хайх:</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+                        </div>
+                    </div>
                     <div className="row rounded">
                         <div className="col-md-12">
                             <table className="table example" id="example">

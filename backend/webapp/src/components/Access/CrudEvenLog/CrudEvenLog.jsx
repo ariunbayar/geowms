@@ -14,11 +14,13 @@ export class CrudEvenLog extends Component {
             crud_event_display: [],
             crud_length:null,
             currentPage:1,
-            crudPerPage:30
+            crudPerPage:30,
+            searchQuery: ''
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
     }
     
     componentDidMount(){
@@ -48,6 +50,25 @@ export class CrudEvenLog extends Component {
             })
         }
     }
+
+    handleSearch(field, e) {
+        if(e.target.value.length > 0)
+        {
+            this.setState({ [field]: e.target.value})
+            service.crudSearch(e.target.value).then(({ crud_event_display }) => {
+                if(crud_event_display){
+                    this.setState({crud_event_display, log_length:crud_event_display.length})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+
+            this.handleGetAll()
+        }
+    }
+
     render() {
         const { crud_event_display, currentPage, crudPerPage, crud_length } = this.state
         const lastIndex=currentPage*crudPerPage
@@ -74,6 +95,19 @@ export class CrudEvenLog extends Component {
                     </div>
 
                     <h5 className="mb-3">Хийгдсэн үйлдлийн мэдээлэл</h5>
+                    <div className="form-row text-right">
+                        <div className="form-group col-md-8">
+                            <label htmlFor="searchQuery">Хайх:</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+                        </div>
+                    </div>
                     <div className="row rounded">
                         <div className="col-md-12">
                         <table className="table example" id="example">
