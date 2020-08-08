@@ -56,17 +56,17 @@ function _getPostOptions() {
     }
 }
 
-
-function getAll() {
+function getAll(last, first) {
     const requestOptions = {
-        ..._getGetOptions(),
+        ..._getPostOptions(),
+    body: JSON.stringify({last, first}),
     }
     return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
 }
 
 
 function detail(id) {
-    const opts = {
+    const opts = { 
         ..._getGetOptions(),
     }
 

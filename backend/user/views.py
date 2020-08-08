@@ -43,14 +43,15 @@ def _get_role_display(role):
         'name': role.get_id_display(),
     }
 
-@require_GET
+@require_POST
 @ajax_required
-def all(request):
-
-    user_list = [_get_user_display(user) for user in User.objects.all()]
-
+def all(request,payload):
+    last = payload.get('last')
+    first = payload.get('first')
+    user_list = [_get_user_display(user) for user in User.objects.all()[first:last]]
     rsp = {
         'user_list': user_list,
+        'len':User.objects.all().count(),
     }
 
     return JsonResponse(rsp)
