@@ -135,7 +135,6 @@ export class GovorgForm extends Component {
                                                 placeholder="Системүүдийн нэр"
                                                 id="id_name"
                                                 type="text"
-                                                value=""
                                             />
 
                                             <ErrorMessage name="name" component="div" className="invalid-feedback"/>
