@@ -27,24 +27,36 @@ export class Жагсаалт extends Component {
         this.handleRemove = this.handleRemove.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)
     }
 
     componentDidMount() {
-        const org_level = this.props.match.params.level
-        const id = this.props.match.params.id
-        this.handleListUpdated(org_level)
+        const currentPage=this.state.currentPage
+        this.handleListCal(currentPage)
     }
 
-    handleListUpdated(org_level, org_id) {
+    handleListCal(currentPage){
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        const govorgPerPage=this.state.govorgPerPage
+        const lastIndex=currentPage*govorgPerPage
+        const firtsIndex=lastIndex-govorgPerPage
+        this.handleListUpdated(org_level,org_id,lastIndex,firtsIndex)
+    }
 
-        service.getAll().then(({govorg_list}) => {
-            this.setState({govorg_list, govorg_length:govorg_list.length})
+    handleListUpdated(org_level, org_id,lastIndex,firtsIndex ) {
+
+        service.getAll(lastIndex,firtsIndex).then(({govorg_list,len}) => {
+            this.setState({govorg_list, govorg_length:len})
         })
 
     }
     handleRemove(id) {
+        const currentPage=this.state.currentPage
         service.remove(id).then(({success}) => {
-            if (success) this.handleListUpdated()
+            if (success) {
+                this.handleListCal(currentPage)
+            }
         })
 
     }
@@ -53,6 +65,7 @@ export class Жагсаалт extends Component {
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
         }
     }
     nextPage(){
@@ -60,16 +73,14 @@ export class Жагсаалт extends Component {
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
     render() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {currentPage, govorgPerPage, govorg_list, govorg_length}=this.state
-        const lastIndex=currentPage*govorgPerPage
-        const firtsIndex=lastIndex-govorgPerPage 
         const totalPages=Math.ceil( govorg_length/govorgPerPage)
-        const currentGovOrg= govorg_list.slice(firtsIndex,lastIndex)
         return (
             <div  className="container my-4">
                 <div className="row">
@@ -106,7 +117,7 @@ export class Жагсаалт extends Component {
                                     <tbody>
                                         { govorg_length === 0 ?
                                              <tr><td>Систем бүртгэлгүй байна </td></tr>:                                         
-                                             currentGovOrg.map((values,index) =>
+                                             govorg_list.map((values,index) =>
                                                 <Govorg
                                                     org_level={org_level}
                                                     org_id={org_id}

@@ -25,7 +25,7 @@ export class WmsList extends Component {
             layers_all: [],
             form_values: {...this.initial_form_values},
             currentPage:1,
-            wmsPerPage:20,
+            wmsPerPage:2,
             wms_length:null
         }
 
@@ -38,17 +38,27 @@ export class WmsList extends Component {
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)
 
     }
 
     componentDidMount() {
-        this.handleListUpdated()
+        const currentPage=this.state.currentPage
+        this.handleListCal(currentPage)
+    }
+    handleListCal(currentPage){
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        const wmsPerPage=this.state.wmsPerPage
+        const lastIndex=currentPage*wmsPerPage
+        const firtsIndex=lastIndex-wmsPerPage
+        this.handleListUpdated(lastIndex,firtsIndex)
     }
 
-    handleListUpdated() {
+    handleListUpdated(lastIndex,firtsIndex) {
 
-        service.getAll().then(({wms_list}) => {
-            this.setState({wms_list, wms_length:wms_list.length})
+        service.getAll(lastIndex,firtsIndex).then(({wms_list, len}) => {
+            this.setState({wms_list, wms_length:len})
         })
 
     }
@@ -68,13 +78,18 @@ export class WmsList extends Component {
 
         if (values.id) {
             service.update(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
+                if (success){
+                    const currentPage=this.state.currentPage
+                    this.handleListCal(currentPage)
+                }
             })
 
         } else {
 
             service.create(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
+                if (success){    
+                    const currentPage=this.state.currentPage
+                    this.handleListCal(currentPage)}
             })
 
         }
@@ -85,7 +100,10 @@ export class WmsList extends Component {
     }
     handleRemove(id) {
         service.remove(id).then(({success}) => {
-            if (success) this.handleSaveSuccess()
+            if (success) {        
+                const currentPage=this.state.currentPage
+                this.handleListCal(currentPage)
+            }
         })
         this.modalClose()
     }
@@ -120,6 +138,7 @@ export class WmsList extends Component {
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
         }
     }
     nextPage(){
@@ -127,14 +146,12 @@ export class WmsList extends Component {
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
     render() {
         const {currentPage, wmsPerPage, wms_list, wms_length}=this.state
-        const lastIndex=currentPage*wmsPerPage
-        const firtsIndex=lastIndex-wmsPerPage 
         const totalPages=Math.ceil( wms_length/wmsPerPage)
-        const currentWms= wms_list.slice(firtsIndex,lastIndex)
         return (
             <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
@@ -161,11 +178,11 @@ export class WmsList extends Component {
                                     <tbody>
                                         {wms_length===0 ? 
                                         <tr><td>WMS бүртгэлгүй байна</td></tr>:
-                                        currentWms.map((values, index) =>
+                                        wms_list.map((values, index) =>
                                             <WMS
                                                 key={values.id}
                                                 values={values}
-                                                idx={(currentPage*20)-20+index+1}
+                                                idx={(currentPage*2)-2+index+1}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                             />
