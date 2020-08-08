@@ -21,6 +21,7 @@ export class Жагсаалт extends Component {
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
         
     }
 
@@ -67,7 +68,26 @@ export class Жагсаалт extends Component {
         }
        
     }
+    handleSearch(){
+        if(e.target.value.length > 2)
+        {
+            this.setState({ [field]: e.target.value , query_min: true})
+            service.userSearch(e.target.value).then(({ user_list }) => {
+                if(user_list){
+                    this.setState({user_list, user_length:user_length.length})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            if(this.state.query_min){
+                this.setState({ query_min:false })
 
+                this.handleGetAll()
+            }
+        }
+    }
     render() {
         const {user_list, user_length, currentPage,usersPerPage}=this.state
         const totalPages=Math.ceil( user_length/usersPerPage)
@@ -75,6 +95,16 @@ export class Жагсаалт extends Component {
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
+                <div className="col-md-4  mb-1" >                 
+                               <input
+                                type="text"
+                                className="form-control"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+                    </div>
                     <div className="col-md-12">
 
                         <table className="table table-fluid">
