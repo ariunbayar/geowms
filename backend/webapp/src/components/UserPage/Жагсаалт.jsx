@@ -68,7 +68,6 @@ export class Жагсаалт extends Component {
        
     }
 
-
     render() {
         const {user_list, user_length, currentPage,usersPerPage}=this.state
         const totalPages=Math.ceil( user_length/usersPerPage)
@@ -79,7 +78,7 @@ export class Жагсаалт extends Component {
                     <div className="col-md-12">
 
                         <table className="table table-fluid">
-                        <thead>
+                            <thead>
                                 <tr>
                                     <th scope="col"> Id </th>
                                     <th scope="col"> Нэр </th>
@@ -89,19 +88,18 @@ export class Жагсаалт extends Component {
                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
                                 </tr>
                             </thead>
-                             
-                                    <tbody>
-                                        {user_length === 0 ?
-                                            <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
-                                            user_list.map((values,index) =>
-                                                <User
-                                                    key={values.id}
-                                                    values={values}
-                                                    idx={(this.state.currentPage*8)-8+index+1}
-                                                />
-                                            )
-                                        }
-                                    </tbody>
+                            <tbody>
+                                {user_length === 0 ?
+                                    <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
+                                    user_list.map((values,index) =>
+                                        <User
+                                            key={values.id}
+                                            values={values}
+                                            idx={(this.state.currentPage*8)-8+index+1}
+                                        />
+                                    )
+                                }
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -123,7 +121,6 @@ export class Жагсаалт extends Component {
                             onClick={this.nextPage} >
                             дараах &raquo;
                             </button>
-                            
                         </div>
                     </div>
                 </div>
