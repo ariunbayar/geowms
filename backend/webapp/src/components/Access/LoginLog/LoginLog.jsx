@@ -12,7 +12,7 @@ export class LoginLog extends Component {
             login_log_all: [],
             login_length:null,
             currentPage:1,
-            loginPerPage:30,
+            loginPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
@@ -21,17 +21,25 @@ export class LoginLog extends Component {
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)        
     }
     
     componentDidMount(){
-        this.handleGetAll()
+        const {currentPage}=this.state
+        this.handleListCal(currentPage)
 
     }
+    handleListCal(currentPage){
+        const {loginPerPage}=this.state
+        const lastIndex=currentPage*loginPerPage
+        const firtsIndex=lastIndex-loginPerPage
+        this.handleGetAll(lastIndex,firtsIndex)
+    }
 
-    handleGetAll(){
-        service.loginAll().then(({ login_log_all }) => {
+    handleGetAll(lastIndex,firtsIndex){
+        service.loginAll(lastIndex,firtsIndex).then(({ login_log_all, len }) => {
             if(login_log_all){
-                this.setState({login_log_all, login_length:login_log_all.length})
+                this.setState({login_log_all, login_length:len})
             }
         })
 
@@ -41,6 +49,7 @@ export class LoginLog extends Component {
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
         }
     }
     nextPage(){
@@ -48,6 +57,7 @@ export class LoginLog extends Component {
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
 
@@ -64,16 +74,16 @@ export class LoginLog extends Component {
         else
         {
             this.setState({ [field]: e.target.value })
-            this.handleGetAll()
+            const {currentPage}=this.state
+            this.handleListCal(currentPage)
         }
     }
 
     render() {
         const { login_log_all,currentPage, loginPerPage, login_length, search_load } = this.state
-        const lastIndex=currentPage*loginPerPage
-        const firtsIndex=lastIndex-loginPerPage 
+
         const totalPages=Math.ceil( login_length/loginPerPage)
-        const currentLogin= login_log_all.slice(firtsIndex,lastIndex)
+
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -123,13 +133,13 @@ export class LoginLog extends Component {
                                     <tbody>
                                         { login_length === 0 ? 
                                         <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:                                 
-                                        currentLogin.map((login, idx) =>
-                                            <LoginLogTable key = {idx} idx = {(currentPage*30)-30+idx+1} values={login}></LoginLogTable>
+                                        login_log_all.map((login, idx) =>
+                                            <LoginLogTable key = {idx} idx = {(currentPage*20)-20+idx+1} values={login}></LoginLogTable>
                                         )}
                                     </tbody>
                             </table>
                             <div className="row">
-                                <div className="col-md-12">
+                                <div className="col-md-12"> 
                                     <div className="float-left">
                                         <strong>Хуудас {currentPage}-{totalPages}</strong>
                                     </div>

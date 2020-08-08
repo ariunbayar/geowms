@@ -41,6 +41,7 @@ def _get_role_display(role):
     return {
         'id': role.id,
         'name': role.get_id_display(),
+        'success':True
     }
 
 @require_POST
@@ -80,7 +81,6 @@ def дэлгэрэнгүй(request, pk):
         'user_detail': _get_user_detail(user),
         'roles': roles,
         'all_role':all_roles,
-        'success': True,
     }
 
     return JsonResponse(rsp)

@@ -14,7 +14,7 @@ export class CrudEvenLog extends Component {
             crud_event_display: [],
             crud_length:null,
             currentPage:1,
-            crudPerPage:30,
+            crudPerPage:20,
             searchQuery: ''
         }
         this.handleGetAll=this.handleGetAll.bind(this)
@@ -24,14 +24,22 @@ export class CrudEvenLog extends Component {
     }
     
     componentDidMount(){
-        this.handleGetAll()
+        const {currentPage}=this.state
+        this.handleListCal(currentPage)
 
     }
+    handleListCal(currentPage){
+        const {crudPerPage}=this.state
+        const lastIndex=currentPage*crudPerPage
+        const firtsIndex=lastIndex-crudPerPage
+        this.handleGetAll(lastIndex,firtsIndex)
+    }
 
-    handleGetAll(){
-        service.CrudEventAll().then(({ crud_event_display }) => {
+
+    handleGetAll(lastIndex,firtsIndex){
+        service.CrudEventAll(lastIndex,firtsIndex).then(({ crud_event_display ,len}) => {
             if(crud_event_display){
-                this.setState({crud_event_display, crud_length:crud_event_display.length})
+                this.setState({crud_event_display, crud_length:len})
             }
         })
 
@@ -41,6 +49,7 @@ export class CrudEvenLog extends Component {
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
         }
     }
     nextPage(){
@@ -48,6 +57,7 @@ export class CrudEvenLog extends Component {
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
 
@@ -64,17 +74,14 @@ export class CrudEvenLog extends Component {
         else
         {
             this.setState({ [field]: e.target.value })
-
-            this.handleGetAll()
+            const {currentPage}=this.state
+            this.handleListCal(currentPage)
         }
     }
 
     render() {
         const { crud_event_display, currentPage, crudPerPage, crud_length } = this.state
-        const lastIndex=currentPage*crudPerPage
-        const firtsIndex=lastIndex-crudPerPage 
         const totalPages=Math.ceil( crud_length/crudPerPage)
-        const currentLogout= crud_event_display.slice(firtsIndex,lastIndex)
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -123,8 +130,8 @@ export class CrudEvenLog extends Component {
                                 <tbody>
                                     { crud_length === 0 ?
                                     <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
-                                    currentLogout.map((logout, idx) =>
-                                        <CrudEvenLogTable key = {idx} idx = {(currentPage*30)-30+idx+1} values={logout}></CrudEvenLogTable>
+                                    crud_event_display.map((logout, idx) =>
+                                        <CrudEvenLogTable key = {idx} idx = {(currentPage*20)-20+idx+1} values={logout}></CrudEvenLogTable>
                                     )}
                                 </tbody>
                         </table>
