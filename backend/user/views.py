@@ -52,7 +52,6 @@ def all(request,payload):
     rsp = {
         'user_list': user_list,
         'len':User.objects.all().count(),
-        'success': True,
     }
 
     return JsonResponse(rsp)
