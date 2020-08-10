@@ -14,7 +14,7 @@ export class LoginLogTable extends Component {
         const idx = this.props.idx
         return (
             <tr>
-                <td>{idx + 1}</td>
+                <td>{idx }</td>
                 <td>{username}</td>
                 <td>{login_type==1 ? "logout" : "login"}</td>
                 <td>{user_id}</td>

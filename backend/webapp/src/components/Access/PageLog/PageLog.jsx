@@ -12,7 +12,7 @@ export class PageLog extends Component {
             page_logs: [],
             log_length:null,
             currentPage:1,
-            logPerPage:30,
+            logPerPage:100,
             searchQuery: '',
             query_min: false
 
@@ -21,17 +21,25 @@ export class PageLog extends Component {
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)
     }
     
     componentDidMount(){
-        this.handleGetAll()
+        const {currentPage}=this.state
+        this.handleListCal(currentPage)
 
     }
+    handleListCal(currentPage){
+        const {logPerPage}=this.state
+        const lastIndex=currentPage*logPerPage
+        const firtsIndex=lastIndex-logPerPage
+        this.handleGetAll(lastIndex,firtsIndex)
+    }
 
-    handleGetAll(){
-        service.pageAll().then(({ page_logs }) => {
-            if(page_logs){
-                this.setState({page_logs, log_length:page_logs.length})
+    handleGetAll(lastIndex,firtsIndex){
+        service.pageAll(lastIndex,firtsIndex).then(({ page_logs, len }) => {
+            if(len){
+                this.setState({page_logs, log_length:len})
             }
         })
 
@@ -41,14 +49,16 @@ export class PageLog extends Component {
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
         }
     }
+
     nextPage(){
-        const { page_logs,currentPage, logPerPage, log_length } = this.state
         if(this.state.currentPage<Math.ceil(this.state.log_length/this.state.logPerPage)){
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
 
@@ -58,7 +68,7 @@ export class PageLog extends Component {
             this.setState({ [field]: e.target.value , query_min: true})
             service.pageSearch(e.target.value).then(({ page_logs }) => {
                 if(page_logs){
-                    this.setState({page_logs, log_length:page_logs.length})
+                    this.setState({page_logs})
                 }
             })
         }
@@ -68,18 +78,17 @@ export class PageLog extends Component {
             if(this.state.query_min){
                 this.setState({ query_min:false })
 
-                this.handleGetAll()
+                const {currentPage}=this.state
+                this.handleListCal(currentPage)
+        
             }
         }
     }
 
 
     render() {
-        const { page_logs,currentPage, logPerPage, log_length } = this.state
-        const lastIndex=currentPage*logPerPage
-        const firtsIndex=lastIndex-logPerPage 
+        const {page_logs, log_length, currentPage,logPerPage}=this.state
         const totalPages=Math.ceil( log_length/logPerPage)
-        const currentLogs= page_logs.slice(firtsIndex,lastIndex)
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -120,7 +129,7 @@ export class PageLog extends Component {
                                     <tr>
                                         <th scope="col">№</th>
                                         <th scope="col">Хаяг</th>
-                                        <th scope="col">Metod</th>
+                                        <th scope="col">Method</th>
                                         <th scope="col">IP Хаяг</th >
                                         <th scope="col">Хэрэглэгчийн дугаар</th >
                                         <th scope="col">Огноо</th >
@@ -129,8 +138,8 @@ export class PageLog extends Component {
                                 <tbody>
                                     {log_length === 0 ?
                                      <tr><td>Хандалт байхгүй байна </td></tr>:
-                                    currentLogs.map((page, idx) =>
-                                        <PageLogTable key = {idx} idx = {(currentPage*30)-30+idx+1} values={page}></PageLogTable>
+                                     page_logs.map((page, idx) =>
+                                        <PageLogTable key = {idx} idx = {(currentPage*100)-100+idx+1} values={page}></PageLogTable>
                                     )}
                                 </tbody>
                             </table>

@@ -23,8 +23,11 @@ function sistemCount() {
     return fetch(`/back/api/систем/тоо/`, opts).then(handleResponse)
 }
 
-function getAll(level) {
-    const requestOptions = {...getGetOptions()}
+function getAll(level,value) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify(value),
+    }
     return fetch(`${prefix}/level-${level}/`, requestOptions).then(handleResponse)
 }
 function OrgAll(level,id){
@@ -61,14 +64,17 @@ function roles(level, org_id) {
 function rolesSave(level, org_id, org_roles) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(org_roles),
+           body: JSON.stringify(org_roles),
     }
     return fetch(`${prefix}/level-${level}/${org_id}/roles-save/`, opts).then(handleResponse)
 }
 
 
-function employeesGetAll(level, org_id) {
-    const requestOptions = {...getGetOptions()}
+function employeesGetAll(level, org_id, last,first) {
+    const requestOptions = {
+        ...getPostOptions(),
+    body: JSON.stringify({last,first}),
+    }
     return fetch(`${prefix}/level-${level}/${org_id}/employees/`, requestOptions).then(handleResponse)
 }
 

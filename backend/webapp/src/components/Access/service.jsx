@@ -22,7 +22,9 @@ export const service = {
 const prefix = '/back/api'
 
 function getAll() {
-    const requestOptions = {...getGetOptions()}
+    const requestOptions = {
+        ...getGettOptions(),
+    }
     return fetch(`${prefix}/log/`, requestOptions).then(handleResponse)
 }
 
@@ -49,8 +51,9 @@ function pageSearch(query) {
     return fetch(`${prefix}/log/page-search/`, requestOptions).then(handleResponse)
 }
 
-function pageAll() {
-    const requestOptions = {...getGetOptions()}
+function pageAll(last, first) {
+    const requestOptions = {...getPostOptions(),
+        body: JSON.stringify({last, first})}
     return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
 }
 
@@ -72,13 +75,19 @@ function logoutDateCount() {
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
 }
 
-function loginAll() {
-    const requestOptions = {...getGetOptions()}
+function loginAll(last,first) {
+    const requestOptions = {
+        ...getPostOptions(),    
+        body: JSON.stringify({last, first})
+    }
     return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
 }
 
-function CrudEventAll() {
-    const requestOptions = {...getGetOptions()}
+function CrudEventAll(last,first) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({last, first})
+    }
     return fetch(`${prefix}/log/crud-event-all/`, requestOptions).then(handleResponse)
 }
 

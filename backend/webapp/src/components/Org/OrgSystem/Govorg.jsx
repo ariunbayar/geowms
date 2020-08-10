@@ -43,7 +43,7 @@ export default class Govorg extends Component {
             <tr>
 
                 <th scope="col">
-                    {id}
+                    {idx}
                 </th>
 
                 <td>

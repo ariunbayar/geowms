@@ -9,14 +9,15 @@ from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 from geoportal_app.models import User
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def login_all(request):
-
+def login_all(request, payload):
+    last = payload.get('last')
+    first = payload.get('first')
     login_log_all_display = []
 
-    for login_log_all in LoginEvent.objects.all():
+    for login_log_all in LoginEvent.objects.all()[first:last]:
         login_log_all_display.append({
             'id': login_log_all.id,
             'login_type': login_log_all.login_type,
@@ -25,7 +26,10 @@ def login_all(request):
             'user_id': login_log_all.user_id,
             'remote_ip': login_log_all.remote_ip,
         })
-    return JsonResponse({'login_log_all': login_log_all_display})
+    return JsonResponse({
+        'login_log_all': login_log_all_display,
+        'len': LoginEvent.objects.all().count()
+    })
 
 
 @require_POST
@@ -65,13 +69,14 @@ def login_date_count(request):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def pageAll(request):
+def pageAll(request,payload):
     log_display = []
-
-    for log in RequestEvent.objects.all():
+    last = payload.get('last')
+    first = payload.get('first')
+    for log in RequestEvent.objects.all()[first:last]:
         log_display.append({
             'id':log.id,
             'url': log.url,
@@ -82,7 +87,10 @@ def pageAll(request):
             'datetime': log.datetime.strftime('%Y-%m-%d'),
 
         })
-    return JsonResponse({'page_logs':  log_display})
+    return JsonResponse({
+        'page_logs':  log_display,
+        'len': RequestEvent.objects.all().count()
+        })
 
 
 @require_POST
@@ -134,12 +142,14 @@ def page_user_count(request):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def crud_event_all(request):
+def crud_event_all(request,payload):
+    last = payload.get('last')
+    first = payload.get('first')
     crud_event_display = []
-    for crud_event in CRUDEvent.objects.all():
+    for crud_event in CRUDEvent.objects.all()[first:last]:
         crud_event_display.append({
             'id': crud_event.id,
             'event_type': crud_event.event_type,
@@ -152,7 +162,10 @@ def crud_event_all(request):
             'user_pk_as_string': crud_event.user_pk_as_string,
             'changed_fields': crud_event.changed_fields,
         })
-    return JsonResponse({'crud_event_display': crud_event_display})
+    return JsonResponse({
+        'crud_event_display': crud_event_display,
+        'len': CRUDEvent.objects.all().count()
+        })
 
 
 @require_POST
