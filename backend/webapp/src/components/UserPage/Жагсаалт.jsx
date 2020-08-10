@@ -16,6 +16,10 @@ export class Жагсаалт extends Component {
             user_length:null,
             currentPage:1,
             usersPerPage:8,
+            searchQuery: '',
+            query_min: false,
+            search_load: false,
+
             }     
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -68,24 +72,21 @@ export class Жагсаалт extends Component {
         }
        
     }
-    handleSearch(){
-        if(e.target.value.length > 2)
+    handleSearch(field, e) {
+        if(e.target.value.length > 0)
         {
-            this.setState({ [field]: e.target.value , query_min: true})
+            this.setState({ [field]: e.target.value, search_load:true})
             service.userSearch(e.target.value).then(({ user_list }) => {
                 if(user_list){
-                    this.setState({user_list, user_length:user_length.length})
+                    this.setState({user_list, user_length:user_list.length, search_load:false})
                 }
             })
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            if(this.state.query_min){
-                this.setState({ query_min:false })
-
-                this.handleGetAll()
-            }
+            const {currentPage}=this.state.currentPage
+            this.handleListCal(currentPage)
         }
     }
     render() {
