@@ -14,7 +14,10 @@ export class UserForm extends Component {
             employees: [],
             employees_length:null,
             currentPage:1,
-            employeesPerPage:2
+            employeesPerPage:2,
+            searchQuery: '',
+            query_min: false,
+            search_load: false,
 
         }
         this.handleGovorgDelete = this.handleGovorgDelete.bind(this)
@@ -22,6 +25,7 @@ export class UserForm extends Component {
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleListCal=this.handleListCal.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
     }
 
     componentDidMount() {
@@ -70,6 +74,25 @@ export class UserForm extends Component {
             this.handleListCal(this.state.currentPage+1)
         }
     }
+    handleSearch(field, e) {
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        if(e.target.value.length > 0)
+        {
+            this.setState({ [field]: e.target.value, search_load:true})
+            service.EmployeeSearch(org_level,org_id,e.target.value).then(({ employees }) => {
+                if(employees){
+                    this.setState({employees, employees_length:employees.length, search_load:false})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            const {currentPage}=this.state.currentPage
+            this.handleListCal(currentPage)
+        }
+    }
     render() {
         const {employees, currentPage, employeesPerPage, employees_length} = this.state
         const id=this.props.values
@@ -91,9 +114,17 @@ export class UserForm extends Component {
                             </NavLink>
                         </div>
                         <div className="text-right">
-                            <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
+                            <NavLink className="btn gp-bg-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
                                 Нэмэх
-                            </NavLink>
+                            </NavLink>     
+                               <input
+                                type="text"
+                                className="form-control col-md-4  mb-1 float-left"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
                         </div>
                         <table className="table">
                             <thead>

@@ -69,6 +69,8 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
+        path('level-<int:level>/orgSearch/', org_views.orgSearch, name='orgSearch'),
+        path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -93,6 +95,7 @@ urlpatterns = [
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('тоо/', govorg_views.тоо, name='тоо'),
+        path('govorgSearch/', govorg_views.govorgSearch, name='govorgSearch'),
     ], 'govorg'))),
 
     path('api/config/', include(([

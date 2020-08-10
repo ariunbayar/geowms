@@ -8,6 +8,7 @@ from main.decorators import ajax_required
 from .models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 @require_POST
 @ajax_required
@@ -335,3 +336,43 @@ def org_remove(request, payload, level):
     org.delete()
 
     return JsonResponse({'success': True})
+
+@require_POST
+@ajax_required
+def orgSearch(request, payload,level):
+    query = payload.get('query')
+    orgs_display = []
+    for org in Org.objects.filter(level=level).annotate(search=SearchVector('name') ).filter(search__contains=query):
+           orgs_display.append({
+            'id': org.id,
+            'name': org.name,
+            'level': org.level,
+            'level_display': org.get_level_display(),
+        })
+
+    return JsonResponse({
+        'orgs': orgs_display,
+        })
+
+@require_POST
+@ajax_required        
+def employeeSearch(request,payload, level, pk):
+    org = get_object_or_404(Org, pk=pk, level=level)
+    employees_display = []
+    query = payload.get('query')
+    for employe in User.objects.filter(employee__org=org).annotate(search=SearchVector('last_name','first_name', 'email') ).filter(search__contains=query):
+        employees_display.append({
+            'id': employe.id,
+            'last_name': employe.last_name,
+            'first_name': employe.first_name,
+            'email': employe.email,
+            'is_active': employe.is_active,
+            'is_sso': employe.is_sso,
+            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
+            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
+            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
+        })
+    return JsonResponse({
+        'employees': employees_display,
+        })
+
