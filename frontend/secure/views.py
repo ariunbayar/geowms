@@ -87,7 +87,7 @@ def login_dan(request):
                     gender=gender,
                     is_sso=True,
                 )
-                user.roles.add(2)
+                user.roles.add(1)
 
             auth.login(request, user)
             if request.user_agent.is_mobile:

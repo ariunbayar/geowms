@@ -51,7 +51,6 @@ export class OrgForm extends Component {
     }
     handleUserDelete(id){
         const org_level = this.props.match.params.level
-        
         service.org_remove(org_level,id).then(({ success }) => {
             if (success) {
                 const currentPage=this.state.currentPage
@@ -95,11 +94,13 @@ export class OrgForm extends Component {
                                 <tr>
                                     <th scope="col">№</th>
                                     <th scope="col">Байгууллага нэр</th>
-                                    <th scope="col">Засах</th >
-                                    <th scope="col">Устгах</th >
+                                    <th scope="col">Түвшин</th>
+                                    <th scope="col"></th >
+                                    <th scope="col"></th >
                                 </tr>
                             </thead>
                             <tbody>
+
                                 { org_length ===0 ?
                                     <tr><td>Байгууллага бүртгэлгүй байна</td></tr>:
 
@@ -113,6 +114,7 @@ export class OrgForm extends Component {
                                             
                                         >
                                         </OrgFormTable>
+
                                 )}
                             </tbody>
                         </table>
