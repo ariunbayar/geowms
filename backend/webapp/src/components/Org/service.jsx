@@ -12,7 +12,9 @@ export const service = {
     employee_remove,
     employeeMore,
     employee_update,
-    sistemCount
+    sistemCount,
+    orgSearch,
+    EmployeeSearch
 }
 
 
@@ -110,4 +112,20 @@ function employee_update(org_level, org_id, paylaod) {
     }
 
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-update/`, opts).then(handleResponse)
+}
+
+function orgSearch(org_level,query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/level-${org_level}/orgSearch/`, requestOptions).then(handleResponse)
+} 
+
+function EmployeeSearch(level, org_id,query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/level-${level}/${org_id}/employeeSearch/`, requestOptions).then(handleResponse)
 }
