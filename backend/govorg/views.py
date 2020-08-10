@@ -11,6 +11,7 @@ from main.decorators import ajax_required
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from .models import GovOrg
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 
 def _get_govorg_display(govorg):
@@ -36,7 +37,6 @@ def _generate_govorg_token():
 def жагсаалт(request,payload):
     last=payload.get('last')
     first=payload.get('first')
-    print(last,first)
     govorg_list = GovOrg.objects.all()[first:last]
 
     govorg_list_display = [
@@ -169,3 +169,24 @@ def тоо(request):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def govorgSearch(request,payload):
+    query = payload.get('query')
+    govorg_list = GovOrg.objects.all().annotate(search=SearchVector('name') ).filter(search__contains=query)
+    govorg_list_display = [
+        _get_govorg_display(govorg)
+        for govorg in govorg_list
+    ]
+
+    rsp = {
+        'govorg_list': govorg_list_display,
+        'len':GovOrg.objects.all().count(),
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+

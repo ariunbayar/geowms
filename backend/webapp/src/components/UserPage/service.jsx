@@ -3,6 +3,7 @@ export const service = {
     detail,
     userDetailChange,
     roleCreate,
+    userSearch
 }
 
 const prefix = '/back/api/user'
@@ -87,4 +88,11 @@ function roleCreate(payload){
         body: JSON.stringify(payload),
     }
     return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
+}
+function userSearch(query) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/userSearch/`, requestOptions).then(handleResponse)
 }

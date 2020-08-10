@@ -4,12 +4,14 @@ from django.shortcuts import get_object_or_404
 
 from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
 
 
 def _get_user_display(user):
+    roles = [_get_role_display(role) for role in user.roles.all()]
     return {
         'id': user.id,
         'last_name': user.last_name,
@@ -18,6 +20,7 @@ def _get_user_display(user):
         'email': user.email,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
+        'roles':roles
     }
 
 def _get_user_detail(user):
@@ -121,3 +124,14 @@ def roleCreate(request, payload):
     else:
         user.roles.add(roleId)
         return JsonResponse({'success': True})
+
+@require_POST
+@ajax_required
+def userSearch(request, payload):
+    query = payload.get('query')
+    user_list = []
+
+    user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)]
+    
+    return JsonResponse({'user_list': user_list})
+    

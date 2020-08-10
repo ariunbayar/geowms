@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST, require_GET
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from main.decorators import ajax_required
-
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import WMS
 from .forms import WMSForm
 
@@ -259,3 +259,15 @@ def proxy(request, wms_id):
     
     else:
         return render(request, "backend/404.html", {})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def wmsSearch(request,payload):
+
+    query=payload.get('query')
+    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all().annotate(search=SearchVector('name') ).filter(search__contains=query)]
+    return JsonResponse({
+        'wms_list': wms_list,
+        })

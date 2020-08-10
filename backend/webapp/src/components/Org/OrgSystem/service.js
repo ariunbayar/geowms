@@ -6,7 +6,8 @@ export const service = {
     update,
     remove,
     detail,
-    getWMSList
+    getWMSList,
+    govorgSearch
   
 }
 
@@ -71,3 +72,10 @@ function getWMSList() {
     return fetch(`/back/wms/all/`, opts).then(handleResponse)
 }
 
+function govorgSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/govorgSearch/`, requestOptions).then(handleResponse)
+}

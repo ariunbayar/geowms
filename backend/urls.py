@@ -27,6 +27,7 @@ urlpatterns = [
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
+        path('wmsSearch/', wms_views.wmsSearch, name='wmsSearch'),
     ], 'wms'))),
 
     path('bundle/', include(([
@@ -47,6 +48,7 @@ urlpatterns = [
         path('roleCreate/', user_views.roleCreate, name='roleCreate'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('userCount/', user_views.userCount, name='userCount'),
+        path('userSearch/', user_views.userSearch, name='userSearch'),
     ], 'user'))),
 
     path('api/суурь-давхарга/', include(([
@@ -69,6 +71,8 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
+        path('level-<int:level>/orgSearch/', org_views.orgSearch, name='orgSearch'),
+        path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -93,6 +97,7 @@ urlpatterns = [
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('тоо/', govorg_views.тоо, name='тоо'),
+        path('govorgSearch/', govorg_views.govorgSearch, name='govorgSearch'),
     ], 'govorg'))),
 
     path('api/config/', include(([

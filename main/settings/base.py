@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'backend.config.apps.ConfigConfig',
     'backend.org.apps.OrgConfig',
     'backend.log.apps.LogConfig',
+    'backend.payment.apps.PaymentConfig',
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
