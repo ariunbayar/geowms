@@ -27,12 +27,10 @@ export class GovorgForm extends Component {
 
     componentDidMount() {
 
-        Promise.all([
-            service.getWMSList(),
-            service.detail(this.props.match.params.system_id),
-        ]).then(([{wms_list}, {govorg}]) => {
-            this.setState({govorg, layers: govorg.layers, wms_list})
+        service.detail(this.props.match.params.system_id).then(({govorg}) => {
+            this.setState({govorg,layer:govorg.layers, wms_list:govorg.wms_list})
         })
+
     }
 
     componentDidUpdate(prevProps) {
@@ -125,7 +123,7 @@ export class GovorgForm extends Component {
 
                                         <div className="form-group">
 
-                                            <label htmlFor="id_name">
+                                            <label htmlFor="id_name" >
                                                 Системүүдийн нэр:
                                             </label>
 

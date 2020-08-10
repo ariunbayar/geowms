@@ -99,7 +99,6 @@ def _get_govorg_detail_display(request, govorg):
 def дэлгэрэнгүй(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
-
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
         'success': True,

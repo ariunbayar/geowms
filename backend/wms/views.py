@@ -33,7 +33,6 @@ def _get_wms_display(request, wms):
 def all(request,payload):
     last=payload.get('last')
     first=payload.get('first')
-    print(first,last)
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()[first:last]]
     return JsonResponse({
         'wms_list': wms_list,
