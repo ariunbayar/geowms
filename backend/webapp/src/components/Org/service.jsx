@@ -23,8 +23,11 @@ function sistemCount() {
     return fetch(`/back/api/систем/тоо/`, opts).then(handleResponse)
 }
 
-function getAll(level) {
-    const requestOptions = {...getGetOptions()}
+function getAll(level,value) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify(value),
+    }
     return fetch(`${prefix}/level-${level}/`, requestOptions).then(handleResponse)
 }
 function OrgAll(level,id){

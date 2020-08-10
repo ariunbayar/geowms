@@ -9,14 +9,14 @@ from .models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def all(request, level):
-
+def all(request, payload, level):
+    last=payload.get("lastIndex")
+    first=payload.get("firstIndex")
     orgs_display = []
-
-    for org in Org.objects.filter(level=level):
+    for org in Org.objects.filter(level=level)[first:last]:
         orgs_display.append({
             'id': org.id,
             'name': org.name,
@@ -24,7 +24,11 @@ def all(request, level):
             'level_display': org.get_level_display(),
         })
 
-    return JsonResponse({'orgs': orgs_display})
+    return JsonResponse({
+        'orgs': orgs_display,
+        'len': Org.objects.filter(level=level).count()
+        })
+
 def OrgAll(request,level,pk):
     orgs_display=[]
     for org in Org.objects.filter(level=level,pk=pk):

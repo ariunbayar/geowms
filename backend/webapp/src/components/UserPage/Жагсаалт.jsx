@@ -21,7 +21,7 @@ export class Жагсаалт extends Component {
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
-        
+        this.handleListCal=this.handleListCal.bind(this)
     }
 
     componentDidMount() {
@@ -38,7 +38,7 @@ export class Жагсаалт extends Component {
 
     handleListUpdated(lastIndex,firtsIndex) { 
         service.getAll(lastIndex,firtsIndex).then(({user_list,len}) => {
-            if(true){
+            if(len){
              this.setState({user_list,user_length:len})
             }
          })
