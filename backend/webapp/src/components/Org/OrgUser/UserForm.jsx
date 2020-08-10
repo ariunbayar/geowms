@@ -14,7 +14,7 @@ export class UserForm extends Component {
             employees: [],
             employees_length:null,
             currentPage:1,
-            employeesPerPage:2,
+            employeesPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
@@ -148,7 +148,7 @@ export class UserForm extends Component {
                                         org_level={org_level}
                                         org_id={org_id}
                                         key = {idx} 
-                                        idx = {(currentPage*2)-2+idx+1} 
+                                        idx = {(currentPage*20)-20+idx+1} 
                                         values={employe} 
                                         handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
                                     >
