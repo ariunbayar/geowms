@@ -14,33 +14,43 @@ export class UserForm extends Component {
             employees: [],
             employees_length:null,
             currentPage:1,
-            employeesPerPage:20
+            employeesPerPage:2
 
         }
         this.handleGovorgDelete = this.handleGovorgDelete.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)
     }
 
     componentDidMount() {
+        const currentPage=this.state.currentPage
+        this.handleListCal(currentPage)
+    }
+
+    handleListCal(currentPage){
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        this.handleGetAll(org_level, org_id)
+        const employeesPerPage=this.state.employeesPerPage
+        const lastIndex=currentPage*employeesPerPage
+        const firtsIndex=lastIndex-employeesPerPage
+        this.handleGetAll(org_level,org_id,lastIndex,firtsIndex)
     }
 
     handleGovorgDelete(id) {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
+        const currentPage=this.state.currentPage
         service.employee_remove(org_level, org_id, id).then(({ success }) => {
-            if (success) {this.handleGetAll(org_level, org_id)}
+            if (success) {this.handleListCal(currentPage)}
         })
 
     }
-    handleGetAll(org_level, org_id){
-        service.employeesGetAll(org_level, org_id).then(({ employees }) => {
+    handleGetAll(org_level, org_id, lastIndex,firtsIndex){
+        service.employeesGetAll(org_level, org_id,lastIndex, firtsIndex).then(({ employees ,len}) => {
             if (employees) {
-                this.setState({ employees , employees_length:employees.length})
+                this.setState({ employees , employees_length:len})
             }
         })
     }
@@ -49,6 +59,7 @@ export class UserForm extends Component {
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
         }
     }
     nextPage(){
@@ -56,6 +67,7 @@ export class UserForm extends Component {
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
     render() {
@@ -63,10 +75,9 @@ export class UserForm extends Component {
         const id=this.props.values
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        const lastIndex=currentPage*employeesPerPage
-        const firtsIndex=lastIndex-employeesPerPage 
+
         const totalPages=Math.ceil( employees_length/employeesPerPage)
-        const currentEmployees= employees.slice(firtsIndex,lastIndex)
+
         return (
             <div className="container my-4">
                 <div className="row">
@@ -101,12 +112,12 @@ export class UserForm extends Component {
                             <tbody>
                                 { employees_length === 0 ? 
                                 <tr><td>Ажилчин бүртгэлгүй байна</td></tr>:
-                                currentEmployees.map((employe, idx) =>
+                                employees.map((employe, idx) =>
                                     <UserFormTable 
                                         org_level={org_level}
                                         org_id={org_id}
                                         key = {idx} 
-                                        idx = {(currentPage*20)-20+idx+1} 
+                                        idx = {(currentPage*2)-2+idx+1} 
                                         values={employe} 
                                         handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
                                     >

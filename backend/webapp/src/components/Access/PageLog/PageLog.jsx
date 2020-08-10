@@ -120,7 +120,7 @@ export class PageLog extends Component {
                                     <tr>
                                         <th scope="col">№</th>
                                         <th scope="col">Хаяг</th>
-                                        <th scope="col">Metod</th>
+                                        <th scope="col">Method</th>
                                         <th scope="col">IP Хаяг</th >
                                         <th scope="col">Хэрэглэгчийн дугаар</th >
                                         <th scope="col">Огноо</th >

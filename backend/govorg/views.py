@@ -30,12 +30,14 @@ def _generate_govorg_token():
     return uuid.uuid4().hex[:32]
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def жагсаалт(request):
-
-    govorg_list = GovOrg.objects.all()
+def жагсаалт(request,payload):
+    last=payload.get('last')
+    first=payload.get('first')
+    print(last,first)
+    govorg_list = GovOrg.objects.all()[first:last]
 
     govorg_list_display = [
         _get_govorg_display(govorg)
@@ -44,6 +46,7 @@ def жагсаалт(request):
 
     rsp = {
         'govorg_list': govorg_list_display,
+        'len':GovOrg.objects.all().count(),
         'success': True,
     }
 

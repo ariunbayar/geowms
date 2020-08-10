@@ -157,16 +157,16 @@ def roles_save(request, payload, level, pk):
     return JsonResponse({'success': True})
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employees(request, level, pk):
-
+def employees(request,payload, level, pk):
+    last = payload.get('last')
+    first = payload.get('first')
     org = get_object_or_404(Org, pk=pk, level=level)
-    
     employees_display = []
 
-    for employe in User.objects.filter(employee__org=org):
+    for employe in User.objects.filter(employee__org=org)[first:last]:
         employees_display.append({
             'id': employe.id,
             'last_name': employe.last_name,
@@ -178,7 +178,10 @@ def employees(request, level, pk):
             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-    return JsonResponse({'employees': employees_display})
+    return JsonResponse({
+        'employees': employees_display,
+        'len':User.objects.filter(employee__org=org).count()
+        })
 
 
 @require_GET
