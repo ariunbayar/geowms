@@ -27,10 +27,20 @@ def _get_wms_display(request, wms):
     }
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def all(request):
+    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
+    return JsonResponse({
+        'wms_list': wms_list,
+        })
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def all(request,payload):
+def pagination(request,payload):
     last=payload.get('last')
     first=payload.get('first')
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()[first:last]]

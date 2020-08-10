@@ -27,8 +27,11 @@ export class GovorgForm extends Component {
 
     componentDidMount() {
 
-        service.detail(this.props.match.params.system_id).then(({govorg}) => {
-            this.setState({govorg,layer:govorg.layers, wms_list:govorg.wms_list})
+        Promise.all([
+            service.getWMSList(),
+            service.detail(this.props.match.params.system_id),
+        ]).then(([{wms_list}, {govorg}]) => {
+            this.setState({govorg, layers: govorg.layers, wms_list})
         })
 
     }
