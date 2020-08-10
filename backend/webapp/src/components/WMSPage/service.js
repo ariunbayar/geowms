@@ -13,7 +13,8 @@ export const service = {
     layerAdd,
     layerRemove,
     detail,
-    wmsIsActiveUpdate
+    wmsIsActiveUpdate,
+    wmsSearch
 }
 
 const prefix = '/back'
@@ -190,4 +191,12 @@ function getLayers(wms_url) {
             })
             .catch(reject)
     })
+}
+
+function wmsSearch(query) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/wms/wmsSearch/`, requestOptions).then(handleResponse)
 }

@@ -131,15 +131,7 @@ def userSearch(request, payload):
     query = payload.get('query')
     user_list = []
 
-    for user in User.objects.annotate(search=SearchVector('last_name', 'first_name', 'email') + SearchVector('username'),).filter(search__contains=query):
-        user_list.append({
-        'id': user.id,
-        'last_name': user.last_name,
-        'first_name': user.first_name,
-        'is_superuser': user.is_superuser,
-        'email': user.email,
-        'is_active': user.is_active,
-        'is_sso': user.is_sso,
-        'username': user.username,
-        })
+    user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)]
+    
     return JsonResponse({'user_list': user_list})
+    

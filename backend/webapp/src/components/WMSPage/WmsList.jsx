@@ -6,7 +6,6 @@ import WMS from './WMS'
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 
-
 export class WmsList extends Component {
 
     constructor(props) {
@@ -25,8 +24,11 @@ export class WmsList extends Component {
             layers_all: [],
             form_values: {...this.initial_form_values},
             currentPage:1,
-            wmsPerPage:2,
-            wms_length:null
+            wmsPerPage:20,
+            wms_length:null,
+            searchQuery: '',
+            query_min: false,
+            search_load: false,
         }
 
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -39,6 +41,7 @@ export class WmsList extends Component {
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleListCal=this.handleListCal.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
 
     }
 
@@ -95,9 +98,11 @@ export class WmsList extends Component {
         }
 
     }
+
     modalClose() {
         this.setState({showModal: false})
     }
+
     handleRemove(id) {
         service.remove(id).then(({success}) => {
             if (success) {        
@@ -141,6 +146,7 @@ export class WmsList extends Component {
             this.handleListCal(this.state.currentPage-1)
         }
     }
+
     nextPage(){
         if(this.state.currentPage<Math.ceil(this.state.wms_length/this.state.wmsPerPage)){
             this.setState({
@@ -149,6 +155,26 @@ export class WmsList extends Component {
             this.handleListCal(this.state.currentPage+1)
         }
     }
+
+    handleSearch(field, e) {
+        if(e.target.value.length > 0 )
+        {   
+            this.setState({ [field]: e.target.value, search_load:true})
+            service.wmsSearch(e.target.value).then(({ wms_list }) => {
+                if(wms_list){
+                    this.setState({wms_list, wms_length:wms_list.length, search_load:false})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            const {currentPage}=this.state.currentPage
+            this.handleListCal(currentPage)
+        }
+    }
+
+
     render() {
         const {currentPage, wmsPerPage, wms_list, wms_length}=this.state
         const totalPages=Math.ceil( wms_length/wmsPerPage)
@@ -160,6 +186,14 @@ export class WmsList extends Component {
                                     <NavLink className="btn gp-bg-primary" to={`/back/wms/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
+                                    <input
+                                        type="text"
+                                        className="form-control col-md-4  mb-1 float-left"
+                                        id="searchQuery"
+                                        placeholder="Хайх"
+                                        onChange={(e) => this.handleSearch('searchQuery', e)}
+                                        value={this.state.searchQuery}
+                                   />
                                 </div>
 
                                 <table className="table">
@@ -182,7 +216,7 @@ export class WmsList extends Component {
                                             <WMS
                                                 key={values.id}
                                                 values={values}
-                                                idx={(currentPage*2)-2+index+1}
+                                                idx={(currentPage*20)-20+index+1}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                             />
