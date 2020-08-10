@@ -28,7 +28,7 @@ export class DevPage extends Component {
                 <strong>Fontawesome 4.7.0: </strong>
                 <LinkExternal href="https://fontawesome.com/v4.7.0/icons/"/>
             </p>
-            <p>
+              <p>
                 <strong>Bootstrap 4.5.0: </strong>
                 <LinkExternal href="https://getbootstrap.com/docs/4.5/components/alerts/"/>
             </p>
@@ -83,6 +83,14 @@ export class DevPage extends Component {
                 </li>
               </ul>
             </div>
+            <h1>GeoPortal гар утасны android application</h1>
+         <div>
+             <ul>
+               <li> Татах линк: 
+                 <LinkExternal href="/backend/webapp/static/assets/geoportal.apk"/>
+                </li>
+                </ul>
+                </div>
             <h1>Өнгөний код</h1>
             <div className="col-md-3 colordiv">
               <ul>
