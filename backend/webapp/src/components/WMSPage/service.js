@@ -14,7 +14,8 @@ export const service = {
     layerRemove,
     detail,
     wmsIsActiveUpdate,
-    wmsSearch
+    wmsSearch,
+    pagination
 }
 
 const prefix = '/back'
@@ -70,11 +71,17 @@ function _getGetOptions() {
     }
 }
 
-
-function getAll(last,first) {
+function pagination(last,first) {
     const requestOptions = {
         ..._getPostOptions(),
         body: JSON.stringify({last,first}),
+    }
+    return fetch(`${prefix}/wms/pagination/`, requestOptions).then(handleResponse)
+}
+
+function getAll() {
+    const requestOptions = {
+        ..._getGetOptions(),
     }
     return fetch(`${prefix}/wms/all/`, requestOptions).then(handleResponse)
 }

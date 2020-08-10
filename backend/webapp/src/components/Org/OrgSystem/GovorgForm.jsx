@@ -33,6 +33,7 @@ export class GovorgForm extends Component {
         ]).then(([{wms_list}, {govorg}]) => {
             this.setState({govorg, layers: govorg.layers, wms_list})
         })
+
     }
 
     componentDidUpdate(prevProps) {
@@ -125,7 +126,7 @@ export class GovorgForm extends Component {
 
                                         <div className="form-group">
 
-                                            <label htmlFor="id_name">
+                                            <label htmlFor="id_name" >
                                                 Системүүдийн нэр:
                                             </label>
 
