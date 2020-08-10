@@ -20,7 +20,8 @@ export class Жагсаалт extends Component {
             govorg_list: [],
             govorg_length:null,
             currentPage:1,
-            govorgPerPage:20
+            govorgPerPage:20,
+            
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -51,6 +52,7 @@ export class Жагсаалт extends Component {
         })
 
     }
+
     handleRemove(id) {
         const currentPage=this.state.currentPage
         service.remove(id).then(({success}) => {
@@ -60,6 +62,7 @@ export class Жагсаалт extends Component {
         })
 
     }
+
     prevPage(){
         if(this.state.currentPage >1){
             this.setState({
@@ -68,6 +71,7 @@ export class Жагсаалт extends Component {
             this.handleListCal(this.state.currentPage-1)
         }
     }
+
     nextPage(){
         if(this.state.currentPage<Math.ceil(this.state.govorg_length/this.state.govorgPerPage)){
             this.setState({
@@ -76,6 +80,25 @@ export class Жагсаалт extends Component {
             this.handleListCal(this.state.currentPage+1)
         }
     }
+
+    handleSearch(field, e) {
+        if(e.target.value.length > 0)
+        {
+            this.setState({ [field]: e.target.value, search_load:true})
+            service.govorgSearch(e.target.value).then(({ govorg_list }) => {
+                if(govorg_list){
+                    this.setState({govorg_list, govorg_length:govorg_list.length, search_load:false})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            const {currentPage}=this.state.currentPage
+            this.handleListCal(currentPage)
+        }
+    }
+
     render() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -98,9 +121,17 @@ export class Жагсаалт extends Component {
                                 </div>
 
                                 <div className="text-right">
-                                    <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
+                                    <NavLink className="btn gp-bg-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
+                                    <input
+                                        type="text"
+                                        className="form-control flaot-left col-md-4  mb-1"
+                                        id="searchQuery"
+                                        placeholder="Хайх"
+                                        onChange={(e) => this.handleSearch('searchQuery', e)}
+                                        value={this.state.searchQuery}
+                                   />
                                 </div>
 
                                 <table className="table">

@@ -12,14 +12,19 @@ export class OrgForm extends Component {
             orgs: [],
             org_length:null,
             currentPage:1,
-            orgPerPage:20
+            orgPerPage:20,
+            searchQuery: '',
+            query_min: false,
+            search_load: false,
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.handleUserDelete=this.handleUserDelete.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleListCal=this.handleListCal.bind(this)
+        this.handleSearch=this.handleSearch.bind(this)
     }
+
     componentDidMount(){  
         const {currentPage}=this.state
         this.handleListCal(currentPage)
@@ -46,7 +51,8 @@ export class OrgForm extends Component {
         if (this.props.match.params.level !== prevProps.match.params.level) {
             const org_level = this.props.match.params.level
             const currentPage=this.state
-        //    this.handleListCal(currentPage,org_level )
+            this.handleListCal(currentPage)
+
         }
     }
     handleUserDelete(id){
@@ -55,6 +61,7 @@ export class OrgForm extends Component {
             if (success) {
                 const currentPage=this.state.currentPage
                 this.handleListCal(currentPage)
+                
             }
         })
     }
@@ -68,6 +75,7 @@ export class OrgForm extends Component {
 
         }
     }
+
     nextPage(){
         if(this.state.currentPage<Math.ceil(this.state.org_length/this.state.orgPerPage)){
             this.setState({
@@ -76,6 +84,26 @@ export class OrgForm extends Component {
             this.handleListCal(this.state.currentPage+1)
         }
     }
+
+    handleSearch(field, e) {
+        const level=this.props.match.params.level
+        if(e.target.value.length > 0)
+        {   
+            this.setState({ [field]: e.target.value, search_load:true})
+            service.orgSearch(level,e.target.value).then(({ orgs }) => {
+                if(orgs){
+                    this.setState({orgs, org_length:orgs.length, search_load:false})
+                }
+            })
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            const {currentPage}=this.state.currentPage
+            this.handleListCal(currentPage)
+        }
+    }
+
     render() {
         const {orgs,orgPerPage,currentPage,org_length} = this.state
         const org_level = this.props.match.params.level
@@ -84,11 +112,21 @@ export class OrgForm extends Component {
             <div className="main-content">
                 <div className="container page-container my-4">
                     <div className="text-right">
-                        <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/нэмэх/`}>
+                        <NavLink className="btn gp-bg-primary  float-right" to={`/back/байгууллага/түвшин/${org_level}/нэмэх/`}>
                             Нэмэх
                         </NavLink>
+                        <input
+                                type="text"
+                                className="form-control col-md-4  mb-1 float-left"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+
                     </div>
                     <div className="mb-3 mt-3">
+
                         <table className="table example" id="example">
                             <thead>
                                 <tr>
