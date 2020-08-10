@@ -52,7 +52,7 @@ def _get_role_display(role):
 def all(request,payload):
     last = payload.get('last')
     first = payload.get('first')
-    user_list = [_get_user_display(user) for user in User.objects.all()[first:last]
+    user_list = [_get_user_display(user) for user in User.objects.all()[first:last]]
     rsp = {
         'user_list': user_list,
         'len':User.objects.all().count(),
