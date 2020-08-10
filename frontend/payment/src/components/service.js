@@ -1,5 +1,6 @@
 export const service = {
-    payment
+    payment,
+    purchaseAll
 }
 
 function getCookie(name) {
@@ -53,8 +54,17 @@ function _getPostOptions() {
     }
 }
 
-function payment(price) {
+function payment(price){
     const requestOptions = {..._getPostOptions(),
         body: JSON.stringify({price})}
     return fetch(`/payment/dictionaryRequest/`, requestOptions).then(handleResponse)
+}
+
+
+function purchaseAll(purchase_id){
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({purchase_id})
+    }
+    return fetch('/back/payment/purchase-all/', requestOptions).then(handleResponse)
 }

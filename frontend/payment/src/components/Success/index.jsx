@@ -1,24 +1,14 @@
 import React, { Component } from "react"
 import {service} from '../service'
-export class Purchase extends Component {
+export class Success extends Component {
 
     constructor(props) {
         super(props)
 
         this.state = {
             purchase: props.purchase,
-            price: 3000,
-            purchase_all: []
+            price: 3000
         }
-    }
-    componentDidMount(){
-        const purchase_id = this.props.match.params.id
-
-        service.purchaseAll(purchase_id).then(({ purchase_all }) => {
-            if (purchase_all) {
-                this.setState({purchase_all})                
-            }
-        })
     }
     handlePayment (){
         const {price} = this.state
@@ -78,12 +68,32 @@ export class Purchase extends Component {
                             </tr>
                         </tbody>
                     </table>
-                    <button  class="btn gp-btn-primary text-center mt-3" onClick={() => this.handlePayment()}>
-                        <a class="fa fa-shopping-cart mr-2"> Худалдаж авах</a>
-                    </button>
+                    <div class="row py-3">
 
+                        <div class="col-md-6 py-0 my-3">
+                            <h5 class="mb-3">Гүйлгээний төлөв<span className="text-success">(Амжилттай)</span></h5>
+                            <ul class="list-unstyled">
+                                <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
+                                    Гүйлгээний дугаар | 1008567
+                                </li>
+                                <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
+                                    Мөнгөн дүн | 3,000₮
+                                </li>
+                                <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
+                                    НИЙТ МӨНГӨН ДҮН | 3,000₮
+                                </li>
+                                <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
+                                    Үр дүн | <span className="text-success">Амжилттай</span>
+                                </li>
+                            </ul>
+                            <button class="btn btn-primary">Хэвлэх</button>
+                        </div>
+                        <div class="col-md-6 py-0 my-3">
+                            <h5 class="mb-3">QR Code </h5>
+                            <img src="/static/assets/image/lavlakh.png"></img>
+                        </div>
+                    </div>
                 </div>
-                
             </div>
         </div>
         )

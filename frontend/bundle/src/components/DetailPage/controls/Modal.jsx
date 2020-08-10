@@ -1,12 +1,39 @@
 import React, {Component} from "react"
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
-
+import {service} from '../service'
+import { Redirect } from 'react-router';
+import { useHistory } from "react-router-dom";
 
 class ModalComponent extends Component{
 
+    constructor(props) {
+
+        super(props)
+
+        this.state = {
+            price: 3000,
+            description: 'Газрын бүрхэвч, газар ашиглалт',
+            payLoad: false,
+        }
+
+    }
+
+    handlePayment(){
+        this.setState({payLoad: true})
+        const {price, description} = this.state
+        service.payment(price, description).then(({ payment_id }) => {
+            if(payment_id){
+                this.setState({payLoad: false})
+                alert(payment_id)
+
+                this.props.history.push("/");
+                alert(payment_id)
+            }
+        })
+    }
     render() {
-        const {content, is_complete} = this.props
+        const {content, is_complete, payLoad} = this.props
         return (
             <div className="modal-dialog modal-dialog-scrollable" style={{zIndex:"5"}}>
                 <div className="modal-content">
@@ -41,8 +68,15 @@ class ModalComponent extends Component{
                     </div>
                     <div className="modal-footer">
                         <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
-                        <a className="btn btn-secondary" data-dismiss="modal" href="/payment/purchase/">Худалдаж авах</a>
-
+                        {payLoad ?
+                        <button type="button" className="btn btn-secondary" data-dismiss="modal">
+                            Худалдаж авах
+                            <a class="spinner-border text-light" role="status">
+                                <span class="sr-only">Loading...</span> 
+                            </a>
+                        </button>:
+                        <button type="button" onClick={() => this.handlePayment()} className="btn btn-secondary" data-dismiss="modal">Худалдаж авах</button>
+                        }                        
                     </div>
                 </div>
             </div>

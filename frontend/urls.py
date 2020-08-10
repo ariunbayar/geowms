@@ -44,10 +44,8 @@ urlpatterns = [
 
     path('payment/', include(([
         path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
-        path('failed/', payment_views.failed, name='failed'),
-        path('success/', payment_views.success, name='success'),
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
-        path('purchase/', payment_views.index, name='purchase'),
     ], 'payment'))),
-    
+
+    re_path('^.*', payment_views.index, name='payment'),
 ]

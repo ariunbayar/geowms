@@ -27,14 +27,6 @@ def index(request):
     return render(request, 'payment/index.html', context)
 
 
-def failed(request):
-    return render(request, 'payment/purchase_failed.html')
-
-
-def success(request):
-    return render(request, 'payment/purchase_success.html')
-
-
 @require_POST
 @ajax_required
 def dictionaryRequest(request, payload):
