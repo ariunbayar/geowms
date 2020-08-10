@@ -1,7 +1,6 @@
 export const service = {
-    loadWMSLayers,
-    loadBaseLayers,
-    payment
+    payment,
+    purchaseAll
 }
 
 function getCookie(name) {
@@ -55,24 +54,17 @@ function _getPostOptions() {
     }
 }
 
-function loadWMSLayers(id) {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
+function payment(price){
+    const requestOptions = {..._getPostOptions(),
+        body: JSON.stringify({price})}
+    return fetch(`/payment/dictionaryRequest/`, requestOptions).then(handleResponse)
 }
 
-function loadBaseLayers() {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
-}
 
-function payment(price, description) {
+function purchaseAll(purchase_id){
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({price, description})
+        body: JSON.stringify({purchase_id})
     }
-    return fetch('/back/payment/purchase/', requestOptions).then(handleResponse)
+    return fetch('/back/payment/purchase-all/', requestOptions).then(handleResponse)
 }
