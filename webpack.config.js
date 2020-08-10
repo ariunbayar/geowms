@@ -16,6 +16,10 @@ module.exports = {
             'babel-polyfill',
             path.resolve(__dirname, 'frontend/mobile/src/index.js'),
         ],
+        'frontend/payment': [
+            'babel-polyfill',
+            path.resolve(__dirname, 'frontend/payment/src/index.js'),
+        ],
     },
     output: {
         // options related to how webpack emits results

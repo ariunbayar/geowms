@@ -6,23 +6,22 @@ from Crypto.PublicKey import RSA
 from django.conf import settings
 
 
-def objectToXmlAccount(data):
-    Bank = data.bank
-    AccountId = data.accountId
-    AccountName = data.accountName
-    Description = data.description
-    Amount = data.amount
+def objectToXmlAccount(amount):
+    Bank = settings.PAYMENT['BANK']
+    AccountId = settings.PAYMENT['ACCOUNT_ID']
+    AccountName = settings.PAYMENT['ACCOUNT_NAME']
+    Description = settings.PAYMENT['DESCRIPTION']
     root = Element('Account')
     BankXml = SubElement(root, 'Bank')
-    BankXml.text = Bank
+    BankXml = Bank
     AccountIdXml = SubElement(root, 'AccountId')
-    AccountIdXml.text = AccountId
+    AccountIdXml = AccountId
     AccountNameXml = SubElement(root, 'AccountName')
     AccountNameXml.text = AccountName
     DescriptionXml = SubElement(root, 'Description')
     DescriptionXml.text = Description
     AmountXml = SubElement(root, 'Amount')
-    AmountXml.text = Amount
+    AmountXml = amount
     return root
 
 
@@ -32,19 +31,19 @@ def objectToXmlAccounts(data):
     return roots
 
 
-def PaymentVerifyRequestMB(amount, encAccounts, encKey):
+def PaymentVerifyRequestMB(price, encAccounts, encKey):
     generated_on = str(datetime.datetime.now())
     root = Element('Request', {'MsgTime': generated_on})
     OrderID = SubElement(root, 'Bank')
-    OrderID.text = "1405085651"
+    OrderID = 1405085651
     MerchantID = SubElement(root, 'MerchantID')
     MerchantID.text = "MERCH"
     TransactionType = SubElement(root, 'TransactionType')
     TransactionType.text = "PURCHASE"
     Amount = SubElement(root, 'Amount')
-    Amount.text = "12500"
+    Amount = price
     Currency = SubElement(root, 'Currency')
-    Currency.text = "496"
+    Currency = 496
     TransactionDateTime = SubElement(root, 'TransactionDateTime')
     TransactionDateTime.text = generated_on
     EncAccounts = SubElement(root, 'EncAccounts')

@@ -1,6 +1,4 @@
 export const service = {
-    loadWMSLayers,
-    loadBaseLayers,
     payment
 }
 
@@ -55,22 +53,8 @@ function _getPostOptions() {
     }
 }
 
-function loadWMSLayers(id) {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
-}
-
-function loadBaseLayers() {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
-}
-
-function payment(content) {
+function payment(price) {
     const requestOptions = {..._getPostOptions(),
-        body: JSON.stringify({content})}
-    return fetch(`${prefix}/payment/purchase/`, requestOptions).then(handleResponse)
+        body: JSON.stringify({price})}
+    return fetch(`/payment/dictionaryRequest/`, requestOptions).then(handleResponse)
 }

@@ -82,18 +82,3 @@ def wms_layers(request, pk):
     }
 
     return JsonResponse(rsp)
-
-
-def purchase(request):
-
-    return render(request, 'bundle/purchase.html')
-
-
-def success(request):
-
-    return render(request, 'bundle/purchase_success.html')
-
-
-def failed(request):
-
-    return render(request, 'bundle/purchase_failed.html')
