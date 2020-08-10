@@ -15,7 +15,7 @@ export class Жагсаалт extends Component {
             user_list: [],
             user_length:null,
             currentPage:1,
-            usersPerPage:8,
+            usersPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
@@ -126,7 +126,7 @@ export class Жагсаалт extends Component {
                                         <User
                                             key={values.id}
                                             values={values}
-                                            idx={(this.state.currentPage*8)-8+index+1}
+                                            idx={(this.state.currentPage*20)-20+index+1}
                                         />
                                     )
                                 }

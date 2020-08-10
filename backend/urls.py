@@ -27,6 +27,7 @@ urlpatterns = [
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
+        path('wmsSearch/', wms_views.wmsSearch, name='wmsSearch'),
     ], 'wms'))),
 
     path('bundle/', include(([
