@@ -18,11 +18,6 @@ export class RadarChart extends Component {
     }
 
     handleBrowserCount(){
-        service.browserCount().then(({ user_browser_names_counts , user_browser_count}) => {
-            if(user_browser_count){
-                this.setState({user_browser_names_counts, user_browser_count})
-            }
-        })
 
     }
 

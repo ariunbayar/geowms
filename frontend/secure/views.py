@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET, require_POST
 from main.auth_api import GeoAuth
 from geoportal_app.models import User, Role
-from backend.log.models import UserLog
 import platform 
 import requests
 from django.http import JsonResponse, HttpResponse
@@ -22,22 +21,6 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
     
-    
-def loginLog(request, user):
-    browser_name = request.user_agent.browser.family
-    browser_version = request.user_agent.browser.version_string
-    device_name = request.user_agent.device.family
-    ip_address = get_client_ip(request)
-    username = user.username
-    email = user.email
-    if request.user_agent.is_pc:
-        plt = platform.system()
-        device_name = plt
-    else:
-        device_name = request.user_agent.device.family
-
-    UserLog.objects.create(username=username, email=email, browser_name=browser_name, browser_version=browser_version, device_name=device_name, ip_address=ip_address)
-
 
 def register(request):
     if request.method == "POST":
@@ -107,7 +90,6 @@ def login_dan(request):
                 user.roles.add(1)
 
             auth.login(request, user)
-            oginLog(request, user)
             if request.user_agent.is_mobile:
                 return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
             else:
@@ -132,7 +114,6 @@ def login(request):
             if user is not None:
                 if user.is_active:
                     auth.login(request, user)
-                    loginLog(request, user)
                     return redirect(settings.LOGIN_REDIRECT_URL)
                 else:
                     messages.warning(request, 'Таны хаяг идэвхгүй байна.')

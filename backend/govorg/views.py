@@ -30,12 +30,14 @@ def _generate_govorg_token():
     return uuid.uuid4().hex[:32]
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def жагсаалт(request):
-
-    govorg_list = GovOrg.objects.all()
+def жагсаалт(request,payload):
+    last=payload.get('last')
+    first=payload.get('first')
+    print(last,first)
+    govorg_list = GovOrg.objects.all()[first:last]
 
     govorg_list_display = [
         _get_govorg_display(govorg)
@@ -44,6 +46,7 @@ def жагсаалт(request):
 
     rsp = {
         'govorg_list': govorg_list_display,
+        'len':GovOrg.objects.all().count(),
         'success': True,
     }
 
@@ -79,7 +82,7 @@ def _get_govorg_detail_display(request, govorg):
             'is_active': wms.is_active,
             'url': wms.url,
             'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
-            'public_url': request.build_absolute_uri(reverse('api:систем:proxy', args=[govorg.token, wms.pk])),
+            'public_url': request.build_absolute_uri(reverse('api:service:proxy', args=[govorg.token, wms.pk])),
         }
         for wms in WMS.objects.all()
     ]

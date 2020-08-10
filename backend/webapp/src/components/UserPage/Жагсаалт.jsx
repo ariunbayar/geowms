@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import "./style.css"
 import {service} from './service'
 import User from './User'
+import { toSize } from "ol/size"
 
 export class Жагсаалт extends Component {
 
@@ -14,54 +15,70 @@ export class Жагсаалт extends Component {
             user_list: [],
             user_length:null,
             currentPage:1,
-            usersPerPage:20
-
-        }
+            usersPerPage:8,
+            }     
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)
     }
 
     componentDidMount() {
-        this.handleListUpdated()
+        const {currentPage}=this.state
+        this.handleListCal(currentPage)
     }
 
-    handleListUpdated() {
+    handleListCal(currentPage){
+        const {usersPerPage}=this.state
+        const lastIndex=currentPage*usersPerPage
+        const firtsIndex=lastIndex-usersPerPage
+        this.handleListUpdated(lastIndex,firtsIndex)
+    }
 
-        service.getAll().then(({user_list}) => {
-            this.setState({user_list,user_length: user_list.length})
-            
-        })
-        
+    handleListUpdated(lastIndex,firtsIndex) { 
+        service.getAll(lastIndex,firtsIndex).then(({user_list,len}) => {
+            if(len){
+             this.setState({user_list,user_length:len})
+            }
+         })
+         
     }
 
     prevPage(){
+        
         if(this.state.currentPage >1){
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
+            
         }
     }
+
     nextPage(){
+
         if(this.state.currentPage<Math.ceil(this.state.user_length/this.state.usersPerPage)){
             this.setState({
-                currentPage:this.state.currentPage+1
+                currentPage:this.state.currentPage+1,
             })
+            this.handleListCal(this.state.currentPage+1)
+
         }
+       
     }
+
     render() {
-        const {currentPage, usersPerPage, user_list, user_length}=this.state
-        const lastIndex=currentPage*usersPerPage
-        const firtsIndex=lastIndex-usersPerPage 
+        const {user_list, user_length, currentPage,usersPerPage}=this.state
         const totalPages=Math.ceil( user_length/usersPerPage)
-        const currentUsers= user_list.slice(firtsIndex,lastIndex)
+
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12">
+
                         <table className="table table-fluid">
-                        <thead>
+                            <thead>
                                 <tr>
                                     <th scope="col"> № </th>
                                     <th scope="col"> Нэр </th>
@@ -70,19 +87,19 @@ export class Жагсаалт extends Component {
                                     <th scope="col">Идэвхтэй эсэх</th>
                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
                                 </tr>
-                            </thead>                     
-                                    <tbody>
-                                        {user_length === 0 ?
-                                            <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
-                                            currentUsers.map((values,index) =>
-                                                <User
-                                                    key={values.id}
-                                                    values={values}
-                                                    idx={(currentPage*20)-20+index+1}
-                                                />
-                                            )
-                                        }
-                                    </tbody>
+                          </thead>
+                            <tbody>
+                                {user_length === 0 ?
+                                    <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
+                                    user_list.map((values,index) =>
+                                        <User
+                                            key={values.id}
+                                            values={values}
+                                            idx={(this.state.currentPage*8)-8+index+1}
+                                        />
+                                    )
+                                }
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -101,11 +118,9 @@ export class Жагсаалт extends Component {
                             <button 
                             type="button"
                             className="btn btn-outline-primary "
-                            onClick={this.nextPage
-                            } >
+                            onClick={this.nextPage} >
                             дараах &raquo;
                             </button>
-                            
                         </div>
                     </div>
                 </div>

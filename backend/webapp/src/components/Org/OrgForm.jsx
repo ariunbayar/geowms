@@ -18,41 +18,54 @@ export class OrgForm extends Component {
         this.handleUserDelete=this.handleUserDelete.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
+        this.handleListCal=this.handleListCal.bind(this)
     }
-    componentDidMount(){
-        const org_level = this.props.match.params.level
+    componentDidMount(){  
+        const {currentPage}=this.state
+        this.handleListCal(currentPage)
+    }
 
-        this.handleGetAll(org_level)
+    handleListCal(currentPage){
+        const org_level=this.props.match.params.level
+        const {orgPerPage}=this.state
+        const lastIndex=currentPage*orgPerPage
+        const firtsIndex=lastIndex-orgPerPage
+        const value={ "firstIndex":firtsIndex, "lastIndex": lastIndex}
+        this.handleGetAll(org_level,value)
     }
-    handleGetAll(org_level){
-        service.getAll(org_level).then(({ orgs }) => {
+
+    handleGetAll(org_level,value){
+        service.getAll(org_level,value).then(({ orgs,len }) => {
             if (orgs) {
-                this.setState({ orgs , org_length:orgs.length})
+                this.setState({ orgs , org_length:len})
+    
             }
         })
     }
     componentDidUpdate(prevProps) {
         if (this.props.match.params.level !== prevProps.match.params.level) {
             const org_level = this.props.match.params.level
-
-            this.handleGetAll(org_level)
+            const currentPage=this.state
+        //    this.handleListCal(currentPage,org_level )
         }
     }
     handleUserDelete(id){
         const org_level = this.props.match.params.level
-
         service.org_remove(org_level,id).then(({ success }) => {
             if (success) {
-                this.handleGetAll(org_level)
+                const currentPage=this.state.currentPage
+                this.handleListCal(currentPage)
             }
         })
     }
-    
+
     prevPage(){
         if(this.state.currentPage >1){
             this.setState({
                 currentPage:this.state.currentPage-1
             })
+            this.handleListCal(this.state.currentPage-1)
+
         }
     }
     nextPage(){
@@ -60,15 +73,13 @@ export class OrgForm extends Component {
             this.setState({
                 currentPage:this.state.currentPage+1
             })
+            this.handleListCal(this.state.currentPage+1)
         }
     }
     render() {
         const {orgs,orgPerPage,currentPage,org_length} = this.state
         const org_level = this.props.match.params.level
-        const lastIndex=currentPage*orgPerPage
-        const firtsIndex=lastIndex-orgPerPage 
         const totalPages=Math.ceil( org_length/orgPerPage)
-        const currentOrg= orgs.slice(firtsIndex,lastIndex)
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -93,7 +104,7 @@ export class OrgForm extends Component {
                                 { org_length ===0 ?
                                     <tr><td>Байгууллага бүртгэлгүй байна</td></tr>:
 
-                                    currentOrg.map((org, idx) =>
+                                    orgs.map((org, idx) =>
                                         <OrgFormTable
                                             key={idx}
                                             idx={(currentPage*20)-20+idx+1}

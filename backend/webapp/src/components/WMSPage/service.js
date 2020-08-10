@@ -70,8 +70,11 @@ function _getGetOptions() {
 }
 
 
-function getAll() {
-    const requestOptions = {..._getGetOptions()}
+function getAll(last,first) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({last,first}),
+    }
     return fetch(`${prefix}/wms/all/`, requestOptions).then(handleResponse)
 }
 

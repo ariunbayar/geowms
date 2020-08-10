@@ -43,16 +43,18 @@ def _get_role_display(role):
     return {
         'id': role.id,
         'name': role.get_id_display(),
+        'success':True
     }
 
-@require_GET
+@require_POST
 @ajax_required
-def all(request):
-
-    user_list = [_get_user_display(user) for user in User.objects.all()]
-    
+def all(request,payload):
+    last = payload.get('last')
+    first = payload.get('first')
+    user_list = [_get_user_display(user) for user in User.objects.all()[first:last]
     rsp = {
         'user_list': user_list,
+        'len':User.objects.all().count(),
     }
 
     return JsonResponse(rsp)
@@ -81,7 +83,6 @@ def дэлгэрэнгүй(request, pk):
         'user_detail': _get_user_detail(user),
         'roles': roles,
         'all_role':all_roles,
-        'success': True,
     }
 
     return JsonResponse(rsp)

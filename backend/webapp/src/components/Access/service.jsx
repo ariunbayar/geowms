@@ -6,17 +6,25 @@ export const service = {
     pageCount,
     pageAll,
     loginAll,
-    logoutAll,
+    CrudEventAll,
     loginDateCount,
+    loginSearch,
     logoutDateCount,
-    pageUserCount
+    pageUserCount,
+    crudMethodCount,
+    crudDateCount,
+    pageSearch,
+    crudSearch
+
 }
 
 
 const prefix = '/back/api'
 
 function getAll() {
-    const requestOptions = {...getGetOptions()}
+    const requestOptions = {
+        ...getGettOptions(),
+    }
     return fetch(`${prefix}/log/`, requestOptions).then(handleResponse)
 }
 
@@ -35,8 +43,17 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
-function pageAll() {
-    const requestOptions = {...getGetOptions()}
+function pageSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/log/page-search/`, requestOptions).then(handleResponse)
+}
+
+function pageAll(last, first) {
+    const requestOptions = {...getPostOptions(),
+        body: JSON.stringify({last, first})}
     return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
 }
 
@@ -45,17 +62,49 @@ function loginDateCount() {
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
 }
 
+function loginSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/log/login-search/`, requestOptions).then(handleResponse)
+}
+
 function logoutDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
 }
 
-function loginAll() {
-    const requestOptions = {...getGetOptions()}
+function loginAll(last,first) {
+    const requestOptions = {
+        ...getPostOptions(),    
+        body: JSON.stringify({last, first})
+    }
     return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
 }
 
-function logoutAll() {
+function CrudEventAll(last,first) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({last, first})
+    }
+    return fetch(`${prefix}/log/crud-event-all/`, requestOptions).then(handleResponse)
+}
+
+function crudMethodCount() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/log/logout-all/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/log/crud-method-count/`, requestOptions).then(handleResponse)
+}
+
+function crudDateCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
+}
+
+function crudSearch(query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/log/crud-search/`, requestOptions).then(handleResponse)
 }

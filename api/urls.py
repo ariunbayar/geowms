@@ -6,8 +6,8 @@ from api.govorg import views as govorg_views
 app_name = 'api'
 urlpatterns = [
 
-    path('систем/', include(([
+    path('service/', include(([
         path('<str:token>/<int:pk>/', govorg_views.proxy, name='proxy'),
-    ], 'систем'))),
+    ], 'service'))),
 
 ]
