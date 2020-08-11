@@ -10,7 +10,7 @@ export default class WMSItem extends Component {
 
         this.state = {
             name: props.wms.name,
-            tile: props.wms.tile,
+            tiles: props.wms.tiles,
             layers: props.wms.layers,
             is_visible: true,
         }
@@ -27,9 +27,7 @@ export default class WMSItem extends Component {
 
     render() {
 
-        const {tile, name, layers, is_visible} = this.state
-        console.log("layers")
-        console.log(layers)
+        const {tiles, name, layers, is_visible} = this.state
         return (
             <Fragment>
 
@@ -45,7 +43,7 @@ export default class WMSItem extends Component {
                 </p>
                 <WMSLayerItems
                     layers={layers}
-                    tileWMS={tile.getSource()}
+                    tileWMS={tiles}
                 />
             </Fragment>
         )
