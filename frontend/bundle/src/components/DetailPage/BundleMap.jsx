@@ -257,8 +257,8 @@ export default class BundleMap extends Component {
         const projection = view.getProjection()
         const resolution = view.getResolution()
 
-        this.state.map_wms_list.forEach(({tiles}) => {
-            tiles.forEach((tile) => {
+        this.state.map_wms_list.forEach(({layers}) => {
+            layers.forEach(({tile}) => {
 
                 const wms_source = tile.getSource()
 
