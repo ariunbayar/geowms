@@ -153,8 +153,8 @@ LOGOUT_REDIRECT_URL = 'bundle:all'
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 
-PAYMENT_SUCCESS_REDIRECT_URL = 'bundle:success'
-PAYMENT_FAIL_REDIRECT_URL = 'bundle:failed'
+PAYMENT_SUCCESS_REDIRECT_URL = 'payment:success'
+PAYMENT_FAIL_REDIRECT_URL = 'payment:failed'
 
 MONGOL_BANK_SUCCESS_HTML = os.path.join(BASE_DIR, 'frontend/payment/templates/payment/mongolbank.html')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')

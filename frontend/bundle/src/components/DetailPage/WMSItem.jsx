@@ -10,7 +10,7 @@ export default class WMSItem extends Component {
 
         this.state = {
             name: props.wms.name,
-            tile: props.wms.tile,
+            tiles: props.wms.tiles,
             layers: props.wms.layers,
             is_visible: true,
         }
@@ -27,7 +27,7 @@ export default class WMSItem extends Component {
 
     render() {
 
-        const {tile, name, layers, is_visible} = this.state
+        const {tiles, name, layers, is_visible} = this.state
         return (
             <Fragment>
 
@@ -41,10 +41,9 @@ export default class WMSItem extends Component {
                     </label>
                     <label className="font-weight-bold" htmlFor="formGroupInput">&nbsp;{name}</label>
                 </p>
-
                 <WMSLayerItems
                     layers={layers}
-                    tileWMS={tile.getSource()}
+                    tileWMS={tiles}
                 />
             </Fragment>
         )

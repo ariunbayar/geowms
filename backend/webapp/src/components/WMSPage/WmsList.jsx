@@ -60,7 +60,7 @@ export class WmsList extends Component {
 
     handleListUpdated(lastIndex,firtsIndex) {
 
-        service.getAll(lastIndex,firtsIndex).then(({wms_list, len}) => {
+        service.pagination(lastIndex,firtsIndex).then(({wms_list, len}) => {
             this.setState({wms_list, wms_length:len})
         })
 

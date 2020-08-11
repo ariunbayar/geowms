@@ -9,6 +9,7 @@ from backend.суурь_давхарга import views as суурь_давхар
 from backend.config import views as config_views
 from backend.org import views as org_views
 from backend.log import views as log_views
+from backend.payment import views as payment_views
 
 
 app_name = 'backend'
@@ -16,6 +17,7 @@ urlpatterns = [
 
     path('wms/', include(([
         path('all/', wms_views.all, name='all'),
+        path('pagination/', wms_views.pagination, name='pagination'),
         path('create/', wms_views.create, name='create'),
         path('update/', wms_views.update, name='update'),
         path('delete/', wms_views.delete, name='delete'),
@@ -108,6 +110,11 @@ urlpatterns = [
         path('create/', config_views.create, name='create'),
         path('disk/', config_views.disk, name='disk'),
     ], 'config'))),
+
+    path('payment/', include(([
+        path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
+        path('purchase/', payment_views.purchase, name='purchase'),
+    ], 'payment'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 

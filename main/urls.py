@@ -12,9 +12,9 @@ import api.urls
 urlpatterns = [
 
     path('admin/', admin.site.urls),
-    path('', include(frontend.urls)),
     path('back/', include(backend.urls)),
     path('api/', include(api.urls)),
+    path('', include(frontend.urls)),
 
     re_path(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
@@ -23,4 +23,4 @@ if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
         path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + urlpatterns

@@ -113,20 +113,23 @@ export default class BundleMap extends Component {
 
             return {
                 name,
-                layers,
-                tile: new Tile({
-                    source: new TileWMS({
-                        projection: this.state.projection,
-                        url: url,
-                        params: {
-                            'LAYERS': layers[0].code,
-                            //'FORMAT': 'image/svg+xml',
-                            'FORMAT': 'image/png',
-                        }
-                    }),
+                layers: layers.map((layer) => {
+                    return{
+                        ...layer,
+                        tile: new Tile({
+                            source: new TileWMS({
+                                projection: this.state.projection,
+                                url: url,
+                                params: {
+                                    'LAYERS': layer.code,
+                                    //'FORMAT': 'image/svg+xml',
+                                    'FORMAT': 'image/png',
+                                }
+                            }),
+                        })
+                    }
                 }),
             }
-
         })
 
         this.setState({map_wms_list})
@@ -213,7 +216,11 @@ export default class BundleMap extends Component {
             ]),
             layers: [
                 ...base_layers,
-                ...map_wms_list.map((wms) => wms.tile),
+                ...map_wms_list.reduce((acc_main, wms) =>
+                {
+                        const tiles = wms.layers.map((layer) => layer.tile)
+                        return [...acc_main, ...tiles]
+                }, []),
                 vector_layer,
                 marker_layer,
             ],
@@ -250,49 +257,51 @@ export default class BundleMap extends Component {
         const projection = view.getProjection()
         const resolution = view.getResolution()
 
-        this.state.map_wms_list.forEach(({tile}) => {
+        this.state.map_wms_list.forEach(({layers}) => {
+            layers.forEach(({tile}) => {
 
-            const wms_source = tile.getSource()
+                const wms_source = tile.getSource()
 
-            const url = wms_source.getFeatureInfoUrl(
-                coordinate,
-                resolution,
-                projection,
-                {
-                    //'INFO_FORMAT': 'text/xml'
-                    //'INFO_FORMAT': 'text/html'
-                    'INFO_FORMAT': 'application/vnd.ogc.gml',
-                }
-            )
+                const url = wms_source.getFeatureInfoUrl(
+                    coordinate,
+                    resolution,
+                    projection,
+                    {
+                        //'INFO_FORMAT': 'text/xml'
+                        //'INFO_FORMAT': 'text/html'
+                        'INFO_FORMAT': 'application/vnd.ogc.gml',
+                    }
+                )
 
-            if (url) {
+                if (url) {
 
-                this.controls.modal.showModal(null, false)
+                    this.controls.modal.showModal(null, false)
 
-                fetch(url)
-                    .then((response) => response.text())
-                    .then((text) => {
-                        const parser = new WMSGetFeatureInfo()
-                        const features = parser.readFeatures(text)
-                        const source = new VectorSource({
-                            features: features
-                        });
-                        this.state.vector_layer.setSource(source)
+                    fetch(url)
+                        .then((response) => response.text())
+                        .then((text) => {
+                            const parser = new WMSGetFeatureInfo()
+                            const features = parser.readFeatures(text)
+                            const source = new VectorSource({
+                                features: features
+                            });
+                            this.state.vector_layer.setSource(source)
 
-                        const feature_info = features.map((feature) => {
-                            const geometry_name = feature.getGeometryName()
-                            const values =
-                                feature.getKeys()
-                                .filter((key) => key != geometry_name)
-                                .map((key) => [key, feature.get(key)])
-                            return [feature.getId(), values]
+                            const feature_info = features.map((feature) => {
+                                const geometry_name = feature.getGeometryName()
+                                const values =
+                                    feature.getKeys()
+                                    .filter((key) => key != geometry_name)
+                                    .map((key) => [key, feature.get(key)])
+                                return [feature.getId(), values]
+                            })
+                            this.controls.modal.showModal(feature_info, true)
                         })
-                        this.controls.modal.showModal(feature_info, true)
-                    })
-            } else {
-                /* TODO */
-                console.log('no feature url', wms_source);
-            }
+                } else {
+                    /* TODO */
+                    console.log('no feature url', wms_source);
+                }
+            })
         })
 
     }
