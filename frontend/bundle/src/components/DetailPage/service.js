@@ -1,6 +1,7 @@
 export const service = {
     loadWMSLayers,
     loadBaseLayers,
+    payment
 }
 
 function getCookie(name) {
@@ -66,4 +67,12 @@ function loadBaseLayers() {
         ..._getGetOptions(),
     }
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
+}
+
+function payment(price, description) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({price, description})
+    }
+    return fetch('/back/payment/purchase/', requestOptions).then(handleResponse)
 }

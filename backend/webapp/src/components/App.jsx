@@ -4,8 +4,8 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import {WMSPage} from "./WMSPage";
 import {BundlePage} from "./BundlePage";
 import {DevPage} from "./DevPage";
+import {Org} from "./Org";
 import {UserPage} from "./UserPage";
-import {GovorgPage} from "./GovorgPage";
 import { СуурьДавхаргаХуудас } from "./СуурьДавхаргаХуудас";
 import {service} from "./service";
 import {ConfigPage} from "./ConfigPage";
@@ -17,14 +17,14 @@ export default class App extends Component {
     super(props);
 
        this.state = {
-      govorg_count: 0,
+        user_count: 0,
     };
   }
 
-  componentDidMount() {
+   componentDidMount() {
 
-    service.getGovOrgCount().then(({ count }) => {
-      this.setState({ govorg_count: count });
+   service.userCount().then(({ user_count }) => {
+      this.setState({ user_count: user_count });
     });
 
   }
@@ -46,7 +46,7 @@ export default class App extends Component {
             <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
               <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>ACCESS</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/login/"}>ACCESS</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/huulga/"}>ХУУЛГА</NavLink>
@@ -61,9 +61,7 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/"}>
-                  СИСТЕМҮҮД
-                   {this.state.govorg_count > 0 && " (" + this.state.govorg_count + ")"}</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/түвшин/1/"}>БАЙГУУЛЛАГА</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}> СУУРЬ ДАВХРАГА</NavLink>
@@ -72,7 +70,7 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/user"}>ХЭРЭГЛЭГЧ</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/user"}>ХЭРЭГЛЭГЧ ({this.state.user_count})</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/тохиргоо/"}>ТОХИРГОО</NavLink>
@@ -84,9 +82,9 @@ export default class App extends Component {
         <div className="main-content">
           <Switch>
             <Route path={"/back/wms/"} component={WMSPage} />
-            <Route path={"/back/байгууллага/"} component={GovorgPage} />
+            <Route path={"/back/байгууллага/"} component={Org} />
             <Route exact path={"/back/log/"} component={Log} />
-            <Route exact path={"/back/access/"} component={Access} />
+            <Route path={"/back/access/"} component={Access} />
             <Route exact path={"/back/huulga/"} component={Huulga} />
             <Route
               path={"/back/суурь-давхарга/"}

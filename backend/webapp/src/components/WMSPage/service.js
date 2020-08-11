@@ -12,7 +12,10 @@ export const service = {
     titleUpdate,
     layerAdd,
     layerRemove,
-    detail
+    detail,
+    wmsIsActiveUpdate,
+    wmsSearch,
+    pagination
 }
 
 const prefix = '/back'
@@ -68,9 +71,18 @@ function _getGetOptions() {
     }
 }
 
+function pagination(last,first) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({last,first}),
+    }
+    return fetch(`${prefix}/wms/pagination/`, requestOptions).then(handleResponse)
+}
 
 function getAll() {
-    const requestOptions = {..._getGetOptions()}
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
     return fetch(`${prefix}/wms/all/`, requestOptions).then(handleResponse)
 }
 
@@ -144,6 +156,15 @@ function update(values) {
     return fetch(`${prefix}/wms/update/`, opts).then(handleResponse)
 }
 
+function wmsIsActiveUpdate(id, is_active) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, is_active}),
+    }
+
+    return fetch(`${prefix}/wms/activeUpdate/`, opts).then(handleResponse)
+}
+
 
 function remove(id) {
     const opts = {
@@ -177,4 +198,12 @@ function getLayers(wms_url) {
             })
             .catch(reject)
     })
+}
+
+function wmsSearch(query) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/wms/wmsSearch/`, requestOptions).then(handleResponse)
 }

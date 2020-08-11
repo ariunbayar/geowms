@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-
+from django.contrib.auth.decorators import user_passes_test
 from main.decorators import ajax_required
 from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
@@ -23,6 +23,7 @@ def _get_bundle_options():
         layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
         wms_display = {
             'name': wms.name,
+            'is_active': wms.is_active,
             'layers': layers,
         }
         form_options.append(wms_display)
@@ -32,6 +33,7 @@ def _get_bundle_options():
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def roleCreate(request, payload):
 
     bundleId = payload.get('bundleId')
@@ -51,6 +53,7 @@ def roleCreate(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def roleRemove(request, payload):
 
     bundleId = payload.get('bundleId')
@@ -69,6 +72,7 @@ def roleRemove(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def defaultCheckUpdate(request, payload):
 
     bundleId = payload.get('bundleId')
@@ -122,7 +126,7 @@ def _get_bundle_display(bundle):
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
-        'wms_list': [(WMS.objects.get(pk=wms[0]).name) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': [{'name': (WMS.objects.get(pk=wms[0]).name), 'is_active':(WMS.objects.get(pk=wms[0]).is_active)} for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
         'roles': roles
     }
 
@@ -132,15 +136,10 @@ def _get_bundle_display(bundle):
 def all(request):
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
-    form_options = _get_bundle_options()
-    form_options_role = _get_role_options()
 
     rsp = {
         'bundle_list': bundle_list,
-        'form_options': form_options,
-        'form_options_role': form_options_role,
     }
-
     return JsonResponse(rsp)
 
 @require_GET
@@ -160,6 +159,7 @@ def updateMore(request, pk):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def create(request, payload):
 
     сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
@@ -181,6 +181,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def update(request, payload):
 
     bundle = get_object_or_404(Bundle, pk=payload.get('id'))
@@ -201,6 +202,7 @@ def update(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def remove(request, payload):
 
     pk = payload.get('id')
@@ -216,6 +218,7 @@ def remove(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def move(request, payload):
 
     bundle1 = get_object_or_404(Bundle, pk=payload.get('id'))

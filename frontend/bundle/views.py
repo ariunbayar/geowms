@@ -54,8 +54,7 @@ def wms_layers(request, pk):
 
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
-    qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order')
-
+    qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order').distinct()
     def _layer_to_display(ob):
         bundle_layers = BundleLayer.objects.filter(
                 bundle_id=pk,
@@ -70,30 +69,16 @@ def wms_layers(request, pk):
             }
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
-        wms_data = {
-            'name': wms.name,
-            'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
-            'layers': [_layer_to_display(layer) for layer in layers],
-        }
-        wms_list.append(wms_data)
+        if wms.is_active:
+            wms_data = {
+                'name': wms.name,
+                'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+                'layers': [_layer_to_display(layer) for layer in layers],
+            }
+            wms_list.append(wms_data)
 
     rsp = {
         'wms_list': wms_list,
     }
 
     return JsonResponse(rsp)
-
-
-def purchase(request):
-
-    return render(request, 'bundle/purchase.html')
-
-
-def success(request):
-
-    return render(request, 'bundle/purchase_success.html')
-
-
-def failed(request):
-
-    return render(request, 'bundle/purchase_failed.html')

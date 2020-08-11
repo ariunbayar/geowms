@@ -5,12 +5,14 @@ import {NavLink} from "react-router-dom"
 export default class User extends Component {
 
     render() {
-        const {id, last_name, first_name, is_superuser, email, is_active, is_sso} = this.props.values
 
+        const {id, last_name, first_name, roles, email, is_active, is_sso} = this.props.values
+
+        const idx=this.props.idx
         return (
             <tr>
                 <td scope="col">
-                    #{id}
+                    {idx}
                 </td>
                 <td scope="col">
                     <NavLink to={`/back/user/${id}/дэлгэрэнгүй/`}>
@@ -21,10 +23,10 @@ export default class User extends Component {
                     {email}
                 </td>
                 <td>
-                    {is_superuser ? 'Админ' : '-'}
+                    {roles.map(role=>role.name)}
                 </td>
                 <td>
-                    {is_active ? '-' : 'Идэвхигүй'}
+                    {is_active ? <p className="text-primary">Идэвхтэй </p>: <p className="text-muted">Идэвхгүй</p>}
                 </td>
                 <td>
                     {is_sso &&

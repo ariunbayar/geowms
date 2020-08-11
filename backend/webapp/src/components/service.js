@@ -1,13 +1,14 @@
 import {handleResponse, getGetOptions} from '../helpers/service'
+         
 
 
 export const service = {
-    getGovOrgCount,
+    userCount
 }
 
 const prefix = '/back'
 
-function getGovOrgCount() {
+function userCount() {
     const opts = {...getGetOptions()}
-    return fetch(`${prefix}/api/байгууллага/тоо/`, opts).then(handleResponse)
+    return fetch(`${prefix}/api/user/userCount/`, opts).then(handleResponse)
 }

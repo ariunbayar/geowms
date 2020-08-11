@@ -1,7 +1,9 @@
 export const service = {
     getAll,
     detail,
+    userDetailChange,
     roleCreate,
+    userSearch
 }
 
 const prefix = '/back/api/user'
@@ -21,6 +23,7 @@ function handleResponse(response) {
         return data
     })
 }
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -36,7 +39,6 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
 function _getGetOptions() {
     return {
         method: 'GET',
@@ -55,25 +57,42 @@ function _getPostOptions() {
     }
 }
 
-function getAll() {
+function getAll(last, first) {
     const requestOptions = {
-        ..._getGetOptions(),
+        ..._getPostOptions(),
+    body: JSON.stringify({last, first}),
     }
     return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
 }
 
 
 function detail(id) {
-    const opts = {
+    const opts = { 
         ..._getGetOptions(),
     }
 
     return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
 }
+
+function userDetailChange(id, is_active){
+    const opts = {
+    ..._getPostOptions(),
+    body: JSON.stringify({id, is_active}),
+    }
+    return fetch(`${prefix}/userDetailChange/`, opts).then(handleResponse)
+    }
+
 function roleCreate(payload){
     const opts = {
         ..._getPostOptions(),
         body: JSON.stringify(payload),
     }
     return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
+}
+function userSearch(query) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/userSearch/`, requestOptions).then(handleResponse)
 }

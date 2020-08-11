@@ -28,11 +28,11 @@ export class DevPage extends Component {
                 <strong>Fontawesome 4.7.0: </strong>
                 <LinkExternal href="https://fontawesome.com/v4.7.0/icons/"/>
             </p>
-            <p>
+              <p>
                 <strong>Bootstrap 4.5.0: </strong>
                 <LinkExternal href="https://getbootstrap.com/docs/4.5/components/alerts/"/>
             </p>
-            <p>
+            <div>
                 <strong>react-chartjs-2 (2.9.0): </strong><br/>
                 <ul>
                     <li>
@@ -42,46 +42,56 @@ export class DevPage extends Component {
                     </li>
                     <li>NPM: <LinkExternal href="https://www.npmjs.com/package/react-chartjs-2"/></li>
                 </ul>
-            </p>
+            </div>
 
             <h1>Координатын формат</h1>
 
             <div>
-              <ul>
-                <li>
-                  Хэрэглэгчид координатын форматыг үзүүлэхэд энэ форматаар
-                  таниулна.
-                </li>
-                <li>
-                  Загвар нь <code>&lt;өргөрөг&gt;,&lt;уртраг&gt;</code> байна.
-                </li>
-                <li>Өргөрөг нь уртрагийн урд бичигдэнэ</li>
-                <li>
-                  Өргөрөг, уртраг нь таслалаас хойш 6 орны нарийвчлалтай,
-                  бутархай хэсгийг
-                  {} <strong>цэгээр</strong> тусгаарласан байна.
-                </li>
-                <li>
-                  Зөв утга: <code>47.917426,106.918118</code>
-                </li>
-                <li>
-                  Буруу утга: <code>47,917426,106,918118</code>. Бутархай орныг
-                  таслалаар тусгаарлаж болохгүй.
-                </li>
-                <li>
-                  Буруу утга: <code>106.918118,47.917426</code>. Өргөрөгийг
-                  уртрагийн өмнө бичих ёстой.
-                </li>
-                <li>
-                  Өргөрөг: <code>-90</code> -ээс <code>90</code> -ийн хооронд
-                  байдаг
-                </li>
-                <li>
-                  Уртраг: <code>-180</code> -аас <code>180</code> -ын хооронд
-                  байдаг
-                </li>
-              </ul>
+                <ul>
+                    <li>
+                        Хэрэглэгчид координатын форматыг үзүүлэхэд энэ форматаар
+                        таниулна.
+                    </li>
+                    <li>
+                        Загвар нь <code>&lt;өргөрөг&gt;,&lt;уртраг&gt;</code> байна.
+                    </li>
+                    <li>Өргөрөг нь уртрагийн урд бичигдэнэ</li>
+                    <li>
+                        Өргөрөг, уртраг нь таслалаас хойш 6 орны нарийвчлалтай,
+                        бутархай хэсгийг
+                        {} <strong>цэгээр</strong> тусгаарласан байна.
+                    </li>
+                    <li>
+                        Зөв утга: <code>47.917426,106.918118</code>
+                    </li>
+                    <li>
+                        Буруу утга: <code>47,917426,106,918118</code>. Бутархай орныг
+                        таслалаар тусгаарлаж болохгүй.
+                    </li>
+                    <li>
+                        Буруу утга: <code>106.918118,47.917426</code>. Өргөрөгийг
+                        уртрагийн өмнө бичих ёстой.
+                    </li>
+                    <li>
+                        Өргөрөг: <code>-90</code> -ээс <code>90</code> -ийн хооронд
+                        байдаг
+                    </li>
+                    <li>
+                        Уртраг: <code>-180</code> -аас <code>180</code> -ын хооронд
+                        байдаг
+                    </li>
+                </ul>
             </div>
+
+            <h1>GeoPortal гар утасны android application</h1>
+            <div>
+                 <ul>
+                     <li>Татах линк:
+                         <LinkExternal href="/static/assets/geoportal.apk"/>
+                     </li>
+                </ul>
+            </div>
+
             <h1>Өнгөний код</h1>
             <div className="col-md-3 colordiv">
               <ul>

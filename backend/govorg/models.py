@@ -6,7 +6,7 @@ class GovOrg(models.Model):
     class Meta:
         ordering = ('created_at',)
         db_table = 'govorg'
-
+    org = models.ForeignKey('backend_org.Org', on_delete=models.PROTECT, null=True)
     name = models.CharField(max_length=250)
     token = models.CharField(max_length=250, db_index=True)
 

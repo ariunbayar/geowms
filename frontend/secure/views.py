@@ -6,11 +6,21 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET, require_POST
 from main.auth_api import GeoAuth
 from geoportal_app.models import User, Role
+import platform 
 import requests
 from django.http import JsonResponse, HttpResponse
 
 from .form import RegisterForm, LoginForm
+from user_agents import parse
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+    
 
 def register(request):
     if request.method == "POST":
@@ -77,7 +87,7 @@ def login_dan(request):
                     gender=gender,
                     is_sso=True,
                 )
-                user.roles.add(2)
+                user.roles.add(1)
 
             auth.login(request, user)
             if request.user_agent.is_mobile:

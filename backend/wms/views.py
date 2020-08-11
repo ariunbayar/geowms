@@ -2,14 +2,14 @@ import requests
 
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import reverse, get_object_or_404
+from django.http import JsonResponse, HttpResponse, Http404
+from django.shortcuts import reverse, get_object_or_404, render
 from django.views.decorators.http import require_POST, require_GET
 
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from main.decorators import ajax_required
-
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import WMS
 from .forms import WMSForm
 
@@ -19,6 +19,7 @@ def _get_wms_display(request, wms):
         'id': wms.id,
         'name': wms.name,
         'url': wms.url,
+        'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
@@ -30,17 +31,30 @@ def _get_wms_display(request, wms):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request):
-
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
-    return JsonResponse({'wms_list': wms_list})
+    return JsonResponse({
+        'wms_list': wms_list,
+        })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pagination(request,payload):
+    last=payload.get('last')
+    first=payload.get('first')
+    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()[first:last]]
+    return JsonResponse({
+        'wms_list': wms_list,
+        'len':WMS.objects.all().count()
+        })
 
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateMore(request, pk):
-
-    print("sadsad")
+    
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.filter(id=pk)]
     return JsonResponse({'wms_list': wms_list})
 
@@ -97,6 +111,21 @@ def move(request, payload):
         'success': True,
     }
 
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def activeUpdate(request, payload):
+
+    wms_id = payload.get('id')
+    is_active = payload.get('is_active')
+
+    WMS.objects.filter(pk=wms_id).update(is_active=is_active)
+    rsp = {
+        'success': True,
+    }
     return JsonResponse(rsp)
 
 
@@ -175,6 +204,12 @@ def update(request, payload):
     wms = get_object_or_404(WMS, pk=payload.get('id'))
     layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
+    is_active=payload.get('is_active')
+    wms_id=payload.get("id")
+    if(is_active):
+        wms.is_active=True
+    else:
+        wms.is_active=False
     if form.is_valid():
 
         with transaction.atomic():
@@ -187,6 +222,7 @@ def update(request, payload):
                         name=layer_choice.get('name'),
                         code=layer_choice.get('code'),
                         legend_url=layer_choice.get('legendurl'))
+
 
         return JsonResponse({
                 'success': True
@@ -217,13 +253,30 @@ def proxy(request, wms_id):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
+    is_active = get_object_or_404(WMS, pk=wms_id).is_active
+    if is_active:
 
-    base_url = get_object_or_404(WMS, pk=wms_id).url
+        base_url = get_object_or_404(WMS, pk=wms_id).url
 
-    queryargs = request.GET
-    headers = {**BASE_HEADERS}
-    rsp = requests.get(base_url, queryargs, headers=headers)
+        queryargs = request.GET
+        headers = {**BASE_HEADERS}
+        rsp = requests.get(base_url, queryargs, headers=headers)
 
-    content_type = rsp.headers.get('content-type')
+        content_type = rsp.headers.get('content-type')
 
-    return HttpResponse(rsp.content, content_type=content_type)
+        return HttpResponse(rsp.content, content_type=content_type)
+    
+    else:
+        return render(request, "backend/404.html", {})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def wmsSearch(request,payload):
+
+    query=payload.get('query')
+    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all().annotate(search=SearchVector('name') ).filter(search__contains=query)]
+    return JsonResponse({
+        'wms_list': wms_list,
+        })

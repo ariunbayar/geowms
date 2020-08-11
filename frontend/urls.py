@@ -14,9 +14,6 @@ urlpatterns = [
         path('', bundle_views.all, name='all'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
-        path('purchase/', bundle_views.purchase, name='purchase'),
-        path('purchase/success/', bundle_views.success, name='success'),
-        path('purchase/failed/', bundle_views.failed, name='failed'),
     ], 'bundle'))),
 
     path('', include(([
@@ -25,8 +22,6 @@ urlpatterns = [
         path('login/', secure_views.login, name='login'),
         path('login/dan/', secure_views.login_dan, name='login-dan'),
         path('logout/', secure_views.logout, name='logout'),
-        path('dictionaryRequest', payment_views.dictionaryRequest, name='dictionaryRequest'),
-        path('dictionaryResponse', payment_views.dictionaryResponse, name='dictionaryResponse'),
     ], 'secure'))),
 
     path('m/', include(([
@@ -46,4 +41,11 @@ urlpatterns = [
         path('статистик/', page_views.statistics, name='statistics'),
     ], 'page'))),
 
+
+    path('payment/', include(([
+        path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
+        path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
+    ], 'payment'))),
+
+    re_path('^.*', payment_views.index, name='payment'),
 ]

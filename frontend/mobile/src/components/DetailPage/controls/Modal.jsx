@@ -41,7 +41,6 @@ class ModalComponent extends Component{
                     </div>
                     <div className="modal-footer">
                         <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
-                        <a className="btn btn-secondary" data-dismiss="modal" href="/purchase/">Худалдаж авах</a>
 
                     </div>
                 </div>
