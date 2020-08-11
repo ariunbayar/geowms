@@ -89,6 +89,7 @@ urlpatterns = [
         path('page-search/', log_views.pageSearch, name='page-search'),
         path('page-date-count/', log_views.page_date_count, name='page-date-count'),
         path('page-user-count/', log_views.page_user_count, name='page-user-count'),
+      
     ], 'log'))),
 
     path('api/систем/', include(([
@@ -113,6 +114,7 @@ urlpatterns = [
 
     path('payment/', include(([
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
+        path('payment_all/', payment_views.payment, name='payment_all'),
         path('purchase/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
 

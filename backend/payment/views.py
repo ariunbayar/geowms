@@ -6,6 +6,29 @@ from django.http import JsonResponse
 from geoportal_app.models import User
 from .models import Payment
 
+
+@require_POST
+@ajax_required
+def all(request):
+
+    print("reawaswares")
+    print("reawaswares")
+    print("reawaswares")
+    print("reawaswares")
+    payment_all = []
+
+    for payment in Payment.objects.all():
+          payment_all.append({
+            'id': payment.id,
+            'amount': payment.amount,
+            'description': payment.description,
+            'created_at': payment.datetime.created_at,
+            'geo_unique_number': payment.geo_unique_number,
+            'error_code': payment.error_code,
+        })
+
+    return JsonResponse({'payment_all': payment_all})
+
 # Create your views here.
 @require_POST
 @ajax_required
