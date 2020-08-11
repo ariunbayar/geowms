@@ -37,11 +37,13 @@ export default class WMSLayerItem extends Component {
                     />
                     <a> {name}</a>
                 </label>
-                <ul>
-                    <li>
-                        <img className="img" src={legendURL}/>
-                    </li>
-                </ul>
+                {legendURL != "null" &&
+                    <ul>
+                        <li>
+                            <img className="img" src={legendURL}/>
+                        </li>
+                    </ul>
+                }
             </li>
         )
     }
