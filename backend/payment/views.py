@@ -6,7 +6,28 @@ from django.http import JsonResponse
 from geoportal_app.models import User
 from .models import Payment
 
-# Create your views here.
+@require_POST
+@ajax_required
+def paymentAll(request, payload):
+    last=payload.get("last")
+    first=payload.get("first")
+    payment_display = []
+    #layers = Payment.objects.all().order_by('success_at'))
+    for payment in Payment.objects.all()[first:last]:
+        payment_display.append({
+            'number': payment.number,
+            'amount': payment.amount,
+            'description': payment.description,
+            'is_success':payment.is_success,
+            'success_at':payment.success_at,
+            'user_id': payment.user_id,
+            'created_at': payment.created_at,
+        })
+    return JsonResponse({
+    'payment':  payment_display,
+    'len':Payment.objects.all().count()
+    })
+
 @require_POST
 @ajax_required
 def purchase(request, payload):
@@ -23,7 +44,7 @@ def purchase(request, payload):
 @require_POST
 @ajax_required
 def purchaseAll(request, payload):
-
+    
     purchase_id = payload.get('purchase_id')
     purchase_all=[] 
     for payment in Payment.objects.filter(pk=purchase_id):

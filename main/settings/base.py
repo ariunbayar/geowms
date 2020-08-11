@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'frontend.secure.apps.SecureConfig',
     'frontend.payment.apps.PaymentConfig',
     'frontend.page.apps.PageConfig',
+    'frontend.profile.apps.ProfileConfig',
 
     # Backend apps
 

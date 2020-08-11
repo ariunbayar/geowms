@@ -157,29 +157,29 @@ export class OrgForm extends Component {
                             </tbody>
                         </table>
                     </div>
-                                    <div className="row">
-                    <div className="col-md-12">
-                        <div className="float-left">
-                            <strong>Хуудас {currentPage}-{totalPages}</strong>
-                        </div>
-                        <div className="float-right">
-                            <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
-                            onClick={this.prevPage}
-                            > &laquo; өмнөх
-                            </button>
-                            <button 
-                            type="button"
-                            className="btn btn-outline-primary "
-                            onClick={this.nextPage
-                            } >
-                            дараах &raquo;
-                            </button>
-                            
+                    <div className="row">
+                        <div className="col-md-12">
+                            <div className="float-left">
+                                <strong>Хуудас {currentPage}-{totalPages}</strong>
+                            </div>
+                            <div className="float-right">
+                                <button
+                                type=" button" 
+                                className="btn btn-outline-primary" 
+                                onClick={this.prevPage}
+                                > &laquo; өмнөх
+                                </button>
+                                <button 
+                                type="button"
+                                className="btn btn-outline-primary "
+                                onClick={this.nextPage
+                                } >
+                                дараах &raquo;
+                                </button>
+                                
+                            </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </div>
         )
