@@ -24,10 +24,10 @@ def paymentMethod(finalRequest):
     base_url = 'http://localhost:8000/dictionaryResponse'
     rsp = requests.get(base_url, data={"order": finalRequest}, headers=headers)
 
-    if not rsp:
-        return False
-    else:
+    if rsp.status_code == 200:
         if ransucces == 2:
             return success
         else:
             return allRequest[ran]
+    else:
+        return False
