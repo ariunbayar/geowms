@@ -43,7 +43,19 @@ export class DevPage extends Component {
                     <li>NPM: <LinkExternal href="https://www.npmjs.com/package/react-chartjs-2"/></li>
                 </ul>
             </div>
-
+            <div>
+                <p>
+                    <strong>django-easy-audit 1.2.3: </strong>
+                    <LinkExternal href="https://github.com/soynatan/django-easy-audit"/>
+                </p>
+                <ul>
+                    <li>Бусад лог хөтөлдөг сангууд ихэвчлэн кодондоо ихээхэн өөрчлөлт хийхийг шаарддаг харин django-easy-audit бол ямарч өөрчлөлтийг шаардахгүй.</li>
+                    <li>Хүссэн линкээ нэмэлтээр хориглож болно.</li>
+                    <li>Хүссэн model-оо нэмэлтээр хориглож болно.</li>
+                    <li>Нэмэлтээр кодчилол шаардахгүй.</li>
+                    <li>Django админ хэсгээс лавлах боломжтой.</li>
+                </ul>
+            </div>
             <h1>Координатын формат</h1>
 
             <div>
