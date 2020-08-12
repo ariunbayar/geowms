@@ -6,11 +6,11 @@ from Crypto.PublicKey import RSA
 from django.conf import settings
 
 
-def objectToXmlAccount(amount):
+def objectToXmlAccount(amount, description):
     Bank = settings.PAYMENT['BANK']
     AccountId = settings.PAYMENT['ACCOUNT_ID']
     AccountName = settings.PAYMENT['ACCOUNT_NAME']
-    Description = settings.PAYMENT['DESCRIPTION']
+    Description = description
     root = Element('Account')
     BankXml = SubElement(root, 'Bank')
     BankXml = Bank
@@ -81,3 +81,24 @@ def signKey(data):
     cipher = PKCS1_v1_5.new(key)
     encrypted_message = cipher.encrypt(data.encode())
     return encrypted_message
+
+
+def xmlConvert(price, description):
+    # Account xml
+    account = objectToXmlAccount(price, description)
+    # Accounts xml
+    accounts = objectToXmlAccounts(account)
+    #encrypt accounts and convert to hex
+    encryptedAccounts = encrypts(accounts)
+    encAccounts = bytesToHex(encryptedAccounts)
+    #encrypt Desede key of payment request and convert to hex
+
+    # encryptedKey = signKey(encAccounts)
+    # encKey = bytesToHex(encryptedKey)
+    encKey = encAccounts
+    #create request xml
+    finalRequest = PaymentVerifyRequestMB(price, encAccounts, encKey)
+    # for i in finalRequest:
+    #     print(tostring(i))
+    
+    return finalRequest

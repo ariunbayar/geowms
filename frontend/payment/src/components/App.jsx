@@ -1,9 +1,9 @@
 import React, {Component} from 'react'
 import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 
-import {Purchase} from './Purchase'
-import {Failed} from './Failed'
-import {Success} from './Success'
+import {Purchase} from './Purchase/Purchase'
+import {Failed} from './Failed/Failed'
+import {Success} from './Success/Success'
 
 
 export class App extends Component {

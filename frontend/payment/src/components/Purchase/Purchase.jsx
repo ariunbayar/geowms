@@ -16,18 +16,27 @@ export class Purchase extends Component {
 
         service.purchaseAll(purchase_id).then(({ purchase_all }) => {
             if (purchase_all) {
-                this.setState({purchase_all})                
+                purchase_all.map((purchase_all) => 
+                this.setState({purchase_all}) 
+                )              
             }
         })
     }
     handlePayment (){
-        const {price} = this.state
-        service.payment(price)
+        const {purchase_all} = this.state
+        service.payment(purchase_all).then(({ success }) => {
+            if (success) {
+                this.props.history.push(`/payment/success/${purchase_all.id}/`)      
+            }
+            else{
+                this.props.history.push(`/payment/failed/${purchase_all.id}/`)      
+            }
+        })
 
     }
 
     render() {
-        const { purchase } = this.state
+        const { purchase, purchase_all } = this.state
         return (
         <div class="container">
             <div class="row">
@@ -38,7 +47,7 @@ export class Purchase extends Component {
                         <tbody>
                             <tr>
                                 <td><i class="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
-                                <td>Газрын бүрхэвч, газар ашиглалт</td>
+                                <td>{purchase_all.description}</td>
                             </tr>
                             <tr>
                                 <td><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
@@ -73,17 +82,23 @@ export class Purchase extends Component {
                                 <td>1113.268</td>
                             </tr>
                             <tr>
-                                <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
-                                <td>{this.state.price}</td>
+                                <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Гүйлгээний дугаар</td>
+                                <td>{purchase_all.geo_unique_number}</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Мөнгөн дүн</td>
+                                <td>{purchase_all.amount}₮</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>НИЙТ МӨНГӨН ДҮН</td>
+                                <td>{purchase_all.amount}₮</td>
                             </tr>
                         </tbody>
                     </table>
                     <button  class="btn gp-btn-primary text-center mt-3" onClick={() => this.handlePayment()}>
-                        <a class="fa fa-shopping-cart mr-2"> Худалдаж авах</a>
+                            <a class="fa fa-shopping-cart mr-2"> Худалдаж авах</a>
                     </button>
-
                 </div>
-                
             </div>
         </div>
         )
