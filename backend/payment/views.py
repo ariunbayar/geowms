@@ -12,8 +12,6 @@ from .models import Payment
 def all(request):
     payment_all = []
     created_at = Payment.objects.all().order_by('created_at')
- 
-
     for payment in Payment.objects.all():
           payment_all.append({
             'id': payment.id,
@@ -48,7 +46,6 @@ def purchase(request, payload):
     payment = Payment.objects.create(number=count, amount=price, description=description, user=user, is_success=False )
     
     return JsonResponse({'payment_id': payment.id})
-
 
 @require_POST
 @ajax_required

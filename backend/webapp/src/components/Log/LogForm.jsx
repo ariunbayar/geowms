@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {LogFormTable} from './LogFormTable'
 import {service} from './service'
 
-
 export class LogForm extends Component {
 
     constructor(props) {
@@ -47,7 +46,6 @@ export class LogForm extends Component {
                 currentPage:this.state.currentPage-1
             })
             this.handleListCal(this.state.currentPage-1)
-
         }
     }
 
@@ -61,19 +59,14 @@ export class LogForm extends Component {
     }
    
     handleListUpdated(){
-
         service.getAll().then(({payment_all}) => {
             this.setState({payment_all})
         })
-
-
     }
     render() {
         const {payment_all} = this.state
         const {payPerPage,currentPage,pay_legth} = this.state
         const totalPages=Math.ceil( pay_legth/payPerPage)
-      
-
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -127,8 +120,5 @@ export class LogForm extends Component {
                 </div>
             </div>      
         )
-
     }
-
-
 }
