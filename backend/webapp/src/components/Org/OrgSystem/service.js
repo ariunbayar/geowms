@@ -15,10 +15,10 @@ export const service = {
 const prefix = '/back/api/систем'
 
 
-function getAll(last,first) {
+function getAll(last,first,org_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({last,first}),
+        body: JSON.stringify({last,first,org_id}),
     }
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
