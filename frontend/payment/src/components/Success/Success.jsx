@@ -70,7 +70,7 @@ export class Success extends Component {
                             </tr>
                             <tr>
                                 <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
-                                <td>{purchase_all.price}</td>
+                                <td>{purchase_all.amount}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -84,10 +84,10 @@ export class Success extends Component {
                                     Гүйлгээний дугаар | {purchase_all.bank_unique_number}
                                 </li>
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
-                                    Мөнгөн дүн | {purchase_all.price}₮
+                                    Мөнгөн дүн | {purchase_all.amount}₮
                                 </li>
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
-                                    НИЙТ МӨНГӨН ДҮН | {purchase_all.price}₮
+                                    НИЙТ МӨНГӨН ДҮН | {purchase_all.amount}₮
                                 </li>
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
                                     Үр дүн | <span className="text-success">Амжилттай</span>
