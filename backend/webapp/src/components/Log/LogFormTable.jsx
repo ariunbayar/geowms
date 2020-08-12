@@ -11,7 +11,7 @@ export class LogFormTable extends Component {
         const {amount, description, created_at, is_success, success_at, user_id, bank_unique_number, data_id, error_code, error_message, failed_at, geo_unique_number} = this.props.values
         return (
             <tr>
-                <td className="sorting_1">{amount}</td>
+                <td>{amount}</td>
                 <td>{description}</td>
                 <td>{created_at}</td>
                 <td>{is_success}</td>
@@ -28,5 +28,5 @@ export class LogFormTable extends Component {
         )
 
     }
-
+    
 }
