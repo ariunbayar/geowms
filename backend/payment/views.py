@@ -7,27 +7,34 @@ from geoportal_app.models import User
 from .models import Payment
 
 
-@require_POST
+@require_GET
 @ajax_required
 def all(request):
-
-    print("reawaswares")
-    print("reawaswares")
-    print("reawaswares")
-    print("reawaswares")
     payment_all = []
+    created_at = Payment.objects.all().order_by('created_at')
+ 
 
     for payment in Payment.objects.all():
           payment_all.append({
             'id': payment.id,
             'amount': payment.amount,
             'description': payment.description,
-            'created_at': payment.datetime.created_at,
-            'geo_unique_number': payment.geo_unique_number,
+            'created_at': payment.created_at.strftime('%Y-%m-%d'),
+            'is_success': payment.is_success,
+            'success_at': payment.success_at.strftime('%Y-%m-%d'),
+            'user_id': payment.user_id,
+            'bank_unique_number': payment.bank_unique_number,
+            'data_id': payment.data_id,
             'error_code': payment.error_code,
+            'error_message': payment.error_message,
+            'failed_at': payment.failed_at.strftime('%Y-%m-%d'),
+            'geo_unique_number': payment.geo_unique_number,
         })
-
-    return JsonResponse({'payment_all': payment_all})
+    return JsonResponse({'payment_all': payment_all,
+            'payment_all': payment_all,
+            'len': Payment.objects.filter().count()
+    
+    })
 
 # Create your views here.
 @require_POST

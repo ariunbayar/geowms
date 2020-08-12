@@ -1,16 +1,15 @@
-import {getGetOptions, getPostOptions, handleResponse} from '../service'
-
+import {getGetOptions,getPostOptions, handleResponse} from '../../helpers/service'
 export const service ={
     getAll
 }
 
-const prefix = '/back/log/'
+const prefix = '/back/payment'
+
 
 
 function getAll() {
     const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({}),
+        ...getGetOptions(),
     }
-    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
 }
