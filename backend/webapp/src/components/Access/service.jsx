@@ -43,10 +43,10 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
-function pageSearch(query) {
+function pageSearch(query, last, first) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({query, last, first}),
     }
     return fetch(`${prefix}/log/page-search/`, requestOptions).then(handleResponse)
 }
@@ -62,10 +62,10 @@ function loginDateCount() {
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
 }
 
-function loginSearch(query) {
+function loginSearch(query, last, first) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({query, last, first}),
     }
     return fetch(`${prefix}/log/login-search/`, requestOptions).then(handleResponse)
 }
@@ -101,10 +101,10 @@ function crudDateCount() {
     return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
 }
 
-function crudSearch(query) {
+function crudSearch(query, last, first) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({query, last, first}),
     }
     return fetch(`${prefix}/log/crud-search/`, requestOptions).then(handleResponse)
 }
