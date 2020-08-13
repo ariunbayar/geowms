@@ -27,7 +27,9 @@ export class OrgRole extends Component {
    
 
     componentDidMount() {
+        this.handleListUpdated()
     }
+    
     handleListUpdated() {
         const {level, id} = this.props.match.params
         service.roles(level, id).then(({org_roles}) => {
