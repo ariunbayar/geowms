@@ -59,6 +59,7 @@ export class GovorgForm extends Component {
         const data = {
             ...values,
             layers: this.state.layers,
+            'org_id': org_id
         }
 
         setStatus('checking')
@@ -75,6 +76,7 @@ export class GovorgForm extends Component {
             })
         }
         else{
+        const org_id = this.props.match.params.id
 
             service.create(data).then(({success}) => {
                 setTimeout(() => {
@@ -171,7 +173,7 @@ export class GovorgForm extends Component {
                                         <div className="row">
                                             <div className="col-md-12">
                                                 <i className="fa fa-check-circle" style={{color:"green"}} aria-hidden="false"></i>
-                                                <a> &nbsp;<strong>{wms.name}</strong>{wms.public_url}</a>
+                                                <a> <strong>{wms.name}</strong> {wms.public_url}</a>
                                             </div>
                                         </div> :
                                         <div className="row">
