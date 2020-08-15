@@ -24,7 +24,7 @@ export class TuuhenOv extends Component {
     }
 
     render() {
-        const {register_id, date, aimag, sum_duureg} = this.state
+        const {register_id, date, aimag, sum_duureg} = this.props.values
         return (
             <table className="table table-bordered">
                 <tbody>

@@ -10,6 +10,7 @@ from backend.config import views as config_views
 from backend.org import views as org_views
 from backend.log import views as log_views
 from backend.payment import views as payment_views
+from backend.tuuhenov import views as tuuhenov_views
 
 
 app_name = 'backend'
@@ -115,6 +116,10 @@ urlpatterns = [
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
         path('purchase/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
+
+    path('tuuhen_ov/', include(([
+        path('create/', tuuhenov_views.create, name='create'),
+    ], 'tuuhen_ov'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 

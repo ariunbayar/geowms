@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class TuuhenovConfig(AppConfig):
-    name = 'tuuhenov'
+    name = 'backend.tuuhenov'
