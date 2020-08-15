@@ -56,8 +56,25 @@ export class DevPage extends Component {
                     <li>Django админ хэсгээс лавлах боломжтой.</li>
                 </ul>
             </div>
-            <h1>Координатын формат</h1>
+            
+            <p>
+                <strong>pycryptodome 3.9.8: </strong>
+                <LinkExternal href="https://pypi.org/project/pycryptodome/"/>
+            </p>
+            <p>
+                <strong>pycrypto 2.6.1: </strong>
+                <LinkExternal href="https://pypi.org/project/pycrypto/"/>
+            </p>
+            <p>
+                <strong>cryptography 3.0: </strong>
+                <LinkExternal href="https://pypi.org/project/cryptography/"/>
+            </p>
+            <p>
+                <strong>elementpath 2.0.0: </strong>
+                <LinkExternal href="https://pypi.org/project/elementpath/"/>
+            </p>
 
+            <h1>Координатын формат</h1>
             <div>
                 <ul>
                     <li>
