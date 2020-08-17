@@ -26,10 +26,10 @@ export class Purchase extends Component {
         const {purchase_all} = this.state
         service.payment(purchase_all).then(({ success }) => {
             if (success) {
-                this.props.history.push(`/payment/success/${purchase_all.id}/`)      
+                // this.props.history.push(`/payment/success/${purchase_all.id}/`)      
             }
             else{
-                this.props.history.push(`/payment/failed/${purchase_all.id}/`)      
+                // this.props.history.push(`/payment/failed/${purchase_all.id}/`)      
             }
         })
 
