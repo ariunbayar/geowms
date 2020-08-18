@@ -59,6 +59,7 @@ export class GovorgForm extends Component {
         const data = {
             ...values,
             layers: this.state.layers,
+            'org_id': org_id
         }
 
         setStatus('checking')
@@ -75,6 +76,7 @@ export class GovorgForm extends Component {
             })
         }
         else{
+        const org_id = this.props.match.params.id
 
             service.create(data).then(({success}) => {
                 setTimeout(() => {
