@@ -27,9 +27,7 @@ INSTALLED_APPS = [
 
     # Dependencies
 
-    'ckeditor',
     'crispy_forms',
-    'ckeditor_uploader',
     'easyaudit',
 
     # Frontend apps
@@ -142,9 +140,6 @@ LOGIN_REDIRECT_URL = 'bundle:all'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
 
-CKEDITOR_UPLOAD_PATH = "uploads/"
-CKEDITOR_IMAGE_BACKEND = 'pillow'
-
 PAYMENT_SUCCESS_REDIRECT_URL = 'payment:success'
 PAYMENT_FAIL_REDIRECT_URL = 'payment:failed'
 
@@ -152,12 +147,5 @@ MONGOL_BANK_SUCCESS_HTML = os.path.join(BASE_DIR, 'frontend/payment/templates/pa
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
 
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': 'full',
-        'height': 400,
-        'width': '100%',
-    },
-}
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.
 DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/']

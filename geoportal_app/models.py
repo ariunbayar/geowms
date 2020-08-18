@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
 
 
@@ -34,19 +33,3 @@ class User(AbstractUser):
     register = models.CharField(max_length=10, null=True)
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
-
-
-class Page(models.Model):
-    title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    short_body = models.TextField(verbose_name='Товч агуулга')
-    body = RichTextUploadingField(verbose_name='Агуулга')
-    sort = models.IntegerField(verbose_name='Дараалал')
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now_add=True, null=True)
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = ("Цэс")
-        verbose_name_plural = ("Цэсүүд")
