@@ -60,14 +60,6 @@ INSTALLED_APPS = [
     'api.govorg.apps.GovOrgConfig',
 ]
 
-# Cache backend is optional, but recommended to speed up user agent parsing
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
-
 USER_AGENTS_CACHE = 'default'
 
 MIDDLEWARE = [
