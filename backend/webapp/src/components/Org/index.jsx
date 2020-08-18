@@ -11,14 +11,28 @@ export class Org extends Component {
     constructor(props) {
         super(props)
 
+        this.default_url = '/back/байгууллага/түвшин/1/'
+
         this.state = {
             user_count: 0,
         }
 
     }
 
+    componentDidMount() {
+        if (this.props.location.pathname.endsWith('түвшин/')) {
+            this.props.history.push(this.default_url)
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.props.location.pathname.endsWith('түвшин/')) {
+            this.props.history.push(this.default_url)
+        }
+    }
+
     render() {
-        const { user_count} = this.state
+        const { user_count } = this.state
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row container">
