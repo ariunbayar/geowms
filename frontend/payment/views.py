@@ -9,9 +9,9 @@ from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 
 from geoportal_app.models import User
-from .MBUtil import xmlConvert
-from .PaymentMethod import paymentMethod
-from .PaymentMethodMB import paymentMethodMB
+from .MBUtil import MBUtil
+from .PaymentMethod import PaymentMethod
+from .PaymentMethodMB import PaymentMethodMB
 
 
 def index(request):
@@ -28,16 +28,22 @@ def index(request):
 def dictionaryRequest(request, payload):
 
     purchase_all = payload.get('purchase_all')
-    amount = purchase_all['amount']
-    payment_id = purchase_all['id']
-    description = purchase_all['description']
-    finalRequest = xmlConvert(amount, description)
-    paymentRequest = paymentMethod(finalRequest)
+    # Хүсэлт илгээх xml датаг бэлтгэх
+    mbutil = MBUtil(purchase_all['amount'], purchase_all['description'])
+    finalRequest = mbutil.xmlConvert()
 
+    # Банкруу хүсэлт илгээж байна.
+    payReq = PaymentMethod(request, finalRequest)
+    paymentRequest = payReq.paymentMethod()
+
+    # Хүсэлт илгээж байна
     if not paymentRequest:
         return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False })
     else:
-        message = paymentMethodMB(paymentRequest, payment_id)
+        # Банкнаас ирсэн response шалгаж байна
+        pay = PaymentMethodMB(paymentRequest, purchase_all['id'])
+        message = pay.paymentMethodMB()
+
         if message:
             return JsonResponse({'success': True})
         else:
