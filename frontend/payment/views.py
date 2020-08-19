@@ -4,8 +4,8 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
 from django.http import JsonResponse
-from django.shortcuts import render, reverse, get_object_or_404
-from django.views.decorators.http import require_POST, require_GET
+from django.shortcuts import render
+from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
 
 from geoportal_app.models import User
@@ -18,6 +18,7 @@ from .MBUtil import (
         signKey
     )
 
+    
 def index(request):
 
     context = {
@@ -37,14 +38,14 @@ def dictionaryRequest(request, payload):
     account = objectToXmlAccount(price)
     # Accounts xml
     accounts = objectToXmlAccounts(account)
-    #encrypt accounts and convert to hex
+    # encrypt accounts and convert to hex
     encryptedAccounts = encrypts(accounts)
     encAccounts = bytesToHex(encryptedAccounts)
-    #encrypt Desede key of payment request and convert to hex
+    # encrypt Desede key of payment request and convert to hex
 
     encryptedKey = signKey(encAccounts)
     encKey = bytesToHex(encryptedKey)
-    #create request xml
+    # create request xml
     finalRequest = PaymentVerifyRequestMB(price, encAccounts, encKey)
     for i in finalRequest:
         print(tostring(i))

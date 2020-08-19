@@ -1,6 +1,8 @@
 from django.db import models
 from geoportal_app.models import User
 # Create your models here.
+
+
 class Payment(models.Model):
     geo_unique_number = models.CharField(max_length=300, unique=True)
     bank_unique_number = models.CharField(max_length=300)
