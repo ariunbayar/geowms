@@ -12,7 +12,8 @@ export class OrgMenu extends Component {
         super(props)
         this.state = {
             org_name:'',
-            sistem_count: 0
+            sistem_count: 0,
+            employee_count:null,
         }
         this.getOrgName=this.getOrgName.bind(this)
         this.handleSistemCount=this.handleSistemCount.bind(this)
@@ -60,7 +61,7 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Хэрэглэгч
+                                        Хэрэглэгч(blabal)
                                     </div>
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
