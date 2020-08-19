@@ -27,7 +27,6 @@ def all(request, payload, level):
 
     return JsonResponse({
         'orgs': orgs_display,
-        'len': Org.objects.filter(level=level).count()
         })
 
 def OrgAll(request,level,pk):
@@ -39,8 +38,11 @@ def OrgAll(request,level,pk):
             'level': org.level,
             'level_display': org.get_level_display(),
         })
-
-    return JsonResponse({'orgs': orgs_display})
+    org = get_object_or_404(Org, pk=pk, level=level)
+    return JsonResponse({
+        'orgs': orgs_display,
+        'count':User.objects.filter(employee__org=org).count()
+        })
 
 def _get_org_role_display(org_role):
 
