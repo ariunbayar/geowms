@@ -60,7 +60,7 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Хэрэглэгч
+                                        Албан хаагчид
                                     </div>
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
