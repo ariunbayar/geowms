@@ -133,6 +133,7 @@ def _get_bundle_display(bundle):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def all(request):
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
@@ -144,6 +145,7 @@ def all(request):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def updateMore(request, pk):
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
     form_options = _get_bundle_options()

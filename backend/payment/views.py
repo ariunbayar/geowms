@@ -4,11 +4,13 @@ from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from geoportal_app.models import User
+from django.contrib.auth.decorators import user_passes_test
 from .models import Payment
 
 # Create your views here.
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def purchase(request, payload):
 
     user = get_object_or_404(User, pk=request.user.id)
@@ -22,6 +24,7 @@ def purchase(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
 
     purchase_id = payload.get('purchase_id')

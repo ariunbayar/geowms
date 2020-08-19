@@ -8,7 +8,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
-
+from django.contrib.auth.decorators import user_passes_test
 
 def _get_user_display(user):
     roles = [_get_role_display(role) for role in user.roles.all()]
@@ -49,6 +49,7 @@ def _get_role_display(role):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def all(request,payload):
     last = payload.get('last')
     first = payload.get('first')
@@ -63,6 +64,7 @@ def all(request,payload):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def userCount(request):
 
     user_count = User.objects.all().count()
@@ -74,6 +76,7 @@ def userCount(request):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def дэлгэрэнгүй(request, pk):
 
     user = get_object_or_404(User, pk=pk)

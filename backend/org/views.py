@@ -29,7 +29,10 @@ def all(request, payload, level):
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
         })
-
+        
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def OrgAll(request,level,pk):
     orgs_display=[]
     for org in Org.objects.filter(level=level,pk=pk):
