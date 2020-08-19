@@ -204,17 +204,11 @@ export class UserAdd extends Component {
         return (
             <div className="container my-4">
                 <div className="row">
-                    <div className="text-left">
-                        <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`}>
-                            Буцах
-                        </NavLink>
-                    </div>
                     <div className="col-md-12">
                         <div className="row">
                             <div className="col-12">
                                 {!org_emp &&
                                 <div className="form-row">
-
                                     <div className="form-group col-md-8">
                                         <label htmlFor="id_name">Нэвтрэх нэр:</label>
                                         <input
