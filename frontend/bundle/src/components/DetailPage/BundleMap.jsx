@@ -23,6 +23,8 @@ import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
 import {Sidebar} from './Sidebar'
+import {DrawButton} from './controls/Draw'
+import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 
 export default class BundleMap extends Component {
 
@@ -37,6 +39,8 @@ export default class BundleMap extends Component {
             is_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
+            draw_layer: null,
+            is_draw_open: true,
         }
 
         this.controls = {
@@ -45,7 +49,7 @@ export default class BundleMap extends Component {
             sidebar: new Sidebar(),
         }
 
-        this.marker = this.initMarker()
+        this.marker = this.drawPayButton()
 
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
@@ -54,6 +58,7 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.toggleDraw = this.toggleDraw.bind(this)
     }
 
     initMarker() {
@@ -71,6 +76,27 @@ export default class BundleMap extends Component {
         const point = new Point([0, 0])
 
         const feature = new Feature({geometry: point})
+        feature.setStyle(style)
+
+        return {feature: feature, point: point}
+
+    }
+    drawPayButton() {
+
+        const style = new Style({
+            image: new Icon({
+                anchor: [0.9, 0],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                scale: 0.7,
+                src: '/static/assets/images/bundle/marker.png'
+            })
+        })
+
+        const point = new Point([1, 0])
+
+        const feature = new Feature({geometry: point})
+
         feature.setStyle(style)
 
         return {feature: feature, point: point}
@@ -177,6 +203,10 @@ export default class BundleMap extends Component {
                     base_layer_controls: []
                 }
             )
+        const source_draw = new VectorSource({wrapX: false})
+        const vector_draw = new VectorLayer({
+            source: source_draw,
+        });
 
         const vector_layer = new VectorLayer({
             source: new VectorSource(),
@@ -209,6 +239,7 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new SidebarButton({toggleSidebar: this.toggleSidebar}),
+                new DrawButton({toggleDraw: this.toggleDraw}),
                 new ScaleLine(),
                 this.controls.modal,
                 this.controls.coordinateCopy,
@@ -223,6 +254,7 @@ export default class BundleMap extends Component {
                 }, []),
                 vector_layer,
                 marker_layer,
+                vector_draw
             ],
             view: new View({
                 projection: this.state.projection,
@@ -231,6 +263,40 @@ export default class BundleMap extends Component {
             })
         })
 
+
+
+
+
+
+
+        const draw = new Draw({
+            source: source_draw,
+            type: 'Circle',
+            geometryFunction: createBox(),
+        });
+        map.addInteraction(draw);
+        const projection_display = this.state.projection_display
+        const projection = map.getView().getProjection()
+        draw.on('drawend',function(e){
+            const coordinat = e.feature.getGeometry().getCoordinates()
+
+            const coodrinatLeftTop = coordinat[0][3]
+            const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, projection_display)
+            const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
+            console.log(coodrinatLeftTop_map_coord)
+
+            const coodrinatRightBottom = coordinat[0][1]
+            const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, projection_display)
+            const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
+            console.log(coodrinatRightBottom_map_coord)
+
+        });
+
+
+
+
+
+        
         map.on('click', this.handleMapClick)
 
         this.map = map
@@ -329,6 +395,22 @@ export default class BundleMap extends Component {
             this.controls.sidebar.showSideBar(this.state.map_wms_list, this.handleSetCenter, false)
         }
     }
+
+
+    toggleDraw(event) {
+        this.toggleDrawInput()
+
+        this.setState(prevState => ({
+            is_draw_open: !prevState.is_draw_open,
+        }))
+        if(this.state.is_draw_open){
+            this.toggleDrawInput()
+        }else{
+
+        }
+    }
+
+
     render() {
 
         return (
