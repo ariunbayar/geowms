@@ -138,7 +138,6 @@ export class GovorgForm extends Component {
                                                 name='name'
                                                 id="id_name"
                                                 type="text"
-                                                value={this.state.govorg.name || ''}
                                             />
 
                                             <ErrorMessage name="name" component="div" className="invalid-feedback"/>
