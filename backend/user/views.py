@@ -130,6 +130,7 @@ def roleCreate(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def userSearch(request, payload):
     query = payload.get('query')
     user_list = []

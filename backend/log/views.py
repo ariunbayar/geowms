@@ -34,6 +34,7 @@ def login_all(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def loginSearch(request, payload):
     query = payload.get('query')
     login_log_all_display = []
@@ -97,6 +98,7 @@ def pageAll(request,payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def pageSearch(request, payload):
     query = payload.get('query')
     last = payload.get('last')
@@ -177,6 +179,7 @@ def crud_event_all(request,payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def crudSearch(request, payload):
     query = payload.get('query')
     last = payload.get('last')

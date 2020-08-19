@@ -343,6 +343,7 @@ def org_remove(request, payload, level):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def orgSearch(request, payload,level):
     query = payload.get('query')
     orgs_display = []
@@ -360,6 +361,7 @@ def orgSearch(request, payload,level):
 
 @require_POST
 @ajax_required        
+@user_passes_test(lambda u: u.is_superuser)
 def employeeSearch(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
