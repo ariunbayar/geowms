@@ -134,10 +134,11 @@ export class GovorgForm extends Component {
 
                                             <Field
                                                 className={'form-control ' + (errors.name ? 'is-invalid' : '')}
-                                                name="name"
                                                 placeholder="Системүүдийн нэр"
+                                                name='name'
                                                 id="id_name"
                                                 type="text"
+                                                value={this.state.govorg.name || ''}
                                             />
 
                                             <ErrorMessage name="name" component="div" className="invalid-feedback"/>
