@@ -274,7 +274,7 @@ export class Үүсгэх extends Component {
                                             <div>
                                                 <button type="submit" className="btn gp-bg-primary" disabled={isSubmitting || has_error}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                                    {isSubmitting && ' Шалгаж байна.'}
+                                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                     {!isSubmitting && 'Нэмэх' }
                                                 </button>
                                             </div>

@@ -122,10 +122,10 @@ export class ConfigForm extends Component {
 
                         {form_is_loading ?
                             <button className="btn gp-bg-primary" onClick={this.handleForm}>
-                                <div className="spinner-border text-primary" role="status">
+                                <div className="spinner-border text-light" role="status">
                                     <span className="sr-only"></span>
                                 </div>
-                                {} Түр хүлээнэ үү...
+                                <a className="text-light"> Түр хүлээнэ үү...</a>
                             </button> :
                             <button className="btn gp-bg-primary" onClick={this.handleForm}>
                                 Хадгалах
