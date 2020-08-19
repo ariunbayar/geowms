@@ -69,10 +69,10 @@ function loadBaseLayers() {
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }
 
-function payment(price, description) {
+function payment(price, description, data_id) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({price, description})
+        body: JSON.stringify({price, description, data_id})
     }
     return fetch('/back/payment/purchase/', requestOptions).then(handleResponse)
 }

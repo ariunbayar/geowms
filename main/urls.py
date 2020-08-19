@@ -15,8 +15,6 @@ urlpatterns = [
     path('back/', include(backend.urls)),
     path('api/', include(api.urls)),
     path('', include(frontend.urls)),
-
-    re_path(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
 
 if settings.DEBUG:

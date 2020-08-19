@@ -37,8 +37,10 @@ def login_all(request, payload):
 def loginSearch(request, payload):
     query = payload.get('query')
     login_log_all_display = []
-
-    for login_log_all in LoginEvent.objects.annotate(search=SearchVector('id', 'login_type', 'user_id', 'remote_ip') + SearchVector('username'),).filter(search__contains=query):
+    last = payload.get('last')
+    first = payload.get('first')
+    logins = LoginEvent.objects.annotate(search=SearchVector('login_type', 'user_id', 'remote_ip', 'datetime') + SearchVector('username'),).filter(search__contains=query)
+    for login_log_all in logins[first:last]:
         login_log_all_display.append({
             'id': login_log_all.id,
             'login_type': login_log_all.login_type,
@@ -47,7 +49,7 @@ def loginSearch(request, payload):
             'user_id': login_log_all.user_id,
             'remote_ip': login_log_all.remote_ip,
         })
-    return JsonResponse({'login_log_all': login_log_all_display})
+    return JsonResponse({'login_log_all': login_log_all_display, 'len': logins.count()})
 
 
 
@@ -97,8 +99,12 @@ def pageAll(request,payload):
 @ajax_required
 def pageSearch(request, payload):
     query = payload.get('query')
+    last = payload.get('last')
+    first = payload.get('first')
     log_display = []
-    for log in RequestEvent.objects.annotate(search=SearchVector('url','id', 'method', 'remote_ip', 'user_id') + SearchVector('url'),).filter(search__contains=query):
+    pages = RequestEvent.objects.annotate(search=SearchVector('url','id', 'method', 'remote_ip', 'user_id') + SearchVector('url'),).filter(search__contains=query)
+    for log in pages[first:last]:
+
         log_display.append({
             'id':log.id,
             'url': log.url,
@@ -109,7 +115,8 @@ def pageSearch(request, payload):
             'datetime': log.datetime.strftime('%Y-%m-%d'),
 
         })
-    return JsonResponse({'page_logs':  log_display})
+    return JsonResponse({'page_logs': log_display, 'len': pages.count()})
+
 
 @require_GET
 @ajax_required
@@ -172,8 +179,11 @@ def crud_event_all(request,payload):
 @ajax_required
 def crudSearch(request, payload):
     query = payload.get('query')
+    last = payload.get('last')
+    first = payload.get('first')
     crud_event_display = []
-    for crud_event in CRUDEvent.objects.annotate(search=SearchVector('event_type', 'object_id', 'content_type_id', 'user_id', 'changed_fields') + SearchVector('object_repr'),).filter(search__contains=query):
+    cruds = CRUDEvent.objects.annotate(search=SearchVector('event_type', 'object_id', 'content_type_id', 'user_id', 'changed_fields') + SearchVector('object_repr'),).filter(search__contains=query)
+    for crud_event in cruds[first:last]:
         crud_event_display.append({
             'id': crud_event.id,
             'event_type': crud_event.event_type,
@@ -186,7 +196,7 @@ def crudSearch(request, payload):
             'user_pk_as_string': crud_event.user_pk_as_string,
             'changed_fields': crud_event.changed_fields,
         })
-    return JsonResponse({'crud_event_display': crud_event_display})
+    return JsonResponse({'crud_event_display': crud_event_display, 'len': cruds.count()})
 
 @require_GET
 @ajax_required

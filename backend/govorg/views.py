@@ -37,7 +37,8 @@ def _generate_govorg_token():
 def жагсаалт(request,payload):
     last=payload.get('last')
     first=payload.get('first')
-    govorg_list = GovOrg.objects.all()[first:last]
+    org_id=payload.get('org_id')
+    govorg_list = GovOrg.objects.filter(org_id=org_id)[first:last]
 
     govorg_list_display = [
         _get_govorg_display(govorg)
@@ -57,10 +58,11 @@ def жагсаалт(request,payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def үүсгэх(request, payload):
-
+    org_id = payload.get('org_id')
     govorg = GovOrg.objects.create(
         name=payload.get('name'),
         token=_generate_govorg_token(),
+        org_id=org_id
     )
 
     layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
@@ -115,6 +117,7 @@ def хадгалах(request, payload, pk):
     govorg = get_object_or_404(GovOrg, pk=pk)
 
     govorg.name = payload.get('name')
+    govorg.org_id = payload.get('org_id')
     govorg.save()
 
     layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
@@ -161,10 +164,10 @@ def устгах(request, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def тоо(request):
+def тоо(request, pk):
 
     rsp = {
-        'count': GovOrg.objects.count(),
+        'count': GovOrg.objects.filter(org_id=pk).count(),
     }
 
     return JsonResponse(rsp)

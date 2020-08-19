@@ -20,9 +20,9 @@ export const service = {
 
 const prefix = '/back/api/org'
 
-function sistemCount() {
+function sistemCount(id) {
     const opts = {...getGetOptions()}
-    return fetch(`/back/api/систем/тоо/`, opts).then(handleResponse)
+    return fetch(`/back/api/систем/${id}/тоо/`, opts).then(handleResponse)
 }
 
 function getAll(level,value) {

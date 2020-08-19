@@ -9,14 +9,10 @@ from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 
 from geoportal_app.models import User
-from .MBUtil import (
-        objectToXmlAccount,
-        objectToXmlAccounts,
-        PaymentVerifyRequestMB,
-        bytesToHex,
-        encrypts,
-        signKey
-    )
+from .MBUtil import MBUtil
+from .PaymentMethod import PaymentMethod
+from .PaymentMethodMB import PaymentMethodMB
+
 
 def index(request):
 
@@ -31,47 +27,34 @@ def index(request):
 @ajax_required
 def dictionaryRequest(request, payload):
 
-    price = payload.get('price')
+    purchase_all = payload.get('purchase_all')
+    # Хүсэлт илгээх xml датаг бэлтгэх
+    mbutil = MBUtil(purchase_all['amount'], purchase_all['description'])
+    finalRequest = mbutil.xmlConvert()
 
-    # Account xml
-    account = objectToXmlAccount(price)
-    # Accounts xml
-    accounts = objectToXmlAccounts(account)
-    #encrypt accounts and convert to hex
-    encryptedAccounts = encrypts(accounts)
-    encAccounts = bytesToHex(encryptedAccounts)
-    #encrypt Desede key of payment request and convert to hex
+    # Банкруу хүсэлт илгээж байна.
+    payReq = PaymentMethod(request, finalRequest)
+    paymentRequest = payReq.paymentMethod()
 
-    encryptedKey = signKey(encAccounts)
-    encKey = bytesToHex(encryptedKey)
-    #create request xml
-    finalRequest = PaymentVerifyRequestMB(price, encAccounts, encKey)
-    for i in finalRequest:
-        print(tostring(i))
-    BASE_HEADERS = {
-        'User-Agent': 'geo 1.0',
-    }
-    headers = {**BASE_HEADERS}
-
-    base_url = 'http://localhost:8000/dictionaryResponse'
-
-    rsp = requests.get(base_url, data={"order": finalRequest}, headers=headers)
-
-    if rsp.status_code == 200:
-        # send mail
-        user = User.objects.filter(username=request.user).first()
-        mail_subject = 'Өдрийн мэнд.'
-        message = "amjilt husiidaa"
-        email = EmailMultiAlternatives(mail_subject, message, to=[user.email])
-        email.attach_file(settings.MONGOL_BANK_SUCCESS_HTML)
-
-        email.send()
-        return redirect(settings.PAYMENT_SUCCESS_REDIRECT_URL)
+    # Хүсэлт илгээж байна
+    if not paymentRequest:
+        return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False })
     else:
-        return redirect(settings.PAYMENT_FAIL_REDIRECT_URL)
+        # Банкнаас ирсэн response шалгаж байна
+        pay = PaymentMethodMB(paymentRequest, purchase_all['id'])
+        message = pay.paymentMethodMB()
 
+        if message:
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False})
+            
 
 def dictionaryResponse(request):
-
+    
     if request.method == 'GET':
-        return JsonResponse({'success': True})
+        print("Dsdfsdfsddfgdf")
+
+        return JsonResponse({'success': True, 'xmlmsg': 12})
+
+

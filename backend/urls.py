@@ -98,7 +98,7 @@ urlpatterns = [
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
-        path('тоо/', govorg_views.тоо, name='тоо'),
+        path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
         path('govorgSearch/', govorg_views.govorgSearch, name='govorgSearch'),
     ], 'govorg'))),
 
