@@ -13,7 +13,7 @@ export class WMSPage extends Component {
     }
 
     render() {
-        
+
         return (
             <Switch>
                 <Route exact path={"/back/wms/"} component={WmsList}/>

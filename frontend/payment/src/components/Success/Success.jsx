@@ -6,18 +6,24 @@ export class Success extends Component {
         super(props)
 
         this.state = {
-            purchase: props.purchase,
-            price: 3000
+            purchase_all: []
         }
     }
-    handlePayment (){
-        const {price} = this.state
-        service.payment(price)
+    componentDidMount(){
+        const purchase_id = this.props.match.params.id
 
+        service.purchaseAll(purchase_id).then(({ purchase_all }) => {
+            if (purchase_all) {
+                purchase_all.map((purchase_all) => 
+                this.setState({purchase_all}) 
+                )              
+            }
+        })
     }
 
+
     render() {
-        const { purchase } = this.state
+        const { purchase_all } = this.state
         return (
         <div class="container">
             <div class="row">
@@ -28,7 +34,7 @@ export class Success extends Component {
                         <tbody>
                             <tr>
                                 <td><i class="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
-                                <td>Газрын бүрхэвч, газар ашиглалт</td>
+                                <td>{purchase_all.description}</td>
                             </tr>
                             <tr>
                                 <td><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
@@ -64,23 +70,24 @@ export class Success extends Component {
                             </tr>
                             <tr>
                                 <td><i class="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
-                                <td>{this.state.price}</td>
+                                <td>{purchase_all.amount}</td>
                             </tr>
                         </tbody>
                     </table>
                     <div class="row py-3">
 
                         <div class="col-md-6 py-0 my-3">
-                            <h5 class="mb-3">Гүйлгээний төлөв<span className="text-success">(Амжилттай)</span></h5>
+                        <h5 class="mb-3">Гүйлгээний төлөв</h5>
+                        <h5 class="mb-3"><span className="text-success">{purchase_all.error_message}</span></h5>
                             <ul class="list-unstyled">
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
-                                    Гүйлгээний дугаар | 1008567
+                                    Гүйлгээний дугаар | {purchase_all.bank_unique_number}
                                 </li>
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
-                                    Мөнгөн дүн | 3,000₮
+                                    Мөнгөн дүн | {purchase_all.amount}₮
                                 </li>
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
-                                    НИЙТ МӨНГӨН ДҮН | 3,000₮
+                                    НИЙТ МӨНГӨН ДҮН | {purchase_all.amount}₮
                                 </li>
                                 <li class="f-nav-item mb-2" style={{borderBottom: 'solid 1px #363636;'}}>
                                     Үр дүн | <span className="text-success">Амжилттай</span>

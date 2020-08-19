@@ -11,15 +11,15 @@ export class BundlePage extends Component {
     }
 
     render() {
-        
+
             return (
                 <Switch>
-                    <Route exact path={"/back/"} component={BundleList}/>
-                    <Route exact path={"/back/:id/засах/"} component={BundleForms}/>
-                    <Route exact path={"/back/үүсгэх"} component={BundleForms}/>
+                    <Route exact path={"/back/дэд-сан/"} component={BundleList}/>
+                    <Route exact path={"/back/дэд-сан/:id/засах/"} component={BundleForms}/>
+                    <Route exact path={"/back/дэд-сан/үүсгэх"} component={BundleForms}/>
                 </Switch>
             )
-    
+
         }
-    
+
     }

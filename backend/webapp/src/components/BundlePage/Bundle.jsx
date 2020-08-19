@@ -3,7 +3,9 @@ import "./styles.css";
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 
+
 export default class Bundle extends Component {
+
     constructor(props) {
         super(props)
 
@@ -24,12 +26,12 @@ export default class Bundle extends Component {
     handleModalDeleteClose() {
         this.setState({is_modal_delete_open: false})
     }
+
     render() {
         const {id, name, price, icon_url, wms_list} = this.props.values
         const {is_modal_delete_open}=this.state
         return (
             <tr>
-
                 <th scope="col">
                     {id}
                 </th>
@@ -66,9 +68,9 @@ export default class Bundle extends Component {
                    </td>
 
                 <td>
-                <NavLink to={`/back/${id}/засах/`}>
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                </NavLink>
+                    <NavLink to={`/back/дэд-сан/${id}/засах/`}>
+                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </NavLink>
                 </td>
 
                 <td>
