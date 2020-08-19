@@ -30,10 +30,6 @@ export class LogForm extends Component {
         const lastIndex = currentPage * payPerPage
         const firtsIndex = lastIndex - payPerPage
         const value={"firstIndex":firtsIndex, "lastIndex": lastIndex}
-        const {payPerPage}=this.state
-        const lastIndex=currentPage*payPerPage
-        const firtsIndex=lastIndex-payPerPage
-        const value={ "firstIndex":firtsIndex, "lastIndex": lastIndex}
         this.handleGetAll(value)
     }
     handleGetAll(value){
