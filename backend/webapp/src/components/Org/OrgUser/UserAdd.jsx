@@ -323,7 +323,7 @@ export class UserAdd extends Component {
                                     <div className="form-group col-md-4">
                                         <label htmlFor="password">Нууц үг:</label>
                                         <input
-                                            type="text"
+                                            type="password"
                                             className="form-control"
                                             id="password"
                                             placeholder="Нууц үг"
@@ -339,7 +339,7 @@ export class UserAdd extends Component {
                                     <div className="form-group col-md-4">
                                         <label htmlFor="re_password">Нууц үг дахин оруулах:</label>
                                         <input
-                                            type="text"
+                                            type="password"
                                             className="form-control"
                                             id="re_password"
                                             placeholder="Нууц үг дахин оруулах"
