@@ -28,11 +28,13 @@ export class DevPage extends Component {
                 <strong>Fontawesome 4.7.0: </strong>
                 <LinkExternal href="https://fontawesome.com/v4.7.0/icons/"/>
             </p>
-              <p>
+
+            <p>
                 <strong>Bootstrap 4.5.0: </strong>
                 <LinkExternal href="https://getbootstrap.com/docs/4.5/components/alerts/"/>
             </p>
-            <div>
+
+            <p>
                 <strong>react-chartjs-2 (2.9.0): </strong><br/>
                 <ul>
                     <li>
@@ -42,10 +44,72 @@ export class DevPage extends Component {
                     </li>
                     <li>NPM: <LinkExternal href="https://www.npmjs.com/package/react-chartjs-2"/></li>
                 </ul>
-            </div>
+            </p>
+
+            <p>
+                <strong>django-easy-audit 1.2.3: </strong>
+                <LinkExternal href="https://github.com/soynatan/django-easy-audit"/>
+            </p>
+            <ul>
+                <li>Бусад лог хөтөлдөг сангууд ихэвчлэн кодондоо ихээхэн өөрчлөлт хийхийг шаарддаг харин django-easy-audit бол ямарч өөрчлөлтийг шаардахгүй.</li>
+                <li>Хүссэн линкээ нэмэлтээр хориглож болно.</li>
+                <li>Хүссэн model-оо нэмэлтээр хориглож болно.</li>
+                <li>Нэмэлтээр кодчилол шаардахгүй.</li>
+                <li>Django админ хэсгээс лавлах боломжтой.</li>
+            </ul>
+
+
+            <p>
+                <strong>django-debug-toolbar 2.1: </strong>
+                <LinkExternal href="https://pypi.org/project/django-debug-toolbar/"/>
+                <ul>
+                    <li>Хөгжүүлэлтийн явцад сайтын ажиллагаатай холбоотой статистик үзүүлнэ.</li>
+                </ul>
+            </p>
+
+            <p>
+                <strong>Django User Agents: </strong>
+                <ul>
+                    <li>User agent таних модуль: <LinkExternal href="https://pypi.org/project/django-user-agents/"/></li>
+                    <li><LinkExternal href="https://pypi.org/project/ua-parser/"/></li>
+                    <li><LinkExternal href="https://pypi.org/project/user-agents/"/></li>
+                </ul>
+            </p>
+
+            <p>
+                <strong>requests 2.23.0: </strong>
+                <LinkExternal href="https://pypi.org/project/requests/"/>
+                <ul>
+                    <li>Бусад газраас хуудас дуудахад ашиглагдана. Ихэвчлэн бусад GeoSpacial сервисүүдийг дуудахад</li>
+                </ul>
+            </p>
+
+            <p>
+                <strong>Pillow 7.1.2: </strong>
+                <LinkExternal href="https://pypi.org/project/Pillow/"/>
+                <ul>
+                    <li>Зураг боловсруулалтын модуль</li>
+                </ul>
+            </p>
+
+            <p>
+                <strong>psycopg2-binary 2.8.5: </strong>
+                <LinkExternal href="https://pypi.org/project/psycopg2-binary/"/>
+                <ul>
+                    <li> Python <LinkExternal href="https://www.postgresql.org/" text="PostgreSQL"/> client</li>
+                </ul>
+            </p>
+
+            <p>
+                <strong>Шифрлэлт, нууцлал: </strong>
+                <ul>
+                    <li>pycryptodome 3.9.8: <LinkExternal href="https://pypi.org/project/pycryptodome/"/></li>
+                    <li>pycrypto 2.6.1: <LinkExternal href="https://pypi.org/project/pycrypto/"/></li>
+                    <li>cryptography 3.0: <LinkExternal href="https://pypi.org/project/cryptography/"/></li>
+                </ul>
+            </p>
 
             <h1>Координатын формат</h1>
-
             <div>
                 <ul>
                     <li>
