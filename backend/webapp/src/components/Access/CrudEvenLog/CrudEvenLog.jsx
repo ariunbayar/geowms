@@ -174,16 +174,16 @@ export class CrudEvenLog extends Component {
                                 type=" button" 
                                 className="btn btn-outline-primary" 
                                 onClick={this.prevPage}
-                                > &laquo; өмнөх
+                                >&laquo;өмнөх
                                 </button>
+                                &nbsp;
                                 <button 
                                 type="button"
                                 className="btn btn-outline-primary "
                                 onClick={this.nextPage
-                                } >
+                                }>
                                 дараах &raquo;
                                 </button>
-                                
                             </div>
                         </div>
                      </div>
