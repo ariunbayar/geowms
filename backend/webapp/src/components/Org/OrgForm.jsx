@@ -172,7 +172,6 @@ export class OrgForm extends Component {
                             >
                                 &laquo; өмнөх
                             </button> {}
-
                             <button
                                 type="button"
                                 className="btn btn-outline-primary "

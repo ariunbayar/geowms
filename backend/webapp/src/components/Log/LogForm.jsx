@@ -105,8 +105,8 @@ export class LogForm extends Component {
                             type=" button"
                             className="btn btn-outline-primary"
                             onClick={this.prevPage}
-                            > &laquo; өмнөх
-                            </button>
+                            >&laquo;өмнөх
+                            </button> {}
                             <button
                             type="button"
                             className="btn btn-outline-primary "
