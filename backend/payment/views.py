@@ -31,7 +31,7 @@ def all(request):
     return JsonResponse({'payment_all': payment_all,
             'payment_all': payment_all,
             'len': Payment.objects.filter().count()
-    
+
     })
 
 # Create your views here.
@@ -44,7 +44,7 @@ def purchase(request, payload):
     data_id = payload.get('data_id')
     count = Payment.objects.all().count()
     payment = Payment.objects.create(geo_unique_number=count, data_id=data_id, amount=price, description=description, user=user, is_success=False )
-    
+
     return JsonResponse({'payment_id': payment.id})
 
 @require_POST
@@ -54,8 +54,8 @@ def purchaseAll(request, payload):
 
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
-    if payment.user_id == request.user.id: 
-        purchase_all=[] 
+    if payment.user_id == request.user.id:
+        purchase_all=[]
         purchase_all.append({
             'id': payment.id,
             'geo_unique_number': payment.geo_unique_number,

@@ -28,5 +28,5 @@ export class LogFormTable extends Component {
         )
 
     }
-    
+
 }

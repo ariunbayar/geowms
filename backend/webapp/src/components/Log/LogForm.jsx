@@ -25,7 +25,7 @@ export class LogForm extends Component {
         this.handleListCal(currentPage)
     }
     handleListCal(currentPage){
-       
+
         const {payPerPage}=this.state
         const lastIndex=currentPage*payPerPage
         const firtsIndex=lastIndex-payPerPage
@@ -57,7 +57,7 @@ export class LogForm extends Component {
             this.handleListCal(this.state.currentPage+1)
         }
     }
-   
+
     handleListUpdated(){
         service.getAll().then(({payment_all}) => {
             this.setState({payment_all})
@@ -102,23 +102,23 @@ export class LogForm extends Component {
                         </div>
                         <div className="float-right">
                             <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
+                            type=" button"
+                            className="btn btn-outline-primary"
                             onClick={this.prevPage}
                             > &laquo; өмнөх
                             </button>
-                            <button 
+                            <button
                             type="button"
                             className="btn btn-outline-primary "
                             onClick={this.nextPage
                             } >
                             дараах &raquo;
                             </button>
-                            
+
                         </div>
                     </div>
                 </div>
-            </div>      
+            </div>
         )
     }
 }
