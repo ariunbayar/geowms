@@ -12,20 +12,24 @@ export class LogForm extends Component {
             currentPage:1,
             payPerPage:100
         }
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
-        this.handleGetAll=this.handleGetAll.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
+
+        this.nextPage = this.nextPage.bind(this) 
+        this.prevPage = this.prevPage.bind(this)
+        this.handleGetAll = this.handleGetAll.bind(this)
+        this.handleListCal = this.handleListCal.bind(this) 
     }
 
     componentDidMount(){
 
         this.handleListUpdated()
-        const {currentPage}=this.state
+        const {currentPage} = this.state
         this.handleListCal(currentPage)
     }
     handleListCal(currentPage){
-
+        const {payPerPage} = this.state
+        const lastIndex = currentPage * payPerPage
+        const firtsIndex = lastIndex - payPerPage
+        const value={"firstIndex":firtsIndex, "lastIndex": lastIndex}
         const {payPerPage}=this.state
         const lastIndex=currentPage*payPerPage
         const firtsIndex=lastIndex-payPerPage
@@ -111,10 +115,9 @@ export class LogForm extends Component {
                             type="button"
                             className="btn btn-outline-primary "
                             onClick={this.nextPage
-                            } >
+                            }>
                             дараах &raquo;
                             </button>
-
                         </div>
                     </div>
                 </div>
