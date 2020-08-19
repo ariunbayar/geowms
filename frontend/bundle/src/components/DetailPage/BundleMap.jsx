@@ -266,15 +266,14 @@ export default class BundleMap extends Component {
 
 
 
-
-
-
         const draw = new Draw({
             source: source_draw,
             type: 'Circle',
             geometryFunction: createBox(),
         });
+
         map.addInteraction(draw);
+
         const projection_display = this.state.projection_display
         const projection = map.getView().getProjection()
         draw.on('drawend',function(e){
@@ -291,10 +290,6 @@ export default class BundleMap extends Component {
             console.log(coodrinatRightBottom_map_coord)
 
         });
-
-
-
-
 
         
         map.on('click', this.handleMapClick)
