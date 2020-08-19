@@ -160,8 +160,8 @@ export default class BundleForm extends Component {
                 </div>
 
                 <div className="form-group">
-                    <NavLink to={`/back/`}>
-                        <button className="btn btn-block gp-outline-primary"  >
+                    <NavLink to={`/back/дэд-сан/`}>
+                        <button className="btn btn-block gp-outline-primary">
                             Буцах
                         </button>
                     </NavLink>
