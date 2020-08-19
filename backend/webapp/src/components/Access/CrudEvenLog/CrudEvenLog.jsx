@@ -175,8 +175,7 @@ export class CrudEvenLog extends Component {
                                 className="btn btn-outline-primary" 
                                 onClick={this.prevPage}
                                 >&laquo;өмнөх
-                                </button>
-                                &nbsp;
+                                </button> {}
                                 <button 
                                 type="button"
                                 className="btn btn-outline-primary "

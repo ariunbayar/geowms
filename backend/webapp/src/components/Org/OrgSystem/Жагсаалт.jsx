@@ -176,10 +176,9 @@ export class Жагсаалт extends Component {
                                         type="button"
                                         className="btn btn-outline-primary "
                                         onClick={this.nextPage
-                                        } >
+                                        }>
                                         дараах &raquo;
                                         </button>
-                                        
                                     </div>
                                 </div>
                             </>
