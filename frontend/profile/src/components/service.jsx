@@ -34,6 +34,15 @@ function getCookie(name) {
     return cookieValue;
 }
 
+export function getGetOptions() {
+    return {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    }
+}
+
 function _getPostOptions() {
     return {
         method: 'POST',
@@ -44,19 +53,11 @@ function _getPostOptions() {
     }
 }
 
-function _getGetOptions() {
-    return {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    }
-}
-
-function loadHistory() {
+function loadHistory(last,first) {
     const requestOptions = {
-        ..._getGetOptions(),
+        ..._getPostOptions(),
+         body: JSON.stringify({last,first})
     }
-    return fetch(`/profile/all/`, requestOptions).then(handleResponse)
+    return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
 }
 

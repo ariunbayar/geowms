@@ -2,13 +2,13 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {HistoryTable} from './historyTable'
-export default class History extends Component {
+export default class HistoryForm extends Component {
 
     constructor(props) {
         super(props)
         this.state={
             payment:[],
-            payment_length:1,
+            payment_length:null,
             currentPage:1,
             paymentPerPage:25,
         }
@@ -28,16 +28,16 @@ export default class History extends Component {
         const {paymentPerPage}=this.state
         const lastIndex=currentPage*paymentPerPage
         const firtsIndex=lastIndex-paymentPerPage
-        const value={ "firstIndex":firtsIndex, "lastIndex": lastIndex}
-        this.handleGetAll()
+        this.handleGetAll(lastIndex,firtsIndex)
     }
 
-    handleGetAll(){
+    handleGetAll(lastIndex,firtsIndex){
 
-        service.loadHistory().then(({ payment }) => {
+        service.loadHistory(lastIndex,firtsIndex).then(({ payment, len}) => {
             if (payment) {
                 this.setState({
-                    payment
+                    payment,
+                    payment_length:len
                 })
             }
         })
@@ -65,6 +65,7 @@ export default class History extends Component {
 
 
     render() {
+        alert
         const {payment,paymentPerPage,currentPage,payment_length} = this.state
         const totalPages=Math.ceil( payment_length/paymentPerPage)
         return (
@@ -79,9 +80,10 @@ export default class History extends Component {
                                 <th scope="col">Дугаар</th>
                                 <th scope="col">Хэмжээ(Amount)</th >
                                 <th scope="col">Танилцуулга (description)</th >
-                                <th scope="col">Огноо</th >
+                                <th scope="col">created_at</th >
                                 <th scope="col">is_success</th >
                                 <th scope="col">success_at</th >
+                                <th scope="col">bank_unique_number</th >
                             </tr>
                         </thead>
                         <tbody>
@@ -111,6 +113,7 @@ export default class History extends Component {
                                 onClick={this.prevPage}
                                 > &laquo; өмнөх
                                 </button>
+                                &nbsp;
                                 <button 
                                 type="button"
                                 className="btn btn-outline-primary "

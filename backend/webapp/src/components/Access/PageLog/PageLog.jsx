@@ -14,7 +14,8 @@ export class PageLog extends Component {
             currentPage:1,
             logPerPage:100,
             searchQuery: '',
-            query_min: false
+            searchIsLoad: false,
+
 
         }
         this.handleGetAll=this.handleGetAll.bind(this)
@@ -22,6 +23,8 @@ export class PageLog extends Component {
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
         this.handleListCal=this.handleListCal.bind(this)
+        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
+
     }
     
     componentDidMount(){
@@ -30,10 +33,16 @@ export class PageLog extends Component {
 
     }
     handleListCal(currentPage){
-        const {logPerPage}=this.state
+        const {logPerPage, searchIsLoad}=this.state
         const lastIndex=currentPage*logPerPage
         const firtsIndex=lastIndex-logPerPage
-        this.handleGetAll(lastIndex,firtsIndex)
+        if(searchIsLoad){
+            this.handleSearchNextPage(lastIndex,firtsIndex)
+        }
+        else
+        {
+            this.handleGetAll(lastIndex,firtsIndex)
+        }
     }
 
     handleGetAll(lastIndex,firtsIndex){
@@ -62,26 +71,33 @@ export class PageLog extends Component {
         }
     }
 
-    handleSearch(field, e) {
-        if(e.target.value.length > 2)
-        {
-            this.setState({ [field]: e.target.value , query_min: true})
-            service.pageSearch(e.target.value).then(({ page_logs }) => {
+    handleSearchNextPage(lastIndex,firtsIndex) {
+            
+            const {searchQuery} = this.state
+
+            service.pageSearch(searchQuery, lastIndex, firtsIndex).then(({ page_logs, len }) => {
                 if(page_logs){
-                    this.setState({page_logs})
+                    this.setState({page_logs, log_length:len})
+                }
+            })
+    }
+
+    handleSearch(field, e) {
+        if(e.target.value.length > 1)
+        {
+            this.setState({ [field]: e.target.value, currentPage:1, logPerPage:100, searchIsLoad:true})
+            const {currentPage, logPerPage} = this.state
+            service.pageSearch(e.target.value, logPerPage, currentPage).then(({ page_logs, len }) => {
+                if(page_logs){
+                    this.setState({page_logs, log_length:len })
                 }
             })
         }
         else
         {
-            this.setState({ [field]: e.target.value })
-            if(this.state.query_min){
-                this.setState({ query_min:false })
-
-                const {currentPage}=this.state
-                this.handleListCal(currentPage)
-        
-            }
+            this.setState({ [field]: e.target.value , currentPage:1, logPerPage:100 ,searchIsLoad:false})
+            const {currentPage}=this.state
+            this.handleListCal(currentPage)
         }
     }
 
@@ -155,16 +171,15 @@ export class PageLog extends Component {
                                 type=" button" 
                                 className="btn btn-outline-primary" 
                                 onClick={this.prevPage}
-                                > &laquo; өмнөх
-                                </button>
+                                >&laquo;өмнөх
+                                </button> {}
                                 <button 
                                 type="button"
                                 className="btn btn-outline-primary "
                                 onClick={this.nextPage
-                                } >
+                                }>
                                 дараах &raquo;
                                 </button>
-                                
                             </div>
                         </div>
                      </div>

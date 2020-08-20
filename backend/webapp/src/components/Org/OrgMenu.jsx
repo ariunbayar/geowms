@@ -26,7 +26,8 @@ export class OrgMenu extends Component {
     }
 
     handleSistemCount(){
-        service.sistemCount().then(({ count }) => {
+        const id=this.props.match.params.id
+        service.sistemCount(id).then(({ count }) => {
             this.setState({ sistem_count: count });
           });
     }

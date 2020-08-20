@@ -16,12 +16,17 @@ export class LoginLog extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
+            searchIsLoad: false,
+
+            
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)        
+        this.handleListCal=this.handleListCal.bind(this)  
+        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
+
     }
     
     componentDidMount(){
@@ -30,10 +35,17 @@ export class LoginLog extends Component {
 
     }
     handleListCal(currentPage){
-        const {loginPerPage}=this.state
+        const {loginPerPage, searchIsLoad}=this.state
         const lastIndex=currentPage*loginPerPage
         const firtsIndex=lastIndex-loginPerPage
-        this.handleGetAll(lastIndex,firtsIndex)
+        if(searchIsLoad){
+            this.handleSearchNextPage(lastIndex,firtsIndex)
+    
+            }
+        else{
+            this.handleGetAll(lastIndex,firtsIndex)
+    
+        }
     }
 
     handleGetAll(lastIndex,firtsIndex){
@@ -61,19 +73,31 @@ export class LoginLog extends Component {
         }
     }
 
+    handleSearchNextPage(lastIndex,firtsIndex) {
+        this.setState({ search_load:true })
+
+        const { searchQuery } = this.state
+        service.loginSearch(searchQuery, lastIndex, firtsIndex).then(({ login_log_all, len }) => {
+            if(login_log_all){
+                this.setState({login_log_all, login_length:len, search_load:false})
+            }
+        })
+    }
+
     handleSearch(field, e) {
-        if(e.target.value.length > 0)
+        if(e.target.value.length > 1)
         {
-            this.setState({ [field]: e.target.value, search_load:true})
-            service.loginSearch(e.target.value).then(({ login_log_all }) => {
+            this.setState({ [field]: e.target.value, search_load:true,  searchIsLoad: true,  currentPage:1, loginPerPage:20})
+            const {currentPage, loginPerPage} = this.state
+            service.loginSearch(e.target.value, loginPerPage, currentPage).then(({ login_log_all, len }) => {
                 if(login_log_all){
-                    this.setState({login_log_all, login_length:login_log_all.length, search_load:false})
+                    this.setState({login_log_all, login_length:len, search_load:false})
                 }
             })
         }
         else
         {
-            this.setState({ [field]: e.target.value })
+            this.setState({ [field]: e.target.value , searchIsLoad: false, currentPage:1, loginPerPage:20})
             const {currentPage}=this.state
             this.handleListCal(currentPage)
         }
@@ -148,16 +172,15 @@ export class LoginLog extends Component {
                                         type=" button" 
                                         className="btn btn-outline-primary" 
                                         onClick={this.prevPage}
-                                        > &laquo; өмнөх
-                                        </button>
+                                        >&laquo;өмнөх
+                                        </button> {}
                                         <button 
                                         type="button"
                                         className="btn btn-outline-primary "
                                         onClick={this.nextPage
-                                        } >
+                                        }>
                                         дараах &raquo;
                                         </button>
-                                        
                                     </div>
                                 </div>
                              </div> 

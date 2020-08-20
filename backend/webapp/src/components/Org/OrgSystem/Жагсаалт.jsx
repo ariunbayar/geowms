@@ -46,8 +46,8 @@ export class Жагсаалт extends Component {
     }
 
     handleListUpdated(org_level, org_id,lastIndex,firtsIndex ) {
-
-        service.getAll(lastIndex,firtsIndex).then(({govorg_list,len}) => {
+        
+        service.getAll(lastIndex,firtsIndex, org_id).then(({govorg_list,len}) => {
             this.setState({govorg_list, govorg_length:len})
         })
 
@@ -176,10 +176,9 @@ export class Жагсаалт extends Component {
                                         type="button"
                                         className="btn btn-outline-primary "
                                         onClick={this.nextPage
-                                        } >
+                                        }>
                                         дараах &raquo;
                                         </button>
-                                        
                                     </div>
                                 </div>
                             </>

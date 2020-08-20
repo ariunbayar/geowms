@@ -48,10 +48,12 @@ urlpatterns = [
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
     ], 'payment'))),
 
-    path('profile/', include(([
+    path('profile/api/', include(([
         path('', profile_views.history, name='history'),
         path('all/', profile_views.all, name='all'),
     ], 'profile'))),
+
+    re_path('^.*', profile_views.history, name='history'),
     
     re_path('^.*', payment_views.index, name='payment'),
 ]
