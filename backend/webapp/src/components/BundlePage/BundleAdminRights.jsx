@@ -61,7 +61,7 @@ export default class BundleAdminRights extends Component {
                                     <th scope="col"> Давхаргын нэр </th>
                                     <th scope="col"> Харагдах чек </th>
                                     {this.props.formOptionsRole.map(({id}, idx) =>
-                                        (id == 1 ? 
+                                        (id == 1 ?
                                         <th key={idx} scope="col">Нээлтэй өгөгдөл</th>:
                                         <th key={idx} scope="col">Эрх {id}</th>
                                         )
@@ -93,7 +93,7 @@ export default class BundleAdminRights extends Component {
 
                 <div className="form-group">
                     <div className="form-group">
-                        <NavLink to={`/back/`}>
+                        <NavLink to={`/back/дэд-сан/`}>
                             <button className="btn btn-block gp-outline-primary"  >
                                 Буцах
                             </button>

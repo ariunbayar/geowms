@@ -15,12 +15,14 @@ export class CrudEvenLog extends Component {
             crud_length:null,
             currentPage:1,
             crudPerPage:20,
-            searchQuery: ''
+            searchQuery: '',
+            searchIsLoad: false,
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
     }
     
     componentDidMount(){
@@ -29,10 +31,19 @@ export class CrudEvenLog extends Component {
 
     }
     handleListCal(currentPage){
+        
+        const {searchIsLoad} = this.state
         const {crudPerPage}=this.state
         const lastIndex=currentPage*crudPerPage
         const firtsIndex=lastIndex-crudPerPage
+        if(searchIsLoad){
+        this.handleSearchNextPage(lastIndex,firtsIndex)
+
+        }
+        else{
         this.handleGetAll(lastIndex,firtsIndex)
+
+        }
     }
 
 
@@ -42,8 +53,8 @@ export class CrudEvenLog extends Component {
                 this.setState({crud_event_display, crud_length:len})
             }
         })
-
     }
+
     prevPage(){
         if(this.state.currentPage >1){
             this.setState({
@@ -52,6 +63,7 @@ export class CrudEvenLog extends Component {
             this.handleListCal(this.state.currentPage-1)
         }
     }
+
     nextPage(){
         if(this.state.currentPage<Math.ceil(this.state.crud_length/this.state.crudPerPage)){
             this.setState({
@@ -61,22 +73,39 @@ export class CrudEvenLog extends Component {
         }
     }
 
+    handleSearchNextPage(lastIndex,firtsIndex) {
+        const {searchQuery} = this.state
+
+        service.crudSearch(searchQuery, lastIndex, firtsIndex).then(({ crud_event_display, len }) => {
+            if(crud_event_display){
+                this.setState({crud_event_display, crud_length:len})
+            }
+        })
+    }
+
     handleSearch(field, e) {
-        if(e.target.value.length > 0)
+
+        if(e.target.value.length > 1)
         {
-            this.setState({ [field]: e.target.value})
-            service.crudSearch(e.target.value).then(({ crud_event_display }) => {
+
+            this.setState({ currentPage: 1, crudPerPage:20})
+            const {currentPage, crudPerPage} = this.state
+            this.setState({ [field]: e.target.value, searchIsLoad: true})
+            service.crudSearch(e.target.value, crudPerPage, currentPage).then(({ crud_event_display, len }) => {
                 if(crud_event_display){
-                    this.setState({crud_event_display, log_length:crud_event_display.length})
+                    this.setState({crud_event_display, crud_length:len})
                 }
             })
         }
+
         else
         {
-            this.setState({ [field]: e.target.value })
+            this.setState({ [field]: e.target.value , searchIsLoad: false, currentPage: 1, crudPerPage:20})
+
             const {currentPage}=this.state
             this.handleListCal(currentPage)
         }
+
     }
 
     render() {
@@ -145,16 +174,15 @@ export class CrudEvenLog extends Component {
                                 type=" button" 
                                 className="btn btn-outline-primary" 
                                 onClick={this.prevPage}
-                                > &laquo; өмнөх
-                                </button>
+                                >&laquo;өмнөх
+                                </button> {}
                                 <button 
                                 type="button"
                                 className="btn btn-outline-primary "
                                 onClick={this.nextPage
-                                } >
+                                }>
                                 дараах &raquo;
                                 </button>
-                                
                             </div>
                         </div>
                      </div>
