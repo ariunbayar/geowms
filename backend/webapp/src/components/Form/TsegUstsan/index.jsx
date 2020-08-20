@@ -4,7 +4,7 @@ import {Switch, Route, Link, NavLink} from "react-router-dom"
 import {Form} from './Form'
 
 
-export class TuuhenOv extends Component {
+export class TsegUstsan extends Component {
 
     constructor(props) {
         super(props)
@@ -15,7 +15,8 @@ export class TuuhenOv extends Component {
         
         return (
             <Switch>
-                <Route path={"/back/tuuhen-ov/"} component={Form}/>
+                <Route exact path={"/back/froms/tseg-ustsan/"} component={Form}/>
+
             </Switch>
         )
 

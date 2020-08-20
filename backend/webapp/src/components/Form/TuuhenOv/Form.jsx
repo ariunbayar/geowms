@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
-import './styles.css'
 import {service} from './service'
 
 export class Form extends Component {
@@ -363,7 +362,7 @@ export class Form extends Component {
 
 
         return (
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded tuuhiin-ov">
+            <div >
                 <div className="row container  my-4">
                     <h4>2015 ОНЫ ТҮҮХ, СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛИЙН МАЯГТ №1</h4>
                 </div>

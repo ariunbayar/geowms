@@ -1,4 +1,4 @@
-import {handleResponse, getPostOptions, getGetOptions} from '../../helpers/service'
+import {handleResponse, getPostOptions, getGetOptions} from '../../../helpers/service'
          
 
 const prefix = '/back/tuuhen_ov'
