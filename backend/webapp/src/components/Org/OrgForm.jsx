@@ -158,7 +158,7 @@ export class OrgForm extends Component {
                             </tbody>
                         </table>
                     </div>
-                                    <div className="row">
+                    <div className="row">
                     <div className="col-md-12">
                         <div className="float-left">
                             <strong>Хуудас {currentPage}-{totalPages}</strong>

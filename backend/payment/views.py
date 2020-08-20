@@ -47,6 +47,7 @@ def purchase(request, payload):
 @require_POST
 @ajax_required
 def purchaseAll(request, payload):
+    user = get_object_or_404(User, pk=request.user.id)
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
