@@ -8,10 +8,10 @@ export class Form extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            tuuhin_ov_register_id: 112312,
+            tuuhin_ov_register_id: 0,
             tuuhin_ov_date: '',
-            tuuhin_ov_aimag: 'Хэнтий',
-            tuuhin_ov_sum_duureg: 'Хөтөл',
+            tuuhin_ov_aimag: '',
+            tuuhin_ov_sum_duureg: '',
 
             torol_zuil_torol_zuil: '',
             torol_zuil_torol_zuil_tree: '',
@@ -19,40 +19,40 @@ export class Form extends Component {
             torol_zuil_torol_zuil_level1: [],
             torol_zuil_torol_zuil_level2: [],
             torol_zuiltorol_zuil_name: '',
-            torol_zuil_dursgalt_gazriin_ner: 'Чулуутын овоо',
+            torol_zuil_dursgalt_gazriin_ner: '',
             torol_zuil_dursgalt_gazriin_coordinatutm: '',
-            torol_zuil_dursgalt_gazriin_coordinatx: 95.701563,
-            torol_zuil_dursgalt_gazriin_coordinaty: 48.266242,
-            torol_zuil_dursgalt_gazriin_coordinatllx: 95.701563,
-            torol_zuil_dursgalt_gazriin_coordinatlly: 48.266242,
+            torol_zuil_dursgalt_gazriin_coordinatx: 0,
+            torol_zuil_dursgalt_gazriin_coordinaty: 0,
+            torol_zuil_dursgalt_gazriin_coordinatllx: 0,
+            torol_zuil_dursgalt_gazriin_coordinatlly: 0,
             torol_zuil_dursgalt_gazriin_coordinatalt: 0,
-            torol_zuil_todorhoilolt: 'Хөтөл уул',
+            torol_zuil_todorhoilolt: '',
 
 
 
-            hemjee_talbai: 3.5,
-            hemjee_urt: 19,
-            hemjee_orgon: 11,
-            hemjee_ondor: 13,
-            hemjee_zuzaan: 12,
-            hemjee_golch: 20,
+            hemjee_talbai: 0,
+            hemjee_urt: 0,
+            hemjee_orgon: 0,
+            hemjee_ondor: 0,
+            hemjee_zuzaan: 0,
+            hemjee_golch: 0,
 
-            hemjee_busad_hemjee: '2 төө',
-            hemjee_too_shirheg: 10,
-            hemjee_temdeglel: 'Сонин хэмнжээ',
+            hemjee_busad_hemjee: '',
+            hemjee_too_shirheg: 0,
+            hemjee_temdeglel: '',
 
 
 
             dg_hamrah_huree_solbiltsolutm: '',
-            dg_hamrah_huree_solbiltsolx: 95.701563,
-            dg_hamrah_huree_solbiltsoly:48.266242,
-            dg_hamrah_huree_solbiltsolllx: 95.701563,
-            dg_hamrah_huree_solbiltsollly: 48.266242,
+            dg_hamrah_huree_solbiltsolx: 0,
+            dg_hamrah_huree_solbiltsoly:0,
+            dg_hamrah_huree_solbiltsolllx: 0,
+            dg_hamrah_huree_solbiltsollly: 0,
             dg_hamrah_huree_solbiltsolllalt: 0,
 
 
             dg_ezen_dursgalt_gazar_ezen: false,
-            dg_ezen_temdeglel: 'Хэрэв дурсгалт газрыг тоймлон тоолсон бол "Тоо ширхэг" хэсэгт тоон утгаар оруулж, "Тэмдэглэл" хэсэгт бичнэ.',
+            dg_ezen_temdeglel: '',
 
 
 
@@ -62,10 +62,10 @@ export class Form extends Component {
             dgh_bus_togtooh_shaardlaga: false,
 
             dgh_hamrah_huree_coordinatutm: '',
-            dgh_hamrah_huree_coordinatx: 95.701563,
-            dgh_hamrah_huree_coordinaty: 48.266242,
-            dgh_hamrah_huree_coordinatllx: 95.701563,
-            dgh_hamrah_huree_coordinatlly: 48.266242,
+            dgh_hamrah_huree_coordinatx: 0,
+            dgh_hamrah_huree_coordinaty: 0,
+            dgh_hamrah_huree_coordinatllx: 0,
+            dgh_hamrah_huree_coordinatlly: 0,
             dgh_hamrah_huree_coordinatalt: 0,
 
 
@@ -131,7 +131,8 @@ export class Form extends Component {
 
 
             last_busad_temdeglel: '',
-            last_burtgegch: ''
+            last_burtgegch: '',
+            handle_save_succes: false,
 
 
         }
@@ -193,7 +194,7 @@ export class Form extends Component {
             var chuluun_zevseg_array = ["1.1 Палеолит","1.2 Мезолит","1.3 Неолим","1.4 Хүний сууж байсан оромж. сууц, агуй","1.5 Бусад"]
             for (var i = 0; i < chuluun_zevseg_array.length; i++)
             {
-                chuluun_zevseg.push(<option >{chuluun_zevseg_array[i]}</option>);
+                chuluun_zevseg.push(<option value={`1.${i+1}`}>{chuluun_zevseg_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: chuluun_zevseg})
         }
@@ -202,7 +203,7 @@ export class Form extends Component {
             var hadnii_zurag_array = ["2.1 Сийлмэл зураг","2.2 Зос бэхэн зураг","2.3 Тамга тэмдэг бичгийн дурсгал"]
             for (var i = 0; i < hadnii_zurag_array.length; i++)
             {
-                hadnii_zurag.push(<option >{hadnii_zurag_array[i]}</option>);
+                hadnii_zurag.push(<option value={`2.${i+1}`}>{hadnii_zurag_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: hadnii_zurag})
         }
@@ -211,7 +212,7 @@ export class Form extends Component {
             var bulsh_orshuulga_array = ["3.1 Неолитын булш","3.2 Шоргоолжин булш","3.3 Хиргисүүр", "3.4 Дөрвөлжин булш", "3.5 Пазырык булш", "3.6 Хүннү булш", "3.7 Түрэг булш", "3.8 Уйгур булш", "3.9 Хятан булш", "3.10 Монгол булш", "3.11 Хадны булш", "3.12 Бусад"]
             for (var i = 0; i < bulsh_orshuulga_array.length; i++)
             {
-                bulsh_orshuulga.push(<option >{bulsh_orshuulga_array[i]}</option>);
+                bulsh_orshuulga.push(<option value={`3.${i+1}`}>{bulsh_orshuulga_array[i]}</option>);
             }
     
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: bulsh_orshuulga})
@@ -221,7 +222,7 @@ export class Form extends Component {
             var tahil_tailga_array = ["4.1 Тахилын онгон", "4.2 Тахилын сүмийн туурь", "4.3 Шивээ", "4.4 Овоо", "4.5 Бусад"]
             for (var i = 0; i < tahil_tailga_array.length; i++)
             {
-                tahil_tailga.push(<option >{tahil_tailga_array[i]}</option>);
+                tahil_tailga.push(<option value={`4.${i+1}`}>{tahil_tailga_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: tahil_tailga})
 
@@ -232,7 +233,7 @@ export class Form extends Component {
     
             for (var i = 0; i < barilga_arhitektur_array.length; i++)
             {
-                barilga_arhitektur.push(<option >{barilga_arhitektur_array[i]}</option>);
+                barilga_arhitektur.push(<option value={`5.${i+1}`}>{barilga_arhitektur_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: barilga_arhitektur})
         
@@ -243,7 +244,7 @@ export class Form extends Component {
             var hoshoo_dursgal_array = ["6.1 Буган чулуун хөшөө", "6.2 Хүн чулуу", "6.3 Тамга тэмдэгтэй хөшөө чулуу", "6.4 Гэрэлт хөшөө", "6.5 Амьтны дүрслэлтэй хөшөө", "6.6 Цулуй хөшөө", "6.7 Бусад"]
             for (var i = 0; i < hoshoo_dursgal_array.length; i++)
             {
-                hoshoo_dursgal.push(<option >{hoshoo_dursgal_array[i]}</option>);
+                hoshoo_dursgal.push(<option value={`6.${i+1}`}>{hoshoo_dursgal_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: hoshoo_dursgal})
         
@@ -253,7 +254,7 @@ export class Form extends Component {
             var uildverleliin_ul_mor_array = ["7.1 Төмөрлөг боловсруулалтын ул мөр", "7.2 Шавар боловсруулалтын ул мөр", "7.3 Газар боловсруулалтын ул мөр", "7.4 Чулуу боловсруулалтын ул мөр"]
             for (var i = 0; i < uildverleliin_ul_mor_array.length; i++)
             {
-                uildverleliin_ul_mor.push(<option >{uildverleliin_ul_mor_array[i]}</option>);
+                uildverleliin_ul_mor.push(<option value={`7.${i+1}`}>{uildverleliin_ul_mor_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: uildverleliin_ul_mor})
         }
@@ -264,50 +265,50 @@ export class Form extends Component {
     handleInputSelectTwo(field, e){
         this.setState({ torol_zuil_torol_zuil_level2: []})
 
-        if(e.target.value == '2.3 Тамга тэмдэг бичгийн дурсгал'){
+        if(e.target.value == '2.3'){
             var tamga_temdeg = []
             var tamga_temdeg_array = ["2.3.1 Түрэг", "2.3.2 Уйгур", "2.3.3 Кидан", "2.3.4 Монгол", "2.3.5 Тод", "2.3.6 Дөрвөлжин", "2.3.7 Манж", "2.3.8 Согд", "2.3.9 Араб", "2.3.10 Перс", "2.3.11 Санскрит", "2.3.12 Төвд", "2.3.13 Хятад", "2.3.14 Бусад"]
             for (var i = 0; i < tamga_temdeg_array.length; i++)
             {
-                tamga_temdeg.push(<option >{tamga_temdeg_array[i]}</option>);
+                tamga_temdeg.push(<option value={`2.3.${i+1}`}>{tamga_temdeg_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: tamga_temdeg})
         }
-        if(e.target.value == '4.1 Тахилын онгон'){
+        if(e.target.value == '4.1'){
             var tamga_temdeg = []
             var tamga_temdeg_array = ["4.1.1 Балбал (зэл чулуу)", "4.1.2 Хашлага чулуу"]
             for (var i = 0; i < tamga_temdeg_array.length; i++)
             {
-                tamga_temdeg.push(<option >{tamga_temdeg_array[i]}</option>);
+                tamga_temdeg.push(<option value={`4.1.${i+1}`}>{tamga_temdeg_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: tamga_temdeg})
         }
-        if(e.target.value == '5.2 Эртний хот'){
+        if(e.target.value == '5.2'){
             var ertnii_hot = []
             var ertnii_hot_array = ["5.2.1 Хүннү", "5.2.2 Түрэг", "5.2.3 Уйгур", "5.2.4 Кидан", "5.2.5 Монгол", "5.2.6 Манж", "5.2.7 Тодорхойгүй"]
             for (var i = 0; i < ertnii_hot_array.length; i++)
             {
-                ertnii_hot.push(<option >{ertnii_hot_array[i]}</option>);
+                ertnii_hot.push(<option value={`5.2.${i+1}`}>{ertnii_hot_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
 
-        if(e.target.value == '5.9 Архитектурын дурсгал'){
+        if(e.target.value == '5.9'){
             var ertnii_hot = []
             var ertnii_hot_array = ["5.9.1 Уран барилга", "5.9.2 Уран барилгын цогцолбор ", "5.9.3 Сүм хийд", "5.9.4 Уран баримал хөшөө (1921-1990 он)", "5.9.5 Сүрлэг чимэглэлийн дүрслэл"]
             for (var i = 0; i < ertnii_hot_array.length; i++)
             {
-                ertnii_hot.push(<option >{ertnii_hot_array[i]}</option>);
+                ertnii_hot.push(<option value={`5.9.${i+1}`}>{ertnii_hot_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
 
-        if(e.target.value == '6.2 Хүн чулуу'){
+        if(e.target.value == '6.2'){
             var ertnii_hot = []
             var ertnii_hot_array = ["6.2.1 Хүрэл", "6.2.2 Түрэг", "6.2.3 Уйгур", "6.2.4 Кидан", "6.2.5 Монгол", "6.2.6 Тодорхойгүй"]
             for (var i = 0; i < ertnii_hot_array.length; i++)
             {
-                ertnii_hot.push(<option >{ertnii_hot_array[i]}</option>);
+                ertnii_hot.push(<option value={`6.2.${i+1}`}>{ertnii_hot_array[i]}</option>);
             }
             this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
@@ -342,10 +343,18 @@ export class Form extends Component {
 
     
     handleSave(){
+        this.setState({handle_save_succes:true})
+
         const form_datas = this.state
         service.create(form_datas).then(({success}) => {
             if (success) {
-                
+                alert("yes")
+                setTimeout(() => {
+                    this.setState({handle_save_succes:false})
+                }, 1000)
+            }
+            else{
+                alert("no")
             }
         })
     }
@@ -355,12 +364,9 @@ export class Form extends Component {
 
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded tuuhiin-ov">
-                <button className="btn gp-bg-primary" onClick={this.handleSave} >
-                    Хадгалах
-                </button>
-                <row className="row container  my-4">
+                <div className="row container  my-4">
                     <h4>2015 ОНЫ ТҮҮХ, СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛИЙН МАЯГТ №1</h4>
-                </row>
+                </div>
                 <table className="table table-bordered">
                     <tbody>
                         <tr>
@@ -386,7 +392,7 @@ export class Form extends Component {
                                     value={this.state.tuuhin_ov_date}
                                 />
                             </td>
-                            <td style={{width: "20%"}}>Бүртгэл хийсэн он сар, өдрийг бичнэ.</td>
+                            <th style={{width: "20%"}}>Бүртгэл хийсэн он сар, өдрийг бичнэ.</th>
                         </tr>
                         <tr>
                             <th scope="row">Аймаг, Нийслэл</th>
@@ -399,7 +405,7 @@ export class Form extends Component {
                                     value={this.state.tuuhin_ov_aimag}
                                 />
                             </td>
-                            <td rowSpan="2" scope="rowgroup">Тухайн дурсгал оршиж буй аймаг, сумын нэрийг бичнэ.</td>
+                            <th rowSpan="2" scope="rowgroup">Тухайн дурсгал оршиж буй аймаг, сумын нэрийг бичнэ.</th>
                         </tr>
                         <tr>
                             <th scope="row">Сум, Дүүрэг</th>
@@ -441,7 +447,7 @@ export class Form extends Component {
                                 </select>)}
                             </div>
                         </td>
-                        <td scope="row" style={{width: "20%"}}>Ерөнхий төрлийн код, нэрийг бичнэ.</td>
+                        <th scope="row" style={{width: "20%"}}>Ерөнхий төрлийн код, нэрийг бичнэ.</th>
                     </tr>
                     <tr>
 
@@ -461,7 +467,7 @@ export class Form extends Component {
                                 <option>Бусад</option>
                             </select>
                         </td>
-                        <td scope="row">Чулуун дурсгалыг урласан материалыг сонгоно.</td>
+                        <th scope="row">Чулуун дурсгалыг урласан материалыг сонгоно.</th>
                     </tr>
 
 
@@ -478,7 +484,7 @@ export class Form extends Component {
                                 value={this.state.torol_zuil_dursgalt_gazriin_ner}
                             />
                         </td>
-                        <td scope="row">Ерөнхий төрлийн код, нэрийг бичнэ.</td>
+                        <th scope="row">Ерөнхий төрлийн код, нэрийг бичнэ.</th>
                     </tr>
                     <tr>
                         <th rowSpan="6" scope="rowgroup" scope="row">Солбилцол</th>
@@ -486,7 +492,7 @@ export class Form extends Component {
                         <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
                         <td rowSpan="2">Alt(m)</td>
-                        <td rowSpan="6" scope="rowgroup">UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</td>
+                        <th rowSpan="6" scope="rowgroup">UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</th>
                     </tr>
                     <tr>
                         <td scope="row">UTM Zone</td>
@@ -499,7 +505,7 @@ export class Form extends Component {
                         <td scope="row">1</td>
                         <td scope="row">
                             <input
-                                type="number"
+                                type="text"
                                 className="form-control"
                                 id="torol_zuil_dursgalt_gazriin_coordinatutm"
                                 onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinatutm', e)}
@@ -707,17 +713,17 @@ export class Form extends Component {
                         <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
                         <td rowSpan="2">Alt(m)</td>
-                        <td rowSpan="6" scope="rowgroup" style={{width: "20%"}}>Хэрэв тухайн газар том талбайг хамран оршиж байгаа бол дурсгалын хамрах хүрээг заавал тогтоох бөгөөд энэхүү хамрах хүрээний цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</td>
+                        <th rowSpan="6" scope="rowgroup" style={{width: "20%"}}>Хэрэв тухайн газар том талбайг хамран оршиж байгаа бол дурсгалын хамрах хүрээг заавал тогтоох бөгөөд энэхүү хамрах хүрээний цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</th>
                     </tr>
                     <tr>
-                        <td scope="row">UTM Zone</td>
-                        <td scope="row">N</td>
-                        <td scope="row">E</td>
-                        <td scope="row">N</td>
-                        <td scope="row">E</td>
+                        <th scope="row">UTM Zone</th>
+                        <th scope="row">N</th>
+                        <th scope="row">E</th>
+                        <th scope="row">N</th>
+                        <th scope="row">E</th>
                     </tr>
                     <tr>
-                        <td scope="row">1</td>
+                        <th scope="row">1</th>
                         <td scope="row">
                             <input
                                 type="number"
@@ -792,7 +798,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг нь сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг нь сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -819,7 +825,7 @@ export class Form extends Component {
                                 </textarea>
                             </td>
                             
-                            <td>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
                     </tbody>
                 </table>
@@ -836,7 +842,7 @@ export class Form extends Component {
                                     <option>Хамгаалалтад аваагүй.</option>
                                 </select>
                             </td>
-                            <td rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <th rowSpan="5" scope="rowgroup" scope="row">Хамгаалалтын бүс тогтоох шаардлагатай эсэх.</th>
@@ -851,7 +857,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="5" scope="rowgroup" scope="row">Нэгийг сонгоно.</td>
+                            <th rowSpan="5" scope="rowgroup" scope="row">Нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                         <td>
@@ -881,14 +887,14 @@ export class Form extends Component {
                         <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
                         <td rowSpan="2">Alt(m)</td>
-                        <td rowSpan="6" scope="rowgroup" style={{width: "20%"}}>Хамгаалалтын бүс тогтоох бүсийн санадтай дурсгалын хамгаалал тогтоох бүсийн хилийн цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</td>
+                        <th rowSpan="6" scope="rowgroup" style={{width: "20%"}}>Хамгаалалтын бүс тогтоох бүсийн санадтай дурсгалын хамгаалал тогтоох бүсийн хилийн цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</th>
                     </tr>
                     <tr>
-                        <td scope="row">UTM Zone</td>
-                        <td scope="row">N</td>
-                        <td scope="row">E</td>
-                        <td scope="row">N</td>
-                        <td scope="row">E</td>
+                        <th scope="row">UTM Zone</th>
+                        <th scope="row">N</th>
+                        <th scope="row">E</th>
+                        <th scope="row">N</th>
+                        <th scope="row">E</th>
                     </tr>
                     <tr>
                         <td scope="row">1</td>
@@ -968,7 +974,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -995,7 +1001,7 @@ export class Form extends Component {
 
                                 </textarea>
                             </td>
-                            <td>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 {/* /////////////////////////// */}
                         <tr>
@@ -1011,7 +1017,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1038,7 +1044,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1054,7 +1060,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1081,7 +1087,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1097,7 +1103,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1124,7 +1130,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Хэрэв хууль бусаар ухаж, тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</td>
+                            <th>Хэрэв хууль бусаар ухаж, тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</th>
                         </tr>
 {/* ////////////////////////////// */}
 
@@ -1142,7 +1148,7 @@ export class Form extends Component {
                                     <label>Тоносон</label>
                                 </div>
                             </td>
-                            <td rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэд хэдэн сонголт хийж болно.</td>
+                            <th rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэд хэдэн сонголт хийж болно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1299,7 +1305,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 
 {/* ////////////////////////////// */}
@@ -1310,13 +1316,13 @@ export class Form extends Component {
                                     <input 
                                         type="checkbox" 
                                         checked={this.state.dgh_baigaliin_huchin_zuil_nar}
-                                        onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_nar', e, '')}
+                                        onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_nar', e, 'Нарны нөлөөлөл')}
                                         value={this.state.dgh_baigaliin_huchin_zuil_nar}
                                         ></input>
                                     <label>Нарны нөлөөлөл</label>
                                 </div>
                             </td>
-                            <td rowSpan="11" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэд хэдэн сонголт хийж болно.</td>
+                            <th rowSpan="11" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэд хэдэн сонголт хийж болно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1462,9 +1468,9 @@ export class Form extends Component {
                                 </textarea>
 
                             </td>
-                            <td>       
+                            <th>       
                                 Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно
-                            </td>
+                            </th>
                         </tr>
 
 {/* ////////////////////////////// */}
@@ -1481,7 +1487,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1521,9 +1527,9 @@ export class Form extends Component {
 
                                 </textarea>
                             </td>
-                            <td>
+                            <th>
                             Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.
-                            </td>
+                            </th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1539,15 +1545,15 @@ export class Form extends Component {
                                     <label>Нэн шаардлагатай</label>
                                 </div>
                             </td>
-                            <td rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
                                 <div className="col-md-12">
                                     <input 
                                         type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga}
-                                    onChange={(e) => this.handleCheck('dgh_sergeen_zasvarlah_eseh_shaardlaga', e)}
+                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga ? false : true}
+                                    onChange={(e) => this.handleCheckGroup('dgh_sergeen_zasvarlah_eseh_shaardlaga', e, false)}
                                     value={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga}
                                         ></input>
                                     <label>Шаардлагагүй</label>
@@ -1559,8 +1565,8 @@ export class Form extends Component {
                                 <div className="col-md-12">
                                     <input 
                                         type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga}
-                                    onChange={(e) => this.handleCheck('dgh_sergeen_zasvarlah_eseh_shaardlaga', e)}
+                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga ? true : false}
+                                    onChange={(e) => this.handleCheckGroup('dgh_sergeen_zasvarlah_eseh_shaardlaga', e, true)}
                                     value={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga}
                                         ></input>
                                     <label>Шаардлагатай</label>
@@ -1579,10 +1585,10 @@ export class Form extends Component {
 
                                 </textarea>
                             </td>
-                            <td>                                
+                            <th>                                
 
                                 Шалтгааныг товч бичнэ.
-                            </td>
+                            </th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1596,7 +1602,7 @@ export class Form extends Component {
                                     <option>Үгүй</option>
                                 </select>
                             </td>
-                            <td rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Нэгийг сонгоно.</td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Нэгийг сонгоно.</th>
                         </tr>
                
                         <tr>
@@ -1611,7 +1617,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1627,7 +1633,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1654,7 +1660,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1670,7 +1676,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1697,7 +1703,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
@@ -1713,7 +1719,7 @@ export class Form extends Component {
                                     <label>Тийм</label>
                                 </div>
                             </td>
-                            <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</td>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -1740,7 +1746,7 @@ export class Form extends Component {
 
                             </textarea>
                         </td>
-                            <td>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</td>
+                            <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                         </tr>
 
 
@@ -1760,7 +1766,7 @@ export class Form extends Component {
 
                                 </textarea>
                             </td>
-                            <td rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Дээр асуулгад хамрагдаагүй бусад мэдээллийг тэмдэгтээр бичнэ.</td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Дээр асуулгад хамрагдаагүй бусад мэдээллийг тэмдэгтээр бичнэ.</th>
                         </tr>
 {/* ////////////////////////////// */}               
                         <tr>
@@ -1776,13 +1782,21 @@ export class Form extends Component {
 
                                 </textarea>
                             </td>
-                            <td rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэрэглэгчийн нэр нууц үгээр нэвтэрч ороход бүртгэгчийн овог нэр, албан тушаал автоматоор бичигдэнэ.</td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэрэглэгчийн нэр нууц үгээр нэвтэрч ороход бүртгэгчийн овог нэр, албан тушаал автоматоор бичигдэнэ.</th>
                         </tr>
                     </tbody>
                 </table>
-                <button className="btn gp-bg-primary" onClick={this.handleSave} >
-                    Хадгалах
-                </button>
+                { this.state.handle_save_succes ?
+                    <button className="btn gp-bg-primary">
+                        <a class="spinner-border text-light" role="status">
+                            <span class="sr-only">Loading...</span> 
+                        </a>
+                        <span> Шалгаж байна. </span>
+                    </button>:
+                    <button className="btn gp-bg-primary" onClick={this.handleSave} >
+                        Хадгалах
+                    </button>
+                }
             </div>  
         )
 
