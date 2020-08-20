@@ -16,14 +16,14 @@ export  class Profile extends Component {
                     
                     <div className="col-md-12">
                         <ul className="list-group list-group-horizontal col-md-12">
-                             <NavLink className=" col-md-3" to={`/Profile/`}>ХУДАЛДАН АВАЛТ</NavLink>  
+                             <NavLink className=" col-md-3" to={`/profile/all/`}>ХУДАЛДАН АВАЛТ</NavLink>  
                         </ul>
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>
-                        <Route path={"/Profile/"}  component={History} />      
+                        <Route path={"/profile/all/"}  component={History} />      
                         </Switch>
                     </div>
                 </div>

@@ -1,14 +1,14 @@
  
 import React, { Component } from "react"
 import {service} from '../service'
-
+import {HistoryTable} from './historyTable'
 export default class History extends Component {
 
     constructor(props) {
         super(props)
         this.state={
             payment:[],
-            payment_length:null,
+            payment_length:1,
             currentPage:1,
             paymentPerPage:25,
         }
@@ -29,15 +29,15 @@ export default class History extends Component {
         const lastIndex=currentPage*paymentPerPage
         const firtsIndex=lastIndex-paymentPerPage
         const value={ "firstIndex":firtsIndex, "lastIndex": lastIndex}
-        this.handleGetAll(value)
+        this.handleGetAll()
     }
 
-    handleGetAll(value){
+    handleGetAll(){
 
-        service.loadHistory(value).then(({ payment,len }) => {
+        service.loadHistory().then(({ payment }) => {
             if (payment) {
                 this.setState({
-                    payment,payment_length:len
+                    payment
                 })
             }
         })
@@ -89,12 +89,12 @@ export default class History extends Component {
                                     <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
 
                                     payment.map((p, idx) =>
-                                        <OrgFormTable
+                                        <HistoryTable
                                             key={idx}
                                             idx={(currentPage*25)-25+idx+1}
                                             values={p}
                                         >
-                                        </OrgFormTable>
+                                        </HistoryTable>
 
                                 )}
                         </tbody>

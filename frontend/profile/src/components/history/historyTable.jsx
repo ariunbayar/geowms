@@ -4,7 +4,7 @@ export class HistoryTable extends Component {
 
     render() {
         const idx = this.props.idx
-        const {number,amount,description,created_at,is_success,success_at,user_id}
+        const {amount,description,created_at,is_success,success_at,user_id}=this.props.values
         return (
             <tr>
                 <td>
@@ -12,9 +12,6 @@ export class HistoryTable extends Component {
                 </td>
                 <td>
                     {user_id}
-                </td>
-                <td>
-                    {number}
                 </td>
                 <td>
                     {amount}

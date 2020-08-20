@@ -1,7 +1,6 @@
 export const service = {
     loadHistory
 }
-const prefix = '/back/payment'
 
 function handleResponse(response) {
     return response.text().then(text => {
@@ -54,11 +53,10 @@ function _getGetOptions() {
     }
 }
 
-function loadHistory(value) {
+function loadHistory() {
     const requestOptions = {
-        ..._getPostOptions(),
-        body: JSON.stringify(value),
+        ..._getGetOptions(),
     }
-    return fetch(`${prefix}/paymentAll/`, requestOptions).then(handleResponse)
+    return fetch(`/profile/all/`, requestOptions).then(handleResponse)
 }
 
