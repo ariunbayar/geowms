@@ -29,11 +29,14 @@ def all(request, payload, level):
     return JsonResponse({
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
-     })
-
-def OrgAll(request, level, pk):
-    orgs_display = []
-    for org in Org.objects.filter(level=level, pk=pk):
+        })
+        
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def OrgAll(request,level,pk):
+    orgs_display=[]
+    for org in Org.objects.filter(level=level,pk=pk):
         orgs_display.append({
             'id': org.id,
             'name': org.name,
@@ -339,7 +342,8 @@ def org_remove(request, payload, level):
 
 @require_POST
 @ajax_required
-def orgSearch(request, payload, level):
+@user_passes_test(lambda u: u.is_superuser)
+def orgSearch(request, payload,level):
     query = payload.get('query')
     orgs_display = []
     for org in Org.objects.filter(level=level).annotate(search=SearchVector('name')).filter(search__contains=query):
@@ -355,7 +359,8 @@ def orgSearch(request, payload, level):
 
 @require_POST
 @ajax_required        
-def employeeSearch(request, payload, level, pk):
+@user_passes_test(lambda u: u.is_superuser)
+def employeeSearch(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
     query = payload.get('query')

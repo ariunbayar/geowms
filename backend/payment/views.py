@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse, Http404
 from geoportal_app.models import User
+from django.contrib.auth.decorators import user_passes_test
 from .models import Payment
 
 
@@ -36,6 +37,7 @@ def all(request):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def purchase(request, payload):
     user = get_object_or_404(User, pk=request.user.id)
     price = payload.get('price')
@@ -49,6 +51,7 @@ def purchase(request, payload):
   
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
     user = get_object_or_404(User, pk=request.user.id)
 
