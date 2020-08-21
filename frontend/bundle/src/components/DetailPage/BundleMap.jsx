@@ -49,7 +49,8 @@ export default class BundleMap extends Component {
             sidebar: new Sidebar(),
         }
 
-        this.marker = this.drawPayButton()
+        this.marker = this.initMarker()
+        this.drawPay = this.drawPayButton()
 
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
@@ -96,7 +97,7 @@ export default class BundleMap extends Component {
         const point = new Point([1, 0])
 
         const feature = new Feature({geometry: point})
-
+        
         feature.setStyle(style)
 
         return {feature: feature, point: point}
@@ -203,7 +204,7 @@ export default class BundleMap extends Component {
                     base_layer_controls: []
                 }
             )
-        const source_draw = new VectorSource({wrapX: false})
+        const source_draw = new VectorSource({wrapX: false, features: [this.drawPay.feature],})
         const vector_draw = new VectorLayer({
             source: source_draw,
         });
@@ -301,6 +302,7 @@ export default class BundleMap extends Component {
     handleMapClick(event) {
 
         this.marker.point.setCoordinates(event.coordinate)
+        this.drawPay.point.setCoordinates(event.coordinate)
 
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
@@ -376,7 +378,7 @@ export default class BundleMap extends Component {
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.marker.point.setCoordinates(map_coord)
+        this.drawPay.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
     
