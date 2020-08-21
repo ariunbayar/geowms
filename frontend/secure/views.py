@@ -3,20 +3,18 @@ from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET
 from main.auth_api import GeoAuth
-from geoportal_app.models import User, Role
-import platform 
-import requests
-from django.http import JsonResponse, HttpResponse
+from geoportal_app.models import User
 
 from .form import RegisterForm, LoginForm
-from user_agents import parse
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
+
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip

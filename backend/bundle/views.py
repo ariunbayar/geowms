@@ -142,6 +142,7 @@ def all(request):
     }
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
 def updateMore(request, pk):
