@@ -67,6 +67,7 @@ export class LogForm extends Component {
         const {payment_all} = this.state
         const {payPerPage,currentPage,pay_legth} = this.state
         const totalPages=Math.ceil( pay_legth/payPerPage)
+        print("user");
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
