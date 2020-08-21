@@ -28,7 +28,7 @@ def _get_disk_info():
                     'avail': int(avail) * 1024,
                     'target': target,
                 }
-    except:
+    except Exception:
         pass
 
     return disk_info
@@ -105,10 +105,10 @@ def delete(request, pk):
 def disk(request):
     disk_info = _get_disk_info()
     for name, info in disk_info.items():
-       disk = {
-            'name': name,
-            'size_used': info['used'],
-            'size_total': info['used'] + info['avail'],
-            'mount_point': info['target'],
+        disk = {
+                'name': name,
+                'size_used': info['used'],
+                'size_total': info['used'] + info['avail'],
+                'mount_point': info['target'],
         }
     return JsonResponse({'success': True, 'disk': disk})

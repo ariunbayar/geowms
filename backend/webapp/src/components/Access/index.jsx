@@ -10,10 +10,25 @@ export class Access extends Component {
 
     constructor(props) {
         super(props)
+
+        this.default_url = '/back/access/login/'
+
+    }
+
+    componentDidMount() {
+        if (this.props.location.pathname.endsWith('access/')) {
+            this.props.history.push(this.default_url)
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.props.location.pathname.endsWith('access/')) {
+            this.props.history.push(this.default_url)
+        }
     }
 
     render() {
-        
+
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row container">
@@ -34,9 +49,9 @@ export class Access extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>
-                            <Route path={"/back/access/login/"} component={LoginLog}/>
-                            <Route path={"/back/access/logout/"} component={CrudEvenLog}/>
-                            <Route path={"/back/access/page/"} component={PageLog}/>
+                            <Route path={"/back/access/login/"} component={LoginLog} />
+                            <Route path={"/back/access/logout/"} component={CrudEvenLog} />
+                            <Route path={"/back/access/page/"} component={PageLog} />
                         </Switch>
                     </div>
                 </div>
