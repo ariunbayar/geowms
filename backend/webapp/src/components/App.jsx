@@ -16,21 +16,21 @@ import {Huulga} from "./Huulga"
 
 export default class App extends Component {
 
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            user_count: 0,
-        };
-    }
+    this.state = {
+      user_count: 0,
+    };
+  }
 
-    componentDidMount() {
+  componentDidMount() {
 
-        service.userCount().then(({ user_count }) => {
-            this.setState({ user_count: user_count });
-        });
+    service.userCount().then(({ user_count }) => {
+      this.setState({ user_count: user_count });
+    });
 
-    }
+  }
 
   render() {
     return (
@@ -49,7 +49,7 @@ export default class App extends Component {
             <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
               <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/login/"}>ACCESS</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>Хандалт</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/huulga/"}>ХУУЛГА</NavLink>

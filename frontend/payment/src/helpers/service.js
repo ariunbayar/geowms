@@ -1,9 +1,3 @@
-export const service = {
-    loadWMSLayers,
-    loadBaseLayers,
-    payment
-}
-
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -20,7 +14,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function handleResponse(response) {
+export function handleResponse(response) {
     return response.text().then(text => {
         const data = text && JSON.parse(text)
         if (!response.ok) {
@@ -36,16 +30,7 @@ function handleResponse(response) {
     })
 }
 
-function _getGetOptions() {
-    return {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    }
-}
-
-function _getPostOptions() {
+export function getPostOptions() {
     return {
         method: 'POST',
         headers: {
@@ -55,24 +40,11 @@ function _getPostOptions() {
     }
 }
 
-function loadWMSLayers(id) {
-    const requestOptions = {
-        ..._getGetOptions(),
+export function getGetOptions() {
+    return {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     }
-    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
-}
-
-function loadBaseLayers() {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
-}
-
-function payment(price, description, data_id) {
-    const requestOptions = {
-        ..._getPostOptions(),
-        body: JSON.stringify({price, description, data_id})
-    }
-    return fetch('/back/payment/purchase/', requestOptions).then(handleResponse)
 }

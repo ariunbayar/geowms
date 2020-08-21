@@ -113,9 +113,8 @@ urlpatterns = [
 
     path('payment/', include(([
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
+        path('all/', payment_views.all, name='all'),
         path('purchase/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
-
     re_path('^.*', webapp_views.index, name='webapp'),
-
 ]

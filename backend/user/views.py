@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.contrib.postgres.search import SearchVector
 from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
@@ -20,8 +20,9 @@ def _get_user_display(user):
         'email': user.email,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
-        'roles':roles
+        'roles': roles
     }
+
 
 def _get_user_detail(user):
     return {
@@ -31,7 +32,6 @@ def _get_user_detail(user):
         'gender': user.gender,
         'is_superuser': user.is_superuser,
         'email': user.email,
-        'is_active': user.is_active,
         'is_sso': user.is_sso,
         'username': user.username,
         'is_active': user.is_active,
@@ -44,18 +44,19 @@ def _get_role_display(role):
     return {
         'id': role.id,
         'name': role.get_id_display(),
-        'success':True
+        'success': True
     }
+
 
 @require_POST
 @ajax_required
-def all(request,payload):
+def all(request, payload):
     last = payload.get('last')
     first = payload.get('first')
     user_list = [_get_user_display(user) for user in User.objects.all()[first:last]]
     rsp = {
         'user_list': user_list,
-        'len':User.objects.all().count(),
+        'len': User.objects.all().count(),
     }
 
     return JsonResponse(rsp)
@@ -77,13 +78,13 @@ def userCount(request):
 def дэлгэрэнгүй(request, pk):
 
     user = get_object_or_404(User, pk=pk)
-    all_role= Role.objects.all()
-    all_roles=[ _get_role_display(q)for q in all_role]
+    all_role = Role.objects.all()
+    all_roles = [_get_role_display(q)for q in all_role]
     roles = [_get_role_display(role) for role in user.roles.all()]
     rsp = {
         'user_detail': _get_user_detail(user),
         'roles': roles,
-        'all_role':all_roles,
+        'all_role': all_roles,
     }
 
     return JsonResponse(rsp)
@@ -96,7 +97,6 @@ def userDetailChange(request, payload):
     
     user_id = payload.get('id')
     is_active = payload.get('is_active')
-    user = get_object_or_404(User, pk=user_id)
     User.objects.filter(pk=user_id).update(is_active=is_active)
     return JsonResponse({'success': True})
     
@@ -106,11 +106,11 @@ def userDetailChange(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def roleCreate(request, payload):
     user = get_object_or_404(User, pk=payload.get('id'))
-    user_id=payload.get('id')
+    user_id = payload.get('id')
     roleId = payload.get('roleId')
     role = user.roles.first()
     if role:
-        if(roleId==5):
+        if(roleId == 5):
             User.objects.filter(pk=user_id).update(is_superuser=True)
             user.roles.remove(role.id)
             user.roles.add(roleId)
@@ -125,13 +125,12 @@ def roleCreate(request, payload):
         user.roles.add(roleId)
         return JsonResponse({'success': True})
 
+
 @require_POST
 @ajax_required
 def userSearch(request, payload):
     query = payload.get('query')
     user_list = []
-
-    user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)]
+    user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name', 'first_name', 'email', 'gender')).filter(search__contains=query)]
     
     return JsonResponse({'user_list': user_list})
-    
