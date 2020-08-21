@@ -4,7 +4,7 @@ import {Switch, Route, Link, NavLink} from "react-router-dom"
 import {Form} from './Form'
 
 
-export class TsegForm extends Component {
+export class TsegPersonal extends Component {
 
     constructor(props) {
         super(props)

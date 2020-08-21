@@ -39,6 +39,12 @@ export class Form extends Component {
         
         handle_save_succes: false,
 
+        file_path1: '',
+        file_path1_error: '',
+        file_path2: '',
+        file_path2_error: '',
+        bairshil_tseg_holoos_img_url: '',
+
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleCheck = this.handleCheck.bind(this)
@@ -78,8 +84,8 @@ export class Form extends Component {
  
     handleSave(){
 
-        console.log(this.state.tseg_holoos_img_url)
-        console.log(this.state.tseg_oiroos_img_url)
+        console.log(this.state.file_path1)
+        console.log(this.state.file_path2)
         this.setState({handle_save_succes:true})
 
         setTimeout(() => {
@@ -284,9 +290,57 @@ export class Form extends Component {
         }
     }
 
-    onChangeHandler(e){
+    onChangeHandler(e, name){
         const file = e.target.files[0]
         console.log(file['name'])
+        const check = true
+        let re = /^[a-z A-Z0-9]+$/
+        let ints = /^[0-9]+$/
+
+        if(file['name'].length === 10)
+        {
+            if(re.test(file['name'][0]))
+            {
+                alert("useg too bish")
+            }
+            if(re.test(file['name'][1]))
+            {
+                alert("useg too bish")
+            }
+            if(re.test(file['name'][2]))
+            {
+                alert("useg too bish")
+            }
+            if(ints.test(file['name'][3]))
+            {
+                alert(" too bish")
+            }
+            if(ints.test(file['name'][4]))
+            {
+                alert(" too bish")
+            }
+            if(ints.test(file['name'][5]))
+            {
+                alert(" too bish")
+            }
+            if(ints.test(file['name'][7]))
+            {
+                alert(" too bish")
+            }
+            if(ints.test(file['name'][8]))
+            {
+                alert(" too bish")
+            }
+            if(ints.test(file['name'][8]))
+            {
+                alert(" too bish")
+            }
+
+        }
+
+
+        this.setState({ [name]: file })
+
     
     }
 
@@ -581,8 +635,21 @@ export class Form extends Component {
                                 <input
                                     type="file"
                                     className="form-control"
-                                    onChange={this.onChangeHandler}
+                                    onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                 />
+                                {file_path1_error.length > 0 ? <a className="text-danger">{file_path1_error}</a> : null}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th colSpan="1" scope="rowgroup">22.</th>
+                            <th colSpan="2" scope="rowgroup">file:</th>
+                            <td colSpan="3" scope="rowgroup">
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    onChange={(e) => this.onChangeHandler(e, 'file_path2')}
+                                />
+                                {file_path2_error.length > 0 ? <a className="text-danger">{file_path2_error}</a> : null}
                             </td>
                         </tr>
                         <tr>
