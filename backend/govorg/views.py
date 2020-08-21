@@ -1,9 +1,8 @@
-from itertools import groupby
 import uuid
 
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, reverse
+from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 
 
@@ -11,7 +10,7 @@ from main.decorators import ajax_required
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from .models import GovOrg
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.contrib.postgres.search import SearchVector
 
 
 def _get_govorg_display(govorg):
@@ -34,10 +33,10 @@ def _generate_govorg_token():
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def жагсаалт(request,payload):
-    last=payload.get('last')
-    first=payload.get('first')
-    org_id=payload.get('org_id')
+def жагсаалт(request, payload):
+    last = payload.get('last')
+    first = payload.get('first')
+    org_id = payload.get('org_id')
     govorg_list = GovOrg.objects.filter(org_id=org_id)[first:last]
 
     govorg_list_display = [
@@ -47,7 +46,7 @@ def жагсаалт(request,payload):
 
     rsp = {
         'govorg_list': govorg_list_display,
-        'len':GovOrg.objects.all().count(),
+        'len': GovOrg.objects.all().count(),
         'success': True,
     }
 
@@ -73,7 +72,6 @@ def үүсгэх(request, payload):
     }
 
     return JsonResponse(rsp)
-
 
 
 def _get_govorg_detail_display(request, govorg):
@@ -176,9 +174,9 @@ def тоо(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def govorgSearch(request,payload):
+def govorgSearch(request, payload):
     query = payload.get('query')
-    govorg_list = GovOrg.objects.all().annotate(search=SearchVector('name') ).filter(search__contains=query)
+    govorg_list = GovOrg.objects.all().annotate(search=SearchVector('name')).filter(search__contains=query)
     govorg_list_display = [
         _get_govorg_display(govorg)
         for govorg in govorg_list
@@ -186,9 +184,8 @@ def govorgSearch(request,payload):
 
     rsp = {
         'govorg_list': govorg_list_display,
-        'len':GovOrg.objects.all().count(),
+        'len': GovOrg.objects.all().count(),
         'success': True,
     }
 
     return JsonResponse(rsp)
-

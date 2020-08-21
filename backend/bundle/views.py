@@ -143,6 +143,7 @@ def all(request):
     }
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
