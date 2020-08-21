@@ -13,9 +13,9 @@ class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     is_success = models.BooleanField()
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    success_at = models.DateTimeField(auto_now=True)
-    failed_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    success_at = models.DateTimeField(null=True)
+    failed_at = models.DateTimeField(null=True)
 
     error_message = models.CharField(max_length=500)
     error_code = models.CharField(max_length=100)
