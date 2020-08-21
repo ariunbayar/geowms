@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
-import {service} from './service'
+import {service} from '../service'
 
 export class Form extends Component {
 

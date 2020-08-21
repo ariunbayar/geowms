@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
+import {service} from '../service'
 
 
 export class Form extends Component {
@@ -40,9 +41,9 @@ export class Form extends Component {
         handle_save_succes: false,
 
         file_path1: '',
-        file_path1_error: '',
+        file_path1_error: false,
         file_path2: '',
-        file_path2_error: '',
+        file_path2_error: false,
         bairshil_tseg_holoos_img_url: '',
 
         }
@@ -84,8 +85,7 @@ export class Form extends Component {
  
     handleSave(){
 
-        console.log(this.state.file_path1)
-        console.log(this.state.file_path2)
+        console.log(this.state)
         this.setState({handle_save_succes:true})
 
         setTimeout(() => {
@@ -293,55 +293,23 @@ export class Form extends Component {
     onChangeHandler(e, name){
         const file = e.target.files[0]
         console.log(file['name'])
-        const check = true
-        let re = /^[a-z A-Z0-9]+$/
-        let ints = /^[0-9]+$/
+        var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
 
         if(file['name'].length === 10)
         {
-            if(re.test(file['name'][0]))
+            if(re.test(file['name']) )
             {
-                alert("useg too bish")
+                this.setState({[name+'_error']: false})
             }
-            if(re.test(file['name'][1]))
-            {
-                alert("useg too bish")
+            else{
+                this.setState({[name+'_error']: true})
             }
-            if(re.test(file['name'][2]))
-            {
-                alert("useg too bish")
-            }
-            if(ints.test(file['name'][3]))
-            {
-                alert(" too bish")
-            }
-            if(ints.test(file['name'][4]))
-            {
-                alert(" too bish")
-            }
-            if(ints.test(file['name'][5]))
-            {
-                alert(" too bish")
-            }
-            if(ints.test(file['name'][7]))
-            {
-                alert(" too bish")
-            }
-            if(ints.test(file['name'][8]))
-            {
-                alert(" too bish")
-            }
-            if(ints.test(file['name'][8]))
-            {
-                alert(" too bish")
-            }
-
+        }
+        else{
+            this.setState({[name+'_error']: true})
         }
 
-
         this.setState({ [name]: file })
-
-    
     }
 
     render() {
@@ -637,7 +605,16 @@ export class Form extends Component {
                                     className="form-control"
                                     onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                 />
-                                {file_path1_error.length > 0 ? <a className="text-danger">{file_path1_error}</a> : null}
+                                {this.state.file_path1_error > 0 ? 
+                                <ul className="text-danger">
+                                    <li>Файлын нэр арван тэмдэгтээс бүтсэн байх ёстой.</li>
+                                    <li>Эхний гурван үе үсэг тоо байх ёстой.</li>
+                                    <li>Дөрөв тав зуравдугаар үе тухайн сар өдөр буюу тоо байх ёстой.</li>
+                                    <li>Долдугаар үе цэг.</li>
+                                    <li>Найм есдүгээр үе тухайн жилийн сүүлийн 2 орон.</li>
+                                    <li>Сүүлйин тэмдэгт үсэг тоо байж болно.</li>
+                                </ul>
+                                : null}
                             </td>
                         </tr>
                         <tr>
@@ -649,7 +626,8 @@ export class Form extends Component {
                                     className="form-control"
                                     onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                 />
-                                {file_path2_error.length > 0 ? <a className="text-danger">{file_path2_error}</a> : null}
+                                {this.state.file_path2_error.length > 0 ? <a className="text-danger">{file_path2_error}</a> : null}
+
                             </td>
                         </tr>
                         <tr>
@@ -683,8 +661,8 @@ export class Form extends Component {
                 </table>
                 { this.state.handle_save_succes ?
                     <button className="btn gp-bg-primary">
-                        <a class="spinner-border text-light" role="status">
-                            <span class="sr-only">Loading...</span> 
+                        <a className="spinner-border text-light" role="status">
+                            <span className="sr-only">Loading...</span> 
                         </a>
                         <span> Шалгаж байна. </span>
                     </button>:
