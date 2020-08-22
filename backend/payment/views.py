@@ -39,7 +39,6 @@ def all(request):
 @ajax_required
 def purchase(request, payload):
     user = get_object_or_404(User, pk=request.user.id)
-    first_name = get_object_or_404(first_name, pk=request.user.id)
     price = payload.get('price')
     description = payload.get('description')
     data_id = payload.get('data_id')

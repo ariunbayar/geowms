@@ -78,7 +78,7 @@ export class LogForm extends Component {
                             <tr>
                                 <th scope="col">Нийт дүн</th>
                                 <th scope="col">Тодорхойлолт</th>
-                                <th scope="col"> Огноо   </th>
+                                <th scope="col"> Огноо</th>
                                 <th scope="col">Амжилттай</th>
                                 <th scope="col">Амжилтгүй</th>
                                 <th scope="col">Хэрэглэгчийн id</th>
