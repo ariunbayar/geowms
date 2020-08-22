@@ -67,7 +67,6 @@ export class LogForm extends Component {
         const {payment_all} = this.state
         const {payPerPage,currentPage,pay_legth} = this.state
         const totalPages=Math.ceil( pay_legth/payPerPage)
-        print("user");
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -78,7 +77,7 @@ export class LogForm extends Component {
                             <tr>
                                 <th scope="col">Нийт дүн</th>
                                 <th scope="col">Тодорхойлолт</th>
-                                <th scope="col"> Огноо</th>
+m                                <th scope="col"> Огноо</th>
                                 <th scope="col">Амжилттай</th>
                                 <th scope="col">Амжилтгүй</th>
                                 <th scope="col">Хэрэглэгчийн id</th>

@@ -14,7 +14,7 @@ export class LogFormTable extends Component {
                 created_at, 
                 is_success, 
                 success_at, 
-                username, 
+                user_firstname, 
                 bank_unique_number, 
                 data_id, 
                 error_code, 
@@ -29,7 +29,7 @@ export class LogFormTable extends Component {
                 <td>{created_at}</td>
                 <td>{is_success}</td>
                 <td>{success_at}</td>
-                <td>{username}</td>
+                <td>{user_firstname}</td>
                 <td>{bank_unique_number}</td>
                 <td>{data_id}</td>
                 <td>{error_code}</td>
