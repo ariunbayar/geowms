@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
-from main.auth_api import GeoAuth
+from main.dan_step1 import GeoAuth
 from geoportal_app.models import User
 
 from .form import RegisterForm, LoginForm
@@ -31,13 +31,10 @@ def register(request):
         form = RegisterForm()
     return render(request, 'secure/register.html', {"form": form})
 
-
 def login_dan(request):
-
     geo_auth = GeoAuth(request)
 
     if geo_auth.is_step1():
-
         payload = [
             {
                 # Оролтын параметргүй дуудагддаг сервис
@@ -48,53 +45,15 @@ def login_dan(request):
             },
         ]
 
-        geo_auth.step1_generate_state()
-        geo_auth.step1_set_scope(payload)
-        url = geo_auth.step1_build_redirect_uri()
+        url = geo_auth.step1_build_redirect_uri(payload)
         return redirect(url)
 
-    if geo_auth.is_step2():
-        if not geo_auth.step2_is_state_valid():
-            raise Http404
-        geo_auth.step2_fetch_access_token()
 
-    if geo_auth.is_step3():
-        data = geo_auth.step3_fetch_scope_data()
+def dan_step2(request):
+    geo_auth = GeoAuth(request)
 
-        services_data = data[1]
-
-        personal_info = services_data.get('services').get('WS100101_getCitizenIDCardInfo').get('response')
-        regnum = personal_info.get('regnum')
-        firstname = personal_info.get('firstname')
-        lastname = personal_info.get('lastname')
-        civil_id = personal_info.get('civilId')
-        gender = personal_info.get('gender')
-
-        if regnum and firstname and lastname and civil_id:
-
-            regnum = regnum.upper()
-            user = User.objects.filter(register=regnum).first()
-            firstname = firstname.capitalize()
-            lastname = lastname.capitalize()
-            if not user:
-                user = User.objects.create(
-                    username='civilId_{}'.format(civil_id),
-                    register=regnum,
-                    first_name=firstname,
-                    last_name=lastname,
-                    gender=gender,
-                    is_sso=True,
-                )
-                user.roles.add(1)
-
-            auth.login(request, user)
-            if request.user_agent.is_mobile:
-                return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
-            else:
-                return redirect(settings.LOGIN_REDIRECT_URL)
-
-    raise Http404
-
+    auth_code = request.GET.get('auth_code')
+    rsp = geo_auth.step2_fetch_access_token(auth_code)
 
 def loginUser(request):
     return render(request, 'secure/loginUser.html')
