@@ -7,7 +7,7 @@ import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill} from 'ol/style'
+import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
 import {Point} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
@@ -18,7 +18,7 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
-
+import {DrawPayModal} from './controls/DrawPayModal'
 import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
@@ -46,11 +46,11 @@ export default class BundleMap extends Component {
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
             modal: new Modal(),
+            drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
         }
 
         this.marker = this.initMarker()
-        this.drawPay = this.drawPayButton()
 
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
@@ -60,6 +60,7 @@ export default class BundleMap extends Component {
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
+        this.toggleDrawed = this.toggleDrawed.bind(this)
     }
 
     initMarker() {
@@ -82,27 +83,8 @@ export default class BundleMap extends Component {
         return {feature: feature, point: point}
 
     }
-    drawPayButton() {
 
-        const style = new Style({
-            image: new Icon({
-                anchor: [0.9, 0],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'pixels',
-                scale: 0.7,
-                src: '/static/assets/images/bundle/marker.png'
-            })
-        })
-
-        const point = new Point([1, 0])
-
-        const feature = new Feature({geometry: point})
-        
-        feature.setStyle(style)
-
-        return {feature: feature, point: point}
-
-    }
+    
 
     componentDidMount() {
         this.loadMapData(this.state.bundle.id)
@@ -204,7 +186,7 @@ export default class BundleMap extends Component {
                     base_layer_controls: []
                 }
             )
-        const source_draw = new VectorSource({wrapX: false, features: [this.drawPay.feature],})
+        const source_draw = new VectorSource({wrapX: false})
         const vector_draw = new VectorLayer({
             source: source_draw,
         });
@@ -243,6 +225,7 @@ export default class BundleMap extends Component {
                 new DrawButton({toggleDraw: this.toggleDraw}),
                 new ScaleLine(),
                 this.controls.modal,
+                this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
             ]),
@@ -265,45 +248,41 @@ export default class BundleMap extends Component {
         })
 
 
-
-
+        const x = new VectorSource({wrapX: false})
         const draw = new Draw({
-            source: source_draw,
+            source: x,
             type: 'Circle',
             geometryFunction: createBox(),
         });
-
         map.addInteraction(draw);
 
-        const projection_display = this.state.projection_display
-        const projection = map.getView().getProjection()
-        draw.on('drawend',function(e){
-            const coordinat = e.feature.getGeometry().getCoordinates()
 
-            const coodrinatLeftTop = coordinat[0][3]
-            const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, projection_display)
-            const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
-            console.log(coodrinatLeftTop_map_coord)
-
-            const coodrinatRightBottom = coordinat[0][1]
-            const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, projection_display)
-            const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
-            console.log(coodrinatRightBottom_map_coord)
-
-        });
-
-        
+        draw.on('drawend', this.toggleDrawed)
         map.on('click', this.handleMapClick)
-
         this.map = map
+    }
 
+    toggleDrawed(event){
+        const projection = this.map.getView().getProjection()
+        const coordinat = event.feature.getGeometry().getCoordinates()
+        const coodrinatRightTop = coordinat[0][2]
+        const coodrinatLeftBottom = coordinat[0][4]
+
+        const coodrinatLeftTop = coordinat[0][3]
+        const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
+        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
+        console.log(coodrinatLeftTop_map_coord)
+
+        const coodrinatRightBottom = coordinat[0][1]
+        const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
+        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
+        console.log(coodrinatRightBottom_map_coord)
+        this.controls.drawModal.showModal(null, coodrinatLeftTop, coodrinatRightBottom, coodrinatRightTop,coodrinatLeftBottom)
     }
 
     handleMapClick(event) {
 
         this.marker.point.setCoordinates(event.coordinate)
-        this.drawPay.point.setCoordinates(event.coordinate)
-
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
@@ -378,7 +357,7 @@ export default class BundleMap extends Component {
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.drawPay.point.setCoordinates(map_coord)
+        this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
     

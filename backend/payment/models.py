@@ -17,3 +17,5 @@ class Payment(models.Model):
 
     error_message = models.CharField(max_length=500)
     error_code = models.CharField(max_length=100)
+    coodrinatLeftTop = models.IntegerField()
+    coodrinatRightBottom = models.IntegerField()

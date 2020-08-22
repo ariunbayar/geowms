@@ -1,7 +1,8 @@
 export const service = {
     loadWMSLayers,
     loadBaseLayers,
-    payment
+    payment,
+    paymentDraw
 }
 
 function getCookie(name) {
@@ -75,4 +76,12 @@ function payment(price, description) {
         body: JSON.stringify({price, description})
     }
     return fetch('/back/payment/purchase/', requestOptions).then(handleResponse)
+}
+
+function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
+    }
+    return fetch('/back/payment/purchase-draw/', requestOptions).then(handleResponse)
 }

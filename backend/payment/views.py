@@ -22,6 +22,21 @@ def purchase(request, payload):
 
 @require_POST
 @ajax_required
+def purchaseDraw(request, payload):
+
+    user = get_object_or_404(User, pk=request.user.id)
+    price = payload.get('price')
+    description = payload.get('description')
+    coodrinatLeftTop = payload.get('coodrinatLeftTop')
+    coodrinatRightBottom = payload.get('coodrinatRightBottom')
+    count = Payment.objects.all().count()
+    payment = Payment.objects.create(number=count, amount=price, description=description, user=user, is_success=False, coodrinatLeftTop=coodrinatLeftTop, coodrinatRightBottom=coodrinatRightBottom )
+    
+    return JsonResponse({'payment_id': payment.id})
+
+
+@require_POST
+@ajax_required
 def purchaseAll(request, payload):
 
     purchase_id = payload.get('purchase_id')
