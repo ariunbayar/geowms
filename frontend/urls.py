@@ -22,7 +22,7 @@ urlpatterns = [
         path('login/', secure_views.login, name='login'),
         path('login/dan/', secure_views.login_dan, name='login-dan'),
         path('logout/', secure_views.logout, name='logout'),
-        path('oauth2/', secure_views.dan_step2, name='dan-step2'),
+        path('oauth2/', secure_views.oauth2, name='oauth2'),
     ], 'secure'))),
 
     path('m/', include(([

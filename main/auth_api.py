@@ -49,7 +49,7 @@ class GeoAuth():
 
     def is_step2(self):
         state = self.request.GET.get('state')
-        auth_code = self.request.GET.get('auth_code')
+        auth_code = self.request.GET.get('code')
         return auth_code and state
 
     def step2_is_state_valid(self):
@@ -57,7 +57,7 @@ class GeoAuth():
         session_state = self.request.session.get(self.SESSION_STATE_NAME)
         return state == session_state
 
-    def step2_fetch_access_token(self, auth_code):
+    def step2_fetch_access_token(self):
 
         BASE_HEADERS = {
             'User-Agent': 'nsdi.gov.mn/oauth2 1.0'
@@ -69,27 +69,20 @@ class GeoAuth():
 
         params = {
                 'grant_type': 'authorization_code',
-                'code': auth_code,
+                'code': self.request.GET.get('code'),
                 'client_id': settings.SSO_GOV_MN['CLIENT_ID'],
                 'client_secret': base64.b64encode(settings.SSO_GOV_MN['CLIENT_SECRET'].encode()),
                 'redirect_uri': settings.SSO_GOV_MN['CALLBACK_URI'],
             }
 
-        rsp = requests.post(base_uri + urlencode(params), headers=self.BASE_HEADERS)
-        
+        rsp = requests.post(base_uri,  data=params, headers=self.BASE_HEADERS)
+
         token_info = rsp.json()
 
-        self.access_token_remote = token_info['access_token']
+        self.access_token = token_info['access_token']
 
-        rsp = {
-            'access_token': token_info['access_token'],
-            'expires_in': token_info['expires_in'],
-            'token_type': 'Bearer',
-            'scope': token_info['scope'],
-        }
-        return rsp
 
-    def _dan_step3(self):
+    def step3_fetch_service(self):
 
         BASE_HEADERS = {
             'User-Agent': 'nsdi.gov.mn/oauth2 1.0'
@@ -99,10 +92,10 @@ class GeoAuth():
 
         headers = {
                 **self.BASE_HEADERS,
-                'Authorization': 'Bearer %s' % self.access_token_remote,
+                'Authorization': 'Bearer %s' % self.access_token,
             }
         rsp = requests.post(base_uri, headers=headers)
         if rsp.status_code == 200:
-            return rsp.text
+            return rsp.json()
 
         return '{"success": false}'
