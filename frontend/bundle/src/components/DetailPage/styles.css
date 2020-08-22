@@ -169,6 +169,10 @@ element.style {
     border-radius: 4px;
     padding: 2px 5px;
 }
+.draw-button:active{
+    background-color: rgba(0,60,136,0.9);
+
+}
 
 .draw-button .fa-object-ungroup{
     font-size: 30px;

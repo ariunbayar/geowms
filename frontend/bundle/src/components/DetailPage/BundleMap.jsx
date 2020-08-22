@@ -40,7 +40,9 @@ export default class BundleMap extends Component {
             coordinate_clicked: null,
             vector_layer: null,
             draw_layer: null,
-            is_draw_open: true,
+            is_draw_open: false,
+            draw: null,
+            source_draw: null,
         }
 
         this.controls = {
@@ -61,6 +63,7 @@ export default class BundleMap extends Component {
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
         this.toggleDrawed = this.toggleDrawed.bind(this)
+        this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
     }
 
     initMarker() {
@@ -186,10 +189,6 @@ export default class BundleMap extends Component {
                     base_layer_controls: []
                 }
             )
-        const source_draw = new VectorSource({wrapX: false})
-        const vector_draw = new VectorLayer({
-            source: source_draw,
-        });
 
         const vector_layer = new VectorLayer({
             source: new VectorSource(),
@@ -210,7 +209,6 @@ export default class BundleMap extends Component {
                 features: [this.marker.feature],
             })
         })
-
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -238,7 +236,6 @@ export default class BundleMap extends Component {
                 }, []),
                 vector_layer,
                 marker_layer,
-                vector_draw
             ],
             view: new View({
                 projection: this.state.projection,
@@ -247,41 +244,11 @@ export default class BundleMap extends Component {
             })
         })
 
-
-        const x = new VectorSource({wrapX: false})
-        const draw = new Draw({
-            source: x,
-            type: 'Circle',
-            geometryFunction: createBox(),
-        });
-        map.addInteraction(draw);
-
-
-        draw.on('drawend', this.toggleDrawed)
         map.on('click', this.handleMapClick)
         this.map = map
     }
 
-    toggleDrawed(event){
-        const projection = this.map.getView().getProjection()
-        const coordinat = event.feature.getGeometry().getCoordinates()
-        const coodrinatRightTop = coordinat[0][2]
-        const coodrinatLeftBottom = coordinat[0][4]
-
-        const coodrinatLeftTop = coordinat[0][3]
-        const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
-        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
-        console.log(coodrinatLeftTop_map_coord)
-
-        const coodrinatRightBottom = coordinat[0][1]
-        const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
-        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
-        console.log(coodrinatRightBottom_map_coord)
-        this.controls.drawModal.showModal(null, coodrinatLeftTop, coodrinatRightBottom, coodrinatRightTop,coodrinatLeftBottom)
-    }
-
     handleMapClick(event) {
-
         this.marker.point.setCoordinates(event.coordinate)
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
@@ -354,6 +321,7 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord) {
+        
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
@@ -372,17 +340,54 @@ export default class BundleMap extends Component {
         }
     }
 
+    toggleDrawed(event){
+        const projection = this.map.getView().getProjection()
+        const coordinat = event.feature.getGeometry().getCoordinates()
 
-    toggleDraw(event) {
-        this.toggleDrawInput()
+        const coodrinatLeftTop = coordinat[0][3]
+        const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
+        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
+
+        const coodrinatRightBottom = coordinat[0][1]
+        const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
+        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
+
+        this.controls.drawModal.showModal(null, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+    }
+    toggleDrawRemove(){
+        this.map.removeLayer(this.state.draw_layer);
+    }
+    
+    toggleDraw() {
 
         this.setState(prevState => ({
             is_draw_open: !prevState.is_draw_open,
         }))
+        
         if(this.state.is_draw_open){
-            this.toggleDrawInput()
-        }else{
 
+            const source_draw = new VectorSource({wrapX: false})
+            const draw_layer = new VectorLayer({
+                source: source_draw
+            })
+
+            const draw = new Draw({
+                source: source_draw,
+                type: 'Circle',
+                geometryFunction: createBox(),
+            });
+
+            this.setState({draw, draw_layer})
+            this.map.addLayer(draw_layer);
+            this.map.addInteraction(draw);
+            draw.on('drawend', this.toggleDrawed)
+
+        }
+        else{
+            
+            this.map.removeInteraction(this.state.draw);
+            this.map.removeLayer(this.state.draw_layer);
+            
         }
     }
 

@@ -24,18 +24,16 @@ class ModalComponent extends Component{
         const {coodrinatLeftTop, coodrinatRightBottom} = this.props
         service.paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom).then(({ payment_id }) => {
             if(payment_id){
-                this.setState({payLoad: false})
-                alert(payment_id)
-
-                this.props.history.push("/");
-                alert(payment_id)
+                setTimeout(() => {
+                    window.location.href=`/payment/purchase/${payment_id}/`;
+                }, 1000)
             }
         })
     }
 
     render() {
         const {payLoad} = this.state
-        const { coodrinatLeftTop, coodrinatRightBottom, coodrinatRightTop, coodrinatLeftBottom} = this.props
+        const { coodrinatLeftTop, coodrinatRightBottom} = this.props
         return (
             <div className="modal-dialog modal-dialog-scrollable" style={{zIndex:"5"}}>
                 <div className="modal-content">
@@ -46,10 +44,12 @@ class ModalComponent extends Component{
                         </button>
                     </div>
                     <div className="modal-body">
-                        <div className="row">{coodrinatLeftTop}</div>
-                        <div className="row">{coodrinatRightBottom}</div>
-                        <div className="row">{coodrinatRightTop}</div>
-                        <div className="row">{coodrinatLeftBottom}</div>
+                        <div className="containner">
+                            <div className="row">X = {coodrinatLeftTop[0]}</div>
+                            <div className="row">Y = {coodrinatLeftTop[1]}</div>
+                            <div className="row">X = {coodrinatRightBottom[0]}</div>
+                            <div className="row">Y = {coodrinatRightBottom[1]}</div>
+                        </div>
                     </div>
                     <div className="modal-footer">
                         <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
@@ -70,6 +70,7 @@ export class DrawPayModal extends Control {
             element: document.createElement('div'),
             target: options.target,
         })
+        console.log(options)
 
         this.is_component_initialized = false
 
@@ -77,11 +78,12 @@ export class DrawPayModal extends Control {
 
         this.renderComponent = this.renderComponent.bind(this)
         this.toggleControl = this.toggleControl.bind(this)
-
     }
 
     toggleControl(is_visible) {
+
         this.element.classList.toggle('d-block', is_visible)
+
     }
 
     renderComponent(props) {
@@ -96,9 +98,9 @@ export class DrawPayModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(content, coodrinatLeftTop, coodrinatRightBottom, coodrinatRightTop,coodrinatLeftBottom) {
+    showModal(content, coodrinatLeftTop, coodrinatRightBottom) {
         this.toggleControl(true)
-        this.renderComponent({content, coodrinatLeftTop, coodrinatRightBottom, coodrinatRightTop, coodrinatLeftBottom})
+        this.renderComponent({content, coodrinatLeftTop, coodrinatRightBottom})
     }
 
 }
