@@ -19,7 +19,7 @@ export class Жагсаалт extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-
+            first: 0
             }     
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -27,6 +27,7 @@ export class Жагсаалт extends Component {
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
         this.handleListCal=this.handleListCal.bind(this)
+        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
     }
 
     componentDidMount() {
@@ -35,24 +36,30 @@ export class Жагсаалт extends Component {
     }
 
     handleListCal(currentPage){
-        const {usersPerPage}=this.state
+        const {usersPerPage, search_load}=this.state
         const lastIndex=currentPage*usersPerPage
         const firtsIndex=lastIndex-usersPerPage
-        this.handleListUpdated(lastIndex,firtsIndex)
+        if(search_load)
+        {
+            this.handleSearchNextPage(lastIndex,firtsIndex)
+        }
+        else
+        {
+            this.handleListUpdated(lastIndex,firtsIndex)
+        }
     }
 
-    handleListUpdated(lastIndex,firtsIndex) { 
+    handleListUpdated(lastIndex,firtsIndex) {
         service.getAll(lastIndex,firtsIndex).then(({user_list,len}) => {
             if(len){
              this.setState({user_list,user_length:len})
             }
-         })
-         
+         }).catch(err => console.log(err))
     }
 
     prevPage(){
         
-        if(this.state.currentPage >1){
+        if(this.state.currentPage > 1){
             this.setState({
                 currentPage:this.state.currentPage-1
             })
@@ -62,7 +69,7 @@ export class Жагсаалт extends Component {
     }
 
     nextPage(){
-
+        
         if(this.state.currentPage<Math.ceil(this.state.user_length/this.state.usersPerPage)){
             this.setState({
                 currentPage:this.state.currentPage+1,
@@ -72,23 +79,37 @@ export class Жагсаалт extends Component {
         }
        
     }
+    handleSearchNextPage(lastIndex,firtsIndex) {
+            
+        const {searchQuery} = this.state
+        
+        service.userSearch(searchQuery, lastIndex, firtsIndex).then(({ user_list, len }) => {
+            if(user_list){
+                this.setState({user_list, user_length:len})
+            }
+        })
+        
+    }
+  
     handleSearch(field, e) {
-        if(e.target.value.length > 0)
+        if(e.target.value.length > 1)
         {
             this.setState({ [field]: e.target.value, search_load:true})
-            service.userSearch(e.target.value).then(({ user_list }) => {
+            const {first, userPerPage} = this.state
+            service.userSearch(e.target.value, userPerPage, first).then(({ user_list, len}) => {
                 if(user_list){
-                    this.setState({user_list, user_length:user_list.length, search_load:false})
+                    this.setState({user_list, user_length:len})
                 }
             })
         }
         else
         {
-            this.setState({ [field]: e.target.value })
-            const {currentPage}=this.state.currentPage
+            this.setState({ [field]: e.target.value , currentPage:1, userPerPage:20, search_load:false})
+            const {currentPage}=this.state
             this.handleListCal(currentPage)
         }
     }
+
     render() {
         const {user_list, user_length, currentPage,usersPerPage}=this.state
         const totalPages=Math.ceil( user_length/usersPerPage)

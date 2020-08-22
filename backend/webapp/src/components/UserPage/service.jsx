@@ -89,10 +89,10 @@ function roleCreate(payload){
     }
     return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
 }
-function userSearch(query) {
+function userSearch(query, last, first) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({query, last, first}),
     }
     return fetch(`${prefix}/userSearch/`, requestOptions).then(handleResponse)
 }

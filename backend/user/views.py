@@ -124,14 +124,16 @@ def roleCreate(request, payload):
     else:
         user.roles.add(roleId)
         return JsonResponse({'success': True})
-
+        
 @require_POST
 @ajax_required
 def userSearch(request, payload):
     query = payload.get('query')
-    user_list = []
-
-    user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)]
+    first = payload.get('first')
+    last = payload.get('last')
+    userList = []
+    users = []
+    users = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)]
+    userList = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)[first:last]]
     
-    return JsonResponse({'user_list': user_list})
-    
+    return JsonResponse({'user_list': userList, "len": len(users)})
