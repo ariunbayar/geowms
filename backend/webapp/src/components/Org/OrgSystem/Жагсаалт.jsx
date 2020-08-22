@@ -141,6 +141,8 @@ export class Жагсаалт extends Component {
                                             <th scope="col"> Системүүдийн нэр</th>
                                             <th scope="col"> Токен </th>
                                             <th scope="col"> Үүсгэсэн огноо </th>
+                                            <th scope="col"> </th>
+                                            <th scope="col"> </th>
                                         </tr>
                                     </thead>
                                     <tbody>
