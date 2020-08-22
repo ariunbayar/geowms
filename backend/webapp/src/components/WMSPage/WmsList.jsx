@@ -235,16 +235,15 @@ export class WmsList extends Component {
                             type=" button" 
                             className="btn btn-outline-primary" 
                             onClick={this.prevPage}
-                            > &laquo; өмнөх
-                            </button>
+                            >&laquo;өмнөх
+                            </button> {}
                             <button 
                             type="button"
                             className="btn btn-outline-primary "
                             onClick={this.nextPage
-                            } >
+                            }>
                             дараах &raquo;
                             </button>
-                            
                         </div>
                     </div>
                 </div>

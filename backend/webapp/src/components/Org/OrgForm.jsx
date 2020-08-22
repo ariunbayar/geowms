@@ -3,15 +3,21 @@ import {OrgFormTable} from './OrgFormTable'
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
 
+
 export class OrgForm extends Component {
 
     constructor(props) {
         super(props)
 
+        this.initials = {
+            currentPage: 1,
+        }
+
         this.state = {
+            level: this.props.match.params.level || 1,
             orgs: [],
             org_length:null,
-            currentPage:1,
+            currentPage: this.initials.currentPage,
             orgPerPage:20,
             searchQuery: '',
             query_min: false,
@@ -25,43 +31,42 @@ export class OrgForm extends Component {
         this.handleSearch=this.handleSearch.bind(this)
     }
 
-    componentDidMount(){  
-        const {currentPage}=this.state
-        this.handleListCal(currentPage)
+    componentDidMount(){
+        this.handleListCal(this.state.currentPage)
+    }
+
+    componentDidUpdate(prevProps) {
+
+        const { level } = this.props.match.params
+
+        if (level !== prevProps.match.params.level) {
+            this.setState({ level }, () => {
+                this.handleListCal(this.initials.currentPage)
+            })
+        }
     }
 
     handleListCal(currentPage){
-        const org_level=this.props.match.params.level
-        const {orgPerPage}=this.state
+        const { orgPerPage } = this.state
         const lastIndex=currentPage*orgPerPage
-        const firtsIndex=lastIndex-orgPerPage
-        const value={ "firstIndex":firtsIndex, "lastIndex": lastIndex}
-        this.handleGetAll(org_level,value)
+        const firstIndex=lastIndex-orgPerPage
+        const value={ "firstIndex":firstIndex, "lastIndex": lastIndex}
+        this.handleGetAll(value)
     }
 
-    handleGetAll(org_level,value){
-        service.getAll(org_level,value).then(({ orgs,len }) => {
+    handleGetAll(value) {
+        service.getAll(this.state.level, value).then(({ orgs,len }) => {
             if (orgs) {
                 this.setState({ orgs , org_length:len})
-    
             }
         })
     }
-    componentDidUpdate(prevProps) {
-        if (this.props.match.params.level !== prevProps.match.params.level) {
-            const org_level = this.props.match.params.level
-            const currentPage=this.state
-            this.handleListCal(currentPage)
 
-        }
-    }
     handleUserDelete(id){
-        const org_level = this.props.match.params.level
-        service.org_remove(org_level,id).then(({ success }) => {
+        service.org_remove(this.state.level,id).then(({ success }) => {
             if (success) {
                 const currentPage=this.state.currentPage
                 this.handleListCal(currentPage)
-                
             }
         })
     }
@@ -86,11 +91,9 @@ export class OrgForm extends Component {
     }
 
     handleSearch(field, e) {
-        const level=this.props.match.params.level
-        if(e.target.value.length > 0)
-        {   
+        if(e.target.value.length > 0) {
             this.setState({ [field]: e.target.value, search_load:true})
-            service.orgSearch(level,e.target.value).then(({ orgs }) => {
+            service.orgSearch(this.state.level,e.target.value).then(({ orgs }) => {
                 if(orgs){
                     this.setState({orgs, org_length:orgs.length, search_load:false})
                 }
@@ -106,13 +109,12 @@ export class OrgForm extends Component {
 
     render() {
         const {orgs,orgPerPage,currentPage,org_length} = this.state
-        const org_level = this.props.match.params.level
         const totalPages=Math.ceil( org_length/orgPerPage)
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
                     <div className="text-right">
-                        <NavLink className="btn gp-bg-primary  float-right" to={`/back/байгууллага/түвшин/${org_level}/нэмэх/`}>
+                        <NavLink className="btn gp-bg-primary  float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
                             Нэмэх
                         </NavLink>
                         <input
@@ -146,10 +148,9 @@ export class OrgForm extends Component {
                                         <OrgFormTable
                                             key={idx}
                                             idx={(currentPage*20)-20+idx+1}
-                                            org_level={org_level}
+                                            org_level={this.state.level}
                                             org={org}
                                             handleUserDelete={() => this.handleUserDelete(org.id)}
-                                            
                                         >
                                         </OrgFormTable>
 
@@ -163,20 +164,21 @@ export class OrgForm extends Component {
                             <strong>Хуудас {currentPage}-{totalPages}</strong>
                         </div>
                         <div className="float-right">
+
                             <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
-                            onClick={this.prevPage}
-                            > &laquo; өмнөх
+                                type="button"
+                                className="btn btn-outline-primary"
+                                onClick={this.prevPage}
+                            >
+                                &laquo; өмнөх
+                            </button> {}
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary "
+                                onClick={this.nextPage}
+                            >
+                                дараах &raquo;
                             </button>
-                            <button 
-                            type="button"
-                            className="btn btn-outline-primary "
-                            onClick={this.nextPage
-                            } >
-                            дараах &raquo;
-                            </button>
-                            
                         </div>
                     </div>
                 </div>

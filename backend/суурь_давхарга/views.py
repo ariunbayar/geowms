@@ -52,6 +52,7 @@ def жагсаалт(request):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def move(request, payload):
     baseLayer = get_object_or_404(BaseLayer, pk=payload.get('id'))
     if payload.get('move') == 'down':

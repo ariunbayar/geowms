@@ -38,8 +38,11 @@ export class СуурьДавхарга extends Control {
         const el = document.createElement('a')
         el.setAttribute('href', '#')
         el.className = 'суурь-давхарга' + (is_active ? ' ' + CLASS_ACTIVE : '')
-        // TODO srcset for img tag using: thumbnail_1x & thumbnail_2x
-        el.style.backgroundImage = `url(${thumbnail_2x})`
+
+        const img = document.createElement('img')
+        img.srcset = `${thumbnail_1x} 1x, ${thumbnail_2x} 2x`
+        el.appendChild(img)
+
         el.addEventListener('click', (event) => {
             event.preventDefault()
             this.handleClick(el, layer)

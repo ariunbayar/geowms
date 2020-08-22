@@ -12,18 +12,21 @@ import {ConfigPage} from "./ConfigPage";
 import {Log} from "./Log"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
+
+
 export default class App extends Component {
+
   constructor(props) {
     super(props);
 
-       this.state = {
-        user_count: 0,
+    this.state = {
+      user_count: 0,
     };
   }
 
-   componentDidMount() {
+  componentDidMount() {
 
-   service.userCount().then(({ user_count }) => {
+    service.userCount().then(({ user_count }) => {
       this.setState({ user_count: user_count });
     });
 
@@ -46,7 +49,7 @@ export default class App extends Component {
             <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
               <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/login/"}>ACCESS</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>Хандалт</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/huulga/"}>ХУУЛГА</NavLink>
@@ -55,19 +58,19 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" to={"/back/log/"}>ЛОГ</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" exact to={"/back/"}>ДЭД САН</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/дэд-сан/"}>ДЭД САН</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" exact to={"/back/wms/"}>WMS</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/wms/"}>WMS</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/түвшин/1/"}>БАЙГУУЛЛАГА</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/байгууллага/түвшин/"}>БАЙГУУЛЛАГА</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/суурь-давхарга/"}> СУУРЬ ДАВХРАГА</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" exact to={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/user"}>ХЭРЭГЛЭГЧ ({this.state.user_count})</NavLink>
@@ -93,7 +96,7 @@ export default class App extends Component {
             <Route exact path={"/back/dev/"} component={DevPage} />
             <Route path={"/back/user/"} component={UserPage} />
             <Route path={"/back/тохиргоо/"} component={ConfigPage} />
-            <Route path={"/back/"} component={BundlePage} />
+            <Route path={"/back/дэд-сан/"} component={BundlePage} />
           </Switch>
         </div>
       </BrowserRouter>

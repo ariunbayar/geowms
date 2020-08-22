@@ -88,7 +88,6 @@ export class BundleForms extends Component {
         return (
             <div  className="container my-4">
                 <div className="row">
-                    
                     <div className="col-md-12">
                             <div className="row">
                                 <div className="col-4">
@@ -97,7 +96,7 @@ export class BundleForms extends Component {
                                     handleCancel={this.handleFormCancel}
                                     formOptions={this.state.form_options}
                                     values={this.state.form_values}
-                                />  
+                                />
                                 </div>
                                 <div className="col-8">
                                 <BundleAdminRights
