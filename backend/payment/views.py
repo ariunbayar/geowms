@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST,require_GET
 from main.decorators import ajax_required
 from django.http import JsonResponse, Http404
 from geoportal_app.models import User
