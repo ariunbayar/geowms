@@ -85,7 +85,7 @@ export class ConfigForm extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <NavLink className="btn btn-outline-primary" exact to={"/back/тохиргоо/"}>
+                        <NavLink className="btn gp-outline-primary" exact to={"/back/тохиргоо/"}>
                             Буцах
                         </NavLink>
                     </div>
@@ -121,13 +121,13 @@ export class ConfigForm extends Component {
                         </div>
 
                         {form_is_loading ?
-                            <button className="btn gp-bg-primary" onClick={this.handleForm}>
-                                <div className="spinner-border text-light" role="status">
+                            <button className="btn gp-btn-primary" onClick={this.handleForm}>
+                                <div className="spinner-border" role="status">
                                     <span className="sr-only"></span>
                                 </div>
-                                <a className="text-light"> Түр хүлээнэ үү...</a>
+                                {} Түр хүлээнэ үү...
                             </button> :
-                            <button className="btn gp-bg-primary" onClick={this.handleForm}>
+                            <button className="btn gp-btn-primary" onClick={this.handleForm}>
                                 Хадгалах
                             </button>
                         }
