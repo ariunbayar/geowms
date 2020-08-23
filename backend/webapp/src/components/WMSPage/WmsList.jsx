@@ -90,7 +90,7 @@ export class WmsList extends Component {
         } else {
 
             service.create(values).then(({success, item}) => {
-                if (success){    
+                if (success){
                     const currentPage=this.state.currentPage
                     this.handleListCal(currentPage)}
             })
@@ -105,7 +105,7 @@ export class WmsList extends Component {
 
     handleRemove(id) {
         service.remove(id).then(({success}) => {
-            if (success) {        
+            if (success) {
                 const currentPage=this.state.currentPage
                 this.handleListCal(currentPage)
             }
@@ -158,7 +158,7 @@ export class WmsList extends Component {
 
     handleSearch(field, e) {
         if(e.target.value.length > 0 )
-        {   
+        {
             this.setState({ [field]: e.target.value, search_load:true})
             service.wmsSearch(e.target.value).then(({ wms_list }) => {
                 if(wms_list){
@@ -183,7 +183,7 @@ export class WmsList extends Component {
                 <div className="row">
                     <div className="col-md-12">
                                 <div className="text-right">
-                                    <NavLink className="btn gp-bg-primary" to={`/back/wms/үүсгэх/`}>
+                                    <NavLink className="btn gp-btn-primary" to={`/back/wms/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
                                     <input
@@ -206,11 +206,11 @@ export class WmsList extends Component {
                                             <th scope="col"> Идэвхтэй эсэх</th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
-                                            
+
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {wms_length===0 ? 
+                                        {wms_length===0 ?
                                         <tr><td>WMS бүртгэлгүй байна</td></tr>:
                                         wms_list.map((values, index) =>
                                             <WMS
@@ -232,19 +232,18 @@ export class WmsList extends Component {
                         </div>
                         <div className="float-right">
                             <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
+                            type=" button"
+                            className="btn gp-outline-primary"
                             onClick={this.prevPage}
-                            > &laquo; өмнөх
-                            </button>
-                            <button 
+                            >&laquo;өмнөх
+                            </button> {}
+                            <button
                             type="button"
-                            className="btn btn-outline-primary "
+                            className="btn gp-outline-primary "
                             onClick={this.nextPage
-                            } >
+                            }>
                             дараах &raquo;
                             </button>
-                            
                         </div>
                     </div>
                 </div>

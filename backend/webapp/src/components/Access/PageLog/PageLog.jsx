@@ -26,7 +26,7 @@ export class PageLog extends Component {
         this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
 
     }
-    
+
     componentDidMount(){
         const {currentPage}=this.state
         this.handleListCal(currentPage)
@@ -72,7 +72,7 @@ export class PageLog extends Component {
     }
 
     handleSearchNextPage(lastIndex,firtsIndex) {
-            
+
             const {searchQuery} = this.state
 
             service.pageSearch(searchQuery, lastIndex, firtsIndex).then(({ page_logs, len }) => {
@@ -168,19 +168,18 @@ export class PageLog extends Component {
                             </div>
                             <div className="float-right">
                                 <button
-                                type=" button" 
-                                className="btn btn-outline-primary" 
+                                type=" button"
+                                className="btn gp-outline-primary"
                                 onClick={this.prevPage}
-                                > &laquo; өмнөх
-                                </button>
-                                <button 
+                                >&laquo;өмнөх
+                                </button> {}
+                                <button
                                 type="button"
-                                className="btn btn-outline-primary "
+                                className="btn gp-outline-primary "
                                 onClick={this.nextPage
-                                } >
+                                }>
                                 дараах &raquo;
                                 </button>
-                                
                             </div>
                         </div>
                      </div>

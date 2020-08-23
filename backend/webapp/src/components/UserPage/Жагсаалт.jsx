@@ -20,7 +20,7 @@ export class Жагсаалт extends Component {
             query_min: false,
             search_load: false,
 
-            }     
+            }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.nextPage=this.nextPage.bind(this)
@@ -41,23 +41,23 @@ export class Жагсаалт extends Component {
         this.handleListUpdated(lastIndex,firtsIndex)
     }
 
-    handleListUpdated(lastIndex,firtsIndex) { 
+    handleListUpdated(lastIndex,firtsIndex) {
         service.getAll(lastIndex,firtsIndex).then(({user_list,len}) => {
             if(len){
              this.setState({user_list,user_length:len})
             }
          })
-         
+
     }
 
     prevPage(){
-        
+
         if(this.state.currentPage >1){
             this.setState({
                 currentPage:this.state.currentPage-1
             })
             this.handleListCal(this.state.currentPage-1)
-            
+
         }
     }
 
@@ -70,7 +70,7 @@ export class Жагсаалт extends Component {
             this.handleListCal(this.state.currentPage+1)
 
         }
-       
+
     }
     handleSearch(field, e) {
         if(e.target.value.length > 0)
@@ -96,7 +96,7 @@ export class Жагсаалт extends Component {
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
-                <div className="col-md-4  mb-1" >                 
+                <div className="col-md-4  mb-1" >
                                <input
                                 type="text"
                                 className="form-control"
@@ -141,15 +141,15 @@ export class Жагсаалт extends Component {
                         </div>
                         <div className="float-right">
                             <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
+                            type=" button"
+                            className="btn gp-outline-primary"
                             onClick={this.prevPage}
-                            > &laquo; өмнөх
-                            </button>
-                            <button 
+                            >&laquo;өмнөх
+                            </button> {}
+                            <button
                             type="button"
-                            className="btn btn-outline-primary "
-                            onClick={this.nextPage} >
+                            className="btn gp-outline-primary "
+                            onClick={this.nextPage}>
                             дараах &raquo;
                             </button>
                         </div>

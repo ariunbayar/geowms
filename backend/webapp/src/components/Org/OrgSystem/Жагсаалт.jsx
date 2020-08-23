@@ -21,7 +21,7 @@ export class Жагсаалт extends Component {
             govorg_length:null,
             currentPage:1,
             govorgPerPage:20,
-            
+
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -46,7 +46,7 @@ export class Жагсаалт extends Component {
     }
 
     handleListUpdated(org_level, org_id,lastIndex,firtsIndex ) {
-        
+
         service.getAll(lastIndex,firtsIndex, org_id).then(({govorg_list,len}) => {
             this.setState({govorg_list, govorg_length:len})
         })
@@ -114,14 +114,14 @@ export class Жагсаалт extends Component {
                             <>
                                 <div className="text-left">
                                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                        <p className="btn btn-outline-primary">
+                                        <p className="btn gp-outline-primary">
                                             <i className="fa fa-angle-double-left"></i> Буцах
                                         </p>
                                     </NavLink>
                                 </div>
 
                                 <div className="text-right">
-                                    <NavLink className="btn gp-bg-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
+                                    <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
                                     <input
@@ -141,13 +141,13 @@ export class Жагсаалт extends Component {
                                             <th scope="col"> Системүүдийн нэр</th>
                                             <th scope="col"> Токен </th>
                                             <th scope="col"> Үүсгэсэн огноо </th>
-                                            <th scope="col">Засах</th>
-                                            <th scope="col">Устгах</th>
+                                            <th scope="col"> </th>
+                                            <th scope="col"> </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         { govorg_length === 0 ?
-                                             <tr><td>Систем бүртгэлгүй байна </td></tr>:                                         
+                                             <tr><td>Систем бүртгэлгүй байна </td></tr>:
                                              govorg_list.map((values,index) =>
                                                 <Govorg
                                                     org_level={org_level}
@@ -167,19 +167,18 @@ export class Жагсаалт extends Component {
                                     </div>
                                     <div className="float-right">
                                         <button
-                                        type=" button" 
-                                        className="btn btn-outline-primary" 
+                                        type=" button"
+                                        className="btn gp-outline-primary"
                                         onClick={this.prevPage}
                                         > &laquo; өмнөх
                                         </button>
-                                        <button 
+                                        <button
                                         type="button"
-                                        className="btn btn-outline-primary "
+                                        className="btn gp-outline-primary "
                                         onClick={this.nextPage
-                                        } >
+                                        }>
                                         дараах &raquo;
                                         </button>
-                                        
                                     </div>
                                 </div>
                             </>

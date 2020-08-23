@@ -35,15 +35,15 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda v: DEBUG == True,
 }
 
-XYP_DAN = {
+SSO_GOV_MN = {
     'ENDPOINTS': {
-        'LOGIN': 'https://<domain>/api/login/?',
-        'AUTHORIZE': 'https://<domain>/api/auth/?',
-        'SERVICE': 'https://<domain>/api/service/?',
+        'AUTHORIZE': 'https://sso.gov.mn/oauth2/authorize',
+        'TOKEN': 'https://sso.gov.mn/oauth2/token',
+        'SERVICE': 'https://sso.gov.mn/oauth2/api/v1/service',
     },
-    'CLIENT_KEY': '',
+    'CLIENT_ID': '',
     'CLIENT_SECRET': '',
-    'REDIRECT_URI': 'http://localhost:8000/login/dan/',
+    'CALLBACK_URI': 'https://nsdi.gov.mn/oauth2/',
 }
 
 EMAIL_USE_TLS = True

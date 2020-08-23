@@ -52,7 +52,7 @@ export class BundleList extends Component {
 
                     <div className="col-md-12">
                         <div className="text-right">
-                            <NavLink className="btn gp-bg-primary" to={`/back/үүсгэх/`}>
+                            <NavLink className="btn gp-btn-primary" to={`/back/үүсгэх/`}>
                                 Нэмэх
                             </NavLink>
                         </div>

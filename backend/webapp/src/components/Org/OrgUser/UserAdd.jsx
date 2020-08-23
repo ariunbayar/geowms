@@ -204,17 +204,11 @@ export class UserAdd extends Component {
         return (
             <div className="container my-4">
                 <div className="row">
-                    <div className="text-left">
-                        <NavLink className="btn gp-bg-primary" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`}>
-                            Буцах
-                        </NavLink>
-                    </div>
                     <div className="col-md-12">
                         <div className="row">
                             <div className="col-12">
                                 {!org_emp &&
                                 <div className="form-row">
-
                                     <div className="form-group col-md-8">
                                         <label htmlFor="id_name">Нэвтрэх нэр:</label>
                                         <input
@@ -323,7 +317,7 @@ export class UserAdd extends Component {
                                     <div className="form-group col-md-4">
                                         <label htmlFor="password">Нууц үг:</label>
                                         <input
-                                            type="text"
+                                            type="password"
                                             className="form-control"
                                             id="password"
                                             placeholder="Нууц үг"
@@ -339,7 +333,7 @@ export class UserAdd extends Component {
                                     <div className="form-group col-md-4">
                                         <label htmlFor="re_password">Нууц үг дахин оруулах:</label>
                                         <input
-                                            type="text"
+                                            type="password"
                                             className="form-control"
                                             id="re_password"
                                             placeholder="Нууц үг дахин оруулах"
@@ -356,13 +350,13 @@ export class UserAdd extends Component {
                                 </div>
                                 <div className="form-group">
                                     {this.state.handleSaveIsLoad ?
-                                        <button className="btn gp-bg-primary">
+                                        <button className="btn gp-btn-primary">
                                             <a className="spinner-border text-light" role="status">
                                                 <span className="sr-only">Loading...</span> 
                                             </a>
                                             <span> Шалгаж байна. </span>
                                         </button>:
-                                        <button className="btn gp-bg-primary" onClick={this.handleFormCheck} >
+                                        <button className="btn gp-btn-primary" onClick={this.handleFormCheck} >
                                             Хадгалах
                                         </button>
                                     }

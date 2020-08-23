@@ -8,7 +8,20 @@ export class LogFormTable extends Component {
     componentDidMount(){
     }
     render() {
-        const {amount, description, created_at, is_success, success_at, user_id, bank_unique_number, data_id, error_code, error_message, failed_at, geo_unique_number} = this.props.values
+        const {
+                amount, 
+                description, 
+                created_at, 
+                is_success, 
+                success_at, 
+                user_id, 
+                bank_unique_number, 
+                data_id, 
+                error_code, 
+                error_message, 
+                failed_at, 
+                geo_unique_number
+            } = this.props.values
         return (
             <tr>
                 <td>{amount}</td>
@@ -23,7 +36,6 @@ export class LogFormTable extends Component {
                 <td>{error_message}</td>
                 <td>{failed_at}</td>
                 <td>{geo_unique_number}</td>
-
             </tr>
         )
 

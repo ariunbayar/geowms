@@ -1,11 +1,9 @@
-import {getGetOptions,getPostOptions, handleResponse} from '../../helpers/service'
+import {getGetOptions,handleResponse} from '../../helpers/service'
 export const service ={
     getAll
 }
 
 const prefix = '/back/payment'
-
-
 
 function getAll() {
     const requestOptions = {
