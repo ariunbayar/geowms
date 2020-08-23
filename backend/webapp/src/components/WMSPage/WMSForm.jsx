@@ -220,7 +220,7 @@ export class WMSForm extends Component {
                                     onChange={this.ActiveChange}/>
                                 </div>
                                 <div className="form-group">
-                                    <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
+                                    <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
                                         Хадгал
                                         </button>
                                 </div>

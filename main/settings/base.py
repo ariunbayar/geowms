@@ -149,4 +149,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
 
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.
-DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/']
+DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/', r'^/api/service/']

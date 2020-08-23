@@ -31,13 +31,10 @@ def register(request):
         form = RegisterForm()
     return render(request, 'secure/register.html', {"form": form})
 
-
 def login_dan(request):
-
     geo_auth = GeoAuth(request)
 
     if geo_auth.is_step1():
-
         payload = [
             {
                 # Оролтын параметргүй дуудагддаг сервис
@@ -48,18 +45,16 @@ def login_dan(request):
             },
         ]
 
-        geo_auth.step1_generate_state()
-        geo_auth.step1_set_scope(payload)
-        url = geo_auth.step1_build_redirect_uri()
+        url = geo_auth.step1_build_redirect_uri(payload)
         return redirect(url)
 
-    if geo_auth.is_step2():
-        if not geo_auth.step2_is_state_valid():
-            raise Http404
-        geo_auth.step2_fetch_access_token()
 
-    if geo_auth.is_step3():
-        data = geo_auth.step3_fetch_scope_data()
+def oauth2(request):
+    geo_auth = GeoAuth(request)
+
+    if geo_auth.is_step2():
+        geo_auth.step2_fetch_access_token()
+        data = geo_auth.step3_fetch_service()
 
         services_data = data[1]
 
