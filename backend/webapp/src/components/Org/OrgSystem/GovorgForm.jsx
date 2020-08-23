@@ -107,7 +107,7 @@ export class GovorgForm extends Component {
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
-                            initialValues={this.state.govorg}
+                            initialValues={{name:this.state.govorg.name || ''}}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -134,8 +134,8 @@ export class GovorgForm extends Component {
 
                                             <Field
                                                 className={'form-control ' + (errors.name ? 'is-invalid' : '')}
-                                                name="name"
                                                 placeholder="Системүүдийн нэр"
+                                                name='name'
                                                 id="id_name"
                                                 type="text"
                                             />
