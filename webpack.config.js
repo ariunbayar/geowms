@@ -1,5 +1,8 @@
 const path = require('path')
 
+const webpack = require('webpack')
+const WebpackBuildNotifierPlugin = require('webpack-build-notifier')
+
 
 module.exports = {
     mode: "development",
@@ -72,5 +75,13 @@ module.exports = {
     watch: true,
     watchOptions: {
         ignored: /node_modules/
-    }
+    },
+    plugins: [
+        new WebpackBuildNotifierPlugin({
+            title: "Geoportal DEV",
+            logo: path.resolve("./geoportal_app/static/assets/favicon.ico"),
+            successSound: true,
+            showDuration: true,
+        }),
+    ],
 }
