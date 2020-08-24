@@ -1,29 +1,32 @@
 const path = require('path')
 
 const webpack = require('webpack')
-const WebpackBuildNotifierPlugin = require('webpack-build-notifier')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const WebpackBuildNotifierPlugin = require('webpack-build-notifier');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
+const hp = (v) => ['babel-polyfill', path.resolve(__dirname, v)]
+const hhwp = ({ chunks, filename }) => new HtmlWebpackPlugin({
+    chunks: chunks,
+    filename: filename,
+    templateContent: '',
+})
 
 module.exports = {
     mode: "development",
     entry: {
-        'backend/webapp': [
-            'babel-polyfill',
-            path.resolve(__dirname, 'backend/webapp/src/index.js'),
-        ],
-        'frontend/bundle': [
-            'babel-polyfill',
-            path.resolve(__dirname, 'frontend/bundle/src/index.js'),
-        ],
-        'frontend/mobile': [
-            'babel-polyfill',
-            path.resolve(__dirname, 'frontend/mobile/src/index.js'),
-        ],
-        'frontend/payment': [
-            'babel-polyfill',
-            path.resolve(__dirname, 'frontend/payment/src/index.js'),
-        ],
-    },
+        'backend/webapp': 
+            hp('backend/webapp/src/index.js'),
+
+        'frontend/bundle': 
+            hp('frontend/bundle/src/index.js'),
+
+        'frontend/mobile': 
+            hp('frontend/mobile/src/index.js'),
+
+        'frontend/payment': 
+            hp('frontend/payment/src/index.js'),
+            },
     output: {
         // options related to how webpack emits results
 
@@ -77,6 +80,27 @@ module.exports = {
         ignored: /node_modules/
     },
     plugins: [
+        new webpack.ProgressPlugin(),
+        new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: false,
+            cleanOnceBeforeBuildPatterns: ['[name]/static/assets/js/*'],
+        }),
+        hhwp({
+            chunks: ['backend/webapp'],
+            filename: path.resolve(__dirname, 'backend/templates/backend/webapp.dev.html'),
+        }),
+        hhwp({
+            chunks: ['frontend/bundle'],
+            filename: path.resolve(__dirname, 'frontend/templates/frontend/frontend.dev.html'),
+        }),
+        hhwp({
+            chunks: ['frontend/mobile'],
+            filename: path.resolve(__dirname, 'frontend/templates/frontend/mobile.dev.html'),
+        }),
+        hhwp({
+            chunks: ['frontend/payment'],
+            filename: path.resolve(__dirname, 'frontend/templates/frontend/payment.dev.html'),
+        }),
         new WebpackBuildNotifierPlugin({
             title: "Geoportal DEV",
             logo: path.resolve("./geoportal_app/static/assets/favicon.ico"),
