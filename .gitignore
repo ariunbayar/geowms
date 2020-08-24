@@ -6,6 +6,7 @@ backend/webapp/static/assets/js/backend/webapp.js
 frontend/mobile/static/assets/js/frontend/mobile.js
 frontend/bundle/static/assets/js/frontend/bundle.js
 frontend/payment/static/assets/js/frontend/payment.js
+frontend/profile/static/assets/js/frontend/profile.js
 
 main/settings/dev.py
 main/settings/prod.py

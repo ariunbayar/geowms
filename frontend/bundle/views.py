@@ -17,7 +17,6 @@ def all(request):
     context = {
         'bundles': bundles,
     }
-
     return render(request, 'bundle/all.html', context)
 
 
@@ -40,7 +39,6 @@ def detail(request, pk):
     context = {
         'bundle_display': bundle_display,
     }
-
     return render(request, 'bundle/detail.html', context)
 
 
