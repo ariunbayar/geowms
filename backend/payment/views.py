@@ -6,11 +6,12 @@ from geoportal_app.models import User
 from django.contrib.auth.decorators import user_passes_test
 from .models import Payment
 
+
 @require_GET
 @ajax_required
 def all(request):
     payment_all = []
-   # created_at = Payment.objects.all().order_by('created_at')
+    created_at = Payment.objects.all().order_by('created_at')
     for payment in Payment.objects.all():
           payment_all.append({
             'id': payment.id,
@@ -33,7 +34,7 @@ def all(request):
 
     })
 
-  
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -53,6 +54,7 @@ def purchase(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
     user = get_object_or_404(User, pk=request.user.id)
+
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
@@ -68,7 +70,7 @@ def purchaseAll(request, payload):
             'failed_at': payment.failed_at,
             'bank_unique_number': payment.bank_unique_number,
             'success_at': payment.success_at.strftime('%Y-%m-%d'),
-            'user': payment.user_id,
+            'user': user.username,
         })
         return JsonResponse({'purchase_all': purchase_all})
     else:
