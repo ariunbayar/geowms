@@ -26,7 +26,10 @@ module.exports = {
 
         'frontend/payment': 
             hp('frontend/payment/src/index.js'),
-            },
+
+        'frontend/profile': 
+            hp('frontend/profile/src/index.js'),
+    },
     output: {
         // options related to how webpack emits results
 
@@ -100,6 +103,10 @@ module.exports = {
         hhwp({
             chunks: ['frontend/payment'],
             filename: path.resolve(__dirname, 'frontend/templates/frontend/payment.dev.html'),
+        }),
+        hhwp({
+            chunks: ['frontend/profile'],
+            filename: path.resolve(__dirname, 'frontend/templates/frontend/profile.dev.html'),
         }),
         new WebpackBuildNotifierPlugin({
             title: "Geoportal DEV",

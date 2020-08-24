@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block content %}
+
+<div id="profile-app" class="content" data-id=""></div>
+{{ profile|json_script:"profile-app-data" }}
+
+{% endblock %}
+
+
+{% block script %}
+
+    {% if DEBUG %}
+        <script src="{% static "assets/js/frontend/profile.js" %}"></script>
+    {% else %}
+        <script src="{% static "assets/js/frontend/profile.min.js" %}?v={{STATIC_VERSION}}"></script>
+    {% endif %}
+
+{% endblock %}
