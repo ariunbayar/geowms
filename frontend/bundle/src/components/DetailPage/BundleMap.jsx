@@ -359,9 +359,12 @@ export default class BundleMap extends Component {
     }
 
     toggleDrawRemove(){
-        var features = this.state.source_draw.getFeatures();
-        var lastFeature = features[features.length - 1];
-        this.state.source_draw.removeFeature(lastFeature);
+        const features = this.state.source_draw.getFeatures();
+        if(features.length > 0)
+        {
+            const lastFeature = features[features.length - 1];
+            this.state.source_draw.removeFeature(lastFeature);
+        }
     }
 
     toggleDraw() {

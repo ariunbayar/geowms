@@ -98,9 +98,9 @@ export class DrawPayModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(content, coodrinatLeftTop, coodrinatRightBottom) {
+    showModal(coodrinatLeftTop, coodrinatRightBottom) {
         this.toggleControl(true)
-        this.renderComponent({content, coodrinatLeftTop, coodrinatRightBottom})
+        this.renderComponent({coodrinatLeftTop, coodrinatRightBottom})
     }
 
 }
