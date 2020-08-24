@@ -39,8 +39,8 @@ export default class BundleMap extends Component {
             is_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
-            draw_layer: null,
             is_draw_open: false,
+            draw_layer: null,
             draw: null,
             source_draw: null,
         }
@@ -86,8 +86,6 @@ export default class BundleMap extends Component {
         return {feature: feature, point: point}
 
     }
-
-    
 
     componentDidMount() {
         this.loadMapData(this.state.bundle.id)
@@ -209,6 +207,7 @@ export default class BundleMap extends Component {
                 features: [this.marker.feature],
             })
         })
+
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -245,11 +244,15 @@ export default class BundleMap extends Component {
         })
 
         map.on('click', this.handleMapClick)
+
         this.map = map
+
     }
 
     handleMapClick(event) {
+
         this.marker.point.setCoordinates(event.coordinate)
+
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
@@ -321,14 +324,14 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord) {
-        
+
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
-    
+
     toggleSidebar(event) {
         this.setState(prevState => ({
             is_sidebar_open: !prevState.is_sidebar_open,
@@ -352,59 +355,56 @@ export default class BundleMap extends Component {
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
         const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
-        this.controls.drawModal.showModal(null, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+        this.controls.drawModal.showModal(coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
     }
+
     toggleDrawRemove(){
-        this.map.removeLayer(this.state.draw_layer);
+        var features = this.state.source_draw.getFeatures();
+        var lastFeature = features[features.length - 1];
+        this.state.source_draw.removeFeature(lastFeature);
     }
-    
+
     toggleDraw() {
 
         this.setState(prevState => ({
             is_draw_open: !prevState.is_draw_open,
         }))
-        
-        if(this.state.is_draw_open){
 
-            const source_draw = new VectorSource({wrapX: false})
+        if(this.state.is_draw_open){
+            const source_draw = new VectorSource()
+
             const draw_layer = new VectorLayer({
                 source: source_draw
             })
 
+            this.setState({source_draw})
+
             const draw = new Draw({
-                source: source_draw,
+                source: this.state.source_draw,
                 type: 'Circle',
                 geometryFunction: createBox(),
             });
-
             this.setState({draw, draw_layer})
             this.map.addLayer(draw_layer);
             this.map.addInteraction(draw);
             draw.on('drawend', this.toggleDrawed)
-
+            draw.on('drawstart', this.toggleDrawRemove)
         }
         else{
-            
             this.map.removeInteraction(this.state.draw);
-            this.map.removeLayer(this.state.draw_layer);
-            
+            this.toggleDrawRemove()
         }
     }
 
-
     render() {
-
         return (
-
             <div>
                 <div className="row">
-
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
                         </div>
                     </div>
-
                 </div>
             </div>
         )
