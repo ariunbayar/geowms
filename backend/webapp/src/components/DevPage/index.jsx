@@ -59,55 +59,55 @@ export class DevPage extends Component {
             </ul>
 
 
-            <p>
+            <div>
                 <strong>django-debug-toolbar 2.1: </strong>
                 <LinkExternal href="https://pypi.org/project/django-debug-toolbar/"/>
                 <ul>
                     <li>Хөгжүүлэлтийн явцад сайтын ажиллагаатай холбоотой статистик үзүүлнэ.</li>
                 </ul>
-            </p>
+            </div>
 
-            <p>
+            <div>
                 <strong>Django User Agents: </strong>
                 <ul>
                     <li>User agent таних модуль: <LinkExternal href="https://pypi.org/project/django-user-agents/"/></li>
                     <li><LinkExternal href="https://pypi.org/project/ua-parser/"/></li>
                     <li><LinkExternal href="https://pypi.org/project/user-agents/"/></li>
                 </ul>
-            </p>
+            </div>
 
-            <p>
+            <div>
                 <strong>requests 2.23.0: </strong>
                 <LinkExternal href="https://pypi.org/project/requests/"/>
                 <ul>
                     <li>Бусад газраас хуудас дуудахад ашиглагдана. Ихэвчлэн бусад GeoSpacial сервисүүдийг дуудахад</li>
                 </ul>
-            </p>
+            </div>
 
-            <p>
+            <div>
                 <strong>Pillow 7.1.2: </strong>
                 <LinkExternal href="https://pypi.org/project/Pillow/"/>
                 <ul>
                     <li>Зураг боловсруулалтын модуль</li>
                 </ul>
-            </p>
+            </div>
 
-            <p>
+            <div>
                 <strong>psycopg2-binary 2.8.5: </strong>
                 <LinkExternal href="https://pypi.org/project/psycopg2-binary/"/>
                 <ul>
                     <li> Python <LinkExternal href="https://www.postgresql.org/" text="PostgreSQL"/> client</li>
                 </ul>
-            </p>
+            </div>
 
-            <p>
+            <div>
                 <strong>Шифрлэлт, нууцлал: </strong>
                 <ul>
                     <li>pycryptodome 3.9.8: <LinkExternal href="https://pypi.org/project/pycryptodome/"/></li>
                     <li>pycrypto 2.6.1: <LinkExternal href="https://pypi.org/project/pycrypto/"/></li>
                     <li>cryptography 3.0: <LinkExternal href="https://pypi.org/project/cryptography/"/></li>
                 </ul>
-            </p>
+            </div>
 
             <h1>Координатын формат</h1>
             <div>
