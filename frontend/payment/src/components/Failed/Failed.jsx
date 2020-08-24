@@ -16,9 +16,9 @@ export class Failed extends Component {
 
         service.purchaseAll(purchase_id).then(({ purchase_all }) => {
             if (purchase_all) {
-                purchase_all.map((purchase_all) => 
-                this.setState({purchase_all}) 
-                )              
+                purchase_all.map((purchase_all) =>
+                this.setState({purchase_all})
+                )
             }
         })
     }
@@ -76,7 +76,7 @@ export class Failed extends Component {
                         </tbody>
                     </table>
                 </div>
-                
+
             </div>
             <div class="row py-3">
 
@@ -100,7 +100,7 @@ export class Failed extends Component {
                 <div class="col-md-6 py-0 my-3" >
                     <h5 class="mb-3">QR Code <span className="text-danger">Алдаа гарлаа</span></h5>
                     <img src="/static/assets/image/lavlakh.png"></img>
-                    
+
                 </div>
             </div>
         </div>

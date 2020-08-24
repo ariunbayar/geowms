@@ -30,7 +30,7 @@ def all(request, payload, level):
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
         })
-        
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -236,7 +236,7 @@ def employee_update(request, payload, level, pk):
     register = payload.get('register')
 
     get_object_or_404(User, pk=user_id)
-    
+
     User.objects.filter(pk=user_id).update(
                             first_name=first_name,
                             last_name=last_name,
@@ -246,8 +246,8 @@ def employee_update(request, payload, level, pk):
                         )
 
     Employee.objects.filter(user_id=user_id).update(position=position)
-   
-    return JsonResponse({'success': True})    
+
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -276,13 +276,13 @@ def employee_add(request, payload, level, pk):
 
         user = User.objects.create(password=password,
                                 is_superuser=is_superuser,
-                                username=username, 
-                                first_name=first_name, 
-                                last_name=last_name, 
+                                username=username,
+                                first_name=first_name,
+                                last_name=last_name,
                                 email=email,
                                 gender=gender,
                                 register=register,)
-        user.roles.add(2)                                
+        user.roles.add(2)
         Employee.objects.create(position=position, org_id=pk, user_id=user.id)
 
         return JsonResponse({'success': True})
@@ -358,7 +358,7 @@ def orgSearch(request, payload,level):
 
 
 @require_POST
-@ajax_required        
+@ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employeeSearch(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)

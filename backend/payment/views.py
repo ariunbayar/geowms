@@ -48,7 +48,7 @@ def purchase(request, payload):
 
     return JsonResponse({'payment_id': payment.id})
 
-  
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)

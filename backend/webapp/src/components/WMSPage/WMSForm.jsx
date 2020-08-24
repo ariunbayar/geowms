@@ -87,7 +87,7 @@ export class WMSForm extends Component {
         const is_active=this.state.is_active
         this.setState({
             [e.target.name]:e.target.checked,
-            
+
         })
         if(is_active){
             this.setState({
@@ -113,10 +113,10 @@ export class WMSForm extends Component {
                 }
                 this.loadLayers(this.state.public_url)
                 this.handleWmsLayerRefresh()
-                
+
             }
         })
-        
+
 
     }
 
@@ -211,9 +211,9 @@ export class WMSForm extends Component {
                                     />
                                 </div>
                                 <div>
-                                    
+
                                     <a >Хязгаарлах</a>
-                                    &nbsp;<input 
+                                    &nbsp;<input
                                     type="checkbox"
                                     name="is_active"
                                     checked={this.state.is_active}

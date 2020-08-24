@@ -9,17 +9,17 @@ export class LogFormTable extends Component {
     }
     render() {
         const {
-                amount, 
-                description, 
-                created_at, 
-                is_success, 
-                success_at, 
-                user_id, 
-                bank_unique_number, 
-                data_id, 
-                error_code, 
-                error_message, 
-                failed_at, 
+                amount,
+                description,
+                created_at,
+                is_success,
+                success_at,
+                user_id,
+                bank_unique_number,
+                data_id,
+                error_code,
+                error_message,
+                failed_at,
                 geo_unique_number
             } = this.props.values
         return (

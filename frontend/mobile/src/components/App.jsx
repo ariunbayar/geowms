@@ -60,9 +60,9 @@ export class App extends Component {
         const {id, name } = this.props.bundle[0]
         this.wmsLayerId(id, name)
     }
-    
+
     componentDidUpdate(prevProps, prevState) {
-        
+
     }
     render() {
         const bundles = this.props.bundle
@@ -70,7 +70,7 @@ export class App extends Component {
             <div>
                 <div>
                     <div>
-                        {this.state.metaDataScreenIsload ? 
+                        {this.state.metaDataScreenIsload ?
                             <div className="metaDataScreen">
                                 <MetaDataScreen bundle={this.state.bundle}></MetaDataScreen>
                                 <a className="wmsLayerButtonBack" onClick={() => this.wmsLayerName()}>
@@ -78,7 +78,7 @@ export class App extends Component {
                                 </a>
                             </div> :
                         null}
-                        {this.state.wmsLayerScreenIsload ? 
+                        {this.state.wmsLayerScreenIsload ?
                         <div className="wmsLayerScreen">
                             <div className="row ">
                                 <div className="col-10">
@@ -90,7 +90,7 @@ export class App extends Component {
                                 </div>
                             </div>
                             <div className="row ">
-                                {bundles.map((bundle, i) => 
+                                {bundles.map((bundle, i) =>
                                         <div className="col-4 text-center sub" key={i}>
                                             <a onClick={() => this.wmsLayerId(bundle.id, bundle.name)}>
                                                 <img src={bundle.icon} />
@@ -102,7 +102,7 @@ export class App extends Component {
                         </div> : null
                         }
                     </div>
-                    
+
                 </div>
             </div>
         )

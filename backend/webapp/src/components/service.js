@@ -1,5 +1,5 @@
 import {handleResponse, getGetOptions} from '../helpers/service'
-         
+
 
 
 export const service = {

@@ -18,7 +18,7 @@ export default class WMSCheckFormSort extends Component {
 
     componentDidUpdate(prevProps) {
         if(prevProps.wmslayers !== this.props.wmslayers)
-        {   
+        {
             const wmslayers = this.props.wmslayers
             this.setState({wmslayers})
         }
@@ -26,7 +26,7 @@ export default class WMSCheckFormSort extends Component {
     }
     handleMove(id, event, wmsId) {
         service.move(id, event, wmsId).then(({success}) => {
-            if (success) 
+            if (success)
             {
                 this.props.handleWmsLayerRefresh(this.state.wmsId)
             }
@@ -46,7 +46,7 @@ export default class WMSCheckFormSort extends Component {
                             <th scope="col"></th>
                             <th scope="col"></th>
                             <th scope="col"></th>
-                                    
+
                         </tr>
                     </thead>
                     <tbody>
