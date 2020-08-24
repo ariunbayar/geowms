@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+
 class Style(models.Model):
 
     class Meta:
@@ -9,7 +10,7 @@ class Style(models.Model):
     name = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
     abstract = models.CharField(max_length=200)
-    onlineResource =  models.CharField(max_length=500)
+    onlineResource = models.CharField(max_length=500)
     imgformat = models.CharField(max_length=50)
 
 

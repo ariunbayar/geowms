@@ -108,15 +108,15 @@ export class UserForm extends Component {
                     <div className="col-md-12">
                         <div className="text-left">
                             <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                <p className="btn btn-outline-primary">
+                                <p className="btn gp-outline-primary">
                                     <i className="fa fa-angle-double-left"></i> Буцах
                                 </p>
                             </NavLink>
                         </div>
                         <div className="text-right">
-                            <NavLink className="btn gp-bg-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
+                            <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
                                 Нэмэх
-                            </NavLink>     
+                            </NavLink>
                                <input
                                 type="text"
                                 className="form-control col-md-4  mb-1 float-left"
@@ -134,22 +134,22 @@ export class UserForm extends Component {
                                     <th scope="col"> Цахим шуудан </th>
                                     <th scope="col"> is_sso </th>
                                     <th scope="col"> Албан тушаал</th>
-                                    <th scope="col"> Үүссэн огноо</th>
-                                    <th scope="col"> Зассан огноо</th>
-                                    <th scope="col"> Засах</th>
-                                    <th scope="col"> Устгах</th>
+                                    <th scope="col"> Үүссэн </th>
+                                    <th scope="col"> Зассан </th>
+                                    <th scope="col"> </th>
+                                    <th scope="col"> </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                { employees_length === 0 ? 
+                                { employees_length === 0 ?
                                 <tr><td>Ажилчин бүртгэлгүй байна</td></tr>:
                                 employees.map((employe, idx) =>
-                                    <UserFormTable 
+                                    <UserFormTable
                                         org_level={org_level}
                                         org_id={org_id}
-                                        key = {idx} 
-                                        idx = {(currentPage*20)-20+idx+1} 
-                                        values={employe} 
+                                        key = {idx}
+                                        idx = {(currentPage*20)-20+idx+1}
+                                        values={employe}
                                         handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
                                     >
                                     </UserFormTable>
@@ -165,19 +165,19 @@ export class UserForm extends Component {
                         </div>
                         <div className="float-right">
                             <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
+                            type=" button"
+                            className="btn gp-outline-primary"
                             onClick={this.prevPage}
                             > &laquo; өмнөх
                             </button>
-                            <button 
+                            <button
                             type="button"
-                            className="btn btn-outline-primary "
+                            className="btn gp-outline-primary "
                             onClick={this.nextPage
                             } >
                             дараах &raquo;
                             </button>
-                            
+
                         </div>
                     </div>
                 </div>

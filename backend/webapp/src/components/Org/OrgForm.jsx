@@ -114,7 +114,7 @@ export class OrgForm extends Component {
             <div className="main-content">
                 <div className="container page-container my-4">
                     <div className="text-right">
-                        <NavLink className="btn gp-bg-primary  float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
+                        <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
                             Нэмэх
                         </NavLink>
                         <input
@@ -158,7 +158,7 @@ export class OrgForm extends Component {
                             </tbody>
                         </table>
                     </div>
-                                    <div className="row">
+                    <div className="row">
                     <div className="col-md-12">
                         <div className="float-left">
                             <strong>Хуудас {currentPage}-{totalPages}</strong>
@@ -167,14 +167,14 @@ export class OrgForm extends Component {
 
                             <button
                                 type="button"
-                                className="btn btn-outline-primary"
+                                className="btn gp-outline-primary"
                                 onClick={this.prevPage}
                             >
                                 &laquo; өмнөх
                             </button> {}
                             <button
                                 type="button"
-                                className="btn btn-outline-primary "
+                                className="btn gp-outline-primary "
                                 onClick={this.nextPage}
                             >
                                 дараах &raquo;

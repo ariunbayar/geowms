@@ -72,13 +72,13 @@ export class OrgAdd extends Component {
                         <div className="col-md-6">
                             <div className="text-left">
                                 <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                    <p className="btn btn-outline-primary">
+                                    <p className="btn gp-outline-primary">
                                         <i className="fa fa-angle-double-left"></i> Буцах
                                     </p>
                                 </NavLink>
                             </div>
                             <br/>
-                            <h5 className="mb-3">Байгууллагын нэр</h5> 
+                            <h5 className="mb-3">Байгууллагын нэр</h5>
                             <div className="form-group">
                                 <input
                                     type="text"
@@ -90,7 +90,7 @@ export class OrgAdd extends Component {
                             </div>
                             {org_id &&
                             <div className="form-group">
-                                    <h5 className="mb-3">Түвшин</h5> 
+                                    <h5 className="mb-3">Түвшин</h5>
                                     <select className="form-control" id="upadte_level" value={this.state.gender} onChange={(e) => this.handleUserSearch('upadte_level', e)}>
                                         <option>1</option>
                                         <option>2</option>
@@ -107,13 +107,13 @@ export class OrgAdd extends Component {
                         <div className="col-md-2">
                             <div className="form-group">
                                 {this.state.handleSaveIsLoad ?
-                                    <button className="btn btn-block gp-bg-primary">
+                                    <button className="btn btn-block gp-btn-primary">
                                         <a className="spinner-border text-light" role="status">
-                                            <span className="sr-only">Loading...</span> 
+                                            <span className="sr-only">Loading...</span>
                                         </a>
                                         <span> Шалгаж байна. </span>
                                     </button>:
-                                    <button className="btn btn-block gp-bg-primary" onClick={this.handleSave} >
+                                    <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
                                         Хадгалах
                                     </button>
                                 }

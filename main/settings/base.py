@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'frontend.secure.apps.SecureConfig',
     'frontend.payment.apps.PaymentConfig',
     'frontend.page.apps.PageConfig',
+    'frontend.profile.apps.ProfileConfig',
 
     # Backend apps
 
@@ -149,4 +150,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
 
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.
-DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/']
+DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/', r'^/api/service/']

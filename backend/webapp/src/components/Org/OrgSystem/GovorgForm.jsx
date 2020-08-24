@@ -97,7 +97,7 @@ export class GovorgForm extends Component {
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
+                        <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                             <i className="fa fa-angle-double-left"></i> Буцах
                         </a>
                     </div>
@@ -107,7 +107,7 @@ export class GovorgForm extends Component {
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
-                            initialValues={this.state.govorg}
+                            initialValues={{name:this.state.govorg.name || ''}}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -134,8 +134,8 @@ export class GovorgForm extends Component {
 
                                             <Field
                                                 className={'form-control ' + (errors.name ? 'is-invalid' : '')}
-                                                name="name"
                                                 placeholder="Системүүдийн нэр"
+                                                name='name'
                                                 id="id_name"
                                                 type="text"
                                             />
@@ -154,7 +154,7 @@ export class GovorgForm extends Component {
                                                     </p>
                                             }
                                             <div>
-                                                <button type="submit" className="btn gp-bg-primary" disabled={isSubmitting || has_error}>
+                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                     {isSubmitting && ' Шалгаж байна.'}
                                                     {!isSubmitting && 'Хадгалах' }

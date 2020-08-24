@@ -18,17 +18,17 @@ export class LoginLog extends Component {
             search_load: false,
             searchIsLoad: false,
 
-            
+
         }
         this.handleGetAll=this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
         this.prevPage=this.prevPage.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)  
+        this.handleListCal=this.handleListCal.bind(this)
         this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
 
     }
-    
+
     componentDidMount(){
         const {currentPage}=this.state
         this.handleListCal(currentPage)
@@ -40,11 +40,11 @@ export class LoginLog extends Component {
         const firtsIndex=lastIndex-loginPerPage
         if(searchIsLoad){
             this.handleSearchNextPage(lastIndex,firtsIndex)
-    
+
             }
         else{
             this.handleGetAll(lastIndex,firtsIndex)
-    
+
         }
     }
 
@@ -135,9 +135,9 @@ export class LoginLog extends Component {
                                 value={this.state.searchQuery}
                             />
                         </div>
-                        {search_load && 
+                        {search_load &&
                             <a className="spinner-border text-light" role="status">
-                                <span className="sr-only">Loading...</span> 
+                                <span className="sr-only">Loading...</span>
                             </a>
                         }
                     </div>
@@ -155,35 +155,35 @@ export class LoginLog extends Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        { login_length === 0 ? 
-                                        <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:                                 
+                                        { login_length === 0 ?
+                                        <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:
                                         login_log_all.map((login, idx) =>
                                             <LoginLogTable key = {idx} idx = {(currentPage*20)-20+idx+1} values={login}></LoginLogTable>
                                         )}
                                     </tbody>
                             </table>
                             <div className="row">
-                                <div className="col-md-12"> 
+                                <div className="col-md-12">
                                     <div className="float-left">
                                         <strong>Хуудас {currentPage}-{totalPages}</strong>
                                     </div>
                                     <div className="float-right">
                                         <button
-                                        type=" button" 
-                                        className="btn btn-outline-primary" 
+                                        type=" button"
+                                        className="btn gp-outline-primary"
                                         onClick={this.prevPage}
                                         >&laquo;өмнөх
                                         </button> {}
-                                        <button 
+                                        <button
                                         type="button"
-                                        className="btn btn-outline-primary "
+                                        className="btn gp-outline-primary "
                                         onClick={this.nextPage
                                         }>
                                         дараах &raquo;
                                         </button>
                                     </div>
                                 </div>
-                             </div> 
+                             </div>
                         </div>
                     </div>
                 </div>

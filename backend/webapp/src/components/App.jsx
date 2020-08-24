@@ -16,21 +16,21 @@ import {Forms} from "./Form"
 
 export default class App extends Component {
 
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            user_count: 0,
-        };
-    }
+    this.state = {
+      user_count: 0,
+    };
+  }
 
-    componentDidMount() {
+  componentDidMount() {
 
-        service.userCount().then(({ user_count }) => {
-            this.setState({ user_count: user_count });
-        });
+    service.userCount().then(({ user_count }) => {
+      this.setState({ user_count: user_count });
+    });
 
-    }
+  }
 
   render() {
     return (
@@ -52,7 +52,7 @@ export default class App extends Component {
                   <NavLink className="nav-link" activeClassName="active" to={"/back/froms/"}>Маягт</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/login/"}>ACCESS</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>Хандалт</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/huulga/"}>ХУУЛГА</NavLink>
