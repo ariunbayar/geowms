@@ -41,7 +41,6 @@ export class WmsList extends Component {
         this.handleAdd = this.handleAdd.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
         this.searchValue = React.createRef();
         this.isLoad = this.isLoad.bind(this)
