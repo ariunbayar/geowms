@@ -5,6 +5,7 @@ from django.db import transaction
 from django.http import JsonResponse, HttpResponse, Http404
 from django.shortcuts import reverse, get_object_or_404, render
 from django.views.decorators.http import require_POST, require_GET
+from django.core.paginator import Paginator
 
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
@@ -273,10 +274,28 @@ def proxy(request, wms_id):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def wmsSearch(request,payload):
+def paginatedList(request, payload):
 
-    query=payload.get('query')
-    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all().annotate(search=SearchVector('name') ).filter(search__contains=query)]
-    return JsonResponse({
-        'wms_list': wms_list,
-        })
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('per_page')
+
+    wms_list = [
+         _get_wms_display(request, ob)
+         for ob in WMS.objects.all()
+         .annotate(search=SearchVector('name'))
+         .filter(search__contains=query)
+    ]
+
+    total_items = Paginator(wms_list, per_page)
+    items_page = total_items.page(page)
+    items = items_page.object_list
+    total_page = total_items.num_pages
+    
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+    }
+    
+    return JsonResponse(rsp)

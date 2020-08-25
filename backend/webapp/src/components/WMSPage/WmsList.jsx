@@ -5,6 +5,8 @@ import WMSForm from './WMSForm'
 import WMS from './WMS'
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
+import { Pagination } from "../pagination/pagination"
+import { toStringHDMS } from "ol/coordinate"
 
 export class WmsList extends Component {
 
@@ -29,8 +31,9 @@ export class WmsList extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
+            firstIndexForSearch: 0
         }
-
+        this.paginate = this.paginate.bind(this)
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -38,24 +41,46 @@ export class WmsList extends Component {
         this.handleAdd = this.handleAdd.bind(this)
         this.handleFormCancel = this.handleFormCancel.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
         this.handleListCal=this.handleListCal.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-
+        this.searchValue = React.createRef();
+        this.isLoad = this.isLoad.bind(this)
     }
 
     componentDidMount() {
-        const currentPage=this.state.currentPage
-        this.handleListCal(currentPage)
+       this.searchValue.current.focus();
     }
-    handleListCal(currentPage){
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        const wmsPerPage=this.state.wmsPerPage
-        const lastIndex=currentPage*wmsPerPage
-        const firtsIndex=lastIndex-wmsPerPage
-        this.handleListUpdated(lastIndex,firtsIndex)
+
+    paginate (page, query) {
+        const { wmsPerPage } = this.state
+        this.setState({ currentPage: page })
+            return service
+                .paginatedList(page, 20, query)
+                .then(page => {
+                    this.setState({ wms_list: page.items, search_load: false})
+                    this.isLoad()
+                    return page
+                })
+    }
+
+    handleSearch(field, e) {
+        if(e.target.value.length >= 1)
+        {
+            this.setState({ [field]: e.target.value, search_load: true })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value, search_load: true })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
+    }
+
+    isLoad(){
+        const { search_load } = this.state
+        if (!search_load) {
+            this.searchValue.current.focus();
+        }
     }
 
     handleListUpdated(lastIndex,firtsIndex) {
@@ -63,7 +88,6 @@ export class WmsList extends Component {
         service.pagination(lastIndex,firtsIndex).then(({wms_list, len}) => {
             this.setState({wms_list, wms_length:len})
         })
-
     }
 
     handleSaveSuccess(id) {
@@ -138,46 +162,8 @@ export class WmsList extends Component {
         this.setState({is_form_open: false})
     }
 
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-        }
-    }
-
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.wms_length/this.state.wmsPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-            this.handleListCal(this.state.currentPage+1)
-        }
-    }
-
-    handleSearch(field, e) {
-        if(e.target.value.length > 0 )
-        {   
-            this.setState({ [field]: e.target.value, search_load:true})
-            service.wmsSearch(e.target.value).then(({ wms_list }) => {
-                if(wms_list){
-                    this.setState({wms_list, wms_length:wms_list.length, search_load:false})
-                }
-            })
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            const {currentPage}=this.state.currentPage
-            this.handleListCal(currentPage)
-        }
-    }
-
-
     render() {
-        const {currentPage, wmsPerPage, wms_list, wms_length}=this.state
-        const totalPages=Math.ceil( wms_length/wmsPerPage)
+        const {wms_list, wms_length, search_load}=this.state
         return (
             <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
@@ -191,11 +177,12 @@ export class WmsList extends Component {
                                         className="form-control col-md-4  mb-1 float-left"
                                         id="searchQuery"
                                         placeholder="Хайх"
+                                        disabled = {( search_load ? true : false )}
                                         onChange={(e) => this.handleSearch('searchQuery', e)}
                                         value={this.state.searchQuery}
+                                        ref = { this.searchValue }
                                    />
                                 </div>
-
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -206,7 +193,6 @@ export class WmsList extends Component {
                                             <th scope="col"> Идэвхтэй эсэх</th>
                                             <th scope="col"></th>
                                             <th scope="col"></th>
-                                            
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -216,7 +202,7 @@ export class WmsList extends Component {
                                             <WMS
                                                 key={values.id}
                                                 values={values}
-                                                idx={(currentPage*20)-20+index+1}
+                                                idx={(this.state.currentPage*20)-20+index+1}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleEdit={() => this.handleEdit(values)}
                                             />
@@ -225,28 +211,9 @@ export class WmsList extends Component {
                                 </table>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <div className="float-left">
-                            <strong>Хуудас {currentPage}-{totalPages}</strong>
-                        </div>
-                        <div className="float-right">
-                            <button
-                            type=" button" 
-                            className="btn btn-outline-primary" 
-                            onClick={this.prevPage}
-                            >&laquo;өмнөх
-                            </button> {}
-                            <button 
-                            type="button"
-                            className="btn btn-outline-primary "
-                            onClick={this.nextPage
-                            }>
-                            дараах &raquo;
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <Pagination paginate={this.paginate} 
+                    searchQuery = { this.state.searchQuery }
+                />
             </div>
         )
     }

@@ -1,6 +1,7 @@
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
 
 from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
@@ -99,7 +100,7 @@ def userDetailChange(request, payload):
     user = get_object_or_404(User, pk=user_id)
     User.objects.filter(pk=user_id).update(is_active=is_active)
     return JsonResponse({'success': True})
-    
+
 
 @require_POST
 @ajax_required
@@ -124,17 +125,36 @@ def roleCreate(request, payload):
     else:
         user.roles.add(roleId)
         return JsonResponse({'success': True})
-        
-        
+
+
 @require_POST
 @ajax_required
-def userSearch(request, payload):
-    query = payload.get('query')
-    first = payload.get('first')
-    last = payload.get('last')
+def paginatedList(request, payload):
 
-    users = []
-    users = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name','first_name', 'email', 'gender') ).filter(search__contains=query)]
-    userList = users[first:last]
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('per_page')
+    user_list = [
+        _get_user_display(user) 
+        for user in User.objects.all()
+        .annotate(search=SearchVector(
+            'last_name',
+            'first_name',
+            'email',
+            'gender')
+        )
+        .filter(search__contains=query)
+    ]
+
+    total_items = Paginator(user_list, per_page)
+    items_page = total_items.page(page)
+    items = items_page.object_list
+    total_page = total_items.num_pages
     
-    return JsonResponse({'user_list': userList, "len": len(users)})
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+    }
+    
+    return JsonResponse(rsp)

@@ -29,7 +29,7 @@ urlpatterns = [
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
-        path('wmsSearch/', wms_views.wmsSearch, name='wmsSearch'),
+        path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
     ], 'wms'))),
 
     path('bundle/', include(([
@@ -50,7 +50,7 @@ urlpatterns = [
         path('roleCreate/', user_views.roleCreate, name='roleCreate'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('userCount/', user_views.userCount, name='userCount'),
-        path('userSearch/', user_views.userSearch, name='userSearch'),
+        path('paginatedList/', user_views.paginatedList, name='paginatedList'),
     ], 'user'))),
 
     path('api/суурь-давхарга/', include(([
