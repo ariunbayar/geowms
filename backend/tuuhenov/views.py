@@ -108,3 +108,17 @@ def create(request, payload):
                                                 [geom, register_id, descriptio, dursgal, dursgal2, aimagname, sumname, type1, stone, latlong, utm ,length, width, hight, depth, meridian, other, number, protection, protecti_1, tus, yaral, malts, human, natural, recover, recover1, protecti_2, other1, ndd, nmm, nss, edd, emm, ess, x, y, register_id])
 
     return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def tsegPersonal(request, payload):
+
+    form_datas = payload.get('form_datas')
+    print(form_datas)
+    print("wwwwww")
+    print("wwwwww")
+    print("wwwwww")
+
+
+    return JsonResponse({'success': True})

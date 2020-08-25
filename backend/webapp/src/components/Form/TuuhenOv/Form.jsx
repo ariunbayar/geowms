@@ -19,12 +19,18 @@ export class Form extends Component {
             torol_zuil_torol_zuil_level2: [],
             torol_zuiltorol_zuil_name: '',
             torol_zuil_dursgalt_gazriin_ner: '',
-            torol_zuil_dursgalt_gazriin_coordinatutm: '',
-            torol_zuil_dursgalt_gazriin_coordinatx: 0,
-            torol_zuil_dursgalt_gazriin_coordinaty: 0,
-            torol_zuil_dursgalt_gazriin_coordinatllx: 0,
-            torol_zuil_dursgalt_gazriin_coordinatlly: 0,
-            torol_zuil_dursgalt_gazriin_coordinatalt: 0,
+
+            torol_zuil_dursgalt_gazriin_coordinat: [
+                {
+                    torol_zuil_dursgalt_gazriin_coordinatutm: '',
+                    torol_zuil_dursgalt_gazriin_coordinatx: 0,
+                    torol_zuil_dursgalt_gazriin_coordinaty: 0,
+                    torol_zuil_dursgalt_gazriin_coordinatllx: 0,
+                    torol_zuil_dursgalt_gazriin_coordinatlly: 0,
+                    torol_zuil_dursgalt_gazriin_coordinatalt: 0,
+                },
+            ],
+
             torol_zuil_todorhoilolt: '',
 
 
@@ -41,14 +47,16 @@ export class Form extends Component {
             hemjee_temdeglel: '',
 
 
-
-            dg_hamrah_huree_solbiltsolutm: '',
-            dg_hamrah_huree_solbiltsolx: 0,
-            dg_hamrah_huree_solbiltsoly:0,
-            dg_hamrah_huree_solbiltsolllx: 0,
-            dg_hamrah_huree_solbiltsollly: 0,
-            dg_hamrah_huree_solbiltsolllalt: 0,
-
+            dg_hamrah_huree_solbiltsol:[
+                {
+                dg_hamrah_huree_solbiltsolutm: '',
+                dg_hamrah_huree_solbiltsolx: 0,
+                dg_hamrah_huree_solbiltsoly:0,
+                dg_hamrah_huree_solbiltsolllx: 0,
+                dg_hamrah_huree_solbiltsollly: 0,
+                dg_hamrah_huree_solbiltsolllalt: 0,
+                }
+            ],
 
             dg_ezen_dursgalt_gazar_ezen: false,
             dg_ezen_temdeglel: '',
@@ -60,13 +68,17 @@ export class Form extends Component {
 
             dgh_bus_togtooh_shaardlaga: false,
 
-            dgh_hamrah_huree_coordinatutm: '',
-            dgh_hamrah_huree_coordinatx: 0,
-            dgh_hamrah_huree_coordinaty: 0,
-            dgh_hamrah_huree_coordinatllx: 0,
-            dgh_hamrah_huree_coordinatlly: 0,
-            dgh_hamrah_huree_coordinatalt: 0,
 
+            dgh_hamrah_huree_coordinat:[
+                {
+                dgh_hamrah_huree_coordinatutm: '',
+                dgh_hamrah_huree_coordinatx: 0,
+                dgh_hamrah_huree_coordinaty: 0,
+                dgh_hamrah_huree_coordinatllx: 0,
+                dgh_hamrah_huree_coordinatlly: 0,
+                dgh_hamrah_huree_coordinatalt: 0,
+                }
+            ],
 
             dgh_tusgai_hamgaalalt: false,
             dgh_tusgai_temdeglel: '',
@@ -134,9 +146,13 @@ export class Form extends Component {
             handle_save_succes: false,
 
 
+
         }
         this.handleSave = this.handleSave.bind(this)
         this.handleInput = this.handleInput.bind(this)
+
+        this.handleCoordinat = this.handleCoordinat.bind(this)
+
         this.handleInputSelect = this.handleInputSelect.bind(this)
         this.handleInputSelectTwo = this.handleInputSelectTwo.bind(this)
         this.handleTextArea = this.handleTextArea.bind(this)
@@ -144,16 +160,62 @@ export class Form extends Component {
         this.handleCheckSelect = this.handleCheckSelect.bind(this)
         this.handleCheckSelectHun = this.handleCheckSelectHun.bind(this)
         this.handleCheckGroup = this.handleCheckGroup.bind(this)
+        this.rowPlus = this.rowPlus.bind(this)
+        this.rowPlusHuree = this.rowPlusHuree.bind(this)
+        this.rowPlusAyulHuree = this.rowPlusAyulHuree.bind(this)
     }
-
+    
     handleInput(field, e) {
-
-
         this.setState({ [field]: e.target.value })
+    }
+
+    handleCoordinat(field, e, idx) {
+        console.log(field, idx)
+        console.log(this.state.torol_zuil_dursgalt_gazriin_coordinat[0])
+        // this.setState({ torol_zuil_dursgalt_gazriin_coordinat:{[field]: e.target.value }})
+
+    }
+    rowPlusHuree(){
+        const new_row = {
+            dg_hamrah_huree_solbiltsolutm: '',
+            dg_hamrah_huree_solbiltsolx: 0,
+            dg_hamrah_huree_solbiltsoly:0,
+            dg_hamrah_huree_solbiltsolllx: 0,
+            dg_hamrah_huree_solbiltsollly: 0,
+            dg_hamrah_huree_solbiltsolllalt: 0,
+        }
+        this.setState({ dg_hamrah_huree_solbiltsol: this.state.dg_hamrah_huree_solbiltsol.concat(new_row ) });
+    }
+    rowPlusAyulHuree(){
+
+        const new_row = {
+            dgh_hamrah_huree_coordinatutm: '',
+            dgh_hamrah_huree_coordinatx: 0,
+            dgh_hamrah_huree_coordinaty: 0,
+            dgh_hamrah_huree_coordinatllx: 0,
+            dgh_hamrah_huree_coordinatlly: 0,
+            dgh_hamrah_huree_coordinatalt: 0,
+        }
+
+        this.setState({ dgh_hamrah_huree_coordinat: this.state.dgh_hamrah_huree_coordinat.concat(new_row ) });
 
 
     }
+    rowPlus(){
 
+        const new_row = {
+            torol_zuil_dursgalt_gazriin_coordinatutm: '',
+            torol_zuil_dursgalt_gazriin_coordinatx: 0,
+            torol_zuil_dursgalt_gazriin_coordinaty: 0,
+            torol_zuil_dursgalt_gazriin_coordinatllx: 0,
+            torol_zuil_dursgalt_gazriin_coordinatlly: 0,
+            torol_zuil_dursgalt_gazriin_coordinatalt: 0,
+        }
+
+        this.setState({ torol_zuil_dursgalt_gazriin_coordinat: this.state.torol_zuil_dursgalt_gazriin_coordinat.concat(new_row ) });
+
+
+    }
     handleCheckSelect(field, e, name) {
         let dgh_baigaliin_huchin_zuil_all = this.state.dgh_baigaliin_huchin_zuil_all
 
@@ -359,7 +421,7 @@ export class Form extends Component {
     }
     
     render() {
-
+        const {torol_zuil_dursgalt_gazriin_coordinat, dg_hamrah_huree_solbiltsol, dgh_hamrah_huree_coordinat} = this.state
 
         return (
             <div >
@@ -449,8 +511,6 @@ export class Form extends Component {
                         <th scope="row" style={{width: "20%"}}>Ерөнхий төрлийн код, нэрийг бичнэ.</th>
                     </tr>
                     <tr>
-
-
                         <th scope="row">Чулуулгын төрөл</th>
                         <td colSpan="7" scope="rowgroup"  scope="row">
                             <select className="form-control" id="torol_zuiltorol_zuil_name" value={this.state.torol_zuiltorol_zuil_name} onChange={(e) => this.handleInputSelect('torol_zuiltorol_zuil_name', e)}>
@@ -468,10 +528,6 @@ export class Form extends Component {
                         </td>
                         <th scope="row">Чулуун дурсгалыг урласан материалыг сонгоно.</th>
                     </tr>
-
-
-
-
                     <tr>
                         <th scope="row">Дурсгалт газрын нэр.</th>
                         <td colSpan="7" scope="rowgroup"  scope="row">
@@ -486,12 +542,12 @@ export class Form extends Component {
                         <th scope="row">Ерөнхий төрлийн код, нэрийг бичнэ.</th>
                     </tr>
                     <tr>
-                        <th rowSpan="6" scope="rowgroup" scope="row">Солбилцол</th>
+                        <th rowSpan="20" scope="rowgroup" scope="row">Солбилцол</th>
                         <th rowSpan="2" scope="rowgroup" scope="row">№</th>
                         <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
                         <td rowSpan="2">Alt(m)</td>
-                        <th rowSpan="6" scope="rowgroup">UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</th>
+                        <th rowSpan="20" scope="rowgroup">UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</th>
                     </tr>
                     <tr>
                         <td scope="row">UTM Zone</td>
@@ -500,72 +556,78 @@ export class Form extends Component {
                         <td scope="row">N</td>
                         <td scope="row">E</td>
                     </tr>
+
+                    {torol_zuil_dursgalt_gazriin_coordinat.map((data, idx) =>
+                        <tr key={idx}>
+                            <td scope="row">{idx + 1}</td>
+                            <td scope="row">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="torol_zuil_dursgalt_gazriin_coordinatutm"
+                                    onChange={(e) => this.handleCoordinat('torol_zuil_dursgalt_gazriin_coordinatutm', e, idx)}
+                                    value={this.state.torol_zuil_dursgalt_gazriin_coordinatutm}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="torol_zuil_dursgalt_gazriin_coordinatx"
+                                    onChange={(e) => this.handleCoordinat('torol_zuil_dursgalt_gazriin_coordinatx', e, idx)}
+                                    value={this.state.torol_zuil_dursgalt_gazriin_coordinatx}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="torol_zuil_dursgalt_gazriin_coordinaty"
+                                    onChange={(e) => this.handleCoordinat('torol_zuil_dursgalt_gazriin_coordinaty', e, idx)}
+                                    value={this.state.torol_zuil_dursgalt_gazriin_coordinaty}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="torol_zuil_dursgalt_gazriin_coordinatllx"
+                                    onChange={(e) => this.handleCoordinat('torol_zuil_dursgalt_gazriin_coordinatllx', e, idx)}
+                                    value={this.state.torol_zuil_dursgalt_gazriin_coordinatllx}
+
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="torol_zuil_dursgalt_gazriin_coordinatlly"
+                                    onChange={(e) => this.handleCoordinat('torol_zuil_dursgalt_gazriin_coordinatlly', e, idx)}
+                                    value={this.state.torol_zuil_dursgalt_gazriin_coordinatlly}
+
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="torol_zuil_dursgalt_gazriin_coordinatalt"
+                                    onChange={(e) => this.handleCoordinat('torol_zuil_dursgalt_gazriin_coordinatalt', e, idx)}
+                                    value={this.state.torol_zuil_dursgalt_gazriin_coordinatalt}
+
+                                />
+                            </td>
+                        </tr>
+                    )}
+
                     <tr>
-                        <td scope="row">1</td>
-                        <td scope="row">
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="torol_zuil_dursgalt_gazriin_coordinatutm"
-                                onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinatutm', e)}
-                                value={this.state.torol_zuil_dursgalt_gazriin_coordinatutm}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="torol_zuil_dursgalt_gazriin_coordinatx"
-                                onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinatx', e)}
-                                value={this.state.torol_zuil_dursgalt_gazriin_coordinatx}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="torol_zuil_dursgalt_gazriin_coordinaty"
-                                onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinaty', e)}
-                                value={this.state.torol_zuil_dursgalt_gazriin_coordinaty}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="torol_zuil_dursgalt_gazriin_coordinatllx"
-                                onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinatllx', e)}
-                                value={this.state.torol_zuil_dursgalt_gazriin_coordinatllx}
-
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="torol_zuil_dursgalt_gazriin_coordinatlly"
-                                onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinatlly', e)}
-                                value={this.state.torol_zuil_dursgalt_gazriin_coordinatlly}
-
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="torol_zuil_dursgalt_gazriin_coordinatalt"
-                                onChange={(e) => this.handleInput('torol_zuil_dursgalt_gazriin_coordinatalt', e)}
-                                value={this.state.torol_zuil_dursgalt_gazriin_coordinatalt}
-
-                            />
+                        <td colSpan="7" scope="rowgroup" scope="row" className="text-center text-primary" style={{fontSize: "20px"}}>
+                            <i onClick={this.rowPlus} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
                         </td>
                     </tr>
+
+
                 </table>
-
-
-
-
-
 
 
                 <table className="table table-bordered">
@@ -586,8 +648,6 @@ export class Form extends Component {
                         </tr>
                     </tbody>
                 </table>
-
-
 
                 <table className="table table-bordered">
                     <tbody>
@@ -701,18 +761,14 @@ export class Form extends Component {
                     </tbody>
                 </table>
 
-
-
-
-
                 <table className="table table-bordered">
                     <tr>
-                        <th rowSpan="6" scope="rowgroup" scope="row" style={{width: "10%"}}>Дурсгалт газрын хамрах хүрээний солбилцол.</th>
+                        <th rowSpan="20" scope="rowgroup" scope="row" style={{width: "10%"}}>Дурсгалт газрын хамрах хүрээний солбилцол.</th>
                         <th rowSpan="2" scope="rowgroup" scope="row">№</th>
                         <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
                         <td rowSpan="2">Alt(m)</td>
-                        <th rowSpan="6" scope="rowgroup" style={{width: "20%"}}>Хэрэв тухайн газар том талбайг хамран оршиж байгаа бол дурсгалын хамрах хүрээг заавал тогтоох бөгөөд энэхүү хамрах хүрээний цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</th>
+                        <th rowSpan="20" scope="rowgroup" style={{width: "20%"}}>Хэрэв тухайн газар том талбайг хамран оршиж байгаа бол дурсгалын хамрах хүрээг заавал тогтоох бөгөөд энэхүү хамрах хүрээний цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</th>
                     </tr>
                     <tr>
                         <th scope="row">UTM Zone</th>
@@ -721,61 +777,68 @@ export class Form extends Component {
                         <th scope="row">N</th>
                         <th scope="row">E</th>
                     </tr>
+                    {dg_hamrah_huree_solbiltsol.map((data, idx) =>
+                        <tr key={idx}>
+                            <th scope="row">{idx+1}</th>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="dg_hamrah_huree_solbiltsolutm"
+                                    onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolutm', e)}
+                                    value={this.state.dg_hamrah_huree_solbiltsolutm}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="dg_hamrah_huree_solbiltsolx"
+                                    onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolx', e)}
+                                    value={this.state.dg_hamrah_huree_solbiltsolx}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="dg_hamrah_huree_solbiltsoly"
+                                    onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsoly', e)}
+                                    value={this.state.dg_hamrah_huree_solbiltsoly}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="dg_hamrah_huree_solbiltsolllx"
+                                    onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolllx', e)}
+                                    value={this.state.dg_hamrah_huree_solbiltsolllx}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="dg_hamrah_huree_solbiltsollly"
+                                    onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsollly', e)}
+                                    value={this.state.dg_hamrah_huree_solbiltsollly}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="dg_hamrah_huree_solbiltsolllalt"
+                                    onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolllalt', e)}
+                                    value={this.state.dg_hamrah_huree_solbiltsolllalt}
+                                />
+                            </td>
+                        </tr>
+                    )}
                     <tr>
-                        <th scope="row">1</th>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="dg_hamrah_huree_solbiltsolutm"
-                                onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolutm', e)}
-                                value={this.state.dg_hamrah_huree_solbiltsolutm}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="dg_hamrah_huree_solbiltsolx"
-                                onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolx', e)}
-                                value={this.state.dg_hamrah_huree_solbiltsolx}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="dg_hamrah_huree_solbiltsoly"
-                                onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsoly', e)}
-                                value={this.state.dg_hamrah_huree_solbiltsoly}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="dg_hamrah_huree_solbiltsolllx"
-                                onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolllx', e)}
-                                value={this.state.dg_hamrah_huree_solbiltsolllx}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="dg_hamrah_huree_solbiltsollly"
-                                onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsollly', e)}
-                                value={this.state.dg_hamrah_huree_solbiltsollly}
-                            />
-                        </td>
-                        <td scope="row">
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="dg_hamrah_huree_solbiltsolllalt"
-                                onChange={(e) => this.handleInput('dg_hamrah_huree_solbiltsolllalt', e)}
-                                value={this.state.dg_hamrah_huree_solbiltsolllalt}
-                            />
+                        <td colSpan="7" scope="rowgroup" scope="row" className="text-center text-primary" style={{fontSize: "20px"}}>
+                            <i onClick={this.rowPlusHuree} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
                         </td>
                     </tr>
 
@@ -875,18 +938,14 @@ export class Form extends Component {
                 </table>
 
 
-
-
-
-
                 <table className="table table-bordered">
                     <tr>
-                        <th rowSpan="6" scope="rowgroup" scope="row" style={{width: "10%"}}>Дурсгалт газрын хамрах хүрээгий.</th>
+                        <th rowSpan="20" scope="rowgroup" scope="row" style={{width: "10%"}}>Дурсгалт газрын хамрах хүрээгий.</th>
                         <th rowSpan="2" scope="rowgroup" scope="row">№</th>
                         <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
                         <td rowSpan="2">Alt(m)</td>
-                        <th rowSpan="6" scope="rowgroup" style={{width: "20%"}}>Хамгаалалтын бүс тогтоох бүсийн санадтай дурсгалын хамгаалал тогтоох бүсийн хилийн цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</th>
+                        <th rowSpan="20" scope="rowgroup" style={{width: "20%"}}>Хамгаалалтын бүс тогтоох бүсийн санадтай дурсгалын хамгаалал тогтоох бүсийн хилийн цэгүүдийн Солбилцлыг дарааллын дагуу бичнэ.</th>
                     </tr>
                     <tr>
                         <th scope="row">UTM Zone</th>
@@ -895,8 +954,9 @@ export class Form extends Component {
                         <th scope="row">N</th>
                         <th scope="row">E</th>
                     </tr>
-                    <tr>
-                        <td scope="row">1</td>
+                    {dgh_hamrah_huree_coordinat.map((data, idx) =>
+                    <tr key={idx}>
+                        <td scope="row">{idx+1}</td>
                         <td scope="row">
                             <input
                                 type="number"
@@ -950,6 +1010,14 @@ export class Form extends Component {
                                 onChange={(e) => this.handleInput('dgh_hamrah_huree_coordinatalt', e)}
                                 value={this.state.dgh_hamrah_huree_coordinatalt}
                             />
+                        </td>
+                    </tr>
+                    )}
+
+
+                    <tr>
+                        <td colSpan="7" scope="rowgroup" scope="row" className="text-center text-primary" style={{fontSize: "20px"}}>
+                            <i onClick={this.rowPlusAyulHuree} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
                         </td>
                     </tr>
                 </table>
@@ -1787,8 +1855,8 @@ export class Form extends Component {
                 </table>
                 { this.state.handle_save_succes ?
                     <button className="btn gp-bg-primary">
-                        <a class="spinner-border text-light" role="status">
-                            <span class="sr-only">Loading...</span> 
+                        <a className="spinner-border text-light" role="status">
+                            <span className="sr-only">Loading...</span> 
                         </a>
                         <span> Шалгаж байна. </span>
                     </button>:

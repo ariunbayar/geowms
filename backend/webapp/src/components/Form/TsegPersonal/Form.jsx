@@ -83,16 +83,6 @@ export class Form extends Component {
         }
     }
  
-    handleSave(){
-
-        console.log(this.state)
-        this.setState({handle_save_succes:true})
-
-        setTimeout(() => {
-            this.setState({handle_save_succes:false})
-        }, 1000)
-    }
-
     handleInputAimag(field, e) {
         if(e.target.value == 'Архангай'){
             var sum_ners = ['Батцэнгэл', 'Булган', 'Жаргалант', 'Ихтамир', 'Өгийнуур', 'Өлзийт', 'Өндөр-Улаан', 'Тариат', 'Цахир', 'Чулуут']
@@ -311,6 +301,23 @@ export class Form extends Component {
 
         this.setState({ [name]: file })
     }
+
+    handleSave(){
+        this.setState({handle_save_succes:true})
+
+        const form_datas = this.state
+        service.tsegPersonal(form_datas).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.setState({handle_save_succes:false})
+                }, 1000)
+            }
+            else{
+                alert("no")
+            }
+        })
+    }
+    
 
     render() {
         return (
