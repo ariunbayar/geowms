@@ -118,18 +118,12 @@ def create(request, payload):
 @ajax_required
 def tsegPersonal(request):
 
-    print("Ww")
-    print("Ww")
-    print(request.POST.get('tesgiin_ner'))
-    print("Ww")
-    print("Ww")
-
-
     tseg_oiroos_img_url = ''
     tseg_holoos_img_url = ''
     bairshil_tseg_oiroos_img_url = ''
     bairshil_tseg_holoos_img_url = ''
-
+    file1 = ''
+    file2 = ''
     if  request.POST.get('tseg_oiroos_img_url'):
         [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(1024, 1080)])
         tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
@@ -142,7 +136,11 @@ def tsegPersonal(request):
     if  request.POST.get('bairshil_tseg_holoos_img_url'):
         [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(1024, 1080)])
         bairshil_tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
-        
+    if request.FILES['file1']:
+        file1 = request.FILES['file1']
+    if request.FILES['file1']:
+        file2 = request.FILES['file2']
+
     TsegPersonal.objects.create(
                 tesgiin_ner= request.POST.get('tesgiin_ner'),
                 toviin_dugaar= request.POST.get('toviin_dugaar'),
@@ -163,8 +161,8 @@ def tsegPersonal(request):
                 hors_shinj_baidal= request.POST.get('hors_shinj_baidal'),
                 # date= request.POST.get('date'),
                 hotolson= request.POST.get('hotolson'),
-                file_path1= request.FILES['file1'],
-                file_path2= request.FILES['file2'],
+                file_path1= file1,
+                file_path2= file2,
                 alban_tushaal= request.POST.get('alban_tushaal'),
                 alban_baiguullga= request.POST.get('alban_baiguullga'),
                                 )
