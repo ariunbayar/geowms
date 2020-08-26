@@ -167,47 +167,47 @@ export class WmsList extends Component {
             <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
                     <div className="col-md-12">
-                                <div className="text-right">
-                                    <NavLink className="btn gp-btn-primary" to={`/back/wms/үүсгэх/`}>
-                                        Нэмэх
-                                    </NavLink>
-                                    <input
-                                        type="text"
-                                        className="form-control col-md-4  mb-1 float-left"
-                                        id="searchQuery"
-                                        placeholder="Хайх"
-                                        disabled = {( search_load ? true : false )}
-                                        onChange={(e) => this.handleSearch('searchQuery', e)}
-                                        value={this.state.searchQuery}
-                                        ref = { this.searchValue }
-                                   />
-                                </div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col"> # </th>
-                                            <th scope="col"> Нэр </th>
-                                            <th scope="col"> Endpoint </th>
-                                            <th scope="col"> Огноо</th>
-                                            <th scope="col"> Идэвхтэй эсэх</th>
-                                            <th scope="col"></th>
-                                            <th scope="col"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {wms_length===0 ?
-                                        <tr><td>WMS бүртгэлгүй байна</td></tr>:
-                                        wms_list.map((values, index) =>
-                                            <WMS
-                                                key={values.id}
-                                                values={values}
-                                                idx={(this.state.currentPage*20)-20+index+1}
-                                                handleRemove={() => this.handleRemove(values.id)}
-                                                handleEdit={() => this.handleEdit(values)}
-                                            />
-                                        )}
-                                    </tbody>
-                                </table>
+                        <div className="text-right">
+                            <NavLink className="btn gp-btn-primary" to={`/back/wms/үүсгэх/`}>
+                                Нэмэх
+                            </NavLink>
+                            <input
+                                type="text"
+                                className="form-control col-md-4  mb-1 float-left"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                disabled = {( search_load ? true : false )}
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                                ref = { this.searchValue }
+                            />
+                        </div>
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> # </th>
+                                    <th scope="col"> Нэр </th>
+                                    <th scope="col"> Endpoint </th>
+                                    <th scope="col"> Огноо</th>
+                                    <th scope="col"> Идэвхтэй эсэх</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {wms_length===0 ?
+                                <tr><td>WMS бүртгэлгүй байна</td></tr>:
+                                wms_list.map((values, index) =>
+                                    <WMS
+                                        key={values.id}
+                                        values={values}
+                                        idx={(this.state.currentPage*20)-20+index+1}
+                                        handleRemove={() => this.handleRemove(values.id)}
+                                        handleEdit={() => this.handleEdit(values)}
+                                    />
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <Pagination paginate={this.paginate} 

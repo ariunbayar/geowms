@@ -68,45 +68,44 @@ export class Жагсаалт extends Component {
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
-                <div className="col-md-4  mb-1" >                 
-                    <input
-                        type="text"
-                        className="form-control"
-                        disabled = {( search_load ? true : false )}
-                        id="searchQuery"
-                        placeholder="Хайх"
-                        onChange={(e) => this.handleSearch('searchQuery', e)}
-                        value={this.state.searchQuery}
-                        ref = {this.searchValue}
-                    />
-                </div>
-                <div className="col-md-12">
-
-                    <table className="table table-fluid">
-                        <thead>
-                            <tr>
-                                <th scope="col"> № </th>
-                                <th scope="col"> Нэр </th>
-                                <th scope="col">Цахим шуудан</th>
-                                <th scope="col">Хэрэглэгчийн эрх</th>
-                                <th scope="col">Идэвхтэй эсэх</th>
-                                <th scope="col">ДАН системээр баталгаажсан эсэх</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {user_length === 0 ?
-                                <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
-                                user_list.map((values,index) =>
-                                    <User
-                                        key={values.id}
-                                        values={values}
-                                        idx={(this.state.currentPage*20)-20+index+1}
-                                    />
-                                )
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                    <div className="col-md-4  mb-1" >                 
+                        <input
+                            type="text"
+                            className="form-control"
+                            disabled = {( search_load ? true : false )}
+                            id="searchQuery"
+                            placeholder="Хайх"
+                            onChange={(e) => this.handleSearch('searchQuery', e)}
+                            value={this.state.searchQuery}
+                            ref = {this.searchValue}
+                        />
+                    </div>
+                    <div className="col-md-12">
+                        <table className="table table-fluid">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> № </th>
+                                    <th scope="col"> Нэр </th>
+                                    <th scope="col">Цахим шуудан</th>
+                                    <th scope="col">Хэрэглэгчийн эрх</th>
+                                    <th scope="col">Идэвхтэй эсэх</th>
+                                    <th scope="col">ДАН системээр баталгаажсан эсэх</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {user_length === 0 ?
+                                    <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
+                                    user_list.map((values,index) =>
+                                        <User
+                                            key={values.id}
+                                            values={values}
+                                            idx={(this.state.currentPage*20)-20+index+1}
+                                        />
+                                    )
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <Pagination
                     paginate = { this.paginate }
