@@ -9,7 +9,7 @@ export default class WMSCheckFormTable extends Component {
         this.state = {
             layer: props.layer,
             wmsId: props.wmsId,
-            title: props.layer.title,
+            title: props.layer.title || '',
             titleDisabled: false,
         }
         this.titleSave = this.titleSave.bind(this)

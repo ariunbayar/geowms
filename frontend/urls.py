@@ -6,6 +6,7 @@ from frontend.суурь_давхарга import views as суурь_давха�
 from frontend.secure import views as secure_views
 from frontend.payment import views as payment_views
 from frontend.page import views as page_views
+from frontend.profile import views as profile_views
 
 
 urlpatterns = [
@@ -22,6 +23,7 @@ urlpatterns = [
         path('login/', secure_views.login, name='login'),
         path('login/dan/', secure_views.login_dan, name='login-dan'),
         path('logout/', secure_views.logout, name='logout'),
+        path('oauth2/', secure_views.oauth2, name='oauth2'),
     ], 'secure'))),
 
     path('m/', include(([
@@ -47,5 +49,12 @@ urlpatterns = [
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
     ], 'payment'))),
 
+    path('profile/api/', include(([
+        path('', profile_views.history, name='history'),
+        path('all/', profile_views.all, name='all'),
+    ], 'profile'))),
+
+    re_path('^.*', profile_views.history, name='history'),
+    
     re_path('^.*', payment_views.index, name='payment'),
 ]

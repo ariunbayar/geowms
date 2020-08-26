@@ -113,7 +113,7 @@ export class WmsList extends Component {
         } else {
 
             service.create(values).then(({success, item}) => {
-                if (success){    
+                if (success){
                     const currentPage=this.state.currentPage
                     this.handleListCal(currentPage)}
             })
@@ -128,7 +128,7 @@ export class WmsList extends Component {
 
     handleRemove(id) {
         service.remove(id).then(({success}) => {
-            if (success) {        
+            if (success) {
                 const currentPage=this.state.currentPage
                 this.handleListCal(currentPage)
             }
@@ -168,7 +168,7 @@ export class WmsList extends Component {
                 <div className="row">
                     <div className="col-md-12">
                                 <div className="text-right">
-                                    <NavLink className="btn gp-bg-primary" to={`/back/wms/үүсгэх/`}>
+                                    <NavLink className="btn gp-btn-primary" to={`/back/wms/үүсгэх/`}>
                                         Нэмэх
                                     </NavLink>
                                     <input
@@ -195,7 +195,7 @@ export class WmsList extends Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {wms_length===0 ? 
+                                        {wms_length===0 ?
                                         <tr><td>WMS бүртгэлгүй байна</td></tr>:
                                         wms_list.map((values, index) =>
                                             <WMS

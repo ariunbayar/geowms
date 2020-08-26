@@ -2,7 +2,7 @@ import requests
 
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse, Http404
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import reverse, get_object_or_404, render
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from main.decorators import ajax_required
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.contrib.postgres.search import SearchVector
 from .models import WMS
 from .forms import WMSForm
 
@@ -33,22 +33,20 @@ def _get_wms_display(request, wms):
 @user_passes_test(lambda u: u.is_superuser)
 def all(request):
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
-    return JsonResponse({
-        'wms_list': wms_list,
-        })
+    return JsonResponse({'wms_list': wms_list, })
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def pagination(request,payload):
-    last=payload.get('last')
-    first=payload.get('first')
+def pagination(request, payload):
+    last = payload.get('last')
+    first = payload.get('first')
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()[first:last]]
     return JsonResponse({
         'wms_list': wms_list,
-        'len':WMS.objects.all().count()
-        })
+        'len': WMS.objects.all().count()
+            })
 
 
 @require_GET
@@ -205,12 +203,11 @@ def update(request, payload):
     wms = get_object_or_404(WMS, pk=payload.get('id'))
     layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
-    is_active=payload.get('is_active')
-    wms_id=payload.get("id")
+    is_active = payload.get('is_active')
     if(is_active):
-        wms.is_active=True
+        wms.is_active = True
     else:
-        wms.is_active=False
+        wms.is_active = False
     if form.is_valid():
 
         with transaction.atomic():
@@ -223,11 +220,7 @@ def update(request, payload):
                         name=layer_choice.get('name'),
                         code=layer_choice.get('code'),
                         legend_url=layer_choice.get('legendurl'))
-
-
-        return JsonResponse({
-                'success': True
-            })
+        return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
 
