@@ -91,7 +91,6 @@ function roleCreate(payload){
 }
 
 function paginatedList(page, per_page, query) {
-    console.log("service ", page, per_page, query)
     const requestOptions = {
         ..._getPostOptions(),
     body: JSON.stringify({ page, per_page, query }),
