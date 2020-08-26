@@ -40,15 +40,20 @@ export class Form extends Component {
         
     }
     handleSave(){
+        this.setState({handle_save_succes:false})
 
-        console.log(this.state)
-        this.setState({handle_save_succes:true})
-
-        setTimeout(() => {
-            this.setState({handle_save_succes:false})
-        }, 1000)
+        const form_datas = this.state
+        service.tsegUstsan(form_datas).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.setState({handle_save_succes:false})
+                }, 1000)
+            }
+            else{
+                alert("no")
+            }
+        })
     }
-
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
     }

@@ -121,6 +121,7 @@ urlpatterns = [
     path('tuuhen_ov/', include(([
         path('create/', tuuhenov_views.create, name='create'),
         path('tseg-personal/', tuuhenov_views.tsegPersonal, name='tseg-personal'),
+        path('tseg-ustsan/', tuuhenov_views.tsegUstsan, name='tseg-ustsan'),
     ], 'tuuhen_ov'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

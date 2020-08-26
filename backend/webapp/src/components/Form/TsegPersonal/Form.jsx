@@ -40,9 +40,9 @@ export class Form extends Component {
         
         handle_save_succes: false,
 
-        file_path1: '',
+        file_path1: null,
         file_path1_error: false,
-        file_path2: '',
+        file_path2: null,
         file_path2_error: false,
         bairshil_tseg_holoos_img_url: '',
 
@@ -62,9 +62,7 @@ export class Form extends Component {
         if(icon){
             let reader = new FileReader();
             reader.onload = (upload) => {
-                this.setState({
-                    [name]: btoa(upload.target.result)
-                })
+                this.setState({[name]: btoa(upload.target.result)})
             }
             reader.readAsBinaryString(icon)
         }
@@ -282,14 +280,15 @@ export class Form extends Component {
 
     onChangeHandler(e, name){
         const file = e.target.files[0]
-        console.log(file['name'])
-        var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
-
-        if(file['name'].length === 10)
+        var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[a-z A-Z 0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
+        this.setState({[name+'_error']: false, [name]: file })
+        console.log()
+        if(file['name'].length === 12)
         {
             if(re.test(file['name']) )
             {
-                this.setState({[name+'_error']: false})
+                
+                this.setState({[name+'_error']: false, [name]: data })
             }
             else{
                 this.setState({[name+'_error']: true})
@@ -298,14 +297,38 @@ export class Form extends Component {
         else{
             this.setState({[name+'_error']: true})
         }
-
-        this.setState({ [name]: file })
     }
 
     handleSave(){
-        this.setState({handle_save_succes:true})
+        this.setState({handle_save_succes:false})
 
-        const form_datas = this.state
+        const form_datas = new FormData() 
+        form_datas.append('file1', this.state.file_path1)
+        form_datas.append('file2', this.state.file_path2)
+        form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
+        form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
+        form_datas.append('trapetsiin_dugaar', this.state.trapetsiin_dugaar)
+        form_datas.append('suljeenii_dugaar', this.state.suljeenii_dugaar)
+        form_datas.append('aimag_name', this.state.aimag_name)
+        form_datas.append('sum_name', this.state.sum_name)
+        form_datas.append('utmx', this.state.utmx)
+        form_datas.append('utmy', this.state.utmy)
+        form_datas.append('latlongx', this.state.latlongx)
+        form_datas.append('latlongy', this.state.latlongy)
+        form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
+        form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
+        form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
+        form_datas.append('bairshil_tseg_oiroos_img_url', this.state.bairshil_tseg_oiroos_img_url)
+        form_datas.append('bairshil_tseg_holoos_img_url', this.state.bairshil_tseg_holoos_img_url)
+        form_datas.append('sudalga_or_shine', this.state.sudalga_or_shine)
+        form_datas.append('hors_shinj_baidal', this.state.hors_shinj_baidal)
+        form_datas.append('date', this.state.date)
+        form_datas.append('hotolson', this.state.hotolson)
+        form_datas.append('alban_tushaal', this.state.alban_tushaal)
+        form_datas.append('alban_baiguullga', this.state.alban_baiguullga)
+        
+
+
         service.tsegPersonal(form_datas).then(({success}) => {
             if (success) {
                 setTimeout(() => {
@@ -604,8 +627,8 @@ export class Form extends Component {
                             </td>
                         </tr>
                         <tr>
-                            <th colSpan="1" scope="rowgroup">22.</th>
-                            <th colSpan="2" scope="rowgroup">file:</th>
+                            <th colSpan="1" scope="rowgroup">15.</th>
+                            <th colSpan="2" scope="rowgroup">Файл 1:</th>
                             <td colSpan="3" scope="rowgroup">
                                 <input
                                     type="file"
@@ -614,31 +637,38 @@ export class Form extends Component {
                                 />
                                 {this.state.file_path1_error > 0 ? 
                                 <ul className="text-danger">
-                                    <li>Файлын нэр арван тэмдэгтээс бүтсэн байх ёстой.</li>
-                                    <li>Эхний гурван үе үсэг тоо байх ёстой.</li>
-                                    <li>Дөрөв тав зуравдугаар үе тухайн сар өдөр буюу тоо байх ёстой.</li>
-                                    <li>Долдугаар үе цэг.</li>
-                                    <li>Найм есдүгээр үе тухайн жилийн сүүлийн 2 орон.</li>
-                                    <li>Сүүлйин тэмдэгт үсэг тоо байж болно.</li>
+                                    <li>XXXXDDDS.YYo</li>
+                                    <li>XXXX – Хэмжсэн цэгийн нэр</li>
+                                    <li>DDD-Жилийн өдөр (GPS-ийн өдөр, 001-365)</li>
+                                    <li>S-хэмжсэн хугацааны урт (0-9, а-Z)</li>
+                                    <li>YY-хэмжилт хийсэн оны сүүлийн 2 орон (2018 үед 18 )Жишээ нь: gunt2170.18o</li>
                                 </ul>
                                 : null}
                             </td>
                         </tr>
                         <tr>
-                            <th colSpan="1" scope="rowgroup">22.</th>
-                            <th colSpan="2" scope="rowgroup">file:</th>
+                            <th colSpan="1" scope="rowgroup">16.</th>
+                            <th colSpan="2" scope="rowgroup">Файл 2:</th>
                             <td colSpan="3" scope="rowgroup">
                                 <input
                                     type="file"
                                     className="form-control"
                                     onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                 />
-                                {this.state.file_path2_error.length > 0 ? <a className="text-danger">{file_path2_error}</a> : null}
+                                {this.state.file_path2_error > 0 ? 
+                                <ul className="text-danger">
+                                    <li>XXXXDDDS.YYo</li>
+                                    <li>XXXX – Хэмжсэн цэгийн нэр</li>
+                                    <li>DDD-Жилийн өдөр (GPS-ийн өдөр, 001-365)</li>
+                                    <li>S-хэмжсэн хугацааны урт (0-9, а-Z)</li>
+                                    <li>YY-хэмжилт хийсэн оны сүүлийн 2 орон (2018 үед 18 )Жишээ нь: gunt2170.18o</li>
+                                </ul>
+                                : null}
 
                             </td>
                         </tr>
                         <tr>
-                            <th colSpan="1" scope="rowgroup">15.</th>
+                            <th colSpan="1" scope="rowgroup">17.</th>
                             <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
                             <td colSpan="3" scope="rowgroup">
                                 <input
@@ -651,7 +681,7 @@ export class Form extends Component {
                             </td>
                         </tr>
                         <tr>
-                            <th colSpan="1" scope="rowgroup">16.</th>
+                            <th colSpan="1" scope="rowgroup">18.</th>
                             <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
                             <td colSpan="3" scope="rowgroup">
                                 <input

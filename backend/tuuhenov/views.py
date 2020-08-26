@@ -4,6 +4,10 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
+from .models import TsegUstsan, TsegPersonal
+from main.utils import resize_b64_to_sizes
+from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
+
 # Create your models here.
 
 
@@ -112,13 +116,109 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
-def tsegPersonal(request, payload):
+def tsegPersonal(request):
+
+    print("Ww")
+    print("Ww")
+    print(request.POST.get('tesgiin_ner'))
+    print("Ww")
+    print("Ww")
+
+
+    tseg_oiroos_img_url = ''
+    tseg_holoos_img_url = ''
+    bairshil_tseg_oiroos_img_url = ''
+    bairshil_tseg_holoos_img_url = ''
+
+    if  request.POST.get('tseg_oiroos_img_url'):
+        [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(1024, 1080)])
+        tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
+    if  request.POST.get('tseg_holoos_img_url'):
+        [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_holoos_img_url'), [(1024, 1080)])
+        tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
+    if  request.POST.get('bairshil_tseg_oiroos_img_url'):
+        [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_oiroos_img_url'), [(1024, 1080)])
+        bairshil_tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
+    if  request.POST.get('bairshil_tseg_holoos_img_url'):
+        [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(1024, 1080)])
+        bairshil_tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
+        
+    TsegPersonal.objects.create(
+                tesgiin_ner= request.POST.get('tesgiin_ner'),
+                toviin_dugaar= request.POST.get('toviin_dugaar'),
+                trapetsiin_dugaar= request.POST.get('trapetsiin_dugaar'),
+                suljeenii_torol= request.POST.get('suljeenii_dugaar'),
+                aimag_name= request.POST.get('aimag_name'),
+                sum_name= request.POST.get('sum_name'),
+                utmx= request.POST.get('utmx'),
+                utmy= request.POST.get('utmy'),
+                latlongx= request.POST.get('latlongx'),
+                latlongy= request.POST.get('latlongy'),
+                tseg_oiroos_img_url= tseg_oiroos_img_url,
+                tseg_holoos_img_url= tseg_holoos_img_url,
+                barishil_tuhai= request.POST.get('barishil_tuhai'),
+                bairshil_tseg_oiroos_img_url= bairshil_tseg_oiroos_img_url,
+                bairshil_tseg_holoos_img_url= bairshil_tseg_holoos_img_url,
+                sudalga_or_shine= request.POST.get('sudalga_or_shine'),
+                hors_shinj_baidal= request.POST.get('hors_shinj_baidal'),
+                # date= request.POST.get('date'),
+                hotolson= request.POST.get('hotolson'),
+                file_path1= request.FILES['file1'],
+                file_path2= request.FILES['file2'],
+                alban_tushaal= request.POST.get('alban_tushaal'),
+                alban_baiguullga= request.POST.get('alban_baiguullga'),
+                                )
+
+    return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def tsegUstsan(request, payload):
+    img_holoos = ''
+    img_oiroos = ''
+    img_baruun = ''
+    img_zuun = ''
+    img_hoino = ''
+    img_omno = ''
 
     form_datas = payload.get('form_datas')
-    print(form_datas)
-    print("wwwwww")
-    print("wwwwww")
-    print("wwwwww")
 
+    if form_datas['zurag_hol']:
+        [image_x2] = resize_b64_to_sizes(form_datas['zurag_hol'], [(1024, 1080)])
+        img_holoos = SimpleUploadedFile('img.png', image_x2)
+    if form_datas['zurag_oir']:
+        [image_x2] = resize_b64_to_sizes(form_datas['zurag_oir'], [(1024, 1080)])
+        img_oiroos = SimpleUploadedFile('img.png', image_x2)
+    if form_datas['zurag_baruun']:
+        [image_x2] = resize_b64_to_sizes(form_datas['zurag_baruun'], [(1024, 1080)])
+        img_baruun = SimpleUploadedFile('img.png', image_x2)
+    if form_datas['zurag_zuun']:
+        [image_x2] = resize_b64_to_sizes(form_datas['zurag_zuun'], [(1024, 1080)])
+        img_zuun = SimpleUploadedFile('img.png', image_x2)
+    if form_datas['zurag_hoid']:
+        [image_x2] = resize_b64_to_sizes(form_datas['zurag_hoid'], [(1024, 1080)])
+        img_hoino = SimpleUploadedFile('img.png', image_x2)
+    if form_datas['zurag_omno']:
+        [image_x2] = resize_b64_to_sizes(form_datas['zurag_omno'], [(1024, 1080)])
+        img_omno = SimpleUploadedFile('img.png', image_x2)
+        
+    TsegUstsan.objects.create(email= form_datas['email'],
+                            name= form_datas['baiguulaga'],
+                            alban_tushaal= form_datas['alban_tushaal'],
+                            phone= form_datas['utas'],
+                            tseg_id= form_datas['tsegiin_dugaar'],
+                            oiroltsoo_bairlal= form_datas['oiroltsoo_bairlal'],
+                            evdersen_baidal= form_datas['evdersen_baidal'],
+                            shaltgaan= form_datas['nohtsol_baidal'],
+                            img_holoos=img_holoos,
+                            img_oiroos= img_oiroos,
+                            img_baruun= img_baruun,
+                            img_zuun= img_zuun,
+                            img_hoino= img_hoino,
+                            img_omno= img_omno,
+                            sergeeh_sanal= form_datas['sergeeh_sanal'],
+                            gps_hemjilt= form_datas['hemjilt_hiih_bolomj'],
+                                    )
 
     return JsonResponse({'success': True})
