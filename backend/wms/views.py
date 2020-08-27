@@ -273,16 +273,14 @@ def paginatedList(request, payload):
     page = payload.get('page')
     per_page = payload.get('per_page')
 
-    wms_list = [
-         _get_wms_display(request, ob)
-         for ob in WMS.objects.all()
-         .annotate(search=SearchVector('name'))
-         .filter(search__contains=query)
-    ]
-
+    wms_list = WMS.objects.all().annotate(search=SearchVector('name')).filter(search__contains=query)
+    
     total_items = Paginator(wms_list, per_page)
     items_page = total_items.page(page)
-    items = items_page.object_list
+    items = [
+        _get_wms_display(request, wms) 
+        for wms in items_page.object_list
+    ]
     total_page = total_items.num_pages
     
     rsp = {

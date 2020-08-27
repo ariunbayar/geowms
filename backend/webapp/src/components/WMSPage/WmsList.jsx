@@ -42,12 +42,6 @@ export class WmsList extends Component {
         this.handleFormCancel = this.handleFormCancel.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.searchValue = React.createRef();
-        this.isLoad = this.isLoad.bind(this)
-    }
-
-    componentDidMount() {
-       this.searchValue.current.focus();
     }
 
     paginate (page, query) {
@@ -56,8 +50,7 @@ export class WmsList extends Component {
             return service
                 .paginatedList(page, 20, query)
                 .then(page => {
-                    this.setState({ wms_list: page.items, search_load: false})
-                    this.isLoad()
+                    this.setState({ wms_list: page.items})
                     return page
                 })
     }
@@ -65,20 +58,13 @@ export class WmsList extends Component {
     handleSearch(field, e) {
         if(e.target.value.length >= 1)
         {
-            this.setState({ [field]: e.target.value, search_load: true })
+            this.setState({ [field]: e.target.value })
             this.paginate(this.state.currentPage, e.target.value)
         }
         else
         {
-            this.setState({ [field]: e.target.value, search_load: true })
+            this.setState({ [field]: e.target.value })
             this.paginate(this.state.currentPage, e.target.value)
-        }
-    }
-
-    isLoad(){
-        const { search_load } = this.state
-        if (!search_load) {
-            this.searchValue.current.focus();
         }
     }
 
@@ -162,7 +148,7 @@ export class WmsList extends Component {
     }
 
     render() {
-        const {wms_list, wms_length, search_load}=this.state
+        const {wms_list, wms_length }=this.state
         return (
             <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
@@ -176,10 +162,8 @@ export class WmsList extends Component {
                                 className="form-control col-md-4  mb-1 float-left"
                                 id="searchQuery"
                                 placeholder="Хайх"
-                                disabled = {( search_load ? true : false )}
                                 onChange={(e) => this.handleSearch('searchQuery', e)}
                                 value={this.state.searchQuery}
-                                ref = { this.searchValue }
                             />
                         </div>
                         <table className="table">

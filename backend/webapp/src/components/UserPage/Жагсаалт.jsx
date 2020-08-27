@@ -23,12 +23,6 @@ export class Жагсаалт extends Component {
             }     
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.searchValue = React.createRef();
-        this.isLoad = this.isLoad.bind(this)
-    }
-
-    componentDidMount(){
-        this.searchValue.current.focus();
     }
 
     paginate (page, query) {
@@ -37,8 +31,7 @@ export class Жагсаалт extends Component {
             return service
                 .paginatedList(page, perpage, query)
                 .then(page => {
-                    this.setState({user_list: page.items, search_load: false})
-                    this.isLoad()
+                    this.setState({user_list: page.items })
                     return page
                 })
     }
@@ -46,25 +39,18 @@ export class Жагсаалт extends Component {
     handleSearch(field, e) {
         if(e.target.value.length >= 1)
         {
-            this.setState({ [field]: e.target.value, search_load: true})
+            this.setState({ [field]: e.target.value })
             this.paginate(this.state.currentPage, e.target.value)
         }
         else
         {
-            this.setState({ [field]: e.target.value, search_load: true })
+            this.setState({ [field]: e.target.value })
             this.paginate(this.state.currentPage, e.target.value)
         }
     }
 
-    isLoad(){
-        const{ search_load } = this.state
-        if (!search_load) {
-            this.searchValue.current.focus();
-        }
-    }
-
     render() {
-        const { user_list, user_length, search_load } = this.state
+        const { user_list, user_length } = this.state
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
@@ -72,12 +58,10 @@ export class Жагсаалт extends Component {
                         <input
                             type="text"
                             className="form-control"
-                            disabled = {( search_load ? true : false )}
                             id="searchQuery"
                             placeholder="Хайх"
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
-                            ref = {this.searchValue}
                         />
                     </div>
                     <div className="col-md-12">

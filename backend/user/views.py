@@ -132,28 +132,28 @@ def roleCreate(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def paginatedList(request, payload):
 
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('per_page')
-    user_list = [
-        _get_user_display(user) 
-        for user in User.objects.all()
-        .annotate(search=SearchVector(
+
+    user_list = User.objects.all().annotate(search=SearchVector(
             'last_name',
             'first_name',
             'email',
             'gender')
-        )
-        .filter(search__contains=query)
-    ]
+        ).filter(search__contains=query)
 
     total_items = Paginator(user_list, per_page)
     items_page = total_items.page(page)
-    items = items_page.object_list
+    items = [
+        _get_user_display(user)
+        for user in items_page.object_list
+    ]
     total_page = total_items.num_pages
-    
+
     rsp = {
         'items': items,
         'page': page,
