@@ -5,8 +5,6 @@ __pycache__
 backend/**/*.dev.html
 frontend/**/*.dev.html
 
-backend/**/*.prod.html
-frontend/**/*.prod.html
 
 main/settings/dev.py
 main/settings/prod.py
