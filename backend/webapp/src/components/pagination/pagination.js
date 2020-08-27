@@ -71,7 +71,7 @@ export class Pagination extends Component {
                     <div className="float-right">
                         <button
                             type=" button"
-                            className={"btn btn-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
                             onClick={this.prevPage}
                         >
                             &laquo;өмнөх
@@ -79,7 +79,7 @@ export class Pagination extends Component {
 
                         <button
                             type="button"
-                            className={"btn btn-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
                             onClick={this.nextPage}
                         >
                             дараах &raquo;
