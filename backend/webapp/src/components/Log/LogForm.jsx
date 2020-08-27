@@ -13,10 +13,10 @@ export class LogForm extends Component {
             payPerPage:100
         }
 
-        this.nextPage = this.nextPage.bind(this) 
+        this.nextPage = this.nextPage.bind(this)
         this.prevPage = this.prevPage.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
-        this.handleListCal = this.handleListCal.bind(this) 
+        this.handleListCal = this.handleListCal.bind(this)
     }
 
     componentDidMount(){
@@ -77,10 +77,10 @@ export class LogForm extends Component {
                             <tr>
                                 <th scope="col">Нийт дүн</th>
                                 <th scope="col">Тодорхойлолт</th>
-                                <th scope="col"> Огноо   </th>
+                                <th scope="col"> Огноо</th>
                                 <th scope="col">Амжилттай</th>
                                 <th scope="col">Амжилтгүй</th>
-                                <th scope="col">Хэрэглэгчийн id</th>
+                                <th scope="col">Хэрэглэгч</th>
                                 <th scope="col">Банкны дугаар</th>
                                 <th scope="col">Дата id</th>
                                 <th scope="col">Алдаатай код</th>
@@ -103,13 +103,13 @@ export class LogForm extends Component {
                         <div className="float-right">
                             <button
                             type=" button"
-                            className="btn btn-outline-primary"
+                            className="btn gp-outline-primary"
                             onClick={this.prevPage}
                             >&laquo;өмнөх
                             </button> {}
                             <button
                             type="button"
-                            className="btn btn-outline-primary "
+                            className="btn gp-outline-primary "
                             onClick={this.nextPage
                             }>
                             дараах &raquo;

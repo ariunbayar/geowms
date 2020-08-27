@@ -10,7 +10,7 @@ def baselayer_update(apps, schema_editor):
     BaseLayer.objects.filter(pk=2).update(sort_order=2)
     BaseLayer.objects.filter(pk=3).update(sort_order=3)
     BaseLayer.objects.filter(pk=4).update(sort_order=4)
-    
+
 
 class Migration(migrations.Migration):
 

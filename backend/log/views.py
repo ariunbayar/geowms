@@ -55,7 +55,7 @@ def loginSearch(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def login_date_count(request):
-    user_login_date_all = LoginEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    user_login_date_all = LoginEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     user_login_date = []
     user_login_date_count = []
     for login_date in user_login_date_all:
@@ -120,7 +120,7 @@ def pageSearch(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def page_date_count(request):
-    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     page_date = []
     page_date_count = []
     for page in page_all:
@@ -147,6 +147,15 @@ def page_user_count(request):
     return JsonResponse(rsp)
 
 
+
+def _get_user_name(user_id):
+
+    if user_id:
+        return User.objects.filter(id=user_id).values('username').first()['username']
+    else:
+        return 'Нэвтрээгүй'
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -162,7 +171,7 @@ def crud_event_all(request, payload):
             'object_repr': crud_event.object_repr,
             'datetime': crud_event.datetime.strftime('%Y-%m-%d'),
             'content_type_id': crud_event.content_type_id,
-            'username': User.objects.filter(id=crud_event.user_id).values('username').first()['username'],
+            'username': _get_user_name(crud_event.user_id),
             'user_id': crud_event.user_id,
             'user_pk_as_string': crud_event.user_pk_as_string,
             'changed_fields': crud_event.changed_fields,
@@ -202,7 +211,7 @@ def crudSearch(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crud_method_count(request):
-    method_all = CRUDEvent.objects.all().order_by('event_type').distinct('event_type') 
+    method_all = CRUDEvent.objects.all().order_by('event_type').distinct('event_type')
     method_id = []
     method_id_count = []
     for login_date in method_all:
@@ -220,7 +229,7 @@ def crud_method_count(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crud_date_count(request):
-    date_all = CRUDEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    date_all = CRUDEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     crud_date = []
     crud_date_count = []
     for crud in date_all:

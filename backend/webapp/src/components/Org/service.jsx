@@ -120,7 +120,7 @@ function orgSearch(org_level,query) {
         body: JSON.stringify({query}),
     }
     return fetch(`${prefix}/level-${org_level}/orgSearch/`, requestOptions).then(handleResponse)
-} 
+}
 
 function EmployeeSearch(level, org_id,query) {
     const requestOptions = {

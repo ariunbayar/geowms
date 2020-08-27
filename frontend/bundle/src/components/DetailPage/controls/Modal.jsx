@@ -69,15 +69,15 @@ class ModalComponent extends Component{
                         <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
                         {payload ?
                         <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                            Ачааллаж байна...  
+                            Ачааллаж байна...
                             <a class="spinner-border text-light" role="status">
-                                <span class="sr-only">Loading...</span> 
+                                <span class="sr-only">Loading...</span>
                             </a>
                         </button>
                         :
                         <button type="button" onClick={() => this.handlePayment()} className="btn btn-secondary" data-dismiss="modal">Худалдаж авах</button>
-                        }      
-                                          
+                        }
+
                     </div>
                 </div>
             </div>
