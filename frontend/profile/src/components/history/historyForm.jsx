@@ -2,6 +2,9 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {HistoryTable} from './historyTable'
+import { Pagination } from "../../../../pagination/pagination"
+
+
 export default class HistoryForm extends Component {
 
     constructor(props) {
@@ -12,62 +15,22 @@ export default class HistoryForm extends Component {
             currentPage:1,
             paymentPerPage:25,
         }
-        this.handleGetAll=this.handleGetAll.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
+        this.paginate = this.paginate.bind(this)
 
     }
-
-    componentDidMount(){
-        const currentPage=this.state.currentPage
-        this.handleListCal(currentPage)
-    }
-
-    handleListCal(currentPage){
-        const {paymentPerPage}=this.state
-        const lastIndex=currentPage*paymentPerPage
-        const firtsIndex=lastIndex-paymentPerPage
-        this.handleGetAll(lastIndex,firtsIndex)
-    }
-
-    handleGetAll(lastIndex,firtsIndex){
-
-        service.loadHistory(lastIndex,firtsIndex).then(({ payment, len}) => {
-            if (payment) {
-                this.setState({
-                    payment,
-                    payment_length:len
+    paginate (page) {
+        const perpage = this.state.paymentPerPage
+        this.setState({ currentPage: page })
+            return service
+                .paginatedList(page, perpage)
+                .then(page => {
+                    this.setState({user_list: page.items })
+                    return page
                 })
-            }
-        })
     }
-
-
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-
-        }
-    }
-
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.payment_length/this.state.paymentPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-            this.handleListCal(this.state.currentPage+1)
-        }
-    }
-
-
     render() {
         alert
-        const {payment,paymentPerPage,currentPage,payment_length} = this.state
-        const totalPages=Math.ceil( payment_length/paymentPerPage)
+        const {paymentpayment_length} = this.state
         return (
         <div className="container">
             <div className="row">
@@ -101,30 +64,10 @@ export default class HistoryForm extends Component {
                                 )}
                         </tbody>
                        </table>
-                       <div className="row">
-                        <div className="col-md-12">
-                            <div className="float-left">
-                                <strong>Хуудас {currentPage}-{totalPages}</strong>
-                            </div>
-                            <div className="float-right">
-                                <button
-                                type=" button"
-                                className="btn btn-outline-primary"
-                                onClick={this.prevPage}
-                                > &laquo; өмнөх
-                                </button>
-                                &nbsp;
-                                <button
-                                type="button"
-                                className="btn btn-outline-primary "
-                                onClick={this.nextPage
-                                } >
-                                дараах &raquo;
-                                </button>
-
-                            </div>
-                        </div>
-                </div>
+                       <Pagination
+                        paginate = { this.paginate }
+                        searchQuery = { this.state.searchQuery }
+                         />
                     </div>
                   </div>
             </div>
