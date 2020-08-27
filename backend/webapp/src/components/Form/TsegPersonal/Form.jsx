@@ -12,8 +12,8 @@ export class Form extends Component {
         tesgiin_ner: '',
         toviin_dugaar: '',
         trapetsiin_dugaar: '',
-        suljeenii_dugaar: '',
-        aimag: '',
+        suljeenii_dugaar: 'GPS',
+        aimag: 'Архангай',
         sum: '',
         sum_ners: [],
 
@@ -53,10 +53,6 @@ export class Form extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.handleInputAimag = this.handleInputAimag.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
-
-
-
-
     }
     onDrop([icon], name) {
         if(icon){
@@ -300,7 +296,7 @@ export class Form extends Component {
     }
 
     handleSave(){
-        this.setState({handle_save_succes:false})
+        this.setState({handle_save_succes:true})
 
         const form_datas = new FormData() 
         form_datas.append('file1', this.state.file_path1)
@@ -309,8 +305,8 @@ export class Form extends Component {
         form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('trapetsiin_dugaar', this.state.trapetsiin_dugaar)
         form_datas.append('suljeenii_dugaar', this.state.suljeenii_dugaar)
-        form_datas.append('aimag_name', this.state.aimag_name)
-        form_datas.append('sum_name', this.state.sum_name)
+        form_datas.append('aimag_name', this.state.aimag)
+        form_datas.append('sum_name', this.state.sum)
         form_datas.append('utmx', this.state.utmx)
         form_datas.append('utmy', this.state.utmy)
         form_datas.append('latlongx', this.state.latlongx)
@@ -333,10 +329,8 @@ export class Form extends Component {
             if (success) {
                 setTimeout(() => {
                     this.setState({handle_save_succes:false})
+                    this.props.history.goBack()
                 }, 1000)
-            }
-            else{
-                alert("no")
             }
         })
     }
@@ -345,6 +339,11 @@ export class Form extends Component {
     render() {
         return (
             <div className="row container  my-4">
+                <div className="col-md-12 mb-4">
+                    <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
+                        <i className="fa fa-angle-double-left"></i> Буцах
+                    </a>
+                </div>
                 <h4>Цэгийн хувийн хэрэг</h4>
                 <table className="table table-bordered">
                     <tbody>

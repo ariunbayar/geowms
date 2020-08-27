@@ -1,9 +1,129 @@
 from django.db import models
 
 # Create your models here.
+class TuuhSoyol(models.Model):
+    dugaar = models.CharField(max_length=100) # Дурсгалт газрын бүртгэлийн дугаар
+    date = models.DateTimeField(null=True) # Он,сар,өдөр
+    inspireid = models.CharField(max_length=25) #
+    too_shirheg = models.CharField(max_length=1000) #	
+    aimagname = models.CharField(max_length=50) # Аймаг, Нийслэл	
+    sumname = models.CharField(max_length=50) # Сум, Дүүрэг
+    burtgegch = models.CharField(max_length=100) #
+    created_at = models.DateTimeField(auto_now_add=True)
 
-# class TuuhSoyol:
-#     managed = False
+
+class DursgaltGazar(models.Model):
+
+    tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
+    geom = models.CharField(max_length=1000)
+    latlong = models.CharField(max_length=100) #
+    utm = models.CharField(max_length=100) #
+    dursgal = models.CharField(max_length=100) # 
+    dursgal2 = models.CharField(max_length=100) #
+    descriptio = models.CharField(max_length=500) #	Дурсгалт газрын шинж чанар, хэлбэр хэмжээ, тоо ширхэг, хийсэн матерал, хадгалалт хамгаалалтын байдал зэргийг тоочин тэмдэглэл бичнэ.
+    type1 = models.CharField(max_length=100) #    Төрөл зүйл
+    type2 = models.CharField(max_length=100) #    Төрөл зүйл
+    stone = models.CharField(max_length=100) # Чулуулгын төрөл
+    length = models.CharField(max_length=100) #
+    width = models.CharField(max_length=20) #
+    hight = models.CharField(max_length=20) #
+    depth = models.CharField(max_length=20) #
+    meridian = models.CharField(max_length=20) #
+    other = models.CharField(max_length=50) #
+    number = models.CharField(max_length=100) #
+    hemjee_comment = models.CharField(max_length=1000)
+
+    protection_irgen = models.CharField(max_length=100) # Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.
+    protection_irgen_commnent = models.CharField(max_length=1000) # Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.
+    
+    protection = models.CharField(max_length=100) # Хамгаалалтын ангилал.
+    protecti_1 = models.CharField(max_length=100) # Хамгаалалтын бүс тогтоох шаардлагатай эсэх.
+
+    tus = models.CharField(max_length=100) #
+    tus_comment = models.CharField(max_length=100) #
+
+    yaral = models.CharField(max_length=100) #
+    yaral_comment = models.CharField(max_length=100) #
+    
+    omchlol = models.CharField(max_length=100) #
+    omchlol_comment = models.CharField(max_length=100) #
+
+    malts = models.CharField(max_length=100) #
+    malts_comment = models.CharField(max_length=100) #
+
+    human = models.CharField(max_length=100) #
+    human_comment = models.CharField(max_length=100) #
+
+    natural = models.CharField(max_length=100) #
+    natural_comment = models.CharField(max_length=100) #
+
+    recover = models.CharField(max_length=100) #Сэргээн засварласан эсэх.
+    recover_comment = models.CharField(max_length=100) #
+
+    recover1 = models.CharField(max_length=100) #Сэргээн засварлах эсэх.
+    recover1_comment = models.CharField(max_length=100) #
+
+    protecti_2 = models.CharField(max_length=100) # Хамгаалалтын зэрэг өөрчлөх санал.
+    protecti_2_comment = models.CharField(max_length=100) #
+
+    hashaa = models.CharField(max_length=100)
+    hashaa_comment = models.CharField(max_length=100)
+
+    saravch = models.CharField(max_length=100)
+    saravch_comment = models.CharField(max_length=100)
+
+    hayg = models.CharField(max_length=100)
+    hayg_comment = models.CharField(max_length=100)
+
+    other1 = models.CharField(max_length=100) #
+    utm = models.CharField(max_length=100) #
+    ndd = models.CharField(max_length=100)
+    nmm = models.CharField(max_length=100) #
+    nss = models.CharField(max_length=100) #
+    edd = models.CharField(max_length=100)
+    emm = models.CharField(max_length=100) #
+    ess = models.CharField(max_length=100) #
+    x = models.CharField(max_length=25) #
+    y = models.CharField(max_length=25) #
+
+    utm_zone = models.CharField(max_length=25) #
+    utm_x = models.CharField(max_length=25) #
+    utm_y = models.CharField(max_length=25) #
+    y = models.CharField(max_length=25) #
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class TuuhSoyolHuree(models.Model):
+    tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
+    geom = models.CharField(max_length=50)
+    latlong = models.CharField(max_length=100) #
+    utm = models.CharField(max_length=100) #
+    ndd = models.CharField(max_length=100) #
+    nmm = models.CharField(max_length=100) #
+    nss = models.CharField(max_length=100) #
+    edd = models.CharField(max_length=100) #
+    emm = models.CharField(max_length=100) #
+    ess = models.CharField(max_length=100) #
+    x = models.CharField(max_length=100) #
+    y = models.CharField(max_length=100) #
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class TuuhSoyolAyuulHuree(models.Model):
+    tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
+    geom = models.CharField(max_length=50)
+    latlong = models.CharField(max_length=100) #
+    utm = models.CharField(max_length=100) #
+    ndd = models.CharField(max_length=100) #
+    nmm = models.CharField(max_length=100) #
+    nss = models.CharField(max_length=100) #
+    edd = models.CharField(max_length=100) #
+    emm = models.CharField(max_length=100) #
+    ess = models.CharField(max_length=100) #
+    x = models.CharField(max_length=100) #
+    y = models.CharField(max_length=100) #
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class TsegPersonal(models.Model):

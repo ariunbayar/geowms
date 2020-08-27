@@ -34,7 +34,7 @@ export class Forms extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>
-                            <Route exact path="/back/froms/" component={TuuhenOv}/>
+                            <Route path="/back/froms/" component={TuuhenOv}/>
                             <Route path="/back/froms/tseg-personal/" component={TsegPersonal}/>
                             <Route path="/back/froms/tseg-ustsan/" component={TsegUstsan}/>
                         </Switch>

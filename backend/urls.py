@@ -119,9 +119,19 @@ urlpatterns = [
     ], 'payment'))),
 
     path('tuuhen_ov/', include(([
+        path('', tuuhenov_views.all, name='all'),
+        path('about/', tuuhenov_views.about, name='about'),
+        path('update/', tuuhenov_views.update, name='update'),
         path('create/', tuuhenov_views.create, name='create'),
         path('tseg-personal/', tuuhenov_views.tsegPersonal, name='tseg-personal'),
+        path('tseg-personal/all/', tuuhenov_views.tsegPersonalAll, name='tseg-personal-all'),
+        path('tseg-personal/remove/', tuuhenov_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', tuuhenov_views.tsegUstsan, name='tseg-ustsan'),
+        path('dursgalt-gazar/create/', tuuhenov_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
+        path('dursgalt-gazar/all/', tuuhenov_views.dursgaltGazarAll, name='dursgalt-gazar-all'),
+        path('dursgalt-gazar/remove/', tuuhenov_views.dursgaltGazarRemove, name='dursgalt-gazar-remove'),
+        path('dursgalt-gazar/about/', tuuhenov_views.dursgaltGazarAbout, name='dursgalt-gazar-about'),
+
     ], 'tuuhen_ov'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
