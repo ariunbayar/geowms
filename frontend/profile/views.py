@@ -13,11 +13,12 @@ def history(request):
 
     return render(request, 'profile/index.html', {"profile": "profile"})
 
+
 def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
-def _get_payment_display(payment):
 
+def _get_payment_display(payment):
 
     return {
         'id': payment.id,
