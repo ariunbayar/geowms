@@ -30,7 +30,7 @@
                     <span class="btn gp-btn-primary">
                         Нэвтэрсэн хэрэглэгч: {{user.last_name|first}}.{{user.first_name}}
                     </span>
-                
+
                     {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
@@ -88,9 +88,6 @@
             <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
                 {% with request.resolver_match.url_name as url_name %}
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-                    <li class="nav-item {% if url_name == "bundle:all" %}active{% endif %}">
-                        <a class="nav-link" href="{% url "bundle:all" %}">НҮҮР</a>
-                    </li>
                     <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
                         <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                     </li>
@@ -112,6 +109,10 @@
                         </a>
                     </li>
                     {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url "profile:history" %}"><i class="fa fa-user"></i> ПРОФАЙЛ</i></a>
+                        </a>
+                      </li>
                 </ul>
                 {% endwith %}
             </div>

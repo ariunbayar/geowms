@@ -165,7 +165,7 @@ export class Үүсгэх extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <a href="#" className="btn btn-outline-primary" onClick={this.props.history.goBack}>
+                        <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                             <i className="fa fa-angle-double-left"></i> Буцах
                         </a>
                     </div>
@@ -272,9 +272,9 @@ export class Үүсгэх extends Component {
                                                     </p>
                                             }
                                             <div>
-                                                <button type="submit" className="btn gp-bg-primary" disabled={isSubmitting || has_error}>
+                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                                    {isSubmitting && ' Шалгаж байна.'}
+                                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                     {!isSubmitting && 'Нэмэх' }
                                                 </button>
                                             </div>
