@@ -5,6 +5,7 @@ import {OrgForm} from './OrgForm'
 import {OrgRole} from './OrgRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
+import "./Org.css"
 
 export class OrgMenu extends Component {
     constructor(props) {
@@ -51,10 +52,8 @@ export class OrgMenu extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="">
-
                 <div className="row">
-                    <div className=" col-md-2">
+                    <div className="col-md-2">
                         <div className="container my-4">
                             <div className="list-group">
                                 <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
@@ -76,8 +75,8 @@ export class OrgMenu extends Component {
                         </div>
                     </div>
                         <div className="col-md-10">
-                            <div className="text-center mt-4">
-                                <h3 className="text-dark " >{org_name}</h3>
+                            <div className="text-left">
+                                <h3 className="text-dark">{org_name}</h3>
                             </div>
                             <Switch>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
@@ -86,7 +85,6 @@ export class OrgMenu extends Component {
                             </Switch>
                         </div>
                 </div>
-            </div>
         )
     }
 }
