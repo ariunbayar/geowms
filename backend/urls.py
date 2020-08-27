@@ -85,10 +85,9 @@ urlpatterns = [
         path('login-date-count/', log_views.login_date_count, name='login-date-count'),
         path('crud-method-count/', log_views.crud_method_count, name='crud-method-count'),
         path('crud-date-count/', log_views.crud_date_count, name='crud-date-count'),
-        path('page-all/', log_views.pageAll, name='page-all'),
-        path('page-search/', log_views.pageSearch, name='page-search'),
         path('page-date-count/', log_views.page_date_count, name='page-date-count'),
         path('page-user-count/', log_views.page_user_count, name='page-user-count'),
+        path('page-list/', log_views.page_list, name='page-list'),
     ], 'log'))),
 
     path('api/систем/', include(([
