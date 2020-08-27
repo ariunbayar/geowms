@@ -29,7 +29,7 @@ export class UserAdd extends Component {
             register:'',
             registerError:false,
             registerErrorMessege:'',
-            
+
             password:'',
             passwordError:false,
             passwordErrorMessege:'',
@@ -58,7 +58,7 @@ export class UserAdd extends Component {
             this.handleGetAll(org_level, org_id, org_emp)
         }
     }
-    
+
     componentDidUpdate(prevState) {
 
     }
@@ -68,7 +68,7 @@ export class UserAdd extends Component {
                 {employee.map((employee) =>
                 this.setState({id:employee.id , username: employee.username, first_name: employee.first_name, last_name: employee.last_name, email: employee.email, gender: employee.gender, register:employee.register, password:employee.password, re_password:employee.re_password, position: employee.position })
                 )}
-            
+
             }
         })
     }
@@ -100,7 +100,7 @@ export class UserAdd extends Component {
                         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
 
                     }, 1200)
-                        
+
                 }
             })
         }
@@ -119,7 +119,7 @@ export class UserAdd extends Component {
 
         if(!org_emp)
         {
-            if(!username){ 
+            if(!username){
                 this.setState({usernameError: true, usernameErrorMessege: "Хоосон байна."})
                 fromState = false
             }
@@ -138,18 +138,18 @@ export class UserAdd extends Component {
 
             }
         }
-        if(!position){ 
+        if(!position){
             this.setState({positionError: true})
             fromState = false
         }
 
-        if(!first_name){ 
+        if(!first_name){
             this.setState({first_nameError: true})
             fromState = false
         }
         if(!last_name) {
             this.setState({last_nameError: true})
-        
+
         }
         if(!email) {
             this.setState({emailError: true} )
@@ -185,14 +185,14 @@ export class UserAdd extends Component {
         {
             this.setState({ [field]: e.target.value })
             this.setState({[field + 'Error']: false})
-    
+
         }
     }
     handleChangeReg(field, e) {
         if(e.target.value.length < 11)
         {
             this.setState({ [field]: e.target.value })
-    
+
         }
     }
 
@@ -352,7 +352,7 @@ export class UserAdd extends Component {
                                     {this.state.handleSaveIsLoad ?
                                         <button className="btn gp-btn-primary">
                                             <a className="spinner-border text-light" role="status">
-                                                <span className="sr-only">Loading...</span> 
+                                                <span className="sr-only">Loading...</span>
                                             </a>
                                             <span> Шалгаж байна. </span>
                                         </button>:

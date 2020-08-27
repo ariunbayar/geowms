@@ -7,7 +7,7 @@ export class CrudEvenLogTable extends Component {
     constructor(props) {
         super(props)
     }
-    
+
     componentDidMount(){
     }
     render() {
@@ -21,7 +21,7 @@ export class CrudEvenLogTable extends Component {
                 <td>{object_id}</td>
                 <td>{username}</td>
                 <td>{datetime}</td>
-                
+
             </tr>
         )
     }

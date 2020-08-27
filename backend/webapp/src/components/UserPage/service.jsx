@@ -67,7 +67,7 @@ function getAll(last, first) {
 
 
 function detail(id) {
-    const opts = { 
+    const opts = {
         ..._getGetOptions(),
     }
 

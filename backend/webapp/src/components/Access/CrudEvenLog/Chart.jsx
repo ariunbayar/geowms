@@ -16,7 +16,7 @@ export class Charts extends Component {
         this.handleBrowserCount()
 
     }
-    
+
     handleBrowserCount(){
         service.crudDateCount().then(({ crud_date , crud_date_count}) => {
             if(crud_date_count){

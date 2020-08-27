@@ -14,9 +14,9 @@ export class Success extends Component {
 
         service.purchaseAll(purchase_id).then(({ purchase_all }) => {
             if (purchase_all) {
-                purchase_all.map((purchase_all) => 
-                this.setState({purchase_all}) 
-                )              
+                purchase_all.map((purchase_all) =>
+                this.setState({purchase_all})
+                )
             }
         })
     }

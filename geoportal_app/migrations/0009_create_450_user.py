@@ -2735,20 +2735,20 @@ def create_users(apps, schema_editor):
 
     for user in users:
         print(user['first_name'])
-        
+
         User.objects.create(
                     first_name=user['first_name'],
                     last_name=user['last_name'],
                     is_active=False,
                     email=user['email'],
-                    username=user['username'],    
-                   
+                    username=user['username'],
+
             )
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('geoportal_app', '0008_user_is_sso'), 
+        ('geoportal_app', '0008_user_is_sso'),
     ]
 
     operations = [

@@ -92,17 +92,17 @@ def дэлгэрэнгүй(request, pk):
 
     return JsonResponse(rsp)
 
-    
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def userDetailChange(request, payload):
-    
+
     user_id = payload.get('id')
     is_active = payload.get('is_active')
     User.objects.filter(pk=user_id).update(is_active=is_active)
     return JsonResponse({'success': True})
-    
+
 
 @require_POST
 @ajax_required
@@ -121,7 +121,7 @@ def roleCreate(request, payload):
         else:
             User.objects.filter(pk=user_id).update(is_superuser=False)
             user.roles.remove(role.id)
-            user.roles.add(roleId) 
+            user.roles.add(roleId)
             return JsonResponse({'success': True})
 
     else:
@@ -136,5 +136,5 @@ def userSearch(request, payload):
     query = payload.get('query')
     user_list = []
     user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name', 'first_name', 'email', 'gender')).filter(search__contains=query)]
-    
+
     return JsonResponse({'user_list': user_list})
