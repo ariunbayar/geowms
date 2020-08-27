@@ -211,7 +211,7 @@ def dursgaltGazarCreate(request, payload):
         protection_irgen = 'Үгүй'
 
     DursgaltGazar.objects.create(   
-                                tuuh_soyl = tuuhSoyol, geom = geom, 
+                                tuuh_soyl = tuuhSoyol,
                                 latlong = latlong, utm = utm, dursgal = dursgal, 
                                 dursgal2 = dursgal2, descriptio = dursgal2, 
                                 type1 = form_datas['torol_zuil_torol_zuil_tree'], 

@@ -15,7 +15,6 @@ class TuuhSoyol(models.Model):
 class DursgaltGazar(models.Model):
 
     tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
-    geom = models.CharField(max_length=1000)
     latlong = models.CharField(max_length=100) #
     utm = models.CharField(max_length=100) #
     dursgal = models.CharField(max_length=100) # 
