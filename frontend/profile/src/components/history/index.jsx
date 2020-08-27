@@ -10,9 +10,9 @@ export  class History extends Component {
   render() {
 
     return (
-        
+
           <Switch>
-            <Route exact path={"/profile/all/"}  component={HistoryForm} />      
+            <Route exact path={"/profile/all/"}  component={HistoryForm} />
           </Switch>
     );
   }

@@ -93,12 +93,12 @@ def дэлгэрэнгүй(request, pk):
 
     return JsonResponse(rsp)
 
-    
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def userDetailChange(request, payload):
-    
+
     user_id = payload.get('id')
     is_active = payload.get('is_active')
     User.objects.filter(pk=user_id).update(is_active=is_active)
@@ -122,7 +122,7 @@ def roleCreate(request, payload):
         else:
             User.objects.filter(pk=user_id).update(is_superuser=False)
             user.roles.remove(role.id)
-            user.roles.add(roleId) 
+            user.roles.add(roleId)
             return JsonResponse({'success': True})
 
     else:
@@ -161,3 +161,4 @@ def paginatedList(request, payload):
     }
     
     return JsonResponse(rsp)
+

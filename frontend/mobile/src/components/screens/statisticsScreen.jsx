@@ -41,34 +41,34 @@ export class StatisticsScreen extends Component {
               { primary: true, type: 'linear', position: 'bottom' },
               { type: 'linear', position: 'left' }
             ]
-        
+
         return (
             <div className="statick">
-                <div  
+                <div
                     style={{
                         top:'80px',
                         width: '95%',
                         height: '300px'
                     }}
-                    >  
+                    >
                         <Chart data={data} axes={axes} />
                 </div>
-                <div  
+                <div
                     style={{
                         top:'80px',
                         width: '95%',
                         height: '300px'
                     }}
-                    >  
+                    >
                         <Chart data={data1} axes={axes} />
                 </div>
-                <div  
+                <div
                     style={{
                         top:'80px',
                         width: '95%',
                         height: '300px'
                     }}
-                    >  
+                    >
                         <Chart data={data2} axes={axes} />
                 </div>
             </div>

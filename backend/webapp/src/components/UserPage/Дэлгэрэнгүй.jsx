@@ -106,9 +106,9 @@ export class Дэлгэрэнгүй extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <NavLink className="btn gp-outline-primary" exact to={'/back/user/'}>
+                        <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                             <i className="fa fa-angle-double-left"></i> Буцах
-                        </NavLink>
+                        </a>
                     </div>
                 </div>
                 <div className="row">
