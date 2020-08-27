@@ -11,7 +11,7 @@ export class Log extends Component {
     }
 
     render() {
-        
+
         return (
             <Switch>
                 <Route exact path={"/back/log/"} component={LogForm}/>

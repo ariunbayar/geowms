@@ -8,7 +8,7 @@ export const service = {
     detail,
     getWMSList,
     govorgSearch
-  
+
 }
 
 

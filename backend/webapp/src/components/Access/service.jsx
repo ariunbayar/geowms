@@ -77,7 +77,7 @@ function logoutDateCount() {
 
 function loginAll(last,first) {
     const requestOptions = {
-        ...getPostOptions(),    
+        ...getPostOptions(),
         body: JSON.stringify({last, first})
     }
     return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)

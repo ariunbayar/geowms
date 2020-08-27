@@ -1,4 +1,4 @@
- 
+
 import React, { Component } from "react"
 import {service} from '../service'
 import {HistoryTable} from './historyTable'
@@ -108,20 +108,20 @@ export default class HistoryForm extends Component {
                             </div>
                             <div className="float-right">
                                 <button
-                                type=" button" 
-                                className="btn btn-outline-primary" 
+                                type=" button"
+                                className="btn btn-outline-primary"
                                 onClick={this.prevPage}
                                 > &laquo; өмнөх
                                 </button>
                                 &nbsp;
-                                <button 
+                                <button
                                 type="button"
                                 className="btn btn-outline-primary "
                                 onClick={this.nextPage
                                 } >
                                 дараах &raquo;
                                 </button>
-                                
+
                             </div>
                         </div>
                 </div>

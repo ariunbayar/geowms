@@ -53,7 +53,7 @@ def pagination(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateMore(request, pk):
-    
+
     wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.filter(id=pk)]
     return JsonResponse({'wms_list': wms_list})
 
@@ -259,7 +259,7 @@ def proxy(request, wms_id):
         content_type = rsp.headers.get('content-type')
 
         return HttpResponse(rsp.content, content_type=content_type)
-    
+
     else:
         return render(request, "backend/404.html", {})
 

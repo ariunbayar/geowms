@@ -21,6 +21,8 @@ def all(request):
             'is_success': payment.is_success,
             'success_at': payment.success_at.strftime('%Y-%m-%d'),
             'user_id': payment.user_id,
+            'user_firstname': payment.user.first_name,
+            'user_lastname': payment.user.last_name,
             'bank_unique_number': payment.bank_unique_number,
             'data_id': payment.data_id,
             'error_code': payment.error_code,
@@ -48,7 +50,7 @@ def purchase(request, payload):
 
     return JsonResponse({'payment_id': payment.id})
 
-  
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
