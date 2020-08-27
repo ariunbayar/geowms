@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                 ('x', models.CharField(max_length=100)),
                 ('y', models.CharField(max_length=100)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('tuuh_soyl', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='tuuhenov.TuuhSoyol')),
+                ('tuuh_soyl', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='forms.TuuhSoyol')),
             ],
         ),
         migrations.CreateModel(
@@ -114,7 +114,7 @@ class Migration(migrations.Migration):
                 ('x', models.CharField(max_length=100)),
                 ('y', models.CharField(max_length=100)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('tuuh_soyl', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='tuuhenov.TuuhSoyol')),
+                ('tuuh_soyl', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='forms.TuuhSoyol')),
             ],
         ),
         migrations.CreateModel(
@@ -178,7 +178,7 @@ class Migration(migrations.Migration):
                 ('utm_y', models.CharField(max_length=25)),
                 ('y', models.CharField(max_length=25)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('tuuh_soyl', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='tuuhenov.TuuhSoyol')),
+                ('tuuh_soyl', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='forms.TuuhSoyol')),
             ],
         ),
     ]

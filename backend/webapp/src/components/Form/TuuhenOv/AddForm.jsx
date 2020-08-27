@@ -27,7 +27,8 @@ export class AddForm extends Component {
             ayul_llalt: 0,
 
 
-            handle_save_succes: false
+            handle_save_succes_huree: false,
+            handle_save_succes_ayul: false,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -68,9 +69,7 @@ export class AddForm extends Component {
 
     handleListUpdated() {
         const id = this.props.match.params.id
-        alert(id)
         service.dursgaltGazarAll(id).then(({form_data}) => {
-            alert(form_data)
             this.setState({form_data})
         })
 
@@ -82,14 +81,14 @@ export class AddForm extends Component {
         })
     }
     handleHureeSave(){
-        this.setState({handle_save_succes:false})
+        this.setState({handle_save_succes_huree:true})
         const id = this.props.match.params.id
 
         const {hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt} = this.state
         service.hureeCreate(id, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt).then(({success}) => {
             if (success) {
                 setTimeout(() => {
-                    this.setState({handle_save_succes:false})
+                    this.setState({handle_save_succes_huree:false})
                     this.hureeData()
 
                 }, 1000)
@@ -98,14 +97,14 @@ export class AddForm extends Component {
     }
 
     handleAyulSave(){
-        this.setState({handle_save_succes:false})
+        this.setState({handle_save_succes_ayul:true})
         const id = this.props.match.params.id
 
         const {ayul_utm, ayul_x, ayul_y, ayul_llx, ayul_lly, ayul_llalt} = this.state
         service.ayulCreate(id, ayul_utm, ayul_x, ayul_y, ayul_llx, ayul_lly, ayul_llalt).then(({success}) => {
             if (success) {
                 setTimeout(() => {
-                    this.setState({handle_save_succes:false})
+                    this.setState({handle_save_succes_ayul:false})
                     this.ayulData()
 
                 }, 1000)
@@ -257,7 +256,13 @@ export class AddForm extends Component {
                                     </tr>
                                 <tr>
                                     <td colSpan="7" scope="rowgroup" scope="row" className="text-center text-primary" style={{fontSize: "20px"}}>
-                                        <i onClick={this.handleHureeSave} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
+                                        { this.state.handle_save_succes_huree ?
+                                                <a className="spinner-border gp-text-primary" role="status">
+                                                    <span className="sr-only">Loading...</span> 
+                                                </a>
+                                            :
+                                            <i onClick={this.handleHureeSave} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
+                                        }
                                     </td>
                                 </tr>
 
@@ -361,7 +366,14 @@ export class AddForm extends Component {
                                     </tr>
                                 <tr>
                                     <td colSpan="7" scope="rowgroup" scope="row" className="text-center text-primary" style={{fontSize: "20px"}}>
-                                        <i onClick={this.handleAyulSave} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
+
+                                        { this.state.handle_save_succes_ayul ?
+                                                <a className="spinner-border gp-text-primary" role="status">
+                                                    <span className="sr-only">Loading...</span> 
+                                                </a>
+                                            :
+                                            <i onClick={this.handleAyulSave} className="fa fa-plus btn btn-outline-primary rounded-circle" aria-hidden="true"></i>
+                                        }
                                     </td>
                                 </tr>
 

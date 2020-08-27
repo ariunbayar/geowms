@@ -72,8 +72,7 @@ export class Form extends Component {
     }
 
     handleSave(){
-        alert(this.state.id)
-        this.setState({handle_save_succes:false})
+        this.setState({handle_save_succes:true})
 
         const form_datas = this.state
         service.tsegUstsan(form_datas).then(({success}) => {
@@ -82,9 +81,6 @@ export class Form extends Component {
                     this.setState({handle_save_succes:false})
                 }, 1000)
                 this.props.history.push( `/back/froms/tseg-ustsan/`)
-            }
-            else{
-                alert("no")
             }
         })
     }

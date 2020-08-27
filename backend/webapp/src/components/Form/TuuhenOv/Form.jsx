@@ -39,7 +39,7 @@ export class Form extends Component {
     
     handleSave(){
         const id = this.props.match.params.id
-        this.setState({handle_save_succes:false})
+        this.setState({handle_save_succes:true})
         const form_datas = this.state
 
         if(id){
@@ -47,24 +47,18 @@ export class Form extends Component {
                 if (success) {
                     setTimeout(() => {
                         this.setState({handle_save_succes:false})
-                        this.props.history.goBack()
+                        this.props.history.push( `/back/froms/tuuhen-ov/`)
                     }, 1000)
-                }
-                else{
-                    alert("no")
                 }
             })
         }
         else{
             service.create(form_datas).then(({success}) => {
                 if (success) {
-                    alert("yes")
                     setTimeout(() => {
                         this.setState({handle_save_succes:false})
+                        this.props.history.push( `/back/froms/tuuhen-ov/`)
                     }, 1000)
-                }
-                else{
-                    alert("no")
                 }
             })
         }

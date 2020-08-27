@@ -104,7 +104,6 @@ function dursgaltGazarCreate(form_datas) {
 }
 
 function dursgaltGazarAll(id) {
-    alert(id)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({id}),

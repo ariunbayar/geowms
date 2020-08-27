@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tuuhenov', '0002_auto_20200827_1954'),
+        ('forms', '0002_auto_20200827_1954'),
     ]
 
     operations = [

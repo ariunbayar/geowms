@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tuuhenov', '0001_initial'),
+        ('forms', '0001_initial'),
     ]
 
     operations = [

@@ -7,7 +7,7 @@ export class DursgaltGazar extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            tuuh_soyl_id: 5,
+            tuuh_soyl_id: null,
             tuuhin_ov_register_id: 0,
             tuuhin_ov_date: '',
             tuuhin_ov_aimag: '',
@@ -417,19 +417,17 @@ export class DursgaltGazar extends Component {
     }
     
     handleSave(){
-        alert("ASda")
-        this.setState({handle_save_succes:false})
+        this.setState({handle_save_succes:true})
 
         const form_datas = this.state
         service.dursgaltGazarCreate(form_datas).then(({success}) => {
             if (success) {
-                alert("yes")
                 setTimeout(() => {
                     this.setState({handle_save_succes:false})
+                    this.props.history.goBack()
+
+
                 }, 1000)
-            }
-            else{
-                alert("no")
             }
         })
     }
