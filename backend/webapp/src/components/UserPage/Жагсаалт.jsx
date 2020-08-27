@@ -3,6 +3,7 @@ import "./style.css"
 import {service} from './service'
 import User from './User'
 import { toSize } from "ol/size"
+import { Pagination } from "../pagination/pagination"
 
 export class Жагсаалт extends Component {
 
@@ -19,95 +20,51 @@ export class Жагсаалт extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-
-            }
-
-        this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
+            }     
+        this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
     }
 
-    componentDidMount() {
-        const {currentPage}=this.state
-        this.handleListCal(currentPage)
+    paginate (page, query) {
+        const perpage = this.state.usersPerPage
+        this.setState({ currentPage: page })
+            return service
+                .paginatedList(page, perpage, query)
+                .then(page => {
+                    this.setState({user_list: page.items })
+                    return page
+                })
     }
 
-    handleListCal(currentPage){
-        const {usersPerPage}=this.state
-        const lastIndex=currentPage*usersPerPage
-        const firtsIndex=lastIndex-usersPerPage
-        this.handleListUpdated(lastIndex,firtsIndex)
-    }
-
-    handleListUpdated(lastIndex,firtsIndex) {
-        service.getAll(lastIndex,firtsIndex).then(({user_list,len}) => {
-            if(len){
-             this.setState({user_list,user_length:len})
-            }
-         })
-
-    }
-
-    prevPage(){
-
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-
-        }
-    }
-
-    nextPage(){
-
-        if(this.state.currentPage<Math.ceil(this.state.user_length/this.state.usersPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1,
-            })
-            this.handleListCal(this.state.currentPage+1)
-
-        }
-
-    }
     handleSearch(field, e) {
-        if(e.target.value.length > 0)
+        if(e.target.value.length >= 1)
         {
-            this.setState({ [field]: e.target.value, search_load:true})
-            service.userSearch(e.target.value).then(({ user_list }) => {
-                if(user_list){
-                    this.setState({user_list, user_length:user_list.length, search_load:false})
-                }
-            })
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            const {currentPage}=this.state.currentPage
-            this.handleListCal(currentPage)
+            this.paginate(this.state.currentPage, e.target.value)
         }
     }
-    render() {
-        const {user_list, user_length, currentPage,usersPerPage}=this.state
-        const totalPages=Math.ceil( user_length/usersPerPage)
 
+    render() {
+        const { user_list, user_length } = this.state
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
-                <div className="col-md-4  mb-1" >
-                               <input
-                                type="text"
-                                className="form-control"
-                                id="searchQuery"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
+                    <div className="col-md-4  mb-1" >                 
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="searchQuery"
+                            placeholder="Хайх"
+                            onChange={(e) => this.handleSearch('searchQuery', e)}
+                            value={this.state.searchQuery}
+                        />
                     </div>
                     <div className="col-md-12">
-
                         <table className="table table-fluid">
                             <thead>
                                 <tr>
@@ -118,7 +75,7 @@ export class Жагсаалт extends Component {
                                     <th scope="col">Идэвхтэй эсэх</th>
                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
                                 </tr>
-                          </thead>
+                            </thead>
                             <tbody>
                                 {user_length === 0 ?
                                     <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
@@ -134,27 +91,10 @@ export class Жагсаалт extends Component {
                         </table>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <div className="float-left">
-                            <strong>Хуудас {currentPage}-{totalPages}</strong>
-                        </div>
-                        <div className="float-right">
-                            <button
-                            type=" button"
-                            className="btn gp-outline-primary"
-                            onClick={this.prevPage}
-                            >&laquo;өмнөх
-                            </button> {}
-                            <button
-                            type="button"
-                            className="btn gp-outline-primary "
-                            onClick={this.nextPage}>
-                            дараах &raquo;
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <Pagination
+                    paginate = { this.paginate }
+                    searchQuery = { this.state.searchQuery }
+                />
             </div>
         )
     }

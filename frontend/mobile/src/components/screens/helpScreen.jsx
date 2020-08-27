@@ -8,7 +8,7 @@ export class HelpScreen extends Component {
         const myImg = '/static/assets/image/help.jpg'
         return (
             <div>
-                <img src={myImg}className="helpImg"/> 
+                <img src={myImg}className="helpImg"/>
             </div>
         )
 

@@ -318,7 +318,7 @@ export default class BundleMap extends Component {
         this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
-    
+
     toggleSidebar(event) {
         this.setState(prevState => ({
             is_sidebar_open: !prevState.is_sidebar_open,

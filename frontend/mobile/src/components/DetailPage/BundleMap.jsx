@@ -322,7 +322,7 @@ export default class BundleMap extends Component {
                             <div id="map"></div>
 
                             <div className={'col-md-12 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
-                                <Sidebar map_wms_list={this.state.map_wms_list} 
+                                <Sidebar map_wms_list={this.state.map_wms_list}
                                     toggleSidebar={this.toggleSidebar}
                                     handleSetCenter={this.handleSetCenter}
                                 />

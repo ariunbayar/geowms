@@ -55,6 +55,6 @@ urlpatterns = [
     ], 'profile'))),
 
     re_path('^.*', profile_views.history, name='history'),
-    
+
     re_path('^.*', payment_views.index, name='payment'),
 ]
