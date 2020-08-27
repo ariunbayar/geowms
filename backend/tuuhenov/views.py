@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar
+from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar, TuuhSoyolHuree, TuuhSoyolAyuulHuree
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 
@@ -131,25 +131,13 @@ def dursgaltGazarCreate(request, payload):
     number = form_datas['hemjee_too_shirheg']
     protection = form_datas['dgh_angilal']
 
-    if form_datas['dgh_bus_togtooh_shaardlaga']:
-        protecti_1 = 'Тийм'
-    else:
-        protecti_1 = 'Үгүй'
+    protecti_1 = form_datas['dgh_bus_togtooh_shaardlaga']
 
-    if form_datas['dgh_tusgai_hamgaalalt']:
-        tus = 'Тийм'
-    else:
-        tus = 'Үгүй'
+    tus = form_datas['dgh_tusgai_hamgaalalt']
 
-    if form_datas['dgh_yaaraltai_hamgaalalt']:
-        yaral = 'Тийм'
-    else:
-        yaral = 'Үгүй'
+    yaral = form_datas['dgh_yaaraltai_hamgaalalt']
 
-    if form_datas['dgh_maltan_sudaltan_hamgaalalt']:
-        malts = 'Тийм'
-    else:
-        malts = 'Үгүй'
+    malts = form_datas['dgh_maltan_sudaltan_hamgaalalt']
 
     human = ''
     for hun in form_datas['dgh_gemtliin_all']:
@@ -159,20 +147,11 @@ def dursgaltGazarCreate(request, payload):
     for natur in form_datas['dgh_baigaliin_huchin_zuil_all']:
         natural = natural + natur + ', '
 
-    if form_datas['dgh_sergeen_zasvarlasan_eseh_hamgaalalt']:
-        recover = 'Тийм'
-    else:
-        recover = 'Үгүй'
+    recover = form_datas['dgh_sergeen_zasvarlasan_eseh_hamgaalalt']
 
-    if form_datas['dgh_sergeen_zasvarlasan_eseh_todorhoi_bish']:
-        recover1 = 'Тийм'
-    else:
-        recover1 = 'Үгүй'
+    recover1 = form_datas['dgh_sergeen_zasvarlah_eseh_nenshaardlaga']
 
-    if form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal']:
-        protecti_2 = 'Тийм'
-    else:
-        protecti_2 = 'Үгүй'
+    protecti_2 = form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal']
 
     descriptio = form_datas['torol_zuil_todorhoilolt']
     other1 = form_datas['last_busad_temdeglel']
@@ -187,31 +166,16 @@ def dursgaltGazarCreate(request, payload):
     utm = form_datas['torol_zuil_dursgalt_gazriin_coordinatutm']  + ' N' + str(form_datas['torol_zuil_dursgalt_gazriin_coordinatx']) + ' E' + str(form_datas['torol_zuil_dursgalt_gazriin_coordinaty'])
     latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
     
-    if form_datas['dgh_hayg_tailbar_eseh_hayg']:
-        hashaa = 'Тийм'
-    else:
-        hashaa = 'Үгүй'
-    if form_datas['dgh_hashaa_baigaa_eseh_hashaa']:
-        saravch = 'Тийм'
-    else:
-        saravch = 'Үгүй'
+    hashaa = form_datas['dgh_hashaa_baigaa_eseh_hashaa']
+    saravch = form_datas['dgh_saravchtai_eseh_saravch']
 
-    if form_datas['dgh_hayg_tailbar_eseh_hayg']:
-        hayg = 'Тийм'
-    else:
-        hayg = 'Үгүй'
+    hayg = form_datas['dgh_hayg_tailbar_eseh_hayg']
 
-    if form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal']:
-        omchlol = 'Тийм'
-    else:
-        omchlol = 'Үгүй'
-    if form_datas['dg_ezen_dursgalt_gazar_ezen']:
-        protection_irgen = 'Тийм'
-    else:
-        protection_irgen = 'Үгүй'
+    omchlol = form_datas['dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt']
+    protection_irgen = form_datas['dg_ezen_dursgalt_gazar_ezen']
 
     DursgaltGazar.objects.create(   
-                                tuuh_soyl = tuuhSoyol,
+                                tuuh_soyl_id = form_datas['tuuh_soyl_id'],
                                 latlong = latlong, utm = utm, dursgal = dursgal, 
                                 dursgal2 = dursgal2, descriptio = dursgal2, 
                                 type1 = form_datas['torol_zuil_torol_zuil_tree'], 
@@ -249,6 +213,18 @@ def dursgaltGazarCreate(request, payload):
 @require_POST
 @ajax_required
 def dursgaltGazarAll(request, payload):
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
+    print("w")
     form_data = []
     for data in DursgaltGazar.objects.filter(tuuh_soyl_id = payload.get('id')):
         form_data.append({
@@ -264,6 +240,7 @@ def dursgaltGazarAll(request, payload):
             'protection': data.protection,
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
+    print(form_data)
     return JsonResponse({'form_data': form_data})
 
 
@@ -343,7 +320,6 @@ def dursgaltGazarAbout(request, payload):
             'utm_y': data.utm_y,
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
-    print(form_data)
     return JsonResponse({'form_data': form_data})
 
 
@@ -509,3 +485,99 @@ def tsegUstsan(request, payload):
     return JsonResponse({'success': True})
 
 
+@require_POST
+@ajax_required
+def hureeCreate(request, payload):
+
+    hm_utm = payload.get('hm_utm')
+    hm_x = payload.get('hm_x')
+    hm_y = payload.get('hm_y')
+    hm_llx = payload.get('hm_llx')
+    hm_lly = payload.get('hm_lly')
+    hm_llalt = payload.get('hm_llalt')
+    idx = payload.get('id')
+    x=float(hm_llx)
+    y=float(hm_lly)
+    cursor = connections['postgis_db'].cursor()
+    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
+    geom = cursor.fetchone()
+
+    ndd = int(x)
+    nmm = int((x - ndd) * 60)
+    nss = int((((x - ndd) * 60) - nmm) * 60)
+    edd = int(y)
+    emm = int((y - edd) * 60)
+    ess = int((((y - edd) * 60) - emm) * 60)
+    latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
+
+    TuuhSoyolHuree.objects.create(tuuh_soyl_id = idx,  geom= geom, latlong=latlong, utm=hm_utm, utmx=hm_llx, utmy=hm_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=hm_llx, y=hm_lly, alt=hm_llalt )
+    return JsonResponse({'success': True})
+
+
+
+@require_POST
+@ajax_required
+def hureeAll(request, payload):
+    ids = payload.get('id')
+    huree_data = []
+    for data in TuuhSoyolHuree.objects.filter(tuuh_soyl_id=ids):
+        huree_data.append({
+            'id': data.id,
+            'x': data.x,
+            'y': data.y,
+            'utmx': data.utmx,
+            'utmy': data.utmy,
+            'utm': data.utm,
+            'alt': data.alt,
+            'created_at': data.created_at.strftime('%Y-%m-%d'),
+        })
+    return JsonResponse({'huree_data': huree_data})
+
+
+@require_POST
+@ajax_required
+def ayulAll(request, payload):
+    ids = payload.get('id')
+    ayul_data = []
+    for data in TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl_id=ids):
+        ayul_data.append({
+            'id': data.id,
+            'x': data.x,
+            'y': data.y,
+            'utmx': data.utmx,
+            'utmy': data.utmy,
+            'utm': data.utm,
+            'alt': data.alt,
+            'created_at': data.created_at.strftime('%Y-%m-%d'),
+        })
+    return JsonResponse({'ayul_data': ayul_data})
+
+
+@require_POST
+@ajax_required
+def ayulHureeCreate(request, payload):
+
+    ayul_utm = payload.get('ayul_utm')
+    ayul_x = payload.get('ayul_x')
+    ayul_y = payload.get('ayul_y')
+    ayul_llx = payload.get('ayul_llx')
+    ayul_lly = payload.get('ayul_lly')
+    ayul_llalt = payload.get('ayul_llalt')
+    idx = payload.get('id')
+    x=float(ayul_llx)
+    y=float(ayul_lly)
+    cursor = connections['postgis_db'].cursor()
+    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
+    geom = cursor.fetchone()
+
+    ndd = int(x)
+    nmm = int((x - ndd) * 60)
+    nss = int((((x - ndd) * 60) - nmm) * 60)
+    edd = int(y)
+    emm = int((y - edd) * 60)
+    ess = int((((y - edd) * 60) - emm) * 60)
+    latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
+
+    TuuhSoyolAyuulHuree.objects.create(tuuh_soyl_id = idx,  geom= geom, latlong=latlong, utm=ayul_utm, utmx=ayul_llx, utmy=ayul_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=ayul_llx, y=ayul_lly, alt=ayul_llalt )
+    return JsonResponse({'success': True})
+    

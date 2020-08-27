@@ -95,9 +95,11 @@ class DursgaltGazar(models.Model):
 
 class TuuhSoyolHuree(models.Model):
     tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
-    geom = models.CharField(max_length=50)
+    geom = models.CharField(max_length=150)
     latlong = models.CharField(max_length=100) #
     utm = models.CharField(max_length=100) #
+    utmx = models.CharField(max_length=100) #
+    utmy = models.CharField(max_length=100) #
     ndd = models.CharField(max_length=100) #
     nmm = models.CharField(max_length=100) #
     nss = models.CharField(max_length=100) #
@@ -106,14 +108,17 @@ class TuuhSoyolHuree(models.Model):
     ess = models.CharField(max_length=100) #
     x = models.CharField(max_length=100) #
     y = models.CharField(max_length=100) #
+    alt = models.CharField(max_length=100) #
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class TuuhSoyolAyuulHuree(models.Model):
     tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
-    geom = models.CharField(max_length=50)
+    geom = models.CharField(max_length=150)
     latlong = models.CharField(max_length=100) #
     utm = models.CharField(max_length=100) #
+    utmx = models.CharField(max_length=100) #
+    utmy = models.CharField(max_length=100) #
     ndd = models.CharField(max_length=100) #
     nmm = models.CharField(max_length=100) #
     nss = models.CharField(max_length=100) #
@@ -122,6 +127,7 @@ class TuuhSoyolAyuulHuree(models.Model):
     ess = models.CharField(max_length=100) #
     x = models.CharField(max_length=100) #
     y = models.CharField(max_length=100) #
+    alt = models.CharField(max_length=100) #
     created_at = models.DateTimeField(auto_now_add=True)
 
 

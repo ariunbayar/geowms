@@ -44,7 +44,7 @@ export default class DursgaltGazarTable extends Component {
                 <th>{type}</th>
                 <th>{created_at}</th>
                 <th>
-                    <NavLink to={`/back/froms/dursgalt-gazar/${id}/update/`}>
+                    <NavLink to={`/back/froms/tuuhen-ov/dursgalt-gazar/${id}/update/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>

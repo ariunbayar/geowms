@@ -15,7 +15,11 @@ export const service = {
     dursgaltGazarCreate,
     dursgaltGazarAll,
     dursgaltGazarRemove,
-    dursgaltGazarAbout
+    dursgaltGazarAbout,
+    hureeCreate,
+    hureeAll,
+    ayulAll,
+    ayulCreate
 }
 function all() {
     const requestOptions = {
@@ -87,13 +91,17 @@ function tsegUstsan(form_datas) {
 
 
 function dursgaltGazarCreate(form_datas) {
+
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({form_datas}),
     }
+
     return fetch(`${prefix}/dursgalt-gazar/create/`, opts).then(handleResponse)
 }
+
 function dursgaltGazarAll(id) {
+    alert(id)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({id}),
@@ -116,4 +124,37 @@ function dursgaltGazarAbout(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/about/`, opts).then(handleResponse)
+}
+
+
+function hureeCreate(id, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt}),
+    }
+    return fetch(`${prefix}/dursgalt-gazar/huree-create/`, opts).then(handleResponse)
+}
+
+function hureeAll(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/dursgalt-gazar/huree-all/`, opts).then(handleResponse)
+}
+
+function ayulCreate(id, ayul_utm, ayul_x, ayul_y, ayul_llx, ayul_lly, ayul_llalt) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id, ayul_utm, ayul_x, ayul_y, ayul_llx, ayul_lly, ayul_llalt}),
+    }
+    return fetch(`${prefix}/dursgalt-gazar/ayul-create/`, opts).then(handleResponse)
+}
+
+function ayulAll(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/dursgalt-gazar/ayul-all/`, opts).then(handleResponse)
 }

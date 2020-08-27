@@ -131,6 +131,10 @@ urlpatterns = [
         path('dursgalt-gazar/all/', tuuhenov_views.dursgaltGazarAll, name='dursgalt-gazar-all'),
         path('dursgalt-gazar/remove/', tuuhenov_views.dursgaltGazarRemove, name='dursgalt-gazar-remove'),
         path('dursgalt-gazar/about/', tuuhenov_views.dursgaltGazarAbout, name='dursgalt-gazar-about'),
+        path('dursgalt-gazar/huree-create/', tuuhenov_views.hureeCreate, name='dursgalt-gazar-huree-create'),
+        path('dursgalt-gazar/huree-all/', tuuhenov_views.hureeAll, name='dursgalt-gazar-huree-all'),
+        path('dursgalt-gazar/ayul-create/', tuuhenov_views.ayulHureeCreate, name='dursgalt-gazar-ayul-create'),
+        path('dursgalt-gazar/ayul-all/', tuuhenov_views.ayulAll, name='dursgalt-gazar-ayul-all'),
 
     ], 'tuuhen_ov'))),
 

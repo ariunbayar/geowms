@@ -43,12 +43,12 @@ export default class FormTable extends Component {
                 <th>{burtgegch}</th>
                 <th>{created_at}</th>
                 <th>
-                    <NavLink to={`/back/froms/${id}/add/`}>
+                    <NavLink to={`/back/froms/tuuhen-ov/${id}/add/`}>
                             <i className="fa fa-plus-circle" aria-hidden="true"></i>
                     </NavLink>
                 </th>
                 <th>
-                    <NavLink to={`/back/froms/${id}/update/`}>
+                    <NavLink to={`/back/froms/tuuhen-ov/${id}/update/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>

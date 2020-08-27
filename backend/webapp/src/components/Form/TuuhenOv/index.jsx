@@ -17,12 +17,14 @@ export class TuuhenOv extends Component {
         
         return (
             <Switch>
-                <Route exact path={"/back/froms/dursgalt-gazar/add/"} component={DursgaltGazar}/>
-                <Route exact path={"/back/froms/dursgalt-gazar/:id/update/"} component={DursgaltGazar}/>
-                <Route exact path={"/back/froms/"} component={FormList}/>
-                <Route exact path={"/back/froms/add/"} component={Form}/>
-                <Route exact path={"/back/froms/:id/add/"} component={AddForm}/>
-                <Route exact path={"/back/froms/:id/update/"} component={Form}/>
+                <Route exact path={"/back/froms/tuuhen-ov/add/"} component={Form}/>
+                <Route exact path={"/back/froms/tuuhen-ov/:id/add/"} component={AddForm}/>
+                <Route exact path={"/back/froms/tuuhen-ov/:id/update/"} component={Form}/>
+                <Route exact path={"/back/froms/tuuhen-ov/dursgalt-gazar/"} component={DursgaltGazar}/>
+                <Route exact path={"/back/froms/tuuhen-ov/dursgalt-gazar/:id/update/"} component={DursgaltGazar}/>
+                
+                <Route exact path={"/back/froms/tuuhen-ov/"} component={FormList}/>
+
 
 
             </Switch>

@@ -44,7 +44,7 @@ export class DursgaltGazar extends Component {
             hemjee_temdeglel: '',
 
 
-            dg_ezen_dursgalt_gazar_ezen: false,
+            dg_ezen_dursgalt_gazar_ezen: 'Үгүй',
             dg_ezen_temdeglel: '',
 
 
@@ -52,17 +52,17 @@ export class DursgaltGazar extends Component {
 
             dgh_angilal: '',
 
-            dgh_bus_togtooh_shaardlaga: false,
+            dgh_bus_togtooh_shaardlaga: 'Үгүй',
 
-            dgh_tusgai_hamgaalalt: false,
+            dgh_tusgai_hamgaalalt: 'Үгүй',
             dgh_tusgai_temdeglel: '',
 
 
-            dgh_yaaraltai_hamgaalalt: false,
+            dgh_yaaraltai_hamgaalalt:'Үгүй',
             dgh_yaaraltai_temdeglel: '',
-            dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: false,
+            dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: 'Үгүй',
             dgh_omchlol_ezemshih_omchlol_sanal_temdeglel: '',
-            dgh_maltan_sudaltan_hamgaalalt: false,
+            dgh_maltan_sudaltan_hamgaalalt: 'Үгүй',
             dgh_maltan_sudaltan_temdeglel: '',
 
             dgh_gemtliin_tonoson: false,
@@ -94,24 +94,24 @@ export class DursgaltGazar extends Component {
             dgh_baigaliin_huchin_zuil_all: [],
             dgh_baigaliin_huchin_zuil_temdeglel: '',
 
-            dgh_sergeen_zasvarlasan_eseh_hamgaalalt: false,
+            dgh_sergeen_zasvarlasan_eseh_hamgaalalt: 'Үгүй',
             dgh_sergeen_zasvarlasan_eseh_todorhoi_bish: false,
             dgh_sergeen_zasvarlasan_eseh_temdeglel: '',
 
-            dgh_sergeen_zasvarlah_eseh_nenshaardlaga: false,
+            dgh_sergeen_zasvarlah_eseh_nenshaardlaga: 'Шаардлагагүй',
             dgh_sergeen_zasvarlah_eseh_shaardlaga: false,
             dgh_sergeen_zasvarlah_eseh_temdeglel: '',
 
             dgh_hamgaalaltiin_zereg_oorchloh_sanal: false,
             dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: '',
 
-            dgh_hashaa_baigaa_eseh_hashaa: false,
+            dgh_hashaa_baigaa_eseh_hashaa: 'Үгүй',
             dgh_hashaa_baigaa_eseh_temdeglel: '',
 
-            dgh_saravchtai_eseh_saravch: false,
+            dgh_saravchtai_eseh_saravch: 'Үгүй',
             dgh_saravchtai_eseh_temdeglel: '',
 
-            dgh_hayg_tailbar_eseh_hayg: false,
+            dgh_hayg_tailbar_eseh_hayg: 'Үгүй',
             dgh_hayg_tailbar_eseh_temdeglel: '',
 
 
@@ -148,63 +148,89 @@ export class DursgaltGazar extends Component {
     }
     componentDidMount(){
         const id = this.props.match.params.id
-        alert(id)
-        service.dursgaltGazarAbout(id).then(({form_data}) => {
-            console.log(form_data)
+        if(id){
+            this.setState({tuuh_soyl_id:id})
 
-            if(form_data){
-                form_data.map((tuuh) => (
+            service.dursgaltGazarAbout(id).then(({form_data}) => {
+                console.log(form_data)
 
-                    this.setState({
-                        tuuhin_ov_date: tuuh['created_at'],
-                        torol_zuil_torol_zuil: tuuh['type1'],
-                        torol_zuil_torol_zuil_tree2: tuuh['type2'],
+                if(form_data){
+                    form_data.map((tuuh) => (
 
-                        torol_zuiltorol_zuil_name: tuuh['stone'],
-                        torol_zuil_dursgalt_gazriin_ner: tuuh['dursgal'],
+                        this.setState({
+                            tuuhin_ov_date: tuuh['created_at'],
+                            torol_zuil_torol_zuil: tuuh['type1'],
+                            torol_zuil_torol_zuil_tree2: tuuh['type2'],
 
-            
-                        torol_zuil_dursgalt_gazriin_coordinatutm: tuuh['utm'],
-                        torol_zuil_dursgalt_gazriin_coordinatx: tuuh['utm_x'],
-                        torol_zuil_dursgalt_gazriin_coordinaty: tuuh['utm_y'],
-                        torol_zuil_dursgalt_gazriin_coordinatllx: tuuh['x'],
-                        torol_zuil_dursgalt_gazriin_coordinatlly: tuuh['y'],
-                        // torol_zuil_dursgalt_gazriin_coordinatalt: tuuh[''],
-            
-                        torol_zuil_todorhoilolt: tuuh[''],
-                        
+                            torol_zuiltorol_zuil_name: tuuh['stone'],
+                            torol_zuil_dursgalt_gazriin_ner: tuuh['dursgal'],
+
+                
+                            torol_zuil_dursgalt_gazriin_coordinatutm: tuuh['utm'],
+                            torol_zuil_dursgalt_gazriin_coordinatx: tuuh['utm_x'],
+                            torol_zuil_dursgalt_gazriin_coordinaty: tuuh['utm_y'],
+                            torol_zuil_dursgalt_gazriin_coordinatllx: tuuh['x'],
+                            torol_zuil_dursgalt_gazriin_coordinatlly: tuuh['y'],
+                            // torol_zuil_dursgalt_gazriin_coordinatalt: tuuh[''],
+                
+                            torol_zuil_todorhoilolt: tuuh[''],
+                            
+                            dgh_hashaa_baigaa_eseh_hashaa: tuuh['hashaa'],
+                            dgh_saravchtai_eseh_saravch: tuuh['saravch'],
+                            
+                            dgh_hayg_tailbar_eseh_hayg: tuuh['hayg'],
+                            
+                            
+                            dgh_sergeen_zasvarlah_eseh_nenshaardlaga: tuuh['recover1'],
+                            
+                            
+                            dgh_sergeen_zasvarlasan_eseh_hamgaalalt: tuuh['recover'],
+                            dgh_maltan_sudaltan_hamgaalalt: tuuh['malts'],
+                            
+                            
+                            dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: tuuh['length'],
+                            
+                            
+                            dgh_yaaraltai_hamgaalalt: tuuh['yaral'],
+                            dgh_tusgai_hamgaalalt: tuuh['tus'],
+                            dgh_bus_togtooh_shaardlaga: tuuh['protecti_1'],
+                            dg_ezen_dursgalt_gazar_ezen: tuuh['protection_irgen'],
+
+                            // hemjee_talbai: tuuh[''],
+                            hemjee_urt: tuuh['length'],
+                            hemjee_orgon: tuuh['width'],
+                            hemjee_ondor: tuuh['hight'],
+                            hemjee_zuzaan: tuuh['depth'],
+                            hemjee_golch: tuuh['meridian'],
+
+                            hemjee_busad_hemjee: tuuh['other'],
+                            hemjee_too_shirheg: tuuh['number'],
+                            hemjee_temdeglel: tuuh['hemjee_comment'],
+                            dg_ezen_temdeglel: tuuh['protection_irgen_commnent'],
+                            dgh_angilal: tuuh['protection'],
+                            dgh_tusgai_temdeglel: tuuh['tus_comment'],
+                            dgh_yaaraltai_temdeglel: tuuh['yaral_comment'],
+                            dgh_omchlol_ezemshih_omchlol_sanal_temdeglel: tuuh['omchlol_comment'],
+                            dgh_maltan_sudaltan_temdeglel: tuuh['malts_comment'],
+                            dgh_gemtliin_temdeglel: tuuh['human_comment'],
+                            dgh_baigaliin_huchin_zuil_temdeglel: tuuh['natural_comment'],
+                            dgh_hashaa_baigaa_eseh_temdeglel: tuuh['hashaa_comment'],
+                            dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: tuuh['protecti_2_comment'],
+                            dgh_sergeen_zasvarlasan_eseh_temdeglel: tuuh['recover_comment'],
+                            dgh_sergeen_zasvarlah_eseh_temdeglel: tuuh['recover1_comment'],
+                            dgh_saravchtai_eseh_temdeglel: tuuh['saravch_comment'],
+                            dgh_hayg_tailbar_eseh_temdeglel: tuuh['hayg_comment'],
+                            last_busad_temdeglel: tuuh['other1'],
 
 
-                        // hemjee_talbai: tuuh[''],
-                        hemjee_urt: tuuh['length'],
-                        hemjee_orgon: tuuh['width'],
-                        hemjee_ondor: tuuh['hight'],
-                        hemjee_zuzaan: tuuh['depth'],
-                        hemjee_golch: tuuh['meridian'],
 
-                        hemjee_busad_hemjee: tuuh['other'],
-                        hemjee_too_shirheg: tuuh['number'],
-                        hemjee_temdeglel: tuuh['hemjee_comment'],
-                        dg_ezen_temdeglel: tuuh['protection_irgen_commnent'],
-                        dgh_angilal: tuuh['protection'],
-                        dgh_tusgai_temdeglel: tuuh['tus_comment'],
-                        dgh_yaaraltai_temdeglel: tuuh['yaral_comment'],
-                        dgh_omchlol_ezemshih_omchlol_sanal_temdeglel: tuuh['omchlol_comment'],
-                        dgh_maltan_sudaltan_temdeglel: tuuh['malts_comment'],
-                        dgh_gemtliin_temdeglel: tuuh['human_comment'],
-                        dgh_baigaliin_huchin_zuil_temdeglel: tuuh['natural_comment'],
-                        dgh_hashaa_baigaa_eseh_temdeglel: tuuh['hashaa_comment'],
-                        dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: tuuh['protecti_2_comment'],
-                        dgh_sergeen_zasvarlasan_eseh_temdeglel: tuuh['recover_comment'],
-                        dgh_sergeen_zasvarlah_eseh_temdeglel: tuuh['recover1_comment'],
-                        dgh_saravchtai_eseh_temdeglel: tuuh['saravch_comment'],
-                        dgh_hayg_tailbar_eseh_temdeglel: tuuh['hayg_comment'],
-                        last_busad_temdeglel: tuuh['other1'],
-                    })
+                            
+                        })
+                        )
                     )
-                )
-            }
-        })
+                }
+            })
+        }
     }
   
     handleCheckSelect(field, e, name) {
@@ -391,10 +417,10 @@ export class DursgaltGazar extends Component {
     }
     
     handleSave(){
+        alert("ASda")
         this.setState({handle_save_succes:false})
 
         const form_datas = this.state
-        console.log(form_datas)
         service.dursgaltGazarCreate(form_datas).then(({success}) => {
             if (success) {
                 alert("yes")
@@ -426,13 +452,13 @@ export class DursgaltGazar extends Component {
                         <td colSpan="7" scope="rowgroup"  scope="row">
                             <div className="form-group">
                                 <select className="form-control" id="torol_zuil_torol_zuil" value={this.state.torol_zuil_torol_zuil} onChange={(e) => this.handleInputSelect('torol_zuil_torol_zuil', e)}>
-                                    <option key={1}>1. Чулуун зэвсгийн дурсгалт газар</option>
-                                    <option key={2}>2. Хадны зураг, бичгийн дүрсгэл</option>
-                                    <option key={3}>3. Булш оршуулгын дурсгал</option>
-                                    <option key={4}>4. Тахил тайлгын байгууламж</option>
-                                    <option key={5}>5. Барилга, архитектурын дурсгал</option>
-                                    <option key={6}>6. Хөшөө дурсгал</option>
-                                    <option key={7}>7. Үйлдвэрлэлийн ул мөр хадгалсан дурсгалт газар</option>
+                                    <option>1. Чулуун зэвсгийн дурсгалт газар</option>
+                                    <option>2. Хадны зураг, бичгийн дүрсгэл</option>
+                                    <option>3. Булш оршуулгын дурсгал</option>
+                                    <option>4. Тахил тайлгын байгууламж</option>
+                                    <option>5. Барилга, архитектурын дурсгал</option>
+                                    <option>6. Хөшөө дурсгал</option>
+                                    <option>7. Үйлдвэрлэлийн ул мөр хадгалсан дурсгалт газар</option>
                                 </select>
                                 {this.state.torol_zuil_torol_zuil_level1.length > 0 && (
                                 <select className="form-control" id="torol_zuil_torol_zuil_tree" value={this.state.torol_zuil_torol_zuil_tree} onChange={(e) => this.handleInputSelectTwo('torol_zuil_torol_zuil_tree', e)}>
@@ -692,33 +718,18 @@ export class DursgaltGazar extends Component {
                 <table className="table table-bordered">
                     <tbody>
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.</th>
                             
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={this.state.dg_ezen_dursgalt_gazar_ezen ? true : false}
-                                        onChange={(e) => this.handleCheckGroup('dg_ezen_dursgalt_gazar_ezen', e, true)}
-                                        value={this.state.dg_ezen_dursgalt_gazar_ezen}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dg_ezen_dursgalt_gazar_ezen" 
+                                value={this.state.dg_ezen_dursgalt_gazar_ezen} 
+                                onChange={(e) => this.handleInputSelect('dg_ezen_dursgalt_gazar_ezen', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
+                                
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг нь сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={this.state.dg_ezen_dursgalt_gazar_ezen ? false : true}
-                                        onChange={(e) => this.handleCheckGroup('dg_ezen_dursgalt_gazar_ezen', e, false)}
-                                        value={this.state.dg_ezen_dursgalt_gazar_ezen}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг нь сонгоно.</th>
                         </tr>
                         <tr>
                             <td>
@@ -752,32 +763,18 @@ export class DursgaltGazar extends Component {
                             <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
-                            <th rowSpan="5" scope="rowgroup" scope="row">Хамгаалалтын бүс тогтоох шаардлагатай эсэх.</th>
+                            <th rowSpan="4" scope="rowgroup" scope="row">Хамгаалалтын бүс тогтоох шаардлагатай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={this.state.dgh_bus_togtooh_shaardlaga ? true : false}
-                                        onChange={(e) => this.handleCheckGroup('dgh_bus_togtooh_shaardlaga', e, true)}
-                                        value={this.state.dgh_bus_togtooh_shaardlaga}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_bus_togtooh_shaardlaga" 
+                                value={this.state.dgh_bus_togtooh_shaardlaga} 
+                                onChange={(e) => this.handleInputSelect('dgh_bus_togtooh_shaardlaga', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="5" scope="rowgroup" scope="row">Нэгийг сонгоно.</th>
+                            <th rowSpan="4" scope="rowgroup" scope="row">Нэгийг сонгоно.</th>
                         </tr>
                         <tr>
-                        <td>
-                            <div className="col-md-12">
-                                <input 
-                                    type="checkbox" 
-                                    checked={this.state.dgh_bus_togtooh_shaardlaga ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_bus_togtooh_shaardlaga', e, false)}
-                                    value={this.state.dgh_bus_togtooh_shaardlaga}
-                                    ></input>
-                                <label>Үгүй</label>
-                            </div>
-                        </td>
                         </tr>
                     </tbody>
                 </table>
@@ -786,32 +783,16 @@ export class DursgaltGazar extends Component {
                 <table className="table table-bordered">
                     <tbody>
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Тусгай хамгаалалтад авах шаардлагатай эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Тусгай хамгаалалтад авах шаардлагатай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_tusgai_hamgaalalt ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_tusgai_hamgaalalt', e, true)}
-                                    value={this.state.dgh_tusgai_hamgaalalt}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_tusgai_hamgaalalt" 
+                                value={this.state.dgh_tusgai_hamgaalalt} 
+                                onChange={(e) => this.handleInputSelect('dgh_tusgai_hamgaalalt', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_tusgai_hamgaalalt ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_tusgai_hamgaalalt', e, false)}
-                                    value={this.state.dgh_tusgai_hamgaalalt}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>                                
@@ -829,33 +810,18 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* /////////////////////////// */}
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Яаралтай авран хамгаалах шаардлагатай эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Яаралтай авран хамгаалах шаардлагатай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_yaaraltai_hamgaalalt ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_yaaraltai_hamgaalalt', e, true)}
-                                    value={this.state.dgh_yaaraltai_hamgaalalt}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_yaaraltai_hamgaalalt" 
+                                value={this.state.dgh_yaaraltai_hamgaalalt} 
+                                onChange={(e) => this.handleInputSelect('dgh_yaaraltai_hamgaalalt', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_yaaraltai_hamgaalalt ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_yaaraltai_hamgaalalt', e, false)}
-                                    value={this.state.dgh_baigaliin_huchin_zuil_biologiin}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
-                        </tr>
+                       
                         <tr>
                         <td>                                
                             <textarea 
@@ -872,32 +838,16 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Өмчлөл, эзэмших ашиглалтын байдлыг өөрчлөх саналтай эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Өмчлөл, эзэмших ашиглалтын байдлыг өөрчлөх саналтай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt', e, true)}
-                                    value={this.state.dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt" 
+                                value={this.state.dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt} 
+                                onChange={(e) => this.handleInputSelect('dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt', e, false)}
-                                    value={this.state.dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                         <td>                                
@@ -915,32 +865,18 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ. Хэрэв хууль бусаар ухаж тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ. Хэрэв хууль бусаар ухаж тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</th>
                             <td>
                                 <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_maltan_sudaltan_hamgaalalt ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_maltan_sudaltan_hamgaalalt', e, true)}
-                                    value={this.state.dgh_maltan_sudaltan_hamgaalalt}
-                                        ></input>
-                                    <label>Тийм</label>
+                                    <select className="form-control" id="dgh_maltan_sudaltan_hamgaalalt" 
+                                        value={this.state.dgh_maltan_sudaltan_hamgaalalt} 
+                                        onChange={(e) => this.handleInputSelect('dgh_maltan_sudaltan_hamgaalalt', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                                 </div>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_maltan_sudaltan_hamgaalalt ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_maltan_sudaltan_hamgaalalt', e, false)}
-                                    value={this.state.dgh_maltan_sudaltan_hamgaalalt}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                         <td>                                
@@ -1299,45 +1235,17 @@ export class DursgaltGazar extends Component {
 
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="4" scope="rowgroup" scope="row" style={{width: "30%"}}>Сэргээн засварласан эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Сэргээн засварласан эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlasan_eseh_hamgaalalt ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_sergeen_zasvarlasan_eseh_hamgaalalt', e, true)}
-                                    value={this.state.dgh_sergeen_zasvarlasan_eseh_hamgaalalt}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_sergeen_zasvarlasan_eseh_hamgaalalt" 
+                                        value={this.state.dgh_sergeen_zasvarlasan_eseh_hamgaalalt} 
+                                        onChange={(e) => this.handleInputSelect('dgh_sergeen_zasvarlasan_eseh_hamgaalalt', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                    <option>Тодорхой биш</option>
+                                </select>
                             </td>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlasan_eseh_hamgaalalt ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_sergeen_zasvarlasan_eseh_hamgaalalt', e, false)}
-                                    value={this.state.dgh_sergeen_zasvarlasan_eseh_hamgaalalt}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlasan_eseh_todorhoi_bish}
-                                    onChange={(e) => this.handleCheck('dgh_sergeen_zasvarlasan_eseh_todorhoi_bish', e)}
-                                    value={this.state.dgh_sergeen_zasvarlasan_eseh_todorhoi_bish}
-                                        ></input>
-                                    <label>Тодорхой биш</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>                                
@@ -1357,45 +1265,18 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="4" scope="rowgroup" scope="row" style={{width: "30%"}}>Сэргээн засварлах эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Сэргээн засварлах эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_nenshaardlaga}
-                                    onChange={(e) => this.handleCheck('dgh_sergeen_zasvarlah_eseh_nenshaardlaga', e)}
-                                    value={this.state.dgh_sergeen_zasvarlah_eseh_nenshaardlaga}
-                                        ></input>
-                                    <label>Нэн шаардлагатай</label>
-                                </div>
+                                <select className="form-control" id="dgh_sergeen_zasvarlah_eseh_nenshaardlaga" 
+                                        value={this.state.dgh_sergeen_zasvarlah_eseh_nenshaardlaga} 
+                                        onChange={(e) => this.handleInputSelect('dgh_sergeen_zasvarlah_eseh_nenshaardlaga', e)}>
+                                    <option>Нэн шаардлагатай</option>
+                                    <option>Шаардлагагүй</option>
+                                    <option>Шаардлагатай</option>
+                                </select>
+                                
                             </td>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_sergeen_zasvarlah_eseh_shaardlaga', e, false)}
-                                    value={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga}
-                                        ></input>
-                                    <label>Шаардлагагүй</label>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_sergeen_zasvarlah_eseh_shaardlaga', e, true)}
-                                    value={this.state.dgh_sergeen_zasvarlah_eseh_shaardlaga}
-                                        ></input>
-                                    <label>Шаардлагатай</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                             <td>                                
@@ -1445,32 +1326,16 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Хашаа хайстай эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Хашаа хайстай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_hashaa_baigaa_eseh_hashaa ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_hashaa_baigaa_eseh_hashaa', e, true)}
-                                    value={this.state.dgh_hashaa_baigaa_eseh_hashaa}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_hashaa_baigaa_eseh_hashaa" 
+                                        value={this.state.dgh_hashaa_baigaa_eseh_hashaa} 
+                                        onChange={(e) => this.handleInputSelect('dgh_hashaa_baigaa_eseh_hashaa', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_hashaa_baigaa_eseh_hashaa ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_hashaa_baigaa_eseh_hashaa', e, false)}
-                                    value={this.state.dgh_hashaa_baigaa_eseh_hashaa}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                         <td>                                
@@ -1488,32 +1353,16 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Саравчтай эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Саравчтай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_saravchtai_eseh_saravch ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_saravchtai_eseh_saravch', e, true)}
-                                    value={this.state.dgh_saravchtai_eseh_saravch}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_saravchtai_eseh_saravch" 
+                                        value={this.state.dgh_saravchtai_eseh_saravch} 
+                                        onChange={(e) => this.handleInputSelect('dgh_saravchtai_eseh_saravch', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_saravchtai_eseh_saravch ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_saravchtai_eseh_saravch', e, false)}
-                                    value={this.state.dgh_saravchtai_eseh_saravch}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                         <td>                                
@@ -1531,32 +1380,16 @@ export class DursgaltGazar extends Component {
                         </tr>
 {/* ////////////////////////////// */}
                         <tr>
-                            <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "30%"}}>Хаяг тайлбартай эсэх.</th>
+                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Хаяг тайлбартай эсэх.</th>
                             <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_hayg_tailbar_eseh_hayg ? true : false}
-                                    onChange={(e) => this.handleCheckGroup('dgh_hayg_tailbar_eseh_hayg', e, true)}
-                                    value={this.state.dgh_hayg_tailbar_eseh_hayg}
-                                        ></input>
-                                    <label>Тийм</label>
-                                </div>
+                                <select className="form-control" id="dgh_hayg_tailbar_eseh_hayg" 
+                                        value={this.state.dgh_hayg_tailbar_eseh_hayg} 
+                                        onChange={(e) => this.handleInputSelect('dgh_hayg_tailbar_eseh_hayg', e)}>
+                                    <option>Тийм</option>
+                                    <option>Үгүй</option>
+                                </select>
                             </td>
-                            <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className="col-md-12">
-                                    <input 
-                                        type="checkbox" 
-                                    checked={this.state.dgh_hayg_tailbar_eseh_hayg ? false : true}
-                                    onChange={(e) => this.handleCheckGroup('dgh_hayg_tailbar_eseh_hayg', e, false)}
-                                    value={this.state.dgh_hayg_tailbar_eseh_hayg}
-                                        ></input>
-                                    <label>Үгүй</label>
-                                </div>
-                            </td>
+                            <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                         </tr>
                         <tr>
                         <td>                                
