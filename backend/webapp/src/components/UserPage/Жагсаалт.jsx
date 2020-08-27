@@ -90,13 +90,13 @@ export class Жагсаалт extends Component {
         }
     }
     render() {
-        const {user_list, user_length, currentPage,usersPerPage}=this.state
-        const totalPages=Math.ceil( user_length/usersPerPage)
+        const {user_list, user_length, currentPage, usersPerPage}=this.state
+        const totalPages=Math.ceil(user_length/usersPerPage)
 
         return (
             <div className="container shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
-                <div className="col-md-4  mb-1" >
+                    <div className="col-md-4  mb-1">
                                <input
                                 type="text"
                                 className="form-control"
