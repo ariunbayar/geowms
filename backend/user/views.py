@@ -1,6 +1,7 @@
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
 
 from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
@@ -132,9 +133,32 @@ def roleCreate(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def userSearch(request, payload):
-    query = payload.get('query')
-    user_list = []
-    user_list = [_get_user_display(user) for user in User.objects.all().annotate(search=SearchVector('last_name', 'first_name', 'email', 'gender')).filter(search__contains=query)]
+def paginatedList(request, payload):
 
-    return JsonResponse({'user_list': user_list})
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('per_page')
+
+    user_list = User.objects.all().annotate(search=SearchVector(
+            'last_name',
+            'first_name',
+            'email',
+            'gender')
+        ).filter(search__contains=query)
+
+    total_items = Paginator(user_list, per_page)
+    items_page = total_items.page(page)
+    items = [
+        _get_user_display(user)
+        for user in items_page.object_list
+    ]
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+    }
+    
+    return JsonResponse(rsp)
+
