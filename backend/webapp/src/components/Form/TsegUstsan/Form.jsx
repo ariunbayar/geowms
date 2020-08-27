@@ -8,6 +8,7 @@ export class Form extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            id: this.props.match.params.id,
             email: '',
             baiguulaga: '',
             alban_tushaal: '',
@@ -27,6 +28,7 @@ export class Form extends Component {
             hemjilt_hiih_bolomj: false,
             email_error_messege: false,
             handle_save_succes: false,
+            list:[]
 
         
         }
@@ -36,9 +38,38 @@ export class Form extends Component {
         this.handleCheck = this.handleCheck.bind(this)
         this.handleCheckGroup = this.handleCheckGroup.bind(this)
         this.handleSave = this.handleSave.bind(this)
+        this.handleGetAll=this.handleGetAll.bind(this)
 
         
     }
+    componentDidMount(){
+        const id=this.props.match.params.id
+        this.handleGetAll(id)
+    }
+
+    handleGetAll(id){
+        if(id){
+            service.tsegustsanEdit(id).then(({ form_data }) => {
+                if (form_data) {
+                    form_data.map(tseg=>this.setState({
+                        email:tseg.email,
+                        baiguulaga:tseg.name,
+                        alban_tushaal:tseg.alban_tushaal,
+                        utas: tseg.utas,
+                        tsegiin_dugaar:tseg.tseg_id,
+                        oiroltsoo_bairlal:tseg.oiroltsoo_bairlal,
+                        evdersen_baidal:tseg.evdersen_baidal,
+                        nohtsol_baidal:tseg.nohtsol_baidal
+
+                    }))
+                }
+                this.setState({
+                    edit:true
+                })
+            })
+        }
+    }
+
     handleSave(){
         this.setState({handle_save_succes:false})
 
@@ -48,6 +79,7 @@ export class Form extends Component {
                 setTimeout(() => {
                     this.setState({handle_save_succes:false})
                 }, 1000)
+                this.props.history.push( `/back/froms/tseg-ustsan/`)
             }
             else{
                 alert("no")

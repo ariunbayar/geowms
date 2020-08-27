@@ -15,7 +15,10 @@ export const service = {
     dursgaltGazarCreate,
     dursgaltGazarAll,
     dursgaltGazarRemove,
-    dursgaltGazarAbout
+    dursgaltGazarAbout,
+    tsegUstsanAll,
+    tseg_remove,
+    tsegustsanEdit,
 }
 function all() {
     const requestOptions = {
@@ -116,4 +119,28 @@ function dursgaltGazarAbout(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/about/`, opts).then(handleResponse)
+}
+
+function tsegUstsanAll() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/tseg-ustsan_all/`, opts).then(handleResponse)
+}
+
+function tseg_remove(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/tseg-ustsan_remove/`, opts).then(handleResponse)
+}
+
+function tsegustsanEdit(id) {
+    console.log(id)
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/tseg-ustsan_edit/`, opts).then(handleResponse)
 }
