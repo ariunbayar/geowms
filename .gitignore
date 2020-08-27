@@ -5,9 +5,6 @@ __pycache__
 backend/**/*.dev.html
 frontend/**/*.dev.html
 
-main/settings/dev.py
-main/settings/prod.py
-
 geoportal_app/static/dist_dev
 geoportal_app/static/dist
 
