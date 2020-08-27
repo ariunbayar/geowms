@@ -64,7 +64,7 @@ export default class BundleMap extends Component {
                 anchorXUnits: 'fraction',
                 anchorYUnits: 'pixels',
                 scale: 0.4,
-                src: '/static/assets/images/bundle/marker.png'
+                src: '/geoportal_app/static/assets/images/bundle/marker.png'
             })
         })
 

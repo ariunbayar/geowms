@@ -34,12 +34,12 @@ module.exports = {
         // options related to how webpack emits results
 
         // where compiled files go
-        path: path.resolve(__dirname),
+        path: path.resolve(__dirname, "geoportal_app/"),
 
         // http://127.0.0.1/<publicPath>/ - where files are served from
-        publicPath: "/static/assets/js/",
+        publicPath: "/",
 
-        filename: '[name]/static/assets/js/[name].js',
+        filename: 'static/dist_dev/[name]/[chunkhash].js',
     },
     module: {
         // configuration regarding modules
@@ -78,6 +78,20 @@ module.exports = {
            '@': path.resolve(__dirname, 'frontend/bundle/src/'),
         }
     },
+    optimization: {
+        runtimeChunk: {
+            name: 'manifest',
+        },
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'libs',
+                    chunks: 'all',
+                }
+            }
+        }
+    },
     watch: true,
     watchOptions: {
         ignored: /node_modules/
@@ -86,27 +100,27 @@ module.exports = {
         new webpack.ProgressPlugin(),
         new CleanWebpackPlugin({
             cleanStaleWebpackAssets: false,
-            cleanOnceBeforeBuildPatterns: ['[name]/static/assets/js/*'],
+            cleanOnceBeforeBuildPatterns: ['geoportal_app/static/dist-dev/**/*'],
         }),
         hhwp({
             chunks: ['backend/webapp'],
-            filename: path.resolve(__dirname, 'backend/templates/backend/webapp.dev.html'),
+            filename: path.resolve(__dirname, 'backend/webapp/templates/backend/webapp.dev.html'),
         }),
         hhwp({
             chunks: ['frontend/bundle'],
-            filename: path.resolve(__dirname, 'frontend/templates/frontend/frontend.dev.html'),
+            filename: path.resolve(__dirname, 'frontend/bundle/templates/bundle/detail.dev.html'),
         }),
         hhwp({
             chunks: ['frontend/mobile'],
-            filename: path.resolve(__dirname, 'frontend/templates/frontend/mobile.dev.html'),
+            filename: path.resolve(__dirname, 'frontend/mobile/templates/mobile/detail.dev.html'),
         }),
         hhwp({
             chunks: ['frontend/payment'],
-            filename: path.resolve(__dirname, 'frontend/templates/frontend/payment.dev.html'),
+            filename: path.resolve(__dirname, 'frontend/payment/templates/payment/index.dev.html'),
         }),
         hhwp({
             chunks: ['frontend/profile'],
-            filename: path.resolve(__dirname, 'frontend/templates/frontend/profile.dev.html'),
+            filename: path.resolve(__dirname, 'frontend/profile/templates/profile/index.dev.html'),
         }),
         new WebpackBuildNotifierPlugin({
             title: "Geoportal DEV",

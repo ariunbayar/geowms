@@ -11,9 +11,9 @@
 {% block script %}
 
     {% if DEBUG %}
-        <script src="{% static "assets/js/frontend/profile.js" %}"></script>
+        {% include "profile/index.dev.html" %}
     {% else %}
-        <script src="{% static "assets/js/frontend/profile.min.js" %}?v={{STATIC_VERSION}}"></script>
+        {% include "profile/index.prod.html" %}
     {% endif %}
 
 {% endblock %}
