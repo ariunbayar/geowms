@@ -274,15 +274,14 @@ def employee_add(request, payload, level, pk):
         else:
             is_superuser = False
 
-        user = User.objects.create(password=password,
-                                is_superuser=is_superuser,
-                                username=username,
-                                first_name=first_name,
-                                last_name=last_name,
-                                email=email,
-                                gender=gender,
-                                register=register,)
-        user.roles.add(2)
+        user = User.objects.create(is_superuser=is_superuser,username=username, 
+                                    first_name=first_name, last_name=last_name, 
+                                    email=email,gender=gender,register=register
+                                )
+        user.roles.add(2)          
+        user.set_password(password)
+        user.save()
+
         Employee.objects.create(position=position, org_id=pk, user_id=user.id)
 
         return JsonResponse({'success': True})
