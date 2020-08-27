@@ -323,8 +323,6 @@ export class Form extends Component {
         form_datas.append('alban_tushaal', this.state.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.alban_baiguullga)
         
-
-
         service.tsegPersonal(form_datas).then(({success}) => {
             if (success) {
                 setTimeout(() => {
