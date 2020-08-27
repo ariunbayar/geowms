@@ -435,7 +435,6 @@ def tsegPersonal(request):
 @require_POST
 @ajax_required
 def tsegUstsan(request, payload):
-
     img_holoos = None
     img_oiroos = None
     img_baruun = None
@@ -463,24 +462,70 @@ def tsegUstsan(request, payload):
     if form_datas['zurag_omno']:
         [image_x2] = resize_b64_to_sizes(form_datas['zurag_omno'], [(1024, 1080)])
         img_omno = SimpleUploadedFile('img.png', image_x2)
+    if form_datas['id'] :
+        TsegUstsan.objects.filter(id=form_datas['id']).update(
+            email= form_datas['email'],
+            name= form_datas['baiguulaga'],
+            alban_tushaal= form_datas['alban_tushaal'],
+            phone= form_datas['utas'],
+            tseg_id= form_datas['tsegiin_dugaar'],
+            oiroltsoo_bairlal= form_datas['oiroltsoo_bairlal'],
+            evdersen_baidal= form_datas['evdersen_baidal'],
+            shaltgaan= form_datas['nohtsol_baidal'],
+            sergeeh_sanal= form_datas['sergeeh_sanal'],
+            gps_hemjilt= form_datas['hemjilt_hiih_bolomj'],
+            )
+        return JsonResponse({'success': True})
+    else:
+        TsegUstsan.objects.create(
+            email= form_datas['email'],
+            name= form_datas['baiguulaga'],
+            alban_tushaal= form_datas['alban_tushaal'],
+            phone= form_datas['utas'],
+            tseg_id= form_datas['tsegiin_dugaar'],
+            oiroltsoo_bairlal= form_datas['oiroltsoo_bairlal'],
+            evdersen_baidal= form_datas['evdersen_baidal'],
+            shaltgaan= form_datas['nohtsol_baidal'],
+            sergeeh_sanal= form_datas['sergeeh_sanal'],
+            gps_hemjilt= form_datas['hemjilt_hiih_bolomj'],
+        )
 
-    TsegUstsan.objects.create(email= form_datas['email'],
-                            name= form_datas['baiguulaga'],
-                            alban_tushaal= form_datas['alban_tushaal'],
-                            phone= form_datas['utas'],
-                            tseg_id= form_datas['tsegiin_dugaar'],
-                            oiroltsoo_bairlal= form_datas['oiroltsoo_bairlal'],
-                            evdersen_baidal= form_datas['evdersen_baidal'],
-                            shaltgaan= form_datas['nohtsol_baidal'],
-                            img_holoos=img_holoos,
-                            img_oiroos= img_oiroos,
-                            img_baruun= img_baruun,
-                            img_zuun= img_zuun,
-                            img_hoino= img_hoino,
-                            img_omno= img_omno,
-                            sergeeh_sanal= form_datas['sergeeh_sanal'],
-                            gps_hemjilt= form_datas['hemjilt_hiih_bolomj'],
-                                    )
+        return JsonResponse({'success': True})
+
+
+@require_GET
+@ajax_required
+def tsegUstsanAll(request):
+    print("www")
+    print("www")
+    print("www")
+    print("www")
+    tseg_ustsan = []
+    for tseg in TsegUstsan.objects.all():
+        tseg_ustsan.append({
+            'id':tseg.id,
+            'tseg_id':tseg.tseg_id,
+            'email': tseg.email,
+            'name': tseg.name,
+            'alban_tushaal': tseg.alban_tushaal,
+            'utas': tseg.phone,
+            'oiroltsoo_bairlal': tseg.oiroltsoo_bairlal,
+            'evdersen_baidal': tseg.evdersen_baidal,
+            'nohtsol_baidal': tseg.shaltgaan,
+        })
+    print(tseg_ustsan)
+    return JsonResponse({
+        'tseg_ustsan_all': tseg_ustsan,
+        'success': True
+    })
+
+@require_POST
+@ajax_required
+def tsegUstsanRemove(request, payload):
+
+    pk = payload.get('id')
+    tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
+    tseg_ustsan.delete()
 
     return JsonResponse({'success': True})
 
@@ -581,3 +626,19 @@ def ayulHureeCreate(request, payload):
     TuuhSoyolAyuulHuree.objects.create(tuuh_soyl_id = idx,  geom= geom, latlong=latlong, utm=ayul_utm, utmx=ayul_llx, utmy=ayul_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=ayul_llx, y=ayul_lly, alt=ayul_llalt )
     return JsonResponse({'success': True})
     
+def tsegUstsanEdit(request, payload):
+
+    form_data = []
+    for tseg in TsegUstsan.objects.filter(pk = payload.get('id')):
+        form_data.append({
+            'tseg_id':tseg.tseg_id,
+            'email': tseg.email,
+            'name': tseg.name,
+            'alban_tushaal': tseg.alban_tushaal,
+            'utas': tseg.phone,
+            'oiroltsoo_bairlal': tseg.oiroltsoo_bairlal,
+            'evdersen_baidal': tseg.evdersen_baidal,
+            'nohtsol_baidal': tseg.shaltgaan,
+        })
+
+    return JsonResponse({'form_data': form_data})
