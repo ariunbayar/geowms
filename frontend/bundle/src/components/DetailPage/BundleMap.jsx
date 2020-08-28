@@ -7,7 +7,7 @@ import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill} from 'ol/style'
+import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
 import {Point} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
@@ -18,11 +18,13 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
-
+import {DrawPayModal} from './controls/DrawPayModal'
 import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
 import {Sidebar} from './Sidebar'
+import {DrawButton} from './controls/Draw'
+import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 
 export default class BundleMap extends Component {
 
@@ -37,11 +39,16 @@ export default class BundleMap extends Component {
             is_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
+            is_draw_open: false,
+            draw_layer: null,
+            draw: null,
+            source_draw: null,
         }
 
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
             modal: new Modal(),
+            drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
         }
 
@@ -54,6 +61,9 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.toggleDraw = this.toggleDraw.bind(this)
+        this.toggleDrawed = this.toggleDrawed.bind(this)
+        this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
     }
 
     initMarker() {
@@ -209,8 +219,10 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new SidebarButton({toggleSidebar: this.toggleSidebar}),
+                new DrawButton({toggleDraw: this.toggleDraw}),
                 new ScaleLine(),
                 this.controls.modal,
+                this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
             ]),
@@ -312,6 +324,7 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord) {
+
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
@@ -329,19 +342,72 @@ export default class BundleMap extends Component {
             this.controls.sidebar.showSideBar(this.state.map_wms_list, this.handleSetCenter, false)
         }
     }
+
+    toggleDrawed(event){
+        const projection = this.map.getView().getProjection()
+        const coordinat = event.feature.getGeometry().getCoordinates()
+
+        const coodrinatLeftTop = coordinat[0][3]
+        const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
+        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
+
+        const coodrinatRightBottom = coordinat[0][1]
+        const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
+        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
+
+        this.controls.drawModal.showModal(coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+    }
+
+    toggleDrawRemove(){
+        const features = this.state.source_draw.getFeatures();
+        if(features.length > 0)
+        {
+            const lastFeature = features[features.length - 1];
+            this.state.source_draw.removeFeature(lastFeature);
+        }
+    }
+
+    toggleDraw() {
+
+        this.setState(prevState => ({
+            is_draw_open: !prevState.is_draw_open,
+        }))
+
+        if(this.state.is_draw_open){
+            const source_draw = new VectorSource()
+
+            const draw_layer = new VectorLayer({
+                source: source_draw
+            })
+
+            this.setState({source_draw})
+
+            const draw = new Draw({
+                source: this.state.source_draw,
+                type: 'Circle',
+                geometryFunction: createBox(),
+            });
+            this.setState({draw, draw_layer})
+            this.map.addLayer(draw_layer);
+            this.map.addInteraction(draw);
+            draw.on('drawend', this.toggleDrawed)
+            draw.on('drawstart', this.toggleDrawRemove)
+        }
+        else{
+            this.map.removeInteraction(this.state.draw);
+            this.toggleDrawRemove()
+        }
+    }
+
     render() {
-
         return (
-
             <div>
                 <div className="row">
-
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
                         </div>
                     </div>
-
                 </div>
             </div>
         )
