@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.db import connections
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
@@ -116,24 +115,18 @@ def dursgaltGazarCreate(request, payload):
     # cursor = connections['postgis_db'].cursor()
     # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
 
-    FID = 1
-    register_id = form_datas['tuuhin_ov_register_id']
-
     dursgal = form_datas['torol_zuil_dursgalt_gazriin_ner']
     dursgal2 = 'None'
 
-    aimagname = form_datas['tuuhin_ov_aimag']
-    sumname = form_datas['tuuhin_ov_sum_duureg']
 
     type2 = form_datas['torol_zuil_torol_zuil_tree']
     if form_datas['torol_zuil_torol_zuil_tree2']:
         type2 = form_datas['torol_zuil_torol_zuil_tree2']
 
-    type1 = form_datas['torol_zuil_torol_zuil'] + ' ' + type2
-    
+    # type1 = form_datas['torol_zuil_torol_zuil'] + ' ' + type2
+
     stone = form_datas['torol_zuiltorol_zuil_name']
     # geom = cursor.fetchone()
-    geom= 'geom'
     length =form_datas['hemjee_urt']
     width =form_datas['hemjee_orgon']
     hight =form_datas['hemjee_ondor']
@@ -155,11 +148,11 @@ def dursgaltGazarCreate(request, payload):
 
     human = ''
     for hun in form_datas['dgh_gemtliin_all']:
-        human = human + hun + ', '
+        human = human + hun + ''
 
     natural = ''
     for natur in form_datas['dgh_baigaliin_huchin_zuil_all']:
-        natural = natural + natur + ', '
+        natural = natural + natur + ''
 
     recover = form_datas['dgh_sergeen_zasvarlasan_eseh_hamgaalalt']
 
@@ -169,7 +162,6 @@ def dursgaltGazarCreate(request, payload):
 
     descriptio = form_datas['torol_zuil_todorhoilolt']
     other1 = form_datas['last_busad_temdeglel']
-    
     ndd = int(x)
     nmm = int((x - ndd) * 60)
     nss = int((((x - ndd) * 60) - nmm) * 60)
@@ -179,7 +171,7 @@ def dursgaltGazarCreate(request, payload):
 
     utm = form_datas['torol_zuil_dursgalt_gazriin_coordinatutm']  + ' N' + str(form_datas['torol_zuil_dursgalt_gazriin_coordinatx']) + ' E' + str(form_datas['torol_zuil_dursgalt_gazriin_coordinaty'])
     latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
-    
+
     hashaa = form_datas['dgh_hashaa_baigaa_eseh_hashaa']
     saravch = form_datas['dgh_saravchtai_eseh_saravch']
 
@@ -188,67 +180,67 @@ def dursgaltGazarCreate(request, payload):
     omchlol = form_datas['dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt']
     protection_irgen = form_datas['dg_ezen_dursgalt_gazar_ezen']
     if form_datas['durgal_id']:
-        DursgaltGazar.objects.filter(pk=form_datas['durgal_id']).update(   
-                                tuuh_soyl_id = tuuhsoyl.id,
-                                latlong = latlong, utm = utm, dursgal = dursgal, 
-                                dursgal2 = dursgal2, descriptio = descriptio, 
-                                type1 = form_datas['torol_zuil_torol_zuil_tree'], 
-                                type2 = form_datas['torol_zuil_torol_zuil_tree2'], 
-                                stone = stone, length = length, 
-                                width = width, hight = hight, depth = depth, 
-                                meridian = meridian, other = other, 
-                                number = number, hemjee_comment = form_datas['hemjee_temdeglel'], 
-                                protection_irgen = protection_irgen,
-                                protection_irgen_commnent = form_datas['dg_ezen_temdeglel'],
-                                protection = protection, protecti_1 = protecti_1,
-                                tus = tus, tus_comment = form_datas['dgh_tusgai_temdeglel'], 
-                                yaral = yaral, yaral_comment = form_datas['dgh_yaaraltai_temdeglel'], 
-                                omchlol = omchlol, omchlol_comment = form_datas['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'], 
-                                malts = malts, malts_comment = form_datas['dgh_maltan_sudaltan_temdeglel'], 
-                                human = human, human_comment = form_datas['dgh_gemtliin_temdeglel'], 
-                                natural = natural, natural_comment = form_datas['dgh_baigaliin_huchin_zuil_temdeglel'], 
-                                recover = recover, recover_comment = form_datas['dgh_sergeen_zasvarlasan_eseh_temdeglel'], 
-                                recover1 = recover1,recover1_comment = form_datas['dgh_sergeen_zasvarlah_eseh_temdeglel'], 
-                                protecti_2 = protecti_2, protecti_2_comment = form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'], 
-                                hashaa = hashaa, hashaa_comment = form_datas['dgh_hashaa_baigaa_eseh_temdeglel'], 
-                                saravch = saravch, saravch_comment = form_datas['dgh_saravchtai_eseh_temdeglel'], 
-                                hayg = hayg, hayg_comment = form_datas['dgh_hayg_tailbar_eseh_temdeglel'], 
-                                other1 = other1,
-                                ndd = ndd, nmm = nmm,
-                                nss = nss, edd = edd, emm = emm , ess = ess, x=x, y=y,
+        DursgaltGazar.objects.filter(pk=form_datas['durgal_id']).update(
+                                tuuh_soyl_id=tuuhsoyl.id,
+                                latlong=latlong, utm=utm, dursgal=dursgal,
+                                dursgal2=dursgal2, descriptio=descriptio,
+                                type1=form_datas['torol_zuil_torol_zuil_tree'],
+                                type2=form_datas['torol_zuil_torol_zuil_tree2'],
+                                stone=stone, length=length,
+                                width=width, hight=hight, depth=depth,
+                                meridian=meridian, other=other,
+                                number=number, hemjee_comment=form_datas['hemjee_temdeglel'],
+                                protection_irgen=protection_irgen,
+                                protection_irgen_commnent=form_datas['dg_ezen_temdeglel'],
+                                protection=protection, protecti_1=protecti_1,
+                                tus=tus, tus_comment=form_datas['dgh_tusgai_temdeglel'],
+                                yaral=yaral, yaral_comment=form_datas['dgh_yaaraltai_temdeglel'],
+                                omchlol=omchlol, omchlol_comment=form_datas['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
+                                malts=malts, malts_comment=form_datas['dgh_maltan_sudaltan_temdeglel'],
+                                human=human, human_comment=form_datas['dgh_gemtliin_temdeglel'],
+                                natural=natural, natural_comment=form_datas['dgh_baigaliin_huchin_zuil_temdeglel'],
+                                recover=recover, recover_comment=form_datas['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
+                                recover1=recover1,recover1_comment=form_datas['dgh_sergeen_zasvarlah_eseh_temdeglel'],
+                                protecti_2=protecti_2, protecti_2_comment=form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
+                                hashaa=hashaa, hashaa_comment=form_datas['dgh_hashaa_baigaa_eseh_temdeglel'],
+                                saravch=saravch, saravch_comment=form_datas['dgh_saravchtai_eseh_temdeglel'],
+                                hayg=hayg, hayg_comment=form_datas['dgh_hayg_tailbar_eseh_temdeglel'],
+                                other1=other1,
+                                ndd=ndd, nmm=nmm,
+                                nss=nss, edd=edd, emm=emm , ess=ess, x=x, y=y,
                                 utm_zone= form_datas['torol_zuil_dursgalt_gazriin_coordinatutm'],
                                 utm_x= form_datas['torol_zuil_dursgalt_gazriin_coordinatx'],
                                 utm_y= form_datas['torol_zuil_dursgalt_gazriin_coordinaty'],
                                )
     else:
-        DursgaltGazar.objects.create(   
-                                tuuh_soyl_id = tuuhsoyl.id,
-                                latlong = latlong, utm = utm, dursgal = dursgal, 
-                                dursgal2 = dursgal2, descriptio = dursgal2, 
-                                type1 = form_datas['torol_zuil_torol_zuil_tree'], 
-                                type2 = form_datas['torol_zuil_torol_zuil_tree2'], 
-                                stone = stone, length = length, 
-                                width = width, hight = hight, depth = depth, 
-                                meridian = meridian, other = other, 
-                                number = number, hemjee_comment = form_datas['hemjee_temdeglel'], 
-                                protection_irgen = protection_irgen,
-                                protection_irgen_commnent = form_datas['dg_ezen_temdeglel'],
-                                protection = protection, protecti_1 = protecti_1,
-                                tus = tus, tus_comment = form_datas['dgh_tusgai_temdeglel'], 
-                                yaral = yaral, yaral_comment = form_datas['dgh_yaaraltai_temdeglel'], 
-                                omchlol = omchlol, omchlol_comment = form_datas['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'], 
-                                malts = malts, malts_comment = form_datas['dgh_maltan_sudaltan_temdeglel'], 
-                                human = human, human_comment = form_datas['dgh_gemtliin_temdeglel'], 
-                                natural = natural, natural_comment = form_datas['dgh_baigaliin_huchin_zuil_temdeglel'], 
-                                recover = recover, recover_comment = form_datas['dgh_sergeen_zasvarlasan_eseh_temdeglel'], 
-                                recover1 = recover1,recover1_comment = form_datas['dgh_sergeen_zasvarlah_eseh_temdeglel'], 
-                                protecti_2 = protecti_2, protecti_2_comment = form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'], 
-                                hashaa = hashaa, hashaa_comment = form_datas['dgh_hashaa_baigaa_eseh_temdeglel'], 
-                                saravch = saravch, saravch_comment = form_datas['dgh_saravchtai_eseh_temdeglel'], 
-                                hayg = hayg, hayg_comment = form_datas['dgh_hayg_tailbar_eseh_temdeglel'], 
-                                other1 = other1,
-                                ndd = ndd, nmm = nmm,
-                                nss = nss, edd = edd, emm = emm , ess = ess, x=x, y=y,
+        DursgaltGazar.objects.create(
+                                tuuh_soyl_id=tuuhsoyl.id,
+                                latlong=latlong, utm=utm, dursgal=dursgal,
+                                dursgal2=dursgal2, descriptio=dursgal2,
+                                type1=form_datas['torol_zuil_torol_zuil_tree'],
+                                type2=form_datas['torol_zuil_torol_zuil_tree2'],
+                                stone=stone, length=length,
+                                width=width, hight=hight, depth=depth,
+                                meridian=meridian, other=other,
+                                number=number, hemjee_comment=form_datas['hemjee_temdeglel'],
+                                protection_irgen=protection_irgen,
+                                protection_irgen_commnent=form_datas['dg_ezen_temdeglel'],
+                                protection=protection, protecti_1=protecti_1,
+                                tus=tus, tus_comment=form_datas['dgh_tusgai_temdeglel'],
+                                yaral=yaral, yaral_comment=form_datas['dgh_yaaraltai_temdeglel'],
+                                omchlol=omchlol, omchlol_comment=form_datas['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
+                                malts=malts, malts_comment=form_datas['dgh_maltan_sudaltan_temdeglel'],
+                                human=human, human_comment=form_datas['dgh_gemtliin_temdeglel'],
+                                natural=natural, natural_comment=form_datas['dgh_baigaliin_huchin_zuil_temdeglel'],
+                                recover=recover, recover_comment=form_datas['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
+                                recover1=recover1,recover1_comment=form_datas['dgh_sergeen_zasvarlah_eseh_temdeglel'],
+                                protecti_2=protecti_2, protecti_2_comment=form_datas['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
+                                hashaa=hashaa, hashaa_comment=form_datas['dgh_hashaa_baigaa_eseh_temdeglel'],
+                                saravch=saravch, saravch_comment=form_datas['dgh_saravchtai_eseh_temdeglel'],
+                                hayg=hayg, hayg_comment=form_datas['dgh_hayg_tailbar_eseh_temdeglel'],
+                                other1=other1,
+                                ndd=ndd, nmm=nmm,
+                                nss=nss, edd=edd, emm=emm , ess=ess, x=x, y=y,
                                 utm_zone= form_datas['torol_zuil_dursgalt_gazriin_coordinatutm'],
                                 utm_x= form_datas['torol_zuil_dursgalt_gazriin_coordinatx'],
                                 utm_y= form_datas['torol_zuil_dursgalt_gazriin_coordinaty'],
@@ -289,9 +281,9 @@ def dursgaltGazarAbout(request, payload):
             'dursgal': data.dursgal, 
             'dursgal2': data.dursgal2,
             'descriptio': data.descriptio,
-            'type1': data.type1,  
-            'type2': data.type2,  
-            'stone': data.stone, 
+            'type1': data.type1,
+            'type2': data.type2,
+            'stone': data.stone,
             'length': data.length,
             'width': data.width,
             'hight': data.hight,
@@ -300,53 +292,37 @@ def dursgaltGazarAbout(request, payload):
             'other': data.other,
             'number': data.number,
             'hemjee_comment': data.hemjee_comment,
-
             'protection_irgen': data.protection_irgen,
             'protection_irgen_commnent': data.protection_irgen_commnent,
-            
-            'protection': data.protection, 
-            'protecti_1': data.protecti_1, 
-
+            'protection': data.protection,
+            'protecti_1': data.protecti_1,
             'tus': data.tus,
             'tus_comment': data.tus_comment,
-
             'yaral': data.yaral,
             'yaral_comment': data.yaral_comment,
-            
             'omchlol': data.omchlol,
             'omchlol_comment': data.omchlol_comment,
-
             'malts': data.malts,
             'malts_comment': data.malts_comment,
-
             'human': data.human,
             'human_comment': data.human_comment,
-
             'natural': data.natural,
             'natural_comment': data.natural_comment,
-
             'recover': data.recover,
             'recover_comment': data.recover_comment,
-
             'recover1': data.recover1,
             'recover1_comment': data.recover1_comment,
-
-            'protecti_2': data.protecti_2, 
+            'protecti_2': data.protecti_2,
             'protecti_2_comment': data.protecti_2_comment,
-
             'hashaa': data.hashaa,
             'hashaa_comment': data.hashaa_comment,
-
             'saravch': data.saravch,
             'saravch_comment': data.saravch_comment,
-
             'hayg': data.hayg,
             'hayg_comment': data.hayg_comment,
-
             'other1': data.other1,
             'x': data.x,
             'y': data.y,
-
             'utm_zone': data.utm_zone,
             'utm_x': data.utm_x,
             'utm_y': data.utm_y,
@@ -358,7 +334,6 @@ def dursgaltGazarAbout(request, payload):
 @require_POST
 @ajax_required
 def dursgaltGazarRemove(request, payload):
-
     pk = payload.get('id')
     tseg_personal = get_object_or_404(DursgaltGazar, pk=pk)
     tseg_personal.delete()
@@ -369,7 +344,6 @@ def dursgaltGazarRemove(request, payload):
 @require_GET
 @ajax_required
 def tsegPersonalAll(request):
-
     tseg_personal = []
     for tseg in TsegPersonal.objects.all():
           tseg_personal.append({
@@ -390,19 +364,15 @@ def tsegPersonalAll(request):
 @require_POST
 @ajax_required
 def tsegPersonalRemove(request, payload):
-
     pk = payload.get('id')
     tseg_personal = get_object_or_404(TsegPersonal, pk=pk)
-
     tseg_personal.tseg_oiroos_img_url.delete(save=False)
     tseg_personal.tseg_holoos_img_url.delete(save=False)
     tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
     tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
-
     tseg_personal.file_path1.delete(save=False)
     tseg_personal.file_path2.delete(save=False)
     tseg_personal.delete()
-
     return JsonResponse({'success': True})
 
 
@@ -411,7 +381,6 @@ def tsegPersonalRemove(request, payload):
 @require_POST
 @ajax_required
 def tsegPersonalUpdate(request, payload):
-    
     pk = payload.get('id')
     tseg_display = []
     tseg_list = TsegPersonal.objects.filter(id = pk)
@@ -430,7 +399,6 @@ def tsegPersonalUpdate(request, payload):
             tseg_holoos_url = ""
         else:
             tseg_holoos_url = tseg.tseg_holoos_img_url.url
-
         if not tseg.bairshil_tseg_holoos_img_url:
             tseg_bair_holoos_url = ""
         else:
@@ -439,7 +407,6 @@ def tsegPersonalUpdate(request, payload):
             tseg_bair_oiroos_url = ""
         else:
             tseg_bair_oiroos_url = tseg.bairshil_tseg_oiroos_img_url.url
-
         if not tseg.file_path1:
             path_file1 = ""
         else:
@@ -452,33 +419,33 @@ def tsegPersonalUpdate(request, payload):
                     'tesgiin_ner': tseg.tesgiin_ner,
                     'toviin_dugaar': tseg.toviin_dugaar,
                     'trapetsiin_dugaar': tseg.trapetsiin_dugaar,
-                    'suljeenii_torol' : tseg.suljeenii_torol,
-                    'aimag_name' : tseg.aimag_name,
-                    'sum_name' : tseg.sum_name,
-                    'utmx' : tseg.utmx,
-                    'utmy' : tseg.utmy,
-                    'latlongx' : tseg.latlongx,
-                    'latlongy' : tseg.latlongy,
-                    'tseg_oiroos_img_url' : tseg_oiroos_url,
-                    'tseg_holoos_img_url' : tseg_holoos_url,
-                    'barishil_tuhai' : tseg.barishil_tuhai,
-                    'bairshil_tseg_oiroos_img_url' : tseg_bair_oiroos_url,
-                    'bairshil_tseg_holoos_img_url' : tseg_bair_holoos_url,
-                    'sudalga_or_shine' :  tseg.sudalga_or_shine,
-                    'hors_shinj_baidal' : tseg.hors_shinj_baidal,
-                    'date' : date,
-                    'hotolson' : tseg.hotolson,
-                    'file_path1' : path_file1,
-                    'file_path2' : path_file2,
-                    'alban_tushaal' : tseg.alban_tushaal,
-                    'alban_baiguullga' : tseg.alban_baiguullga,
+                    'suljeenii_torol': tseg.suljeenii_torol,
+                    'aimag_name': tseg.aimag_name,
+                    'sum_name': tseg.sum_name,
+                    'utmx': tseg.utmx,
+                    'utmy': tseg.utmy,
+                    'latlongx': tseg.latlongx,
+                    'latlongy': tseg.latlongy,
+                    'tseg_oiroos_img_url': tseg_oiroos_url,
+                    'tseg_holoos_img_url': tseg_holoos_url,
+                    'barishil_tuhai': tseg.barishil_tuhai,
+                    'bairshil_tseg_oiroos_img_url': tseg_bair_oiroos_url,
+                    'bairshil_tseg_holoos_img_url': tseg_bair_holoos_url,
+                    'sudalga_or_shine':  tseg.sudalga_or_shine,
+                    'hors_shinj_baidal': tseg.hors_shinj_baidal,
+                    'date': date,
+                    'hotolson': tseg.hotolson,
+                    'file_path1': path_file1,
+                    'file_path2': path_file2,
+                    'alban_tushaal': tseg.alban_tushaal,
+                    'alban_baiguullga': tseg.alban_baiguullga,
         })
     rsp = {
         'items': tseg_display,
     }
     return JsonResponse(rsp)
-    
-    
+
+
 @require_POST
 @ajax_required
 def tsegPersonal(request):
@@ -511,56 +478,55 @@ def tsegPersonal(request):
     if int(pk) != -1:
 
         TsegPersonal.objects.filter(pk=pk).update(
-                    tesgiin_ner= request.POST.get('tesgiin_ner'),
-                    toviin_dugaar= request.POST.get('toviin_dugaar'),
-                    trapetsiin_dugaar= request.POST.get('trapetsiin_dugaar'),
-                    suljeenii_torol= request.POST.get('suljeenii_dugaar'),
-                    aimag_name= request.POST.get('aimag_name'),
-                    sum_name= request.POST.get('sum_name'),
-                    utmx= request.POST.get('utmx'),
-                    utmy= request.POST.get('utmy'),
-                    latlongx= request.POST.get('latlongx'),
-                    latlongy= request.POST.get('latlongy'),
-                    tseg_oiroos_img_url= tseg_oiroos_img_url,
-                    tseg_holoos_img_url= tseg_holoos_img_url,
-                    barishil_tuhai= request.POST.get('barishil_tuhai'),
-                    bairshil_tseg_oiroos_img_url= bairshil_tseg_oiroos_img_url,
-                    bairshil_tseg_holoos_img_url= bairshil_tseg_holoos_img_url,
-                    sudalga_or_shine= request.POST.get('sudalga_or_shine'),
-                    hors_shinj_baidal= request.POST.get('hors_shinj_baidal'),
-                    date= date,
-                    hotolson= request.POST.get('hotolson'),
-                    file_path1= file1,
-                    file_path2= file2,
-                    alban_tushaal= request.POST.get('alban_tushaal'),
-                    alban_baiguullga= request.POST.get('alban_baiguullga'),
+                    tesgiin_ner=request.POST.get('tesgiin_ner'),
+                    toviin_dugaar=request.POST.get('toviin_dugaar'),
+                    trapetsiin_dugaar=request.POST.get('trapetsiin_dugaar'),
+                    suljeenii_torol=request.POST.get('suljeenii_dugaar'),
+                    aimag_name=request.POST.get('aimag_name'),
+                    sum_name=request.POST.get('sum_name'),
+                    utmx=request.POST.get('utmx'),
+                    utmy=request.POST.get('utmy'),
+                    latlongx=request.POST.get('latlongx'),
+                    latlongy=request.POST.get('latlongy'),
+                    tseg_oiroos_img_url=tseg_oiroos_img_url,
+                    tseg_holoos_img_url=tseg_holoos_img_url,
+                    barishil_tuhai=request.POST.get('barishil_tuhai'),
+                    bairshil_tseg_oiroos_img_url=bairshil_tseg_oiroos_img_url,
+                    bairshil_tseg_holoos_img_url=bairshil_tseg_holoos_img_url,
+                    sudalga_or_shine=request.POST.get('sudalga_or_shine'),
+                    hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
+                    date=date,
+                    hotolson=request.POST.get('hotolson'),
+                    file_path1=file1,
+                    file_path2=file2,
+                    alban_tushaal=request.POST.get('alban_tushaal'),
+                    alban_baiguullga=request.POST.get('alban_baiguullga'),
                                     )
-
     else:
         TsegPersonal.objects.create(
-                    tesgiin_ner= request.POST.get('tesgiin_ner'),
-                    toviin_dugaar= request.POST.get('toviin_dugaar'),
-                    trapetsiin_dugaar= request.POST.get('trapetsiin_dugaar'),
-                    suljeenii_torol= request.POST.get('suljeenii_dugaar'),
-                    aimag_name= request.POST.get('aimag_name'),
-                    sum_name= request.POST.get('sum_name'),
-                    utmx= request.POST.get('utmx'),
-                    utmy= request.POST.get('utmy'),
-                    latlongx= request.POST.get('latlongx'),
-                    latlongy= request.POST.get('latlongy'),
-                    tseg_oiroos_img_url= tseg_oiroos_img_url,
-                    tseg_holoos_img_url= tseg_holoos_img_url,
-                    barishil_tuhai= request.POST.get('barishil_tuhai'),
-                    bairshil_tseg_oiroos_img_url= bairshil_tseg_oiroos_img_url,
-                    bairshil_tseg_holoos_img_url= bairshil_tseg_holoos_img_url,
-                    sudalga_or_shine= request.POST.get('sudalga_or_shine'),
-                    hors_shinj_baidal= request.POST.get('hors_shinj_baidal'),
-                    date= date,
-                    hotolson= request.POST.get('hotolson'),
-                    file_path1= file1,
-                    file_path2= file2,
-                    alban_tushaal= request.POST.get('alban_tushaal'),
-                    alban_baiguullga= request.POST.get('alban_baiguullga'),
+                    tesgiin_ner=request.POST.get('tesgiin_ner'),
+                    toviin_dugaar=request.POST.get('toviin_dugaar'),
+                    trapetsiin_dugaar=request.POST.get('trapetsiin_dugaar'),
+                    suljeenii_torol=request.POST.get('suljeenii_dugaar'),
+                    aimag_name=request.POST.get('aimag_name'),
+                    sum_name=request.POST.get('sum_name'),
+                    utmx=request.POST.get('utmx'),
+                    utmy=request.POST.get('utmy'),
+                    latlongx=request.POST.get('latlongx'),
+                    latlongy=request.POST.get('latlongy'),
+                    tseg_oiroos_img_url=tseg_oiroos_img_url,
+                    tseg_holoos_img_url=tseg_holoos_img_url,
+                    barishil_tuhai=request.POST.get('barishil_tuhai'),
+                    bairshil_tseg_oiroos_img_url=bairshil_tseg_oiroos_img_url,
+                    bairshil_tseg_holoos_img_url=bairshil_tseg_holoos_img_url,
+                    sudalga_or_shine=request.POST.get('sudalga_or_shine'),
+                    hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
+                    date=date,
+                    hotolson=request.POST.get('hotolson'),
+                    file_path1=file1,
+                    file_path2=file2,
+                    alban_tushaal=request.POST.get('alban_tushaal'),
+                    alban_baiguullga=request.POST.get('alban_baiguullga'),
                                     )
 
     return JsonResponse({'success': True})
@@ -598,30 +564,30 @@ def tsegUstsan(request, payload):
         img_omno = SimpleUploadedFile('img.png', image_x2)
     if form_datas['id'] :
         TsegUstsan.objects.filter(id=form_datas['id']).update(
-            email= form_datas['email'],
-            name= form_datas['baiguulaga'],
-            alban_tushaal= form_datas['alban_tushaal'],
-            phone= form_datas['utas'],
-            tseg_id= form_datas['tsegiin_dugaar'],
-            oiroltsoo_bairlal= form_datas['oiroltsoo_bairlal'],
-            evdersen_baidal= form_datas['evdersen_baidal'],
-            shaltgaan= form_datas['nohtsol_baidal'],
-            sergeeh_sanal= form_datas['sergeeh_sanal'],
-            gps_hemjilt= form_datas['hemjilt_hiih_bolomj'],
+            email=form_datas['email'],
+            name=form_datas['baiguulaga'],
+            alban_tushaal=form_datas['alban_tushaal'],
+            phone=form_datas['utas'],
+            tseg_id=form_datas['tsegiin_dugaar'],
+            oiroltsoo_bairlal=form_datas['oiroltsoo_bairlal'],
+            evdersen_baidal=form_datas['evdersen_baidal'],
+            shaltgaan=form_datas['nohtsol_baidal'],
+            sergeeh_sanal=form_datas['sergeeh_sanal'],
+            gps_hemjilt=form_datas['hemjilt_hiih_bolomj'],
             )
         return JsonResponse({'success': True})
     else:
         TsegUstsan.objects.create(
-            email= form_datas['email'],
-            name= form_datas['baiguulaga'],
-            alban_tushaal= form_datas['alban_tushaal'],
-            phone= form_datas['utas'],
-            tseg_id= form_datas['tsegiin_dugaar'],
-            oiroltsoo_bairlal= form_datas['oiroltsoo_bairlal'],
-            evdersen_baidal= form_datas['evdersen_baidal'],
-            shaltgaan= form_datas['nohtsol_baidal'],
-            sergeeh_sanal= form_datas['sergeeh_sanal'],
-            gps_hemjilt= form_datas['hemjilt_hiih_bolomj'],
+            email=form_datas['email'],
+            name=form_datas['baiguulaga'],
+            alban_tushaal=form_datas['alban_tushaal'],
+            phone=form_datas['utas'],
+            tseg_id=form_datas['tsegiin_dugaar'],
+            oiroltsoo_bairlal=form_datas['oiroltsoo_bairlal'],
+            evdersen_baidal=form_datas['evdersen_baidal'],
+            shaltgaan=form_datas['nohtsol_baidal'],
+            sergeeh_sanal=form_datas['sergeeh_sanal'],
+            gps_hemjilt=form_datas['hemjilt_hiih_bolomj'],
         )
 
         return JsonResponse({'success': True})
@@ -633,8 +599,8 @@ def tsegUstsanAll(request):
     tseg_ustsan = []
     for tseg in TsegUstsan.objects.all():
         tseg_ustsan.append({
-            'id':tseg.id,
-            'tseg_id':tseg.tseg_id,
+            'id': tseg.id,
+            'tseg_id': tseg.tseg_id,
             'email': tseg.email,
             'name': tseg.name,
             'alban_tushaal': tseg.alban_tushaal,
@@ -687,7 +653,6 @@ def hureeCreate(request, payload):
 
     TuuhSoyolHuree.objects.create(tuuh_soyl_id = idx,  geom= geom, latlong=latlong, utm=hm_utm, utmx=hm_llx, utmy=hm_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=hm_llx, y=hm_lly, alt=hm_llalt )
     return JsonResponse({'success': True})
-
 
 
 @require_POST
@@ -765,7 +730,7 @@ def tsegUstsanEdit(request, payload):
     form_data = []
     for tseg in TsegUstsan.objects.filter(pk = payload.get('id')):
         form_data.append({
-            'tseg_id':tseg.tseg_id,
+            'tseg_id': tseg.tseg_id,
             'email': tseg.email,
             'name': tseg.name,
             'alban_tushaal': tseg.alban_tushaal,
@@ -774,5 +739,4 @@ def tsegUstsanEdit(request, payload):
             'evdersen_baidal': tseg.evdersen_baidal,
             'nohtsol_baidal': tseg.shaltgaan,
         })
-
     return JsonResponse({'form_data': form_data})
