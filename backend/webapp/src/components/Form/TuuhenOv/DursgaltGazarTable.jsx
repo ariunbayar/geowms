@@ -30,7 +30,9 @@ export default class DursgaltGazarTable extends Component {
     }
 
     render() {
-        const { id, dursgal, tuuh_soyl_id, geom, latlong, utm, type, stone, protection, created_at} = this.props.values
+        const dursgalt_id = this.props.dursgalt_id
+
+        const { id, dursgal, tuuh_soyl_id, latlong, utm, type, stone, protection, created_at} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
@@ -38,13 +40,12 @@ export default class DursgaltGazarTable extends Component {
 
                 <th>{dursgal}</th>
                 <th>{stone}</th>
-                <th>{geom}</th>
                 <th>{latlong}</th>
                 <th>{utm}</th>
                 <th>{type}</th>
                 <th>{created_at}</th>
                 <th>
-                    <NavLink to={`/back/froms/tuuhen-ov/dursgalt-gazar/${id}/update/`}>
+                    <NavLink to={`/back/froms/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/update/${id}/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>

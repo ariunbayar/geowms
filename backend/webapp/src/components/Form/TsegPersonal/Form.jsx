@@ -8,7 +8,7 @@ export class Form extends Component {
     constructor(props) {
         super(props)
         this.state = {
-        
+        id: -1,
         tesgiin_ner: '',
         toviin_dugaar: '',
         trapetsiin_dugaar: '',
@@ -33,19 +33,25 @@ export class Form extends Component {
 
         tseg_oiroos_img_url: '',
         tseg_holoos_img_url: '',
+        tseg_holoos_img_url_zurag: '',
+        tseg_oiroos_img_url_zurag: '',
 
         bairshil_tseg_oiroos_img_url: '',
         bairshil_tseg_holoos_img_url: '',
+        bairshil_tseg_holoos_img_url_zurag: '',
+        bairshil_tseg_oiroos_img_url_zurag: '',
 
-        
         handle_save_succes: false,
 
         file_path1: null,
+        file_path11: null,
         file_path1_error: false,
         file_path2: null,
+        file_path22: null,
         file_path2_error: false,
         bairshil_tseg_holoos_img_url: '',
-
+        
+        real_sum: '',
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleCheck = this.handleCheck.bind(this)
@@ -53,7 +59,17 @@ export class Form extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.handleInputAimag = this.handleInputAimag.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
+        this.tsegUpdate = this.tsegUpdate.bind(this)
     }
+
+    componentDidMount(){
+        const id = this.props.match.params.id
+        if(id) {
+            this.setState({id})
+            this.tsegUpdate(id)
+        }
+    }
+
     onDrop([icon], name) {
         if(icon){
             let reader = new FileReader();
@@ -76,7 +92,7 @@ export class Form extends Component {
             this.setState({ [field]: false })
         }
     }
- 
+
     handleInputAimag(field, e) {
         if(e.target.value == 'Архангай'){
             var sum_ners = ['Батцэнгэл', 'Булган', 'Жаргалант', 'Ихтамир', 'Өгийнуур', 'Өлзийт', 'Өндөр-Улаан', 'Тариат', 'Цахир', 'Чулуут']
@@ -278,7 +294,6 @@ export class Form extends Component {
         const file = e.target.files[0]
         var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[a-z A-Z 0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
         this.setState({[name+'_error']: false, [name]: file })
-        console.log()
         if(file['name'].length === 12)
         {
             if(re.test(file['name']) )
@@ -297,11 +312,11 @@ export class Form extends Component {
 
     handleSave(){
         this.setState({handle_save_succes:true})
-
         const form_datas = new FormData() 
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
         form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
+        form_datas.append('idx', this.state.id)
         form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('trapetsiin_dugaar', this.state.trapetsiin_dugaar)
         form_datas.append('suljeenii_dugaar', this.state.suljeenii_dugaar)
@@ -322,7 +337,10 @@ export class Form extends Component {
         form_datas.append('hotolson', this.state.hotolson)
         form_datas.append('alban_tushaal', this.state.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.alban_baiguullga)
-        
+        const id = this.props.match.params.id
+        const {alban_baiguullga,alban_tushaal,hotolson,date,hors_shinj_baidal,sudalga_or_shine,bairshil_tseg_holoos_img_url, bairshil_tseg_oiroos_img_url, 
+            barishil_tuhai, tseg_holoos_img_url, tseg_oiroos_img_url, latlongy, latlongx, utmy, utmx, sum, aimag, suljeenii_dugaar, trapetsiin_dugaar, 
+            toviin_dugaar, tesgiin_ner, file_path2, file_path1}= this.state
         service.tsegPersonal(form_datas).then(({success}) => {
             if (success) {
                 setTimeout(() => {
@@ -333,6 +351,47 @@ export class Form extends Component {
         })
     }
     
+    tsegUpdate(id){
+        service.updateTseg(id).then(({items}) =>{
+            if(items){
+                {
+                    items.map((item, idx) =>
+                        this.setState({ 
+                            tesgiin_ner: item.tesgiin_ner,
+                            toviin_dugaar: item.toviin_dugaar,
+                            trapetsiin_dugaar: item.trapetsiin_dugaar,
+                            suljeenii_dugaar: item.suljeenii_dugaar,
+                            aimag: item.aimag_name,
+                            real_sum: item.sum_name,
+                    
+                            utmx: item.utmx,
+                            utmy: item.utmy,
+                            latlongx: item.latlongx,
+                            latlongy: item.latlongy,
+                    
+                            barishil_tuhai: item.barishil_tuhai,
+                            sudalga_or_shine: item.sudalga_or_shine,
+                            hors_shinj_baidal: item.hors_shinj_baidal,
+                            date: item.date,
+                    
+                            hotolson: item.hotolson,
+                            alban_tushaal: item.alban_tushaal,
+                            alban_baiguullga: item.alban_baiguullga,
+                    
+                            tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
+                            tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
+                    
+                            bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
+                            bairshil_tseg_holoos_img_url_zurag: item.bairshil_tseg_holoos_img_url,
+                
+                            file_path11: item.file_path1,
+                            file_path22: item.file_path2,
+                        })
+                    )
+                }
+            }
+        })
+    }
 
     render() {
         return (
@@ -401,6 +460,7 @@ export class Form extends Component {
                             <th>Аймаг</th>
                             <td colSpan="1" scope="rowgroup">
                                 <select className="form-control" id="aimag" value={this.state.aimag} onChange={(e) => this.handleInputAimag('aimag', e)}>
+                                    
                                     <option>Архангай</option>
                                     <option>Баян-Өлгий</option>
                                     <option>Баянхонгор</option>
@@ -427,6 +487,9 @@ export class Form extends Component {
                             <th>Сум</th>
                             <td colSpan="2" scope="rowgroup">
                                 <select className="form-control" id="sum" value={this.state.sum} onChange={(e) => this.handleInput('sum', e)}>
+                                    {
+                                        this.state.real_sum ? <option>{this.state.real_sum}</option> : ""
+                                    }
                                     {this.state.sum_ners}
                                 </select>
                             </td>
@@ -487,11 +550,6 @@ export class Form extends Component {
                                 />
                             </td>
                         </tr>
-
-
-
-
-
                         <tr>
                             <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>7. Цэгийн фото зураг</th>
                         </tr>
@@ -514,6 +572,11 @@ export class Form extends Component {
                                     singleImage={true}
                                     label=''
                                 />
+                                {
+                                this.state.tseg_oiroos_img_url_zurag ?
+                                <center><img src={this.state.tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
+                                <center><label>Зураг байхгүй байна.</label></center>
+                                }
                             </div>
 
                             </td>
@@ -528,6 +591,11 @@ export class Form extends Component {
                                     singleImage={true}
                                     label=''
                                 />
+                                {
+                                this.state.tseg_holoos_img_url_zurag ?
+                                <center><img src={this.state.tseg_holoos_img_url_zurag } width="150px" height="100px"/></center>:
+                                <center><label>Зураг байхгүй байна.</label></center>
+                                }
                             </td>
                         </tr>
                         <tr>
@@ -541,7 +609,6 @@ export class Form extends Component {
                                     style={{height:"60px"}}
                                     onChange={(e) => this.handleInput('barishil_tuhai', e)}
                                     value={this.state.barishil_tuhai}>
-
                                 </textarea>
                             </th>
                         </tr>
@@ -561,6 +628,11 @@ export class Form extends Component {
                                     singleImage={true}
                                     label=''
                                 />
+                                {
+                                this.state.bairshil_tseg_oiroos_img_url_zurag ?
+                                <center><img src={this.state.bairshil_tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
+                                <center><label>Зураг байхгүй байна.</label></center>
+                                }
                             </td>
                             <td colSpan="3" scope="rowgroup">
                                 <ImageUploader
@@ -573,6 +645,11 @@ export class Form extends Component {
                                     singleImage={true}
                                     label=''
                                 />
+                                {
+                                this.state.bairshil_tseg_holoos_img_url_zurag ?
+                                <center><img src={this.state.bairshil_tseg_holoos_img_url_zurag} width="150px" height="100px"/></center>:
+                                <center><label>Зураг байхгүй байна.</label></center>
+                                }
                             </td>
                         </tr>
                         <tr>
@@ -627,6 +704,7 @@ export class Form extends Component {
                             <th colSpan="1" scope="rowgroup">15.</th>
                             <th colSpan="2" scope="rowgroup">Файл 1:</th>
                             <td colSpan="3" scope="rowgroup">
+                                {this.state.file_path11 === '' ? null : this.state.file_path11}
                                 <input
                                     type="file"
                                     className="form-control"
@@ -647,11 +725,13 @@ export class Form extends Component {
                             <th colSpan="1" scope="rowgroup">16.</th>
                             <th colSpan="2" scope="rowgroup">Файл 2:</th>
                             <td colSpan="3" scope="rowgroup">
+                                {this.state.file_path21 === '' ? null : this.state.file_path21}
                                 <input
                                     type="file"
                                     className="form-control"
                                     onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                 />
+                                
                                 {this.state.file_path2_error > 0 ? 
                                 <ul className="text-danger">
                                     <li>XXXXDDDS.YYo</li>

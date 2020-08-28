@@ -7,6 +7,8 @@ export class DursgaltGazar extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            id: null,
+            durgal_id: null,
             tuuh_soyl_id: null,
             tuuhin_ov_register_id: 0,
             tuuhin_ov_date: '',
@@ -125,7 +127,6 @@ export class DursgaltGazar extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.handleInput = this.handleInput.bind(this)
 
-        this.handleCoordinat = this.handleCoordinat.bind(this)
 
         this.handleInputSelect = this.handleInputSelect.bind(this)
         this.handleInputSelectTwo = this.handleInputSelectTwo.bind(this)
@@ -140,18 +141,15 @@ export class DursgaltGazar extends Component {
         this.setState({ [field]: e.target.value })
     }
 
-    handleCoordinat(field, e, idx) {
-        console.log(field, idx)
-        console.log(this.state.torol_zuil_dursgalt_gazriin_coordinat[0])
-        // this.setState({ torol_zuil_dursgalt_gazriin_coordinat:{[field]: e.target.value }})
-
-    }
     componentDidMount(){
-        const id = this.props.match.params.id
-        if(id){
-            this.setState({tuuh_soyl_id:id})
+        const tuuhenov_id = this.props.match.params.id
+        this.setState({ id:tuuhenov_id})
 
-            service.dursgaltGazarAbout(id).then(({form_data}) => {
+        const durgal_id = this.props.match.params.idx
+        if(durgal_id){
+            this.setState({durgal_id})
+
+            service.dursgaltGazarAbout(durgal_id).then(({form_data}) => {
                 console.log(form_data)
 
                 if(form_data){
@@ -173,7 +171,7 @@ export class DursgaltGazar extends Component {
                             torol_zuil_dursgalt_gazriin_coordinatlly: tuuh['y'],
                             // torol_zuil_dursgalt_gazriin_coordinatalt: tuuh[''],
                 
-                            torol_zuil_todorhoilolt: tuuh[''],
+                            torol_zuil_todorhoilolt: tuuh['descriptio'],
                             
                             dgh_hashaa_baigaa_eseh_hashaa: tuuh['hashaa'],
                             dgh_saravchtai_eseh_saravch: tuuh['saravch'],
@@ -417,6 +415,7 @@ export class DursgaltGazar extends Component {
     }
     
     handleSave(){
+        const id = this.props.match.params.id
         this.setState({handle_save_succes:true})
 
         const form_datas = this.state
@@ -425,7 +424,7 @@ export class DursgaltGazar extends Component {
                 setTimeout(() => {
                     this.setState({handle_save_succes:false})
                     this.props.history.goBack()
-
+                    this.props.history.push( `/back/froms/tuuhen-ov/${id}/add/`)
 
                 }, 1000)
             }

@@ -113,6 +113,8 @@ export class AddForm extends Component {
     }
 
     render() {
+        const dursgalt_id = this.props.match.params.id
+
         return (
             <div  className="container my-4">
                 <div className="row">
@@ -122,7 +124,7 @@ export class AddForm extends Component {
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
-                            <NavLink className="btn gp-btn-primary" to={`/back/froms/tuuhen-ov/dursgalt-gazar/`}>
+                            <NavLink className="btn gp-btn-primary" to={`/back/froms/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
                                 Нэмэх
                             </NavLink>
                         </div>
@@ -133,7 +135,6 @@ export class AddForm extends Component {
                                     <th scope="col"> № </th>
                                     <th scope="col">Дурсгалт газрын нэр</th>
                                     <th scope="col">Чулуулгын төрөл</th>
-                                    <th scope="col">Geom</th>
                                     <th scope="col">Latitude Longitude</th>
                                     <th scope="col">UTM</th>
                                     <th scope="col">type</th>
@@ -147,6 +148,7 @@ export class AddForm extends Component {
                                     <DursgaltGazarTable
                                         key={idx}
                                         idx = {idx}
+                                        dursgalt_id = {dursgalt_id}
                                         values={values}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
@@ -287,7 +289,7 @@ export class AddForm extends Component {
                                     <tr key={idx}>
                                         <th scope="row">{idx+1}</th>
                                         <td scope="row">
-                                            {data.utm}
+                                        {data.utm}
                                         </td>
                                         <td scope="row">
                                         {data.utmx}

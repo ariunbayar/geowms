@@ -8,6 +8,7 @@ export const service = {
     create,
     update,
     about,
+    remove,
     tsegPersonal,
     tsegUstsan,
     tsegPersonalAll,
@@ -22,7 +23,8 @@ export const service = {
     ayulCreate,
     tsegUstsanAll,
     tseg_remove,
-    tsegustsanEdit
+    tsegustsanEdit,
+    updateTseg
 }
 function all() {
     const requestOptions = {
@@ -53,6 +55,15 @@ function create(form_datas) {
         body: JSON.stringify({form_datas}),
     }
     return fetch(`${prefix}/create/`, opts).then(handleResponse)
+}
+
+function remove(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+
+    return fetch(`${prefix}/remove/`, opts).then(handleResponse)
 }
 
 function tsegPersonalAll() {
@@ -94,7 +105,7 @@ function tsegUstsan(form_datas) {
 
 
 function dursgaltGazarCreate(form_datas) {
-
+    console.log(form_datas)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({form_datas}),
@@ -119,6 +130,7 @@ function dursgaltGazarRemove(id) {
 
     return fetch(`${prefix}/dursgalt-gazar/remove/`, opts).then(handleResponse)
 }
+
 
 function dursgaltGazarAbout(id) {
     const opts = {
@@ -185,4 +197,12 @@ function tsegustsanEdit(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/tseg-ustsan_edit/`, opts).then(handleResponse)
+}
+
+function updateTseg(id){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/tseg-personal/update/`, opts).then(handleResponse)
 }

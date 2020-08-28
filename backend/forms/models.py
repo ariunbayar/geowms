@@ -4,7 +4,7 @@ from django.db import models
 class TuuhSoyol(models.Model):
     dugaar = models.CharField(max_length=100) # Дурсгалт газрын бүртгэлийн дугаар
     date = models.DateTimeField(null=True) # Он,сар,өдөр
-    inspireid = models.CharField(max_length=25) #
+    inspireid = models.CharField(max_length=50) #
     too_shirheg = models.CharField(max_length=1000) #	
     aimagname = models.CharField(max_length=50) # Аймаг, Нийслэл	
     sumname = models.CharField(max_length=50) # Сум, Дүүрэг
@@ -82,13 +82,13 @@ class DursgaltGazar(models.Model):
     edd = models.CharField(max_length=100)
     emm = models.CharField(max_length=100) #
     ess = models.CharField(max_length=100) #
-    x = models.CharField(max_length=25) #
-    y = models.CharField(max_length=25) #
+    x = models.CharField(max_length=50) #
+    y = models.CharField(max_length=50) #
 
-    utm_zone = models.CharField(max_length=25) #
-    utm_x = models.CharField(max_length=25) #
-    utm_y = models.CharField(max_length=25) #
-    y = models.CharField(max_length=25) #
+    utm_zone = models.CharField(max_length=50) #
+    utm_x = models.CharField(max_length=50) #
+    utm_y = models.CharField(max_length=50) #
+    y = models.CharField(max_length=50) #
 
     created_at = models.DateTimeField(auto_now_add=True)
 

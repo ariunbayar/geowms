@@ -122,8 +122,12 @@ urlpatterns = [
         path('', forms_views.all, name='all'),
         path('about/', forms_views.about, name='about'),
         path('update/', forms_views.update, name='update'),
+        path('remove/', forms_views.remove, name='remove'),
         path('create/', forms_views.create, name='create'),
         path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
+
+        path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
+
         path('tseg-personal/all/', forms_views.tsegPersonalAll, name='tseg-personal-all'),
         path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),

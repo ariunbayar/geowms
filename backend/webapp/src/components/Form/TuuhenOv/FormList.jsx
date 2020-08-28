@@ -28,10 +28,9 @@ export class FormList extends Component {
     }
 
     handleRemove(id) {
-        alert(id)
-        // service.tsegPersonalRemove(id).then(({success}) => {
-        //     if (success) this.handleListUpdated()
-        // })
+        service.remove(id).then(({success}) => {
+            if (success) this.handleListUpdated()
+        })
     }
 
 
