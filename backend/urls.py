@@ -10,6 +10,7 @@ from backend.config import views as config_views
 from backend.org import views as org_views
 from backend.log import views as log_views
 from backend.payment import views as payment_views
+from backend.forms import views as forms_views
 
 
 app_name = 'backend'
@@ -116,5 +117,33 @@ urlpatterns = [
         path('purchase/', payment_views.purchase, name='purchase'),
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
     ], 'payment'))),
+
+    path('tuuhen_ov/', include(([
+        path('', forms_views.all, name='all'),
+        path('about/', forms_views.about, name='about'),
+        path('update/', forms_views.update, name='update'),
+        path('remove/', forms_views.remove, name='remove'),
+        path('create/', forms_views.create, name='create'),
+        path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
+
+        path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
+
+        path('tseg-personal/all/', forms_views.tsegPersonalAll, name='tseg-personal-all'),
+        path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
+        path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
+        path('tseg-ustsan_all/', forms_views.tsegUstsanAll, name='tseg-ustsan_all'),
+        path('tseg-ustsan_remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan_remove'),
+        path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
+        path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
+        path('dursgalt-gazar/all/', forms_views.dursgaltGazarAll, name='dursgalt-gazar-all'),
+        path('dursgalt-gazar/remove/', forms_views.dursgaltGazarRemove, name='dursgalt-gazar-remove'),
+        path('dursgalt-gazar/about/', forms_views.dursgaltGazarAbout, name='dursgalt-gazar-about'),
+        path('dursgalt-gazar/huree-create/', forms_views.hureeCreate, name='dursgalt-gazar-huree-create'),
+        path('dursgalt-gazar/huree-all/', forms_views.hureeAll, name='dursgalt-gazar-huree-all'),
+        path('dursgalt-gazar/ayul-create/', forms_views.ayulHureeCreate, name='dursgalt-gazar-ayul-create'),
+        path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
+
+    ], 'tuuhen_ov'))),
+
     re_path('^.*', webapp_views.index, name='webapp'),
 ]
