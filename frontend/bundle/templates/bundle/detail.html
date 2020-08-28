@@ -11,9 +11,9 @@
 {% block script %}
 
     {% if DEBUG %}
-        <script src="{% static "assets/js/frontend/bundle.js" %}"></script>
+        {% include "bundle/detail.dev.html" %}
     {% else %}
-        <script src="{% static "assets/js/frontend/bundle.min.js" %}?v={{STATIC_VERSION}}"></script>
+        {% include "bundle/detail.prod.html" %}
     {% endif %}
 
 {% endblock %}

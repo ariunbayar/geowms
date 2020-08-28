@@ -11,9 +11,9 @@
 {% block script %}
 
     {% if DEBUG %}
-        <script src="{% static "assets/js/frontend/payment.js" %}"></script>
+        {% include "payment/index.dev.html" %}
     {% else %}
-        <script src="{% static "assets/js/frontend/payment.min.js" %}?v={{STATIC_VERSION}}"></script>
+        {% include "payment/index.prod.html" %}
     {% endif %}
 
 {% endblock %}

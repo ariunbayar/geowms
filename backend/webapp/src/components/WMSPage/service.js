@@ -14,8 +14,8 @@ export const service = {
     layerRemove,
     detail,
     wmsIsActiveUpdate,
-    wmsSearch,
-    pagination
+    pagination,
+    paginatedList
 }
 
 const prefix = '/back'
@@ -77,6 +77,14 @@ function pagination(last,first) {
         body: JSON.stringify({last,first}),
     }
     return fetch(`${prefix}/wms/pagination/`, requestOptions).then(handleResponse)
+}
+
+function paginatedList (page, per_page, query) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({ page, per_page, query }),
+    }
+    return fetch(`${prefix}/wms/paginatedList/`, requestOptions).then(handleResponse)
 }
 
 function getAll() {
@@ -198,12 +206,4 @@ function getLayers(wms_url) {
             })
             .catch(reject)
     })
-}
-
-function wmsSearch(query) {
-    const requestOptions = {
-        ..._getPostOptions(),
-        body: JSON.stringify({query}),
-    }
-    return fetch(`${prefix}/wms/wmsSearch/`, requestOptions).then(handleResponse)
 }

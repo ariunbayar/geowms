@@ -12,9 +12,9 @@
 {% block script %}
 
     {% if DEBUG %}
-        <script src="{% static "assets/js/frontend/mobile.js" %}"></script>
+        {% include "mobile/detail.dev.html" %}
     {% else %}
-        <script src="{% static "assets/js/frontend/mobile.min.js" %}?v={{STATIC_VERSION}}"></script>
+        {% include "mobile/detail.prod.html" %}
     {% endif %}
 
 {% endblock %}

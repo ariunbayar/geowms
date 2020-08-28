@@ -30,7 +30,7 @@ urlpatterns = [
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
-        path('wmsSearch/', wms_views.wmsSearch, name='wmsSearch'),
+        path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
     ], 'wms'))),
 
     path('bundle/', include(([
@@ -51,7 +51,7 @@ urlpatterns = [
         path('roleCreate/', user_views.roleCreate, name='roleCreate'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('userCount/', user_views.userCount, name='userCount'),
-        path('userSearch/', user_views.userSearch, name='userSearch'),
+        path('paginatedList/', user_views.paginatedList, name='paginatedList'),
     ], 'user'))),
 
     path('api/суурь-давхарга/', include(([
@@ -86,10 +86,9 @@ urlpatterns = [
         path('login-date-count/', log_views.login_date_count, name='login-date-count'),
         path('crud-method-count/', log_views.crud_method_count, name='crud-method-count'),
         path('crud-date-count/', log_views.crud_date_count, name='crud-date-count'),
-        path('page-all/', log_views.pageAll, name='page-all'),
-        path('page-search/', log_views.pageSearch, name='page-search'),
         path('page-date-count/', log_views.page_date_count, name='page-date-count'),
         path('page-user-count/', log_views.page_user_count, name='page-user-count'),
+        path('page-list/', log_views.page_list, name='page-list'),
     ], 'log'))),
 
     path('api/систем/', include(([
@@ -116,6 +115,7 @@ urlpatterns = [
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
         path('all/', payment_views.all, name='all'),
         path('purchase/', payment_views.purchase, name='purchase'),
+        path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
     ], 'payment'))),
 
     path('tuuhen_ov/', include(([

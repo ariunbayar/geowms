@@ -15,7 +15,7 @@ export class Capabilities {
             return "null"
         }
     }
-    
+
     getLayers() {
         const nodes = this.xml.querySelectorAll('WMS_Capabilities > Capability Layer')
         return [...nodes].map((layer) => {
