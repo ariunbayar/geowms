@@ -67,7 +67,6 @@ export class CrudEvenLog extends Component {
                             <hr />
                         </div>
                     </div>
-
                     <h5 className="mb-3">Хийгдсэн үйлдлийн мэдээлэл</h5>
                     <div className="form-row text-right">
                         <div className="form-group col-md-8">

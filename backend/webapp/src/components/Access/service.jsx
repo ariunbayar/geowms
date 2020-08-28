@@ -4,13 +4,12 @@ export const service = {
     getAll,
     browserCount,
     pageCount,
-    loginAll,
     loginDateCount,
-    loginSearch,
     logoutDateCount,
     pageUserCount,
     crudMethodCount,
     crudDateCount,
+    loginList,
     crudList,
     pageList,
 }
@@ -56,30 +55,22 @@ function crudList(page, perpage, query){
     return fetch(`${prefix}/log/crud-list/`, requestOptions).then(handleResponse)
 }
 
+function loginList(page, perpage, query){
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ page, perpage, query }),
+    }
+    return fetch(`${prefix}/log/login-list/`, requestOptions).then(handleResponse)
+}
+
 function loginDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
 }
 
-function loginSearch(query, last, first) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({query, last, first}),
-    }
-    return fetch(`${prefix}/log/login-search/`, requestOptions).then(handleResponse)
-}
-
 function logoutDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
-}
-
-function loginAll(last,first) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({last, first})
-    }
-    return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
 }
 
 function crudMethodCount() {

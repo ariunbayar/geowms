@@ -35,22 +35,40 @@ def login_all(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def loginSearch(request, payload):
+def login_list(request, payload):
     query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
     login_log_all_display = []
-    last = payload.get('last')
-    first = payload.get('first')
-    logins = LoginEvent.objects.annotate(search=SearchVector('login_type', 'user_id', 'remote_ip', 'datetime') + SearchVector('username'),).filter(search__contains=query)
-    for login_log_all in logins[first:last]:
+
+    logins = LoginEvent.objects.annotate(search=SearchVector(
+        'login_type', 
+        'user_id', 
+        'remote_ip', 
+        'datetime'
+    ) + SearchVector('username'),).filter(search__contains=query)
+
+    total_items = Paginator(logins, per_page)
+    items_page = total_items.page(page)
+
+    for login_log_all in items_page.object_list:
         login_log_all_display.append({
             'id': login_log_all.id,
-            'login_type': login_log_all.login_type,
             'username': login_log_all.username,
-            'datetime': login_log_all.datetime.strftime('%Y-%m-%d'),
+            'login_type': login_log_all.login_type,
             'user_id': login_log_all.user_id,
             'remote_ip': login_log_all.remote_ip,
+            'datetime': login_log_all.datetime.strftime('%Y-%m-%d'),
         })
-    return JsonResponse({'login_log_all': login_log_all_display, 'len': logins.count()})
+
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': login_log_all_display,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
