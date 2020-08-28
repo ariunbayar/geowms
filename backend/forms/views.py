@@ -5,7 +5,7 @@ from main.decorators import ajax_required
 from django.http import JsonResponse
 from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar, TuuhSoyolHuree, TuuhSoyolAyuulHuree
 from main.utils import resize_b64_to_sizes
-from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 # Create your models here.
 
@@ -535,6 +535,7 @@ def tsegPersonal(request):
 @require_POST
 @ajax_required
 def tsegUstsan(request, payload):
+
     img_holoos = None
     img_oiroos = None
     img_baruun = None
@@ -568,6 +569,12 @@ def tsegUstsan(request, payload):
             name=form_datas['baiguulaga'],
             alban_tushaal=form_datas['alban_tushaal'],
             phone=form_datas['utas'],
+            img_holoos=img_holoos,
+            img_oiroos=img_oiroos,
+            img_baruun=img_baruun,
+            img_zuun=img_zuun,
+            img_hoino=img_hoino,
+            img_omno=img_omno,
             tseg_id=form_datas['tsegiin_dugaar'],
             oiroltsoo_bairlal=form_datas['oiroltsoo_bairlal'],
             evdersen_baidal=form_datas['evdersen_baidal'],
@@ -582,6 +589,12 @@ def tsegUstsan(request, payload):
             name=form_datas['baiguulaga'],
             alban_tushaal=form_datas['alban_tushaal'],
             phone=form_datas['utas'],
+            img_holoos=img_holoos,
+            img_oiroos=img_oiroos,
+            img_baruun=img_baruun,
+            img_zuun=img_zuun,
+            img_hoino=img_hoino,
+            img_omno=img_omno,
             tseg_id=form_datas['tsegiin_dugaar'],
             oiroltsoo_bairlal=form_datas['oiroltsoo_bairlal'],
             evdersen_baidal=form_datas['evdersen_baidal'],
