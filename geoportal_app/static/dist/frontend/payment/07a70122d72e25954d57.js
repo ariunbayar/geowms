@@ -30,4 +30,4 @@
 /*!************************************************************!*\
   !*** multi babel-polyfill ./frontend/payment/src/index.js ***!
   \************************************************************/
-/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/user/projects/eg/geoWMS/frontend/payment/src/index.js */"./frontend/payment/src/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./frontend/payment/src/index.js?')}},[[3,"manifest","libs"]]]);
+/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/baigalaa/Documents/project/geoWMS/frontend/payment/src/index.js */"./frontend/payment/src/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./frontend/payment/src/index.js?')}},[[3,"manifest","libs"]]]);
