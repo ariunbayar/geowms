@@ -63,7 +63,6 @@ urlpatterns = [
 
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
-        path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
         path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
         path('level-<int:level>/<int:pk>/employees/', org_views.employees, name='employees'),
@@ -73,7 +72,7 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
-        path('level-<int:level>/orgSearch/', org_views.orgSearch, name='orgSearch'),
+        path('level-<int:level>/org-list/', org_views.orgList, name='orgList'),
         path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
     ], 'org'))),
 

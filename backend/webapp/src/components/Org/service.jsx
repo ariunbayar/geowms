@@ -6,15 +6,14 @@ export const service = {
     org_remove,
     roles,
     rolesSave,
-    OrgAll,
     employeesGetAll,
     employee_add,
     employee_remove,
     employeeMore,
     employee_update,
     sistemCount,
-    orgSearch,
-    EmployeeSearch
+    EmployeeSearch,
+    orgList,
 }
 
 
@@ -32,11 +31,6 @@ function getAll(level,value) {
     }
     return fetch(`${prefix}/level-${level}/`, requestOptions).then(handleResponse)
 }
-function OrgAll(level,id){
-    const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
-}
-
 
 function org_add(level, values) {
     const opts = {
@@ -114,12 +108,13 @@ function employee_update(org_level, org_id, paylaod) {
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-update/`, opts).then(handleResponse)
 }
 
-function orgSearch(org_level,query) {
-    const requestOptions = {
+function orgList(page, perpage, query) {
+    const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({page, perpage, query}),
     }
-    return fetch(`${prefix}/level-${org_level}/orgSearch/`, requestOptions).then(handleResponse)
+    console.log("aa")
+    return fetch(`${prefix}/level-${org_level}/org-list/`, opts).then(handleResponse)
 }
 
 function EmployeeSearch(level, org_id,query) {
