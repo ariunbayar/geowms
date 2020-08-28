@@ -104,7 +104,7 @@ export class DursgaltGazar extends Component {
             dgh_sergeen_zasvarlah_eseh_shaardlaga: false,
             dgh_sergeen_zasvarlah_eseh_temdeglel: '',
 
-            dgh_hamgaalaltiin_zereg_oorchloh_sanal: false,
+            dgh_hamgaalaltiin_zereg_oorchloh_sanal: '',
             dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: '',
 
             dgh_hashaa_baigaa_eseh_hashaa: 'Үгүй',
@@ -164,7 +164,7 @@ export class DursgaltGazar extends Component {
                             torol_zuil_dursgalt_gazriin_ner: tuuh['dursgal'],
 
                 
-                            torol_zuil_dursgalt_gazriin_coordinatutm: tuuh['utm'],
+                            torol_zuil_dursgalt_gazriin_coordinatutm: tuuh['utm_zone'],
                             torol_zuil_dursgalt_gazriin_coordinatx: tuuh['utm_x'],
                             torol_zuil_dursgalt_gazriin_coordinaty: tuuh['utm_y'],
                             torol_zuil_dursgalt_gazriin_coordinatllx: tuuh['x'],
@@ -214,6 +214,7 @@ export class DursgaltGazar extends Component {
                             dgh_baigaliin_huchin_zuil_temdeglel: tuuh['natural_comment'],
                             dgh_hashaa_baigaa_eseh_temdeglel: tuuh['hashaa_comment'],
                             dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: tuuh['protecti_2_comment'],
+                            dgh_hamgaalaltiin_zereg_oorchloh_sanal:tuuh['protecti_2'], 
                             dgh_sergeen_zasvarlasan_eseh_temdeglel: tuuh['recover_comment'],
                             dgh_sergeen_zasvarlah_eseh_temdeglel: tuuh['recover1_comment'],
                             dgh_saravchtai_eseh_temdeglel: tuuh['saravch_comment'],
