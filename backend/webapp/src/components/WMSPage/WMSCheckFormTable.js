@@ -9,7 +9,7 @@ export default class WMSCheckFormTable extends Component {
         this.state = {
             layer: props.layer,
             wmsId: props.wmsId,
-            title: props.layer.title,
+            title: props.layer.title || '',
             titleDisabled: false,
         }
         this.titleSave = this.titleSave.bind(this)
@@ -21,7 +21,7 @@ export default class WMSCheckFormTable extends Component {
 
     componentDidUpdate(prevProps) {
         if(prevProps.layer !== this.props.layer)
-        {   
+        {
             const layer = this.props.layer
             this.setState({layer, title:this.props.layer.title})
         }
@@ -34,7 +34,7 @@ export default class WMSCheckFormTable extends Component {
             const title = this.state.title
             const id = this.state.layer.id
             service.titleUpdate(title, id).then(({success}) => {
-                if (success) 
+                if (success)
                 {
                     this.setState({titleDisabled: false})
                 }
@@ -55,7 +55,7 @@ export default class WMSCheckFormTable extends Component {
     render() {
         const {layer, wmsId, title, titleDisabled} = this.state
         return (
-     
+
             <tr>
                 <td >
                     {layer.name}
@@ -64,14 +64,14 @@ export default class WMSCheckFormTable extends Component {
                     <input type="text" name={name} value={title}  onChange={this.handleChange} disabled = {(this.state.titleDisabled)? "" : "disabled"}/>
                 </td>
                 <td >
-                    {titleDisabled ? 
+                    {titleDisabled ?
                     <a href="#" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
                         <i className="fa fa-floppy-o" aria-hidden="true"></i>
                     </a>:
                     <a href="#" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </a>
-                    
+
                     }
                 </td>
                 <td >

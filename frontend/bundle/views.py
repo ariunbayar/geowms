@@ -17,7 +17,6 @@ def all(request):
     context = {
         'bundles': bundles,
     }
-
     return render(request, 'bundle/all.html', context)
 
 
@@ -40,7 +39,6 @@ def detail(request, pk):
     context = {
         'bundle_display': bundle_display,
     }
-
     return render(request, 'bundle/detail.html', context)
 
 
@@ -55,7 +53,7 @@ def wms_layers(request, pk):
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
     qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order').distinct()
-    
+
     def _layer_to_display(ob):
 
         bundle_layers = BundleLayer.objects.filter(

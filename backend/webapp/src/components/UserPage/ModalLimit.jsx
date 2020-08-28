@@ -82,8 +82,8 @@ export default class ModalLimit extends Component {
                                 {this.props.text}
                             </div>
                             <div className="modal-footer">
-                                <button type="button" onClick={() => this.handleClose()} className="btn btn-outline-primary">Буцах</button>
-                                <button type="button" onClick={() => this.handleProceed ()} className="btn gp-bg-primary text-white">Хязгаарлах</button>
+                                <button type="button" onClick={() => this.handleClose()} className="btn gp-outline-primary">Буцах</button>
+                                <button type="button" onClick={() => this.handleProceed ()} className="btn gp-btn-primary text-white">Хязгаарлах</button>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import base64 
+import base64
 import xml.etree.ElementTree as ET
 from django.conf import settings
 from backend.payment.models import Payment
@@ -87,7 +87,7 @@ class PaymentMethodMB():
                 message = self.paymentSuccess()
                 return message
 
-            elif status == '32': 
+            elif status == '32':
                 # print("Эх гүйлгээ олдоогүй тохиолдолд")
                 message = self.paymentConfirm()
                 return message

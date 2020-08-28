@@ -10,8 +10,8 @@
 {% block script %}
 
     {% if DEBUG %}
-        <script src="{% static "assets/js/backend/webapp.js" %}"></script>
+        {% include "backend/webapp.dev.html" %}
     {% else %}
-        <script src="{% static "assets/js/backend/webapp.min.js" %}?v={{STATIC_VERSION}}"></script>
+        {% include "backend/webapp.prod.html" %}
     {% endif %}
 {% endblock %}

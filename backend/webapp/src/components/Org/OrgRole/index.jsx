@@ -24,12 +24,10 @@ export class OrgRole extends Component {
         this.handleSave = this.handleSave.bind(this)
     }
 
-   
-
     componentDidMount() {
         this.handleListUpdated()
     }
-    
+
     handleListUpdated() {
         const {level, id} = this.props.match.params
         service.roles(level, id).then(({org_roles}) => {
@@ -56,7 +54,7 @@ export class OrgRole extends Component {
                     this.setState({handleSaveIsLoad:false})
                     this.handleListUpdated()
                 }, 1000)
-                
+
             }
         })
     }
@@ -78,7 +76,7 @@ export class OrgRole extends Component {
                     <div className="col-md-12">
                         <div className="text-left">
                             <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                <p className="btn btn-outline-primary">
+                                <p className="btn gp-outline-primary">
                                     <i className="fa fa-angle-double-left"></i> Буцах
                                 </p>
                             </NavLink>
@@ -103,13 +101,13 @@ export class OrgRole extends Component {
                                 </tbody>
                             </table>
                             {this.state.handleSaveIsLoad ?
-                                <button className="btn gp-bg-primary">
-                                    <a class="spinner-border text-light" role="status">
-                                        <span class="sr-only">Loading...</span> 
-                                    </a>
-                                    <span> Шалгаж байна. </span>
+                                <button className="btn gp-btn-primary">
+                                    <div class="spinner-border text-light" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <a className="text-light"> Шалгаж байна.</a>
                                 </button>:
-                                <button className="btn gp-bg-primary" onClick={this.handleSave} >
+                                <button className="btn gp-btn-primary" onClick={this.handleSave} >
                                     Хадгалах
                                 </button>
                             }

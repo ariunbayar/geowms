@@ -75,7 +75,7 @@ class MBUtil():
         EncKey = SubElement(root, 'EncKey')
         EncKey.text = self.encKey
         Description = SubElement(root, 'Description')
-        Description.text = self.guilgee_utga 
+        Description.text = self.guilgee_utga
         ApproveURL = SubElement(root, 'ApproveURL')
         ApproveURL.text = self.pay_url
         DeclineURL = SubElement(root, 'DeclineURL')
@@ -123,5 +123,5 @@ class MBUtil():
         self.PaymentVerifyRequestMB()
         # for i in self.finalRequest:
         #     print(tostring(i))
-        
+
         return self.finalRequest

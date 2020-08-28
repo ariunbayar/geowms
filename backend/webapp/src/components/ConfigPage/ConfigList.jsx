@@ -53,7 +53,7 @@ export class ConfigList extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="text-right mb-4">
-                            <NavLink className="btn gp-bg-primary" to={"/back/тохиргоо/үүсгэх/"}>
+                            <NavLink className="btn gp-btn-primary" to={"/back/тохиргоо/үүсгэх/"}>
                                 Нэмэх
                             </NavLink>
                         </div>
