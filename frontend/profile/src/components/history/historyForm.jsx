@@ -24,13 +24,13 @@ export default class HistoryForm extends Component {
             return service
                 .paginatedList(page, perpage)
                 .then(page => {
-                    this.setState({user_list: page.items })
+                    this.setState({payment: page.items })
                     return page
                 })
     }
     render() {
-        alert
-        const {paymentpayment_length} = this.state
+        const {payment,payment_length} = this.state
+        console.log(payment)
         return (
         <div className="container">
             <div className="row">
@@ -56,7 +56,7 @@ export default class HistoryForm extends Component {
                                     payment.map((p, idx) =>
                                         <HistoryTable
                                             key={idx}
-                                            idx={(currentPage*25)-25+idx+1}
+                                            idx={(this.state.currentPage*25)-25+idx+1}
                                             values={p}
                                         >
                                         </HistoryTable>
@@ -66,7 +66,6 @@ export default class HistoryForm extends Component {
                        </table>
                        <Pagination
                         paginate = { this.paginate }
-                        searchQuery = { this.state.searchQuery }
                          />
                     </div>
                   </div>

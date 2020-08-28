@@ -1,5 +1,5 @@
 export const service = {
-    loadHistory
+    paginatedList
 }
 
 function handleResponse(response) {
