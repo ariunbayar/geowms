@@ -155,11 +155,23 @@ def _get_user_name(user_id):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def crud_event_all(request, payload):
-    last = payload.get('last')
-    first = payload.get('first')
+def crudList(request, payload):
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
     crud_event_display = []
-    for crud_event in CRUDEvent.objects.all()[first:last]:
+    cruds = CRUDEvent.objects.annotate(search=SearchVector(
+        'event_type', 
+        'object_id',
+        'content_type_id', 
+        'user_id',
+        'changed_fields'
+        ) + SearchVector('object_repr')).filter(search__contains=query)
+
+    total_items = Paginator(cruds, per_page)
+    items_page = total_items.page(page)
+
+    for crud_event in items_page.object_list:
         crud_event_display.append({
             'id': crud_event.id,
             'event_type': crud_event.event_type,
@@ -172,35 +184,13 @@ def crud_event_all(request, payload):
             'user_pk_as_string': crud_event.user_pk_as_string,
             'changed_fields': crud_event.changed_fields,
         })
-    return JsonResponse({
-        'crud_event_display': crud_event_display,
-        'len': CRUDEvent.objects.all().count()
-    })
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def crudSearch(request, payload):
-    query = payload.get('query')
-    last = payload.get('last')
-    first = payload.get('first')
-    crud_event_display = []
-    cruds = CRUDEvent.objects.annotate(search=SearchVector('event_type', 'object_id', 'content_type_id', 'user_id', 'changed_fields') + SearchVector('object_repr'),).filter(search__contains=query)
-    for crud_event in cruds[first:last]:
-        crud_event_display.append({
-            'id': crud_event.id,
-            'event_type': crud_event.event_type,
-            'object_id': crud_event.object_id,
-            'object_repr': crud_event.object_repr,
-            'datetime': crud_event.datetime.strftime('%Y-%m-%d'),
-            'content_type_id': crud_event.content_type_id,
-            'username': User.objects.filter(id=crud_event.user_id).values('username').first()['username'],
-            'user_id': crud_event.user_id,
-            'user_pk_as_string': crud_event.user_pk_as_string,
-            'changed_fields': crud_event.changed_fields,
-        })
-    return JsonResponse({'crud_event_display': crud_event_display, 'len': cruds.count()})
+    total_page = total_items.num_pages
+    rsp = {
+        'items': crud_event_display,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
