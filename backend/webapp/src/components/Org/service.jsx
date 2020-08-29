@@ -1,4 +1,4 @@
-import {handleResponse, getGetOptions, getPostOptions, getCookie} from '../../helpers/service'
+import {handleResponse,getGetOptions, getPostOptions, getCookie} from '../../helpers/service'
 
 export const service = {
     getAll,
@@ -14,6 +14,7 @@ export const service = {
     sistemCount,
     EmployeeSearch,
     orgList,
+    orgAll,
 }
 
 
@@ -108,13 +109,17 @@ function employee_update(org_level, org_id, paylaod) {
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-update/`, opts).then(handleResponse)
 }
 
-function orgList(page, perpage, query) {
+function orgList(page, perpage, query, org_level) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({page, perpage, query}),
+        body: JSON.stringify({page, perpage, query,org_level}),
     }
-    console.log("aa")
     return fetch(`${prefix}/level-${org_level}/org-list/`, opts).then(handleResponse)
+}
+
+function orgAll(level,id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
 }
 
 function EmployeeSearch(level, org_id,query) {

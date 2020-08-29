@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {OrgFormTable} from './OrgFormTable'
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
-
+import { Pagination } from "../pagination/pagination"
 
 export class OrgForm extends Component {
 
@@ -18,7 +18,7 @@ export class OrgForm extends Component {
             orgs: [],
             org_length:null,
             currentPage: this.initials.currentPage,
-            orgPerPage:20,
+            orgPerPage:2,
             searchQuery: '',
             query_min: false,
             search_load: false,
@@ -27,27 +27,36 @@ export class OrgForm extends Component {
         this.handleSearch = this.handleSearch.bind(this)
     }
 
-    paginate (page, query) {
+    componentDidUpdate(prevProp){
+        if(this.props.match.params.level !== prevProp.match.params.level ){
+            this.setState({ level: this.props.match.params.level })
+            const level = this.props.match.params.level
+            this.paginate(1, "", level)
+        }
+    }
+
+    paginate (page, query, level) {
         const perpage = this.state.orgPerPage
         this.setState({ currentPage: page })
             return service
-                .orgList(page, perpage, query)
+                .orgList(page, perpage, query, level)
                 .then(page => {
-                    this.setState({ org: page.items, org_length: page.items.length })
+                    this.setState({ orgs: page.items, org_length: page.items.length })
                     return page
                 })
     }
 
     handleSearch(field, e) {
+        const level = this.props.match.params.level
         if(e.target.value.length >= 1)
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(this.state.currentPage, e.target.value, level)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(this.state.currentPage, e.target.value, level)
         }
     }
 
@@ -82,7 +91,7 @@ export class OrgForm extends Component {
                             </thead>
                             <tbody>
                                 { org_length ===0 ?
-                                    <tr><td>Байгууллага бүртгэлгүй байна</td></tr>:
+                                    <tr><td>Байгууллага бүртгэлгүй байна</td></tr> :
                                     orgs.map((org, idx) =>
                                         <OrgFormTable
                                             key={idx}
@@ -98,6 +107,7 @@ export class OrgForm extends Component {
                     <Pagination 
                         paginate = {this.paginate}
                         searchQuery = {this.state.searchQuery}
+                        org_level = {this.props.match.params.level}
                     />
                 </div>
             </div>
