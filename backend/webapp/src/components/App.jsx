@@ -12,7 +12,7 @@ import {ConfigPage} from "./ConfigPage";
 import {Log} from "./Log"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
-
+import {Forms} from "./Form"
 
 export default class App extends Component {
 
@@ -48,6 +48,9 @@ export default class App extends Component {
 
             <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
               <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
+                <li className="nav-item">
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/froms/"}>Маягт</NavLink>
+                </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>Хандалт</NavLink>
                 </li>
@@ -87,6 +90,7 @@ export default class App extends Component {
             <Route path={"/back/wms/"} component={WMSPage} />
             <Route path={"/back/байгууллага/"} component={Org} />
             <Route exact path={"/back/log/"} component={Log} />
+            <Route path={"/back/froms/"} component={Forms} />
             <Route path={"/back/access/"} component={Access} />
             <Route exact path={"/back/huulga/"} component={Huulga} />
             <Route

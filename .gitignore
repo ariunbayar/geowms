@@ -2,20 +2,39 @@ activate
 *.swp
 __pycache__
 
-backend/webapp/static/assets/js/backend/webapp.js
-frontend/mobile/static/assets/js/frontend/mobile.js
-frontend/bundle/static/assets/js/frontend/bundle.js
-frontend/payment/static/assets/js/frontend/payment.js
-frontend/profile/static/assets/js/frontend/profile.js
+
+backend/**/*.dev.html
+frontend/**/*.dev.html
 
 main/settings/dev.py
 main/settings/prod.py
+
+
+backend/webapp/static/
+frontend/bundle/static/
+frontend/mobile/static/
+frontend/payment/static/
+frontend/profile/static/
+
+geoportal_app/static/dist_dev
+
 geoportal_app/media/дэд-сан/*
 geoportal_app/media/суурь_давхарга/thumbnail_1x/*
 geoportal_app/media/суурь_давхарга/thumbnail_2x/*
 !geoportal_app/media/дэд-сан/.keep
 !geoportal_app/media/суурь_давхарга/thumbnail_1x/.keep
 !geoportal_app/media/суурь_давхарга/thumbnail_2x/.keep
+
+
+geoportal_app/media/tseg-ustsan/*
+!geoportal_app/media/tseg-ustsan/.keep
+geoportal_app/media/tseg-personal-file/*
+!geoportal_app/media/tseg-personal-file/.keep
+geoportal_app/media/tseg-personal-img/*
+!geoportal_app/media/tseg-personal-img/.keep
+geoportal_app/media/tseg-personal/*
+!geoportal_app/media/tseg-personal/.keep
+
 
 package-lock.json
 node_modules/
