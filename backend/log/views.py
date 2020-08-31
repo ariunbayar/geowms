@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.postgres.search import SearchVector
+from django.core.paginator import Paginator
+
 from main.decorators import ajax_required
 from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 from geoportal_app.models import User
@@ -55,7 +57,7 @@ def loginSearch(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def login_date_count(request):
-    user_login_date_all = LoginEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    user_login_date_all = LoginEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     user_login_date = []
     user_login_date_count = []
     for login_date in user_login_date_all:
@@ -72,37 +74,25 @@ def login_date_count(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def pageAll(request, payload):
-    log_display = []
-    last = payload.get('last')
-    first = payload.get('first')
-    for log in RequestEvent.objects.all()[first:last]:
-        log_display.append({
-            'id': log.id,
-            'url': log.url,
-            'method': log.method,
-            'query_string': log.query_string,
-            'remote_ip': log.remote_ip,
-            'user_id': log.user_id,
-            'datetime': log.datetime.strftime('%Y-%m-%d'),
-        })
-    return JsonResponse({
-        'page_logs': log_display,
-        'len': RequestEvent.objects.all().count()
-            })
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def pageSearch(request, payload):
+def page_list(request, payload):
     query = payload.get('query')
-    last = payload.get('last')
-    first = payload.get('first')
-    log_display = []
-    pages = RequestEvent.objects.annotate(search=SearchVector('url', 'id', 'method', 'remote_ip', 'user_id') + SearchVector('url'),).filter(search__contains=query)
-    for log in pages[first:last]:
+    page = payload.get('page')
+    per_page = payload.get('perpage')
 
+    log_display = []
+
+    pages =  RequestEvent.objects.annotate(search=SearchVector(
+        'url',
+        'id',
+        'method',
+        'remote_ip',
+        'user_id',
+        'url',)
+    ).filter(search__contains=query)
+
+    total_items = Paginator(pages, per_page)
+    items_page = total_items.page(page)
+    for log in items_page.object_list:
         log_display.append({
             'id': log.id,
             'url': log.url,
@@ -111,16 +101,22 @@ def pageSearch(request, payload):
             'remote_ip': log.remote_ip,
             'user_id': log.user_id,
             'datetime': log.datetime.strftime('%Y-%m-%d'),
+    })
+    total_page = total_items.num_pages
+    rsp = {
+        'items': log_display,
+        'page': page,
+        'total_page': total_page,
+    }
 
-        })
-    return JsonResponse({'page_logs': log_display, 'len': pages.count()})
+    return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def page_date_count(request):
-    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     page_date = []
     page_date_count = []
     for page in page_all:
@@ -147,6 +143,15 @@ def page_user_count(request):
     return JsonResponse(rsp)
 
 
+
+def _get_user_name(user_id):
+
+    if user_id:
+        return User.objects.filter(id=user_id).values('username').first()['username']
+    else:
+        return 'Нэвтрээгүй'
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -162,7 +167,7 @@ def crud_event_all(request, payload):
             'object_repr': crud_event.object_repr,
             'datetime': crud_event.datetime.strftime('%Y-%m-%d'),
             'content_type_id': crud_event.content_type_id,
-            'username': User.objects.filter(id=crud_event.user_id).values('username').first()['username'],
+            'username': _get_user_name(crud_event.user_id),
             'user_id': crud_event.user_id,
             'user_pk_as_string': crud_event.user_pk_as_string,
             'changed_fields': crud_event.changed_fields,
@@ -202,7 +207,7 @@ def crudSearch(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crud_method_count(request):
-    method_all = CRUDEvent.objects.all().order_by('event_type').distinct('event_type') 
+    method_all = CRUDEvent.objects.all().order_by('event_type').distinct('event_type')
     method_id = []
     method_id_count = []
     for login_date in method_all:
@@ -220,7 +225,7 @@ def crud_method_count(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crud_date_count(request):
-    date_all = CRUDEvent.objects.all().order_by('datetime__date').distinct('datetime__date') 
+    date_all = CRUDEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     crud_date = []
     crud_date_count = []
     for crud in date_all:

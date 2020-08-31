@@ -21,6 +21,8 @@ def all(request):
             'is_success': payment.is_success,
             'success_at': payment.success_at.strftime('%Y-%m-%d'),
             'user_id': payment.user_id,
+            'user_firstname': payment.user.first_name,
+            'user_lastname': payment.user.last_name,
             'bank_unique_number': payment.bank_unique_number,
             'data_id': payment.data_id,
             'error_code': payment.error_code,
@@ -48,7 +50,31 @@ def purchase(request, payload):
 
     return JsonResponse({'payment_id': payment.id})
 
-  
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def purchaseDraw(request, payload):
+    user = get_object_or_404(User, pk=request.user.id)
+    price = payload.get('price')
+    description = payload.get('description')
+    coodrinatLeftTop = payload.get('coodrinatLeftTop')
+    coodrinatRightBottom = payload.get('coodrinatRightBottom')
+    count = Payment.objects.all().count()
+    payment = Payment.objects.create(geo_unique_number=count, 
+                                        amount=price, 
+                                        description=description, 
+                                        user=user, 
+                                        is_success=False, 
+                                        coodrinatLeftTopX=coodrinatLeftTop[0], 
+                                        coodrinatLeftTopY=coodrinatLeftTop[1], 
+                                        coodrinatRightBottomX=coodrinatRightBottom[0],
+                                        coodrinatRightBottomY=coodrinatRightBottom[1] 
+                                    )
+
+    return JsonResponse({'payment_id': payment.id})
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -69,7 +95,7 @@ def purchaseAll(request, payload):
             'error_message': payment.error_message,
             'failed_at': payment.failed_at,
             'bank_unique_number': payment.bank_unique_number,
-            'success_at': payment.success_at.strftime('%Y-%m-%d'),
+            'success_at': payment.success_at,
             'user': user.username,
         })
         return JsonResponse({'purchase_all': purchase_all})

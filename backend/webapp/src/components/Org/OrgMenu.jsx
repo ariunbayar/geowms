@@ -35,7 +35,7 @@ export class OrgMenu extends Component {
     }
 
     getOrgName(org_level,id){
-        service.OrgAll(org_level,id).then(({ orgs,count }) => {
+        service.orgAll(org_level,id).then(({ orgs,count }) => {
             if (orgs) {
                 orgs.map(org=>this.setState({
                     org_name:org.name
@@ -63,12 +63,13 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Хэрэглэгч({this.state.employee_count})
+                                        Хэрэглэгч<span className="badge badge-primary badge-pill">{this.state.employee_count}</span>
+  
                                     </div>
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Систем ({this.state.sistem_count})
+                                        Систем<span className="badge badge-primary badge-pill">{this.state.sistem_count}</span>
                                     </div>
                                 </NavLink>
                             </div>

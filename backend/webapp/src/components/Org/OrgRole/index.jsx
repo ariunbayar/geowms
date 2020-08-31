@@ -24,8 +24,6 @@ export class OrgRole extends Component {
         this.handleSave = this.handleSave.bind(this)
     }
 
-
-
     componentDidMount() {
         this.handleListUpdated()
     }

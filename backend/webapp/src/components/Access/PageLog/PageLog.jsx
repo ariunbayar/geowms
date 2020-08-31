@@ -3,6 +3,7 @@ import {PageLogTable} from './PageLogTable'
 import {Charts} from './Chart'
 import {PieChart} from './PieChart'
 import {service} from "../service"
+import { Pagination } from "../../pagination/pagination"
 
 export class PageLog extends Component {
 
@@ -15,96 +16,37 @@ export class PageLog extends Component {
             logPerPage:100,
             searchQuery: '',
             searchIsLoad: false,
-
-
         }
-        this.handleGetAll=this.handleGetAll.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
-        this.handleSearch=this.handleSearch.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
-        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
-
+        this.paginate = this.paginate.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
     }
 
-    componentDidMount(){
-        const {currentPage}=this.state
-        this.handleListCal(currentPage)
-
+    paginate (page,query) {
+        const perpage = this.state.logPerPage
+        this.setState({ currentPage: page })
+            return service
+                .pageList(page, perpage, query)
+                .then(page => {
+                    this.setState({ page_logs: page.items })
+                    return page
+                })
     }
-    handleListCal(currentPage){
-        const {logPerPage, searchIsLoad}=this.state
-        const lastIndex=currentPage*logPerPage
-        const firtsIndex=lastIndex-logPerPage
-        if(searchIsLoad){
-            this.handleSearchNextPage(lastIndex,firtsIndex)
+
+    handleSearch (field, e) {
+        if(e.target.value.length >= 1)
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
         }
         else
         {
-            this.handleGetAll(lastIndex,firtsIndex)
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
         }
     }
-
-    handleGetAll(lastIndex,firtsIndex){
-        service.pageAll(lastIndex,firtsIndex).then(({ page_logs, len }) => {
-            if(len){
-                this.setState({page_logs, log_length:len})
-            }
-        })
-
-    }
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-        }
-    }
-
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.log_length/this.state.logPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-            this.handleListCal(this.state.currentPage+1)
-        }
-    }
-
-    handleSearchNextPage(lastIndex,firtsIndex) {
-
-            const {searchQuery} = this.state
-
-            service.pageSearch(searchQuery, lastIndex, firtsIndex).then(({ page_logs, len }) => {
-                if(page_logs){
-                    this.setState({page_logs, log_length:len})
-                }
-            })
-    }
-
-    handleSearch(field, e) {
-        if(e.target.value.length > 1)
-        {
-            this.setState({ [field]: e.target.value, currentPage:1, logPerPage:100, searchIsLoad:true})
-            const {currentPage, logPerPage} = this.state
-            service.pageSearch(e.target.value, logPerPage, currentPage).then(({ page_logs, len }) => {
-                if(page_logs){
-                    this.setState({page_logs, log_length:len })
-                }
-            })
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value , currentPage:1, logPerPage:100 ,searchIsLoad:false})
-            const {currentPage}=this.state
-            this.handleListCal(currentPage)
-        }
-    }
-
 
     render() {
-        const {page_logs, log_length, currentPage,logPerPage}=this.state
-        const totalPages=Math.ceil( log_length/logPerPage)
+        const { page_logs, log_length } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -123,7 +65,6 @@ export class PageLog extends Component {
                             <hr />
                         </div>
                     </div>
-
                     <h5 className="mb-3">Нэвтэрч орсон мэдээлэл</h5>
                     <div className="form-row text-right">
                         <div className="form-group col-md-8">
@@ -153,36 +94,22 @@ export class PageLog extends Component {
                                 </thead>
                                 <tbody>
                                     {log_length === 0 ?
-                                     <tr><td>Хандалт байхгүй байна </td></tr>:
-                                     page_logs.map((page, idx) =>
-                                        <PageLogTable key = {idx} idx = {(currentPage*100)-100+idx+1} values={page}></PageLogTable>
+                                    <tr><td>Хандалт байхгүй байна </td></tr>:
+                                    page_logs.map((page, idx) =>
+                                        <PageLogTable 
+                                            key = {idx} 
+                                            idx = {(this.state.currentPage*100)-100+idx+1} 
+                                            values={page}>
+                                        </PageLogTable>
                                     )}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="col-md-12">
-                            <div className="float-left">
-                                <strong>Хуудас {currentPage}-{totalPages}</strong>
-                            </div>
-                            <div className="float-right">
-                                <button
-                                type=" button"
-                                className="btn gp-outline-primary"
-                                onClick={this.prevPage}
-                                >&laquo;өмнөх
-                                </button> {}
-                                <button
-                                type="button"
-                                className="btn gp-outline-primary "
-                                onClick={this.nextPage
-                                }>
-                                дараах &raquo;
-                                </button>
-                            </div>
-                        </div>
-                     </div>
+                    <Pagination
+                        paginate = {this.paginate}
+                        searchQuery = {this.state.searchQuery}
+                    />
                 </div>
             </div>
         )

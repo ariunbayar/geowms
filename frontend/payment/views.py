@@ -14,7 +14,7 @@ from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 
 
-    
+
 def index(request):
 
     context = {
@@ -48,10 +48,10 @@ def dictionaryRequest(request, payload):
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False})
-            
+
 
 def dictionaryResponse(request):
-    
+
     if request.method == 'GET':
         print("Dsdfsdfsddfgdf")
 

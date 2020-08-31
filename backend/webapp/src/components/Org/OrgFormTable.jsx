@@ -12,8 +12,7 @@ export class OrgFormTable extends Component {
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
-    componentDidMount(){
-    }
+
     handleModalDeleteOpen() {
         this.setState({is_modal_delete_open: true})
     }
