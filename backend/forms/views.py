@@ -121,8 +121,7 @@ def dursgaltGazarCreate(request, payload):
     dursgal2 = 'None'
 
     if form_datas['torol_zuil_torol_zuil_tree2']:
-        print('')
-        # type2 = form_datas['torol_zuil_torol_zuil_tree2']
+         type2 = form_datas['torol_zuil_torol_zuil_tree2']
 
     # type1 = form_datas['torol_zuil_torol_zuil'] + ' ' + type2
 
