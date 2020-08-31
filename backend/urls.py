@@ -89,14 +89,13 @@ urlpatterns = [
     ], 'log'))),
 
     path('api/систем/', include(([
-        path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
-        path('govorgSearch/', govorg_views.govorgSearch, name='govorgSearch'),
+        path('govorgList/', govorg_views.govorgList, name='govorgList'),
     ], 'govorg'))),
 
     path('api/config/', include(([

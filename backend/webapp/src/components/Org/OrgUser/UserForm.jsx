@@ -35,7 +35,7 @@ export class UserForm extends Component {
             return service
                 .employee_list(page, perpage, query, org_level, org_id)
                 .then(page => {
-                    this.setState({ employees: page.items })
+                    this.setState({ employees: page.items, employees_length: page.items.length })
                     return page
                 })
     }
@@ -56,13 +56,13 @@ export class UserForm extends Component {
     handleGovorgDelete(id) {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        const { load } = this.state
+        const { load, searchQuery } = this.state
         service.employee_remove(org_level, org_id, id).then(({ success }) => {
             if (success) {
                 var a = load
                 a ++
                 this.setState({ load: a })
-                this.paginate(1, "")
+                this.paginate(1, searchQuery)
             }
         })
     }

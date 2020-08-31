@@ -33,6 +33,7 @@ export class Pagination extends Component {
         if(prevProps.load !== this.props.load)
         {
             const query = this.props.searchQuery
+            console.log(query)
             this.loadPage(1, query)
         }
         if(this.props.org_level){

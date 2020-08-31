@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
-
+from django.core.paginator import Paginator
 
 from main.decorators import ajax_required
 from backend.wms.models import WMS
@@ -28,29 +28,6 @@ def _get_govorg_display(govorg):
 
 def _generate_govorg_token():
     return uuid.uuid4().hex[:32]
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def жагсаалт(request, payload):
-    last = payload.get('last')
-    first = payload.get('first')
-    org_id = payload.get('org_id')
-    govorg_list = GovOrg.objects.filter(org_id=org_id)[first:last]
-
-    govorg_list_display = [
-        _get_govorg_display(govorg)
-        for govorg in govorg_list
-    ]
-
-    rsp = {
-        'govorg_list': govorg_list_display,
-        'len': GovOrg.objects.all().count(),
-        'success': True,
-    }
-
-    return JsonResponse(rsp)
 
 
 @require_POST
@@ -174,18 +151,26 @@ def тоо(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def govorgSearch(request, payload):
+def govorgList(request, payload):
+   
+    page = payload.get('page')
+    per_page = payload.get('perpage')
     query = payload.get('query')
-    govorg_list = GovOrg.objects.all().annotate(search=SearchVector('name')).filter(search__contains=query)
-    govorg_list_display = [
+    org_id = payload.get('org_id')
+    govorg_list = GovOrg.objects.all().annotate(search=SearchVector(
+        'name')).filter(search__contains=query, org_id = org_id)
+
+    total_items = Paginator(govorg_list, per_page)
+    items_page = total_items.page(page)
+    items = [
         _get_govorg_display(govorg)
-        for govorg in govorg_list
+        for govorg in items_page.object_list
     ]
+    total_page = total_items.num_pages
 
     rsp = {
-        'govorg_list': govorg_list_display,
-        'len': GovOrg.objects.all().count(),
-        'success': True,
+        'items': items,
+        'page': page,
+        'total_page': total_page,
     }
-
     return JsonResponse(rsp)
