@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.postgres.search import SearchVector
+from django.core.paginator import Paginator
+
 from main.decorators import ajax_required
 from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 from geoportal_app.models import User
@@ -72,37 +74,25 @@ def login_date_count(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def pageAll(request, payload):
-    log_display = []
-    last = payload.get('last')
-    first = payload.get('first')
-    for log in RequestEvent.objects.all()[first:last]:
-        log_display.append({
-            'id': log.id,
-            'url': log.url,
-            'method': log.method,
-            'query_string': log.query_string,
-            'remote_ip': log.remote_ip,
-            'user_id': log.user_id,
-            'datetime': log.datetime.strftime('%Y-%m-%d'),
-        })
-    return JsonResponse({
-        'page_logs': log_display,
-        'len': RequestEvent.objects.all().count()
-            })
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def pageSearch(request, payload):
+def page_list(request, payload):
     query = payload.get('query')
-    last = payload.get('last')
-    first = payload.get('first')
-    log_display = []
-    pages = RequestEvent.objects.annotate(search=SearchVector('url', 'id', 'method', 'remote_ip', 'user_id') + SearchVector('url'),).filter(search__contains=query)
-    for log in pages[first:last]:
+    page = payload.get('page')
+    per_page = payload.get('perpage')
 
+    log_display = []
+
+    pages =  RequestEvent.objects.annotate(search=SearchVector(
+        'url',
+        'id',
+        'method',
+        'remote_ip',
+        'user_id',
+        'url',)
+    ).filter(search__contains=query)
+
+    total_items = Paginator(pages, per_page)
+    items_page = total_items.page(page)
+    for log in items_page.object_list:
         log_display.append({
             'id': log.id,
             'url': log.url,
@@ -111,9 +101,15 @@ def pageSearch(request, payload):
             'remote_ip': log.remote_ip,
             'user_id': log.user_id,
             'datetime': log.datetime.strftime('%Y-%m-%d'),
+    })
+    total_page = total_items.num_pages
+    rsp = {
+        'items': log_display,
+        'page': page,
+        'total_page': total_page,
+    }
 
-        })
-    return JsonResponse({'page_logs': log_display, 'len': pages.count()})
+    return JsonResponse(rsp)
 
 
 @require_GET

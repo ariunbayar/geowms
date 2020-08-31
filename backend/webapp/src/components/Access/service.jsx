@@ -4,7 +4,6 @@ export const service = {
     getAll,
     browserCount,
     pageCount,
-    pageAll,
     loginAll,
     CrudEventAll,
     loginDateCount,
@@ -13,9 +12,8 @@ export const service = {
     pageUserCount,
     crudMethodCount,
     crudDateCount,
-    pageSearch,
-    crudSearch
-
+    crudSearch,
+    pageList,
 }
 
 
@@ -43,18 +41,12 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
-function pageSearch(query, last, first) {
+function pageList(page, perpage, query){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query, last, first}),
+        body: JSON.stringify({ page, perpage, query }),
     }
-    return fetch(`${prefix}/log/page-search/`, requestOptions).then(handleResponse)
-}
-
-function pageAll(last, first) {
-    const requestOptions = {...getPostOptions(),
-        body: JSON.stringify({last, first})}
-    return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/log/page-list/`, requestOptions).then(handleResponse)
 }
 
 function loginDateCount() {

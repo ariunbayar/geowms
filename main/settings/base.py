@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'backend.org.apps.OrgConfig',
     'backend.log.apps.LogConfig',
     'backend.payment.apps.PaymentConfig',
+    'backend.forms.apps.FormsConfig',
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
@@ -135,7 +136,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'geoportal_app', 'static')
 LOGIN_URL = 'secure:login'
 LOGIN_REDIRECT_URL = 'bundle:all'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'

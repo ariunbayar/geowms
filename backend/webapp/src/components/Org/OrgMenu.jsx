@@ -34,7 +34,7 @@ export class OrgMenu extends Component {
     }
 
     getOrgName(org_level,id){
-        service.OrgAll(org_level,id).then(({ orgs,count }) => {
+        service.orgAll(org_level,id).then(({ orgs,count }) => {
             if (orgs) {
                 orgs.map(org=>this.setState({
                     org_name:org.name
