@@ -2,7 +2,6 @@ from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
-
 from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
@@ -10,6 +9,7 @@ from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
 from django.contrib.auth.decorators import user_passes_test
+
 
 def _get_user_display(user):
     roles = [_get_role_display(role) for role in user.roles.all()]
@@ -24,6 +24,9 @@ def _get_user_display(user):
         'roles': roles
     }
 
+    
+def _datetime_display(dt):
+    return dt.strftime('%Y-%m-%d') if dt else None
 
 def _get_user_detail(user):
     return {
@@ -36,8 +39,8 @@ def _get_user_detail(user):
         'is_sso': user.is_sso,
         'username': user.username,
         'is_active': user.is_active,
-        'last_login': user.last_login.strftime('%Y-%m-%d'),
-        'date_joined': user.date_joined.strftime('%Y-%m-%d'),
+        'last_login':_datetime_display(user.last_login),
+        'date_joined':_datetime_display(user.date_joined)
     }
 
 
