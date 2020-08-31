@@ -16,7 +16,7 @@ export class UserForm extends Component {
             employees: [],
             employees_length:null,
             currentPage:1,
-            employeesPerPage:2,
+            employeesPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
