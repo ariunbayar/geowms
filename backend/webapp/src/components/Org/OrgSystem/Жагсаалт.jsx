@@ -20,7 +20,7 @@ export class Жагсаалт extends Component {
             govorg_list: [],
             govorg_length:null,
             currentPage:1,
-            govorgPerPage:2,
+            govorgPerPage:20,
             load: 0,
             searchQuery: '',
         }
