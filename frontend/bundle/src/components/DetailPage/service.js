@@ -83,5 +83,5 @@ function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom)
         ..._getPostOptions(),
         body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
     }
-    return fetch('/back/payment/purchase-draw/', requestOptions).then(handleResponse)
+    return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
 }

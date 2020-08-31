@@ -47,6 +47,8 @@ urlpatterns = [
     path('payment/', include(([
         path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
+        path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
+
     ], 'payment'))),
 
     path('profile/api/', include(([
@@ -54,7 +56,7 @@ urlpatterns = [
         path('all/', profile_views.all, name='all'),
     ], 'profile'))),
 
+    re_path('^.*', payment_views.index, name='payment'),
     re_path('^.*', profile_views.history, name='history'),
 
-    re_path('^.*', payment_views.index, name='payment'),
 ]
