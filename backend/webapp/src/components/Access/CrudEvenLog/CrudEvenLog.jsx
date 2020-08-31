@@ -29,7 +29,7 @@ export class CrudEvenLog extends Component {
             return service
                 .crudList(page, perpage, query)
                 .then(page => {
-                    this.setState({ crud_event_display: page.items})
+                    this.setState({ crud_event_display: page.items, crud_length: page.items.length })
                     return page
                 })
     }
@@ -38,17 +38,17 @@ export class CrudEvenLog extends Component {
         if(e.target.value.length >= 1)
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(1, e.target.value)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(1, e.target.value)
         }
     }
 
     render() {
-        const { crud_event_display, currentPage, crud_length } = this.state
+        const { crud_event_display, currentPage, crud_length, crudPerPage } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -99,7 +99,7 @@ export class CrudEvenLog extends Component {
                                     crud_event_display.map((logout, idx) =>
                                         <CrudEvenLogTable 
                                             key = {idx} 
-                                            idx = {(currentPage*20)-20+idx+1} 
+                                            idx = {(currentPage*crudPerPage)-crudPerPage+idx+1} 
                                             values={logout}>
                                         </CrudEvenLogTable>
                                     )}

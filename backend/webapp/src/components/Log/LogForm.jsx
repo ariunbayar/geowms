@@ -29,8 +29,7 @@ export class LogForm extends Component {
     }
 
     render() {
-        const {payment_all} = this.state
-        const {pay_legth} = this.state
+        const {payment_all, pay_legth} = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
