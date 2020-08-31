@@ -67,7 +67,6 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
         path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
-        path('level-<int:level>/<int:pk>/employees/', org_views.employees, name='employees'),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('level-<int:level>/<int:pk>/employee-remove/', org_views.employee_remove, name='employee-remove'),
         path('level-<int:level>/<int:pk>/employee-more-<int:emp>/', org_views.employee_more, name='employee-more'),
@@ -75,8 +74,7 @@ urlpatterns = [
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
         path('level-<int:level>/orgSearch/', org_views.orgSearch, name='orgSearch'),
-        # path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
-        path('level-<int:level>/<int:pk>/employeePaginate/', org_views.employeePaginate, name='employeePaginate'),
+        path('level-<int:level>/<int:pk>/employeeList/', org_views.employeeList, name='employeeList'),
     ], 'org'))),
 
     path('api/log/', include(([

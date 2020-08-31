@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
+from django.core.paginator import Paginator
 
 from main.decorators import ajax_required
 from .models import Org, OrgRole, Employee
@@ -170,32 +171,6 @@ def roles_save(request, payload, level, pk):
     return JsonResponse({'success': True})
 
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def employees(request, payload, level, pk):
-    last = payload.get('last')
-    first = payload.get('first')
-    org = get_object_or_404(Org, pk=pk, level=level)
-    employees_display = []
-
-    for employe in User.objects.filter(employee__org=org)[first:last]:
-        employees_display.append({
-            'id': employe.id,
-            'last_name': employe.last_name,
-            'first_name': employe.first_name,
-            'email': employe.email,
-            'is_active': employe.is_active,
-            'is_sso': employe.is_sso,
-            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
-            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
-            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
-        })
-    return JsonResponse({
-        'employees': employees_display,
-        'len': User.objects.filter(employee__org=org).count()
-                })
-
 
 @require_GET
 @ajax_required
@@ -356,37 +331,22 @@ def orgSearch(request, payload,level):
     return JsonResponse({'orgs': orgs_display, })
 
 
-# @require_POST
-# @ajax_required
-# @user_passes_test(lambda u: u.is_superuser)
-# def employeeSearch(request,payload, level, pk):
-#     org = get_object_or_404(Org, pk=pk, level=level)
-#     employees_display = []
-#     query = payload.get('query')
-#     for employe in User.objects.filter(employee__org=org).annotate(search=SearchVector('last_name', 'first_name', 'email')).filter(search__contains=query):
-#         employees_display.append({
-#             'id': employe.id,
-#             'last_name': employe.last_name,
-#             'first_name': employe.first_name,
-#             'email': employe.email,
-#             'is_active': employe.is_active,
-#             'is_sso': employe.is_sso,
-#             'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
-#             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
-#             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
-#         })
-#     return JsonResponse({'employees': employees_display, })
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employeePaginate(request,payload, level, pk):
+def employeeList(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
+    page = payload.get('page')
     query = payload.get('query')
     per_page = payload.get('perpage')
-    emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector('last_name', 'first_name', 'email')).filter(search__contains=query)
+
+    emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
+        'last_name', 
+        'first_name', 
+        'email')
+    ).filter(search__contains=query)
+
     total_items = Paginator(emp_list, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
