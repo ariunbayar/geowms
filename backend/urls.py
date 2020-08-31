@@ -64,7 +64,6 @@ urlpatterns = [
 
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
-        path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
         path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
         path('level-<int:level>/<int:pk>/employees/', org_views.employees, name='employees'),
@@ -74,15 +73,14 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
-        path('level-<int:level>/orgSearch/', org_views.orgSearch, name='orgSearch'),
+         path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
+        path('level-<int:level>/org-list/', org_views.orgList, name='orgList'),
         path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
     ], 'org'))),
 
     path('api/log/', include(([
-        path('login-all/', log_views.login_all, name='login-all'),
-        path('login-search/', log_views.loginSearch, name='login-search'),
-        path('crud-event-all/', log_views.crud_event_all, name='crud-event-all'),
-        path('crud-search/', log_views.crudSearch, name='crud-search'),
+        path('login-list/', log_views.login_list, name='login-list'),
+        path('crud-list/', log_views.crudList, name='crudList'),
         path('login-date-count/', log_views.login_date_count, name='login-date-count'),
         path('crud-method-count/', log_views.crud_method_count, name='crud-method-count'),
         path('crud-date-count/', log_views.crud_date_count, name='crud-date-count'),
@@ -113,7 +111,7 @@ urlpatterns = [
 
     path('payment/', include(([
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
-        path('all/', payment_views.all, name='all'),
+        path('payment-list/', payment_views.paymentList, name='paymentList'),
         path('purchase/', payment_views.purchase, name='purchase'),
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
     ], 'payment'))),

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 
+from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from backend.payment.models import Payment
 
@@ -39,15 +40,20 @@ def _get_payment_display(payment):
 @login_required
 def all(request, payload):
 
-    last = payload.get('last')
-    first = payload.get('first')
-
-    payment_list_display = [
-        _get_payment_display(payment)
-        for payment in Payment.objects.all()[first:last]
+    page = payload.get('page')
+    per_page = payload.get('per_page')
+    total_items = Paginator(Payment.objects.all(), per_page)
+    items_page = total_items.page(page)
+    items = [
+        _get_payment_display(pay)
+        for pay in items_page.object_list
     ]
+    total_page = total_items.num_pages
 
-    return JsonResponse({
-        "payment": payment_list_display,
-        'len': Payment.objects.all().count()
-    })
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+    }
+    
+    return JsonResponse(rsp)
