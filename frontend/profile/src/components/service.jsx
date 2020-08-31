@@ -1,5 +1,5 @@
 export const service = {
-    loadHistory
+    paginatedList
 }
 
 function handleResponse(response) {
@@ -53,11 +53,11 @@ function _getPostOptions() {
     }
 }
 
-function loadHistory(last,first) {
+function paginatedList(page, per_page) {
     const requestOptions = {
         ..._getPostOptions(),
-         body: JSON.stringify({last,first})
+    body: JSON.stringify({ page, per_page }),
     }
+
     return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
 }
-

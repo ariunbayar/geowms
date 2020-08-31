@@ -3,6 +3,7 @@ import {Charts} from './Chart'
 import {RadarChart} from './Radar'
 import {service} from "../service"
 import {CrudEvenLogTable} from './CrudEvenLogTable'
+import { Pagination } from "../../pagination/pagination"
 
 
 export class CrudEvenLog extends Component {
@@ -18,99 +19,36 @@ export class CrudEvenLog extends Component {
             searchQuery: '',
             searchIsLoad: false,
         }
-        this.handleGetAll=this.handleGetAll.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
+        this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
     }
 
-    componentDidMount(){
-        const {currentPage}=this.state
-        this.handleListCal(currentPage)
-
-    }
-    handleListCal(currentPage){
-
-        const {searchIsLoad} = this.state
-        const {crudPerPage}=this.state
-        const lastIndex=currentPage*crudPerPage
-        const firtsIndex=lastIndex-crudPerPage
-        if(searchIsLoad){
-        this.handleSearchNextPage(lastIndex,firtsIndex)
-
-        }
-        else{
-        this.handleGetAll(lastIndex,firtsIndex)
-
-        }
-    }
-
-
-    handleGetAll(lastIndex,firtsIndex){
-        service.CrudEventAll(lastIndex,firtsIndex).then(({ crud_event_display ,len}) => {
-            if(crud_event_display){
-                this.setState({crud_event_display, crud_length:len})
-            }
-        })
-    }
-
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-        }
-    }
-
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.crud_length/this.state.crudPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-            this.handleListCal(this.state.currentPage+1)
-        }
-    }
-
-    handleSearchNextPage(lastIndex,firtsIndex) {
-        const {searchQuery} = this.state
-
-        service.crudSearch(searchQuery, lastIndex, firtsIndex).then(({ crud_event_display, len }) => {
-            if(crud_event_display){
-                this.setState({crud_event_display, crud_length:len})
-            }
-        })
+    paginate (page, query) {
+        const perpage = this.state.crudPerPage
+        this.setState({ currentPage: page })
+            return service
+                .crudList(page, perpage, query)
+                .then(page => {
+                    this.setState({ crud_event_display: page.items, crud_length: page.items.length })
+                    return page
+                })
     }
 
     handleSearch(field, e) {
-
-        if(e.target.value.length > 1)
+        if(e.target.value.length >= 1)
         {
-
-            this.setState({ currentPage: 1, crudPerPage:20})
-            const {currentPage, crudPerPage} = this.state
-            this.setState({ [field]: e.target.value, searchIsLoad: true})
-            service.crudSearch(e.target.value, crudPerPage, currentPage).then(({ crud_event_display, len }) => {
-                if(crud_event_display){
-                    this.setState({crud_event_display, crud_length:len})
-                }
-            })
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
         }
-
         else
         {
-            this.setState({ [field]: e.target.value , searchIsLoad: false, currentPage: 1, crudPerPage:20})
-
-            const {currentPage}=this.state
-            this.handleListCal(currentPage)
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
         }
-
     }
 
     render() {
-        const { crud_event_display, currentPage, crudPerPage, crud_length } = this.state
-        const totalPages=Math.ceil( crud_length/crudPerPage)
+        const { crud_event_display, currentPage, crud_length, crudPerPage } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -129,7 +67,6 @@ export class CrudEvenLog extends Component {
                             <hr />
                         </div>
                     </div>
-
                     <h5 className="mb-3">Хийгдсэн үйлдлийн мэдээлэл</h5>
                     <div className="form-row text-right">
                         <div className="form-group col-md-8">
@@ -146,7 +83,7 @@ export class CrudEvenLog extends Component {
                     </div>
                     <div className="row rounded">
                         <div className="col-md-12">
-                        <table className="table example" id="example">
+                            <table className="table example" id="example">
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>
@@ -160,34 +97,19 @@ export class CrudEvenLog extends Component {
                                     { crud_length === 0 ?
                                     <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
                                     crud_event_display.map((logout, idx) =>
-                                        <CrudEvenLogTable key = {idx} idx = {(currentPage*20)-20+idx+1} values={logout}></CrudEvenLogTable>
+                                        <CrudEvenLogTable 
+                                            key = {idx} 
+                                            idx = {(currentPage*crudPerPage)-crudPerPage+idx+1} 
+                                            values={logout}>
+                                        </CrudEvenLogTable>
                                     )}
                                 </tbody>
-                        </table>
-                        <div className="row">
-                        <div className="col-md-12">
-                            <div className="float-left">
-                                <strong>Хуудас {currentPage}-{totalPages}</strong>
-                            </div>
-                            <div className="float-right">
-                                <button
-                                type=" button"
-                                className="btn gp-outline-primary"
-                                onClick={this.prevPage}
-                                >&laquo;өмнөх
-                                </button> {}
-                                <button
-                                type="button"
-                                className="btn gp-outline-primary "
-                                onClick={this.nextPage
-                                }>
-                                дараах &raquo;
-                                </button>
-                            </div>
+                            </table>
+                            <Pagination 
+                                paginate = {this.paginate}
+                                searchQuery = {this.state.searchQuery}
+                            />
                         </div>
-                     </div>
-                        </div>
-
                     </div>
                 </div>
             </div>

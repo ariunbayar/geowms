@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {Charts} from './Chart'
 import {service} from "../service"
 import {LoginLogTable} from './LoginLogTable'
+import { Pagination } from "../../pagination/pagination"
 
 
 export class LoginLog extends Component {
@@ -15,99 +16,38 @@ export class LoginLog extends Component {
             loginPerPage:20,
             searchQuery: '',
             query_min: false,
-            search_load: false,
-            searchIsLoad: false,
-
-
         }
-        this.handleGetAll=this.handleGetAll.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
+        this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
-        this.handleSearchNextPage=this.handleSearchNextPage.bind(this)
-
     }
 
-    componentDidMount(){
-        const {currentPage}=this.state
-        this.handleListCal(currentPage)
-
-    }
-    handleListCal(currentPage){
-        const {loginPerPage, searchIsLoad}=this.state
-        const lastIndex=currentPage*loginPerPage
-        const firtsIndex=lastIndex-loginPerPage
-        if(searchIsLoad){
-            this.handleSearchNextPage(lastIndex,firtsIndex)
-
-            }
-        else{
-            this.handleGetAll(lastIndex,firtsIndex)
-
-        }
-    }
-
-    handleGetAll(lastIndex,firtsIndex){
-        service.loginAll(lastIndex,firtsIndex).then(({ login_log_all, len }) => {
-            if(login_log_all){
-                this.setState({login_log_all, login_length:len})
-            }
-        })
-
-    }
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-        }
-    }
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.login_length/this.state.loginPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-            this.handleListCal(this.state.currentPage+1)
-        }
-    }
-
-    handleSearchNextPage(lastIndex,firtsIndex) {
-        this.setState({ search_load:true })
-
-        const { searchQuery } = this.state
-        service.loginSearch(searchQuery, lastIndex, firtsIndex).then(({ login_log_all, len }) => {
-            if(login_log_all){
-                this.setState({login_log_all, login_length:len, search_load:false})
-            }
-        })
+    paginate (page, query) {
+       
+        const perpage = this.state.loginPerPage
+        this.setState({ currentPage: page })
+            return service
+                .loginList(page, perpage, query)
+                .then(page => {
+                    this.setState({ login_log_all: page.items, login_length: page.items.length })
+                    return page
+                })
     }
 
     handleSearch(field, e) {
-        if(e.target.value.length > 1)
+        if(e.target.value.length >= 1)
         {
-            this.setState({ [field]: e.target.value, search_load:true,  searchIsLoad: true,  currentPage:1, loginPerPage:20})
-            const {currentPage, loginPerPage} = this.state
-            service.loginSearch(e.target.value, loginPerPage, currentPage).then(({ login_log_all, len }) => {
-                if(login_log_all){
-                    this.setState({login_log_all, login_length:len, search_load:false})
-                }
-            })
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
         }
         else
         {
-            this.setState({ [field]: e.target.value , searchIsLoad: false, currentPage:1, loginPerPage:20})
-            const {currentPage}=this.state
-            this.handleListCal(currentPage)
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
         }
     }
 
     render() {
-        const { login_log_all,currentPage, loginPerPage, login_length, search_load } = this.state
-
-        const totalPages=Math.ceil( login_length/loginPerPage)
-
+        const { login_log_all,currentPage, login_length, loginPerPage } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -122,7 +62,6 @@ export class LoginLog extends Component {
                             <hr />
                         </div>
                     </div>
-
                     <h5 className="mb-3">Хэрэглэгчийн оролт гаралтын тэмдэглэл</h5>
                     <div className="form-row text-right">
                         <div className="form-group col-md-8">
@@ -135,11 +74,6 @@ export class LoginLog extends Component {
                                 value={this.state.searchQuery}
                             />
                         </div>
-                        {search_load &&
-                            <a className="spinner-border text-light" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </a>
-                        }
                     </div>
                     <div className="row rounded">
                         <div className="col-md-12">
@@ -158,32 +92,19 @@ export class LoginLog extends Component {
                                         { login_length === 0 ?
                                         <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:
                                         login_log_all.map((login, idx) =>
-                                            <LoginLogTable key = {idx} idx = {(currentPage*20)-20+idx+1} values={login}></LoginLogTable>
+                                        
+                                            <LoginLogTable
+                                                key = {idx} 
+                                                idx = {(currentPage*loginPerPage)-loginPerPage+idx+1} 
+                                                values={login}>
+                                            </LoginLogTable>
                                         )}
                                     </tbody>
                             </table>
-                            <div className="row">
-                                <div className="col-md-12">
-                                    <div className="float-left">
-                                        <strong>Хуудас {currentPage}-{totalPages}</strong>
-                                    </div>
-                                    <div className="float-right">
-                                        <button
-                                        type=" button"
-                                        className="btn gp-outline-primary"
-                                        onClick={this.prevPage}
-                                        >&laquo;өмнөх
-                                        </button> {}
-                                        <button
-                                        type="button"
-                                        className="btn gp-outline-primary "
-                                        onClick={this.nextPage
-                                        }>
-                                        дараах &raquo;
-                                        </button>
-                                    </div>
-                                </div>
-                             </div>
+                            <Pagination 
+                                paginate = {this.paginate}
+                                searchQuery = {this.state.searchQuery}
+                            />
                         </div>
                     </div>
                 </div>
