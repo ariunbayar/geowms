@@ -9,7 +9,7 @@ from django.contrib.postgres.search import SearchVector
 from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
-from django.contrib.auth.decorators import user_passes_test
+
 
 def _get_user_display(user):
     roles = [_get_role_display(role) for role in user.roles.all()]
@@ -52,7 +52,7 @@ def _get_role_display(role):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def all(request,payload):
+def all(request, payload):
     last = payload.get('last')
     first = payload.get('first')
     user_list = [_get_user_display(user) for user in User.objects.all()[first:last]]
@@ -144,7 +144,7 @@ def paginatedList(request, payload):
             'first_name',
             'email',
             'gender')
-        ).filter(search__contains=query)
+    ).filter(search__contains=query)
 
     total_items = Paginator(user_list, per_page)
     items_page = total_items.page(page)
@@ -161,4 +161,3 @@ def paginatedList(request, payload):
     }
     
     return JsonResponse(rsp)
-

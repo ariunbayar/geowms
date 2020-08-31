@@ -1,6 +1,5 @@
-import requests
 from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse, Http404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
@@ -71,7 +70,7 @@ def purchase(request, payload):
     description = payload.get('description')
     data_id = payload.get('data_id')
     count = Payment.objects.all().count()
-    payment = Payment.objects.create(geo_unique_number=count, data_id=data_id, amount=price, description=description, user=user, is_success=False )
+    payment = Payment.objects.create(geo_unique_number=count, data_id=data_id, amount=price, description=description, user=user, is_success=False)
 
     return JsonResponse({'payment_id': payment.id})
 
@@ -86,16 +85,17 @@ def purchaseDraw(request, payload):
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
     count = Payment.objects.all().count()
-    payment = Payment.objects.create(geo_unique_number=count, 
-                                        amount=price, 
-                                        description=description, 
-                                        user=user, 
-                                        is_success=False, 
-                                        coodrinatLeftTopX=coodrinatLeftTop[0], 
-                                        coodrinatLeftTopY=coodrinatLeftTop[1], 
-                                        coodrinatRightBottomX=coodrinatRightBottom[0],
-                                        coodrinatRightBottomY=coodrinatRightBottom[1] 
-                                    )
+    payment = Payment.objects.create(
+        geo_unique_number=count, 
+        amount=price, 
+        description=description, 
+        user=user, 
+        is_success=False, 
+        coodrinatLeftTopX=coodrinatLeftTop[0], 
+        coodrinatLeftTopY=coodrinatLeftTop[1], 
+        coodrinatRightBottomX=coodrinatRightBottom[0],
+        coodrinatRightBottomY=coodrinatRightBottom[1] 
+    )
 
     return JsonResponse({'payment_id': payment.id})
 
@@ -109,7 +109,7 @@ def purchaseAll(request, payload):
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
-        purchase_all=[]
+        purchase_all = []
         purchase_all.append({
             'id': payment.id,
             'geo_unique_number': payment.geo_unique_number,

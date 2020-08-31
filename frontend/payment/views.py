@@ -1,18 +1,11 @@
-import requests
-from xml.etree.ElementTree import tostring
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.shortcuts import redirect
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
 
-from geoportal_app.models import User
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
-
 
 
 def index(request):
@@ -38,7 +31,7 @@ def dictionaryRequest(request, payload):
 
     # Хүсэлт илгээж байна
     if not paymentRequest:
-        return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False })
+        return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False})
     else:
         # Банкнаас ирсэн response шалгаж байна
         pay = PaymentMethodMB(paymentRequest, purchase_all['id'])
@@ -56,5 +49,3 @@ def dictionaryResponse(request):
         print("Dsdfsdfsddfgdf")
 
         return JsonResponse({'success': True, 'xmlmsg': 12})
-
-
