@@ -4,7 +4,7 @@ import {service} from './service'
 import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
 import {NavLink} from "react-router-dom"
-
+import { Pagination } from '../../pagination/pagination'
 
 export class Жагсаалт extends Component {
 
@@ -21,89 +21,56 @@ export class Жагсаалт extends Component {
             govorg_length:null,
             currentPage:1,
             govorgPerPage:20,
-
+            load: 0,
+            searchQuery: '',
         }
-
-        this.handleListUpdated = this.handleListUpdated.bind(this)
+        this.paginate = this.paginate.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
-        this.nextPage=this.nextPage.bind(this)
-        this.prevPage=this.prevPage.bind(this)
-        this.handleListCal=this.handleListCal.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
     }
 
-    componentDidMount() {
-        const currentPage=this.state.currentPage
-        this.handleListCal(currentPage)
-    }
-
-    handleListCal(currentPage){
-        const org_level = this.props.match.params.level
+    paginate (page, query) {
+        const perpage = this.state.govorgPerPage
         const org_id = this.props.match.params.id
-        const govorgPerPage=this.state.govorgPerPage
-        const lastIndex=currentPage*govorgPerPage
-        const firtsIndex=lastIndex-govorgPerPage
-        this.handleListUpdated(org_level,org_id,lastIndex,firtsIndex)
-    }
-
-    handleListUpdated(org_level, org_id,lastIndex,firtsIndex ) {
-
-        service.getAll(lastIndex,firtsIndex, org_id).then(({govorg_list,len}) => {
-            this.setState({govorg_list, govorg_length:len})
-        })
-
-    }
-
-    handleRemove(id) {
-        const currentPage=this.state.currentPage
-        service.remove(id).then(({success}) => {
-            if (success) {
-                this.handleListCal(currentPage)
-            }
-        })
-
-    }
-
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-            this.handleListCal(this.state.currentPage-1)
-        }
-    }
-
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.govorg_length/this.state.govorgPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-            this.handleListCal(this.state.currentPage+1)
-        }
+        this.setState({ currentPage: page })
+            return service
+                .govorgList(page, perpage, query, org_id)
+                .then(page => {
+                    this.setState({ govorg_list: page.items, govorg_length: page.items.length })
+                    return page
+                })
     }
 
     handleSearch(field, e) {
-        if(e.target.value.length > 0)
+        if(e.target.value.length >= 1)
         {
-            this.setState({ [field]: e.target.value, search_load:true})
-            service.govorgSearch(e.target.value).then(({ govorg_list }) => {
-                if(govorg_list){
-                    this.setState({govorg_list, govorg_length:govorg_list.length, search_load:false})
-                }
-            })
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            const {currentPage}=this.state.currentPage
-            this.handleListCal(currentPage)
+            this.paginate(1, e.target.value)
         }
+    }
+
+    handleRemove(id) {
+        const { load, searchQuery }=this.state
+        service.remove(id).then(({success}) => {
+            if (success) {
+                var a = load
+                a ++
+                this.setState({ load: a })
+                this.paginate(1, searchQuery)
+            }
+        })
+
     }
 
     render() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {currentPage, govorgPerPage, govorg_list, govorg_length}=this.state
-        const totalPages=Math.ceil( govorg_length/govorgPerPage)
         return (
             <div  className="container my-4">
                 <div className="row">
@@ -153,7 +120,7 @@ export class Жагсаалт extends Component {
                                                     org_level={org_level}
                                                     org_id={org_id}
                                                     key={values.id}
-                                                    idx={(currentPage*20)-20+index+1}
+                                                    idx={(currentPage*govorgPerPage)-govorgPerPage+index+1}
                                                     values={values}
                                                     handleRemove={() => this.handleRemove(values.id)}
                                                     handleEdit={() => this.handleEdit(values)}
@@ -161,29 +128,13 @@ export class Жагсаалт extends Component {
                                         )}
                                     </tbody>
                                 </table>
-                                <div className="col-md-12">
-                                    <div className="float-left">
-                                        <strong>Хуудас {currentPage}-{totalPages}</strong>
-                                    </div>
-                                    <div className="float-right">
-                                        <button
-                                        type=" button"
-                                        className="btn gp-outline-primary"
-                                        onClick={this.prevPage}
-                                        > &laquo; өмнөх
-                                        </button>
-                                        <button
-                                        type="button"
-                                        className="btn gp-outline-primary "
-                                        onClick={this.nextPage
-                                        }>
-                                        дараах &raquo;
-                                        </button>
-                                    </div>
-                                </div>
+                                <Pagination 
+                                    paginate = {this.paginate}
+                                    searchQuery = {this.state.searchQuery}
+                                    load = {this.state.load}
+                                />
                             </>
                         }
-
                     </div>
                 </div>
             </div>

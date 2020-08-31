@@ -66,16 +66,15 @@ urlpatterns = [
         path('level-<int:level>/', org_views.all, name='all'),
         path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
         path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
-        path('level-<int:level>/<int:pk>/employees/', org_views.employees, name='employees'),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('level-<int:level>/<int:pk>/employee-remove/', org_views.employee_remove, name='employee-remove'),
         path('level-<int:level>/<int:pk>/employee-more-<int:emp>/', org_views.employee_more, name='employee-more'),
         path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
-         path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
+        path('level-<int:level>/<int:pk>/employeeList/', org_views.employeeList, name='employeeList'), 
+        path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/org-list/', org_views.orgList, name='orgList'),
-        path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -90,14 +89,13 @@ urlpatterns = [
     ], 'log'))),
 
     path('api/систем/', include(([
-        path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
-        path('govorgSearch/', govorg_views.govorgSearch, name='govorgSearch'),
+        path('govorgList/', govorg_views.govorgList, name='govorgList'),
     ], 'govorg'))),
 
     path('api/config/', include(([
@@ -113,7 +111,6 @@ urlpatterns = [
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
         path('payment-list/', payment_views.paymentList, name='paymentList'),
         path('purchase/', payment_views.purchase, name='purchase'),
-        path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
     ], 'payment'))),
 
     path('tuuhen_ov/', include(([

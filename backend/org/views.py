@@ -180,32 +180,6 @@ def employees(request, payload, level, pk):
     })
 
 
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def employee_more(request, level, pk, emp):
-
-    org = get_object_or_404(Org, pk=pk, level=level)
-    employees_display = []
-
-    for employe in User.objects.filter(employee__org=org, pk=emp):
-        employees_display.append({
-            'id': employe.id,
-            'last_name': employe.last_name,
-            'username': employe.username,
-            'first_name': employe.first_name,
-            'email': employe.email,
-            'register': employe.register,
-            'gender': employe.gender,
-            'is_active': employe.is_active,
-            'is_sso': employe.is_sso,
-            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
-            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
-            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
-        })
-    return JsonResponse({'employee': employees_display})
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -381,8 +355,20 @@ def OrgAll(request, level, pk):
 def employeeSearch(request, payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
+    page = payload.get('page')
     query = payload.get('query')
-    for employe in User.objects.filter(employee__org=org).annotate(search=SearchVector('last_name', 'first_name', 'email')).filter(search__contains=query):
+    per_page = payload.get('perpage')
+
+    emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
+        'last_name', 
+        'first_name', 
+        'email')
+    ).filter(search__contains=query)
+
+    total_items = Paginator(emp_list, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for employe in page_items:
         employees_display.append({
             'id': employe.id,
             'last_name': employe.last_name,
@@ -394,4 +380,12 @@ def employeeSearch(request, payload, level, pk):
             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-    return JsonResponse({'employees': employees_display, })
+    total_page = total_items.num_pages
+    
+    rsp = {
+        'items': employees_display,
+        'page': page,
+        'total_page': total_page,
+    }
+
+    return JsonResponse(rsp)

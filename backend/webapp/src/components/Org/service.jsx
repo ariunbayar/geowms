@@ -6,13 +6,12 @@ export const service = {
     org_remove,
     roles,
     rolesSave,
-    employeesGetAll,
     employee_add,
     employee_remove,
     employeeMore,
     employee_update,
     sistemCount,
-    EmployeeSearch,
+    employee_list,
     orgList,
     orgAll,
 }
@@ -66,20 +65,10 @@ function rolesSave(level, org_id, org_roles) {
     return fetch(`${prefix}/level-${level}/${org_id}/roles-save/`, opts).then(handleResponse)
 }
 
-
-function employeesGetAll(level, org_id, last,first) {
-    const requestOptions = {
-        ...getPostOptions(),
-    body: JSON.stringify({last,first}),
-    }
-    return fetch(`${prefix}/level-${level}/${org_id}/employees/`, requestOptions).then(handleResponse)
-}
-
 function employeeMore(level, org_id, org_emp) {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/level-${level}/${org_id}/employee-more-${org_emp}/`, requestOptions).then(handleResponse)
 }
-
 
 function employee_add(org_level, org_id, payload) {
     const opts = {
@@ -89,7 +78,6 @@ function employee_add(org_level, org_id, payload) {
 
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-add/`, opts).then(handleResponse)
 }
-
 
 function employee_remove(org_level, org_id, user_id) {
     const opts = {
@@ -122,10 +110,10 @@ function orgAll(level,id){
     return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
 }
 
-function EmployeeSearch(level, org_id,query) {
+function employee_list(page, perpage, query, level, org_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({page, perpage, query, level, org_id}),
     }
-    return fetch(`${prefix}/level-${level}/${org_id}/employeeSearch/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
 }
