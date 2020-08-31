@@ -22,12 +22,13 @@ export class LoginLog extends Component {
     }
 
     paginate (page, query) {
+       
         const perpage = this.state.loginPerPage
         this.setState({ currentPage: page })
             return service
                 .loginList(page, perpage, query)
                 .then(page => {
-                    this.setState({ login_log_all: page.items })
+                    this.setState({ login_log_all: page.items, login_length: page.items.length })
                     return page
                 })
     }
@@ -36,17 +37,17 @@ export class LoginLog extends Component {
         if(e.target.value.length >= 1)
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(1, e.target.value)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(1, e.target.value)
         }
     }
 
     render() {
-        const { login_log_all,currentPage, login_length } = this.state
+        const { login_log_all,currentPage, login_length, loginPerPage } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -94,7 +95,7 @@ export class LoginLog extends Component {
                                         
                                             <LoginLogTable
                                                 key = {idx} 
-                                                idx = {(currentPage*20)-20+idx+1} 
+                                                idx = {(currentPage*loginPerPage)-loginPerPage+idx+1} 
                                                 values={login}>
                                             </LoginLogTable>
                                         )}
