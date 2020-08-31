@@ -1,13 +1,14 @@
-import {getGetOptions,handleResponse} from '../../helpers/service'
+import {getGetOptions,handleResponse,getPostOptions} from '../../helpers/service'
 export const service ={
-    getAll
+    payList,
 }
 
 const prefix = '/back/payment'
 
-function getAll() {
-    const requestOptions = {
-        ...getGetOptions(),
+function payList(page, perpage) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({page, perpage}),
     }
-    return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/payment-list/`, opts).then(handleResponse)
 }
