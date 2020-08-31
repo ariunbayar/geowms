@@ -30,17 +30,6 @@ export class Pagination extends Component {
             this.setState({ searchQuery: query })
             this.loadPage(1, query)
         }
-        if(prevProps.load !== this.props.load)
-        {
-            const query = this.props.searchQuery
-            this.loadPage(1, query)
-        }
-        if(this.props.org_level){
-            if(prevProps.org_level !== this.props.org_level){
-                const query = this.props.searchQuery
-                this.loadPage(1, query)
-            }
-        }
     }
 
     nextPage() {
@@ -58,10 +47,9 @@ export class Pagination extends Component {
 
         page = Math.max(page, 1)
         page = Math.min(page, this.state.total_page)
+
         this.setState({is_loading: true})
-        if(this.props.org_level){
-            const level = this.props.org_level
-            this.props.paginate(page, query, level)
+        this.props.paginate(page, query)
             .then(({ page, total_page}) => {
                 this.setState({
                     page,
@@ -69,18 +57,7 @@ export class Pagination extends Component {
                     is_loading: false,
                 })
             })
-        }
-        else
-        {
-            this.props.paginate(page, query)
-            .then(({ page, total_page}) => {
-                this.setState({
-                    page,
-                    total_page,
-                    is_loading: false,
-                })
-            })
-        }    
+            
     }
 
     render() {

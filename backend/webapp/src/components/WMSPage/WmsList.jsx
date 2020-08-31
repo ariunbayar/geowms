@@ -44,10 +44,10 @@ export class WmsList extends Component {
     }
 
     paginate (page, query) {
-        const { wmsPerPage } = this.state
+        const perpage = this.state.wmsPerPage
         this.setState({ currentPage: page })
             return service
-                .paginatedList(page, 20, query)
+                .paginatedList(page, perpage, query)
                 .then(page => {
                     this.setState({ wms_list: page.items})
                     return page

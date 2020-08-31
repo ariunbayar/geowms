@@ -7,12 +7,13 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
+from django.shortcuts import get_object_or_404
 
 from geoportal_app.models import User
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
-
+from backend.payment.models import Payment
 
 
 def index(request):
@@ -58,3 +59,24 @@ def dictionaryResponse(request):
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
+@require_POST
+@ajax_required
+def purchaseDraw(request, payload):
+    user = get_object_or_404(User, pk=request.user.id)
+    price = payload.get('price')
+    description = payload.get('description')
+    coodrinatLeftTop = payload.get('coodrinatLeftTop')
+    coodrinatRightBottom = payload.get('coodrinatRightBottom')
+    count = Payment.objects.all().count()
+    payment = Payment.objects.create(geo_unique_number=count, 
+                                        amount=price, 
+                                        description=description, 
+                                        user=user, 
+                                        is_success=False, 
+                                        coodrinatLeftTopX=coodrinatLeftTop[0], 
+                                        coodrinatLeftTopY=coodrinatLeftTop[1], 
+                                        coodrinatRightBottomX=coodrinatRightBottom[0],
+                                        coodrinatRightBottomY=coodrinatRightBottom[1] 
+                                    )
+
+    return JsonResponse({'payment_id': payment.id})

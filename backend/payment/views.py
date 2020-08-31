@@ -1,25 +1,48 @@
+import requests
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-from main.decorators import ajax_required
 from django.http import JsonResponse, Http404
-from geoportal_app.models import User
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
+
+from main.decorators import ajax_required
+from geoportal_app.models import User
 from .models import Payment
 
 
-@require_GET
+@require_POST
 @ajax_required
-def all(request):
+def paymentList(request, payload):
+
+    page = payload.get('page')
+    per_page = payload.get('perpage')
     payment_all = []
-    created_at = Payment.objects.all().order_by('created_at')
-    for payment in Payment.objects.all():
-          payment_all.append({
+
+    payments = Payment.objects.all()
+    total_items = Paginator(payments, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+
+    for payment in page_items:
+        if payment.created_at:
+            created_date = payment.created_at.strftime('%Y-%m-%d')
+        else:
+            created_date = None
+        if payment.success_at:
+            success_date = payment.success_at.strftime('%Y-%m-%d')
+        else:
+            success_date = None
+        if payment.failed_at:
+            failed_date = payment.failed_at.strftime('%Y-%m-%d')
+        else:
+            failed_date = None
+        payment_all.append({
             'id': payment.id,
             'amount': payment.amount,
             'description': payment.description,
-            'created_at': payment.created_at.strftime('%Y-%m-%d'),
+            'created_at': created_date,
             'is_success': payment.is_success,
-            'success_at': payment.success_at.strftime('%Y-%m-%d'),
+            'success_at': success_date,
             'user_id': payment.user_id,
             'user_firstname': payment.user.first_name,
             'user_lastname': payment.user.last_name,
@@ -27,14 +50,16 @@ def all(request):
             'data_id': payment.data_id,
             'error_code': payment.error_code,
             'error_message': payment.error_message,
-            'failed_at': payment.failed_at.strftime('%Y-%m-%d'),
+            'failed_at': failed_date,
             'geo_unique_number': payment.geo_unique_number,
         })
-    return JsonResponse({'payment_all': payment_all,
-            'payment_all': payment_all,
-            'len': Payment.objects.filter().count()
-
-    })
+    total_page = total_items.num_pages
+    rsp = {
+        'items': payment_all,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -47,31 +72,6 @@ def purchase(request, payload):
     data_id = payload.get('data_id')
     count = Payment.objects.all().count()
     payment = Payment.objects.create(geo_unique_number=count, data_id=data_id, amount=price, description=description, user=user, is_success=False )
-
-    return JsonResponse({'payment_id': payment.id})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def purchaseDraw(request, payload):
-    user = get_object_or_404(User, pk=request.user.id)
-    price = payload.get('price')
-    description = payload.get('description')
-    coodrinatLeftTop = payload.get('coodrinatLeftTop')
-    coodrinatRightBottom = payload.get('coodrinatRightBottom')
-    count = Payment.objects.all().count()
-    payment = Payment.objects.create(geo_unique_number=count, 
-                                        amount=price, 
-                                        description=description, 
-                                        user=user, 
-                                        is_success=False, 
-                                        coodrinatLeftTopX=coodrinatLeftTop[0], 
-                                        coodrinatLeftTopY=coodrinatLeftTop[1], 
-                                        coodrinatRightBottomX=coodrinatRightBottom[0],
-                                        coodrinatRightBottomY=coodrinatRightBottom[1] 
-                                    )
-
     return JsonResponse({'payment_id': payment.id})
 
 
@@ -80,7 +80,6 @@ def purchaseDraw(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
     user = get_object_or_404(User, pk=request.user.id)
-
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
@@ -101,4 +100,3 @@ def purchaseAll(request, payload):
         return JsonResponse({'purchase_all': purchase_all})
     else:
         raise Http404
-

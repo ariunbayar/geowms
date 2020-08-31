@@ -27,7 +27,7 @@ export class PageLog extends Component {
             return service
                 .pageList(page, perpage, query)
                 .then(page => {
-                    this.setState({ page_logs: page.items })
+                    this.setState({ page_logs: page.items, log_length: page.items.length })
                     return page
                 })
     }
@@ -36,17 +36,17 @@ export class PageLog extends Component {
         if(e.target.value.length >= 1)
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(1, e.target.value)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
+            this.paginate(1, e.target.value)
         }
     }
 
     render() {
-        const { page_logs, log_length } = this.state
+        const { page_logs, log_length, currentPage, logPerPage } = this.state
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
@@ -98,7 +98,7 @@ export class PageLog extends Component {
                                     page_logs.map((page, idx) =>
                                         <PageLogTable 
                                             key = {idx} 
-                                            idx = {(this.state.currentPage*100)-100+idx+1} 
+                                            idx = {(currentPage*logPerPage)-logPerPage+idx+1} 
                                             values={page}>
                                         </PageLogTable>
                                     )}

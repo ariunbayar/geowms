@@ -31,25 +31,7 @@ def all(request, payload, level):
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
         })
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def OrgAll(request,level,pk):
-    orgs_display=[]
-    for org in Org.objects.filter(level=level,pk=pk):
-        orgs_display.append({
-            'id': org.id,
-            'name': org.name,
-            'level': org.level,
-            'level_display': org.get_level_display(),
-        })
-    org = get_object_or_404(Org, pk=pk, level=level)
-    return JsonResponse({
-        'orgs': orgs_display,
-        'count':User.objects.filter(employee__org=org).count()
-        })
-
+    
 
 def _get_org_role_display(org_role):
 
@@ -317,18 +299,53 @@ def org_remove(request, payload, level):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def orgSearch(request, payload,level):
+def orgList(request, payload,level):
+
+    page = payload.get('page')
     query = payload.get('query')
+    per_page = payload.get('perpage')
+    level = payload.get('org_level')
     orgs_display = []
-    for org in Org.objects.filter(level=level).annotate(search=SearchVector('name')).filter(search__contains=query):
+
+    orgs = Org.objects.filter(level=level).annotate(search=SearchVector(
+        'name')).filter(search__contains=query)
+    total_items = Paginator(orgs, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for org in page_items:
         orgs_display.append({
             'id': org.id,
             'name': org.name,
             'level': org.level,
             'level_display': org.get_level_display(),
         })
+    total_page = total_items.num_pages
 
-    return JsonResponse({'orgs': orgs_display, })
+    rsp = {
+        'items': orgs_display,
+        'page': page,
+        'total_page': total_page
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def OrgAll(request,level,pk):
+    orgs_display=[]
+    for org in Org.objects.filter(level=level,pk=pk):
+        orgs_display.append({
+            'id': org.id,
+            'name': org.name,
+            'level': org.level,
+            'level_display': org.get_level_display(),
+        })
+    org = get_object_or_404(Org, pk=pk, level=level)
+    return JsonResponse({
+        'orgs': orgs_display,
+        'count':User.objects.filter(employee__org=org).count()
+        })
 
 
 @require_POST
@@ -362,7 +379,6 @@ def employeeList(request,payload, level, pk):
             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-    
     total_page = total_items.num_pages
     
     rsp = {
@@ -370,5 +386,5 @@ def employeeList(request,payload, level, pk):
         'page': page,
         'total_page': total_page,
     }
-    
+
     return JsonResponse(rsp)
