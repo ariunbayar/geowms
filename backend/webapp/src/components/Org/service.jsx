@@ -14,7 +14,7 @@ export const service = {
     employee_update,
     sistemCount,
     orgSearch,
-    EmployeeSearch
+    employee_paginated,
 }
 
 
@@ -122,10 +122,11 @@ function orgSearch(org_level,query) {
     return fetch(`${prefix}/level-${org_level}/orgSearch/`, requestOptions).then(handleResponse)
 }
 
-function EmployeeSearch(level, org_id,query) {
+function employee_paginated(page, perpage, query, level, org_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({page, perpage, query, level, org_id}),
     }
-    return fetch(`${prefix}/level-${level}/${org_id}/employeeSearch/`, requestOptions).then(handleResponse)
+    console.log(page, perpage, query, level, org_id)
+    return fetch(`${prefix}/level-${level}/${org_id}/employeePaginate/`, requestOptions).then(handleResponse)
 }

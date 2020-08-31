@@ -2,6 +2,8 @@ import React, { Component } from "react"
 import {UserFormTable} from './UserFormTable'
 import {service} from '../service'
 import {NavLink} from "react-router-dom"
+import { Pagination } from "../../pagination/pagination"
+
 export class UserForm extends Component {
 
 
@@ -14,12 +16,13 @@ export class UserForm extends Component {
             employees: [],
             employees_length:null,
             currentPage:1,
-            employeesPerPage:20,
+            employeesPerPage:2,
             searchQuery: '',
             query_min: false,
             search_load: false,
 
         }
+        this.paginate = this.paginate.bind(this)
         this.handleGovorgDelete = this.handleGovorgDelete.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.nextPage=this.nextPage.bind(this)
@@ -27,6 +30,33 @@ export class UserForm extends Component {
         this.handleListCal=this.handleListCal.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
     }
+
+    paginate (page, query) {
+        const perpage = this.state.employeesPerPage
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        this.setState({ currentPage: page })
+            return service
+                .employee_paginated(page, perpage, query, org_level, org_id)
+                .then(page => {
+                    this.setState({employees: page.items })
+                    return page
+                })
+    }
+
+    handleSearch(field, e) {
+        if(e.target.value.length >= 1)
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
+    }
+
 
     componentDidMount() {
         const currentPage=this.state.currentPage
@@ -74,25 +104,7 @@ export class UserForm extends Component {
             this.handleListCal(this.state.currentPage+1)
         }
     }
-    handleSearch(field, e) {
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        if(e.target.value.length > 0)
-        {
-            this.setState({ [field]: e.target.value, search_load:true})
-            service.EmployeeSearch(org_level,org_id,e.target.value).then(({ employees }) => {
-                if(employees){
-                    this.setState({employees, employees_length:employees.length, search_load:false})
-                }
-            })
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            const {currentPage}=this.state.currentPage
-            this.handleListCal(currentPage)
-        }
-    }
+
     render() {
         const {employees, currentPage, employeesPerPage, employees_length} = this.state
         const id=this.props.values
@@ -158,29 +170,10 @@ export class UserForm extends Component {
                         </table>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <div className="float-left">
-                            <strong>Хуудас {currentPage}-{totalPages}</strong>
-                        </div>
-                        <div className="float-right">
-                            <button
-                            type=" button"
-                            className="btn gp-outline-primary"
-                            onClick={this.prevPage}
-                            > &laquo; өмнөх
-                            </button>
-                            <button
-                            type="button"
-                            className="btn gp-outline-primary "
-                            onClick={this.nextPage
-                            } >
-                            дараах &raquo;
-                            </button>
-
-                        </div>
-                    </div>
-                </div>
+                <Pagination 
+                    paginate = { this.paginate }
+                    searchQuery = { this.state.searchQuery }
+                />
             </div>
         )
     }
