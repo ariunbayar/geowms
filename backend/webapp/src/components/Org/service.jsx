@@ -47,7 +47,7 @@ function org_remove(level, org_id) {
         ...getPostOptions(),
         body: JSON.stringify({org_id}),
     }
-
+    console.log(level, org_id)
     return fetch(`${prefix}/level-${level}/org-remove/`, opts).then(handleResponse)
 }
 
