@@ -54,11 +54,6 @@ export class Org extends Component {
                         </ul>
                     </div>
                 </div>
-                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                <p className="btn gp-outline-primary">
-                                    <i className="fa fa-angle-double-left"></i> Буцах
-                                </p>
-                </NavLink>
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>
