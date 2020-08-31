@@ -30,7 +30,6 @@ export default class HistoryForm extends Component {
     }
     render() {
         const {payment,payment_length} = this.state
-        console.log(payment)
         return (
         <div className="container">
             <div className="row">
