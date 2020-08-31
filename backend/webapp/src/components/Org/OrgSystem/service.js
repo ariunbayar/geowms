@@ -66,6 +66,5 @@ function govorgList(page, perpage, query, org_id) {
         ...getPostOptions(),
         body: JSON.stringify({page, perpage, query, org_id}),
     }
-    console.log(page,perpage,query)
     return fetch(`${prefix}/govorgList/`, requestOptions).then(handleResponse)
 }
