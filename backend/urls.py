@@ -115,7 +115,6 @@ urlpatterns = [
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
         path('all/', payment_views.all, name='all'),
         path('purchase/', payment_views.purchase, name='purchase'),
-        path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
     ], 'payment'))),
 
     path('tuuhen_ov/', include(([
