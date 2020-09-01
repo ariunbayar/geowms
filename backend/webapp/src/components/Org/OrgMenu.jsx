@@ -53,7 +53,7 @@ export class OrgMenu extends Component {
         const org_id = this.props.match.params.id
         return (
                 <div className="row">
-                    <div className="col-md-2 pr-0">
+                    <div className="col-md-2 pr-0 pl-0">
                         <div className="container pr-0">
                             <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
                                 <p className="btn  mt-2 gp-outline-primary">
