@@ -153,7 +153,7 @@ def roles_save(request, payload, level, pk):
     return JsonResponse({'success': True})
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_more(request, level, pk, emp):
