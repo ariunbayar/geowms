@@ -12,14 +12,14 @@ class ModalComponent extends Component{
         this.state = {
             price: 3000,
             description: 'Газрын бүрхэвч, газар ашиглалт',
-            payLoad: false,
+            payload: false,
             data_id: 2,
         }
 
     }
 
     handlePayment(){
-        this.setState({payLoad: true})
+        this.setState({payload: true})
         const {price, description, data_id} = this.state
         service.payment(price, description, data_id).then(({ payment_id }) => {
             if(payment_id){
@@ -31,7 +31,7 @@ class ModalComponent extends Component{
     }
     render() {
         const { content, is_complete } = this.props
-        const { payLoad } = this.state
+        const { payload } = this.state
 
         return (
             <div className="modal-dialog modal-dialog-scrollable" style={{zIndex:"5"}}>
@@ -67,17 +67,17 @@ class ModalComponent extends Component{
                     </div>
                     <div className="modal-footer">
                         <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
-                        {payLoad ?
+                        {payload ?
                         <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                            Ачааллаж байна...  
+                            Ачааллаж байна...
                             <a class="spinner-border text-light" role="status">
-                                <span class="sr-only">Loading...</span> 
+                                <span class="sr-only">Loading...</span>
                             </a>
                         </button>
                         :
                         <button type="button" onClick={() => this.handlePayment()} className="btn btn-secondary" data-dismiss="modal">Худалдаж авах</button>
-                        }      
-                                          
+                        }
+
                     </div>
                 </div>
             </div>

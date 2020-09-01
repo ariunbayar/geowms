@@ -4,18 +4,14 @@ export const service = {
     getAll,
     browserCount,
     pageCount,
-    pageAll,
-    loginAll,
-    CrudEventAll,
     loginDateCount,
-    loginSearch,
     logoutDateCount,
     pageUserCount,
     crudMethodCount,
     crudDateCount,
-    pageSearch,
-    crudSearch
-
+    loginList,
+    crudList,
+    pageList,
 }
 
 
@@ -43,18 +39,28 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
-function pageSearch(query, last, first) {
+function pageList(page, perpage, query){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query, last, first}),
+        body: JSON.stringify({ page, perpage, query }),
     }
-    return fetch(`${prefix}/log/page-search/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/log/page-list/`, requestOptions).then(handleResponse)
 }
 
-function pageAll(last, first) {
-    const requestOptions = {...getPostOptions(),
-        body: JSON.stringify({last, first})}
-    return fetch(`${prefix}/log/page-all/`, requestOptions).then(handleResponse)
+function crudList(page, perpage, query){
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ page, perpage, query }),
+    }
+    return fetch(`${prefix}/log/crud-list/`, requestOptions).then(handleResponse)
+}
+
+function loginList(page, perpage, query){
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ page, perpage, query }),
+    }
+    return fetch(`${prefix}/log/login-list/`, requestOptions).then(handleResponse)
 }
 
 function loginDateCount() {
@@ -62,33 +68,9 @@ function loginDateCount() {
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
 }
 
-function loginSearch(query, last, first) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({query, last, first}),
-    }
-    return fetch(`${prefix}/log/login-search/`, requestOptions).then(handleResponse)
-}
-
 function logoutDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
-}
-
-function loginAll(last,first) {
-    const requestOptions = {
-        ...getPostOptions(),    
-        body: JSON.stringify({last, first})
-    }
-    return fetch(`${prefix}/log/login-all/`, requestOptions).then(handleResponse)
-}
-
-function CrudEventAll(last,first) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({last, first})
-    }
-    return fetch(`${prefix}/log/crud-event-all/`, requestOptions).then(handleResponse)
 }
 
 function crudMethodCount() {
@@ -99,12 +81,4 @@ function crudMethodCount() {
 function crudDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
-}
-
-function crudSearch(query, last, first) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({query, last, first}),
-    }
-    return fetch(`${prefix}/log/crud-search/`, requestOptions).then(handleResponse)
 }

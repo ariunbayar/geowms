@@ -10,6 +10,7 @@ from backend.config import views as config_views
 from backend.org import views as org_views
 from backend.log import views as log_views
 from backend.payment import views as payment_views
+from backend.forms import views as forms_views
 
 
 app_name = 'backend'
@@ -29,7 +30,7 @@ urlpatterns = [
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
-        path('wmsSearch/', wms_views.wmsSearch, name='wmsSearch'),
+        path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
     ], 'wms'))),
 
     path('bundle/', include(([
@@ -50,7 +51,7 @@ urlpatterns = [
         path('roleCreate/', user_views.roleCreate, name='roleCreate'),
         path('<int:pk>/дэлгэрэнгүй/', user_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('userCount/', user_views.userCount, name='userCount'),
-        path('userSearch/', user_views.userSearch, name='userSearch'),
+        path('paginatedList/', user_views.paginatedList, name='paginatedList'),
     ], 'user'))),
 
     path('api/суурь-давхарга/', include(([
@@ -63,43 +64,38 @@ urlpatterns = [
 
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
-        path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
         path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
-        path('level-<int:level>/<int:pk>/employees/', org_views.employees, name='employees'),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('level-<int:level>/<int:pk>/employee-remove/', org_views.employee_remove, name='employee-remove'),
         path('level-<int:level>/<int:pk>/employee-more-<int:emp>/', org_views.employee_more, name='employee-more'),
         path('level-<int:level>/<int:pk>/employee-update/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
-        path('level-<int:level>/orgSearch/', org_views.orgSearch, name='orgSearch'),
-        path('level-<int:level>/<int:pk>/employeeSearch/', org_views.employeeSearch, name='employeeSearch'),
+        path('level-<int:level>/<int:pk>/employeeList/', org_views.employeeList, name='employeeList'), 
+        path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
+        path('level-<int:level>/org-list/', org_views.orgList, name='orgList'),
     ], 'org'))),
 
     path('api/log/', include(([
-        path('login-all/', log_views.login_all, name='login-all'),
-        path('login-search/', log_views.loginSearch, name='login-search'),
-        path('crud-event-all/', log_views.crud_event_all, name='crud-event-all'),
-        path('crud-search/', log_views.crudSearch, name='crud-search'),
+        path('login-list/', log_views.login_list, name='login-list'),
+        path('crud-list/', log_views.crudList, name='crudList'),
         path('login-date-count/', log_views.login_date_count, name='login-date-count'),
         path('crud-method-count/', log_views.crud_method_count, name='crud-method-count'),
         path('crud-date-count/', log_views.crud_date_count, name='crud-date-count'),
-        path('page-all/', log_views.pageAll, name='page-all'),
-        path('page-search/', log_views.pageSearch, name='page-search'),
         path('page-date-count/', log_views.page_date_count, name='page-date-count'),
         path('page-user-count/', log_views.page_user_count, name='page-user-count'),
+        path('page-list/', log_views.page_list, name='page-list'),
     ], 'log'))),
 
     path('api/систем/', include(([
-        path('', govorg_views.жагсаалт, name=''),
         path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
-        path('govorgSearch/', govorg_views.govorgSearch, name='govorgSearch'),
+        path('govorgList/', govorg_views.govorgList, name='govorgList'),
     ], 'govorg'))),
 
     path('api/config/', include(([
@@ -113,8 +109,36 @@ urlpatterns = [
 
     path('payment/', include(([
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
-        path('all/', payment_views.all, name='all'),
+        path('payment-list/', payment_views.paymentList, name='paymentList'),
         path('purchase/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
+
+    path('tuuhen_ov/', include(([
+        path('', forms_views.all, name='all'),
+        path('about/', forms_views.about, name='about'),
+        path('update/', forms_views.update, name='update'),
+        path('remove/', forms_views.remove, name='remove'),
+        path('create/', forms_views.create, name='create'),
+        path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
+
+        path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
+
+        path('tseg-personal/all/', forms_views.tsegPersonalAll, name='tseg-personal-all'),
+        path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
+        path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
+        path('tseg-ustsan_all/', forms_views.tsegUstsanAll, name='tseg-ustsan_all'),
+        path('tseg-ustsan_remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan_remove'),
+        path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
+        path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
+        path('dursgalt-gazar/all/', forms_views.dursgaltGazarAll, name='dursgalt-gazar-all'),
+        path('dursgalt-gazar/remove/', forms_views.dursgaltGazarRemove, name='dursgalt-gazar-remove'),
+        path('dursgalt-gazar/about/', forms_views.dursgaltGazarAbout, name='dursgalt-gazar-about'),
+        path('dursgalt-gazar/huree-create/', forms_views.hureeCreate, name='dursgalt-gazar-huree-create'),
+        path('dursgalt-gazar/huree-all/', forms_views.hureeAll, name='dursgalt-gazar-huree-all'),
+        path('dursgalt-gazar/ayul-create/', forms_views.ayulHureeCreate, name='dursgalt-gazar-ayul-create'),
+        path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
+
+    ], 'tuuhen_ov'))),
+
     re_path('^.*', webapp_views.index, name='webapp'),
 ]

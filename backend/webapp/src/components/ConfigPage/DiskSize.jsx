@@ -53,7 +53,7 @@ export default class DiskSize extends Component {
                 </table>
                 <p>Дискийн хэмжээний өөрчлөлтийн мэдээллийг 5 минут тутамд шинэчилнэ.</p>
             </div>
-                    
+
         )
     }
 }

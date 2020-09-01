@@ -3,19 +3,21 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
+from django.core.paginator import Paginator
 
 from main.decorators import ajax_required
 from .models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.contrib.postgres.search import SearchVector
+
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request, payload, level):
-    last=payload.get("lastIndex")
-    first=payload.get("firstIndex")
+    last = payload.get("lastIndex")
+    first = payload.get("firstIndex")
     orgs_display = []
     for org in Org.objects.filter(level=level)[first:last]:
         orgs_display.append({
@@ -29,18 +31,7 @@ def all(request, payload, level):
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
         })
-
-def OrgAll(request,level,pk):
-    orgs_display=[]
-    for org in Org.objects.filter(level=level,pk=pk):
-        orgs_display.append({
-            'id': org.id,
-            'name': org.name,
-            'level': org.level,
-            'level_display': org.get_level_display(),
-        })
-
-    return JsonResponse({'orgs': orgs_display})
+    
 
 def _get_org_role_display(org_role):
 
@@ -162,32 +153,6 @@ def roles_save(request, payload, level, pk):
     return JsonResponse({'success': True})
 
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def employees(request,payload, level, pk):
-    last = payload.get('last')
-    first = payload.get('first')
-    org = get_object_or_404(Org, pk=pk, level=level)
-    employees_display = []
-
-    for employe in User.objects.filter(employee__org=org)[first:last]:
-        employees_display.append({
-            'id': employe.id,
-            'last_name': employe.last_name,
-            'first_name': employe.first_name,
-            'email': employe.email,
-            'is_active': employe.is_active,
-            'is_sso': employe.is_sso,
-            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
-            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
-            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
-        })
-    return JsonResponse({
-        'employees': employees_display,
-        'len':User.objects.filter(employee__org=org).count()
-        })
-
 
 @require_GET
 @ajax_required
@@ -219,7 +184,6 @@ def employee_more(request, level, pk, emp):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_update(request, payload, level, pk):
-    username = payload.get('username')
     user_id = payload.get('id')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -227,11 +191,9 @@ def employee_update(request, payload, level, pk):
     email = payload.get('email')
     gender = payload.get('gender')
     register = payload.get('register')
-    password = payload.get('password')
-    re_password = payload.get('re_password')
 
     get_object_or_404(User, pk=user_id)
-    
+
     User.objects.filter(pk=user_id).update(
                             first_name=first_name,
                             last_name=last_name,
@@ -241,8 +203,8 @@ def employee_update(request, payload, level, pk):
                         )
 
     Employee.objects.filter(user_id=user_id).update(position=position)
-   
-    return JsonResponse({'success': True})    
+
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -258,7 +220,6 @@ def employee_add(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     password = payload.get('password')
-    re_password = payload.get('re_password')
 
     user = User.objects.filter(username=username).first()
     if user:
@@ -270,18 +231,16 @@ def employee_add(request, payload, level, pk):
         else:
             is_superuser = False
 
-        user = User.objects.create(password=password,
-                                is_superuser=is_superuser,
-                                username=username, 
-                                first_name=first_name, 
-                                last_name=last_name, 
-                                email=email,
-                                gender=gender,
-                                register=register,
+        user = User.objects.create(is_superuser=is_superuser,username=username, 
+                                    first_name=first_name, last_name=last_name, 
+                                    email=email,gender=gender,register=register
                                 )
-        user.roles.add(2)                                
+        user.roles.add(2)          
+        user.set_password(password)
+        user.save()
+
         Employee.objects.create(position=position, org_id=pk, user_id=user.id)
-            
+
         return JsonResponse({'success': True})
 
 
@@ -294,7 +253,7 @@ def employee_remove(request, payload, level, pk):
     get_object_or_404(User, pk=user_id)
 
     user = User.objects.filter(pk=user_id)
-    employee=Employee.objects.filter(user_id=user_id)
+    employee = Employee.objects.filter(user_id=user_id)
     employee.delete()
     user.delete()
 
@@ -308,9 +267,7 @@ def org_add(request, payload, level):
 
     org_name = payload.get('org_name')
     upadte_level = payload.get('upadte_level')
-    org_id=payload.get('id')
-    org_check = Org.objects.filter(name=org_name)
-    org_id_check=Org.objects.filter(id=org_id)
+    org_id = payload.get('id')
     if org_id:
         Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level)
         return JsonResponse({'success': True})
@@ -326,7 +283,7 @@ def org_remove(request, payload, level):
 
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
-    org_users = Employee.objects.filter(org = org_id)
+    org_users = Employee.objects.filter(org=org_id)
     for org_user in org_users:
 
         user = User.objects.filter(pk=org_user.user_id)
@@ -338,30 +295,79 @@ def org_remove(request, payload, level):
 
     return JsonResponse({'success': True})
 
+
 @require_POST
 @ajax_required
-def orgSearch(request, payload,level):
+@user_passes_test(lambda u: u.is_superuser)
+def orgList(request, payload,level):
+
+    page = payload.get('page')
     query = payload.get('query')
+    per_page = payload.get('perpage')
+    level = payload.get('org_level')
     orgs_display = []
-    for org in Org.objects.filter(level=level).annotate(search=SearchVector('name') ).filter(search__contains=query):
-           orgs_display.append({
+
+    orgs = Org.objects.filter(level=level).annotate(search=SearchVector(
+        'name')).filter(search__contains=query)
+    total_items = Paginator(orgs, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for org in page_items:
+        orgs_display.append({
             'id': org.id,
             'name': org.name,
             'level': org.level,
             'level_display': org.get_level_display(),
         })
+    total_page = total_items.num_pages
 
+    rsp = {
+        'items': orgs_display,
+        'page': page,
+        'total_page': total_page
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def OrgAll(request,level,pk):
+    orgs_display=[]
+    for org in Org.objects.filter(level=level,pk=pk):
+        orgs_display.append({
+            'id': org.id,
+            'name': org.name,
+            'level': org.level,
+            'level_display': org.get_level_display(),
+        })
+    org = get_object_or_404(Org, pk=pk, level=level)
     return JsonResponse({
         'orgs': orgs_display,
+        'count':User.objects.filter(employee__org=org).count()
         })
 
+
 @require_POST
-@ajax_required        
-def employeeSearch(request,payload, level, pk):
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employeeList(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
+    page = payload.get('page')
     query = payload.get('query')
-    for employe in User.objects.filter(employee__org=org).annotate(search=SearchVector('last_name','first_name', 'email') ).filter(search__contains=query):
+    per_page = payload.get('perpage')
+
+    emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
+        'last_name', 
+        'first_name', 
+        'email')
+    ).filter(search__contains=query)
+
+    total_items = Paginator(emp_list, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for employe in page_items:
         employees_display.append({
             'id': employe.id,
             'last_name': employe.last_name,
@@ -373,7 +379,12 @@ def employeeSearch(request,payload, level, pk):
             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-    return JsonResponse({
-        'employees': employees_display,
-        })
+    total_page = total_items.num_pages
+    
+    rsp = {
+        'items': employees_display,
+        'page': page,
+        'total_page': total_page,
+    }
 
+    return JsonResponse(rsp)

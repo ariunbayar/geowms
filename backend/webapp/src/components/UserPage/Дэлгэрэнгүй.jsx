@@ -106,9 +106,9 @@ export class Дэлгэрэнгүй extends Component {
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12 mb-4">
-                        <NavLink className="btn btn-outline-primary" exact to={'/back/user/'}>
+                        <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                             <i className="fa fa-angle-double-left"></i> Буцах
-                        </NavLink>
+                        </a>
                     </div>
                 </div>
                 <div className="row">
@@ -120,9 +120,9 @@ export class Дэлгэрэнгүй extends Component {
                         <p><strong>Хэрэглэгчийн нэр</strong>: {is_sso ? <a>{first_name}</a> : <a> {username}</a>} </p>
                         <p><strong>Хэрэглэгчийн эрх</strong>:{role_name} </p>
                         <p><strong>Идэвхитэй эсэх</strong>: {is_active ?  'Идэвхтэй': '-'}
-                           &nbsp; {is_active ? 
-                                <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button> : 
-                                <button  className="btn btn-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхжүүлэх</button>}     
+                           &nbsp; {is_active ?
+                                <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button> :
+                                <button  className="btn gp-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхжүүлэх</button>}
                        </p>
                         <p><strong>Бүртгүүлсэн огноо</strong>: {date_joined} </p>
                         <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>
@@ -134,20 +134,20 @@ export class Дэлгэрэнгүй extends Component {
                             text={"Та хэрэглэгчийн системд нэвтрэх эрхийг хязгаарлах гэж байна. Хязгаарлагдсан хэрэглэгч систем нэвтрэх эрхгүй болохыг анхаарна уу!"}
                             title="Тохиргоог хязгаарлах"
                         />
-                           }    
+                           }
                         </div>
                     </div>
                     <div className="col-md-8 mb-4">
                           <h4>Хэрэглэгчийн эрхийн түвшинүүд </h4>
                           <table>
                               <tbody>
-                                     {this.state.all_role.map(role => 
+                                     {this.state.all_role.map(role =>
                                      <tr key={role.id}>
                                          <td>
-                                                <input 
-                                                    type="radio" 
-                                                    checked={role.id === this.state.roleId} 
-                                                    name="input" 
+                                                <input
+                                                    type="radio"
+                                                    checked={role.id === this.state.roleId}
+                                                    name="input"
                                                     onChange={() => this.handleOnClick(role.id)}/>
                                                 &nbsp; {role.name}
                                         </td>
@@ -155,10 +155,10 @@ export class Дэлгэрэнгүй extends Component {
                                       }
                               </tbody>
                           </table>
-                           
-                          <br/> 
-                            {check && <button type="button" className="btn btn-outline-primary" onClick={this.getRole}>Хадгалах</button>}
-                    </div> 
+
+                          <br/>
+                            {check && <button type="button" className="btn gp-outline-primary" onClick={this.getRole}>Хадгалах</button>}
+                    </div>
                 </div>
             </div>
         )

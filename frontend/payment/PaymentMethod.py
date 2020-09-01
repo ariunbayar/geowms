@@ -24,10 +24,10 @@ class PaymentMethod():
         allRequest = [success, success2, status34, cancelled, status53, status16, status7, status2, failed]
         ran = random.randrange(1, 9)
         ransucces = random.randrange(1, 3)
-        
 
-        
-        
+
+
+
         rsp = requests.get(self.base_url, data=self.finalRequest, headers=self.BASE_HEADERS)
 
         if rsp.status_code == 200:

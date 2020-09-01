@@ -40,7 +40,7 @@ export class Жагсаалт extends Component {
     }
     handleMove(event, id) {
         service.move(event, id).then(({bundle_list, success}) => {
-            if (success) 
+            if (success)
             {
                 service.getAll().then(({items, wms_list}) => {
                     this.setState({items})

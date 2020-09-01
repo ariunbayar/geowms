@@ -1,27 +1,16 @@
 import {getGetOptions, getPostOptions, handleResponse} from '../../../helpers/service'
 
 export const service = {
-    getAll,
     create,
     update,
     remove,
     detail,
     getWMSList,
-    govorgSearch
-  
-}
+    govorgList,
+}   
 
 
 const prefix = '/back/api/систем'
-
-
-function getAll(last,first,org_id) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({last,first,org_id}),
-    }
-    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
-}
 
 
 function create(values) {
@@ -72,10 +61,10 @@ function getWMSList() {
     return fetch(`/back/wms/all/`, opts).then(handleResponse)
 }
 
-function govorgSearch(query) {
+function govorgList(page, perpage, query, org_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({query}),
+        body: JSON.stringify({page, perpage, query, org_id}),
     }
-    return fetch(`${prefix}/govorgSearch/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/govorgList/`, requestOptions).then(handleResponse)
 }

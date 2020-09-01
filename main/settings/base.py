@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'frontend.secure.apps.SecureConfig',
     'frontend.payment.apps.PaymentConfig',
     'frontend.page.apps.PageConfig',
+    'frontend.profile.apps.ProfileConfig',
 
     # Backend apps
 
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'backend.org.apps.OrgConfig',
     'backend.log.apps.LogConfig',
     'backend.payment.apps.PaymentConfig',
+    'backend.forms.apps.FormsConfig',
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
@@ -134,18 +136,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'geoportal_app', 'static')
 LOGIN_URL = 'secure:login'
 LOGIN_REDIRECT_URL = 'bundle:all'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
 
-PAYMENT_SUCCESS_REDIRECT_URL = 'payment:success'
-PAYMENT_FAIL_REDIRECT_URL = 'payment:failed'
 
-MONGOL_BANK_SUCCESS_HTML = os.path.join(BASE_DIR, 'frontend/payment/templates/payment/mongolbank.html')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'
 
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.
-DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/']
+DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/', r'^/api/service/']

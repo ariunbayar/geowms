@@ -12,7 +12,8 @@ export class OrgMenu extends Component {
         super(props)
         this.state = {
             org_name:'',
-            sistem_count: 0
+            sistem_count: 0,
+            employee_count:null,
         }
         this.getOrgName=this.getOrgName.bind(this)
         this.handleSistemCount=this.handleSistemCount.bind(this)
@@ -33,11 +34,14 @@ export class OrgMenu extends Component {
     }
 
     getOrgName(org_level,id){
-        service.OrgAll(org_level,id).then(({ orgs }) => {
+        service.orgAll(org_level,id).then(({ orgs,count }) => {
             if (orgs) {
                 orgs.map(org=>this.setState({
                     org_name:org.name
                 }))
+                this.setState({
+                    employee_count:count
+                })
             }
         })
     }
@@ -60,12 +64,12 @@ export class OrgMenu extends Component {
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Албан хаагчид
+                                        Албан хаагчид<span className="badge badge-primary badge-pill">{this.state.employee_count}</span>
                                     </div>
                                 </NavLink>
                                 <NavLink className="menu" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
-                                        Систем ({this.state.sistem_count})
+                                        Систем<span className="badge badge-primary badge-pill">{this.state.sistem_count}</span>
                                     </div>
                                 </NavLink>
                             </div>
