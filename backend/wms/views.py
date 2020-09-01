@@ -23,7 +23,7 @@ def _get_wms_display(request, wms):
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
-        'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+        'public_url': request.build_absolute_uri(reverse('api:service:public_proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }
 
@@ -239,29 +239,6 @@ def delete(request, payload):
     wms.delete()
 
     return JsonResponse({'success': True})
-
-
-@require_GET
-def proxy(request, wms_id):
-
-    BASE_HEADERS = {
-        'User-Agent': 'geo 1.0',
-    }
-    is_active = get_object_or_404(WMS, pk=wms_id).is_active
-    if is_active:
-
-        base_url = get_object_or_404(WMS, pk=wms_id).url
-
-        queryargs = request.GET
-        headers = {**BASE_HEADERS}
-        rsp = requests.get(base_url, queryargs, headers=headers)
-
-        content_type = rsp.headers.get('content-type')
-
-        return HttpResponse(rsp.content, content_type=content_type)
-
-    else:
-        return render(request, "backend/404.html", {})
 
 
 @require_POST

@@ -29,7 +29,7 @@ urlpatterns = [
         path('move/', wms_views.move, name='move'),
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
-        path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
+        # path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
         path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
     ], 'wms'))),
 
