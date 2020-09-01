@@ -28,3 +28,21 @@ class WMS(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     styles = models.ManyToManyField(Style)
+
+
+class WMSLog(models.Model):
+
+    class Meta:
+        db_table = 'api_wms_log'
+        ordering = ('-created_at',)
+
+    system = models.ForeignKey('backend_govorg.GovOrg', on_delete=models.PROTECT, null=True)
+    wms = models.ForeignKey('backend_wms.WMS', on_delete=models.PROTECT, null=True)
+
+    qs_all = models.TextField(null=True)
+    qs_request = models.CharField(max_length=50, db_index=True)
+
+    rsp_status = models.PositiveIntegerField()
+    rsp_size = models.PositiveIntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)

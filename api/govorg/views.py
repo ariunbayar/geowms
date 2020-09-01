@@ -8,7 +8,7 @@ from django.views.decorators.http import require_GET
 
 from backend.govorg.models import GovOrg
 from backend.wms.models import WMS
-
+from backend.wms.models import WMSLog
 
 def _filter_layers(content, allowed_layers):
 
@@ -51,11 +51,9 @@ def _filter_layers(content, allowed_layers):
 
 @require_GET
 def proxy(request, token, pk):
-
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-
     govorg = get_object_or_404(GovOrg, token=token)
     wms = get_object_or_404(WMS, pk=pk)
     base_url = wms.url
@@ -64,16 +62,27 @@ def proxy(request, token, pk):
         queryargs = request.GET
         headers = {**BASE_HEADERS}
         rsp = requests.get(base_url, queryargs, headers=headers)
-
         content = rsp.content
-
         allowed_layers = [layer.code for layer in govorg.wms_layers.filter(wms=wms)]
-
         if request.GET.get('REQUEST') == 'GetCapabilities':
 
             content = _filter_layers(content, allowed_layers)
 
         content_type = rsp.headers.get('content-type')
+        
+        if not queryargs.get('REQUEST'):
+            qs_request = "no request"
+        else:
+            qs_request = queryargs.get('REQUEST')
+        wms_log = WMSLog.objects.create(
+            qs_all= dict(queryargs),
+            qs_request= qs_request,
+            rsp_status= rsp.status_code,
+            rsp_size= len(rsp.content),
+            system_id= govorg.id,
+            wms_id=pk,
+        )
+        wms_log.save()
 
         return HttpResponse(content, content_type=content_type)
     else:
