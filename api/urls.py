@@ -7,6 +7,6 @@ app_name = 'api'
 urlpatterns = [
     path('service/', include(([
         path('<str:token>/<int:pk>/', govorg_views.proxy, name='proxy'),
-        path('WMS/<int:wms_id>/', public_views.p_proxy, name='public_proxy'),
+        path('WMS/<int:wms_id>', public_views.proxy, name='wms_proxy'),
     ], 'service'))),
 ]
