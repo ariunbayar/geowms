@@ -78,29 +78,6 @@ def purchase(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def purchaseDraw(request, payload):
-    user = get_object_or_404(User, pk=request.user.id)
-    price = payload.get('price')
-    description = payload.get('description')
-    coodrinatLeftTop = payload.get('coodrinatLeftTop')
-    coodrinatRightBottom = payload.get('coodrinatRightBottom')
-    count = Payment.objects.all().count()
-    payment = Payment.objects.create(
-        geo_unique_number=count, 
-        amount=price, 
-        description=description, 
-        user=user, 
-        is_success=False, 
-        coodrinatLeftTopX=coodrinatLeftTop[0], 
-        coodrinatLeftTopY=coodrinatLeftTop[1], 
-        coodrinatRightBottomX=coodrinatRightBottom[0],
-        coodrinatRightBottomY=coodrinatRightBottom[1] 
-    )
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
     user = get_object_or_404(User, pk=request.user.id)
     purchase_id = payload.get('purchase_id')
