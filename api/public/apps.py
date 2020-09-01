@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class PublicConfig(AppConfig):
-    name = 'public'
+    name = 'api.public'
+    label = 'api_public'
