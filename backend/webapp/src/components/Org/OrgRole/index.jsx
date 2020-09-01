@@ -73,7 +73,7 @@ export class OrgRole extends Component {
         return (
             <div className="container my-4">
                 <div className="row">
-                    <div className="col-md-12">
+                    <div className="col-md-12 pt-2">
                         <div className="text"></div>
                         <div className="mb-3 mt-3">
                             <table className="table table-bordered">
