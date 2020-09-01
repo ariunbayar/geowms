@@ -3,10 +3,13 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar, TuuhSoyolHuree, TuuhSoyolAyuulHuree
+from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.postgres.search import SearchVector
+from django.core.paginator import Paginator
+import uuid
 # Create your models here.
 
 
@@ -341,25 +344,55 @@ def dursgaltGazarRemove(request, payload):
     return JsonResponse({'success': True})
 
 
-@require_GET
+@require_POST
 @ajax_required
-def tsegPersonalAll(request):
+@user_passes_test(lambda u: u.is_superuser)
+def tseg_personal_list(request, payload):
+    cursor = connections['postgis_db'].cursor()
+    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [108.1232, 95.12312])
+    geoms= cursor.fetchone()
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
     tseg_personal = []
-    for tseg in TsegPersonal.objects.all():
-          tseg_personal.append({
-            'id': tseg.id,
-            'tesgiin_ner': tseg.tesgiin_ner,
-            'toviin_dugaar': tseg.toviin_dugaar,
-            'trapetsiin_dugaar': tseg.trapetsiin_dugaar,
-            'suljeenii_torol': tseg.suljeenii_torol,
-            'aimag_name': tseg.aimag_name,
-            'sum_name': tseg.sum_name,
-            'utmx': tseg.utmx,
-            'utmy': tseg.utmy,
-            'latlongx': tseg.latlongx,
-            'latlongy': tseg.latlongy,
+    mpoint = Mpoint.objects.using('postgis_db').annotate(search=SearchVector(
+        'point_id',
+        'pid',
+        't_type',
+        'point_type',
+        ) + SearchVector('point_name')).filter(search__contains=query)
+
+    total_items = Paginator(mpoint, per_page)
+    items_page = total_items.page(page)
+
+    for mpoint_all in items_page.object_list:
+        tseg_personal.append({
+            'id': mpoint_all.id,
+            'objectid': mpoint_all.objectid,
+            'point_id': mpoint_all.point_id,
+            'point_name': mpoint_all.point_name,
+            'pid': mpoint_all.pid,
+            'point_class': mpoint_all.point_class,
+            'point_type': mpoint_all.point_type,
+            'center_typ': mpoint_all.center_typ,
+            'aimag': mpoint_all.aimag,
+            'sum': mpoint_all.sum,
+            'sheet1': mpoint_all.sheet1,
+            'sheet2': mpoint_all.sheet2,
+            'sheet3': mpoint_all.sheet3,
+            'geom': mpoint_all.geom,
+            't_type': mpoint_all.t_type,
         })
-    return JsonResponse({'tseg_personal': tseg_personal})
+
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': tseg_personal,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
+
 
 @require_POST
 @ajax_required
@@ -450,6 +483,7 @@ def tsegPersonalUpdate(request, payload):
 @ajax_required
 def tsegPersonal(request):
     pk = request.POST.get('idx')
+    # tseg_personal = get_object_or_404(TsegPersonal, id=pk)
     tseg_oiroos_img_url = ''
     tseg_holoos_img_url = ''
     bairshil_tseg_oiroos_img_url = ''
@@ -458,26 +492,52 @@ def tsegPersonal(request):
     file2 = ''
     date = None
     if  request.POST.get('tseg_oiroos_img_url'):
+        tseg_personal.tseg_oiroos_img_url.delete(save=False)
         [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(1024, 1080)])
         tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
     if  request.POST.get('tseg_holoos_img_url'):
+        # tseg_personal.tseg_holoos_img_url.delete(save=False)
         [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_holoos_img_url'), [(1024, 1080)])
         tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
     if  request.POST.get('bairshil_tseg_oiroos_img_url'):
+        # tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
         [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_oiroos_img_url'), [(1024, 1080)])
         bairshil_tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
     if  request.POST.get('bairshil_tseg_holoos_img_url'):
+        # tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
         [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(1024, 1080)])
         bairshil_tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
     if not request.POST.get('file1'):
+        # tseg_personal.file_path1.delete(save=False)
         file1 = request.FILES['file1']
     if not request.POST.get('file2'):
+        # tseg_personal.file_path2.delete(save=False)
         file2 = request.FILES['file2']
     if request.POST.get('date'):
         date = request.POST.get('date')
-    if int(pk) != -1:
 
-        TsegPersonal.objects.filter(pk=pk).update(
+
+
+
+    if pk:
+        Mpoint.objects.using('postgis_db').filter(id=pk).update(
+                    objectid=123 #float(request.POST.get('toviin_dugaar')),
+                    ,point_id=12,
+                    point_name=request.POST.get('tesgiin_ner'),
+                    pid='None',
+                    point_class=8,
+                    point_type='None',
+                    center_typ='None',
+                    aimag=request.POST.get('aimag_name'),
+                    sum=request.POST.get('sum_name'),
+                    sheet1='M',
+                    sheet2=request.POST.get('latlongx'),
+                    sheet3=request.POST.get('latlongy'),
+                    t_type='g109',
+                    # geom= None
+                    )
+
+        TsegPersonal.objects.filter(id=pk).update(
                     tesgiin_ner=request.POST.get('tesgiin_ner'),
                     toviin_dugaar=request.POST.get('toviin_dugaar'),
                     trapetsiin_dugaar=request.POST.get('trapetsiin_dugaar'),
@@ -503,13 +563,40 @@ def tsegPersonal(request):
                     alban_baiguullga=request.POST.get('alban_baiguullga'),
                                     )
     else:
+        print("bhgu")
+        print("bhgu")
+        print("bhgu")
+        print("bhgu")
+        check_id = True
+        while check_id:
+            unique_id = uuid.uuid4()
+            if Mpoint.objects.using('postgis_db').filter(id=unique_id):
+                check_id = True
+            else:
+                check_id = False
+        Mpoint.objects.using('postgis_db').create(
+                    id=unique_id,
+                    objectid=123 #float(request.POST.get('toviin_dugaar')),
+                    ,point_id=12,
+                    point_name=request.POST.get('tesgiin_ner'),
+                    pid='None',
+                    point_class=8,
+                    point_type='None',
+                    center_typ='None',
+                    aimag=request.POST.get('aimag_name'),
+                    sum=request.POST.get('sum_name'),
+                    sheet1='M',
+                    sheet2=request.POST.get('latlongx'),
+                    sheet3=request.POST.get('latlongy'),
+                    t_type='g109',
+                    # geom= None
+                    )
         TsegPersonal.objects.create(
+                    id=unique_id,
                     tesgiin_ner=request.POST.get('tesgiin_ner'),
                     toviin_dugaar=request.POST.get('toviin_dugaar'),
                     trapetsiin_dugaar=request.POST.get('trapetsiin_dugaar'),
                     suljeenii_torol=request.POST.get('suljeenii_dugaar'),
-                    aimag_name=request.POST.get('aimag_name'),
-                    sum_name=request.POST.get('sum_name'),
                     utmx=request.POST.get('utmx'),
                     utmy=request.POST.get('utmy'),
                     latlongx=request.POST.get('latlongx'),

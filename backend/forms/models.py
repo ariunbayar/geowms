@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.gis.db import models
  # Create your models here.
 class TuuhSoyol(models.Model):
     dugaar = models.CharField(max_length=100)
@@ -133,14 +133,14 @@ class TuuhSoyolAyuulHuree(models.Model):
 
 class TsegPersonal(models.Model):
 
-
+    id = models.CharField(max_length=50, primary_key=True)
     tesgiin_ner = models.CharField(max_length=50)
     toviin_dugaar = models.CharField(max_length=100)
     trapetsiin_dugaar = models.CharField(max_length=100)
     suljeenii_torol = models.CharField(max_length=20)
 
-    aimag_name = models.CharField(max_length=30)
-    sum_name = models.CharField(max_length=30)
+    aimag_name = models.CharField(max_length=30) #
+    sum_name = models.CharField(max_length=30) #
 
     utmx = models.CharField(max_length=50)
     utmy = models.CharField(max_length=50)
@@ -194,3 +194,28 @@ class TsegUstsan(models.Model):
     gps_hemjilt = models.BooleanField(db_index=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Mpoint(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.BigIntegerField()
+    point_id =  models.CharField(max_length=10)
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+
+    sheet2 = models.DecimalField(blank=True, null=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, null=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint'

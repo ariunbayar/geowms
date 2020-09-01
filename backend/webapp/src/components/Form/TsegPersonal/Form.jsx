@@ -8,7 +8,7 @@ export class Form extends Component {
     constructor(props) {
         super(props)
         this.state = {
-        id: -1,
+        id: '',
         tesgiin_ner: '',
         toviin_dugaar: '',
         trapetsiin_dugaar: '',
