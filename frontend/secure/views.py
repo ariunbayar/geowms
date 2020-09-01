@@ -31,6 +31,7 @@ def register(request):
         form = RegisterForm()
     return render(request, 'secure/register.html', {"form": form})
 
+
 def login_dan(request):
     geo_auth = GeoAuth(request)
 

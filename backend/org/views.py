@@ -30,7 +30,7 @@ def all(request, payload, level):
     return JsonResponse({
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
-        })
+    })
     
 
 def _get_org_role_display(org_role):
@@ -153,7 +153,6 @@ def roles_save(request, payload, level, pk):
     return JsonResponse({'success': True})
 
 
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -177,7 +176,7 @@ def employee_more(request, level, pk, emp):
             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-    return JsonResponse({'employee': employees_display})
+    return JsonResponse({'employee': employees_display})    
 
 
 @require_POST
@@ -231,10 +230,11 @@ def employee_add(request, payload, level, pk):
         else:
             is_superuser = False
 
-        user = User.objects.create(is_superuser=is_superuser,username=username, 
-                                    first_name=first_name, last_name=last_name, 
-                                    email=email,gender=gender,register=register
-                                )
+        user = User.objects.create(
+            is_superuser=is_superuser, username=username, 
+            first_name=first_name, last_name=last_name, 
+            email=email, gender=gender, register=register
+        )
         user.roles.add(2)          
         user.set_password(password)
         user.save()
@@ -299,7 +299,7 @@ def org_remove(request, payload, level):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def orgList(request, payload,level):
+def orgList(request, payload, level):
 
     page = payload.get('page')
     query = payload.get('query')
@@ -332,9 +332,9 @@ def orgList(request, payload,level):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def OrgAll(request,level,pk):
-    orgs_display=[]
-    for org in Org.objects.filter(level=level,pk=pk):
+def OrgAll(request, level, pk):
+    orgs_display = []
+    for org in Org.objects.filter(level=level, pk=pk):
         orgs_display.append({
             'id': org.id,
             'name': org.name,
@@ -344,8 +344,8 @@ def OrgAll(request,level,pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     return JsonResponse({
         'orgs': orgs_display,
-        'count':User.objects.filter(employee__org=org).count()
-        })
+        'count': User.objects.filter(employee__org=org).count()
+    })
 
 
 @require_POST
