@@ -18,7 +18,7 @@ export class OrgForm extends Component {
             orgs: [],
             org_length:null,
             currentPage: this.initials.currentPage,
-            orgPerPage:2,
+            orgPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
