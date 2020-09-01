@@ -165,8 +165,11 @@ def employee_more(request, level, pk, emp):
         employees_display.append({
             'id': employe.id,
             'last_name': employe.last_name,
+            'username': employe.username,
             'first_name': employe.first_name,
             'email': employe.email,
+            'register': employe.register,
+            'gender': employe.gender,
             'is_active': employe.is_active,
             'is_sso': employe.is_sso,
             'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
