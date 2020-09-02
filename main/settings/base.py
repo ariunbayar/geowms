@@ -60,9 +60,6 @@ INSTALLED_APPS = [
 
     'api.govorg.apps.GovOrgConfig',
     'api.public.apps.PublicConfig',
-    
-    #Govorg apps
-    'govorg.org.apps.OrgConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
