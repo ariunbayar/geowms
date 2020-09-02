@@ -12,7 +12,7 @@ export default class Employee extends Component {
         this.state={
             employee:[],
             currentPage:1,
-            orgPerPage:2,
+            orgPerPage:20,
         }
         this.paginate = this.paginate.bind(this)
     }
@@ -52,7 +52,7 @@ export default class Employee extends Component {
                            { this.state.employee.map((p, idx) =>
                             <EmployeeTable
                                 key={idx}
-                                idx={(this.state.currentPage*2)-2+idx+1}
+                                idx={(this.state.currentPage*20)-20+idx+1}
                                 values={p}
                             />
                             )}
