@@ -1,6 +1,7 @@
 from django.db import models
 
- # Create your models here.
+
+# Create your models here.
 class TuuhSoyol(models.Model):
     dugaar = models.CharField(max_length=100)
     date = models.DateTimeField(null=True)
@@ -132,8 +133,6 @@ class TuuhSoyolAyuulHuree(models.Model):
 
 
 class TsegPersonal(models.Model):
-
-
     tesgiin_ner = models.CharField(max_length=50)
     toviin_dugaar = models.CharField(max_length=100)
     trapetsiin_dugaar = models.CharField(max_length=100)
@@ -158,7 +157,6 @@ class TsegPersonal(models.Model):
     sudalga_or_shine = models.CharField(max_length=30)
     hors_shinj_baidal = models.CharField(max_length=200)
 
-
     date = models.DateTimeField(null=True)
 
     hotolson = models.CharField(max_length=100)
@@ -169,7 +167,6 @@ class TsegPersonal(models.Model):
     alban_tushaal = models.CharField(max_length=200)
     alban_baiguullga = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
-
 
 
 class TsegUstsan(models.Model):
