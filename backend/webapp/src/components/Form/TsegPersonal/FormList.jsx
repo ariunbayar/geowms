@@ -14,7 +14,7 @@ export class FormList extends Component {
             length:null,
             currentPage:1,
             PerPage:50,
-            searchQuery: '',
+            searchQuery: 'g109',
             query_min: false,
         }
 
@@ -49,20 +49,8 @@ export class FormList extends Component {
 
     handleRemove(id) {
         service.tsegPersonalRemove(id).then(({success}) => {
-            if (success) this.handleListUpdated()
+            if (success) this.paginate(1, this.state.searchQuery)
         })
-    }
-        handleSearch(field, e) {
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value)
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value)
-        }
     }
 
 
