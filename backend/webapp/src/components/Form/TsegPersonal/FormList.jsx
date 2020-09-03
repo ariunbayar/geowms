@@ -82,7 +82,6 @@ export class FormList extends Component {
                                 <tr>
                                     <th scope="col"> № </th>
                                     <th scope="col">Цэгийн дугаар</th>
-                                    <th scope="col">Төвийн дугаар</th>
                                     <th scope="col">Цэгийн нэр</th>
                                     <th scope="col">Цэгийн дугаар</th>
                                     <th scope="col">Полигон дугаар</th>

@@ -132,7 +132,6 @@ class TuuhSoyolAyuulHuree(models.Model):
 
 
 class TsegPersonal(models.Model):
-
     id = models.CharField(max_length=50, primary_key=True)
     suljeenii_torol = models.CharField(max_length=20)
     utmx = models.CharField(max_length=50)

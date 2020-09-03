@@ -529,13 +529,11 @@ def tsegPersonal(request):
             ids = False
             if tesgiin_ner_check:
                 name = True
-                print("rewrwer")
+
             if objectid_check:
-                print(objectid_check)
-                print('objectid_check')
                 ids = True
+
             return JsonResponse({'success': False, 'name': name, 'ids':ids})
-        print("ewrwerewrwerwer")
         Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
         date = None
         file1 = ''
@@ -576,8 +574,6 @@ def tsegPersonal(request):
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, unique_id])
-
         
         mpoint = Mpoint.objects.using('postgis_db').create(
                     id=unique_id, objectid=objectid ,point_id="null",
@@ -587,6 +583,8 @@ def tsegPersonal(request):
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
                     sheet3=request.POST.get('latlongy'), t_type='g109',
         )
+        update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, str(unique_id)])
+
         TsegPersonal.objects.create(
                     id=unique_id,
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
@@ -605,7 +603,7 @@ def tsegPersonal(request):
                     alban_tushaal=request.POST.get('alban_tushaal'),
                     alban_baiguullga=request.POST.get('alban_baiguullga'),
         )
-        return JsonResponse({'success': True, 'name': False, 'ids':False})
+    return JsonResponse({'success': True, 'name': False, 'ids':False})
 
 
 @require_POST
