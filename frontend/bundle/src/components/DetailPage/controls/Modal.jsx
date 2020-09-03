@@ -17,14 +17,18 @@ class ModalComponent extends Component{
         }
 
     }
+    componentDidMount(){
+        console.log("paymnet bna", payment_id)
+    }
 
     handlePayment(){
         this.setState({payload: true})
         const {price, description, data_id} = this.state
         service.payment(price, description, data_id).then(({ payment_id }) => {
             if(payment_id){
+                
                 setTimeout(() => {
-                    window.location.href=`/payment/purchase/${payment_id}/`;
+                    this.props.history.push(`/payment/purchase/${payment_id}/`);
                 }, 1000)
             }
         })
