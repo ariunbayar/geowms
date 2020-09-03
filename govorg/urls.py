@@ -6,7 +6,7 @@ urlpatterns = [
       path('', include(([
         path('', org_views.all, name='all'), 
         path('employee/', org_views.employees, name='employees'),
-        path('system/', org_views.system, name='system'),   
+        path('bundle/', org_views.all, name='bundle'),   
     ], 'org'))),
     re_path('^.*', org_views.all, name='org'),
 ]
