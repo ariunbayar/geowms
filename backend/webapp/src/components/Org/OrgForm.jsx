@@ -22,6 +22,7 @@ export class OrgForm extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
+            load: 0,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
@@ -35,11 +36,11 @@ export class OrgForm extends Component {
         }
     }
 
-    paginate (page, query, level) {
+    paginate (page, query, level, org_id) {
         const perpage = this.state.orgPerPage
         this.setState({ currentPage: page })
             return service
-                .orgList(page, perpage, query, level)
+                .orgList(page, perpage, query, level, org_id)
                 .then(page => {
                     this.setState({ orgs: page.items, org_length: page.items.length })
                     return page
@@ -48,16 +49,31 @@ export class OrgForm extends Component {
 
     handleSearch(field, e) {
         const level = this.props.match.params.level
+        const org_id = this.props.match.params.org_id
         if(e.target.value.length >= 1)
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value, level)
+            this.paginate(this.state.currentPage, e.target.value, level, org_id)
         }
         else
         {
             this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value, level)
+            this.paginate(this.state.currentPage, e.target.value, level, org_id)
         }
+    }
+
+    handleUserDelete(id){
+        const { load, searchQuery } = this.state
+        const level = this.props.match.params.level
+        const org_id = this.props.match.params.org_id
+        service.org_remove(this.state.level,id).then(({ success }) => {
+            if (success) {
+                var a = load
+                a++
+                this.setState({ load: a })
+                this.paginate(1, searchQuery, level, org_id)
+            }
+        })
     }
 
     render() {
@@ -108,6 +124,7 @@ export class OrgForm extends Component {
                         paginate = {this.paginate}
                         searchQuery = {this.state.searchQuery}
                         org_level = {this.props.match.params.level}
+                        load = { this.state.load }
                     />
                 </div>
             </div>

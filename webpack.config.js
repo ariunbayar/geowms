@@ -29,6 +29,8 @@ module.exports = {
 
         'frontend/profile': 
             hp('frontend/profile/src/index.js'),
+        'govorg/org': 
+            hp('govorg/org/src/index.js'),
     },
     output: {
         // options related to how webpack emits results
@@ -121,6 +123,10 @@ module.exports = {
         hhwp({
             chunks: ['frontend/profile'],
             filename: path.resolve(__dirname, 'frontend/profile/templates/profile/index.dev.html'),
+        }),
+        hhwp({
+            chunks: ['govorg/org'],
+            filename: path.resolve(__dirname, 'govorg/org/templates/org/index.dev.html'),
         }),
         new WebpackBuildNotifierPlugin({
             title: "Geoportal DEV",

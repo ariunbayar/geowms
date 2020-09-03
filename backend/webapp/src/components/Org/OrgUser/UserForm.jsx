@@ -103,7 +103,7 @@ export class UserForm extends Component {
                                     <th scope="col"> №</th>
                                     <th scope="col"> Нэр</th>
                                     <th scope="col"> Цахим шуудан </th>
-                                    <th scope="col"> is_sso </th>
+                                    <th scope="col"> ДАН систем </th>
                                     <th scope="col"> Албан тушаал</th>
                                     <th scope="col"> Үүссэн </th>
                                     <th scope="col"> Зассан </th>
@@ -113,7 +113,7 @@ export class UserForm extends Component {
                             </thead>
                             <tbody>
                                 { employees_length === 0 ?
-                                <tr><td>Ажилчин бүртгэлгүй байна</td></tr>:
+                                <tr><td>Ажилтан бүртгэлгүй байна</td></tr>:
                                 employees.map((employe, idx) =>
                                     <UserFormTable
                                         org_level={org_level}

@@ -99,7 +99,7 @@ def page_list(request, payload):
 
     log_display = []
 
-    pages =  RequestEvent.objects.annotate(search=SearchVector(
+    pages = RequestEvent.objects.annotate(search=SearchVector(
         'url',
         'id',
         'method',
@@ -119,7 +119,7 @@ def page_list(request, payload):
             'remote_ip': log.remote_ip,
             'user_id': log.user_id,
             'datetime': log.datetime.strftime('%Y-%m-%d'),
-    })
+        })
     total_page = total_items.num_pages
     rsp = {
         'items': log_display,
@@ -161,7 +161,6 @@ def page_user_count(request):
     return JsonResponse(rsp)
 
 
-
 def _get_user_name(user_id):
 
     if user_id:
@@ -184,7 +183,7 @@ def crudList(request, payload):
         'content_type_id', 
         'user_id',
         'changed_fields'
-        ) + SearchVector('object_repr')).filter(search__contains=query)
+    ) + SearchVector('object_repr')).filter(search__contains=query)
 
     total_items = Paginator(cruds, per_page)
     items_page = total_items.page(page)

@@ -1,6 +1,12 @@
 from django.db import models
+<<<<<<< HEAD
 from django.contrib.gis.db import models
  # Create your models here.
+=======
+
+
+# Create your models here.
+>>>>>>> f7c585c1386e64a76db77ade7db51ee0a565a6c7
 class TuuhSoyol(models.Model):
     dugaar = models.CharField(max_length=100)
     date = models.DateTimeField(null=True)
@@ -152,6 +158,7 @@ class TsegPersonal(models.Model):
     alban_tushaal = models.CharField(max_length=200)
     alban_baiguullga = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
+
 
 
 class TsegUstsan(models.Model):

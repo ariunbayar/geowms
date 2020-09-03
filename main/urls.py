@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 import backend.urls
 import frontend.urls
 import api.urls
+import govorg.urls
 
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('back/', include(backend.urls)),
     path('api/', include(api.urls)),
+    path('gov/', include(govorg.urls)),
     path('', include(frontend.urls)),
 ]
 
