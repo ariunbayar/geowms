@@ -22,7 +22,6 @@ export class App extends Component {
                                 <NavLink className="menu" exact to={`/profile/all/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
                                         Худалдан авалт
-  
                                     </div>
                                 </NavLink>
                             </div>
