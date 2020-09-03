@@ -33,7 +33,7 @@ export default class HistoryForm extends Component {
         return (
         <div className="container">
             <div className="row">
-                <div className="col-md-12 py-0 my-4">
+                <div className="col-md-12 py-0">
                     <table className="table table-bordered">
                          <thead>
                             <tr>
