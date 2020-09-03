@@ -41,10 +41,10 @@ export default class Bundle extends Component {
 
     render() {
         return (
-            <div className="container my-4">
+            <div className="container my-5 ml-5">
                 <div className="row">
-                    <div className="col-md-12">
-                        <div className="mb-3 mt-3">
+                    <div className="col-md-12 pl-5 ">
+                        <div className="mb-3">
                             <table className="table table-bordered">
                                 <thead>
                                     <tr>
