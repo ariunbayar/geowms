@@ -12,7 +12,7 @@ export class App extends Component {
             <div className="container my-3 p-3 mb-5">
                 <div className="row">
                     <div className=" col-md-2">
-                        <div className=" my-4">
+                        <div className=" my-0">
                             <div className="list-group border">
                                 <NavLink className="menu" exact to={'/profile/api/'} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
