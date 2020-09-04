@@ -65,6 +65,7 @@ export class Forms extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
     }
+
     componentDidMount(){
         const id = this.props.match.params.id
         if(id) {
@@ -87,7 +88,7 @@ export class Forms extends Component {
 
         })
     }
-    
+
     onDrop([icon], name) {
         if(icon){
             let reader = new FileReader();
@@ -97,7 +98,7 @@ export class Forms extends Component {
             reader.readAsBinaryString(icon)
         }
     }
-    
+
     onChangeHandler(e, name){
         const file = e.target.files[0]
         var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[a-z A-Z 0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
@@ -118,7 +119,6 @@ export class Forms extends Component {
         }
     }
 
-    
     handleSubmit(values, { setStatus, setSubmitting }) {
 
         setStatus('checking')
@@ -182,6 +182,7 @@ export class Forms extends Component {
 
         })
     }
+
     tsegUpdate(id){
         service.updateTseg(id).then(({tseg_display}) =>{
             if(tseg_display){
@@ -246,8 +247,6 @@ export class Forms extends Component {
             dirty,
         }) => {
             const has_error = Object.keys(errors).length > 0
-            console.log("EROROROORR", errors)
-            console.log(this.state.values)
             return (
                 <Form>
                     <div className="row container  my-1">
