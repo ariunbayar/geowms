@@ -609,7 +609,6 @@ def tsegPersonal(request):
 @require_POST
 @ajax_required
 def tsegUstsan(request):
-    print(request.POST)
 
     is_dan = bool(request.POST.get('is_dan'))
     tseg_id = int(request.POST.get('id'))
@@ -679,6 +678,7 @@ def tsegUstsan(request):
         return JsonResponse({'success': True})
     else:
         print("uusgeh")
+        
         if img_holoos:
             [image_x2] = resize_b64_to_sizes(img_holoos, [(300, 300)])
             img_holoos = SimpleUploadedFile('img.png', image_x2)
@@ -904,14 +904,14 @@ def tsegUstsanEdit(request, payload):
 @require_POST
 @ajax_required
 def tsegPersonalSearch(request, payload):
-
     query = payload.get('query')
     items = []
-    tsegs = TsegPersonal.objects.filter(tesgiin_ner__icontains=query)
-    if(tsegs):
-        for tseg in tsegs:
+    mpoint = Mpoint.objects.using('postgis_db').filter(objectid__icontains=query)
+    print(mpoint)
+    if(mpoint):
+        for tseg in mpoint:
             items.append({
-                "tseg": tseg.tesgiin_ner
+                "tseg": tseg.objectid
             })
         rsp = {
             'items': items

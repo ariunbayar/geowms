@@ -106,13 +106,11 @@ function tsegUstsan(form_datas) {
         ...getPostOptions(),
         body: form_datas,
     }
-    console.log("service", form_datas)
     return fetch(`${prefix}/tseg-ustsan/`, opts).then(handleResponse)
 }
 
 
 function dursgaltGazarCreate(form_datas) {
-    console.log(form_datas)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({form_datas}),
@@ -198,12 +196,10 @@ function tseg_remove(id) {
 
 
 function tsegustsanEdit(id) {
-    console.log(id)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({id}),
     }
-    console.log("service", id)
     return fetch(`${prefix}/tseg-ustsan_edit/`, opts).then(handleResponse)
 }
 

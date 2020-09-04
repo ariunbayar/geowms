@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
-
 import {FormTseg} from './Form'
 import {List} from './List'
 import { service } from "../service"
@@ -29,7 +28,6 @@ export class TsegUstsan extends Component {
 
     render() {
         const {is_dan} = this.state
-        console.log("is Dan", is_dan)
         return (
             <Switch>
                 <Route exact path={"/back/froms/tseg-ustsan/"} component={List}/>

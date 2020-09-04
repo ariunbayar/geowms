@@ -3,7 +3,6 @@ import ImageUploader from 'react-images-upload'
 import {service} from '../service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaDan} from './validationSchema'
-import Modal from './alertModel'
 export class DanForm extends Component {
 
     constructor(props) {
@@ -14,12 +13,12 @@ export class DanForm extends Component {
         this.state = {
             id: -1,
             values:{
-                oiroltsoo_bairlal: '21',
-                evdersen_baidal: '12',
-                nohtsol_baidal: '21',
-                sergeeh_sanal: '21',
+                oiroltsoo_bairlal: '',
+                evdersen_baidal: '',
+                nohtsol_baidal: '',
+                sergeeh_sanal: '',
             },
-            tsegiin_dugaar: '12',
+            tsegiin_dugaar: '',
 
             zurag_hol: '',
             zurag_oir: '',
@@ -40,8 +39,7 @@ export class DanForm extends Component {
             items:[],
             parse: [],
             checkError: [],
-            is_modal_open: false,
-            showBox: false,
+            showBox: true,
             error:{error:''},
             is_dan: false,
         }
@@ -54,7 +52,6 @@ export class DanForm extends Component {
         this.optionVal = this.optionVal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.checkAldaa = this.checkAldaa.bind(this)
-        this.openModal = this.openModal.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
         this.checkUser = this.checkUser.bind(this)
@@ -67,6 +64,9 @@ export class DanForm extends Component {
         }
         this.handleGetAll(id)
         this.checkUser()
+        setTimeout(() => {
+            this.setState({ showBox: false })
+        }, 1500);
     }
 
     handleSearchWithTseg(field, e) {
@@ -78,17 +78,15 @@ export class DanForm extends Component {
                 this.setState({ checkError: this.state.error })
             }   
         }
-        else{
+        if(e.target.value.length > 2){
             this.error_msg = []
             service.searchTseg(e.target.value).then(items => {
                 
                 if(items.items !== false){
-                    console.log("NONONONONONONON", items)
                     this.setState({items: items.items, tseg_dugaar_error:false , checkError:[] })
                     this.optionVal(items.items)
                 }
                 else{
-                    console.log("FAAAAAAAAAALSE")
                     this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
                 }
             })
@@ -97,7 +95,6 @@ export class DanForm extends Component {
 
     optionVal(items){
         this.datalist = []
-        console.log("DDDDDDAAAAAAAAAAATAAAAALSIT", items)
         items.map((item, key) => {
             this.datalist.push(<option key={key} value={item.tseg}></option>)
         })
@@ -113,14 +110,8 @@ export class DanForm extends Component {
         }
     }
 
-    openModal(event){
-        event.preventDefault()
-        this.setState({is_modal_open: true})
-    }
-
     handleGetAll(id){
         if(id){
-            console.log("id baina")
             this.setState({id:id})
             service.tsegustsanEdit(id).then(({ form_data }) => {
                 if (form_data) {
@@ -164,13 +155,10 @@ export class DanForm extends Component {
     handleSubmit(values, { setStatus, setSubmitting }){
         setStatus('checking')
         setSubmitting(true)
-        console.log("haha", this.state.id)
         const form_datas = new FormData() 
         this.setState({values})
         const is_dan = this.state.is_dan
-        console.log("hahaha", is_dan)
         if (is_dan == true) {
-            console.log("isDan", is_dan)
             form_datas.append('is_dan', this.state.is_dan)
         }
         form_datas.append('id', this.state.id)
@@ -186,7 +174,6 @@ export class DanForm extends Component {
         form_datas.append('zurag_zuun', this.state.zurag_zuun)
         form_datas.append('zurag_hoid', this.state.zurag_hoid)
         form_datas.append('zurag_omno', this.state.zurag_omno)
-        console.log(form_datas)
         service.tsegUstsan(form_datas).then(({success}) => {
             if (success) {
                 setTimeout(() => {
@@ -219,13 +206,11 @@ export class DanForm extends Component {
                     [name]: btoa(upload.target.result)
                 })
             }
-            console.log("ONDROP ", )
             reader.readAsBinaryString(icon)
         }
     }
 
     handleCheckGroup(field, e, check) {
-        console.log(check)
         this.setState({ [field]: check })
     }
 
@@ -237,9 +222,6 @@ export class DanForm extends Component {
     }
 
     render() {
-        console.log("render12312312123123123123")
-        console.log("render", this.state.values)
-        console.log("render12312312123123123123")
         const{id,zurag_hol_prev, zurag_oir_prev, zurag_baruun_prev, zurag_zuun_prev, zurag_hoid_prev, zurag_omno_prev, tseg_dugaar_error} = this.state
         return (
             <Formik
@@ -264,13 +246,16 @@ export class DanForm extends Component {
                     dirty,
                 }) => {
                     const checkError = this.state.checkError
-                    console.log("EERROORORORR",checkError)
                     const has_error = Object.keys(errors).length > 0
                     const error_bn = Object.keys(checkError).length > 0
-                    console.log("error", error_bn, Object.keys([]).length, has_error, isSubmitting)
                     return (
                     <Form>
                         <div className="row container  my-4">
+                        <div className="col-md-12 mb-4">
+                            <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
+                                <i className="fa fa-angle-double-left"></i> Буцах
+                            </a>
+                        </div>
                         <h4>Цэгийн мэдээлэл</h4>
                         <table className="table table-bordered">
                             <tbody>
@@ -280,7 +265,7 @@ export class DanForm extends Component {
                                     <td colSpan="4" scope="rowgroup">
                                         <input 
                                             name="tsegiin_dugaar" 
-                                            type="text" 
+                                            type="number" 
                                             id="tsegiin_dugaar"
                                             list="tsegList"
                                             className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
@@ -360,11 +345,16 @@ export class DanForm extends Component {
                                             onMouseOver={(e) => this.handleBoxOver(e)}
                                             onMouseLeave={(e) => this.handleBoxLeave(e)}
                                             className="float-right"
-                                            
                                         >
-                                            <i className="fa fa-exclamation-circle float-right"></i>
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div
+                                                className={`p-3 mb-2 bg-secondary text-white rounded `+
+                                                    `position-absolute d-none ${this.state.showBox ? " d-block" : ""}`}
+                                            >
+                                                300x300 байх шаардлагатай .jpg .png байх ёстой
+                                            </div>
+                                        </i>
                                         </div>
-                                        <div className={`d-none ${this.state.showBox ? " d-block" : ""}`}>HAHA</div>
                                     </th>
                                 </tr>
                                 <tr>
@@ -580,12 +570,12 @@ export class DanForm extends Component {
                             </tbody>
                         </table>
                         <div>
-                            <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
-                                disabled={isSubmitting || has_error || error_bn}>
-                                {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                {!isSubmitting && 'Нэмэх' }
-                            </button>
+                        <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
+                            disabled={isSubmitting || has_error || error_bn}>
+                            {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                            {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                            {!isSubmitting && (id == -1)?'Нэмэх': 'засах'}
+                        </button>
                         </div>
                         <datalist id="tsegList">
                             {this.datalist}

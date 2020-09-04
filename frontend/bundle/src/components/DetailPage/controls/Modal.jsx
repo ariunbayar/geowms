@@ -17,9 +17,6 @@ class ModalComponent extends Component{
         }
 
     }
-    componentDidMount(){
-        console.log("paymnet bna", payment_id)
-    }
 
     handlePayment(){
         this.setState({payload: true})

@@ -29,14 +29,12 @@ export class List extends Component {
                 this.setState({
                     list:tseg_ustsan_all
                 })
-            console.log(tseg_ustsan_all)
             }
         })
     
     }
 
     handleTsegDelete(id){
-
         service.tseg_remove(id).then(({ success }) => {
             if (success) {
                 this.handlelistall()
