@@ -9,7 +9,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-
+import math
+import pyproj
+import psycopg2
 import uuid
 # Create your models here.
 
@@ -453,17 +455,36 @@ def tsegPersonalUpdate(request, payload):
 @require_POST
 @ajax_required
 def findSum(request, payload):
+    
     info = []
-    x = payload.get("y")
-    y = payload.get("x")
+    L = payload.get("y")
+    B = payload.get("x")
+    if(44 <= B <= 48):
+        vseg = "L"
+    elif(48 <= B <= 52):
+        vseg = "M"
+    elif(52 <= B <= 56):
+        vseg = "N"
+
     cursor = connections['postgis_db'].cursor()
-    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [x, y])
+    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [L, B])
     geom = cursor.fetchone()
+    zoneout=int(L)/6+31
+
+    instr = ("+proj=longlat +datum=WGS84 +no_defs")
+    outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+    inproj = pyproj.Proj(instr)
+    outproj = pyproj.Proj(outstr)
+
+    val= pyproj.transform(inproj, outproj, L,B)
     info.append({
         'aimag': geom[0],
-        'sum': geom[1]
-    })
+        'sum': geom[1],
+        'E': val[0],
+        'N': val[1],
+        "vseg": vseg
 
+    })
     return JsonResponse({"info":info})
 
 

@@ -4,7 +4,8 @@ import {service} from '../service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import BundleMap from '../../map/BundleMap'
-//title: props.layer.title || '',
+import { coordinateRelationship } from "ol/extent"
+
 export class Forms extends Component {
 
     constructor(props) {
@@ -14,14 +15,11 @@ export class Forms extends Component {
             values:{
                 tesgiin_ner: '',
                 toviin_dugaar: '',
-                trapetsiin_dugaar: '',
+             
                 suljeenii_torol: '',
-                sum_name: '',
-                utmx: '',
-                utmy: '',
-                latlongx: "",
-                latlongy: '',
-                barishil_tuhai: '',
+                
+               
+               
                 sudalga_or_shine: '',
                 hors_shinj_baidal: '',
                 date: '',
@@ -31,6 +29,15 @@ export class Forms extends Component {
                 center_typ: '',
                 pid: '',
             },
+
+            utmx: '',
+            utmy: '',
+            latlongx: "",
+            latlongy: '',
+            trapetsiin_dugaar: '',
+            sum_name: '',
+            barishil_tuhai: '',
+
             real_sum: '',
             aimag_name: '',
             sum_ners: '',
@@ -52,16 +59,11 @@ export class Forms extends Component {
             id_error: false,
 
         }
-        this.handleInput = this.handleInput.bind(this)
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
         this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.userName = this.userName.bind(this)
         this.handleXY = this.handleXY.bind(this)
-    }
-    userName(){
-
     }
     componentDidMount(){
         const id = this.props.match.params.id
@@ -69,22 +71,18 @@ export class Forms extends Component {
             this.setState({id})
             this.tsegUpdate(id)
         }
-        else{
-            this.userName()
-        }
     }
 
     handleXY(values, info){
         info.map(e=>this.setState({
-            values:{
-                sum_name:e.sum
-            }
+            utmx:e.E,
+            utmy:e.N,
+            trapetsiin_dugaar: e.vseg,
+            sum_name:e.sum,
         }))
         this.setState({
-            values:{
-                latlongy:values[0],
-                latlongx:values[1],
-            },
+            latlongy:values[0],
+            latlongx:values[1],
             aimag_name:info[0]['aimag'],
 
         })
@@ -99,11 +97,6 @@ export class Forms extends Component {
             reader.readAsBinaryString(icon)
         }
     }
-
-    handleInput(field, e) {
-        this.setState({aimag_name: e.target.value })
-    }
-
     
     onChangeHandler(e, name){
         const file = e.target.files[0]
@@ -134,9 +127,9 @@ export class Forms extends Component {
         this.setState({values})
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
-        form_datas.append('tesgiin_ner', this.state.values.tesgiin_ner)
+        form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
         form_datas.append('idx', this.state.id)
-        form_datas.append('toviin_dugaar', this.state.values.toviin_dugaar)
+        form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('trapetsiin_dugaar', this.state.values.trapetsiin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
         form_datas.append('pid', this.state.values.pid)
@@ -198,7 +191,7 @@ export class Forms extends Component {
                             tesgiin_ner: item.point_name,
                             pid: item.pid,
                             center_typ: item.center_typ,
-                            sum_name: item.sum,
+                            
                             trapetsiin_dugaar: item.sheet1,
                             toviin_dugaar: item.objectid,
                             latlongx: item.sheet2,
@@ -216,6 +209,7 @@ export class Forms extends Component {
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
                         },
+                        sum_name: item.sum,
                         aimag_name: item.aimag,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
@@ -252,6 +246,8 @@ export class Forms extends Component {
             dirty,
         }) => {
             const has_error = Object.keys(errors).length > 0
+            console.log("EROROROORR", errors)
+            console.log(this.state.values)
             return (
                 <Form>
                     <div className="row container  my-1">
@@ -298,13 +294,15 @@ export class Forms extends Component {
                                     <th style={{width: "5%"}} scope="row">3</th>
                                     <th>Трапецийн дугаар(1:100000)</th>
                                     <td>
-                                        <Field
+                                        <input
                                             className={'form-control ' + (errors.trapetsiin_dugaar ? 'is-invalid' : '')}
                                             name='trapetsiin_dugaar'
                                             id="id_trapetsiin_dugaar"
+                                            disabled={true}
                                             type="text"
+                                            value={this.state.trapetsiin_dugaar}
                                         />
-                                        <ErrorMessage name="trapetsiin_dugaar" component="div" className="invalid-feedback"/>
+                                       
                                     </td>
                                     <th style={{width: "5%"}} scope="row">4</th>
                                     <th>Сүлжээний төрөл</th>
@@ -331,10 +329,11 @@ export class Forms extends Component {
                                     <th style={{width: "5%"}} scope="row">5</th>
                                     <th>Аймаг</th>
                                     <td colSpan="1" scope="rowgroup">
-                                    <Field
+                                    <input
                                             className={'form-control '}
                                             name='aimag_name'
                                             id="aimag_name"
+                                            disabled={true}
                                             type="text"
                                             value={this.state.aimag_name}
                                         />      
@@ -342,13 +341,14 @@ export class Forms extends Component {
                                     </td>
                                     <th>Сум</th>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.sum_name ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control '}
                                             name='sum_name'
                                             id="sum_name"
                                             type="text"
+                                            disabled={true}
+                                            value={this.state.sum_name || ''}
                                         />
-                                        <ErrorMessage name="sum_name" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
 
@@ -356,30 +356,32 @@ export class Forms extends Component {
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /UTM/</th>
                                     <th colSpan="2" style={{textAlign:'center'}}>
-                                    UTM-N
+                                    UTM-E
                                     </th>
                                     <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>
-                                    UTM-E
+                                    UTM-N
                                     </th>
                                 </tr>
                                 <tr>
                                     <td colSpan="2">
-                                        <Field
-                                            className={'form-control ' + (errors.utmx ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control '}
                                             name='utmx'
                                             id="id_utmx"
+                                            disabled={true}
                                             type="number"
+                                            value={this.state.utmx}
                                         />
-                                        <ErrorMessage name="utmx" component="div" className="invalid-feedback"/>
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.utmy ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control '}
                                             name='utmy'
                                             id="id_utmy"
+                                            disabled={true}
                                             type="number"
+                                            value={this.state.utmy}
                                         />
-                                        <ErrorMessage name="utmy" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -388,22 +390,24 @@ export class Forms extends Component {
                                 </tr>
                                 <tr>
                                     <td colSpan="2">
-                                        <Field
-                                            className={'form-control ' + (errors.latlongx ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control ' }
                                             name='latlongx'
                                             id="id_latlongx"
+                                            disabled={true}
                                             type="number"
+                                            value ={this.state.latlongx}
                                         />
-                                        <ErrorMessage name="latlongx" component="div" className="invalid-feedback"/>
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.latlongy ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control ' }
                                             name='latlongy'
+                                            disabled={true}
                                             id="id_latlongy"
                                             type="number"
+                                            value ={this.state.latlongy}
                                         />
-                                        <ErrorMessage name="latlongy" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -481,14 +485,15 @@ export class Forms extends Component {
                                 <tr>
                                     <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">11. Байршлын тухай: </th>
                                     <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.barishil_tuhai ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control ' }
                                             component="textarea"
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
+                                            value={`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${this.state.barishil_tuhai}`}
                                         />
-                                        <ErrorMessage name="barishil_tuhai" component="div" className="invalid-feedback"/>
+
                                     </th>
                                 </tr>
                                 <tr>
