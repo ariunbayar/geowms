@@ -72,7 +72,7 @@ def wms_layers(request, pk):
         if wms.is_active:
             wms_data = {
                 'name': wms.name,
-                'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+                'url': request.build_absolute_uri(reverse('api:service:wms_proxy', args=[wms.pk])),
                 'layers': [_layer_to_display(layer) for layer in layers],
             }
             wms_list.append(wms_data)

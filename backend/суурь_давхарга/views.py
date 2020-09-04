@@ -38,7 +38,7 @@ def жагсаалт(request):
 
         wms_list.append({
             'name': wms.name,
-            'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+            'url': request.build_absolute_uri(reverse('api:service:wms_proxy', args=[wms.pk])),
             'layers': layers,
         })
 

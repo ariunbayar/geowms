@@ -30,19 +30,20 @@ export default class FormTable extends Component {
     }
 
     render() {
-        const { id, tesgiin_ner, toviin_dugaar, trapetsiin_dugaar, suljeenii_torol, aimag_name, sum_name, latlongx,latlongy} = this.props.values
+        const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ,aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
                 <th>{idx + 1}</th>
-                <th>{tesgiin_ner}</th>
-                <th>{toviin_dugaar}</th>
-                <th>{trapetsiin_dugaar}</th>
-                <th>{suljeenii_torol}</th>
-                <th>{aimag_name}</th>
-                <th>{sum_name}</th>
-                <th>{latlongx}</th>
-                <th>{latlongy}</th>
+                <th>{objectid}</th>
+                <th>{point_name}</th>
+                <th>{pid}</th>
+                <th>{point_class}</th>
+                <th>{point_type}</th>
+                <th>{center_typ}</th>
+                <th>{aimag}</th>
+                <th>{sum}</th>
+                <th>{t_type}</th>
                 <th>
                     <NavLink to={`/back/froms/tseg-personal/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>

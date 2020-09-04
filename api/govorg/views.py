@@ -2,8 +2,8 @@ import re
 from xml.etree import ElementTree
 import requests
 
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, Http404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET
 
 from backend.govorg.models import GovOrg
@@ -69,7 +69,7 @@ def proxy(request, token, pk):
             content = _filter_layers(content, allowed_layers)
 
         content_type = rsp.headers.get('content-type')
-        
+
         if not queryargs.get('REQUEST'):
             qs_request = "no request"
         else:
@@ -86,4 +86,4 @@ def proxy(request, token, pk):
 
         return HttpResponse(content, content_type=content_type)
     else:
-        return render(request, "backend/404.html", {})
+        raise Http404

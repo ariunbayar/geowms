@@ -59,7 +59,7 @@ def wms_layers(request, pk):
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         wms_data = {
             'name': wms.name,
-            'url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+            'url': request.build_absolute_uri(reverse('api:service:wms_proxy', args=[wms.pk])),
             'layers': [
                 {'name': layer.name, 'code': layer.code}
                 for layer in layers
