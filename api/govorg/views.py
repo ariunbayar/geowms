@@ -10,6 +10,7 @@ from backend.govorg.models import GovOrg
 from backend.wms.models import WMS
 from backend.wms.models import WMSLog
 
+
 def _filter_layers(content, allowed_layers):
 
     if isinstance(content, bytes):
@@ -70,10 +71,8 @@ def proxy(request, token, pk):
 
         content_type = rsp.headers.get('content-type')
 
-        if not queryargs.get('REQUEST'):
-            qs_request = "no request"
-        else:
-            qs_request = queryargs.get('REQUEST')
+        qs_request = queryargs.get('REQUEST', 'no request')
+
         wms_log = WMSLog.objects.create(
             qs_all= dict(queryargs),
             qs_request= qs_request,
@@ -82,7 +81,6 @@ def proxy(request, token, pk):
             system_id= govorg.id,
             wms_id=pk,
         )
-        wms_log.save()
 
         return HttpResponse(content, content_type=content_type)
     else:
