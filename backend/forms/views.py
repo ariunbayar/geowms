@@ -609,10 +609,8 @@ def tsegPersonal(request):
 @require_POST
 @ajax_required
 def tsegUstsan(request):
-
     is_dan = bool(request.POST.get('is_dan'))
     tseg_id = int(request.POST.get('id'))
-    
     email = request.POST.get('email')
     baiguulla = request.POST.get('baiguulaga')
     alban_tushaal = request.POST.get('alban_tushaal')
@@ -623,14 +621,12 @@ def tsegUstsan(request):
     shaltgaan = request.POST.get('nohtsol_baidal')
     sergeeh_sanal = request.POST.get('sergeeh_sanal')
     TorF = bool(request.POST.get('hemjilt_hiih_bolomj'))
-
     img_holoos = request.POST.get('zurag_hol')
     img_oiroos = request.POST.get('zurag_oir')
     img_baruun = request.POST.get('zurag_baruun')
     img_zuun = request.POST.get('zurag_zuun')
     img_hoino = request.POST.get('zurag_hoid')
     img_omno = request.POST.get('zurag_omno')
-
     if is_dan:
         users = User.objects.filter(id=request.user.id)
         for user in users:
@@ -638,9 +634,7 @@ def tsegUstsan(request):
             baiguulla = ''
             alban_tushaal = ''
             phone = ''
-
     if tseg_id != -1:
-        print("Zasah")
         Tsegs = get_object_or_404(TsegUstsan, id=tseg_id)
         TsegUstsan.objects.filter(id=tseg_id).update(
                 email=email,
@@ -655,7 +649,6 @@ def tsegUstsan(request):
                 gps_hemjilt=TorF,
             )
         if img_holoos and len(img_holoos) > 2000:
-            print(len(img_holoos))
             Tsegs.img_holoos.delete(save=False)
             [image_x2] = resize_b64_to_sizes(img_holoos, [(200, 200)])
             Tsegs.img_holoos = SimpleUploadedFile('icon.png', image_x2)
@@ -677,8 +670,6 @@ def tsegUstsan(request):
             Tsegs.save()
         return JsonResponse({'success': True})
     else:
-        print("uusgeh")
-        
         if img_holoos:
             [image_x2] = resize_b64_to_sizes(img_holoos, [(300, 300)])
             img_holoos = SimpleUploadedFile('img.png', image_x2)
@@ -742,11 +733,9 @@ def tsegUstsanAll(request):
 @require_POST
 @ajax_required
 def tsegUstsanRemove(request, payload):
-
     pk = payload.get('id')
     tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
     tseg_ustsan.delete()
-
     return JsonResponse({'success': True})
 
 
@@ -859,10 +848,8 @@ def tsegUstsanEdit(request, payload):
     img_omno_url = ''
     img_hoino_url = ''
     for tseg in TsegUstsan.objects.filter(pk = payload.get('id')):
-
         if tseg.img_holoos:
             img_holoos_url = tseg.img_holoos.url
-
         if tseg.img_holoos:
             img_holoos_url = tseg.img_holoos.url
         if tseg.img_oiroos:
@@ -875,7 +862,6 @@ def tsegUstsanEdit(request, payload):
             img_omno_url = tseg.img_omno.url
         if tseg.img_hoino:
             img_hoino_url = tseg.img_hoino.url
-
         form_data.append({
             'tseg_id': tseg.tseg_id,
             'email': tseg.email,
@@ -894,7 +880,6 @@ def tsegUstsanEdit(request, payload):
             'img_omno': img_omno_url,
             'img_hoino': img_hoino_url,
         })
-    print(form_data)
     rsp ={
         'form_data': form_data
     }
@@ -907,7 +892,6 @@ def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
     mpoint = Mpoint.objects.using('postgis_db').filter(objectid__icontains=query)
-    print(mpoint)
     if(mpoint):
         for tseg in mpoint:
             items.append({
@@ -922,19 +906,15 @@ def tsegPersonalSearch(request, payload):
             'items': False
         }
         return JsonResponse(rsp)
-   
 
 
 @require_POST
 @ajax_required
 def checkDan(request, payload):
     user_id = request.user.id
-    print('userid',user_id)
     users = get_object_or_404(User,id=user_id)
     isDan = users.is_sso
-    print(isDan)
     if isDan:
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
-    

@@ -12,18 +12,15 @@ export class FormTseg extends Component {
         this.error_msg = []
         this.state = {
             id: -1,
-            
             values:{
                 email: '',
                 baiguulaga: '',
                 alban_tushaal: '',
                 utas: '',
-                
                 oiroltsoo_bairlal: '',
                 evdersen_baidal: '',
                 nohtsol_baidal: '',
                 sergeeh_sanal: '',
-                
             },
             tsegiin_dugaar: '',
 
@@ -33,7 +30,6 @@ export class FormTseg extends Component {
             zurag_zuun: '',
             zurag_hoid: '',
             zurag_omno: '',
-
             zurag_hol_prev: '',
             zurag_oir_prev: '',
             zurag_baruun_prev: '',
@@ -49,7 +45,6 @@ export class FormTseg extends Component {
             checkError: [],
             showBox: true,
             error:{error:''}
-        
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleInputEmail = this.handleInputEmail.bind(this)
@@ -64,6 +59,7 @@ export class FormTseg extends Component {
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
     }
+
     componentDidMount(){
         const id = this.props.match.params.id
         if(id){
@@ -193,7 +189,7 @@ export class FormTseg extends Component {
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
     }
-    
+
     handleInputEmail(field, e) {
 
         let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -236,6 +232,7 @@ export class FormTseg extends Component {
     handleBoxOver (e){
         this.setState({ showBox: true })
     } 
+
     handleBoxLeave(e){
         this.setState({ showBox: false })
     }
@@ -247,10 +244,6 @@ export class FormTseg extends Component {
                 initialValues={this.state.values}
                 enableReinitialize
                 validationSchema={validationSchemaAdmin}
-                // onSubmit={fields => {
-                //     alert('SUCCESS!! :-)\n\n' + JSON.stringify(fields, null, 4))
-                //     this.handleSubmit()
-                // }}
                 onSubmit={this.handleSubmit}
                 >
                 {({

@@ -14,7 +14,6 @@ export class TsegUstsan extends Component {
         }
         this.checkUser = this.checkUser.bind(this)
     }
-    
     // Hereglegch shalgah
     componentDidMount(){
         this.checkUser()
@@ -45,8 +44,6 @@ export class TsegUstsan extends Component {
                     :
                     <Route exact path={"/back/froms/tseg-ustsan/:id/засах"} component={FormTseg}/>
                 }
-                
-                
             </Switch>
         )
 

@@ -19,14 +19,12 @@ export class DanForm extends Component {
                 sergeeh_sanal: '',
             },
             tsegiin_dugaar: '',
-
             zurag_hol: '',
             zurag_oir: '',
             zurag_baruun: '',
             zurag_zuun: '',
             zurag_hoid: '',
             zurag_omno: '',
-
             zurag_hol_prev: '',
             zurag_oir_prev: '',
             zurag_baruun_prev: '',
@@ -43,6 +41,7 @@ export class DanForm extends Component {
             error:{error:''},
             is_dan: false,
         }
+
         this.handleInput = this.handleInput.bind(this)
         this.onDrop = this.onDrop.bind(this)
         this.handleCheck = this.handleCheck.bind(this)
@@ -228,10 +227,6 @@ export class DanForm extends Component {
                 initialValues={this.state.values}
                 enableReinitialize
                 validationSchema={validationSchemaDan}
-                // onSubmit={fields => {
-                //     alert('SUCCESS!! :-)\n\n' + JSON.stringify(fields, null, 4))
-                //     this.handleSubmit()
-                // }}
                 onSubmit={this.handleSubmit}
                 >
                 {({

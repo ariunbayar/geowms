@@ -14,6 +14,7 @@ export const validationSchemaDan = Yup.object().shape({
     sergeeh_sanal: Yup.string()
         .required('Санал хоосон байна!'),
 });
+
 export const validationSchemaAdmin = Yup.object().shape({
     //Цэгийн хувийн хэргийн дугаар
     email: Yup.string()

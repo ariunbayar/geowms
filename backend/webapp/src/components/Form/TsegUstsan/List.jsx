@@ -22,7 +22,6 @@ export class List extends Component {
         this.handlelistall()
     }
     
-
     handlelistall(){
         service.tsegUstsanAll().then(({tseg_ustsan_all, success }) => {
             if (success) {
@@ -50,7 +49,6 @@ export class List extends Component {
                           <NavLink className="btn gp-btn-primary float-right" to={"/back/froms/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
-                        
                         <table className="table table-fluid">
                             <thead>
                                 <tr>
@@ -63,7 +61,6 @@ export class List extends Component {
                                     <th>Устгах</th>
                                 </tr>
                                </thead>
-                               
                              <tbody>
                              { 
                                 this.state.list.map((tseg, idx) =>
