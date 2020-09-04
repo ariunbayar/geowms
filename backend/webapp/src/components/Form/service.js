@@ -159,18 +159,18 @@ function dursgaltGazarAbout(id) {
 }
 
 
-function hureeCreate(id, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt) {
+function hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt}),
+        body: JSON.stringify({dursgalt_id, x, y, tuuh_soyl_huree_id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/huree-create/`, opts).then(handleResponse)
 }
 
-function hureeUpdate(tuuhen_ov, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id) {
+function hureeUpdate(tuuhen_ov,  x, y, id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({tuuhen_ov, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id}),
+        body: JSON.stringify({tuuhen_ov,  x, y, id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/huree-update/`, opts).then(handleResponse)
 }
@@ -183,10 +183,10 @@ function hureeDelete(ayul_id, tuuhen_ov) {
     return fetch(`${prefix}/dursgalt-gazar/huree-delete/`, opts).then(handleResponse)
 }
 
-function hureeAll(id) {
+function hureeAll(id, tuuh_soyl_huree_id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id}),
+        body: JSON.stringify({id, tuuh_soyl_huree_id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/huree-all/`, opts).then(handleResponse)
 }
@@ -194,18 +194,18 @@ function hureeAll(id) {
 
 
 
-function ayulCreate(id, ayul_utm, ayul_x, ayul_y, ayul_llx, ayul_lly, ayul_llalt) {
+function ayulCreate(dursgalt_id, x, y, id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id, ayul_utm, ayul_x, ayul_y, ayul_llx, ayul_lly, ayul_llalt}),
+        body: JSON.stringify({dursgalt_id, x, y, id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/ayul-create/`, opts).then(handleResponse)
 }
 
-function ayulUpdate(tuuhen_ov, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id) {
+function ayulUpdate(tuuhen_ov, x, y, id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({tuuhen_ov, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id}),
+        body: JSON.stringify({tuuhen_ov, x, y, id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/ayul-update/`, opts).then(handleResponse)
 }

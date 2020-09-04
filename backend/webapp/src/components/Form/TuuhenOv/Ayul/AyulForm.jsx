@@ -9,14 +9,10 @@ export class AyulForm extends Component {
 
         super(props)
         this.state = {
-            form_data: [{},{}],
+            form_data: [],
             ayul_data: [],
-            hm_utm: '',
-            hm_x: 0,
-            hm_y: 0,
-            hm_llx: 0,
-            hm_lly: 0,
-            hm_llalt: 0,
+            x: 0,
+            y: 0,
             handle_save_succes_huree: false,
         }
 
@@ -55,9 +51,8 @@ export class AyulForm extends Component {
     handleHureeSave(){
         this.setState({handle_save_succes_huree:true})
         const dursgalt_id = this.props.dursgalt_id
-        const {hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt} = this.state
-        service.ayulCreate(dursgalt_id, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt).then(({success}) => {
-            
+        const {x, y} = this.state
+        service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
             if (success) {
                 setTimeout(() => {
                     this.setState({handle_save_succes_huree:false})
@@ -76,18 +71,13 @@ export class AyulForm extends Component {
                 <table className="table table-bordered">
                     <tr>
                         <th rowSpan="2" scope="rowgroup" scope="row">№</th>
-                        <td colSpan="3">UTM</td>
                         <td colSpan="2">Latitude Longitude</td>
-                        <td rowSpan="2">Alt(m)</td>
                         <td rowSpan="2">Засах</td>
                         <td rowSpan="2">Устгах</td>
                     </tr>
                     <tr>
-                        <th scope="row">UTM Zone</th>
-                        <th scope="row">N</th>
-                        <th scope="row">E</th>
-                        <th scope="row">N</th>
-                        <th scope="row">E</th>
+                        <th scope="row">X</th>
+                        <th scope="row">Y</th>
                     </tr>
                     {this.state.ayul_data.map((data, idx) =>
                             <AyulFormTable 
@@ -101,58 +91,23 @@ export class AyulForm extends Component {
 
                         <tr >
                             <th scope="row"></th>
+
                             <td scope="row">
                                 <input
                                     type="number"
                                     className="form-control"
-                                    id="hm_utm"
-                                    onChange={(e) => this.handleInput('hm_utm', e)}
-                                    value={this.state.hm_utm}
+                                    id="x"
+                                    onChange={(e) => this.handleInput('x', e)}
+                                    value={this.state.x}
                                 />
                             </td>
                             <td scope="row">
                                 <input
                                     type="number"
                                     className="form-control"
-                                    id="hm_x"
-                                    onChange={(e) => this.handleInput('hm_x', e)}
-                                    value={this.state.hm_x}
-                                />
-                            </td>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="hm_y"
-                                    onChange={(e) => this.handleInput('hm_y', e)}
-                                    value={this.state.hm_y}
-                                />
-                            </td>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="hm_llx"
-                                    onChange={(e) => this.handleInput('hm_llx', e)}
-                                    value={this.state.hm_llx}
-                                />
-                            </td>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="hm_lly"
-                                    onChange={(e) => this.handleInput('hm_lly', e)}
-                                    value={this.state.hm_lly}
-                                />
-                            </td>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="hm_llalt"
-                                    onChange={(e) => this.handleInput('hm_llalt', e)}
-                                    value={this.state.hm_llalt}
+                                    id="y"
+                                    onChange={(e) => this.handleInput('y', e)}
+                                    value={this.state.y}
                                 />
                             </td>
                             <td colSpan="2" scope="rowgroup" scope="row">

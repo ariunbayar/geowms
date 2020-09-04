@@ -11,12 +11,13 @@ class TuuhSoyol(models.Model):
     sumname = models.CharField(max_length=30)
     burtgegch = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'tuuhsoyol'
+        managed = False
 
 
 class TuuhSoyolPoint(models.Model):
-# models.MultiPolygonField()
-    tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
-    geom = models.CharField(max_length=100)
+    tuuh_soyl = models.CharField(max_length=100)
     latlong = models.CharField(max_length=100)
     utm = models.CharField(max_length=100)
     dursgal = models.CharField(max_length=100) 
@@ -27,7 +28,7 @@ class TuuhSoyolPoint(models.Model):
     stone = models.CharField(max_length=50)
     length = models.CharField(max_length=100)
     width = models.CharField(max_length=20)
-    # area = models.CharField(max_length=20)
+    area = models.CharField(max_length=20)
     width = models.CharField(max_length=20)
     hight = models.CharField(max_length=20)
     depth = models.CharField(max_length=20)
@@ -35,49 +36,34 @@ class TuuhSoyolPoint(models.Model):
     other = models.CharField(max_length=50)
     number = models.BigIntegerField()
     hemjee_comment = models.CharField(max_length=500)
-
     protection_irgen = models.CharField(max_length=100)
     protection_irgen_commnent = models.CharField(max_length=1000)
-    
     protection = models.CharField(max_length=100)
     protecti_1 = models.CharField(max_length=100)
-
     tus = models.CharField(max_length=10)
     tus_comment = models.CharField(max_length=500)
-
     yaral = models.CharField(max_length=100)
     yaral_comment = models.CharField(max_length=500)
-    
     omchlol = models.CharField(max_length=100)
     omchlol_comment = models.CharField(max_length=500)
-
     malts = models.CharField(max_length=100)
     malts_comment = models.CharField(max_length=500)
-
     human = models.CharField(max_length=100)
     human_comment = models.CharField(max_length=500)
-
     natural = models.CharField(max_length=100)
     natural_comment = models.CharField(max_length=500)
-
     recover = models.CharField(max_length=100)
     recover_comment = models.CharField(max_length=500)
-
     recover1 = models.CharField(max_length=100)
     recover1_comment = models.CharField(max_length=500)
-
     protecti_2 = models.CharField(max_length=100)
     protecti_2_comment = models.CharField(max_length=500)
-
     hashaa = models.CharField(max_length=100)
     hashaa_comment = models.CharField(max_length=500)
-
     saravch = models.CharField(max_length=100)
     saravch_comment = models.CharField(max_length=500)
-
     hayg = models.CharField(max_length=100)
     hayg_comment = models.CharField(max_length=500)
-
     other1 = models.CharField(max_length=100)
     utm = models.CharField(max_length=100)
     ndd = models.BigIntegerField()
@@ -89,49 +75,34 @@ class TuuhSoyolPoint(models.Model):
     x = models.CharField(max_length=50)
     y = models.CharField(max_length=50)
     alt = models.CharField(max_length=100)
-
     utm_zone = models.CharField(max_length=50)
     utm_x = models.CharField(max_length=50)
     utm_y = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'tuuhsoyolpoint'
+        managed = False
 
 
 class TuuhSoyolHuree(models.Model):
-    tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
-    geom = models.CharField(max_length=150)
-    latlong = models.CharField(max_length=100)
-    utm = models.CharField(max_length=100)
-    utmx = models.CharField(max_length=100)
-    utmy = models.CharField(max_length=100)
-    ndd = models.BigIntegerField()
-    nmm = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    nss = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    edd = models.BigIntegerField()
-    emm = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    ess = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    tuuh_soyl = models.CharField(max_length=100)
+    tuuh_soyl_huree_id = models.PositiveIntegerField()
     x = models.CharField(max_length=100)
     y = models.CharField(max_length=100)
-    alt = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'tuuhsoyolhuree'
+        managed = False
 
 
 class TuuhSoyolAyuulHuree(models.Model):
-    tuuh_soyl = models.ForeignKey(TuuhSoyol, on_delete=models.PROTECT)
-    geom = models.CharField(max_length=150)
-    latlong = models.CharField(max_length=100)
-    utm = models.CharField(max_length=100)
-    utmx = models.CharField(max_length=100)
-    utmy = models.CharField(max_length=100)
-    ndd = models.BigIntegerField()
-    nmm = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    nss = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    edd = models.BigIntegerField()
-    emm = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    ess = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    tuuh_soyl = models.CharField(max_length=100)
     x = models.CharField(max_length=100)
     y = models.CharField(max_length=100)
-    alt = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'tuuhsoyolayuulhuree'
+        managed = False
 
 
 class TsegPersonal(models.Model):
@@ -158,7 +129,6 @@ class TsegPersonal(models.Model):
 
 
 class TsegUstsan(models.Model):
-
     email = models.CharField(max_length=300)
     name = models.CharField(max_length=300)
     alban_tushaal = models.CharField(max_length=300)

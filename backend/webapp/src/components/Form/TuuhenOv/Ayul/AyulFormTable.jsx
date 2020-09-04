@@ -9,12 +9,8 @@ export default class AyulFormTable extends Component {
 
         this.state = {
             id: props.values.id,
-            hm_utm:'',
-            hm_x: 0,
-            hm_y: 0,
-            hm_llx: 0,
-            hm_lly: 0,
-            hm_llalt: 0,
+            x: 0,
+            y: 0,
             is_modal_delete_open: false,
             disable: false,
             save_is_load: false,
@@ -38,12 +34,8 @@ export default class AyulFormTable extends Component {
     updateData(){
         this.setState({
             id: this.props.values.id,
-            hm_utm: this.props.values.utm,
-            hm_x: this.props.values.utmx,
-            hm_y: this.props.values.utmy,
-            hm_llx: this.props.values.x,
-            hm_lly: this.props.values.y,
-            hm_llalt: this.props.values.alt,
+            x: this.props.values.x,
+            y: this.props.values.y,
         })
     }
 
@@ -61,12 +53,8 @@ export default class AyulFormTable extends Component {
         {
             this.setState({
                 id: this.props.values.id,
-                hm_utm: this.props.values.utm,
-                hm_x: this.props.values.utmx,
-                hm_y: this.props.values.utmy,
-                hm_llx: this.props.values.x,
-                hm_lly: this.props.values.y,
-                hm_llalt: this.props.values.alt,
+                x: this.props.values.x,
+                y: this.props.values.y,
             })
         }
     }
@@ -76,9 +64,8 @@ export default class AyulFormTable extends Component {
         {   
             this.setState({save_is_load: true})
             const tuuhen_ov = this.props.tuuhen_ov
-            const {hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id} = this.state
-            console.log(hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id, tuuhen_ov)
-            service.ayulUpdate(tuuhen_ov, hm_utm, hm_x, hm_y, hm_llx, hm_lly, hm_llalt, id).then(({success}) => {
+            const {x, y, id} = this.state
+            service.ayulUpdate(tuuhen_ov, x, y, id).then(({success}) => {
                 if (success) {
                     setTimeout(() => {
                         this.setState({disable: false, save_is_load: false})
@@ -103,62 +90,23 @@ export default class AyulFormTable extends Component {
                     <input
                         type="number"
                         className="form-control"
-                        id="hm_utm"
-                        onChange={(e) => this.handleInput('hm_utm', e)}
+                        id="x"
+                        onChange={(e) => this.handleInput('x', e)}
                         disabled = {(this.state.disable)? "" : "disabled"}
-                        value={this.state.hm_utm}
+                        value={this.state.x}
                     />
                 </td>
                 <td scope="row">
                     <input
                         type="number"
                         className="form-control"
-                        id="hm_x"
-                        onChange={(e) => this.handleInput('hm_x', e)}
+                        id="y"
+                        onChange={(e) => this.handleInput('y', e)}
                         disabled = {(this.state.disable)? "" : "disabled"}
-                        value={this.state.hm_x}
+                        value={this.state.y}
                     />
                 </td>
-                <td scope="row">
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="hm_y"
-                        onChange={(e) => this.handleInput('hm_y', e)}
-                        disabled = {(this.state.disable)? "" : "disabled"}
-                        value={this.state.hm_y}
-                    />
-                </td>
-                <td scope="row">
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="hm_llx"
-                        onChange={(e) => this.handleInput('hm_llx', e)}
-                        disabled = {(this.state.disable)? "" : "disabled"}
-                        value={this.state.hm_llx}
-                    />
-                </td>
-                <td scope="row">
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="hm_lly"
-                        onChange={(e) => this.handleInput('hm_lly', e)}
-                        disabled = {(this.state.disable)? "" : "disabled"}
-                        value={this.state.hm_lly}
-                    />
-                </td>
-                <td scope="row">
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="hm_llalt"
-                        onChange={(e) => this.handleInput('hm_llalt', e)}
-                        disabled = {(this.state.disable)? "" : "disabled"}
-                        value={this.state.hm_llalt}
-                    />
-                </td>
+                
                 <td>
                     {this.state.disable ?
                     (this.state.save_is_load ?

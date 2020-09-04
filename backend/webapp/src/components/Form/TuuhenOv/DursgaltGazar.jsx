@@ -292,8 +292,6 @@ export class DursgaltGazar extends Component {
             this.setState({durgal_id})
 
             service.dursgaltGazarAbout(durgal_id).then(({form_data}) => {
-                console.log(form_data)
-
                 if(form_data){
                     form_data.map((tuuh) => (
 
@@ -363,6 +361,7 @@ export class DursgaltGazar extends Component {
                                 dgh_hayg_tailbar_eseh_temdeglel: tuuh['hayg_comment'],
                                 last_busad_temdeglel: tuuh['other1'],
                                 torol_zuil_dursgalt_gazriin_coordinatalt: tuuh['alt'],
+                                hemjee_talbai: tuuh['area'],
                             },
                             torol_zuil_torol_zuil: tuuh['type1'],
                             torol_zuil_torol_zuil_tree2: tuuh['type2'],
@@ -566,7 +565,6 @@ export class DursgaltGazar extends Component {
 
         const form_datas_values = this.state.values
         const form_datas = this.state
-        console.log()
         if(idx){
             service.dursgaltGazarUpdate(form_datas_values, form_datas).then(({success}) => {
                 if (success) {

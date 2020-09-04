@@ -50,11 +50,9 @@ export class Forms extends Component {
     }
     
     handleSubmit(values, { setStatus, setSubmitting }) {
-
         setStatus('checking')
         setSubmitting(true)
         this.setState({values})
-        console.log(this.state)
         const id = this.props.match.params.id
 
         if(id){
@@ -170,13 +168,13 @@ export class Forms extends Component {
                                 </tr>
 
                                 <tr>
-                                    <th scope="row">Тоо ширхэг</th>
+                                    <th scope="row">Хамрах хүруу тоо ширхэг</th>
                                     <td>
                                         <Field
                                             className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
                                             name='too_shirheg'
                                             id="id_too_shirheg"
-                                            type="text"
+                                            type="number"
                                         />
                                         <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
                                     </td>

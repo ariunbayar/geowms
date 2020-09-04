@@ -13,18 +13,6 @@ from django.contrib.gis.geos import GEOSGeometry
 
 import uuid
 # Create your models here.
-pnt1 = GEOSGeometry('POINT(5 23)')
-pnt = GEOSGeometry('010100000000000000000014400000000000003740')
-
-print(GEOSGeometry('POINT (98 95)', srid=4326))
-print(GEOSGeometry('{ "type": "Point", "coordinates": [ 5.000000, 23.000000 ] }'))
-
-print(GEOSGeometry('POINT (0 0)', srid=4326))
-print(GEOSGeometry('POINT (0 0)', srid=4326))
-
-print(pnt1)
-print(pnt)
-
 
 
 @require_POST
@@ -36,7 +24,7 @@ def create(request, payload):
     form_datas = payload.get('form_datas')
     if form_datas['date']:
         date = form_datas['date']
-    TuuhSoyol.objects.create( id = unique_id,
+    TuuhSoyol.objects.using('postgis_db').create( id = unique_id,
                                 dugaar=form_datas['dugaar'],
                                 date=date,
                                 inspireid="geo",
@@ -55,7 +43,7 @@ def update(request, payload):
     form_datas = payload.get('form_datas')
     if form_datas['date']:
         date = form_datas['date']
-    TuuhSoyol.objects.filter(id=form_datas['id']).update(
+    TuuhSoyol.objects.using('postgis_db').filter(id=form_datas['id']).update(
                                                         dugaar=form_datas['dugaar'],
                                                         date=date,
                                                         inspireid="geo",
@@ -73,9 +61,9 @@ def update(request, payload):
 def remove(request, payload):
     pk = payload.get('id')
     tuuhSoyol = get_object_or_404(TuuhSoyol, pk=pk)
-    TuuhSoyolPoint.objects.filter(tuuh_soyl_id=pk).delete()
-    TuuhSoyolHuree.objects.filter(tuuh_soyl_id=pk).delete()
-    TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl_id=pk).delete()
+    TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
+    TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
+    TuuhSoyolAyuulHuree.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
     tuuhSoyol.delete()
 
     return JsonResponse({'success': True})
@@ -86,7 +74,7 @@ def remove(request, payload):
 def about(request, payload):
     ids = payload.get('id')
     tuuh_soyl = []
-    for tuuh in TuuhSoyol.objects.filter(id=ids):
+    for tuuh in TuuhSoyol.objects.using('postgis_db').filter(id=ids):
         tuuh_soyl.append({
             'id': tuuh.id,
             'dugaar': tuuh.dugaar,
@@ -106,7 +94,7 @@ def about(request, payload):
 def all(request):
 
     tuuh_soyl = []
-    for tuuh in TuuhSoyol.objects.all():
+    for tuuh in TuuhSoyol.objects.using('postgis_db').all():
         tuuh_soyl.append({
             'id': tuuh.id,
             'dugaar': tuuh.dugaar,
@@ -126,13 +114,13 @@ def all(request):
 def dursgaltGazarUpdate(request, payload):
     form_datas = payload.get('form_datas')
     form_datas_values = payload.get('form_datas_values')
-    tuuhsoyl = get_object_or_404(TuuhSoyol, id=form_datas['tuuhenov_id'])
+    tuuhsoyl = TuuhSoyol.objects.using('postgis_db').filter(id=form_datas['tuuhenov_id']).first()
 
     x = float(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatllx'])
     y = float(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatlly'])
 
-    # cursor = connections['postgis_db'].cursor()
-    # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
+    cursor = connections['postgis_db'].cursor()
+    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
 
     dursgal = form_datas_values['torol_zuil_dursgalt_gazriin_ner']
     dursgal2 = 'None'
@@ -145,10 +133,11 @@ def dursgaltGazarUpdate(request, payload):
     # type1 = form_datas_values['torol_zuil_torol_zuil'] + ' ' + type2
 
     stone = form_datas_values['torol_zuiltorol_zuil_name']
-    # geom = cursor.fetchone()
+    geom = cursor.fetchone()
     length =form_datas_values['hemjee_urt']
     width =form_datas_values['hemjee_orgon']
     hight =form_datas_values['hemjee_ondor']
+    area =form_datas_values['hemjee_talbai']
     depth =form_datas_values['hemjee_zuzaan']
     meridian =form_datas_values['hemjee_golch']
 
@@ -201,42 +190,42 @@ def dursgaltGazarUpdate(request, payload):
     omchlol = form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt']
     protection_irgen = form_datas_values['dg_ezen_dursgalt_gazar_ezen']
     
-    if form_datas['durgal_id']:
-        TuuhSoyolPoint.objects.filter(pk=form_datas['durgal_id']).update(
-                                tuuh_soyl_id=tuuhsoyl.id,
-                                latlong=latlong, utm=utm, dursgal=dursgal,
-                                dursgal2=dursgal2, descriptio=dursgal2,
-                                type1=form_datas['torol_zuil_torol_zuil_tree'],
-                                type2=form_datas['torol_zuil_torol_zuil_tree2'],
-                                stone=stone, length=length,
-                                width=width, hight=hight, depth=depth,
-                                meridian=meridian, other=other,
-                                number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
-                                protection_irgen=protection_irgen,
-                                protection_irgen_commnent=form_datas_values['dg_ezen_temdeglel'],
-                                protection=protection, protecti_1=protecti_1,
-                                tus=tus, tus_comment=form_datas_values['dgh_tusgai_temdeglel'],
-                                yaral=yaral, yaral_comment=form_datas_values['dgh_yaaraltai_temdeglel'],
-                                omchlol=omchlol, omchlol_comment=form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
-                                malts=malts, malts_comment=form_datas_values['dgh_maltan_sudaltan_temdeglel'],
-                                human=human, human_comment=form_datas_values['dgh_gemtliin_temdeglel'],
-                                natural=natural, natural_comment=form_datas_values['dgh_baigaliin_huchin_zuil_temdeglel'],
-                                recover=recover, recover_comment=form_datas_values['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
-                                recover1=recover1,recover1_comment=form_datas_values['dgh_sergeen_zasvarlah_eseh_temdeglel'],
-                                protecti_2=protecti_2, protecti_2_comment=form_datas_values['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
-                                hashaa=hashaa, hashaa_comment=form_datas_values['dgh_hashaa_baigaa_eseh_temdeglel'],
-                                saravch=saravch, saravch_comment=form_datas_values['dgh_saravchtai_eseh_temdeglel'],
-                                hayg=hayg, hayg_comment=form_datas_values['dgh_hayg_tailbar_eseh_temdeglel'],
-                                other1=other1,
-                                ndd=ndd, nmm=nmm,
-                                nss=nss, edd=edd, emm=emm , ess=ess, x=x, y=y,
-                                utm_zone= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm'],
-                                utm_x= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx'],
-                                alt=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
-                                utm_y= form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'],
-                               )
-    
-
+    tuuhsoyolpoint = TuuhSoyolPoint.objects.using('postgis_db').filter(pk=form_datas['durgal_id']).update(
+                            tuuh_soyl=tuuhsoyl.id,
+                            latlong=latlong, utm=utm, dursgal=dursgal,
+                            dursgal2=dursgal2, descriptio=dursgal2,
+                            type1=form_datas['torol_zuil_torol_zuil_tree'],
+                            type2=form_datas['torol_zuil_torol_zuil_tree2'],
+                            stone=stone, length=length,
+                            area=area,
+                            width=width, hight=hight, depth=depth,
+                            meridian=meridian, other=other,
+                            number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
+                            protection_irgen=protection_irgen,
+                            protection_irgen_commnent=form_datas_values['dg_ezen_temdeglel'],
+                            protection=protection, protecti_1=protecti_1,
+                            tus=tus, tus_comment=form_datas_values['dgh_tusgai_temdeglel'],
+                            yaral=yaral, yaral_comment=form_datas_values['dgh_yaaraltai_temdeglel'],
+                            omchlol=omchlol, omchlol_comment=form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
+                            malts=malts, malts_comment=form_datas_values['dgh_maltan_sudaltan_temdeglel'],
+                            human=human, human_comment=form_datas_values['dgh_gemtliin_temdeglel'],
+                            natural=natural, natural_comment=form_datas_values['dgh_baigaliin_huchin_zuil_temdeglel'],
+                            recover=recover, recover_comment=form_datas_values['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
+                            recover1=recover1,recover1_comment=form_datas_values['dgh_sergeen_zasvarlah_eseh_temdeglel'],
+                            protecti_2=protecti_2, protecti_2_comment=form_datas_values['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
+                            hashaa=hashaa, hashaa_comment=form_datas_values['dgh_hashaa_baigaa_eseh_temdeglel'],
+                            saravch=saravch, saravch_comment=form_datas_values['dgh_saravchtai_eseh_temdeglel'],
+                            hayg=hayg, hayg_comment=form_datas_values['dgh_hayg_tailbar_eseh_temdeglel'],
+                            other1=other1,
+                            ndd=ndd, nmm=nmm,
+                            nss=nss, edd=edd, emm=emm , ess=ess, x=x, y=y,
+                            utm_zone= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm'],
+                            utm_x= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx'],
+                            alt=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
+                            utm_y= form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'],
+                            )
+    update_cursor = connections['postgis_db'].cursor()
+    update_cursor.execute(''' UPDATE tuuhsoyolpoint SET geom = %s WHERE id = %s ''', [geom, str(tuuhsoyolpoint.id)])
     return JsonResponse({'success': True})
 
 
@@ -245,18 +234,13 @@ def dursgaltGazarUpdate(request, payload):
 def dursgaltGazarCreate(request, payload):
     form_datas = payload.get('form_datas')
     form_datas_values = payload.get('form_datas_values')
-    tuuhsoyl = get_object_or_404(TuuhSoyol, id=form_datas['tuuhenov_id'])
-
+    tuuhsoyl = TuuhSoyol.objects.using('postgis_db').filter(id=form_datas['tuuhenov_id']).first()
     x = float(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatllx'])
     y = float(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatlly'])
-
-    # cursor = connections['postgis_db'].cursor()
-    # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
-
+    cursor = connections['postgis_db'].cursor()
+    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
     dursgal = form_datas_values['torol_zuil_dursgalt_gazriin_ner']
     dursgal2 = 'None'
-
-
     type2 = form_datas['torol_zuil_torol_zuil_tree']
     if form_datas['torol_zuil_torol_zuil_tree2']:
         type2 = form_datas['torol_zuil_torol_zuil_tree2']
@@ -264,9 +248,10 @@ def dursgaltGazarCreate(request, payload):
     # type1 = form_datas_values['torol_zuil_torol_zuil'] + ' ' + type2
 
     stone = form_datas_values['torol_zuiltorol_zuil_name']
-    # geom = cursor.fetchone()
+    geom = cursor.fetchone()
     length =form_datas_values['hemjee_urt']
     width =form_datas_values['hemjee_orgon']
+    area =form_datas_values['hemjee_talbai']
     hight =form_datas_values['hemjee_ondor']
     depth =form_datas_values['hemjee_zuzaan']
     meridian =form_datas_values['hemjee_golch']
@@ -320,15 +305,15 @@ def dursgaltGazarCreate(request, payload):
 
     omchlol = form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt']
     protection_irgen = form_datas_values['dg_ezen_dursgalt_gazar_ezen']
-    
-    TuuhSoyolPoint.objects.create(
-                            tuuh_soyl_id=tuuhsoyl.id,
+    tuuhsoyolpoint = TuuhSoyolPoint.objects.using('postgis_db').create(
+                            tuuh_soyl=tuuhsoyl.id,
                             latlong=latlong, utm=utm, dursgal=dursgal,
                             dursgal2=dursgal2, descriptio=dursgal2,
                             type1=form_datas['torol_zuil_torol_zuil_tree'],
                             type2=form_datas['torol_zuil_torol_zuil_tree2'],
                             stone=stone, length=length,
                             width=width, hight=hight, depth=depth,
+                            area=area,
                             meridian=meridian, other=other,
                             number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
                             protection_irgen=protection_irgen,
@@ -354,7 +339,9 @@ def dursgaltGazarCreate(request, payload):
                             utm_y=form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'],
                             alt=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
                             )
-
+    
+    update_cursor = connections['postgis_db'].cursor()
+    update_cursor.execute(''' UPDATE tuuhsoyolpoint SET geom = %s WHERE id = %s ''', [geom, tuuhsoyolpoint.id])
     return JsonResponse({'success': True})
 
 
@@ -364,11 +351,11 @@ def dursgaltGazarCreate(request, payload):
 def dursgaltGazarAll(request, payload):
     form_data = []
     tuug_soyol = payload.get('id')
-    for data in TuuhSoyolPoint.objects.filter(tuuh_soyl_id = tuug_soyol):
+    for data in TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuug_soyol):
         form_data.append({
             'id': data.id,
             'dursgal': data.dursgal,
-            'tuuh_soyl_id': data.tuuh_soyl_id,
+            'tuuh_soyl': data.tuuh_soyl,
             'latlong': data.latlong,
             'utm': data.utm,
             'type': data.type1,
@@ -383,13 +370,12 @@ def dursgaltGazarAll(request, payload):
 @require_POST
 @ajax_required
 def dursgaltGazarAbout(request, payload):
-    get_object_or_404(TuuhSoyolPoint, id=payload.get('id'))
     form_data = []
-    for data in TuuhSoyolPoint.objects.filter(pk = payload.get('id')):
+    for data in TuuhSoyolPoint.objects.using('postgis_db').filter(pk = payload.get('id')):
         form_data.append({
             'latlong': data.latlong,
             'utm': data.utm,
-            'dursgal': data.dursgal, 
+            'dursgal': data.dursgal,
             'dursgal2': data.dursgal2,
             'descriptio': data.descriptio,
             'type1': data.type1,
@@ -398,6 +384,7 @@ def dursgaltGazarAbout(request, payload):
             'length': data.length,
             'width': data.width,
             'hight': data.hight,
+            'area': data.area,
             'depth': data.depth,
             'meridian': data.meridian,
             'other': data.other,
@@ -509,8 +496,6 @@ def tsegPersonalRemove(request, payload):
     pk = payload.get('id')
     mpoint = Mpoint.objects.using('postgis_db').filter(id=pk).update(point_class=9)
     return JsonResponse({'success': True})
-
-
 
 
 @require_POST
@@ -825,29 +810,18 @@ def tsegUstsanRemove(request, payload):
 @ajax_required
 def hureeCreate(request, payload):
 
-    hm_utm = payload.get('hm_utm')
-    hm_x = payload.get('hm_x')
-    hm_y = payload.get('hm_y')
-    hm_llx = payload.get('hm_llx')
-    hm_lly = payload.get('hm_lly')
-    hm_llalt = payload.get('hm_llalt')
-    idx = payload.get('id')
-    x=float(hm_llx)
-    y=float(hm_lly)
+    x = payload.get('x')
+    y = payload.get('y')
+    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
+    dursgalt_id = payload.get('dursgalt_id')
+    x_t=float(x)
+    y_t=float(y)
+    
     # cursor = connections['postgis_db'].cursor()
     # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
     # geom = 
-    geom = 'geom'
-
-    ndd = int(x)
-    nmm = int((x - ndd) * 60)
-    nss = int((((x - ndd) * 60) - nmm) * 60)
-    edd = int(y)
-    emm = int((y - edd) * 60)
-    ess = int((((y - edd) * 60) - emm) * 60)
-    latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
-
-    TuuhSoyolHuree.objects.create(tuuh_soyl_id = idx,  geom= geom, latlong=latlong, utm=hm_utm, utmx=hm_llx, utmy=hm_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=hm_llx, y=hm_lly, alt=hm_llalt )
+    TuuhSoyolHuree.objects.using('postgis_db').create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
+    
     return JsonResponse({'success': True})
 
 
@@ -856,28 +830,14 @@ def hureeCreate(request, payload):
 def hureeUpdate(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     huree_id = payload.get('id')
-    hm_utm = payload.get('hm_utm')
-    hm_x = payload.get('hm_x')
-    hm_y = payload.get('hm_y')
-    hm_llx = payload.get('hm_llx')
-    hm_lly = payload.get('hm_lly')
-    hm_llalt = payload.get('hm_llalt')
-    x=float(hm_llx)
-    y=float(hm_lly)
+    x = payload.get('x')
+    y = payload.get('y')
+    x_t=float(x)
+    y_t=float(y)
     # cursor = connections['postgis_db'].cursor()
     # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
     # geom = 
-    geom = 'geom'
-
-    ndd = int(x)
-    nmm = int((x - ndd) * 60)
-    nss = int((((x - ndd) * 60) - nmm) * 60)
-    edd = int(y)
-    emm = int((y - edd) * 60)
-    ess = int((((y - edd) * 60) - emm) * 60)
-    latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
-
-    TuuhSoyolHuree.objects.filter(tuuh_soyl_id=tuuhen_ov, pk=huree_id).update(geom= geom, latlong=latlong, utm=hm_utm, utmx=hm_llx, utmy=hm_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=hm_llx, y=hm_lly, alt=hm_llalt )
+    TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov, pk=huree_id).update(x=x, y=y)
     return JsonResponse({'success': True})
 
 
@@ -886,7 +846,7 @@ def hureeUpdate(request, payload):
 def hureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
-    tuuhsoyl = get_object_or_404(TuuhSoyolHuree, id=ayul_id, tuuh_soyl_id=tuuhen_ov)
+    tuuhsoyl = get_object_or_404(TuuhSoyolHuree, id=ayul_id, tuuh_soyl=tuuhen_ov)
     tuuhsoyl.delete()
     return JsonResponse({'success': True})
 
@@ -895,16 +855,13 @@ def hureeDelete(request, payload):
 @ajax_required
 def hureeAll(request, payload):
     ids = payload.get('id')
+    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     huree_data = []
-    for data in TuuhSoyolHuree.objects.filter(tuuh_soyl_id=ids):
+    for data in TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl=ids, tuuh_soyl_huree_id=tuuh_soyl_huree_id):
         huree_data.append({
             'id': data.id,
             'x': data.x,
             'y': data.y,
-            'utmx': data.utmx,
-            'utmy': data.utmy,
-            'utm': data.utm,
-            'alt': data.alt,
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
     return JsonResponse({'huree_data': huree_data})
@@ -915,15 +872,11 @@ def hureeAll(request, payload):
 def ayulAll(request, payload):
     ids = payload.get('id')
     ayul_data = []
-    for data in TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl_id=ids):
+    for data in TuuhSoyolAyuulHuree.objects.using('postgis_db').filter(tuuh_soyl=ids):
         ayul_data.append({
             'id': data.id,
             'x': data.x,
             'y': data.y,
-            'utmx': data.utmx,
-            'utmy': data.utmy,
-            'utm': data.utm,
-            'alt': data.alt,
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
     return JsonResponse({'ayul_data': ayul_data})
@@ -933,29 +886,15 @@ def ayulAll(request, payload):
 @ajax_required
 def ayulHureeCreate(request, payload):
 
-    ayul_utm = payload.get('ayul_utm')
-    ayul_x = payload.get('ayul_x')
-    ayul_y = payload.get('ayul_y')
-    ayul_llx = payload.get('ayul_llx')
-    ayul_lly = payload.get('ayul_lly')
-    ayul_llalt = payload.get('ayul_llalt')
-    idx = payload.get('id')
-    x=float(ayul_llx)
-    y=float(ayul_lly)
+    x = payload.get('x')
+    y = payload.get('y')
+    idx = payload.get('dursgalt_id')
+    x_t=float(x)
+    y_y=float(y)
     # cursor = connections['postgis_db'].cursor()
     # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
     # geom = cursor.fetchone()
-    geom = 'geom'
-
-    ndd = int(x)
-    nmm = int((x - ndd) * 60)
-    nss = int((((x - ndd) * 60) - nmm) * 60)
-    edd = int(y)
-    emm = int((y - edd) * 60)
-    ess = int((((y - edd) * 60) - emm) * 60)
-    latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
-
-    TuuhSoyolAyuulHuree.objects.create(tuuh_soyl_id = idx,  geom= geom, latlong=latlong, utm=ayul_utm, utmx=ayul_x, utmy=ayul_y, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=ayul_llx, y=ayul_lly, alt=ayul_llalt )
+    TuuhSoyolAyuulHuree.objects.using('postgis_db').create(tuuh_soyl = idx, x=x, y=y)
     return JsonResponse({'success': True})
     
 
@@ -964,39 +903,24 @@ def ayulHureeCreate(request, payload):
 def ayulHureeUpdate(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     huree_id = payload.get('id')
-    hm_utm = payload.get('hm_utm')
-    hm_x = payload.get('hm_x')
-    hm_y = payload.get('hm_y')
-    hm_llx = payload.get('hm_llx')
-    hm_lly = payload.get('hm_lly')
-    hm_llalt = payload.get('hm_llalt')
-    x=float(hm_llx)
-    y=float(hm_lly)
+    x = payload.get('x')
+    y = payload.get('y')
+    x_t=float(x)
+    y_t=float(y)
     # cursor = connections['postgis_db'].cursor()
     # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
     # geom = 
-    geom = 'geom'
 
-    ndd = int(x)
-    nmm = int((x - ndd) * 60)
-    nss = int((((x - ndd) * 60) - nmm) * 60)
-    edd = int(y)
-    emm = int((y - edd) * 60)
-    ess = int((((y - edd) * 60) - emm) * 60)
-    latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
-
-    TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl_id=tuuhen_ov, pk=huree_id).update(geom= geom, latlong=latlong, utm=hm_utm, utmx=hm_llx, utmy=hm_lly, ndd=ndd, nmm=nmm, nss=nss, edd=edd, emm=emm, ess=ess, x=hm_llx, y=hm_lly, alt=hm_llalt )
+    TuuhSoyolAyuulHuree.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov, pk=huree_id).update(x=x, y=y)
     return JsonResponse({'success': True})
 
 
 @require_POST
 @ajax_required
 def ayulHureeDelete(request, payload):
-
-
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
-    tuuhsoyl = get_object_or_404(TuuhSoyolAyuulHuree, id=ayul_id, tuuh_soyl_id=tuuhen_ov)
+    tuuhsoyl = get_object_or_404(TuuhSoyolAyuulHuree, id=ayul_id, tuuh_soyl=tuuhen_ov)
     tuuhsoyl.delete()
     return JsonResponse({'success': True})
 
