@@ -112,29 +112,28 @@ a {
 /*}*/
 
 .sub {
-    transition: transform .15s ease-in;
-    border-radius: 8px;
     padding: 1rem 0;
 }
 
-.sub:hover {
-    color: white;
-    transform: scale(1.05) translateY(-4px);
-}
 .sub .icon {
     transition:
         opacity .15s ease-in,
         transform .15s ease-in;
 }
-.sub:hover .icon {
+.sub a:focus {
+    outline: 0;
+}
+.sub:hover .icon,
+.sub a:focus .icon {
     opacity: .1;
-    transform: scale(1.1);
+    transform: scale(1.1) translateY(-4px);
 }
 .sub h6 {
     transition: transform .25s ease-out .07s;
     padding: 1rem;
 }
-.sub:hover h6 {
+.sub:hover h6,
+.sub a:focus h6 {
     transform: translateY(-40px) scale(1.2);
 }
 .sub > a {
