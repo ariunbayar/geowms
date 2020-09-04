@@ -109,10 +109,12 @@
                         </a>
                     </li>
                     {% endif %}
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url "profile:history" %}"><i class="fa fa-user"></i> ПРОФАЙЛ</i></a>
                         </a>
                       </li>
+                    {% endif %}
                 </ul>
                 {% endwith %}
             </div>
