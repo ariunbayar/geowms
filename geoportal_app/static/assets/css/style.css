@@ -40,6 +40,12 @@
   border-color: #034ea2;
 }
 
+.owl-carousel .owl-item img {
+    height: 365px !important;
+    width: auto !important;
+    margin: 0 auto;
+}
+
 /*bootstrap color change*/
 
 .btn {
