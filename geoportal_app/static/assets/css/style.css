@@ -45,6 +45,15 @@
     width: auto !important;
     margin: 0 auto;
 }
+.owl-carousel .owl-item h1,
+.owl-carousel .owl-item h6 {
+    text-shadow: 0 0 2px #fff;
+}
+.owl-item .item .caption {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: .4rem;
+    padding: 1rem 4rem;
+}
 
 /*bootstrap color change*/
 
