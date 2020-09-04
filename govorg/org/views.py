@@ -59,11 +59,13 @@ def system(request):
 
 
 def all(request):
-    User.objects.filter(username="bolormaa")
-    user_id = get_object_or_404(User,username="bolormaa").id
-    org_id = get_object_or_404(Employee, user_id=user_id).org_id
-    org_name = get_object_or_404(Org, id=org_id).name.upper()
-    return render(request, 'org/index.html', {"org_name": org_name})
+    org = Org.objects.filter(employee__user=request.user).first()
+
+    context = {
+        'org': {"org_name": org.name},
+    }
+
+    return render(request, 'org/index.html', context)
 
 
 def _get_org_role_display(org_role):
@@ -103,10 +105,7 @@ def _get_default_org_role(org, bundle):
 @ajax_required
 def bundle(request):
 
-    User.objects.filter(username="bolormaa")
-    user_id = get_object_or_404(User,username="bolormaa").id
-    org_id = get_object_or_404(Employee, user_id=user_id).org_id
-    org = get_object_or_404(Org, pk=org_id)
+    org = Org.objects.filter(employee__user=request.user).first()
 
     bundles = Bundle.objects.all()
     mapped_org_roles = dict([
