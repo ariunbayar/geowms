@@ -23,8 +23,9 @@ class ModalComponent extends Component{
         const {price, description, data_id} = this.state
         service.payment(price, description, data_id).then(({ payment_id }) => {
             if(payment_id){
+                
                 setTimeout(() => {
-                    window.location.href=`/payment/purchase/${payment_id}/`;
+                    this.props.history.push(`/payment/purchase/${payment_id}/`);
                 }, 1000)
             }
         })

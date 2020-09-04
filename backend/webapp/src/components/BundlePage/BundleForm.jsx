@@ -37,7 +37,6 @@ export default class BundleForm extends Component {
 
     }
 
-
     handleChange(field, e) {
         this.setState({[field]: e.target.value})
     }

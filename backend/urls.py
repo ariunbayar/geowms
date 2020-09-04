@@ -29,7 +29,6 @@ urlpatterns = [
         path('move/', wms_views.move, name='move'),
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
-        path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
         path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
     ], 'wms'))),
 
@@ -110,7 +109,7 @@ urlpatterns = [
     path('payment/', include(([
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
         path('payment-list/', payment_views.paymentList, name='paymentList'),
-        path('purchase/', payment_views.purchase, name='purchase'),
+        path('purchase-awah/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
 
     path('tuuhen_ov/', include(([
@@ -121,8 +120,9 @@ urlpatterns = [
         path('create/', forms_views.create, name='create'),
         path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
         path('tseg-personal/findSum/', forms_views.findSum, name='findSum'),
+        path('check-dan/', forms_views.checkDan, name='tseg-checkDan'),
         path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
-    
+        path('tseg-personal/search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
         path('tseg-personal/list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
         path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
@@ -130,12 +130,17 @@ urlpatterns = [
         path('tseg-ustsan_remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan_remove'),
         path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
         path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
+        path('dursgalt-gazar/update/', forms_views.dursgaltGazarUpdate, name='dursgalt-gazar-update'),
         path('dursgalt-gazar/all/', forms_views.dursgaltGazarAll, name='dursgalt-gazar-all'),
         path('dursgalt-gazar/remove/', forms_views.dursgaltGazarRemove, name='dursgalt-gazar-remove'),
         path('dursgalt-gazar/about/', forms_views.dursgaltGazarAbout, name='dursgalt-gazar-about'),
         path('dursgalt-gazar/huree-create/', forms_views.hureeCreate, name='dursgalt-gazar-huree-create'),
+        path('dursgalt-gazar/huree-update/', forms_views.hureeUpdate, name='dursgalt-gazar-huree-update'),
+        path('dursgalt-gazar/huree-delete/', forms_views.hureeDelete, name='dursgalt-gazar-huree-delete'),
         path('dursgalt-gazar/huree-all/', forms_views.hureeAll, name='dursgalt-gazar-huree-all'),
         path('dursgalt-gazar/ayul-create/', forms_views.ayulHureeCreate, name='dursgalt-gazar-ayul-create'),
+        path('dursgalt-gazar/ayul-update/', forms_views.ayulHureeUpdate, name='dursgalt-gazar-ayul-update'),
+        path('dursgalt-gazar/ayul-delete/', forms_views.ayulHureeDelete, name='dursgalt-gazar-ayul-delete'),
         path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
 
     ], 'tuuhen_ov'))),
