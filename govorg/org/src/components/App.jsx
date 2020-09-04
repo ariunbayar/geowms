@@ -2,6 +2,8 @@
 import React, {Component} from 'react'
 import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import Employee from './Menu/Employee/EmployeeForm'
+import Bundle from './Menu/Bundle/Bundle'
+
 export class App extends Component {
 
     render() {
@@ -14,7 +16,7 @@ export class App extends Component {
                             <div className="sidebar-sticky ">
                                 <ul className="nav flex-column ">
                                     <li className="nav-item m-1 pb-1"> 
-                                        <NavLink  to={'/gov/org/bundle/'} activeClassName="active">
+                                        <NavLink  exact to={'/gov/bundle/'} activeClassName="active">
                                         <i className="fa fa-database text-primary"></i>&nbsp;ДЭД САН
                                         </NavLink>
                                     </li>
@@ -24,7 +26,7 @@ export class App extends Component {
                                         </NavLink>
                                     </li>
                                     <li className="nav-item m-1">
-                                        <NavLink  to={'/gov/org/system/'} activeClassName="active">
+                                        <NavLink  to={'/gov/system/'} activeClassName="active">
                                         <i className='fas fa-university text-primary'></i>&nbsp;СИСТЕМ
                                         </NavLink>
                                     </li>
@@ -34,9 +36,8 @@ export class App extends Component {
                         <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
                         <div className="col-md-10">
                                 <Switch>
-                                    <Route path="/gov/" component={Employee}/>
-                                    <Route path="/gov/org/bundle/" component={Employee}/>
-                                    <Route path="/gov/org/system/" component={Employee}/>
+                                    <Route exact path="/gov/" component={Employee}/>
+                                    <Route exact path="/gov/bundle/" component={Bundle}/>
                                 </Switch>
                             </div>
                         </main>

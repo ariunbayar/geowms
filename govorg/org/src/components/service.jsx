@@ -1,5 +1,6 @@
 export const service = {
-    paginatedList
+    paginatedList,
+    roles
 }
 
 function handleResponse(response) {
@@ -60,5 +61,11 @@ function paginatedList(page, per_page) {
           body: JSON.stringify({ page, per_page }),
     }
 
-    return fetch(`/gov/employee/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/employee/`, requestOptions).then(handleResponse)
+}
+
+
+function roles() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`/gov/api/bundle/`, requestOptions).then(handleResponse)
 }
