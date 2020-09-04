@@ -3,12 +3,15 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar, TuuhSoyolHuree, TuuhSoyolAyuulHuree
+from .models import TsegUstsan, TsegPersonal, TuuhSoyol, DursgaltGazar, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 from geoportal_app.models import User
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.postgres.search import SearchVector
+from django.core.paginator import Paginator
+import uuid
 # Create your models here.
-
 
 @require_POST
 @ajax_required
@@ -341,38 +344,61 @@ def dursgaltGazarRemove(request, payload):
     return JsonResponse({'success': True})
 
 
-@require_GET
+@require_POST
 @ajax_required
-def tsegPersonalAll(request):
+@user_passes_test(lambda u: u.is_superuser)
+def tseg_personal_list(request, payload):
+    # cursor = connections['postgis_db'].cursor()
+    # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [108.1232, 95.12312])
+    # geoms= cursor.fetchone()
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
     tseg_personal = []
-    for tseg in TsegPersonal.objects.all():
-          tseg_personal.append({
-            'id': tseg.id,
-            'tesgiin_ner': tseg.tesgiin_ner,
-            'toviin_dugaar': tseg.toviin_dugaar,
-            'trapetsiin_dugaar': tseg.trapetsiin_dugaar,
-            'suljeenii_torol': tseg.suljeenii_torol,
-            'aimag_name': tseg.aimag_name,
-            'sum_name': tseg.sum_name,
-            'utmx': tseg.utmx,
-            'utmy': tseg.utmy,
-            'latlongx': tseg.latlongx,
-            'latlongy': tseg.latlongy,
+    mpoint = Mpoint.objects.using('postgis_db').annotate(search=SearchVector(
+        'point_id',
+        'pid',
+        't_type',
+        'point_type',
+        ) + SearchVector('point_name')).filter(search__contains=query)
+
+    total_items = Paginator(mpoint, per_page)
+    items_page = total_items.page(page)
+
+    for mpoint_all in items_page.object_list:
+        tseg_personal.append({
+            'id': mpoint_all.id,
+            'objectid': mpoint_all.objectid,
+            'point_id': mpoint_all.point_id,
+            'point_name': mpoint_all.point_name,
+            'pid': mpoint_all.pid,
+            'point_class': mpoint_all.point_class,
+            'point_type': mpoint_all.point_type,
+            'center_typ': mpoint_all.center_typ,
+            'aimag': mpoint_all.aimag,
+            'sum': mpoint_all.sum,
+            'sheet1': mpoint_all.sheet1,
+            'sheet2': mpoint_all.sheet2,
+            'sheet3': mpoint_all.sheet3,
+            'geom': mpoint_all.geom,
+            't_type': mpoint_all.t_type,
         })
-    return JsonResponse({'tseg_personal': tseg_personal})
+
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': tseg_personal,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
+
 
 @require_POST
 @ajax_required
 def tsegPersonalRemove(request, payload):
     pk = payload.get('id')
-    tseg_personal = get_object_or_404(TsegPersonal, pk=pk)
-    tseg_personal.tseg_oiroos_img_url.delete(save=False)
-    tseg_personal.tseg_holoos_img_url.delete(save=False)
-    tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
-    tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
-    tseg_personal.file_path1.delete(save=False)
-    tseg_personal.file_path2.delete(save=False)
-    tseg_personal.delete()
+    mpoint = Mpoint.objects.using('postgis_db').filter(id=pk).update(point_class=9)
     return JsonResponse({'success': True})
 
 
@@ -383,65 +409,43 @@ def tsegPersonalRemove(request, payload):
 def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     tseg_display = []
-    tseg_list = TsegPersonal.objects.filter(id = pk)
-    for tseg in tseg_list:
-
-        if not tseg.date:
-           date = ""
-        else:
-            date = tseg.date.strftime("%Y-%m-%d")
-
-        if not tseg.tseg_oiroos_img_url:
-            tseg_oiroos_url = ""
-        else:
-            tseg_oiroos_url = tseg.tseg_oiroos_img_url.url
-        if not tseg.tseg_holoos_img_url:
-            tseg_holoos_url = ""
-        else:
-            tseg_holoos_url = tseg.tseg_holoos_img_url.url
-        if not tseg.bairshil_tseg_holoos_img_url:
-            tseg_bair_holoos_url = ""
-        else:
-            tseg_bair_holoos_url = tseg.bairshil_tseg_holoos_img_url.url
-        if not tseg.bairshil_tseg_oiroos_img_url:
-            tseg_bair_oiroos_url = ""
-        else:
-            tseg_bair_oiroos_url = tseg.bairshil_tseg_oiroos_img_url.url
-        if not tseg.file_path1:
-            path_file1 = ""
-        else:
-            path_file1 = tseg.file_path1.name
-        if not tseg.file_path2:
-            path_file2 = ""
-        else:
-            path_file2 = tseg.file_path2.name
-        tseg_display.append({
-                    'tesgiin_ner': tseg.tesgiin_ner,
-                    'toviin_dugaar': tseg.toviin_dugaar,
-                    'trapetsiin_dugaar': tseg.trapetsiin_dugaar,
-                    'suljeenii_torol': tseg.suljeenii_torol,
-                    'aimag_name': tseg.aimag_name,
-                    'sum_name': tseg.sum_name,
-                    'utmx': tseg.utmx,
-                    'utmy': tseg.utmy,
-                    'latlongx': tseg.latlongx,
-                    'latlongy': tseg.latlongy,
-                    'tseg_oiroos_img_url': tseg_oiroos_url,
-                    'tseg_holoos_img_url': tseg_holoos_url,
-                    'barishil_tuhai': tseg.barishil_tuhai,
-                    'bairshil_tseg_oiroos_img_url': tseg_bair_oiroos_url,
-                    'bairshil_tseg_holoos_img_url': tseg_bair_holoos_url,
-                    'sudalga_or_shine':  tseg.sudalga_or_shine,
-                    'hors_shinj_baidal': tseg.hors_shinj_baidal,
-                    'date': date,
-                    'hotolson': tseg.hotolson,
-                    'file_path1': path_file1,
-                    'file_path2': path_file2,
-                    'alban_tushaal': tseg.alban_tushaal,
-                    'alban_baiguullga': tseg.alban_baiguullga,
-        })
+    tseg = TsegPersonal.objects.filter(id = pk).first()
+    data = Mpoint.objects.using('postgis_db').filter(id=pk).first()
+    tseg_display.append({
+        'utmx': tseg.utmx,
+        'utmy': tseg.utmy,
+        'latlongx': tseg.latlongx,
+        'latlongy': tseg.latlongy,
+        'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg.tseg_oiroos_img_url else '',
+        'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg.tseg_holoos_img_url else '',
+        'barishil_tuhai': tseg.barishil_tuhai,
+        'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg.bairshil_tseg_oiroos_img_url else '',
+        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_holoos_img_url.url if tseg.bairshil_tseg_holoos_img_url else '',
+        'sudalga_or_shine':  tseg.sudalga_or_shine,
+        'hors_shinj_baidal': tseg.hors_shinj_baidal,
+        'date': tseg.date.strftime("%Y-%m-%d") if tseg.date else '',
+        'hotolson': tseg.hotolson,
+        'file_path1': tseg.file_path1.name if tseg.file_path1 else '',
+        'file_path2': tseg.file_path2.name if tseg.file_path2 else '',
+        'alban_tushaal': tseg.alban_tushaal,
+        'alban_baiguullga': tseg.alban_baiguullga,
+        'id': data.id,
+        'objectid': data.objectid,
+        'point_id': data.point_id,
+        'point_name': data.point_name,
+        'pid': data.pid,
+        'point_class': data.point_class,
+        'point_type': data.point_type,
+        'center_typ': data.center_typ,
+        'aimag': data.aimag,
+        'sum': data.sum,
+        'sheet1': data.sheet1,
+        'sheet2': data.sheet2,
+        'sheet3': data.sheet3,
+        't_type': data.t_type,
+    })
     rsp = {
-        'items': tseg_display,
+        'tseg_display': tseg_display,
     }
     return JsonResponse(rsp)
 
@@ -450,86 +454,156 @@ def tsegPersonalUpdate(request, payload):
 @ajax_required
 def tsegPersonal(request):
     pk = request.POST.get('idx')
-    tseg_oiroos_img_url = ''
-    tseg_holoos_img_url = ''
-    bairshil_tseg_oiroos_img_url = ''
-    bairshil_tseg_holoos_img_url = ''
-    file1 = ''
-    file2 = ''
-    date = None
-    if  request.POST.get('tseg_oiroos_img_url'):
-        [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(1024, 1080)])
-        tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
-    if  request.POST.get('tseg_holoos_img_url'):
-        [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_holoos_img_url'), [(1024, 1080)])
-        tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
-    if  request.POST.get('bairshil_tseg_oiroos_img_url'):
-        [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_oiroos_img_url'), [(1024, 1080)])
-        bairshil_tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
-    if  request.POST.get('bairshil_tseg_holoos_img_url'):
-        [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(1024, 1080)])
-        bairshil_tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
-    if not request.POST.get('file1'):
-        file1 = request.FILES['file1']
-    if not request.POST.get('file2'):
-        file2 = request.FILES['file2']
-    if request.POST.get('date'):
-        date = request.POST.get('date')
-    if int(pk) != -1:
+    if pk:
+        date = None
+        tseg_personal = get_object_or_404(TsegPersonal, id=pk)
+        if request.POST.get('date'):
+            date = request.POST.get('date')
+        objectid = float(request.POST.get('toviin_dugaar'))
+        x = float(request.POST.get('latlongx'))
+        y = float(request.POST.get('latlongy'))
+        cursor = connections['postgis_db'].cursor()
+        update_cursor = connections['postgis_db'].cursor()
+        cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
+        geom = cursor.fetchone()
 
-        TsegPersonal.objects.filter(pk=pk).update(
-                    tesgiin_ner=request.POST.get('tesgiin_ner'),
-                    toviin_dugaar=request.POST.get('toviin_dugaar'),
-                    trapetsiin_dugaar=request.POST.get('trapetsiin_dugaar'),
-                    suljeenii_torol=request.POST.get('suljeenii_dugaar'),
-                    aimag_name=request.POST.get('aimag_name'),
-                    sum_name=request.POST.get('sum_name'),
-                    utmx=request.POST.get('utmx'),
-                    utmy=request.POST.get('utmy'),
+        update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, pk])
+
+        Mpoint.objects.using('postgis_db').filter(id=pk).update(
+                     objectid=objectid ,point_id="null",
+                    point_name=request.POST.get('tesgiin_ner'),
+                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                    aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
+                    sheet3=request.POST.get('latlongy'), t_type='g109',
+        )
+        TsegPersonal.objects.filter(id=pk).update(
+
+                    suljeenii_torol=request.POST.get('suljeenii_torol'),
+                    utmx=request.POST.get('utmx'), utmy=request.POST.get('utmy'),
                     latlongx=request.POST.get('latlongx'),
                     latlongy=request.POST.get('latlongy'),
-                    tseg_oiroos_img_url=tseg_oiroos_img_url,
-                    tseg_holoos_img_url=tseg_holoos_img_url,
                     barishil_tuhai=request.POST.get('barishil_tuhai'),
-                    bairshil_tseg_oiroos_img_url=bairshil_tseg_oiroos_img_url,
-                    bairshil_tseg_holoos_img_url=bairshil_tseg_holoos_img_url,
                     sudalga_or_shine=request.POST.get('sudalga_or_shine'),
                     hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
-                    date=date,
-                    hotolson=request.POST.get('hotolson'),
-                    file_path1=file1,
-                    file_path2=file2,
+                    date=date, hotolson=request.POST.get('hotolson'), 
                     alban_tushaal=request.POST.get('alban_tushaal'),
                     alban_baiguullga=request.POST.get('alban_baiguullga'),
-                                    )
+        )
+        if request.POST.get('tseg_oiroos_img_url') and len(request.POST.get('tseg_oiroos_img_url')) > 2000:
+            tseg_personal.tseg_oiroos_img_url.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_oiroos_img_url'), [(200, 200)])
+            tseg_personal.tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
+            tseg_personal.save()
+        if request.POST.get('tseg_holoos_img_url') and len(request.POST.get('tseg_holoos_img_url')) > 2000:
+            tseg_personal.tseg_holoos_img_url.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_holoos_img_url'), [(200, 200)])
+            tseg_personal.tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
+            tseg_personal.save()
+        if request.POST.get('bairshil_tseg_oiroos_img_url')  and len(request.POST.get('bairshil_tseg_oiroos_img_url')) > 2000:
+            tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_oiroos_img_url'), [(200, 200)])
+            tseg_personal.bairshil_tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
+            tseg_personal.save()
+        if  request.POST.get('bairshil_tseg_holoos_img_url')  and len(request.POST.get('bairshil_tseg_holoos_img_url')) > 2000:
+            tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_holoos_img_url'), [(200, 200)])
+            tseg_personal.bairshil_tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
+            tseg_personal.save()
+        if not request.POST.get('file1'):
+            tseg_personal.file_path1.delete(save=False)
+            tseg_personal.file_path1 = request.FILES['file1']
+            tseg_personal.save()
+        if not request.POST.get('file2'):
+            tseg_personal.file_path2.delete(save=False)
+            tseg_personal.file_path2 = request.FILES['file2']
+            tseg_personal.save()
+        return JsonResponse({'success': True, 'name': False, 'ids':False})
     else:
+        tesgiin_ner = request.POST.get('tesgiin_ner')
+        objectid = int(request.POST.get('toviin_dugaar'))
+        tesgiin_ner_check = Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
+        objectid_check = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
+        if tesgiin_ner_check or objectid_check:
+            name = False
+            ids = False
+            if tesgiin_ner_check:
+                name = True
+
+            if objectid_check:
+                ids = True
+
+            return JsonResponse({'success': False, 'name': name, 'ids':ids})
+        Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
+        date = None
+        file1 = ''
+        file2 = ''
+        tseg_oiroos_img_url = ''
+        tseg_holoos_img_url = ''
+        bairshil_tseg_oiroos_img_url = ''
+        bairshil_tseg_holoos_img_url = ''
+        if  request.POST.get('tseg_oiroos_img_url'):
+            [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(1024, 1080)])
+            tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
+        if  request.POST.get('tseg_holoos_img_url'):
+            [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_holoos_img_url'), [(1024, 1080)])
+            tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
+        if  request.POST.get('bairshil_tseg_oiroos_img_url'):
+            [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_oiroos_img_url'), [(1024, 1080)])
+            bairshil_tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
+        if  request.POST.get('bairshil_tseg_holoos_img_url'):
+            [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(1024, 1080)])
+            bairshil_tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
+        if not request.POST.get('file1'):
+            file1 = request.FILES['file1']
+        if not request.POST.get('file2'):
+            file2 = request.FILES['file2']
+        if request.POST.get('date'):
+            date = request.POST.get('date')
+        check_id = True
+        while check_id:
+            unique_id = uuid.uuid4()
+            if Mpoint.objects.using('postgis_db').filter(id=unique_id):
+                check_id = True
+            else:
+                check_id = False
+
+        x = float(request.POST.get('latlongx'))
+        y = float(request.POST.get('latlongy'))
+        cursor = connections['postgis_db'].cursor()
+        update_cursor = connections['postgis_db'].cursor()
+        cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
+        geom = cursor.fetchone()
+        
+        mpoint = Mpoint.objects.using('postgis_db').create(
+                    id=unique_id, objectid=objectid ,point_id="null",
+                    point_name=request.POST.get('tesgiin_ner'),
+                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                    aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
+                    sheet3=request.POST.get('latlongy'), t_type='g109',
+        )
+        update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, str(unique_id)])
+
         TsegPersonal.objects.create(
-                    tesgiin_ner=request.POST.get('tesgiin_ner'),
-                    toviin_dugaar=request.POST.get('toviin_dugaar'),
-                    trapetsiin_dugaar=request.POST.get('trapetsiin_dugaar'),
-                    suljeenii_torol=request.POST.get('suljeenii_dugaar'),
-                    aimag_name=request.POST.get('aimag_name'),
-                    sum_name=request.POST.get('sum_name'),
-                    utmx=request.POST.get('utmx'),
-                    utmy=request.POST.get('utmy'),
+                    id=unique_id,
+                    suljeenii_torol=request.POST.get('suljeenii_torol'),
+                    utmx=request.POST.get('utmx'), utmy=request.POST.get('utmy'),
                     latlongx=request.POST.get('latlongx'),
                     latlongy=request.POST.get('latlongy'),
-                    tseg_oiroos_img_url=tseg_oiroos_img_url,
-                    tseg_holoos_img_url=tseg_holoos_img_url,
                     barishil_tuhai=request.POST.get('barishil_tuhai'),
-                    bairshil_tseg_oiroos_img_url=bairshil_tseg_oiroos_img_url,
-                    bairshil_tseg_holoos_img_url=bairshil_tseg_holoos_img_url,
                     sudalga_or_shine=request.POST.get('sudalga_or_shine'),
                     hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
-                    date=date,
-                    hotolson=request.POST.get('hotolson'),
-                    file_path1=file1,
-                    file_path2=file2,
+                    date=date, hotolson=request.POST.get('hotolson'), 
+                    file_path1=file1,file_path2=file2,
+                    bairshil_tseg_oiroos_img_url=bairshil_tseg_oiroos_img_url,
+                    bairshil_tseg_holoos_img_url=bairshil_tseg_holoos_img_url,
+                    tseg_oiroos_img_url=tseg_oiroos_img_url,
+                    tseg_holoos_img_url=tseg_holoos_img_url,
                     alban_tushaal=request.POST.get('alban_tushaal'),
                     alban_baiguullga=request.POST.get('alban_baiguullga'),
-                                    )
-
-    return JsonResponse({'success': True})
+        )
+    return JsonResponse({'success': True, 'name': False, 'ids':False})
 
 
 @require_POST

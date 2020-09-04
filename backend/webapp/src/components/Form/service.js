@@ -11,7 +11,7 @@ export const service = {
     remove,
     tsegPersonal,
     tsegUstsan,
-    tsegPersonalAll,
+    tsegPersonalList,
     tsegPersonalRemove,
     dursgaltGazarCreate,
     dursgaltGazarAll,
@@ -68,12 +68,17 @@ function remove(id) {
     return fetch(`${prefix}/remove/`, opts).then(handleResponse)
 }
 
-function tsegPersonalAll() {
+
+function tsegPersonalList(page, perpage, query){
+
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({ page, perpage, query }),
     }
-    return fetch(`${prefix}/tseg-personal/all/`, requestOptions).then(handleResponse)
+
+    return fetch(`${prefix}/tseg-personal/list/`, requestOptions).then(handleResponse)
 }
+
 
 function tsegPersonalRemove(id) {
     const opts = {

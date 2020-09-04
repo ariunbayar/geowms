@@ -1,9 +1,7 @@
-import requests
-
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import reverse, get_object_or_404, render
+from django.http import JsonResponse
+from django.shortcuts import reverse, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 
@@ -23,7 +21,7 @@ def _get_wms_display(request, wms):
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
-        'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
+        'public_url': request.build_absolute_uri(reverse('api:service:wms_proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }
 
@@ -241,29 +239,6 @@ def delete(request, payload):
     return JsonResponse({'success': True})
 
 
-@require_GET
-def proxy(request, wms_id):
-
-    BASE_HEADERS = {
-        'User-Agent': 'geo 1.0',
-    }
-    is_active = get_object_or_404(WMS, pk=wms_id).is_active
-    if is_active:
-
-        base_url = get_object_or_404(WMS, pk=wms_id).url
-
-        queryargs = request.GET
-        headers = {**BASE_HEADERS}
-        rsp = requests.get(base_url, queryargs, headers=headers)
-
-        content_type = rsp.headers.get('content-type')
-
-        return HttpResponse(rsp.content, content_type=content_type)
-
-    else:
-        return render(request, "backend/404.html", {})
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -274,19 +249,19 @@ def paginatedList(request, payload):
     per_page = payload.get('per_page')
 
     wms_list = WMS.objects.all().annotate(search=SearchVector('name')).filter(search__contains=query)
-    
+
     total_items = Paginator(wms_list, per_page)
     items_page = total_items.page(page)
     items = [
-        _get_wms_display(request, wms) 
+        _get_wms_display(request, wms)
         for wms in items_page.object_list
     ]
     total_page = total_items.num_pages
-    
+
     rsp = {
         'items': items,
         'page': page,
         'total_page': total_page,
     }
-    
+
     return JsonResponse(rsp)
