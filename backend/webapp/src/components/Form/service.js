@@ -29,7 +29,9 @@ export const service = {
     tsegUstsanAll,
     tseg_remove,
     tsegustsanEdit,
-    updateTseg
+    updateTseg,
+    searchTseg,
+    checkDan,
 }
 function all() {
     const requestOptions = {
@@ -107,12 +109,10 @@ function tsegUstsan(form_datas) {
 
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({form_datas}),
+        body: form_datas,
     }
-
     return fetch(`${prefix}/tseg-ustsan/`, opts).then(handleResponse)
 }
-
 
 function dursgaltGazarCreate(form_datas_values, form_datas) {
     const opts = {
@@ -227,9 +227,9 @@ function ayulAll(id) {
 }
 
 
-function tsegUstsanAll() {
+function tsegUstsanAll(id) {
     const opts = {
-        ...getGetOptions(),
+        ...getGetOptions(id),
     }
     return fetch(`${prefix}/tseg-ustsan_all/`, opts).then(handleResponse)
 }
@@ -244,7 +244,6 @@ function tseg_remove(id) {
 
 
 function tsegustsanEdit(id) {
-    console.log(id)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({id}),
@@ -258,4 +257,20 @@ function updateTseg(id){
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/tseg-personal/update/`, opts).then(handleResponse)
+}
+
+function searchTseg(query){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`${prefix}/tseg-personal/search/`, opts).then(handleResponse)
+}
+
+function checkDan(){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({}),
+    }
+    return fetch(`${prefix}/check-dan/`, opts).then(handleResponse)
 }

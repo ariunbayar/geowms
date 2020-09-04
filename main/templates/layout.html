@@ -109,10 +109,12 @@
                         </a>
                     </li>
                     {% endif %}
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url "profile:history" %}"><i class="fa fa-user"></i> ПРОФАЙЛ</i></a>
                         </a>
                       </li>
+                    {% endif %}
                 </ul>
                 {% endwith %}
             </div>
@@ -156,16 +158,19 @@
                         <h6 class="mb-3 gp-text-light-primary">Холбоо барих</h6>
                         <ul class="list-unstyled text-white-50">
                             <li class="mb-2">
-                                <span><i class="fa fa-map-marker mr-2"
-                                        aria-hidden="true"></i>{{ CONFIGS.agency_contact_address }}</span>
+                                <div class="row">
+                                    <div class="col-md-1"><i class="fa fa-map-marker mr-2" aria-hidden="true"></i></div><div class="col-md-11"><span>{{ CONFIGS.agency_contact_address }}</span></div>
+                                </div>
                             </li>
                             <li class="mb-2">
-                                <span><i class="fa fa-phone mr-2"
-                                        aria-hidden="true"></i>{{ CONFIGS.agency_contact_phone }}</span>
+                                <div class="row">
+                                    <div class="col-md-1"><i class="fa fa-phone mr-2" aria-hidden="true"></i></div><div class="col-md-11"><span>{{ CONFIGS.agency_contact_phone }}</span></div>
+                                </div>
                             </li>
                             <li class="mb-2">
-                                <span><i class="fa fa-envelope mr-2"
-                                        aria-hidden="true"></i>{{ CONFIGS.agency_contact_email }}</span>
+                                <div class="row">
+                                    <div class="col-md-1"><i class="fa fa-envelope mr-2" aria-hidden="true"></i></div><div class="col-md-11"><span>{{ CONFIGS.agency_contact_email }}</span></div>
+                                </div>
                             </li>
                         </ul>
                     </div>
