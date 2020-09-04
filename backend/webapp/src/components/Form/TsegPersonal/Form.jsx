@@ -4,6 +4,7 @@ import {service} from '../service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import BundleMap from '../../map/BundleMap'
+import { coordinateRelationship } from "ol/extent"
 
 export class Forms extends Component {
 
@@ -14,14 +15,11 @@ export class Forms extends Component {
             values:{
                 tesgiin_ner: '',
                 toviin_dugaar: '',
-                trapetsiin_dugaar: '',
+             
                 suljeenii_torol: '',
-                sum_name: '',
-                utmx: '',
-                utmy: '',
-                latlongx: '',
-                latlongy: '',
-                barishil_tuhai: '',
+                
+               
+               
                 sudalga_or_shine: '',
                 hors_shinj_baidal: '',
                 date: '',
@@ -31,9 +29,18 @@ export class Forms extends Component {
                 center_typ: '',
                 pid: '',
             },
+
+            utmx: '',
+            utmy: '',
+            latlongx: "",
+            latlongy: '',
+            trapetsiin_dugaar: '',
+            sum_name: '',
+            barishil_tuhai: '',
+
             real_sum: '',
             aimag_name: '',
-            sum_ners: [],
+            sum_ners: '',
             file_path1: null,
             file_path11: null,
             file_path1_error: false,
@@ -52,32 +59,34 @@ export class Forms extends Component {
             id_error: false,
 
         }
-        this.handleInput = this.handleInput.bind(this)
         this.onDrop = this.onDrop.bind(this)
-        this.handleInputAimag = this.handleInputAimag.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
         this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.userName = this.userName.bind(this)
+        this.handleXY = this.handleXY.bind(this)
     }
-    componentDidUpdate(prevProps, prevState){
-        if(prevState.aimag_name !== this.state.aimag_name)
-        {
-            this.handleInputAimag(this.state.aimag_name)
-        }
-    }
-    userName(){
 
-    }
     componentDidMount(){
         const id = this.props.match.params.id
         if(id) {
             this.setState({id})
             this.tsegUpdate(id)
         }
-        else{
-            this.userName()
-        }
+    }
+
+    handleXY(values, info){
+        info.map(e=>this.setState({
+            utmx:e.E,
+            utmy:e.N,
+            trapetsiin_dugaar: e.vseg,
+            sum_name:e.sum,
+        }))
+        this.setState({
+            latlongy:values[0],
+            latlongx:values[1],
+            aimag_name:info[0]['aimag'],
+
+        })
     }
 
     onDrop([icon], name) {
@@ -87,208 +96,6 @@ export class Forms extends Component {
                 this.setState({[name]: btoa(upload.target.result)})
             }
             reader.readAsBinaryString(icon)
-        }
-    }
-
-    handleInput(field, e) {
-        this.setState({aimag_name: e.target.value })
-    }
-
-
-    handleInputAimag(name) {
-        if(name == 'Архангай'){
-            var sum_ners = ['...', 'Батцэнгэл', 'Булган', 'Жаргалант', 'Ихтамир', 'Өгийнуур', 'Өлзийт', 'Өндөр-Улаан', 'Тариат', 'Цахир', 'Чулуут']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Баян-Өлгий'){
-            var sum_ners = ['...', 'Алтай', 'Алтанцөгц', 'Баяннуур', 'Бугат', 'Булган', 'Буянт', 'Дэлгүүн', 'Ногооннуур', 'Сагсай', 'Цагааннуур', 'Толбо', 'Улаанхус', 'Цэнгэл']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Баянхонгор'){
-            var sum_ners = ['...', 'Баянхонгор', 'Баацагаан', 'Баянбулаг', 'Баянговь', 'Баян-Овоо', 'Баян-Өндөр', 'Баянцагаан', 'Богд', 'Бөмбөгөр', 'Бууцагаан', 'Галуут', 'Гурванбулаг', 'Жаргалант', 'Жинст', 'Заг', 'Өлзийт', 'Хүрээмарал', 'Шинэжинст', 'Эрдэнэцогт']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Булган'){
-            var sum_ners = ['...', 'Булган', 'Баян-Агт', 'Баяннуур', 'Бугат', 'Бүрэгхангай', 'Гурванбулаг', 'Дашинчилэн', 'Могод', 'Орхон', 'Рашаант', 'Сайхан', 'Сэлэнгэ', 'Тэшиг', 'Хангал', 'Хишиг-Өндөр', 'Хутаг-Өндөр']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Говь-Алтай'){
-            var sum_ners = ['...', 'Алтай', 'Баян-Уул', 'Бигэр', 'Бугат', 'Дарви', 'Дэлгэр', 'Есөнбулаг', 'Жаргалан', 'Тайшир', 'Тонхил', 'Төгрөг', 'Халиун', 'Хөхморьт', 'Цогт', 'Цээл', 'Чандмань', 'Шарга', 'Эрдэнэ']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Говьсүмбэр'){
-            var sum_ners = ['...', 'Сүмбэр', 'Баянтал', 'Шивээговь']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дархан-Уул'){
-            var sum_ners = ['...', 'Дархан', 'Хонгор', 'Орхон', 'Шарынгол']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дорноговь'){
-
-            var sum_ners = ['...', 'Айраг', 'Алтанширээ', 'Даланжаргалан', 'Дэлгэрэх', 'Замын-Үүд', 'Иххэт', 'Мандах', 'Өргөн', 'Сайхандулаан', 'Улаанбадрах', 'Хатанбулаг', 'Хөвсгөл', 'Эрдэнэ']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дорнод'){
-            
-            var sum_ners = ['...', 'Баяндун', 'Баянтүмэн', 'Баян-Уул', 'Булган', 'Гурванзагал', 'Дашбалбар', 'Матад', 'Сэргэлэн', 'Халхгол', 'Хөлөнбуйр', 'Хэрлэн (Сүмбэр)', 'Цагаан-Овоо', 'Чулуунхороот (Эрээнцав)', 'Чойбалсан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дундговь'){
-            var sum_ners = ['...', 'Адаацаг', 'Баянжаргалан', 'Говь-Угтаал', 'Гурвансайхан', 'Дэлгэрхангай', 'Дэлгэрцогт', 'Дэрэн', 'Луус', 'Өлзийт', 'Өндөршил', 'Сайхан-Овоо', 'Сайнцагаан', 'Хулд', 'Цагаандэлгэр', 'Эрдэнэдалай']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Завхан'){
-
-            var sum_ners = ['...', 'Алдархаан', 'Асгат', 'Баянтэс', 'Баянхайрхан', 'Дөрвөлжин', 'Завханмандал', 'Идэр', 'Их-Уул', 'Нөмрөг', 'Отгон', 'Сантмаргац', 'Сонгино', 'Тосонцэнгэл', 'Түдэвтэй', 'Тэлмэн', 'Тэс', 'Ургамал', 'Цагаанхайрхан', 'Цагаанчулуут', 'Цэцэн-Уул', 'Шилүүстэй', 'Эрдэнэхайрхан', 'Яруу']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-
-        if(name == 'Орхон'){
-            var sum_ners = ['...', 'Баян-Өндөр', 'Жаргалант']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Өвөрхангай'){
-            var sum_ners = ['...', 'Арвайхээр', 'Баруунбаян-Улаан', 'Бат-Өлзий', 'Баянгол', 'Баян-Өндөр', 'Богд', 'Бүрд', 'Гучин-Ус', 'Хархорин', 'Хайрхандулаан', 'Хужирт', 'Нарийнтээл', 'Өлзийт', 'Сант', 'Тарагт', 'Төгрөг', 'Уянга', 'Есөнзүйл', 'Зүүнбаян-Улаан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Өмнөговь'){
-            var sum_ners = ['...', 'Баяндалай', 'Баян-Овоо', 'Булган', 'Гурвантэс', 'Мандал-Овоо', 'Манлай', 'Ноён', 'Номгон', 'Сэврэй', 'Ханбогд', 'Ханхонгор', 'Хүрмэн', 'Цогт-Овоо', 'Цогтцэций']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Сүхбаатар'){
-            var sum_ners = ['...', 'Асгат', 'Баяндэлгэр', 'Дарьганга', 'Мөнххаан', 'Наран', 'Онгон', 'Сүхбаатар', 'Түвшинширээ', 'Түмэнцогт', 'Уулбаян', 'Халзан', 'Эрдэнэцагаан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Сэлэнгэ'){
-            var sum_ners = ['...', 'Алтанбулаг', 'Баруунбүрэн', 'Баянгол', 'Ерөө', 'Жавхлант', 'Зүүнбүрэн', 'Мандал', 'Орхон', 'Орхонтуул', 'Сайхан', 'Сант', 'Сүхбаатар', 'Түшиг', 'Хүдэр', 'Хушаат', 'Цагааннуур', 'Шаамар']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Төв'){
-            var sum_ners = ['...', 'Алтанбулаг', 'Аргалант', 'Архуст', 'Баян', 'Батсүмбэр', 'Баяндэлгэр', 'Баянжаргалан', 'Баян-Өнжүүл', 'Баянхангай', 'Баянцагаан', 'Баянцогт', 'Баянчандмань', 'Борнуур', 'Бүрэн', 'Дэлгэрхаан', 'Жаргалант', 'Заамар', 'Лүн', 'Мөнгөнморьт', 'Өндөрширээт', 'Сэргэлэн', 'Сүмбэр', 'Угтаал', 'Цээл', 'Эрдэнэ', 'Эрдэнэсант']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Увс'){
-            var sum_ners = ['...', 'Баруунтуруун', 'Бөхмөрөн', 'Давст', 'Завхан', 'Зүүнговь', 'Зүүнхангай', 'Малчин', 'Наранбулаг', 'Өлгий', 'Өмнөговь', 'Өндөрхангай', 'Сагил', 'Тариалан', 'Тэс', 'Түргэн', 'Улаангом', 'Ховд', 'Хяргас', 'Цагаанхайрхан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Ховд'){
-            var sum_ners = ['...', 'Жаргалант','Алтай', 'Булган', 'Буянт', 'Дарви', 'Дөргөн', 'Дуут', 'Зэрэг', 'Манхан', 'Мөнххайрхан', 'Мөст', 'Мянгад', 'Үенч', 'Ховд', 'Цэцэг', 'Чандмань', 'Эрдэнэбүрэн']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Хөвсгөл'){
-
-            var sum_ners = ['...', 'Алаг-Эрдэнэ', 'Арбулаг', 'Баянзүрх', 'Бүрэнтогтох', 'Галт', 'Жаргалант', 'Их-Уул', 'Мөрөн', 'Рашаант', 'Рэнчинлхүмбэ', 'Тариалан', 'Тосонцэнгэл', 'Төмөрбулаг', 'Түнэл', 'Улаан-Уул', 'Ханх', 'Хатгал', 'Цагааннуур', 'Цагаан-Уул', 'Цагаан-Үүр', 'Цэцэрлэг', 'Чандмань-Өндөр', 'Шинэ-Идэр', 'Эрдэнэбулган']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Хэнтий'){
-            var sum_ners = ['...', 'Батноров', 'Батширээт', 'Баян-Адрага', 'Баянмөнх', 'Баян-Овоо', 'Баянхутаг', 'Биндэр', 'Галшар', 'Дадал', 'Дархан', 'Дэлгэрхаан', 'Жаргалтхаан', 'Мөрөн', 'Норовлин', 'Өмнөдэлгэр', 'Хэрлэн', 'Цэнхэрмандал']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
         }
     }
 
@@ -312,7 +119,6 @@ export class Forms extends Component {
         }
     }
 
-    
     handleSubmit(values, { setStatus, setSubmitting }) {
 
         setStatus('checking')
@@ -321,9 +127,9 @@ export class Forms extends Component {
         this.setState({values})
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
-        form_datas.append('tesgiin_ner', this.state.values.tesgiin_ner)
+        form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
         form_datas.append('idx', this.state.id)
-        form_datas.append('toviin_dugaar', this.state.values.toviin_dugaar)
+        form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('trapetsiin_dugaar', this.state.values.trapetsiin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
         form_datas.append('pid', this.state.values.pid)
@@ -376,6 +182,7 @@ export class Forms extends Component {
 
         })
     }
+
     tsegUpdate(id){
         service.updateTseg(id).then(({tseg_display}) =>{
             if(tseg_display){
@@ -385,7 +192,7 @@ export class Forms extends Component {
                             tesgiin_ner: item.point_name,
                             pid: item.pid,
                             center_typ: item.center_typ,
-                            sum_name: item.sum,
+                            
                             trapetsiin_dugaar: item.sheet1,
                             toviin_dugaar: item.objectid,
                             latlongx: item.sheet2,
@@ -403,6 +210,7 @@ export class Forms extends Component {
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
                         },
+                        sum_name: item.sum,
                         aimag_name: item.aimag,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
@@ -441,9 +249,11 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row container  my-4">
-                        <div>
-                            <BundleMap></BundleMap>
+                    <div className="row container  my-1">
+                        <div className="float-left">
+                            <BundleMap
+                            handleXY={this.handleXY}
+                            />
                         </div>
                         <div className="col-md-12 mb-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -483,13 +293,15 @@ export class Forms extends Component {
                                     <th style={{width: "5%"}} scope="row">3</th>
                                     <th>Трапецийн дугаар(1:100000)</th>
                                     <td>
-                                        <Field
+                                        <input
                                             className={'form-control ' + (errors.trapetsiin_dugaar ? 'is-invalid' : '')}
                                             name='trapetsiin_dugaar'
                                             id="id_trapetsiin_dugaar"
+                                            disabled={true}
                                             type="text"
+                                            value={this.state.trapetsiin_dugaar}
                                         />
-                                        <ErrorMessage name="trapetsiin_dugaar" component="div" className="invalid-feedback"/>
+                                       
                                     </td>
                                     <th style={{width: "5%"}} scope="row">4</th>
                                     <th>Сүлжээний төрөл</th>
@@ -516,40 +328,26 @@ export class Forms extends Component {
                                     <th style={{width: "5%"}} scope="row">5</th>
                                     <th>Аймаг</th>
                                     <td colSpan="1" scope="rowgroup">
-                                        <select className="form-control" id="aimag" value={this.state.aimag_name} onChange={(e) => this.handleInput('aimag', e)}>
-                                            
-                                            <option>Архангай</option>
-                                            <option>Баян-Өлгий</option>
-                                            <option>Баянхонгор</option>
-                                            <option>Булган</option>
-                                            <option>Говь-Алтай</option>
-                                            <option>Говьсүмбэр</option>
-                                            <option>Дархан-Уул</option>
-                                            <option>Дорноговь</option>
-                                            <option>Дорнод</option>
-                                            <option>Дундговь</option>
-                                            <option>Завхан</option>
-                                            <option>Орхон</option>
-                                            <option>Өвөрхангай</option>
-                                            <option>Өмнөговь</option>
-                                            <option>Сүхбаатар</option>
-                                            <option>Сэлэнгэ</option>
-                                            <option>Төв</option>
-                                            <option>Увс</option>
-                                            <option>Ховд</option>
-                                            <option>Хөвсгөл</option>
-                                            <option>Хэнтий</option>
-                                        </select>
+                                    <input
+                                            className={'form-control '}
+                                            name='aimag_name'
+                                            id="aimag_name"
+                                            disabled={true}
+                                            type="text"
+                                            value={this.state.aimag_name}
+                                        />      
+
                                     </td>
                                     <th>Сум</th>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Fragment>
-                                            <Field name="sum_name" as="select" className="form-control"
-                                            className={'form-control ' + (errors.sum_name ? 'is-invalid' : '')}>
-                                                {this.state.sum_ners}
-                                            </Field>
-                                            <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
-                                        </Fragment>
+                                        <input
+                                            className={'form-control '}
+                                            name='sum_name'
+                                            id="sum_name"
+                                            type="text"
+                                            disabled={true}
+                                            value={this.state.sum_name || ''}
+                                        />
                                     </td>
                                 </tr>
 
@@ -557,30 +355,32 @@ export class Forms extends Component {
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /UTM/</th>
                                     <th colSpan="2" style={{textAlign:'center'}}>
-                                    UTM-N
+                                    UTM-E
                                     </th>
                                     <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>
-                                    UTM-E
+                                    UTM-N
                                     </th>
                                 </tr>
                                 <tr>
                                     <td colSpan="2">
-                                        <Field
-                                            className={'form-control ' + (errors.utmx ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control '}
                                             name='utmx'
                                             id="id_utmx"
+                                            disabled={true}
                                             type="number"
+                                            value={this.state.utmx}
                                         />
-                                        <ErrorMessage name="utmx" component="div" className="invalid-feedback"/>
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.utmy ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control '}
                                             name='utmy'
                                             id="id_utmy"
+                                            disabled={true}
                                             type="number"
+                                            value={this.state.utmy}
                                         />
-                                        <ErrorMessage name="utmy" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -589,22 +389,24 @@ export class Forms extends Component {
                                 </tr>
                                 <tr>
                                     <td colSpan="2">
-                                        <Field
-                                            className={'form-control ' + (errors.latlongx ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control ' }
                                             name='latlongx'
                                             id="id_latlongx"
+                                            disabled={true}
                                             type="number"
+                                            value ={this.state.latlongx}
                                         />
-                                        <ErrorMessage name="latlongx" component="div" className="invalid-feedback"/>
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.latlongy ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control ' }
                                             name='latlongy'
+                                            disabled={true}
                                             id="id_latlongy"
                                             type="number"
+                                            value ={this.state.latlongy}
                                         />
-                                        <ErrorMessage name="latlongy" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -682,14 +484,15 @@ export class Forms extends Component {
                                 <tr>
                                     <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">11. Байршлын тухай: </th>
                                     <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.barishil_tuhai ? 'is-invalid' : '')}
+                                        <input
+                                            className={'form-control ' }
                                             component="textarea"
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
+                                            value={`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${this.state.barishil_tuhai}`}
                                         />
-                                        <ErrorMessage name="barishil_tuhai" component="div" className="invalid-feedback"/>
+
                                     </th>
                                 </tr>
                                 <tr>

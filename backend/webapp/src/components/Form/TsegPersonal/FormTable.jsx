@@ -15,7 +15,6 @@ export default class FormTable extends Component {
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
 
-
     handleModalDeleteOpen(event) {
         event.preventDefault()
         this.setState({is_modal_delete_open: true})
@@ -24,9 +23,9 @@ export default class FormTable extends Component {
     handleModalDeleteClose() {
         this.setState({is_modal_delete_open: false})
     }
+
     componentDidUpdate(prevProps){
         if(prevProps.values !== this.props.values) this.setState({is_modal_delete_open: false})
-
     }
 
     render() {

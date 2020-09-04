@@ -3,21 +3,24 @@
 }
 
 .🌍 > #map{
-    width: 20%;
-    height: 500px;
-    right: 14px;
+    width: 18%;
+    height: 600px;
+    right: 5px;
     position: fixed;
 }
 
 .суурь-давхаргууд{
-    right: .5rem;
-    bottom: 70px;
-    position: fixed;
+    right: .0rem;
+    z-index: -100;
+    bottom: 2px;
+    height: 2.1rem;
+    position: absolute;
+
 }
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
-    width: 6rem;
-    height: 3.1rem;
+    width: 5.6rem;
+    height: 2.1rem;
     overflow: hidden;
     margin: 1px;
     border-radius: 2px;
