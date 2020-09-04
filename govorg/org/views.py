@@ -8,7 +8,6 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 
 
-
 def _get_employee_display(employe):
 
     return {
@@ -30,7 +29,7 @@ def _get_employee_display(employe):
 @require_POST
 @ajax_required
 def employees(request, payload):
-    
+
     page = payload.get('page')
     per_page = payload.get('per_page')
     User.objects.filter(username="bolormaa")
@@ -52,7 +51,7 @@ def employees(request, payload):
         'page': page,
         'total_page': total_page,
     }
-    
+
     return JsonResponse(rsp)
 
 
@@ -61,9 +60,11 @@ def system(request):
 
 
 def all(request):
-    User.objects.filter(username="bolormaa")
-    user_id = get_object_or_404(User,username="bolormaa").id
-    org_id = get_object_or_404(Employee, user_id=user_id).org_id
-    org_name = get_object_or_404(Org, id=org_id).name.upper()
-    return render(request, 'org/index.html', {"org_name": org_name})
 
+    org = Org.objects.filter(employee__user=request.user).first()
+
+    context = {
+        'org': {"org_name": org.name},
+    }
+
+    return render(request, 'org/index.html', context)
