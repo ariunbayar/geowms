@@ -1,9 +1,7 @@
-import requests
-
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import reverse, get_object_or_404, render
+from django.http import JsonResponse
+from django.shortcuts import reverse, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 
@@ -251,19 +249,19 @@ def paginatedList(request, payload):
     per_page = payload.get('per_page')
 
     wms_list = WMS.objects.all().annotate(search=SearchVector('name')).filter(search__contains=query)
-    
+
     total_items = Paginator(wms_list, per_page)
     items_page = total_items.page(page)
     items = [
-        _get_wms_display(request, wms) 
+        _get_wms_display(request, wms)
         for wms in items_page.object_list
     ]
     total_page = total_items.num_pages
-    
+
     rsp = {
         'items': items,
         'page': page,
         'total_page': total_page,
     }
-    
+
     return JsonResponse(rsp)
