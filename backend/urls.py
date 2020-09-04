@@ -122,7 +122,7 @@ urlpatterns = [
 
         path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
 
-        path('tseg-personal/all/', forms_views.tsegPersonalAll, name='tseg-personal-all'),
+        path('tseg-personal/list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
         path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
         path('tseg-ustsan_all/', forms_views.tsegUstsanAll, name='tseg-ustsan_all'),

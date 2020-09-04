@@ -6,6 +6,7 @@ import {OrgRole} from './OrgRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 
+
 export class OrgMenu extends Component {
     constructor(props) {
 
@@ -51,12 +52,15 @@ export class OrgMenu extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="">
-
                 <div className="row">
-                    <div className=" col-md-2">
-                        <div className="container my-4">
-                            <div className="list-group">
+                    <div className="col-md-2 pr-0 pl-0">
+                        <div className="container pr-0">
+                            <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                <p className="btn  mt-2 gp-outline-primary">
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                                </p>
+                            </NavLink>
+                            <div className="list-group mt-lg-5">
                                 <NavLink className="menu" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12">
                                         Эрх
@@ -75,10 +79,10 @@ export class OrgMenu extends Component {
                             </div>
                         </div>
                     </div>
-                        <div className="col-md-10">
-                            <div className="text-center mt-4">
-                                <h3 className="text-dark " >{org_name}</h3>
-                            </div>
+                        <div className="col-md-10 pl-0">
+                        <div className="text-center mt-4">
+                            <h3 className="text-dark">{org_name}</h3>
+                        </div>
                             <Switch>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                                 <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
@@ -86,7 +90,6 @@ export class OrgMenu extends Component {
                             </Switch>
                         </div>
                 </div>
-            </div>
         )
     }
 }
