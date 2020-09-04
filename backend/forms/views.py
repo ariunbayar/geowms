@@ -452,6 +452,23 @@ def tsegPersonalUpdate(request, payload):
 
 @require_POST
 @ajax_required
+def findSum(request, payload):
+    info = []
+    x = payload.get("y")
+    y = payload.get("x")
+    cursor = connections['postgis_db'].cursor()
+    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [x, y])
+    geom = cursor.fetchone()
+    info.append({
+        'aimag': geom[0],
+        'sum': geom[1]
+    })
+
+    return JsonResponse({"info":info})
+
+
+@require_POST
+@ajax_required
 def tsegPersonal(request):
     pk = request.POST.get('idx')
     if pk:

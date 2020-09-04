@@ -4,7 +4,7 @@ import {service} from '../service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import BundleMap from '../../map/BundleMap'
-
+//title: props.layer.title || '',
 export class Forms extends Component {
 
     constructor(props) {
@@ -19,7 +19,7 @@ export class Forms extends Component {
                 sum_name: '',
                 utmx: '',
                 utmy: '',
-                latlongx: '',
+                latlongx: "",
                 latlongy: '',
                 barishil_tuhai: '',
                 sudalga_or_shine: '',
@@ -33,7 +33,7 @@ export class Forms extends Component {
             },
             real_sum: '',
             aimag_name: '',
-            sum_ners: [],
+            sum_ners: '',
             file_path1: null,
             file_path11: null,
             file_path1_error: false,
@@ -54,17 +54,11 @@ export class Forms extends Component {
         }
         this.handleInput = this.handleInput.bind(this)
         this.onDrop = this.onDrop.bind(this)
-        this.handleInputAimag = this.handleInputAimag.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
         this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.userName = this.userName.bind(this)
-    }
-    componentDidUpdate(prevProps, prevState){
-        if(prevState.aimag_name !== this.state.aimag_name)
-        {
-            this.handleInputAimag(this.state.aimag_name)
-        }
+        this.handleXY = this.handleXY.bind(this)
     }
     userName(){
 
@@ -80,6 +74,22 @@ export class Forms extends Component {
         }
     }
 
+    handleXY(values, info){
+        info.map(e=>this.setState({
+            values:{
+                sum_name:e.sum
+            }
+        }))
+        this.setState({
+            values:{
+                latlongy:values[0],
+                latlongx:values[1],
+            },
+            aimag_name:info[0]['aimag'],
+
+        })
+    }
+    
     onDrop([icon], name) {
         if(icon){
             let reader = new FileReader();
@@ -94,204 +104,7 @@ export class Forms extends Component {
         this.setState({aimag_name: e.target.value })
     }
 
-
-    handleInputAimag(name) {
-        if(name == 'Архангай'){
-            var sum_ners = ['...', 'Батцэнгэл', 'Булган', 'Жаргалант', 'Ихтамир', 'Өгийнуур', 'Өлзийт', 'Өндөр-Улаан', 'Тариат', 'Цахир', 'Чулуут']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Баян-Өлгий'){
-            var sum_ners = ['...', 'Алтай', 'Алтанцөгц', 'Баяннуур', 'Бугат', 'Булган', 'Буянт', 'Дэлгүүн', 'Ногооннуур', 'Сагсай', 'Цагааннуур', 'Толбо', 'Улаанхус', 'Цэнгэл']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Баянхонгор'){
-            var sum_ners = ['...', 'Баянхонгор', 'Баацагаан', 'Баянбулаг', 'Баянговь', 'Баян-Овоо', 'Баян-Өндөр', 'Баянцагаан', 'Богд', 'Бөмбөгөр', 'Бууцагаан', 'Галуут', 'Гурванбулаг', 'Жаргалант', 'Жинст', 'Заг', 'Өлзийт', 'Хүрээмарал', 'Шинэжинст', 'Эрдэнэцогт']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Булган'){
-            var sum_ners = ['...', 'Булган', 'Баян-Агт', 'Баяннуур', 'Бугат', 'Бүрэгхангай', 'Гурванбулаг', 'Дашинчилэн', 'Могод', 'Орхон', 'Рашаант', 'Сайхан', 'Сэлэнгэ', 'Тэшиг', 'Хангал', 'Хишиг-Өндөр', 'Хутаг-Өндөр']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Говь-Алтай'){
-            var sum_ners = ['...', 'Алтай', 'Баян-Уул', 'Бигэр', 'Бугат', 'Дарви', 'Дэлгэр', 'Есөнбулаг', 'Жаргалан', 'Тайшир', 'Тонхил', 'Төгрөг', 'Халиун', 'Хөхморьт', 'Цогт', 'Цээл', 'Чандмань', 'Шарга', 'Эрдэнэ']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Говьсүмбэр'){
-            var sum_ners = ['...', 'Сүмбэр', 'Баянтал', 'Шивээговь']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дархан-Уул'){
-            var sum_ners = ['...', 'Дархан', 'Хонгор', 'Орхон', 'Шарынгол']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дорноговь'){
-
-            var sum_ners = ['...', 'Айраг', 'Алтанширээ', 'Даланжаргалан', 'Дэлгэрэх', 'Замын-Үүд', 'Иххэт', 'Мандах', 'Өргөн', 'Сайхандулаан', 'Улаанбадрах', 'Хатанбулаг', 'Хөвсгөл', 'Эрдэнэ']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дорнод'){
-            
-            var sum_ners = ['...', 'Баяндун', 'Баянтүмэн', 'Баян-Уул', 'Булган', 'Гурванзагал', 'Дашбалбар', 'Матад', 'Сэргэлэн', 'Халхгол', 'Хөлөнбуйр', 'Хэрлэн (Сүмбэр)', 'Цагаан-Овоо', 'Чулуунхороот (Эрээнцав)', 'Чойбалсан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Дундговь'){
-            var sum_ners = ['...', 'Адаацаг', 'Баянжаргалан', 'Говь-Угтаал', 'Гурвансайхан', 'Дэлгэрхангай', 'Дэлгэрцогт', 'Дэрэн', 'Луус', 'Өлзийт', 'Өндөршил', 'Сайхан-Овоо', 'Сайнцагаан', 'Хулд', 'Цагаандэлгэр', 'Эрдэнэдалай']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Завхан'){
-
-            var sum_ners = ['...', 'Алдархаан', 'Асгат', 'Баянтэс', 'Баянхайрхан', 'Дөрвөлжин', 'Завханмандал', 'Идэр', 'Их-Уул', 'Нөмрөг', 'Отгон', 'Сантмаргац', 'Сонгино', 'Тосонцэнгэл', 'Түдэвтэй', 'Тэлмэн', 'Тэс', 'Ургамал', 'Цагаанхайрхан', 'Цагаанчулуут', 'Цэцэн-Уул', 'Шилүүстэй', 'Эрдэнэхайрхан', 'Яруу']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-
-        if(name == 'Орхон'){
-            var sum_ners = ['...', 'Баян-Өндөр', 'Жаргалант']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Өвөрхангай'){
-            var sum_ners = ['...', 'Арвайхээр', 'Баруунбаян-Улаан', 'Бат-Өлзий', 'Баянгол', 'Баян-Өндөр', 'Богд', 'Бүрд', 'Гучин-Ус', 'Хархорин', 'Хайрхандулаан', 'Хужирт', 'Нарийнтээл', 'Өлзийт', 'Сант', 'Тарагт', 'Төгрөг', 'Уянга', 'Есөнзүйл', 'Зүүнбаян-Улаан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Өмнөговь'){
-            var sum_ners = ['...', 'Баяндалай', 'Баян-Овоо', 'Булган', 'Гурвантэс', 'Мандал-Овоо', 'Манлай', 'Ноён', 'Номгон', 'Сэврэй', 'Ханбогд', 'Ханхонгор', 'Хүрмэн', 'Цогт-Овоо', 'Цогтцэций']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Сүхбаатар'){
-            var sum_ners = ['...', 'Асгат', 'Баяндэлгэр', 'Дарьганга', 'Мөнххаан', 'Наран', 'Онгон', 'Сүхбаатар', 'Түвшинширээ', 'Түмэнцогт', 'Уулбаян', 'Халзан', 'Эрдэнэцагаан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Сэлэнгэ'){
-            var sum_ners = ['...', 'Алтанбулаг', 'Баруунбүрэн', 'Баянгол', 'Ерөө', 'Жавхлант', 'Зүүнбүрэн', 'Мандал', 'Орхон', 'Орхонтуул', 'Сайхан', 'Сант', 'Сүхбаатар', 'Түшиг', 'Хүдэр', 'Хушаат', 'Цагааннуур', 'Шаамар']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Төв'){
-            var sum_ners = ['...', 'Алтанбулаг', 'Аргалант', 'Архуст', 'Баян', 'Батсүмбэр', 'Баяндэлгэр', 'Баянжаргалан', 'Баян-Өнжүүл', 'Баянхангай', 'Баянцагаан', 'Баянцогт', 'Баянчандмань', 'Борнуур', 'Бүрэн', 'Дэлгэрхаан', 'Жаргалант', 'Заамар', 'Лүн', 'Мөнгөнморьт', 'Өндөрширээт', 'Сэргэлэн', 'Сүмбэр', 'Угтаал', 'Цээл', 'Эрдэнэ', 'Эрдэнэсант']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Увс'){
-            var sum_ners = ['...', 'Баруунтуруун', 'Бөхмөрөн', 'Давст', 'Завхан', 'Зүүнговь', 'Зүүнхангай', 'Малчин', 'Наранбулаг', 'Өлгий', 'Өмнөговь', 'Өндөрхангай', 'Сагил', 'Тариалан', 'Тэс', 'Түргэн', 'Улаангом', 'Ховд', 'Хяргас', 'Цагаанхайрхан']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Ховд'){
-            var sum_ners = ['...', 'Жаргалант','Алтай', 'Булган', 'Буянт', 'Дарви', 'Дөргөн', 'Дуут', 'Зэрэг', 'Манхан', 'Мөнххайрхан', 'Мөст', 'Мянгад', 'Үенч', 'Ховд', 'Цэцэг', 'Чандмань', 'Эрдэнэбүрэн']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Хөвсгөл'){
-
-            var sum_ners = ['...', 'Алаг-Эрдэнэ', 'Арбулаг', 'Баянзүрх', 'Бүрэнтогтох', 'Галт', 'Жаргалант', 'Их-Уул', 'Мөрөн', 'Рашаант', 'Рэнчинлхүмбэ', 'Тариалан', 'Тосонцэнгэл', 'Төмөрбулаг', 'Түнэл', 'Улаан-Уул', 'Ханх', 'Хатгал', 'Цагааннуур', 'Цагаан-Уул', 'Цагаан-Үүр', 'Цэцэрлэг', 'Чандмань-Өндөр', 'Шинэ-Идэр', 'Эрдэнэбулган']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-        if(name == 'Хэнтий'){
-            var sum_ners = ['...', 'Батноров', 'Батширээт', 'Баян-Адрага', 'Баянмөнх', 'Баян-Овоо', 'Баянхутаг', 'Биндэр', 'Галшар', 'Дадал', 'Дархан', 'Дэлгэрхаан', 'Жаргалтхаан', 'Мөрөн', 'Норовлин', 'Өмнөдэлгэр', 'Хэрлэн', 'Цэнхэрмандал']
-            var sum_ners_options = []
-            for (var i = 0; i < sum_ners.length; i++)
-            {
-                sum_ners_options.push(<option>{sum_ners[i]}</option>);
-            }
-            this.setState({ sum_ners: sum_ners_options})
-        }
-    }
-
+    
     onChangeHandler(e, name){
         const file = e.target.files[0]
         var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[a-z A-Z 0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
@@ -441,9 +254,11 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row container  my-4">
-                        <div>
-                            <BundleMap></BundleMap>
+                    <div className="row container  my-1">
+                        <div className="float-left">
+                            <BundleMap
+                            handleXY={this.handleXY}
+                            />
                         </div>
                         <div className="col-md-12 mb-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -516,40 +331,24 @@ export class Forms extends Component {
                                     <th style={{width: "5%"}} scope="row">5</th>
                                     <th>Аймаг</th>
                                     <td colSpan="1" scope="rowgroup">
-                                        <select className="form-control" id="aimag" value={this.state.aimag_name} onChange={(e) => this.handleInput('aimag', e)}>
-                                            
-                                            <option>Архангай</option>
-                                            <option>Баян-Өлгий</option>
-                                            <option>Баянхонгор</option>
-                                            <option>Булган</option>
-                                            <option>Говь-Алтай</option>
-                                            <option>Говьсүмбэр</option>
-                                            <option>Дархан-Уул</option>
-                                            <option>Дорноговь</option>
-                                            <option>Дорнод</option>
-                                            <option>Дундговь</option>
-                                            <option>Завхан</option>
-                                            <option>Орхон</option>
-                                            <option>Өвөрхангай</option>
-                                            <option>Өмнөговь</option>
-                                            <option>Сүхбаатар</option>
-                                            <option>Сэлэнгэ</option>
-                                            <option>Төв</option>
-                                            <option>Увс</option>
-                                            <option>Ховд</option>
-                                            <option>Хөвсгөл</option>
-                                            <option>Хэнтий</option>
-                                        </select>
+                                    <Field
+                                            className={'form-control '}
+                                            name='aimag_name'
+                                            id="aimag_name"
+                                            type="text"
+                                            value={this.state.aimag_name}
+                                        />      
+
                                     </td>
                                     <th>Сум</th>
                                     <td colSpan="2" scope="rowgroup">
-                                        <Fragment>
-                                            <Field name="sum_name" as="select" className="form-control"
-                                            className={'form-control ' + (errors.sum_name ? 'is-invalid' : '')}>
-                                                {this.state.sum_ners}
-                                            </Field>
-                                            <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
-                                        </Fragment>
+                                        <Field
+                                            className={'form-control ' + (errors.sum_name ? 'is-invalid' : '')}
+                                            name='sum_name'
+                                            id="sum_name"
+                                            type="text"
+                                        />
+                                        <ErrorMessage name="sum_name" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
 

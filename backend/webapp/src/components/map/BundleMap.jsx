@@ -30,12 +30,13 @@ export default class BundleMap extends Component {
             projection_display: 'EPSG:4326',
             map_wms_list: [],
             is_sidebar_open: true,
-            coordinate_clicked: null,
+            coordinate_clicked: '',
             vector_layer: null,
             is_draw_open: false,
             draw_layer: null,
             draw: null,
             source_draw: null,
+            info:[]
         }
 
         this.controls = {
@@ -48,6 +49,7 @@ export default class BundleMap extends Component {
         this.loadMapData = this.loadMapData.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.getCurrentUtmZone = this.getCurrentUtmZone.bind(this)
     }
 
     initMarker() {
@@ -69,7 +71,7 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
-        this.loadMapData(1)
+        this.loadMapData(9)
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -82,6 +84,7 @@ export default class BundleMap extends Component {
         ]).then(([{base_layer_list}, {wms_list}]) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
         })
+
 
     }
 
@@ -207,21 +210,29 @@ export default class BundleMap extends Component {
         this.map = map
 
     }
+    getCurrentUtmZone() {
+            var position = transform(mapObj.getView().getCenter(), mapObj.getView().getProjection(), "EPSG:4326");
+            return getUtmZoneFromPosition(position[0]);
+    };
 
     handleMapClick(event) {
-        alert()
         this.marker.point.setCoordinates(event.coordinate)
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
         this.setState({coordinate_clicked})
-        this.showFeaturesAt(event.coordinate)
+        this.showFeaturesAt(coordinate_clicked) 
     }
 
-
     showFeaturesAt(coordinate) {
-        alert(coordinate)
-
+        var array = coordinate.split(',').map(function(n) {
+            return Number(n);
+        });
+        service.findSum(array).then(({info}) => {
+           if(info){
+            this.props.handleXY(array, info)
+           }
+        })
     }
 
 
@@ -232,8 +243,7 @@ export default class BundleMap extends Component {
         this.marker.point.setCoordinates(map_coord)
         view.setCenter(map_coord)
     }
-
-
+    
 
     render() {
         return (
