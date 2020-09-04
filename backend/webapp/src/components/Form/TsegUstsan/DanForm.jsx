@@ -2,9 +2,9 @@ import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
 import {service} from '../service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
-import {validationSchemaAdmin} from './validationSchema'
+import {validationSchemaDan} from './validationSchema'
 import Modal from './alertModel'
-export class FormTseg extends Component {
+export class DanForm extends Component {
 
     constructor(props) {
         super(props)
@@ -13,20 +13,13 @@ export class FormTseg extends Component {
         this.error_msg = []
         this.state = {
             id: -1,
-            
             values:{
-                email: '',
-                baiguulaga: '',
-                alban_tushaal: '',
-                utas: '',
-                
-                oiroltsoo_bairlal: '',
-                evdersen_baidal: '',
-                nohtsol_baidal: '',
-                sergeeh_sanal: '',
-                
+                oiroltsoo_bairlal: '21',
+                evdersen_baidal: '12',
+                nohtsol_baidal: '21',
+                sergeeh_sanal: '21',
             },
-            tsegiin_dugaar: '',
+            tsegiin_dugaar: '12',
 
             zurag_hol: '',
             zurag_oir: '',
@@ -42,7 +35,6 @@ export class FormTseg extends Component {
             zurag_hoid_prev: '',
             zurag_omno_prev: '',
             hemjilt_hiih_bolomj: false,
-            email_error_messege: false,
             tseg_dugaar_error: false,
             list:[],
             items:[],
@@ -50,11 +42,10 @@ export class FormTseg extends Component {
             checkError: [],
             is_modal_open: false,
             showBox: false,
-            error:{error:''}
-        
+            error:{error:''},
+            is_dan: false,
         }
         this.handleInput = this.handleInput.bind(this)
-        this.handleInputEmail = this.handleInputEmail.bind(this)
         this.onDrop = this.onDrop.bind(this)
         this.handleCheck = this.handleCheck.bind(this)
         this.handleCheckGroup = this.handleCheckGroup.bind(this)
@@ -66,13 +57,16 @@ export class FormTseg extends Component {
         this.openModal = this.openModal.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
+        this.checkUser = this.checkUser.bind(this)
     }
+
     componentDidMount(){
         const id = this.props.match.params.id
         if(id){
             this.setState({id})
         }
         this.handleGetAll(id)
+        this.checkUser()
     }
 
     handleSearchWithTseg(field, e) {
@@ -95,11 +89,10 @@ export class FormTseg extends Component {
                 }
                 else{
                     console.log("FAAAAAAAAAALSE")
-                    this.setState({ tseg_dugaar_error: true, checkError: error })
+                    this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
                 }
             })
-        }
-        
+        }   
     }
 
     optionVal(items){
@@ -129,16 +122,11 @@ export class FormTseg extends Component {
         if(id){
             console.log("id baina")
             this.setState({id:id})
-            console.log("email",this.state.values.email)
             service.tsegustsanEdit(id).then(({ form_data }) => {
                 if (form_data) {
                     form_data.map((tseg) => {
                         this.setState({
                             values:{
-                                email:tseg.email,
-                                baiguulaga:tseg.name,
-                                alban_tushaal:tseg.alban_tushaal,
-                                utas: tseg.utas,
                                 oiroltsoo_bairlal:tseg.oiroltsoo_bairlal,
                                 evdersen_baidal:tseg.evdersen_baidal,
                                 nohtsol_baidal:tseg.nohtsol_baidal,
@@ -167,17 +155,25 @@ export class FormTseg extends Component {
         }
     }
 
+    checkUser(){
+        service.checkDan().then(success => {
+            this.setState({ is_dan: success.success })
+        })
+    }
+
     handleSubmit(values, { setStatus, setSubmitting }){
         setStatus('checking')
         setSubmitting(true)
         console.log("haha", this.state.id)
         const form_datas = new FormData() 
         this.setState({values})
+        const is_dan = this.state.is_dan
+        console.log("hahaha", is_dan)
+        if (is_dan == true) {
+            console.log("isDan", is_dan)
+            form_datas.append('is_dan', this.state.is_dan)
+        }
         form_datas.append('id', this.state.id)
-        form_datas.append('email', values.email)
-        form_datas.append('baiguulaga', values.baiguulaga)
-        form_datas.append('alban_tushaal', values.alban_tushaal)
-        form_datas.append('utas', values.utas)
         form_datas.append('tsegiin_dugaar', this.state.tsegiin_dugaar)
         form_datas.append('oiroltsoo_bairlal', values.oiroltsoo_bairlal)
         form_datas.append('evdersen_baidal', values.evdersen_baidal)
@@ -206,20 +202,6 @@ export class FormTseg extends Component {
         this.setState({ [field]: e.target.value })
     }
     
-    handleInputEmail(field, e) {
-
-        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        if(re.test(e.target.value))
-        {
-            this.setState({emailErrorMessege:false , [field]: e.target.value})
-        }
-        else{
-            this.setState({email_error_messege: true, checkError: this.state.error })
-            
-        }
-
-    }
-
     handleCheck(field, e) {
         if (e.target.checked) {
             this.setState({ [field]: true })
@@ -263,7 +245,7 @@ export class FormTseg extends Component {
             <Formik
                 initialValues={this.state.values}
                 enableReinitialize
-                validationSchema={validationSchemaAdmin}
+                validationSchema={validationSchemaDan}
                 // onSubmit={fields => {
                 //     alert('SUCCESS!! :-)\n\n' + JSON.stringify(fields, null, 4))
                 //     this.handleSubmit()
@@ -289,71 +271,6 @@ export class FormTseg extends Component {
                     return (
                     <Form>
                         <div className="row container  my-4">
-                        <h4>Цэгийн хувийн хэргийн дугаар</h4>
-                        <table className="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">1.</th>
-                                <th style={{width: "15%"}}>Имэйл хаяг</th>
-                               <td>
-                                    <Field 
-                                        name="email" 
-                                        type="text" 
-                                        id="email"
-                                        className={'form-control' + 
-                                            (errors.email && 
-                                                touched.email ? ' is-invalid' : '')} 
-                                    />
-                                    <ErrorMessage name="email" component="div" className="invalid-feedback" />
-                                    {this.state.email_error_messege ? <a className="text-primary">Имэйл хаяг буруу байна.</a> : null}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">2.</th>
-                                    <th style={{width: "15%"}}>Албан байгууллага</th>
-                                    <td>
-                                        <Field 
-                                            name="baiguulaga" 
-                                            type="text" 
-                                            id="baiguulaga"
-                                            className={'form-control' + 
-                                                (errors.baiguulaga && 
-                                                    touched.baiguulaga ? ' is-invalid' : '')} 
-                                        />
-                                        <ErrorMessage name="baiguulaga" component="div" className="invalid-feedback" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">2.</th>
-                                    <th style={{width: "15%"}}>Албан тушаал alban_tushaal</th>
-                                    <td>
-                                        <Field 
-                                            name="alban_tushaal" 
-                                            type="text" 
-                                            className={'form-control' + 
-                                                (errors.alban_tushaal && 
-                                                    touched.alban_tushaal ? ' is-invalid' : '')} 
-                                        />
-                                        <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">2.</th>
-                                    <th style={{width: "15%"}}>Утасны дугаар</th>
-                                    <td>
-                                        <Field 
-                                            name="utas" 
-                                            type="text" 
-                                            id="utas"
-                                            className={'form-control' + 
-                                                (errors.alban_tushaal && 
-                                                    touched.alban_tushaal ? ' is-invalid' : '')} 
-                                        />
-                                        <ErrorMessage name="utas" component="div" className="invalid-feedback" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                         <h4>Цэгийн мэдээлэл</h4>
                         <table className="table table-bordered">
                             <tbody>
@@ -660,11 +577,9 @@ export class FormTseg extends Component {
                                         </div>
                                     </td>
                                 </tr>
-
                             </tbody>
                         </table>
                         <div>
-                            
                             <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
                                 disabled={isSubmitting || has_error || error_bn}>
                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
