@@ -130,7 +130,6 @@ export class WMSForm extends Component {
     }
 
     loadLayers(public_url) {
-
         service.getLayers(public_url).then((layer_choices) => {
             this.setState({ layer_choices })
         })

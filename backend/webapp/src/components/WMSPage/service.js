@@ -192,8 +192,8 @@ function getLayers(wms_url) {
             method: 'GET',
         }
 
-        const url = wms_url + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities'
-
+        const url = wms_url + '?SERVICE=WMS&VERSION=1.0.0&REQUEST=GetCapabilities'
+        
         fetch(url, requestOptions)
             .then(rsp => rsp.blob())
             .then(data => {
