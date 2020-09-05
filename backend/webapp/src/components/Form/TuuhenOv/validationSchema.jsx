@@ -9,12 +9,6 @@ export const validationSchema = object().shape({
     date: string()
         .max(50, '50-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
-    aimagname: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    sumname: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
     too_shirheg: string()
         .required('Хоосон байна!'),
     burtgegch: string()
