@@ -1045,11 +1045,11 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
-    mpoint = Mpoint.objects.using('postgis_db').filter(objectid__icontains=query)
+    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)
     if(mpoint):
         for tseg in mpoint:
             items.append({
-                "tseg": tseg.objectid
+                "tseg": tseg.point_id
             })
         rsp = {
             'items': items
@@ -1064,7 +1064,7 @@ def tsegPersonalSearch(request, payload):
 
 @require_POST
 @ajax_required
-def checkDan(request, payload):
+def checkDan(request):
     user_id = request.user.id
     users = get_object_or_404(User,id=user_id)
     isDan = users.is_sso
@@ -1072,3 +1072,33 @@ def checkDan(request, payload):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
+
+
+@require_POST
+@ajax_required
+def tsegPersonalSuccess(request, payload):
+    try:
+        point_type = int(payload.get('point_type'))
+        objectid = int(payload.get('objectid'))
+        point_class = int(payload.get('point_class'))
+        mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
+        if point_class == point_type:
+            rsp = {
+                'success': False, 
+                'msg': "Төлөв адилхан тул боломжгүй",
+            }
+            return JsonResponse(rsp)
+        mpoints.update(
+            point_class=point_type
+        )
+        rsp = {
+            'success': True, 
+            'msg': "Амжилттай боллоо",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False, 
+            'msg': "Амжилтгүй боллоо",
+        }
+        return JsonResponse(rsp)

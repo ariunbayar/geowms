@@ -44,6 +44,7 @@ export default class Modal extends Component {
             if (callback) {
                 callback()
             } else {
+                console.log(callback)
                 this.props.modalClose && this.props.modalClose()
             }
         }, 150)
@@ -84,7 +85,13 @@ export default class Modal extends Component {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" onClick={() => this.handleClose()} className="btn gp-outline-primary">Буцах</button>
-                                <button type="button" onClick={this.handleProceed} className="btn gp-btn-primary text-white">Устгах</button>
+                                <button 
+                                    type="button" 
+                                    onClick={this.handleProceed} 
+                                    className="btn gp-btn-primary text-white"
+                                >
+                                    {this.props.actionName ? this.props.actionName : "Устгах"}
+                                </button>
                             </div>
                         </div>
                     </div>
