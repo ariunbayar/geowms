@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 import {service} from '../service'
 import {validationSchema} from './validationSchema'
+import {HureeEdit} from './HureeEdit'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 
 export class Forms extends Component {
@@ -22,10 +23,38 @@ export class Forms extends Component {
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
+        this.hureeRemove = this.hureeRemove.bind(this)
+        this.hureeAdd = this.hureeAdd.bind(this)
+        this.handleRefresh = this.handleRefresh.bind(this)
     }
+    hureeRemove(id){
+        const tuuh_id = this.props.match.params.id
+        service.hureeCount(id, 'remove', tuuh_id).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.handleRefresh()
+                }, 1000)
+            }
+        })
 
+    }
+    hureeAdd(){
+        const tuuh_id = this.props.match.params.id
+        service.hureeCount(1, 'add', tuuh_id).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.handleRefresh()
+                }, 1000)
+            }
+        })
+    }
     
     componentDidMount(){
+        const id = this.props.match.params.id
+        if(id) this.handleRefresh()
+
+    }
+    handleRefresh(){
         const id = this.props.match.params.id
         service.about(id).then(({tuuh_soyl}) => {
             if(tuuh_soyl){
@@ -43,7 +72,6 @@ export class Forms extends Component {
                 )
             }
         })
-
     }
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
@@ -83,6 +111,12 @@ export class Forms extends Component {
     }
     
     render() {
+        const huree_components = []
+        const huree_len = this.state.values.too_shirheg
+        for(var i=1; i<=huree_len; i++)
+        {
+            huree_components.push(<HureeEdit huree_id={i} hureeRemove={this.hureeRemove} ></HureeEdit>)
+        }
         return (
             <Formik
                 enableReinitialize
@@ -177,6 +211,10 @@ export class Forms extends Component {
                                             type="number"
                                         />
                                         <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
+                                        <a className="btn gp-outline-primary" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</a>
+                                        <ul>
+                                            {huree_components}
+                                        </ul>
                                     </td>
                                     <th>Тоо ширхэг.</th>
                                 </tr>

@@ -9,7 +9,7 @@ export class FormList extends Component {
 
         super(props)
         this.state = {
-            tuuh_soyl: [{},{}],
+            tuuh_soyl: [],
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)

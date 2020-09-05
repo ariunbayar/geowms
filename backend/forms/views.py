@@ -40,6 +40,33 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+def hureeCountEdit(request, payload):
+    id = payload.get('id')
+    action = payload.get('action')
+    tuuh_id = payload.get('tuuh_id')
+    tuuh = TuuhSoyol.objects.using('postgis_db').filter(id=tuuh_id).first()
+
+    if action == 'add':
+        too_shirheg = int(tuuh.too_shirheg) + 1
+        TuuhSoyol.objects.using('postgis_db').filter(id=tuuh_id).update(too_shirheg=too_shirheg)
+    else:
+
+        # TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl_huree_id=id).delete()
+
+        alls = TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl=tuuh_id, tuuh_soyl_huree_id=id).order_by('sort_order')
+        for data in alls:
+            print(data.tuuh_soyl_huree_id)
+
+        # too_shirheg = int(tuuh.too_shirheg) - 1 
+        # TuuhSoyol.objects.using('postgis_db').filter(id=tuuh_id).update(too_shirheg=too_shirheg)
+
+
+    return JsonResponse({'success': True})
+
+
+
+@require_POST
+@ajax_required
 def update(request, payload):
     date = None
     form_datas = payload.get('form_datas')

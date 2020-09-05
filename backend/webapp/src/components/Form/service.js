@@ -8,6 +8,7 @@ export const service = {
     create,
     update,
     about,
+    hureeCount,
     remove,
     tsegPersonal,
     tsegUstsan,
@@ -54,6 +55,14 @@ function update(form_datas) {
         body: JSON.stringify({form_datas}),
     }
     return fetch(`${prefix}/update/`, opts).then(handleResponse)
+}
+
+function hureeCount(id, action, tuuh_id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id, action, tuuh_id}),
+    }
+    return fetch(`${prefix}/huree-count/`, opts).then(handleResponse)
 }
 
 function create(form_datas) {
