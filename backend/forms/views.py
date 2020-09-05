@@ -31,8 +31,8 @@ def create(request, payload):
                                 date=date,
                                 inspireid="geo",
                                 too_shirheg=form_datas['too_shirheg'],
-                                aimagname=form_datas['aimagname'],
-                                sumname=form_datas['sumname'],
+                                aimagname=payload.get('aimagname'),
+                                sumname=payload.get('sumname'),
                                 burtgegch=form_datas['burtgegch']
                             )
     return JsonResponse({'success': True})
@@ -77,8 +77,8 @@ def update(request, payload):
                                                         date=date,
                                                         inspireid="geo",
                                                         too_shirheg=form_datas['too_shirheg'],
-                                                        aimagname=form_datas['aimagname'],
-                                                        sumname=form_datas['sumname'],
+                                                        aimagname=payload.get('aimagname'),
+                                                        sumname=payload.get('sumname'),
                                                         burtgegch=form_datas['burtgegch']
                                                     )
 
@@ -208,7 +208,7 @@ def dursgaltGazarUpdate(request, payload):
     emm = int((y - edd) * 60)
     ess = int((((y - edd) * 60) - emm) * 60)
 
-    utm = form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm']  + ' N' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx']) + ' E' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'])
+    # utm = form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm']  + ' N' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx']) + ' E' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'])
     latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
 
     hashaa = form_datas_values['dgh_hashaa_baigaa_eseh_hashaa']
@@ -221,7 +221,7 @@ def dursgaltGazarUpdate(request, payload):
     
     tuuhsoyolpoint = TuuhSoyolPoint.objects.using('postgis_db').filter(pk=form_datas['durgal_id']).update(
                             tuuh_soyl=tuuhsoyl.id,
-                            latlong=latlong, utm=utm, dursgal=dursgal,
+                            latlong=latlong, dursgal=dursgal,
                             dursgal2=dursgal2, descriptio=dursgal2,
                             type1=form_datas['torol_zuil_torol_zuil_tree'],
                             type2=form_datas['torol_zuil_torol_zuil_tree2'],
@@ -248,7 +248,6 @@ def dursgaltGazarUpdate(request, payload):
                             other1=other1,
                             ndd=ndd, nmm=nmm,
                             nss=nss, edd=edd, emm=emm , ess=ess, x=x, y=y,
-                            utm_zone= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm'],
                             utm_x= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx'],
                             alt=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
                             utm_y= form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'],
@@ -324,7 +323,7 @@ def dursgaltGazarCreate(request, payload):
     emm = int((y - edd) * 60)
     ess = int((((y - edd) * 60) - emm) * 60)
 
-    utm = form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm']  + ' N' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx']) + ' E' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'])
+    # utm = form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm']  + ' N' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx']) + ' E' + str(form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'])
     latlong = 'N' + str(ndd) + ' ' + str(nmm) + ' ' + str(nss)
 
     hashaa = form_datas_values['dgh_hashaa_baigaa_eseh_hashaa']
@@ -336,7 +335,7 @@ def dursgaltGazarCreate(request, payload):
     protection_irgen = form_datas_values['dg_ezen_dursgalt_gazar_ezen']
     tuuhsoyolpoint = TuuhSoyolPoint.objects.using('postgis_db').create(
                             tuuh_soyl=tuuhsoyl.id,
-                            latlong=latlong, utm=utm, dursgal=dursgal,
+                            latlong=latlong, dursgal=dursgal,
                             dursgal2=dursgal2, descriptio=dursgal2,
                             type1=form_datas['torol_zuil_torol_zuil_tree'],
                             type2=form_datas['torol_zuil_torol_zuil_tree2'],
@@ -363,7 +362,6 @@ def dursgaltGazarCreate(request, payload):
                             other1=other1,
                             ndd=ndd, nmm=nmm,
                             nss=nss, edd=edd, emm=emm , ess=ess, x=x, y=y,
-                            utm_zone= form_datas_values['torol_zuil_dursgalt_gazriin_coordinatutm'],
                             utm_x=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatx'],
                             utm_y=form_datas_values['torol_zuil_dursgalt_gazriin_coordinaty'],
                             alt=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
@@ -938,8 +936,11 @@ def hureeUpdate(request, payload):
 def hureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
-    tuuhsoyl = get_object_or_404(TuuhSoyolHuree, id=ayul_id, tuuh_soyl=tuuhen_ov)
-    tuuhsoyl.delete()
+    tuuhsoyl = TuuhSoyolHuree.objects.using('postgis_db').filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
+    if tuuhsoyl:
+        tuuhsoyl.delete()
+    else:
+        return JsonResponse({'success': False})
     return JsonResponse({'success': True})
 
 
@@ -1012,10 +1013,12 @@ def ayulHureeUpdate(request, payload):
 def ayulHureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
-    tuuhsoyl = get_object_or_404(TuuhSoyolAyuulHuree, id=ayul_id, tuuh_soyl=tuuhen_ov)
-    tuuhsoyl.delete()
+    tuuhsoyl = TuuhSoyolAyuulHuree.objects.using('postgis_db').filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
+    if tuuhsoyl:
+        tuuhsoyl.delete()
+    else:
+        return JsonResponse({'success': False})
     return JsonResponse({'success': True})
-
 
     
 @require_POST

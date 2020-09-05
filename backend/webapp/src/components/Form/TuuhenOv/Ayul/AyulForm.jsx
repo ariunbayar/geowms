@@ -13,6 +13,7 @@ export class AyulForm extends Component {
             ayul_data: [],
             x: 0,
             y: 0,
+            save_is_error: false,
             handle_save_succes_huree: false,
         }
 
@@ -30,6 +31,17 @@ export class AyulForm extends Component {
     componentDidMount() {
         this.hureeData()
     }
+
+
+    componentDidUpdate(prevProps, prevState){
+        if(prevProps.x !== this.props.x)
+        {
+            const { x, y } = this.props
+            this.setState({ x, y })
+        }
+    }
+
+
 
     hureeData(){
         service.ayulAll(this.props.dursgalt_id).then(({ayul_data}) => {
@@ -52,14 +64,20 @@ export class AyulForm extends Component {
         this.setState({handle_save_succes_huree:true})
         const dursgalt_id = this.props.dursgalt_id
         const {x, y} = this.state
-        service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
-            if (success) {
-                setTimeout(() => {
-                    this.setState({handle_save_succes_huree:false})
-                    this.hureeData()
-                }, 1000)
-            }
-        })
+        if(x == 0 || y==0){
+            this.setState({save_is_error:true, handle_save_succes_huree: false})
+        }
+        else{
+            service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
+                if (success) {
+                    setTimeout(() => {
+                        this.setState({handle_save_succes_huree:false, save_is_error:false})
+                        this.hureeData()
+                    }, 1000)
+                }
+            })
+        }
+
     }
 
     render() {
@@ -118,6 +136,8 @@ export class AyulForm extends Component {
                                     :
                                     <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
                                 }
+                                <br></br>
+                                {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
                             </td>
                         </tr>
 

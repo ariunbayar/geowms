@@ -50,10 +50,10 @@ function about(id) {
     return fetch(`${prefix}/about/`, opts).then(handleResponse)
 }
 
-function update(form_datas) {
+function update(form_datas, aimagname, sumname) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({form_datas}),
+        body: JSON.stringify({form_datas, aimagname, sumname}),
     }
     return fetch(`${prefix}/update/`, opts).then(handleResponse)
 }
@@ -66,10 +66,10 @@ function hureeCount(id, action, tuuh_id) {
     return fetch(`${prefix}/huree-count/`, opts).then(handleResponse)
 }
 
-function create(form_datas) {
+function create(form_datas, aimagname, sumname) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({form_datas}),
+        body: JSON.stringify({form_datas, aimagname, sumname}),
     }
     return fetch(`${prefix}/create/`, opts).then(handleResponse)
 }

@@ -4,6 +4,7 @@ import {NavLink} from "react-router-dom"
 import {service} from '../service'
 import {HureeForm} from './Huree/HureeForm'
 import {AyulForm} from './Ayul/AyulForm'
+import BundleMap from '../../map/BundleMap'
 
 export class AddForm extends Component {
 
@@ -15,12 +16,20 @@ export class AddForm extends Component {
             ayul_data: [],
             handle_save_succes_ayul: false,
             huree_len: 0,
+            x: '',
+            y: '',
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.hureeTooShirheg = this.hureeTooShirheg.bind(this)
+        this.handleXY = this.handleXY.bind(this)
+    }
+
+    handleXY(values, info){
+        console.log(values)
+        this.setState({x:values[0], y:values[1]})
     }
 
     handleInput(field, e) {
@@ -64,11 +73,15 @@ export class AddForm extends Component {
         const huree_components = []
         for(var i=1; i<=huree_len; i++)
         {
-            huree_components.push(<HureeForm dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i}></HureeForm>)
+            huree_components.push(<HureeForm dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y}></HureeForm>)
         }
         return (
             <div  className="container my-4">
                 <div className="row">
+                    <BundleMap
+                        handleXY={this.handleXY}
+                        coordinatCheck={true}
+                    />
                     <div className="col-md-12">
                         <div className="text-right">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -102,7 +115,6 @@ export class AddForm extends Component {
                                         values={values}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
-                                        
                                     />
                                 )}
                             </tbody>
@@ -112,6 +124,8 @@ export class AddForm extends Component {
                         {huree_components}
                         <AyulForm 
                             dursgalt_id={dursgalt_id}
+                            x={this.state.x}
+                            y={this.state.y}
                         >
                         </AyulForm>
                          

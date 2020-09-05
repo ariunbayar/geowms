@@ -92,14 +92,8 @@ export class Forms extends Component {
         const id = this.props.match.params.id
 
         if(id){
-            alert("create")
-
             const form_datas = this.state.values
-            console.log(form_datas)
-            form_datas.push(this.state.aimagname)
-            form_datas.push(this.state.sumname)
-            console.log(form_datas)
-            service.update(form_datas).then(({success}) => {
+            service.update(form_datas, this.state.aimagname, this.state.sumname).then(({success}) => {
                 if (success) {
                     setTimeout(() => {
                         setStatus('saved')
@@ -109,12 +103,8 @@ export class Forms extends Component {
             })
         }
         else{
-            alert("create")
             const form_datas = this.state.values
-            form_datas.push({'aimagname': this.state.aimagname})
-            form_datas.push({'sumname':this.state.sumname})
-            console.log(form_datas)
-            service.create(form_datas).then(({success}) => {
+            service.create(form_datas,  this.state.aimagname, this.state.sumname).then(({success}) => {
                 if (success) {
                     setTimeout(() => {
                         setStatus('saved')
@@ -153,7 +143,7 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                     <BundleMap handleXY={this.handleXY}/>
+                     <BundleMap handleXY={this.handleXY} coordinatCheck={false} />
                     <div >
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>

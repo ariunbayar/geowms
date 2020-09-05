@@ -14,7 +14,7 @@ export default class HureeFormTable extends Component {
             is_modal_delete_open: false,
             disable: false,
             save_is_load: false,
-
+            save_is_error: false,
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -65,13 +65,18 @@ export default class HureeFormTable extends Component {
             this.setState({save_is_load: true})
             const tuuhen_ov = this.props.tuuhen_ov
             const { x, y, id} = this.state
-            service.hureeUpdate(tuuhen_ov,  x, y, id).then(({success}) => {
-                if (success) {
-                    setTimeout(() => {
-                        this.setState({disable: false, save_is_load: false})
-                    }, 1000)
-                }
-            })
+            if(x == 0 || y==0){
+                this.setState({save_is_error:true, save_is_load: false})
+            }
+            else{
+                service.hureeUpdate(tuuhen_ov,  x, y, id).then(({success}) => {
+                    if (success) {
+                        setTimeout(() => {
+                            this.setState({disable: false, save_is_load: false, save_is_error:false})
+                        }, 1000)
+                    }
+                })
+            }
         }
         else
         {
@@ -121,6 +126,8 @@ export default class HureeFormTable extends Component {
                     </a>
 
                     }
+                    <br></br>
+                    {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
                 </td>
                 <td>
                     <a onClick={this.handleModalDeleteOpen}>

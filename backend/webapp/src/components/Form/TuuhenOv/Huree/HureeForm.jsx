@@ -14,6 +14,7 @@ export class HureeForm extends Component {
             x: 0,
             y: 0,
             handle_save_succes_huree: false,
+            save_is_error: false,
         }
 
         this.handleRemove = this.handleRemove.bind(this)
@@ -31,6 +32,14 @@ export class HureeForm extends Component {
         this.hureeData()
     }
 
+    componentDidUpdate(prevProps, prevState){
+        if(prevProps.x !== this.props.x)
+        {
+            const { x, y } = this.props
+            this.setState({ x, y })
+        }
+    }
+
     hureeData(){
         service.hureeAll(this.props.dursgalt_id, this.props.tuuh_soyl_huree_id).then(({huree_data}) => {
                 this.setState({huree_data})
@@ -40,6 +49,7 @@ export class HureeForm extends Component {
     handleRemove(id) {
         const tuuhen_ov = this.props.dursgalt_id
         const ayul_id = id
+        console.log(tuuhen_ov, ayul_id)
         service.hureeDelete(ayul_id, tuuhen_ov).then(({success}) => {
             if(success){
                 this.hureeData()
@@ -53,14 +63,19 @@ export class HureeForm extends Component {
         const dursgalt_id = this.props.dursgalt_id
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         const {x, y} = this.state
-        service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
-            if (success) {
-                setTimeout(() => {
-                    this.setState({handle_save_succes_huree:false})
-                    this.hureeData()
-                }, 1000)
-            }
-        })
+        if(x == 0 || y==0){
+            this.setState({save_is_error:true, handle_save_succes_huree: false})
+        }
+        else{
+            service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
+                if (success) {
+                    setTimeout(() => {
+                        this.setState({handle_save_succes_huree:false, save_is_error:false})
+                        this.hureeData()
+                    }, 1000)
+                }
+            })
+        }
     }
 
     render() {
@@ -117,7 +132,9 @@ export class HureeForm extends Component {
                                         </a>
                                     :
                                     <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
-                                }
+                                }   
+                                <br></br>
+                                {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
                             </td>
                         </tr>
 
