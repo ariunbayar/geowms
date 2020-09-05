@@ -4,7 +4,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import {History} from './history'
 
 import {Info} from './information/info'
-import { List } from './TsegUstsan/List';
+import { DanForm } from './TsegUstsan/DanForm';
 
 export class App extends Component {
 
@@ -38,7 +38,7 @@ export class App extends Component {
                         <Switch>
                             <Route path="/profile/all/" component={History}/>
                             <Route path="/profile/api/" component={Info}/>
-                            <Route path="/profile/tseg-ustsan/" component={List}/>
+                            <Route path="/profile/tseg-ustsan/" component={DanForm}/>
                         </Switch>
                     </div>
                 </div>

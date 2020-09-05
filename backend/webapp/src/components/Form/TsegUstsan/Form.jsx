@@ -395,11 +395,11 @@ export class FormTseg extends Component {
                                                 (errors.evdersen_baidal && 
                                                     touched.evdersen_baidal ? ' is-invalid' : '')} 
                                         >
-                                            <option>--- Сонгоно уу ---</option>
-                                            <option>Эвдэрсэн</option>
-                                            <option>Төв гэмтсэн</option>
-                                            <option>Хазайсан</option>
-                                            <option>Дарагдсан</option>
+                                            <option value="">--- Сонгоно уу ---</option>
+                                            <option value="Эвдэрсэн">Эвдэрсэн</option>
+                                            <option value="Төв гэмтсэн">Төв гэмтсэн</option>
+                                            <option value="Хазайсан">Хазайсан</option>
+                                            <option value="Дарагдсан">Дарагдсан</option>
                                         </Field>
                                         <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
                                     </td>
@@ -624,11 +624,11 @@ export class FormTseg extends Component {
                                             id="sergeeh_sanal"
                                             type="textarea"
                                         >
-                                            <option>--- Сонгоно уу ---</option>
-                                            <option>Шаардлагагүй</option>
-                                            <option>Сэргээх</option>
-                                            <option>Шилжүүлэх</option>
-                                            <option>Шинээр байгуулах</option>
+                                            <option value="">--- Сонгоно уу ---</option>
+                                            <option value="Шаардлагагүй">Шаардлагагүй</option>
+                                            <option value="Сэргээх">Сэргээх</option>
+                                            <option value="Шилжүүлэх">Шилжүүлэх</option>
+                                            <option value="Шинээр байгуулах">Шинээр байгуулах</option>
                                         </Field>
                                         <ErrorMessage name="sergeeh_sanal" component="div" className="invalid-feedback"/>
                                     </td>

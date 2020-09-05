@@ -6,13 +6,12 @@ const prefix = '/profile/api/tseg-ustsan'
 export const service = {
     tsegustsanEdit,
     searchTseg,
-    tsegUstsanAll,
+    tsegUstsan,
 }
 
-function tsegustsanEdit(id) {
+function tsegustsanEdit() {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/edit/`, opts).then(handleResponse)
 }
@@ -25,9 +24,10 @@ function searchTseg(query){
     return fetch(`${prefix}/search/`, opts).then(handleResponse)
 }
 
-function tsegUstsanAll(id) {
+function tsegUstsan(form_datas) {
     const opts = {
-        ...getGetOptions(id),
+        ...getPostOptions(),
+        body: form_datas,
     }
-    return fetch(`${prefix}/list/`, opts).then(handleResponse)
+    return fetch(`${prefix}/add/`, opts).then(handleResponse)
 }

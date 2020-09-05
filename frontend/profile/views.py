@@ -6,7 +6,11 @@ from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from backend.payment.models import Payment
+from geoportal_app.models import User
 from backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint
+from main.utils import resize_b64_to_sizes
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 
 @require_GET
 @login_required
@@ -62,57 +66,6 @@ def all(request, payload):
 @require_POST
 @ajax_required
 @login_required
-def tsegUstsanEdit(request, payload):
-    print("haha")
-    form_data = []
-    img_holoos_url = ''
-    img_oiroos_url = ''
-    img_baruun_url = ''
-    img_zuun_url = ''
-    img_omno_url = ''
-    img_hoino_url = ''
-    for tseg in TsegUstsan.objects.filter(pk = payload.get('id')):
-        if tseg.img_holoos:
-            img_holoos_url = tseg.img_holoos.url
-        if tseg.img_holoos:
-            img_holoos_url = tseg.img_holoos.url
-        if tseg.img_oiroos:
-            img_oiroos_url = tseg.img_oiroos.url
-        if tseg.img_baruun:
-            img_baruun_url = tseg.img_baruun.url
-        if tseg.img_zuun:
-            img_zuun_url = tseg.img_zuun.url
-        if tseg.img_omno:
-            img_omno_url = tseg.img_omno.url
-        if tseg.img_hoino:
-            img_hoino_url = tseg.img_hoino.url
-        form_data.append({
-            'tseg_id': tseg.tseg_id,
-            'email': tseg.email,
-            'name': tseg.name,
-            'alban_tushaal': tseg.alban_tushaal,
-            'utas': tseg.phone,
-            'oiroltsoo_bairlal': tseg.oiroltsoo_bairlal,
-            'evdersen_baidal': tseg.evdersen_baidal,
-            'nohtsol_baidal': tseg.shaltgaan,
-            'sergeeh_sanal': tseg.sergeeh_sanal,
-            'gps_hemjilt': tseg.gps_hemjilt,
-            'img_holoos': img_holoos_url,
-            'img_oiroos': img_oiroos_url,
-            'img_baruun': img_baruun_url,
-            'img_zuun': img_zuun_url,
-            'img_omno': img_omno_url,
-            'img_hoino': img_hoino_url,
-        })
-    rsp ={
-        'form_data': form_data
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required
 def tsegSearch(request, payload):
     query = payload.get('query')
     items = []
@@ -133,26 +86,70 @@ def tsegSearch(request, payload):
         return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required
-def tsegList(request):
-    print("hi")
-    tseg_ustsan = []
-    for tseg in TsegUstsan.objects.all():
-        tseg_ustsan.append({
-            'id': tseg.id,
-            'tseg_id': tseg.tseg_id,
-            'email': tseg.email,
-            'name': tseg.name,
-            'alban_tushaal': tseg.alban_tushaal,
-            'utas': tseg.phone,
-            'oiroltsoo_bairlal': tseg.oiroltsoo_bairlal,
-            'evdersen_baidal': tseg.evdersen_baidal,
-            'nohtsol_baidal': tseg.shaltgaan,
-        })
-    return JsonResponse({
-        'tseg_ustsan_all': tseg_ustsan,
-        'success': True
-    })
+def tsegAdd(request):
+    tseg_dugaar = request.POST.get('tsegiin_dugaar')
 
+    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=tseg_dugaar).first()
+    if mpoint.point_id != tseg_dugaar:
+        return JsonResponse({'success': False})
+
+    oiroltsoo_bairlal = request.POST.get('oiroltsoo_bairlal')
+    evdersen_baidal = request.POST.get('evdersen_baidal')
+    shaltgaan = request.POST.get('nohtsol_baidal')
+    sergeeh_sanal = request.POST.get('sergeeh_sanal')
+    TorF = bool(request.POST.get('hemjilt_hiih_bolomj'))
+    img_holoos = request.POST.get('zurag_hol')
+    img_oiroos = request.POST.get('zurag_oir')
+    img_baruun = request.POST.get('zurag_baruun')
+    img_zuun = request.POST.get('zurag_zuun')
+    img_hoino = request.POST.get('zurag_hoid')
+    img_omno = request.POST.get('zurag_omno')
+
+    if img_holoos:
+        [image_x2] = resize_b64_to_sizes(img_holoos, [(300, 300)])
+        img_holoos = SimpleUploadedFile('img.png', image_x2)
+    if img_oiroos:
+        [image_x2] = resize_b64_to_sizes(img_oiroos, [(300, 300)])
+        img_oiroos = SimpleUploadedFile('img.png', image_x2)
+    if img_baruun:
+        [image_x2] = resize_b64_to_sizes(img_baruun, [(300, 300)])
+        img_baruun = SimpleUploadedFile('img.png', image_x2)
+    if img_zuun:
+        [image_x2] = resize_b64_to_sizes(img_zuun, [(300, 300)])
+        img_zuun = SimpleUploadedFile('img.png', image_x2)
+    if img_hoino:
+        [image_x2] = resize_b64_to_sizes(img_hoino, [(300, 300)])
+        img_hoino = SimpleUploadedFile('img.png', image_x2)
+    if img_omno:
+        [image_x2] = resize_b64_to_sizes(img_omno, [(300, 300)])
+        img_omno = SimpleUploadedFile('img.png', image_x2)
+
+    users = User.objects.filter(id=request.user.id)
+    for user in users:
+        email = user.email
+        baiguulla = 'ДАН'
+        alban_tushaal = 'ДАН'
+        phone = ''
+
+    TsegUstsan.objects.create(
+        email=email,
+        name=baiguulla,
+        alban_tushaal=alban_tushaal,
+        phone=phone,
+        img_holoos=img_holoos,
+        img_oiroos=img_oiroos,
+        img_baruun=img_baruun,
+        img_zuun=img_zuun,
+        img_hoino=img_hoino,
+        img_omno=img_omno,
+        tseg_id=tseg_dugaar,
+        oiroltsoo_bairlal=oiroltsoo_bairlal,
+        evdersen_baidal=evdersen_baidal,
+        shaltgaan=shaltgaan,
+        sergeeh_sanal=sergeeh_sanal,
+        gps_hemjilt=TorF,
+    )
+    return JsonResponse({'success': True})
