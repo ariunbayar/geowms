@@ -32,6 +32,7 @@ export const service = {
     updateTseg,
     searchTseg,
     checkDan,
+    tsegPersonalSuccess,
 }
 function all() {
     const requestOptions = {
@@ -273,4 +274,12 @@ function checkDan(){
         body: JSON.stringify({}),
     }
     return fetch(`${prefix}/check-dan/`, opts).then(handleResponse)
+}
+
+function tsegPersonalSuccess(point_type, objectid){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({point_type, objectid}),
+    }
+    return fetch(`${prefix}/tseg-personal/batalgaajuulah/`, opts).then(handleResponse)
 }

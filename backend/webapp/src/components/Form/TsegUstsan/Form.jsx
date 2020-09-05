@@ -7,7 +7,7 @@ export class FormTseg extends Component {
 
     constructor(props) {
         super(props)
-
+        this._isMounted = false;
         this.datalist = []
         this.error_msg = []
         this.state = {
@@ -61,15 +61,20 @@ export class FormTseg extends Component {
     }
 
     componentDidMount(){
+        this._isMounted = true;
         const id = this.props.match.params.id
         if(id){
-            this.setState({id})
+            this._isMounted && this.setState({id})
         }
-        this.handleGetAll(id)
+        this._isMounted && this.handleGetAll(id)
 
         setTimeout(() => {
-            this.setState({ showBox: false })
+            this._isMounted && this.setState({ showBox: false })
         }, 1500);
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     handleSearchWithTseg(field, e) {
@@ -113,13 +118,13 @@ export class FormTseg extends Component {
         }
     }
 
-    handleGetAll(id){
+    async handleGetAll(id){
         if(id){
-            this.setState({id:id})
+            this._isMounted &&  this.setState({id:id})
             service.tsegustsanEdit(id).then(({ form_data }) => {
                 if (form_data) {
                     form_data.map((tseg) => {
-                        this.setState({
+                        this._isMounted && this.setState({
                             values:{
                                 email:tseg.email,
                                 baiguulaga:tseg.name,

@@ -1064,7 +1064,7 @@ def tsegPersonalSearch(request, payload):
 
 @require_POST
 @ajax_required
-def checkDan(request, payload):
+def checkDan(request):
     user_id = request.user.id
     users = get_object_or_404(User,id=user_id)
     isDan = users.is_sso
@@ -1072,3 +1072,35 @@ def checkDan(request, payload):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
+
+
+@require_POST
+@ajax_required
+def tsegPersonalSuccess(request, payload):
+    try:
+        point_type = int(payload.get('point_type'))
+        objectid = payload.get('objectid')
+        mpoint = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
+
+        if mpoint.point_class == point_type:
+            rsp = {
+                'success': True, 
+                'msg': "Төлөв адилхан тул боломжгүй",
+            }
+            return JsonResponse(rsp)
+        
+        mpoint.update(
+            point_class=point_type
+        )
+        rsp = {
+            'success': True, 
+            'msg': "Амжилттай боллоо",
+        }
+        return JsonResponse(rsp)
+
+    except Exception:
+        rsp = {
+            'success': False, 
+            'msg': "Амжилтгүй боллоо",
+        }
+        return JsonResponse(rsp)
