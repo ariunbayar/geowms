@@ -4,7 +4,7 @@ import {service} from '../service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaDan} from './validationSchema'
 export class DanForm extends Component {
-    
+
     constructor(props) {
         super(props)
         this._isMounted = false;
@@ -59,7 +59,6 @@ export class DanForm extends Component {
 
     componentDidMount(){
         this._isMounted = true;
-        
         const id = this.props.match.params.id
         if(id){
             this._isMounted && this.setState({id})
@@ -154,6 +153,7 @@ export class DanForm extends Component {
 
     checkUser(){
         service.checkDan().then(success => {
+            console.log("is_dan", success)
             this.setState({ is_dan: success.success })
         })
     }

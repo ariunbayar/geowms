@@ -55,16 +55,24 @@ export class FormList extends Component {
         })
     }
 
-    handleSuccess(point_type, objectid) {
-        service.tsegPersonalSuccess(point_type, objectid).then(({success, msg}) => {
+    handleSuccess(point_type, objectid, point_class) {
+        service.tsegPersonalSuccess(point_type, objectid, point_class).then(({success, msg}) => {
             if(success){
                 this.paginate(1, this.state.searchQuery)
                 this.setState({ error: !success, error_msg: msg })
+                setTimeout(() => {
+                    this.setState({ error: false, error_msg: [] })
+                }, 1500);
             }
-            else{
+            else
+            {
                 this.setState({ error: !success, error_msg: msg })
-
+                setTimeout(() => {
+                    this.setState({ error: false, error_msg: [] })
+                }, 1500);
+                
             }
+            
         })
     }
 
@@ -131,7 +139,7 @@ export class FormList extends Component {
                                         values={values}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
-                                        handleSuccess = {() => this.handleSuccess(values.point_type, values.objectid)}
+                                        handleSuccess = {() => this.handleSuccess(values.point_type, values.objectid, values.point_class)}
                                     />
                                 )}
                             </tbody>

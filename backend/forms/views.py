@@ -1079,17 +1079,18 @@ def checkDan(request):
 def tsegPersonalSuccess(request, payload):
     try:
         point_type = int(payload.get('point_type'))
-        objectid = payload.get('objectid')
-        mpoint = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
-
-        if mpoint.point_class == point_type:
+        objectid = int(payload.get('objectid'))
+        point_class = int(payload.get('point_class'))
+        mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
+        
+        if point_class == point_type:
             rsp = {
-                'success': True, 
+                'success': False, 
                 'msg': "Төлөв адилхан тул боломжгүй",
             }
             return JsonResponse(rsp)
-        
-        mpoint.update(
+    
+        mpoints.update(
             point_class=point_type
         )
         rsp = {

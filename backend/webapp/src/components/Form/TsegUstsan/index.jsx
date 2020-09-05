@@ -20,7 +20,9 @@ export class TsegUstsan extends Component {
     }
 
     checkUser(){
+        console.log("haha")
         service.checkDan().then(success => {
+            console.log("is_dan", success)
             this.setState({ is_dan: success.success })
         })
     }
