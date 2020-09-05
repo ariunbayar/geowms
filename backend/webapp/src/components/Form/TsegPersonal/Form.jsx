@@ -15,11 +15,7 @@ export class Forms extends Component {
             values:{
                 tesgiin_ner: '',
                 toviin_dugaar: '',
-             
                 suljeenii_torol: '',
-                
-               
-               
                 sudalga_or_shine: '',
                 hors_shinj_baidal: '',
                 date: '',
@@ -29,7 +25,14 @@ export class Forms extends Component {
                 center_typ: '',
                 pid: '',
             },
-
+            BA:0,
+            BB:0,
+            BC:0,
+            LA:0,
+            LB:0,
+            LC:0,
+            zone: '',
+            cc:'',
             utmx: '',
             utmy: '',
             latlongx: "",
@@ -37,7 +40,6 @@ export class Forms extends Component {
             trapetsiin_dugaar: '',
             sum_name: '',
             barishil_tuhai: '',
-
             real_sum: '',
             aimag_name: '',
             sum_ners: '',
@@ -64,6 +66,7 @@ export class Forms extends Component {
         this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
+        this.handleOnchange = this.handleOnchange.bind(this)
     }
 
     componentDidMount(){
@@ -74,12 +77,27 @@ export class Forms extends Component {
         }
     }
 
+    handleOnchange(e){
+        this.setState({
+            [e.target.name]:e.target.value,
+            //sum:`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${e.target.value}`   
+        })
+    }
+
     handleXY(values, info){
         info.map(e=>this.setState({
             utmx:e.E,
             utmy:e.N,
             trapetsiin_dugaar: e.vseg,
             sum_name:e.sum,
+            cc:e.cc,
+            zone:e.zone,
+            BA:e.BA,
+            BB:e.BB,
+            BC:e.BC,
+            LA:e.LA,
+            LB:e.LB,
+            LC:e.LC
         }))
         this.setState({
             latlongy:values[0],
@@ -100,6 +118,7 @@ export class Forms extends Component {
     }
 
     onChangeHandler(e, name){
+        console.log("name", name)
         const file = e.target.files[0]
         var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[a-z A-Z 0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
         this.setState({[name+'_error']: false, [name]: file })
@@ -108,7 +127,7 @@ export class Forms extends Component {
             if(re.test(file['name']) )
             {
                 
-                this.setState({[name+'_error']: false, [name]: data })
+                this.setState({[name+'_error']: false, [name]: name })
             }
             else{
                 this.setState({[name+'_error']: true})
@@ -120,11 +139,12 @@ export class Forms extends Component {
     }
 
     handleSubmit(values, { setStatus, setSubmitting }) {
-
         setStatus('checking')
         setSubmitting(true)
         const form_datas = new FormData() 
         this.setState({values})
+        const latlongx = ((this.state.BA+(this.state.BB/60))+((this.state.BC/3600)*60))
+        const latlongy = ((this.state.LA+(this.state.LB/60))+((this.state.LC/3600)*60))
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
         form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
@@ -138,8 +158,8 @@ export class Forms extends Component {
         form_datas.append('sum_name', this.state.values.sum_name)
         form_datas.append('utmx', this.state.values.utmx)
         form_datas.append('utmy', this.state.values.utmy)
-        form_datas.append('latlongx', this.state.values.latlongx)
-        form_datas.append('latlongy', this.state.values.latlongy)
+        form_datas.append('latlongx', latlongx)
+        form_datas.append('latlongy', latlongy)
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
         form_datas.append('barishil_tuhai', this.state.values.barishil_tuhai)
@@ -164,7 +184,7 @@ export class Forms extends Component {
                 setSubmitting(false)
             }
 
-            if(name){
+            if( name){
                 alert('Энэхүү цэг мэдээллийн санд байна.')
                 this.setState({name_error:true})
             }
@@ -184,6 +204,7 @@ export class Forms extends Component {
     }
 
     tsegUpdate(id){
+
         service.updateTseg(id).then(({tseg_display}) =>{
             if(tseg_display){
                 tseg_display.map((item, idx) =>
@@ -228,9 +249,9 @@ export class Forms extends Component {
     }
 
     render() {
+        console.log("")
         return (
         <Formik
-            enableReinitialize
             initialValues={this.state.values}
             validationSchema={validationSchema}
             onSubmit={this.handleSubmit}
@@ -272,6 +293,7 @@ export class Forms extends Component {
                                             name='tesgiin_ner'
                                             id="id_tesgiin_ner"
                                             type="text"
+                                            defaultValue={this.state.values.tesgiin_ner}
                                         />
                                         <ErrorMessage name="tesgiin_ner" component="div" className="invalid-feedback"/>
                                             {this.state.name_error ? <a className='text-danger'>Давхцаж байна.</a> : null}
@@ -299,7 +321,8 @@ export class Forms extends Component {
                                             id="id_trapetsiin_dugaar"
                                             disabled={true}
                                             type="text"
-                                            value={this.state.trapetsiin_dugaar}
+                                            value={this.state.trapetsiin_dugaar }
+                                            value={`${this.state.trapetsiin_dugaar}` + '- ' + `${this.state.zone}` + ' -' + `${this.state.cc}`}
                                         />
                                        
                                     </td>
@@ -354,58 +377,62 @@ export class Forms extends Component {
                                 <tr>
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /UTM/</th>
-                                    <th colSpan="2" style={{textAlign:'center'}}>
-                                    UTM-E
-                                    </th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>
-                                    UTM-N
-                                    </th>
                                 </tr>
                                 <tr>
-                                    <td colSpan="2">
-                                        <input
-                                            className={'form-control '}
-                                            name='utmx'
-                                            id="id_utmx"
-                                            disabled={true}
-                                            type="number"
-                                            value={this.state.utmx}
-                                        />
-                                    </td>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <input
-                                            className={'form-control '}
-                                            name='utmy'
-                                            id="id_utmy"
-                                            disabled={true}
-                                            type="number"
-                                            value={this.state.utmy}
-                                        />
-                                    </td>
+                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг -B</th>
+                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг -L</th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="2" style={{textAlign:'center'}}>Longitude -x</th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Latitude-y</th>
-                                </tr>
-                                <tr>
-                                    <td colSpan="2">
+                                    <td colSpan="2" className="pl-3">
                                         <input
-                                            className={'form-control ' }
-                                            name='latlongx'
-                                            id="id_latlongx"
-                                            disabled={true}
+                                            className={'form-control col-3 float-left m-2' }
+                                            name='LongitudeA'
+                                            id="LongitudeA"
                                             type="number"
-                                            value ={this.state.latlongx}
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.BA}
+                                        />
+                                        <input
+                                            className={'form-control col-2 float-left m-2'}
+                                            name='LongitudeB'
+                                            id="LongitudeB"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.BB}
+                                        />
+                                        <input
+                                            className={'form-control col-4 float-left m-2' }
+                                            name='LongitudeC'
+                                            id="LongitudeC"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.BC}
                                         />
                                     </td>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <input
-                                            className={'form-control ' }
-                                            name='latlongy'
-                                            disabled={true}
-                                            id="id_latlongy"
+                                    <td colSpan="2" scope="rowgroup" className="pl-5">
+                                    <input
+                                            className={'form-control col-3 float-left m-2' }
+                                            name='LatitudeA'
+                                            id="LatitudeA"
                                             type="number"
-                                            value ={this.state.latlongy}
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.LA}
+                                        />
+                                        <input
+                                            className={'form-control col-2 float-left m-2'}
+                                            name='LatitudeB'
+                                            id="LatitudeB"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.LB}
+                                        />
+                                        <input
+                                            className={'form-control col-4 float-left m-2' }
+                                            name='LatitudeC'
+                                            id="LatitudeC"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.LC}
                                         />
                                     </td>
                                 </tr>
@@ -490,6 +517,7 @@ export class Forms extends Component {
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
+                                            onChange = {(e) => this.handleOnchange(e)}
                                             value={`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${this.state.barishil_tuhai}`}
                                         />
 

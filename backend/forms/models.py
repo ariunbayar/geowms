@@ -150,8 +150,8 @@ class TsegUstsan(models.Model):
 
 class Mpoint(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
-    objectid = models.BigIntegerField()
-    point_id =  models.CharField(max_length=10)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
     point_name = models.CharField(max_length=50)
     pid = models.CharField(max_length=20)
     point_class = models.BigIntegerField()
