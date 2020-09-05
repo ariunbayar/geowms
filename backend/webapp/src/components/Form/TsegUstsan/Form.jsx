@@ -79,20 +79,22 @@ export class FormTseg extends Component {
 
     handleSearchWithTseg(field, e) {
         this.setState({ [field]: e.target.value })
-        if(e.target.value == ''){
+        if(e.target.value.length == 0){
             this.error_msg = []
             this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
             if(this.error_msg.length > 0){
                 this.setState({ checkError: this.state.error })
             }   
         }
-        if(e.target.value.length > 2){
+        else{
             this.error_msg = []
-            service.searchTseg(e.target.value).then(items => {
-                
-                if(items.items !== false){
-                    this.setState({items: items.items, tseg_dugaar_error:false , checkError:[] })
-                    this.optionVal(items.items)
+        }
+        if(e.target.value.length > 0){
+            this.error_msg = []
+            service.searchTseg(e.target.value).then(({items}) => {
+                if(items !== false){
+                    this.setState({items, tseg_dugaar_error:false , checkError:[] })
+                    this.optionVal(items)
                 }
                 else{
                     this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
@@ -120,7 +122,7 @@ export class FormTseg extends Component {
 
     async handleGetAll(id){
         if(id){
-            this._isMounted &&  this.setState({id:id})
+            this._isMounted &&  this.setState({id})
             service.tsegustsanEdit(id).then(({ form_data }) => {
                 if (form_data) {
                     form_data.map((tseg) => {

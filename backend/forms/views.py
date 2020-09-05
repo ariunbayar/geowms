@@ -1045,11 +1045,11 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
-    mpoint = Mpoint.objects.using('postgis_db').filter(objectid__icontains=query)
+    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)
     if(mpoint):
         for tseg in mpoint:
             items.append({
-                "tseg": tseg.objectid
+                "tseg": tseg.point_id
             })
         rsp = {
             'items': items
