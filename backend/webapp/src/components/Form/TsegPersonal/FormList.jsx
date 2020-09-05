@@ -16,6 +16,8 @@ export class FormList extends Component {
             PerPage:50,
             searchQuery: 'g109',
             query_min: false,
+            error: false,
+            error_msg: [],
         }
 
         this.paginate = this.paginate.bind(this)
@@ -23,7 +25,6 @@ export class FormList extends Component {
     }
 
     paginate (page, query) {
-       
         const perpage = this.state.PerPage
         this.setState({ currentPage: page })
             return service
@@ -53,12 +54,45 @@ export class FormList extends Component {
         })
     }
 
+    handleSuccess(point_type, objectid, point_class) {
+        service.tsegPersonalSuccess(point_type, objectid, point_class).then(({success, msg}) => {
+            if(success){
+                this.paginate(1, this.state.searchQuery)
+                this.setState({ error: !success, error_msg: msg })
+                setTimeout(() => {
+                    this.setState({ error: false, error_msg: [] })
+                }, 1500);
+            }
+            else
+            {
+                this.setState({ error: !success, error_msg: msg })
+                setTimeout(() => {
+                    this.setState({ error: false, error_msg: [] })
+                }, 1500);
+                
+            }
+            
+        })
+    }
+
     render() {
+        const { error, error_msg } = this.state
+        const error_bn = Object.keys(error_msg).length > 0
         return (
             <div  className="container my-4">
                 <div className="row">
-
                     <div className="col-md-12">
+                        {
+                            error && error_bn
+                            ?
+                            <div className="text-left">
+                                <div className="text-danger">{error_msg}</div>
+                            </div>
+                            :
+                            <div className="text-left">
+                                <div className="text-success">{error_msg}</div>
+                            </div>
+                        }
                         <div className="text-right">
                             <NavLink className="btn gp-btn-primary" to={`/back/froms/tseg-personal/add/`}>
                                 Нэмэх
@@ -86,13 +120,12 @@ export class FormList extends Component {
                                     <th scope="col">Полигон дугаар</th>
                                     <th scope="col">Төвийн төрөл</th>
                                     <th scope="col">Цэгийн төрөл</th>
-                                    
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
-
                                     <th scope="col">Геом төрөл</th>
                                     <th scope="col">Засах</th>
                                     <th scope="col">Устгах</th>
+                                    <th scope="col">Баталгаажуулах</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,7 +136,7 @@ export class FormList extends Component {
                                         values={values}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
-                                        
+                                        handleSuccess = {() => this.handleSuccess(values.point_type, values.objectid, values.point_class)}
                                     />
                                 )}
                             </tbody>
