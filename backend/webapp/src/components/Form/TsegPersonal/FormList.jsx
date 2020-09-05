@@ -25,7 +25,6 @@ export class FormList extends Component {
     }
 
     paginate (page, query) {
-       
         const perpage = this.state.PerPage
         this.setState({ currentPage: page })
             return service
@@ -121,10 +120,8 @@ export class FormList extends Component {
                                     <th scope="col">Полигон дугаар</th>
                                     <th scope="col">Төвийн төрөл</th>
                                     <th scope="col">Цэгийн төрөл</th>
-                                    
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
-
                                     <th scope="col">Геом төрөл</th>
                                     <th scope="col">Засах</th>
                                     <th scope="col">Устгах</th>

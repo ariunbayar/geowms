@@ -1082,14 +1082,12 @@ def tsegPersonalSuccess(request, payload):
         objectid = int(payload.get('objectid'))
         point_class = int(payload.get('point_class'))
         mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
-        
         if point_class == point_type:
             rsp = {
                 'success': False, 
                 'msg': "Төлөв адилхан тул боломжгүй",
             }
             return JsonResponse(rsp)
-    
         mpoints.update(
             point_class=point_type
         )
@@ -1098,7 +1096,6 @@ def tsegPersonalSuccess(request, payload):
             'msg': "Амжилттай боллоо",
         }
         return JsonResponse(rsp)
-
     except Exception:
         rsp = {
             'success': False, 
