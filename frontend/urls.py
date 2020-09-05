@@ -54,6 +54,9 @@ urlpatterns = [
     path('profile/api/', include(([
         path('', profile_views.history, name='history'),
         path('all/', profile_views.all, name='all'),
+        path('tseg-ustsan/edit/', profile_views.tsegUstsanEdit, name='tseg-ustsan-edit'),
+        path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
+        path('tseg-ustsan/list/', profile_views.tsegList, name='tseg-list'),
     ], 'profile'))),
 
     re_path('^.*', payment_views.index, name='payment'),
