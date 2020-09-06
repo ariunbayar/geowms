@@ -23,18 +23,6 @@ export const validationSchemaTseg = object().shape({
         .required('Хоосон байна!'),
     torol_zuiltorol_zuil_name: string()
     .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatx: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinaty: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatllx: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatlly: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
     torol_zuil_dursgalt_gazriin_coordinatalt: string()
         .max(50, '50-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),

@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
-import {service} from '../service'
+import {service} from './service'
 import {validationSchemaTseg} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import BundleMap from '../../map/BundleMap'
+import Maps from '../map/Map'
 
 export class DursgaltGazar extends Component {
 
@@ -20,10 +20,6 @@ export class DursgaltGazar extends Component {
                 tuuhin_ov_sum_duureg: '',
                 torol_zuiltorol_zuil_name: '',
                 torol_zuil_dursgalt_gazriin_ner: '',
-                torol_zuil_dursgalt_gazriin_coordinatx: null,
-                torol_zuil_dursgalt_gazriin_coordinaty: null,
-                torol_zuil_dursgalt_gazriin_coordinatllx: null,
-                torol_zuil_dursgalt_gazriin_coordinatlly: null,
                 torol_zuil_dursgalt_gazriin_coordinatalt: null,
                 torol_zuil_todorhoilolt: '',
                 hemjee_talbai: null,
@@ -34,39 +30,41 @@ export class DursgaltGazar extends Component {
                 hemjee_golch: null,
                 hemjee_busad_hemjee: '',
                 hemjee_too_shirheg: null,
-                hemjee_temdeglel: '',
-                dg_ezen_dursgalt_gazar_ezen: 'Үгүй',
-                dg_ezen_temdeglel: '',
-                dgh_angilal: '',
-                dgh_bus_togtooh_shaardlaga: 'Үгүй',
-                dgh_tusgai_hamgaalalt: 'Үгүй',
-                dgh_tusgai_temdeglel: '',
-                dgh_yaaraltai_hamgaalalt:'Үгүй',
-                dgh_yaaraltai_temdeglel: '',
-                dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: 'Үгүй',
+                hemjee_temdeglel: ' ',
+                dg_ezen_dursgalt_gazar_ezen: '',
+                dg_ezen_temdeglel: ' ',
+                dgh_angilal: ' ',
+                dgh_bus_togtooh_shaardlaga: '',
+                dgh_tusgai_hamgaalalt: '',
+                dgh_tusgai_temdeglel: ' ',
+                dgh_yaaraltai_hamgaalalt:'',
+                dgh_yaaraltai_temdeglel: ' ',
+                dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: '',
                 dgh_omchlol_ezemshih_omchlol_sanal_temdeglel: '',
-                dgh_maltan_sudaltan_hamgaalalt: 'Үгүй',
-                dgh_maltan_sudaltan_temdeglel: '',
-                dgh_gemtliin_temdeglel: '',
-                dgh_baigaliin_huchin_zuil_temdeglel: '',
-                dgh_sergeen_zasvarlasan_eseh_hamgaalalt: 'Үгүй',
-                dgh_sergeen_zasvarlasan_eseh_temdeglel: '',
-                dgh_sergeen_zasvarlah_eseh_nenshaardlaga: 'Шаардлагагүй',
-                dgh_sergeen_zasvarlah_eseh_temdeglel: '',
+                dgh_maltan_sudaltan_hamgaalalt: '',
+                dgh_maltan_sudaltan_temdeglel: ' ',
+                dgh_gemtliin_temdeglel: ' ',
+                dgh_baigaliin_huchin_zuil_temdeglel: ' ',
+                dgh_sergeen_zasvarlasan_eseh_hamgaalalt: '',
+                dgh_sergeen_zasvarlasan_eseh_temdeglel: ' ',
+                dgh_sergeen_zasvarlah_eseh_nenshaardlaga: '',
+                dgh_sergeen_zasvarlah_eseh_temdeglel: ' ',
                 dgh_hamgaalaltiin_zereg_oorchloh_sanal: '',
-                dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: '',
-                dgh_hashaa_baigaa_eseh_hashaa: 'Үгүй',
-                dgh_hashaa_baigaa_eseh_temdeglel: '',
-                dgh_saravchtai_eseh_saravch: 'Үгүй',
-                dgh_saravchtai_eseh_temdeglel: '',
-                dgh_hayg_tailbar_eseh_hayg: 'Үгүй',
-                dgh_hayg_tailbar_eseh_temdeglel: '',
-                last_busad_temdeglel: '',
+                dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: ' ',
+                dgh_hashaa_baigaa_eseh_hashaa: '',
+                dgh_hashaa_baigaa_eseh_temdeglel: ' ',
+                dgh_saravchtai_eseh_saravch: '',
+                dgh_saravchtai_eseh_temdeglel: ' ',
+                dgh_hayg_tailbar_eseh_hayg: '',
+                dgh_hayg_tailbar_eseh_temdeglel: ' ',
+                last_busad_temdeglel: ' ',
             },
-
+            torol_zuil_dursgalt_gazriin_coordinatx: null,
+            torol_zuil_dursgalt_gazriin_coordinaty: null,
             torol_zuil_torol_zuil: '',
             torol_zuil_torol_zuil_tree: '',
             torol_zuil_torol_zuil_tree2: '',
+            torol_zuil_torol_zuil_tree2_update: '',
             torol_zuil_torol_zuil_level1: [],
             torol_zuil_torol_zuil_level2: [],
             dgh_gemtliin_all: [],
@@ -115,11 +113,10 @@ export class DursgaltGazar extends Component {
     }
 
     handleXY(values, info){
-        this.setState({values:{torol_zuil_dursgalt_gazriin_coordinatx: values[0], 
-            torol_zuil_dursgalt_gazriin_coordinaty: values[1],
-            torol_zuil_dursgalt_gazriin_coordinatllx:info[0].E, 
-            torol_zuil_dursgalt_gazriin_coordinatlly:info[0].N
-        }})
+        this.setState({
+                torol_zuil_dursgalt_gazriin_coordinatx: values[0], 
+                torol_zuil_dursgalt_gazriin_coordinaty: values[1],
+        })
     }
 
     handleInput(field, e) {
@@ -135,6 +132,45 @@ export class DursgaltGazar extends Component {
         {
             this.baigalCheck(this.state.natural)
         }
+        if(prevState.torol_zuil_torol_zuil !== this.state.torol_zuil_torol_zuil)
+        {
+            this.handleInputSelect('torol_zuil_torol_zuil', this.state.torol_zuil_torol_zuil)
+        }
+        if(prevState.torol_zuil_torol_zuil_tree !== this.state.torol_zuil_torol_zuil_tree)
+        {
+            this.handleInputSelectTwo('torol_zuil_torol_zuil_tree', this.state.torol_zuil_torol_zuil_tree)
+        }
+        if(prevState.torol_zuil_torol_zuil_tree2_update !== this.state.torol_zuil_torol_zuil_tree2_update)
+        {
+            const check_data = this.state.torol_zuil_torol_zuil_tree2_update
+            if(check_data.length == 5)
+            {
+                let torol2 = ''
+                let check = 0
+                for(var i=0; i<check_data.length; i++)
+                {
+                    if(check != 2){
+                        if(check_data[i] == '.')
+                        {
+                            if(check != 1) torol2 = torol2 + check_data[i]
+                            check = check + 1
+
+                        }
+                        else{
+                            torol2 = torol2 + check_data[i]
+                        }
+                    }
+                }
+                this.handleInputSelectTwo('torol_zuil_torol_zuil_tree', torol2)
+                this.setState({torol_zuil_torol_zuil_tree2: check_data})
+            }
+            else{
+                this.handleInputSelectTwo('torol_zuil_torol_zuil_tree', this.state.torol_zuil_torol_zuil_tree2_update)
+            }
+
+            this.handleInputSelectTwo('torol_zuil_torol_zuil_tree2_update', this.state.torol_zuil_torol_zuil_tree2_update)
+        }
+
     }
 
     humenCheck(human){
@@ -262,47 +298,25 @@ export class DursgaltGazar extends Component {
                         this.setState({ 
                             values:{
                                 tuuhin_ov_date: tuuh['created_at'],
-                                
-
                                 torol_zuiltorol_zuil_name: tuuh['stone'],
                                 torol_zuil_dursgalt_gazriin_ner: tuuh['dursgal'],
-
-                    
-                                torol_zuil_dursgalt_gazriin_coordinatx: tuuh['utm_x'],
-                                torol_zuil_dursgalt_gazriin_coordinaty: tuuh['utm_y'],
-                                torol_zuil_dursgalt_gazriin_coordinatllx: tuuh['x'],
-                                torol_zuil_dursgalt_gazriin_coordinatlly: tuuh['y'],
-                    
                                 torol_zuil_todorhoilolt: tuuh['descriptio'],
-                                
                                 dgh_hashaa_baigaa_eseh_hashaa: tuuh['hashaa'],
                                 dgh_saravchtai_eseh_saravch: tuuh['saravch'],
-                                
                                 dgh_hayg_tailbar_eseh_hayg: tuuh['hayg'],
-                                
-                                
                                 dgh_sergeen_zasvarlah_eseh_nenshaardlaga: tuuh['recover1'],
-                                
-                                
                                 dgh_sergeen_zasvarlasan_eseh_hamgaalalt: tuuh['recover'],
                                 dgh_maltan_sudaltan_hamgaalalt: tuuh['malts'],
-                                
-                                
                                 dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: tuuh['length'],
-                                
-                                
                                 dgh_yaaraltai_hamgaalalt: tuuh['yaral'],
                                 dgh_tusgai_hamgaalalt: tuuh['tus'],
                                 dgh_bus_togtooh_shaardlaga: tuuh['protecti_1'],
                                 dg_ezen_dursgalt_gazar_ezen: tuuh['protection_irgen'],
-
-                                // hemjee_talbai: tuuh[''],
                                 hemjee_urt: tuuh['length'],
                                 hemjee_orgon: tuuh['width'],
                                 hemjee_ondor: tuuh['hight'],
                                 hemjee_zuzaan: tuuh['depth'],
                                 hemjee_golch: tuuh['meridian'],
-
                                 hemjee_busad_hemjee: tuuh['other'],
                                 hemjee_too_shirheg: tuuh['number'],
                                 hemjee_temdeglel: tuuh['hemjee_comment'],
@@ -325,8 +339,10 @@ export class DursgaltGazar extends Component {
                                 torol_zuil_dursgalt_gazriin_coordinatalt: tuuh['alt'],
                                 hemjee_talbai: tuuh['area'],
                             },
+                            torol_zuil_dursgalt_gazriin_coordinatx: tuuh['x'],
+                            torol_zuil_dursgalt_gazriin_coordinaty: tuuh['y'],
                             torol_zuil_torol_zuil: tuuh['type1'],
-                            torol_zuil_torol_zuil_tree2: tuuh['type2'],
+                            torol_zuil_torol_zuil_tree2_update: tuuh['type2'],
                             human: tuuh['human'],
                             natural: tuuh['natural'],
                         })
@@ -370,26 +386,26 @@ export class DursgaltGazar extends Component {
 
     }
 
-    handleInputSelect(field, e) {
-        if(e.target.value == '1. Чулуун зэвсгийн дурсгалт газар'){
+    handleInputSelect(field, name) {
+        if(name == '1'){
             var chuluun_zevseg = []
             var chuluun_zevseg_array = ["1.1 Палеолит","1.2 Мезолит","1.3 Неолим","1.4 Хүний сууж байсан оромж. сууц, агуй","1.5 Бусад"]
             for (var i = 0; i < chuluun_zevseg_array.length; i++)
             {
                 chuluun_zevseg.push(<option value={`1.${i+1}`}>{chuluun_zevseg_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: chuluun_zevseg})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: chuluun_zevseg})
         }
-        if(e.target.value == '2. Хадны зураг, бичгийн дүрсгэл'){
+        if(name == '2'){
             var hadnii_zurag = []
             var hadnii_zurag_array = ["2.1 Сийлмэл зураг","2.2 Зос бэхэн зураг","2.3 Тамга тэмдэг бичгийн дурсгал"]
             for (var i = 0; i < hadnii_zurag_array.length; i++)
             {
                 hadnii_zurag.push(<option value={`2.${i+1}`}>{hadnii_zurag_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: hadnii_zurag})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: hadnii_zurag})
         }
-        if(e.target.value == '3. Булш оршуулгын дурсгал'){
+        if(name == '3'){
             var bulsh_orshuulga = []
             var bulsh_orshuulga_array = ["3.1 Неолитын булш","3.2 Шоргоолжин булш","3.3 Хиргисүүр", "3.4 Дөрвөлжин булш", "3.5 Пазырык булш", "3.6 Хүннү булш", "3.7 Түрэг булш", "3.8 Уйгур булш", "3.9 Хятан булш", "3.10 Монгол булш", "3.11 Хадны булш", "3.12 Бусад"]
             for (var i = 0; i < bulsh_orshuulga_array.length; i++)
@@ -397,19 +413,19 @@ export class DursgaltGazar extends Component {
                 bulsh_orshuulga.push(<option value={`3.${i+1}`}>{bulsh_orshuulga_array[i]}</option>);
             }
     
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: bulsh_orshuulga})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: bulsh_orshuulga})
         }
-        if(e.target.value == '4. Тахил тайлгын байгууламж'){
+        if(name == '4'){
             var tahil_tailga = []
             var tahil_tailga_array = ["4.1 Тахилын онгон", "4.2 Тахилын сүмийн туурь", "4.3 Шивээ", "4.4 Овоо", "4.5 Бусад"]
             for (var i = 0; i < tahil_tailga_array.length; i++)
             {
                 tahil_tailga.push(<option value={`4.${i+1}`}>{tahil_tailga_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: tahil_tailga})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: tahil_tailga})
 
         }
-        if(e.target.value == '5. Барилга, архитектурын дурсгал'){
+        if(name == '5'){
             var barilga_arhitektur = []
             var barilga_arhitektur_array = ["5.1 Суурьшлын ул мөр бүхий газар", "5.2 Эртний хот", "5.3 Хэрмэн зам", "5.4 Шуудуу", "5.5 Сүм хийдийн туурь", "5.6 суврага", "5.7 Түүхэн дурсгалт байшин", "5.8 Агуй, оромж, түр сууц", "5.9 Архитектурын дурсгал", "5.10 Бусад"]
     
@@ -417,84 +433,84 @@ export class DursgaltGazar extends Component {
             {
                 barilga_arhitektur.push(<option value={`5.${i+1}`}>{barilga_arhitektur_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: barilga_arhitektur})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: barilga_arhitektur})
         
         }
 
-        if(e.target.value == '6. Хөшөө дурсгал'){
+        if(name == '6'){
             var hoshoo_dursgal = []
             var hoshoo_dursgal_array = ["6.1 Буган чулуун хөшөө", "6.2 Хүн чулуу", "6.3 Тамга тэмдэгтэй хөшөө чулуу", "6.4 Гэрэлт хөшөө", "6.5 Амьтны дүрслэлтэй хөшөө", "6.6 Цулуй хөшөө", "6.7 Бусад"]
             for (var i = 0; i < hoshoo_dursgal_array.length; i++)
             {
                 hoshoo_dursgal.push(<option value={`6.${i+1}`}>{hoshoo_dursgal_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: hoshoo_dursgal})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: hoshoo_dursgal})
         
         }
-        if(e.target.value == '7. Үйлдвэрлэлийн ул мөр хадгалсан дурсгалт газар'){
+        if(name == '7'){
             var uildverleliin_ul_mor = []
             var uildverleliin_ul_mor_array = ["7.1 Төмөрлөг боловсруулалтын ул мөр", "7.2 Шавар боловсруулалтын ул мөр", "7.3 Газар боловсруулалтын ул мөр", "7.4 Чулуу боловсруулалтын ул мөр"]
             for (var i = 0; i < uildverleliin_ul_mor_array.length; i++)
             {
                 uildverleliin_ul_mor.push(<option value={`7.${i+1}`}>{uildverleliin_ul_mor_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level1: uildverleliin_ul_mor})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level1: uildverleliin_ul_mor})
         }
-        this.setState({ [field]: e.target.value})
+        this.setState({ [field]: name})
 
 
     }
-    handleInputSelectTwo(field, e){
+    handleInputSelectTwo(field, name){
         this.setState({ torol_zuil_torol_zuil_level2: []})
 
-        if(e.target.value == '2.3'){
+        if(name == '2.3'){
             var tamga_temdeg = []
             var tamga_temdeg_array = ["2.3.1 Түрэг", "2.3.2 Уйгур", "2.3.3 Кидан", "2.3.4 Монгол", "2.3.5 Тод", "2.3.6 Дөрвөлжин", "2.3.7 Манж", "2.3.8 Согд", "2.3.9 Араб", "2.3.10 Перс", "2.3.11 Санскрит", "2.3.12 Төвд", "2.3.13 Хятад", "2.3.14 Бусад"]
             for (var i = 0; i < tamga_temdeg_array.length; i++)
             {
                 tamga_temdeg.push(<option value={`2.3.${i+1}`}>{tamga_temdeg_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: tamga_temdeg})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level2: tamga_temdeg})
         }
-        if(e.target.value == '4.1'){
+        if(name == '4.1'){
             var tamga_temdeg = []
             var tamga_temdeg_array = ["4.1.1 Балбал (зэл чулуу)", "4.1.2 Хашлага чулуу"]
             for (var i = 0; i < tamga_temdeg_array.length; i++)
             {
                 tamga_temdeg.push(<option value={`4.1.${i+1}`}>{tamga_temdeg_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: tamga_temdeg})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level2: tamga_temdeg})
         }
-        if(e.target.value == '5.2'){
+        if(name == '5.2'){
             var ertnii_hot = []
             var ertnii_hot_array = ["5.2.1 Хүннү", "5.2.2 Түрэг", "5.2.3 Уйгур", "5.2.4 Кидан", "5.2.5 Монгол", "5.2.6 Манж", "5.2.7 Тодорхойгүй"]
             for (var i = 0; i < ertnii_hot_array.length; i++)
             {
                 ertnii_hot.push(<option value={`5.2.${i+1}`}>{ertnii_hot_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: ertnii_hot})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
 
-        if(e.target.value == '5.9'){
+        if(name == '5.9'){
             var ertnii_hot = []
             var ertnii_hot_array = ["5.9.1 Уран барилга", "5.9.2 Уран барилгын цогцолбор ", "5.9.3 Сүм хийд", "5.9.4 Уран баримал хөшөө (1921-1990 он)", "5.9.5 Сүрлэг чимэглэлийн дүрслэл"]
             for (var i = 0; i < ertnii_hot_array.length; i++)
             {
                 ertnii_hot.push(<option value={`5.9.${i+1}`}>{ertnii_hot_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: ertnii_hot})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
 
-        if(e.target.value == '6.2'){
+        if(name == '6.2'){
             var ertnii_hot = []
             var ertnii_hot_array = ["6.2.1 Хүрэл", "6.2.2 Түрэг", "6.2.3 Уйгур", "6.2.4 Кидан", "6.2.5 Монгол", "6.2.6 Тодорхойгүй"]
             for (var i = 0; i < ertnii_hot_array.length; i++)
             {
                 ertnii_hot.push(<option value={`6.2.${i+1}`}>{ertnii_hot_array[i]}</option>);
             }
-            this.setState({ [field]: e.target.value , torol_zuil_torol_zuil_level2: ertnii_hot})
+            this.setState({ [field]: name , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
-        this.setState({ [field]: e.target.value})
+        this.setState({ [field]: name})
 
 
     }
@@ -579,9 +595,9 @@ export class DursgaltGazar extends Component {
             return (
                 <Form>
                     <div>
-                        <BundleMap
+                        <Maps
                             handleXY={this.handleXY}
-                            coordinatCheck={false}
+                            coordinatCheck={true}
                         />
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -597,22 +613,22 @@ export class DursgaltGazar extends Component {
                                 <th scope="row" style={{width: "20%"}}>Төрөл зүйл</th>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <div className="form-group">
-                                        <select className="form-control" id="torol_zuil_torol_zuil" value={this.state.torol_zuil_torol_zuil} onChange={(e) => this.handleInputSelect('torol_zuil_torol_zuil', e)}>
-                                            <option>1. Чулуун зэвсгийн дурсгалт газар</option>
-                                            <option>2. Хадны зураг, бичгийн дүрсгэл</option>
-                                            <option>3. Булш оршуулгын дурсгал</option>
-                                            <option>4. Тахил тайлгын байгууламж</option>
-                                            <option>5. Барилга, архитектурын дурсгал</option>
-                                            <option>6. Хөшөө дурсгал</option>
-                                            <option>7. Үйлдвэрлэлийн ул мөр хадгалсан дурсгалт газар</option>
+                                        <select className="form-control" id="torol_zuil_torol_zuil" value={this.state.torol_zuil_torol_zuil} onChange={(e) => this.handleInput('torol_zuil_torol_zuil', e)}>
+                                            <option value="1" >1. Чулуун зэвсгийн дурсгалт газар</option>
+                                            <option value="2" >2. Хадны зураг, бичгийн дүрсгэл</option>
+                                            <option value="3" >3. Булш оршуулгын дурсгал</option>
+                                            <option value="4" >4. Тахил тайлгын байгууламж</option>
+                                            <option value="5" >5. Барилга, архитектурын дурсгал</option>
+                                            <option value="6" >6. Хөшөө дурсгал</option>
+                                            <option value="7" >7. Үйлдвэрлэлийн ул мөр хадгалсан дурсгалт газар</option>
                                         </select>
                                         {this.state.torol_zuil_torol_zuil_level1.length > 0 && (
-                                        <select className="form-control" id="torol_zuil_torol_zuil_tree" value={this.state.torol_zuil_torol_zuil_tree} onChange={(e) => this.handleInputSelectTwo('torol_zuil_torol_zuil_tree', e)}>
+                                        <select className="form-control" id="torol_zuil_torol_zuil_tree" value={this.state.torol_zuil_torol_zuil_tree} onChange={(e) => this.handleInput('torol_zuil_torol_zuil_tree', e)}>
                                             {this.state.torol_zuil_torol_zuil_level1}
                                         </select>)}
 
                                         {this.state.torol_zuil_torol_zuil_level2.length > 0 && (
-                                        <select className="form-control" id="torol_zuil_torol_zuil_tree2" value={this.state.torol_zuil_torol_zuil_tree2} onChange={(e) => this.handleInputSelect('torol_zuil_torol_zuil_tree2', e)}>
+                                        <select className="form-control" id="torol_zuil_torol_zuil_tree2" value={this.state.torol_zuil_torol_zuil_tree2} onChange={(e) => this.handleInput('torol_zuil_torol_zuil_tree2', e)}>
                                             {this.state.torol_zuil_torol_zuil_level2}
                                         </select>)}
                                     </div>
@@ -658,57 +674,36 @@ export class DursgaltGazar extends Component {
                             <tr>
                                 <th rowSpan="20" scope="rowgroup" scope="row">Солбилцол</th>
                                 <th rowSpan="2" colSpan="2" scope="rowgroup" scope="row">№</th>
-                                <td colSpan="3">UTM</td>
-                                <td colSpan="2">Latitude Longitude</td>
+                                <td colSpan="5">Latitude Longitude</td>
                                 <th rowSpan="20" scope="rowgroup">UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</th>
                             </tr>
                             <tr>
-                                <td scope="row">N</td>
-                                <td scope="row">E</td>
-                                <td scope="row">N</td>
-                                <td scope="row">E</td>
-                                <td scope="row">Өндөр</td>
+                                <td colSpan="2" scope="row">X</td>
+                                <td colSpan="2" scope="row">Y</td>
+                                <td colSpan="1" scope="row">Өндөр</td>
                             </tr>
 
                             <tr>
                                 <td colSpan="2" scope="row">1.</td>
-                                <td scope="row">
-                                    <Field
-                                        className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinatx ? 'is-invalid' : '')}
+                                <td scope="row" colSpan="2">
+                                    <input
+                                        className='form-control'
                                         name='torol_zuil_dursgalt_gazriin_coordinatx'
                                         id="id_torol_zuil_dursgalt_gazriin_coordinatx"
+                                        value={this.state.torol_zuil_dursgalt_gazriin_coordinatx}
                                         type="text"
                                     />
-                                    <ErrorMessage name="torol_zuil_dursgalt_gazriin_coordinatx" component="div" className="invalid-feedback"/>
                                 </td>
-                                <td scope="row">
-                                    <Field
-                                        className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinaty ? 'is-invalid' : '')}
+                                <td scope="row" colSpan="2">
+                                    <input
+                                        className='form-control'
                                         name='torol_zuil_dursgalt_gazriin_coordinaty'
+                                        value={this.state.torol_zuil_dursgalt_gazriin_coordinaty}
                                         id="id_torol_zuil_dursgalt_gazriin_coordinaty"
                                         type="text"
                                     />
-                                    <ErrorMessage name="torol_zuil_dursgalt_gazriin_coordinaty" component="div" className="invalid-feedback"/>
                                 </td>
-                                <td scope="row">
-                                    <Field
-                                        className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinatllx ? 'is-invalid' : '')}
-                                        name='torol_zuil_dursgalt_gazriin_coordinatllx'
-                                        id="id_torol_zuil_dursgalt_gazriin_coordinatllx"
-                                        type="text"
-                                    />
-                                    <ErrorMessage name="torol_zuil_dursgalt_gazriin_coordinatllx" component="div" className="invalid-feedback"/>
-                                </td>
-                                <td scope="row">
-                                    <Field
-                                        className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinatlly ? 'is-invalid' : '')}
-                                        name='torol_zuil_dursgalt_gazriin_coordinatlly'
-                                        id="id_torol_zuil_dursgalt_gazriin_coordinatlly"
-                                        type="text"
-                                    />
-                                    <ErrorMessage name="torol_zuil_dursgalt_gazriin_coordinatlly" component="div" className="invalid-feedback"/>
-                                </td>
-                                <td scope="row">
+                                <td scope="row" colSpan="1">
                                     <Field
                                         className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinatalt ? 'is-invalid' : '')}
                                         name='torol_zuil_dursgalt_gazriin_coordinatalt'

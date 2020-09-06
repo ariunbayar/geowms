@@ -1,10 +1,10 @@
 import React, { Component } from "react"
 import DursgaltGazarTable from './DursgaltGazarTable'
 import {NavLink} from "react-router-dom"
-import {service} from '../service'
+import {service} from './service'
 import {HureeForm} from './Huree/HureeForm'
 import {AyulForm} from './Ayul/AyulForm'
-import BundleMap from '../../map/BundleMap'
+import Maps from '../map/Map'
 
 export class AddForm extends Component {
 
@@ -78,7 +78,7 @@ export class AddForm extends Component {
         return (
             <div  className="container my-4">
                 <div className="row">
-                    <BundleMap
+                    <Maps
                         handleXY={this.handleXY}
                         coordinatCheck={true}
                     />
@@ -87,7 +87,7 @@ export class AddForm extends Component {
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
-                            <NavLink className="btn gp-btn-primary" to={`/back/froms/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
+                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
                                 Нэмэх
                             </NavLink>
                         </div>
@@ -98,8 +98,6 @@ export class AddForm extends Component {
                                     <th scope="col"> № </th>
                                     <th scope="col">Дурсгалт газрын нэр</th>
                                     <th scope="col">Чулуулгын төрөл</th>
-                                    <th scope="col">Latitude Longitude</th>
-                                    <th scope="col">UTM</th>
                                     <th scope="col">type</th>
                                     <th scope="col">created_at</th>
                                     <th scope="col">Засах</th>

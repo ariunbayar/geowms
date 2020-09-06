@@ -18,8 +18,6 @@ class TuuhSoyol(models.Model):
 
 class TuuhSoyolPoint(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
-    latlong = models.CharField(max_length=100)
-    utm = models.CharField(max_length=100)
     dursgal = models.CharField(max_length=100) 
     dursgal2 = models.CharField(max_length=100)
     descriptio = models.CharField(max_length=150)
@@ -65,19 +63,9 @@ class TuuhSoyolPoint(models.Model):
     hayg = models.CharField(max_length=100)
     hayg_comment = models.CharField(max_length=500)
     other1 = models.CharField(max_length=100)
-    utm = models.CharField(max_length=100)
-    ndd = models.BigIntegerField()
-    nmm = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    nss = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    edd = models.BigIntegerField()
-    emm = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    ess = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     x = models.CharField(max_length=50)
     y = models.CharField(max_length=50)
-    alt = models.CharField(max_length=100)
-    utm_zone = models.CharField(max_length=50)
-    utm_x = models.CharField(max_length=50)
-    utm_y = models.CharField(max_length=50)
+    ondor = models.CharField(max_length=101)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'tuuhsoyolpoint'
@@ -92,6 +80,13 @@ class TuuhSoyolHuree(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'tuuhsoyolhuree'
+
+
+class TuuhSoyolHureePol(models.Model):
+    tuuh_soyl = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'tuuhsoyolhureepol'
         managed = False
 
 
@@ -102,6 +97,12 @@ class TuuhSoyolAyuulHuree(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'tuuhsoyolayuulhuree'
+
+class TuuhSoyolAyuulHureePol(models.Model):
+    tuuh_soyl = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'tuuhsoyolayuulhureepol'
         managed = False
 
 

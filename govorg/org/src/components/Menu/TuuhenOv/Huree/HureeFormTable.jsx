@@ -1,6 +1,6 @@
 import React, { Component } from "react"
-import Modal from "../../../Modal"
-import {service} from '../../service'
+import Modal from "../../helpers/Modal"
+import {service} from '../service'
 
 export default class HureeFormTable extends Component {
 

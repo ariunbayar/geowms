@@ -1,10 +1,9 @@
 import React, { Component } from "react"
-import {Switch, Route, Link, NavLink} from "react-router-dom"
-import {service} from '../service'
+import {service} from './service'
 import {validationSchema} from './validationSchema'
 import {HureeEdit} from './HureeEdit'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import BundleMap from '../../map/BundleMap'
+import Maps from '../map/Map'
 
 export class Forms extends Component {
 
@@ -118,6 +117,8 @@ export class Forms extends Component {
     render() {
         const huree_components = []
         const huree_len = this.state.values.too_shirheg
+        const tuuh_id = this.props.match.params.id
+
         for(var i=1; i<=huree_len; i++)
         {
             huree_components.push(<HureeEdit huree_id={i} hureeRemove={this.hureeRemove} ></HureeEdit>)
@@ -143,7 +144,7 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                     <BundleMap handleXY={this.handleXY} coordinatCheck={false} />
+                     <Maps handleXY={this.handleXY} coordinatCheck={false} />
                     <div >
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -210,19 +211,23 @@ export class Forms extends Component {
 
                                 <tr>
                                     <th scope="row">Хамрах хүруу тоо ширхэг</th>
+                                    {tuuh_id ? 
                                     <td>
-                                        <Field
-                                            className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
-                                            name='too_shirheg'
-                                            id="id_too_shirheg"
-                                            type="number"
-                                        />
-                                        <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
-                                        <a className="btn gp-outline-primary" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</a>
-                                        <ul>
-                                            {huree_components}
-                                        </ul>
+                                            <a className="btn gp-outline-primary" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</a>
+                                            <ul>
+                                                {huree_components}
+                                            </ul>
+                                    </td>:
+                                    <td>
+                                            <Field
+                                                className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
+                                                name='too_shirheg'
+                                                id="id_too_shirheg"
+                                                type="number"
+                                            />
+                                            <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
                                     </td>
+                                    }
                                     <th>Тоо ширхэг.</th>
                                 </tr>
                                 <tr>
