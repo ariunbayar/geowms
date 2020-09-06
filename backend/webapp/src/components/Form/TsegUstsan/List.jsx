@@ -56,9 +56,9 @@ export class List extends Component {
                                     <th scope="col"> Email </th>
                                     <th scope="col">Байгууллага</th>
                                     <th scope="col">Албан тушаал</th>
-                                    <th scope="col">Утас</th>
+                                    <th scope="col">Цэгийн дугаар</th>
                                     <th>Засах</th>
-                                    <th>Устгах</th>
+                                    <th>Баталгаажуулах</th>
                                 </tr>
                                </thead>
                              <tbody>

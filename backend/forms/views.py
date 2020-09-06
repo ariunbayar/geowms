@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from .models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint, TuuhSoyolHureePol, TuuhSoyolAyuulHureePol
+from .models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint, TuuhSoyolHureePol, TuuhSoyolAyuulHureePol, TsegUstsanLog
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 from geoportal_app.models import User
@@ -841,7 +841,20 @@ def tsegUstsanAll(request):
 def tsegUstsanRemove(request, payload):
     pk = payload.get('id')
     tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
-    tseg_ustsan.delete()
+    mpoint = Mpoint.objects.using('postgis_db').filter(point_id=tseg_ustsan.tseg_id).first()
+    if mpoint:
+        tseglog = TsegUstsanLog.objects.create(
+                    log_id=mpoint.id,
+                    img_holoos =  tseg_ustsan.img_holoos.url if tseg_ustsan.img_holoos else '',
+                    img_oiroos = tseg_ustsan.img_oiroos.url if tseg_ustsan.img_oiroos else '',
+                    img_baruun = tseg_ustsan.img_baruun.url if tseg_ustsan.img_baruun else '',
+                    img_zuun = tseg_ustsan.img_zuun.url if tseg_ustsan.img_zuun else '',
+                    img_hoino = tseg_ustsan.img_hoino.url if tseg_ustsan.img_hoino else '',
+                    img_omno = tseg_ustsan.img_omno.url if tseg_ustsan.img_omno else '',
+
+            )
+        tseg_ustsan.delete()
+        Mpoint.objects.using('postgis_db').filter(point_id=tseg_ustsan.tseg_id).update(point_class=9)
     return JsonResponse({'success': True})
 
 

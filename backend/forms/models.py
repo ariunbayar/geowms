@@ -149,6 +149,17 @@ class TsegUstsan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class TsegUstsanLog(models.Model):
+    log_id = models.CharField(max_length=100)
+    img_holoos = models.ImageField(upload_to='tseg-ustsan/')
+    img_oiroos = models.ImageField(upload_to='tseg-ustsan/')
+    img_baruun = models.ImageField(upload_to='tseg-ustsan/')
+    img_zuun = models.ImageField(upload_to='tseg-ustsan/')
+    img_hoino = models.ImageField(upload_to='tseg-ustsan/')
+    img_omno = models.ImageField(upload_to='tseg-ustsan/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Mpoint(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)

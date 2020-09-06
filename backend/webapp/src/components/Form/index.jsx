@@ -18,10 +18,10 @@ export class Forms extends Component {
                 <div className="row container">
                     <div className="col-md-12">
                         <ul className="list-group list-group-horizontal col-md-12">
-                            <NavLink to="/back/froms/tseg-personal/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
+                            <NavLink to="/back/froms/tseg-personal/" className="list-group-item col-md-6" activeClassName="text-white gp-bg-primary">
                                 Цэг бүртгэлийн хүсэлт
                             </NavLink>
-                            <NavLink to="/back/froms/tseg-ustsan/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
+                            <NavLink to="/back/froms/tseg-ustsan/" className="list-group-item col-md-6" activeClassName="text-white gp-bg-primary">
                                 Цэг устсан хүсэлт
                             </NavLink>
                         </ul>
