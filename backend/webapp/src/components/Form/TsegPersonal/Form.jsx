@@ -15,11 +15,7 @@ export class Forms extends Component {
             values:{
                 tesgiin_ner: '',
                 toviin_dugaar: '',
-             
                 suljeenii_torol: '',
-                
-               
-               
                 sudalga_or_shine: '',
                 hors_shinj_baidal: '',
                 date: '',
@@ -29,7 +25,14 @@ export class Forms extends Component {
                 center_typ: '',
                 pid: '',
             },
-
+            BA:0,
+            BB:0,
+            BC:0,
+            LA:0,
+            LB:0,
+            LC:0,
+            zone: '',
+            cc:'',
             utmx: '',
             utmy: '',
             latlongx: "",
@@ -37,7 +40,6 @@ export class Forms extends Component {
             trapetsiin_dugaar: '',
             sum_name: '',
             barishil_tuhai: '',
-
             real_sum: '',
             aimag_name: '',
             sum_ners: '',
@@ -64,6 +66,7 @@ export class Forms extends Component {
         this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
+        this.handleOnchange = this.handleOnchange.bind(this)
     }
 
     componentDidMount(){
@@ -74,19 +77,33 @@ export class Forms extends Component {
         }
     }
 
+    handleOnchange(e){
+        this.setState({
+            [e.target.name]:e.target.value,
+        })
+    }
+
     handleXY(values, info){
-        info.map(e=>this.setState({
-            utmx:e.E,
-            utmy:e.N,
-            trapetsiin_dugaar: e.vseg,
-            sum_name:e.sum,
-        }))
         this.setState({
             latlongy:values[0],
             latlongx:values[1],
             aimag_name:info[0]['aimag'],
+            utmx: info[0].E,
+            utmy: info[0].N,
+            trapetsiin_dugaar: info[0].vseg,
+            sum_name: info[0].sum,
+            cc: info[0].cc,
+            zone: info[0].zone,
+            BA: info[0].BA,
+            BB: info[0].BB,
+            BC: info[0].BC,
+            LA: info[0].LA,
+            LB: info[0].LB,
+            LC: info[0].LC
 
         })
+        const barishil_tuhai = info[0]['aimag'] + ', ' + info[0].sum
+        this.setState({barishil_tuhai})
     }
 
     onDrop([icon], name) {
@@ -108,7 +125,7 @@ export class Forms extends Component {
             if(re.test(file['name']) )
             {
                 
-                this.setState({[name+'_error']: false, [name]: data })
+                this.setState({[name+'_error']: false, [name]: file })
             }
             else{
                 this.setState({[name+'_error']: true})
@@ -118,36 +135,37 @@ export class Forms extends Component {
             this.setState({[name+'_error']: true})
         }
     }
-
     handleSubmit(values, { setStatus, setSubmitting }) {
-
         setStatus('checking')
         setSubmitting(true)
         const form_datas = new FormData() 
         this.setState({values})
+        const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
-        form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
+        form_datas.append('tesgiin_ner', this.state.values.tesgiin_ner)
         form_datas.append('idx', this.state.id)
+        form_datas.append('trapetsiin_dugaar', trapetsiin_dugaar)
         form_datas.append('toviin_dugaar', this.state.values.toviin_dugaar)
-        form_datas.append('trapetsiin_dugaar', this.state.values.trapetsiin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
-        form_datas.append('sum_name', this.state.values.sum_name)
+        form_datas.append('sum_name', this.state.sum_name)
         form_datas.append('utmx', this.state.values.utmx)
         form_datas.append('utmy', this.state.values.utmy)
-        form_datas.append('latlongx', this.state.values.latlongx)
-        form_datas.append('latlongy', this.state.values.latlongy)
+        form_datas.append('latlongx', this.state.latlongx)
+        form_datas.append('latlongy', this.state.latlongy)
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
-        form_datas.append('barishil_tuhai', this.state.values.barishil_tuhai)
+        form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
         form_datas.append('bairshil_tseg_oiroos_img_url', this.state.bairshil_tseg_oiroos_img_url)
         form_datas.append('bairshil_tseg_holoos_img_url', this.state.bairshil_tseg_holoos_img_url)
         form_datas.append('sudalga_or_shine', this.state.values.sudalga_or_shine)
         form_datas.append('hors_shinj_baidal', this.state.values.hors_shinj_baidal)
         form_datas.append('date', this.state.values.date)
+        form_datas.append('BA', this.state.BA)
+        form_datas.append('LA', this.state.LA)
         form_datas.append('hotolson', this.state.values.hotolson)
         form_datas.append('alban_tushaal', this.state.values.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.values.alban_baiguullga)
@@ -164,7 +182,7 @@ export class Forms extends Component {
                 setSubmitting(false)
             }
 
-            if(name){
+            if( name){
                 alert('Энэхүү цэг мэдээллийн санд байна.')
                 this.setState({name_error:true})
             }
@@ -185,24 +203,22 @@ export class Forms extends Component {
 
     tsegUpdate(id){
         service.updateTseg(id).then(({tseg_display}) =>{
-            if(tseg_display){
+            if(tseg_display){                
                 tseg_display.map((item, idx) =>
                     this.setState({ 
                         values : {
+                            ...this.state.values,
                             tesgiin_ner: item.point_name,
                             pid: item.pid,
+                            toviin_dugaar: item.point_id,
                             center_typ: item.center_typ,
-                            
-                            trapetsiin_dugaar: item.sheet1,
-                            toviin_dugaar: item.objectid,
                             latlongx: item.sheet2,
                             latlongy: item.sheet3,
-                            suljeenii_torol: item.point_type,
+                            suljeenii_torol: item.suljeenii_torol,
                             utmx: item.utmx,
                             utmy: item.utmy,
-                            latlongx: item.latlongx,
+                            latlongx: item.latlongx,    
                             latlongy: item.latlongy,
-                            barishil_tuhai: item.barishil_tuhai,
                             sudalga_or_shine: item.sudalga_or_shine,
                             hors_shinj_baidal: item.hors_shinj_baidal,
                             date: item.date,
@@ -210,8 +226,16 @@ export class Forms extends Component {
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
                         },
+                        LA:item.LA,
+                        LB:item.LB,
+                        LC:item.LC,
+                        BA:item.BA,
+                        BB:item.BB,
+                        BC:item.BC,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
+                        trapetsiin_dugaar: item.point_type,
+                        barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
                 
@@ -224,10 +248,11 @@ export class Forms extends Component {
                     })
                 )
             }
-        })
+        } )
     }
 
     render() {
+
         return (
         <Formik
             enableReinitialize
@@ -299,7 +324,8 @@ export class Forms extends Component {
                                             id="id_trapetsiin_dugaar"
                                             disabled={true}
                                             type="text"
-                                            value={this.state.trapetsiin_dugaar}
+                                            value={this.state.trapetsiin_dugaar }
+                                            value={`${this.state.trapetsiin_dugaar}` + '- ' + `${this.state.zone}` + ' -' + `${this.state.cc}`}
                                         />
                                        
                                     </td>
@@ -311,13 +337,13 @@ export class Forms extends Component {
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 
                                                 <option>...</option>
-                                                <option value="1">GPS</option>
-                                                <option value="2">GPS1</option>
-                                                <option value="3">GPS2</option>
-                                                <option value="4">GPS3</option>
-                                                <option value="5">GPS4</option>
-                                                <option value="6">GPS5</option>
-                                                <option value="7">GPS6</option>
+                                                <option value="1">GPS-ийн сүлжээний цэг</option>
+                                                <option value="2">Гравиметрийн сүлжээний Цэг</option>
+                                                <option value="3">Өндрийн сүлжээний цэг</option>
+                                                <option value="4">Триангуляцийн сүлжээний цэг</option>
+                                                <option value="5">Полигометрийн сүлжээний цэг</option>
+                                                <option value="6">Зураглалын сүлжээний цэг</option>
+                                                <option value="7">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
                                         </Fragment>
@@ -354,58 +380,62 @@ export class Forms extends Component {
                                 <tr>
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /UTM/</th>
-                                    <th colSpan="2" style={{textAlign:'center'}}>
-                                    UTM-E
-                                    </th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>
-                                    UTM-N
-                                    </th>
                                 </tr>
                                 <tr>
-                                    <td colSpan="2">
-                                        <input
-                                            className={'form-control '}
-                                            name='utmx'
-                                            id="id_utmx"
-                                            disabled={true}
-                                            type="number"
-                                            value={this.state.utmx}
-                                        />
-                                    </td>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <input
-                                            className={'form-control '}
-                                            name='utmy'
-                                            id="id_utmy"
-                                            disabled={true}
-                                            type="number"
-                                            value={this.state.utmy}
-                                        />
-                                    </td>
+                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг -B</th>
+                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг -L</th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="2" style={{textAlign:'center'}}>Longitude -x</th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Latitude-y</th>
-                                </tr>
-                                <tr>
-                                    <td colSpan="2">
+                                    <td colSpan="2" className="pl-3">
                                         <input
-                                            className={'form-control ' }
-                                            name='latlongx'
-                                            id="id_latlongx"
-                                            disabled={true}
+                                            className={'form-control col-3 float-left m-2' }
+                                            name='LongitudeA'
+                                            id="LongitudeA"
                                             type="number"
-                                            value ={this.state.latlongx}
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.BA}
+                                        />
+                                        <input
+                                            className={'form-control col-2 float-left m-2'}
+                                            name='LongitudeB'
+                                            id="LongitudeB"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.BB}
+                                        />
+                                        <input
+                                            className={'form-control col-4 float-left m-2' }
+                                            name='LongitudeC'
+                                            id="LongitudeC"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.BC}
                                         />
                                     </td>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <input
-                                            className={'form-control ' }
-                                            name='latlongy'
-                                            disabled={true}
-                                            id="id_latlongy"
+                                    <td colSpan="2" scope="rowgroup" className="pl-5">
+                                    <input
+                                            className={'form-control col-3 float-left m-2' }
+                                            name='LatitudeA'
+                                            id="LatitudeA"
                                             type="number"
-                                            value ={this.state.latlongy}
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.LA}
+                                        />
+                                        <input
+                                            className={'form-control col-2 float-left m-2'}
+                                            name='LatitudeB'
+                                            id="LatitudeB"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.LB}
+                                        />
+                                        <input
+                                            className={'form-control col-4 float-left m-2' }
+                                            name='LatitudeC'
+                                            id="LatitudeC"
+                                            type="number"
+                                            onChange = {(e)=>this.handleOnchange(e)}
+                                            value ={this.state.LC}
                                         />
                                     </td>
                                 </tr>
@@ -490,7 +520,8 @@ export class Forms extends Component {
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
-                                            value={`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${this.state.barishil_tuhai}`}
+                                            onChange = {(e) => this.handleOnchange(e)}
+                                            value={this.state.barishil_tuhai}
                                         />
 
                                     </th>

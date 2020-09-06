@@ -7,7 +7,7 @@ export const validationSchema = object().shape({
         .max(50, '50-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
     toviin_dugaar: string()
-        .max(100, '100-с илүүгүй урттай оруулна уу!')
+        .max(4, '4-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
     pid: string()
         .max(20, '20-с илүүгүй урттай оруулна уу!')
