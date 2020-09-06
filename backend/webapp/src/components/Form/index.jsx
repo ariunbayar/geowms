@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 
-import { TuuhenOv } from './TuuhenOv'
 import { TsegPersonal } from './TsegPersonal'
 import { TsegUstsan } from './TsegUstsan'
 
@@ -19,9 +18,6 @@ export class Forms extends Component {
                 <div className="row container">
                     <div className="col-md-12">
                         <ul className="list-group list-group-horizontal col-md-12">
-                            <NavLink to="/back/froms/tuuhen-ov/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
-                                Түүхэн өв бүртгэлийн хүсэлт
-                            </NavLink>
                             <NavLink to="/back/froms/tseg-personal/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
                                 Цэг бүртгэлийн хүсэлт
                             </NavLink>
@@ -34,7 +30,6 @@ export class Forms extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>
-                            <Route path="/back/froms/tuuhen-ov/" component={TuuhenOv}/>
                             <Route path="/back/froms/tseg-personal/" component={TsegPersonal}/>
                             <Route path="/back/froms/tseg-ustsan/" component={TsegUstsan}/>
                             <Route exact path="/back/froms/"/>

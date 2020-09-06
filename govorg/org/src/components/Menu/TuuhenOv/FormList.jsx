@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
-import {service} from '../service'
+import {service} from './service'
 
 export class FormList extends Component {
 
@@ -9,7 +9,7 @@ export class FormList extends Component {
 
         super(props)
         this.state = {
-            tuuh_soyl: [{},{}],
+            tuuh_soyl: [],
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -41,7 +41,7 @@ export class FormList extends Component {
 
                     <div className="col-md-12">
                         <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={`/back/froms/tuuhen-ov/add/`}>
+                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/tuuhen-ov/add/`}>
                                 Нэмэх
                             </NavLink>
                         </div>

@@ -1,8 +1,9 @@
 import React, { Component } from "react"
-import {Switch, Route, Link, NavLink} from "react-router-dom"
-import {service} from '../service'
+import {service} from './service'
 import {validationSchema} from './validationSchema'
+import {HureeEdit} from './HureeEdit'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+import Maps from '../map/Map'
 
 export class Forms extends Component {
 
@@ -13,19 +14,54 @@ export class Forms extends Component {
                 id: 0,
                 dugaar: '',
                 date: '',
-                aimagname: '',
-                sumname: '',
                 too_shirheg: '',
                 burtgegch: '',
-            }
+            },
+            aimagname: '',
+            sumname: '',
 
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
+        this.hureeRemove = this.hureeRemove.bind(this)
+        this.hureeAdd = this.hureeAdd.bind(this)
+        this.handleRefresh = this.handleRefresh.bind(this)
+        this.handleXY = this.handleXY.bind(this)
     }
 
+    hureeRemove(id){
+        const tuuh_id = this.props.match.params.id
+        service.hureeCount(id, 'remove', tuuh_id).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.handleRefresh()
+                }, 1000)
+            }
+        })
+
+    }
+
+    handleXY(values, info){
+        info.map(e=>this.setState({aimagname:e.aimag, sumname:e.sum}))
+    }
+
+    hureeAdd(){
+        const tuuh_id = this.props.match.params.id
+        service.hureeCount(1, 'add', tuuh_id).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.handleRefresh()
+                }, 1000)
+            }
+        })
+    }
     
     componentDidMount(){
+        const id = this.props.match.params.id
+        if(id) this.handleRefresh()
+
+    }
+    handleRefresh(){
         const id = this.props.match.params.id
         service.about(id).then(({tuuh_soyl}) => {
             if(tuuh_soyl){
@@ -33,17 +69,16 @@ export class Forms extends Component {
                     this.setState({
                         values:{
                             dugaar: tuuh['dugaar'],date: tuuh['date'],
-                            aimagname: tuuh['aimagname'],
-                            sumname: tuuh['sumname'], 
                             too_shirheg: tuuh['too_shirheg'], 
                             burtgegch: tuuh['burtgegch'],
                             id :id 
-                        }
+                        },
+                        aimagname: tuuh['aimagname'],
+                        sumname: tuuh['sumname'], 
                     })
                 )
             }
         })
-
     }
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
@@ -57,8 +92,7 @@ export class Forms extends Component {
 
         if(id){
             const form_datas = this.state.values
-
-            service.update(form_datas).then(({success}) => {
+            service.update(form_datas, this.state.aimagname, this.state.sumname).then(({success}) => {
                 if (success) {
                     setTimeout(() => {
                         setStatus('saved')
@@ -68,10 +102,8 @@ export class Forms extends Component {
             })
         }
         else{
-            alert("create")
             const form_datas = this.state.values
-
-            service.create(form_datas).then(({success}) => {
+            service.create(form_datas,  this.state.aimagname, this.state.sumname).then(({success}) => {
                 if (success) {
                     setTimeout(() => {
                         setStatus('saved')
@@ -83,6 +115,14 @@ export class Forms extends Component {
     }
     
     render() {
+        const huree_components = []
+        const huree_len = this.state.values.too_shirheg
+        const tuuh_id = this.props.match.params.id
+
+        for(var i=1; i<=huree_len; i++)
+        {
+            huree_components.push(<HureeEdit huree_id={i} hureeRemove={this.hureeRemove} ></HureeEdit>)
+        }
         return (
             <Formik
                 enableReinitialize
@@ -104,7 +144,7 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-
+                     <Maps handleXY={this.handleXY} coordinatCheck={false} />
                     <div >
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -144,40 +184,50 @@ export class Forms extends Component {
                                 <tr>
                                     <th scope="row">Аймаг, Нийслэл</th>
                                     <td scope="row">
-                                        <Field
-                                            className={'form-control ' + (errors.aimagname ? 'is-invalid' : '')}
+                                        <input
+                                            className='form-control'
                                             name='aimagname'
                                             id="id_aimagname"
+                                            value={this.state.aimagname}
+                                            disabled={true}
                                             type="text"
                                         />
-                                        <ErrorMessage name="aimagname" component="div" className="invalid-feedback"/>
                                     </td>
                                     <th rowSpan="2" scope="rowgroup">Тухайн дурсгал оршиж буй аймаг, сумын нэрийг бичнэ.</th>
                                 </tr>
                                 <tr>
                                     <th scope="row">Сум, Дүүрэг</th>
                                     <td>
-                                        <Field
-                                            className={'form-control ' + (errors.sumname ? 'is-invalid' : '')}
+                                        <input
+                                            className='form-control'
                                             name='sumname'
+                                            value={this.state.sumname}
+                                            disabled={true}
                                             id="id_sumname"
                                             type="text"
                                         />
-                                        <ErrorMessage name="sumname" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <th scope="row">Хамрах хүруу тоо ширхэг</th>
+                                    {tuuh_id ? 
                                     <td>
-                                        <Field
-                                            className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
-                                            name='too_shirheg'
-                                            id="id_too_shirheg"
-                                            type="number"
-                                        />
-                                        <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
+                                            <a className="btn gp-outline-primary" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</a>
+                                            <ul>
+                                                {huree_components}
+                                            </ul>
+                                    </td>:
+                                    <td>
+                                            <Field
+                                                className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
+                                                name='too_shirheg'
+                                                id="id_too_shirheg"
+                                                type="number"
+                                            />
+                                            <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
                                     </td>
+                                    }
                                     <th>Тоо ширхэг.</th>
                                 </tr>
                                 <tr>

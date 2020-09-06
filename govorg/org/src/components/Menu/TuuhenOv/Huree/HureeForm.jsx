@@ -1,19 +1,19 @@
 import React, { Component } from "react"
-import {service} from '../../service'
-import {NavLink} from "react-router-dom"
-import AyulFormTable from "./AyulFormTable"
+import {service} from '../service'
+import HureeFormTable from "./HureeFormTable"
 
-export class AyulForm extends Component {
+export class HureeForm extends Component {
 
     constructor(props) {
 
         super(props)
         this.state = {
-            form_data: [],
-            ayul_data: [],
+            form_data: [{},{}],
+            huree_data: [],
             x: 0,
             y: 0,
             handle_save_succes_huree: false,
+            save_is_error: false,
         }
 
         this.handleRemove = this.handleRemove.bind(this)
@@ -31,16 +31,25 @@ export class AyulForm extends Component {
         this.hureeData()
     }
 
+    componentDidUpdate(prevProps, prevState){
+        if(prevProps.x !== this.props.x)
+        {
+            const { x, y } = this.props
+            this.setState({ x, y })
+        }
+    }
+
     hureeData(){
-        service.ayulAll(this.props.dursgalt_id).then(({ayul_data}) => {
-                this.setState({ayul_data})
+        service.hureeAll(this.props.dursgalt_id, this.props.tuuh_soyl_huree_id).then(({huree_data}) => {
+                this.setState({huree_data})
         })
     }
 
     handleRemove(id) {
         const tuuhen_ov = this.props.dursgalt_id
         const ayul_id = id
-        service.ayulDelete(ayul_id, tuuhen_ov).then(({success}) => {
+        console.log(tuuhen_ov, ayul_id)
+        service.hureeDelete(ayul_id, tuuhen_ov).then(({success}) => {
             if(success){
                 this.hureeData()
             }
@@ -51,23 +60,29 @@ export class AyulForm extends Component {
     handleHureeSave(){
         this.setState({handle_save_succes_huree:true})
         const dursgalt_id = this.props.dursgalt_id
+        const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         const {x, y} = this.state
-        service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
-            if (success) {
-                setTimeout(() => {
-                    this.setState({handle_save_succes_huree:false})
-                    this.hureeData()
-                }, 1000)
-            }
-        })
+        if(x == 0 || y==0){
+            this.setState({save_is_error:true, handle_save_succes_huree: false})
+        }
+        else{
+            service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
+                if (success) {
+                    setTimeout(() => {
+                        this.setState({handle_save_succes_huree:false, save_is_error:false})
+                        this.hureeData()
+                    }, 1000)
+                }
+            })
+        }
     }
 
     render() {
         const tuuhen_ov = this.props.dursgalt_id
-
+        const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         return (
             <div>
-                <h4>Дурсгалт газрын аюулын хамрах хүрээний солбилцол.</h4>
+                <h6>Хүрээ  {tuuh_soyl_huree_id}.</h6>
                 <table className="table table-bordered">
                     <tr>
                         <th rowSpan="2" scope="rowgroup" scope="row">№</th>
@@ -79,19 +94,18 @@ export class AyulForm extends Component {
                         <th scope="row">X</th>
                         <th scope="row">Y</th>
                     </tr>
-                    {this.state.ayul_data.map((data, idx) =>
-                            <AyulFormTable 
+                    {this.state.huree_data.map((data, idx) =>
+                            <HureeFormTable 
                                 key={idx} 
                                 values={data} 
                                 idx={idx}
                                 tuuhen_ov={tuuhen_ov}
                                 handleRemove={() => this.handleRemove(data.id)}
-                            ></AyulFormTable>
+                            ></HureeFormTable>
                         )}
 
                         <tr >
                             <th scope="row"></th>
-
                             <td scope="row">
                                 <input
                                     type="number"
@@ -117,7 +131,9 @@ export class AyulForm extends Component {
                                         </a>
                                     :
                                     <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
-                                }
+                                }   
+                                <br></br>
+                                {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
                             </td>
                         </tr>
 

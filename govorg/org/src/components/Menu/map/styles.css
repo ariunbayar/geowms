@@ -100,7 +100,6 @@
 }
 
 .ol-scale-line{
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
+    position: fixed;
+    bottom: 70px;
 }

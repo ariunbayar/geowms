@@ -1,8 +1,8 @@
 import React, { Component } from "react"
-import Modal from "../../../Modal"
-import {service} from '../../service'
+import Modal from "../../helpers/Modal"
+import {service} from '../service'
 
-export default class HureeFormTable extends Component {
+export default class AyulFormTable extends Component {
 
     constructor(props) {
         super(props)
@@ -14,6 +14,7 @@ export default class HureeFormTable extends Component {
             is_modal_delete_open: false,
             disable: false,
             save_is_load: false,
+            save_is_error: false,
 
         }
 
@@ -64,14 +65,22 @@ export default class HureeFormTable extends Component {
         {   
             this.setState({save_is_load: true})
             const tuuhen_ov = this.props.tuuhen_ov
-            const { x, y, id} = this.state
-            service.hureeUpdate(tuuhen_ov,  x, y, id).then(({success}) => {
-                if (success) {
-                    setTimeout(() => {
-                        this.setState({disable: false, save_is_load: false})
-                    }, 1000)
-                }
-            })
+            const {x, y, id} = this.state
+            if(x == 0 || y==0){
+                this.setState({save_is_error:true, save_is_load: false})
+            }
+            else if(x == null || y==null){
+                this.setState({save_is_error:true, save_is_load: false})
+            }
+            else{
+                service.ayulUpdate(tuuhen_ov, x, y, id).then(({success}) => {
+                    if (success) {
+                        setTimeout(() => {
+                            this.setState({disable: false, save_is_load: false, save_is_error:false})
+                        }, 1000)
+                    }
+                })
+            }
         }
         else
         {
@@ -106,6 +115,7 @@ export default class HureeFormTable extends Component {
                         value={this.state.y}
                     />
                 </td>
+                
                 <td>
                     {this.state.disable ?
                     (this.state.save_is_load ?
@@ -121,6 +131,9 @@ export default class HureeFormTable extends Component {
                     </a>
 
                     }
+                    <br></br>
+                    {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+
                 </td>
                 <td>
                     <a onClick={this.handleModalDeleteOpen}>

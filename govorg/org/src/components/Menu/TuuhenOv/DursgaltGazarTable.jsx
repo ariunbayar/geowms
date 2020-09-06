@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../../Modal"
+import Modal from "../helpers/Modal"
 
-export default class FormTable extends Component {
+export default class DursgaltGazarTable extends Component {
 
     constructor(props) {
         super(props)
@@ -30,25 +30,19 @@ export default class FormTable extends Component {
     }
 
     render() {
-        const { id, dugaar, date, inspireid, too_shirheg, aimagname, sumname, burtgegch,created_at} = this.props.values
+        const dursgalt_id = this.props.dursgalt_id
+
+        const { id, dursgal, tuuh_soyl_id, type, stone, protection, created_at} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
                 <th>{idx + 1}</th>
-
-                <th>{dugaar}</th>
-                <th>{aimagname}</th>
-                <th>{sumname}</th>
-                <th>{too_shirheg}</th>
-                <th>{burtgegch}</th>
+                <th>{dursgal}</th>
+                <th>{stone}</th>
+                <th>{type}</th>
                 <th>{created_at}</th>
                 <th>
-                    <NavLink to={`/back/froms/tuuhen-ov/${id}/add/`}>
-                            <i className="fa fa-plus-circle" aria-hidden="true"></i>
-                    </NavLink>
-                </th>
-                <th>
-                    <NavLink to={`/back/froms/tuuhen-ov/${id}/update/`}>
+                    <NavLink to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/update/${id}/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>

@@ -119,6 +119,7 @@ urlpatterns = [
         path('update/', forms_views.update, name='update'),
         path('remove/', forms_views.remove, name='remove'),
         path('create/', forms_views.create, name='create'),
+        path('huree-count/', forms_views.hureeCountEdit, name='huree-count'),
         path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
         path('tseg-personal/findSum/', forms_views.findSum, name='findSum'),
         path('tseg-personal/batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),

@@ -9,12 +9,6 @@ export const validationSchema = object().shape({
     date: string()
         .max(50, '50-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
-    aimagname: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    sumname: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
     too_shirheg: string()
         .required('Хоосон байна!'),
     burtgegch: string()
@@ -29,30 +23,12 @@ export const validationSchemaTseg = object().shape({
         .required('Хоосон байна!'),
     torol_zuiltorol_zuil_name: string()
     .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatutm: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatx: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinaty: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatllx: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    torol_zuil_dursgalt_gazriin_coordinatlly: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
     torol_zuil_dursgalt_gazriin_coordinatalt: string()
         .max(50, '50-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
-
     torol_zuil_todorhoilolt: string()
-        .max(500, '500-с илүүгүй урттай оруулна уу!'),
-
-
-
+        .max(500, '500-с илүүгүй урттай оруулна уу!')
+        .required('Хоосон байна!'),
     hemjee_talbai: string()
         .max(20, '20-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),

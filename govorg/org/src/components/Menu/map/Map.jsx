@@ -20,7 +20,7 @@ import {CoordinateCopy} from './controls/CoordinateCopy'
 import "./styles.css"
 import {service} from './service'
 
-export default class BundleMap extends Component {
+export default class Maps extends Component {
 
     constructor(props) {
         super(props)
@@ -228,18 +228,11 @@ export default class BundleMap extends Component {
         var array = coordinate.split(',').map(function(n) {
             return Number(n);
         });
-        if(this.props.coordinatCheck)
-        {
-            this.props.handleXY(array, null)
-
-        }
-        else{
-            service.findSum(array).then(({info}) => {
-                if(info){
-                 this.props.handleXY(array, info)
-                }
-             })
-        }
+        service.findSum(array).then(({info}) => {
+           if(info){
+            this.props.handleXY(array, info)
+           }
+        })
     }
 
 

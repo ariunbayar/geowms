@@ -3,6 +3,7 @@ import React, {Component} from 'react'
 import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import Employee from './Menu/Employee/EmployeeForm'
 import Bundle from './Menu/Bundle/Bundle'
+import { TuuhenOv } from './Menu/TuuhenOv'
 
 export class App extends Component {
 
@@ -30,12 +31,18 @@ export class App extends Component {
                                         <i className='fas fa-university text-primary'></i>&nbsp;СИСТЕМ
                                         </NavLink>
                                     </li>
+                                    <li className="nav-item m-1">
+                                        <NavLink  to={'/gov/tuuhen-ov/'} activeClassName="active">
+                                        <i className='fas fa-university text-primary'></i>&nbsp;Түүхэн өв бүртгэлийн хүсэлт
+                                        </NavLink>
+                                    </li>
                                 </ul>
                             </div>
                         </nav>
                         <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
                         <div className="col-md-10">
                                 <Switch>
+                                    <Route path="/gov/tuuhen-ov/" component={TuuhenOv}/>
                                     <Route exact path="/gov/" component={Employee}/>
                                     <Route exact path="/gov/bundle/" component={Bundle}/>
                                 </Switch>
