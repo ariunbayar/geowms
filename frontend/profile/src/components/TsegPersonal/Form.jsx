@@ -1,12 +1,11 @@
 import React, { Component, Fragment } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from '../service'
+import {service} from './service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import BundleMap from '../../map/BundleMap'
-import { coordinateRelationship } from "ol/extent"
+import Maps from '../map/Map'
 
-export class Forms extends Component {
+export default class Forms extends Component {
 
     constructor(props) {
         super(props)
@@ -276,7 +275,7 @@ export class Forms extends Component {
                 <Form>
                     <div className="row container  my-1">
                         <div className="float-left">
-                            <BundleMap
+                            <Maps
                             handleXY={this.handleXY}
                             />
                         </div>
