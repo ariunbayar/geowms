@@ -14,7 +14,7 @@ export class FormList extends Component {
             length:null,
             currentPage:1,
             PerPage:50,
-            searchQuery: 'g109',
+            searchQuery: '',
             query_min: false,
             error: false,
             error_msg: [],
@@ -69,9 +69,7 @@ export class FormList extends Component {
                 setTimeout(() => {
                     this.setState({ error: false, error_msg: [] })
                 }, 1500);
-                
             }
-            
         })
     }
 
@@ -114,7 +112,6 @@ export class FormList extends Component {
                             <thead>
                                 <tr>
                                     <th scope="col"> № </th>
-                                    <th scope="col">Цэгийн дугаар</th>
                                     <th scope="col">Цэгийн нэр</th>
                                     <th scope="col">Цэгийн дугаар</th>
                                     <th scope="col">Полигон дугаар</th>
@@ -122,7 +119,6 @@ export class FormList extends Component {
                                     <th scope="col">Цэгийн төрөл</th>
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
-                                    <th scope="col">Геом төрөл</th>
                                     <th scope="col">Засах</th>
                                     <th scope="col">Устгах</th>
                                     <th scope="col">Баталгаажуулах</th>
