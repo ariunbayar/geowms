@@ -107,7 +107,6 @@ def tsegAdd(request):
     img_zuun = request.POST.get('zurag_zuun')
     img_hoino = request.POST.get('zurag_hoid')
     img_omno = request.POST.get('zurag_omno')
-
     if img_holoos:
         [image_x2] = resize_b64_to_sizes(img_holoos, [(300, 300)])
         img_holoos = SimpleUploadedFile('img.png', image_x2)

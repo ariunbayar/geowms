@@ -78,7 +78,7 @@ export class DanForm extends Component {
         else{
             this.error_msg = []
         }
-        if(e.target.value.length > 2){
+        if(e.target.value.length > 1){
             this.error_msg = []
             service.searchTseg(e.target.value).then(({items}) => {
                 

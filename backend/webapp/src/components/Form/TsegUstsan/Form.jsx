@@ -285,7 +285,7 @@ export class FormTseg extends Component {
                                     <Field 
                                         name="email" 
                                         type="text" 
-                                        id="email"
+                                        id="id_email"
                                         className={'form-control' + 
                                             (errors.email && 
                                                 touched.email ? ' is-invalid' : '')} 
@@ -301,7 +301,7 @@ export class FormTseg extends Component {
                                         <Field 
                                             name="baiguulaga" 
                                             type="text" 
-                                            id="baiguulaga"
+                                            id="id_baiguulaga"
                                             className={'form-control' + 
                                                 (errors.baiguulaga && 
                                                     touched.baiguulaga ? ' is-invalid' : '')} 
@@ -311,11 +311,12 @@ export class FormTseg extends Component {
                                 </tr>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">2.</th>
-                                    <th style={{width: "15%"}}>Албан тушаал alban_tushaal</th>
+                                    <th style={{width: "15%"}}>Албан тушаал</th>
                                     <td>
                                         <Field 
                                             name="alban_tushaal" 
                                             type="text" 
+                                            id='id_alban_tushaal'
                                             className={'form-control' + 
                                                 (errors.alban_tushaal && 
                                                     touched.alban_tushaal ? ' is-invalid' : '')} 
@@ -330,7 +331,7 @@ export class FormTseg extends Component {
                                         <Field 
                                             name="utas" 
                                             type="text" 
-                                            id="utas"
+                                            id="id_utas"
                                             className={'form-control' + 
                                                 (errors.alban_tushaal && 
                                                     touched.alban_tushaal ? ' is-invalid' : '')} 
@@ -374,7 +375,7 @@ export class FormTseg extends Component {
                                         <Field 
                                             name="oiroltsoo_bairlal" 
                                             type="text" 
-                                            id="oiroltsoo_bairlal"
+                                            id="id_oiroltsoo_bairlal"
                                             className={'form-control' + 
                                                 (errors.oiroltsoo_bairlal && 
                                                     touched.oiroltsoo_bairlal ? ' is-invalid' : '')} 
@@ -390,7 +391,7 @@ export class FormTseg extends Component {
                                             as = "select"
                                             name="evdersen_baidal" 
                                             type="text" 
-                                            id="evdersen_baidal"
+                                            id="id_evdersen_baidal"
                                             className={'form-control' + 
                                                 (errors.evdersen_baidal && 
                                                     touched.evdersen_baidal ? ' is-invalid' : '')} 
@@ -416,7 +417,7 @@ export class FormTseg extends Component {
                                                     touched.nohtsol_baidal ? ' is-invalid' : '')}
                                             component="textarea"
                                             name='nohtsol_baidal'
-                                            id="nohtsol_baidal"
+                                            id="id_nohtsol_baidal"
                                             type="textarea"
                                         />
                                         <ErrorMessage name="nohtsol_baidal" component="div" className="invalid-feedback"/>
@@ -473,7 +474,7 @@ export class FormTseg extends Component {
                                             id >= 0 ? 
                                             zurag_hol_prev ?
                                             <center><img src={zurag_hol_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
+                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -496,7 +497,7 @@ export class FormTseg extends Component {
                                             ? 
                                             zurag_oir_prev ?
                                             <center><img src={zurag_oir_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
+                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -527,7 +528,7 @@ export class FormTseg extends Component {
                                             ? 
                                             zurag_baruun_prev ?
                                             <center><img src={zurag_baruun_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
+                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -550,7 +551,7 @@ export class FormTseg extends Component {
                                             ? 
                                             zurag_zuun_prev ?
                                             <center><img src={zurag_zuun_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
+                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -582,7 +583,7 @@ export class FormTseg extends Component {
                                             ? 
                                             zurag_hoid_prev ?
                                             <center><img src={zurag_hoid_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
+                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -605,7 +606,7 @@ export class FormTseg extends Component {
                                             ? 
                                             zurag_omno_prev ?
                                             <center><img src={zurag_omno_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
+                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -621,7 +622,7 @@ export class FormTseg extends Component {
                                                     touched.sergeeh_sanal ? ' is-invalid' : '')}
                                             as="select"
                                             name='sergeeh_sanal'
-                                            id="sergeeh_sanal"
+                                            id="id_sergeeh_sanal"
                                             type="textarea"
                                         >
                                             <option value="">--- Сонгоно уу ---</option>

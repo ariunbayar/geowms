@@ -1064,18 +1064,6 @@ def tsegPersonalSearch(request, payload):
 
 @require_POST
 @ajax_required
-def checkDan(request):
-    user_id = request.user.id
-    users = get_object_or_404(User,id=user_id)
-    isDan = users.is_sso
-    if isDan:
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
-
-
-@require_POST
-@ajax_required
 def tsegPersonalSuccess(request, payload):
     try:
         point_type = int(payload.get('point_type'))
