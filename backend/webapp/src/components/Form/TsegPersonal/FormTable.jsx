@@ -47,7 +47,6 @@ export default class FormTable extends Component {
         return (
             <tr>
                 <th>{idx + 1}</th>
-                <th>{objectid}</th>
                 <th>{point_name}</th>
                 <th>{pid}</th>
                 <th>{point_class}</th>
@@ -55,7 +54,6 @@ export default class FormTable extends Component {
                 <th>{center_typ}</th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
-                <th>{t_type}</th>
                 <th>
                     <NavLink to={`/back/froms/tseg-personal/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>

@@ -4,6 +4,9 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import {History} from './history'
 
 import {Info} from './information/info'
+import { DanForm } from './TsegUstsan/DanForm';
+import Forms from './TsegPersonal/Form'
+
 export class App extends Component {
 
     render() {
@@ -24,6 +27,16 @@ export class App extends Component {
                                         Худалдан авалт
                                     </div>
                                 </NavLink>
+                                <NavLink className="menu" exact to={`/profile/tseg-ustsan/`} activeClassName="active">
+                                    <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
+                                        Цэг устсан хүсэлт
+                                    </div>
+                                </NavLink>
+                                <NavLink className="menu" exact to={`/profile/tseg-personal/`} activeClassName="active">
+                                    <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
+                                        Цэг бүртгэлийн хүсэлт.
+                                    </div>
+                                </NavLink>
                             </div>
                         </div>
                     </div>
@@ -31,6 +44,9 @@ export class App extends Component {
                         <Switch>
                             <Route path="/profile/all/" component={History}/>
                             <Route path="/profile/api/" component={Info}/>
+                            <Route path="/profile/tseg-ustsan/" component={DanForm}/>
+                            <Route path="/profile/tseg-personal/" component={Forms}/>
+
                         </Switch>
                     </div>
                 </div>

@@ -32,7 +32,6 @@ export const service = {
     tsegustsanEdit,
     updateTseg,
     searchTseg,
-    checkDan,
     tsegPersonalSuccess,
 }
 function all() {
@@ -275,13 +274,6 @@ function searchTseg(query){
         body: JSON.stringify({query}),
     }
     return fetch(`${prefix}/tseg-personal/search/`, opts).then(handleResponse)
-}
-
-function checkDan(){
-    const opts = {
-        ...getPostOptions(),
-    }
-    return fetch(`${prefix}/check-dan/`, opts).then(handleResponse)
 }
 
 function tsegPersonalSuccess(point_type, objectid, point_class){

@@ -12,7 +12,6 @@ from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 import math
 import pyproj
-import psycopg2
 import uuid
 # Create your models here.
 
@@ -531,12 +530,26 @@ def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     tseg_display = []
     tseg = TsegPersonal.objects.filter(id = pk).first()
-    data = Mpoint.objects.using('postgis_db').filter(id=pk).first()
+    data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
+
+
+    LA = int(float(tseg.latlongx))
+    LB = int((float(tseg.latlongx)-LA)*60)
+    LC = float("{:.6f}".format(((float(tseg.latlongx))-LA-LB/60)*3600 ))
+    BA = int(float(tseg.latlongy))
+    BB = int((float(tseg.latlongy)-BA)*60)
+    BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
+    
+    
     tseg_display.append({
-        'utmx': tseg.utmx,
-        'utmy': tseg.utmy,
         'latlongx': tseg.latlongx,
         'latlongy': tseg.latlongy,
+        'LA':LA,
+        'LB':LB,
+        'LC':LC,
+        'BA':BA,
+        'BB':BB,
+        'BC':BC,
         'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg.tseg_oiroos_img_url else '',
         'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg.tseg_holoos_img_url else '',
         'barishil_tuhai': tseg.barishil_tuhai,
@@ -550,6 +563,7 @@ def tsegPersonalUpdate(request, payload):
         'file_path2': tseg.file_path2.name if tseg.file_path2 else '',
         'alban_tushaal': tseg.alban_tushaal,
         'alban_baiguullga': tseg.alban_baiguullga,
+        'suljeenii_torol': tseg.suljeenii_torol,
         'id': data.id,
         'objectid': data.objectid,
         'point_id': data.point_id,
@@ -578,13 +592,6 @@ def findSum(request, payload):
     info = []
     L = payload.get("y")
     B = payload.get("x")
-    if(44 <= B <= 48):
-        vseg = "L"
-    elif(48 <= B <= 52):
-        vseg = "M"
-    elif(52 <= B <= 56):
-        vseg = "N"
-
     cursor = connections['postgis_db'].cursor()
     cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [L, B])
     geom = cursor.fetchone()
@@ -596,14 +603,54 @@ def findSum(request, payload):
     outproj = pyproj.Proj(outstr)
 
     val= pyproj.transform(inproj, outproj, L,B)
+
+    Brange=[40,44,48,52,56]
+    Letter=['K','L','M','N','O']
+    for k in Brange:
+        if k>B:
+            ind=Brange.index(k)
+            B0=Letter[ind-1]
+            Bmin=Brange[ind-1]
+            break
+        else:
+            B0 = "aldaa"
+
+    zone=int(L/6)+31
+    Lmin=(zone-30)*6-6
+
+    c=0
+    while Lmin<L:
+        Lmin=Lmin+0.5
+        c=c+1
+    cc=0
+    while Bmin<B:
+        Bmin=Bmin+1/3
+        cc=cc+1
+
+        
+    cc = (12-cc)*12+c
+
+    LA = int(L)
+    LB = int((L-LA)*60)
+    LC = float("{:.6f}".format((L-LA-LB/60)*3600 ))
+
+    BA = int(B)
+    BB = int((B-BA)*60)
+    BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
     info.append({
         'aimag': geom[0],
         'sum': geom[1],
-        'E': val[0],
-        'N': val[1],
-        "vseg": vseg
-
+        "vseg": B0,
+        'zone': zone,
+        'cc': cc,
+        'BA': BA,
+        'BB': BB,
+        'BC': BC,
+        'LA': LA,
+        'LB': LB,
+        'LC': LC
     })
+
     return JsonResponse({"info":info})
 
 
@@ -611,12 +658,14 @@ def findSum(request, payload):
 @ajax_required
 def tsegPersonal(request):
     pk = request.POST.get('idx')
+    point_id = request.POST.get('toviin_dugaar')
+    if(len(point_id)<4):
+        point_id.zfill(4)
     if pk:
         date = None
         tseg_personal = get_object_or_404(TsegPersonal, id=pk)
         if request.POST.get('date'):
             date = request.POST.get('date')
-        objectid = float(request.POST.get('toviin_dugaar'))
         x = float(request.POST.get('latlongx'))
         y = float(request.POST.get('latlongy'))
         cursor = connections['postgis_db'].cursor()
@@ -627,13 +676,14 @@ def tsegPersonal(request):
         update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, pk])
 
         Mpoint.objects.using('postgis_db').filter(id=pk).update(
-                    objectid=objectid ,point_id="null",
+                    objectid="null" ,point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
                     pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
-                    sheet3=request.POST.get('latlongy'), t_type='g109',
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
+                    sheet3=request.POST.get('LA'), t_type='g109',
         )
+
         TsegPersonal.objects.filter(id=pk).update(
 
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
@@ -678,18 +728,16 @@ def tsegPersonal(request):
         return JsonResponse({'success': True, 'name': False, 'ids':False})
     else:
         tesgiin_ner = request.POST.get('tesgiin_ner')
-        objectid = int(request.POST.get('toviin_dugaar'))
+        objectid = request.POST.get('toviin_dugaar')
         tesgiin_ner_check = Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
-        objectid_check = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
+        objectid_check = Mpoint.objects.using('postgis_db').filter(point_id=objectid)
         if tesgiin_ner_check or objectid_check:
             name = False
             ids = False
             if tesgiin_ner_check:
                 name = True
-
             if objectid_check:
                 ids = True
-
             return JsonResponse({'success': False, 'name': name, 'ids':ids})
         Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
         date = None
@@ -731,14 +779,15 @@ def tsegPersonal(request):
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        
         mpoint = Mpoint.objects.using('postgis_db').create(
-                    id=unique_id, objectid=objectid ,point_id="null",
+                    id=unique_id, 
+                    objectid='null', point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
-                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), 
+                    center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
-                    sheet3=request.POST.get('latlongy'), t_type='g109',
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
+                    sheet3=request.POST.get('LA'), t_type='g109',
         )
         update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, str(unique_id)])
 
@@ -1094,22 +1143,10 @@ def tsegPersonalSearch(request, payload):
 
 @require_POST
 @ajax_required
-def checkDan(request):
-    user_id = request.user.id
-    users = get_object_or_404(User,id=user_id)
-    isDan = users.is_sso
-    if isDan:
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
-
-
-@require_POST
-@ajax_required
 def tsegPersonalSuccess(request, payload):
     try:
         point_type = int(payload.get('point_type'))
-        objectid = int(payload.get('objectid'))
+        objectid = payload.get('objectid')
         point_class = int(payload.get('point_class'))
         mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
         if point_class == point_type:
