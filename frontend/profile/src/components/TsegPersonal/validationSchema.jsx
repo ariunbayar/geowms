@@ -9,9 +9,6 @@ export const validationSchema = object().shape({
     toviin_dugaar: string()
         .max(4, '4-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
-    pid: string()
-        .max(20, '20-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
     suljeenii_torol: string()
         .required('Хоосон байна!'),
     center_typ: string()
