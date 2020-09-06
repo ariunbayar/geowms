@@ -871,7 +871,21 @@ def hureeCreate(request, payload):
     # cursor = connections['postgis_db'].cursor()
     # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
     # geom = 
+    
+
+    geom= "0101000020E61000003AE8120EBD67474036583849F3675940"
+
     TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
+    huree_all = TuuhSoyolHuree.objects.filter(tuuh_soyl = dursgalt_id).distinct('tuuh_soyl_huree_id')
+    for huree in huree_all:
+        print(huree.x)
+        print(huree.y)
+    print(huree_all)
+    # check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    # if not check:
+    #     TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = idx, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    # update_cursor = connections['postgis_db'].cursor()
+    # update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, idx])
     
     return JsonResponse({'success': True})
 
@@ -949,12 +963,13 @@ def ayulHureeCreate(request, payload):
     # xy_array = [ '95 102' , '12 , 123']
     # cursor.execute('''SELECT ST_MakePolygon( ST_AddPoint(foo.open_line, ST_StartPoint(foo.open_line)) ) FROM (SELECT ST_GeomFromText('LINESTRING(%s)') As open_line) As foo;''', [xy_array]) 
     # geom = cursor.fetchone()
+    geom= "0101000020E61000003AE8120EBD67474036583849F3675940"
     TuuhSoyolAyuulHuree.objects.create(tuuh_soyl = idx, x=x, y=y)
-    # check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
-    # if not check:
-    #     TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx)
-    # update_cursor = connections['postgis_db'].cursor()
-    # update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, idx])
+    check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
+    if not check:
+        TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx)
+    update_cursor = connections['postgis_db'].cursor()
+    update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, idx])
 
     return JsonResponse({'success': True})
 

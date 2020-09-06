@@ -41,7 +41,7 @@ export class FormList extends Component {
 
                     <div className="col-md-12">
                         <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/tuuhen-ov/add/`}>
+                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/add/`}>
                                 Нэмэх
                             </NavLink>
                         </div>
