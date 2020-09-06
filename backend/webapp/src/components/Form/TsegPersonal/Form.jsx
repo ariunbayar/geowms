@@ -212,13 +212,9 @@ export class Forms extends Component {
                             pid: item.pid,
                             toviin_dugaar: item.point_id,
                             center_typ: item.center_typ,
-                            latlongx: item.sheet2,
-                            latlongy: item.sheet3,
                             suljeenii_torol: item.suljeenii_torol,
                             utmx: item.utmx,
                             utmy: item.utmy,
-                            latlongx: item.latlongx,    
-                            latlongy: item.latlongy,
                             sudalga_or_shine: item.sudalga_or_shine,
                             hors_shinj_baidal: item.hors_shinj_baidal,
                             date: item.date,
@@ -232,6 +228,8 @@ export class Forms extends Component {
                         BA:item.BA,
                         BB:item.BB,
                         BC:item.BC,
+                        latlongx: item.latlongx,    
+                        latlongy: item.latlongy,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
                         trapetsiin_dugaar: item.point_type,
@@ -616,6 +614,7 @@ export class Forms extends Component {
                                         <input
                                             type="file"
                                             className={'form-control ' + (this.state.file_path1_error > 0 ? 'is-invalid' : '')}
+                                            disabled={values.suljeenii_torol == '1' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                         />
                                         {this.state.file_path1_error > 0 ? 
@@ -638,9 +637,9 @@ export class Forms extends Component {
                                             type="file"
                                             className="form-control"
                                             className={'form-control ' + (this.state.file_path2_error > 0 ? 'is-invalid' : '')}
+                                            disabled={values.suljeenii_torol == '1' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                         />
-                                        
                                         {this.state.file_path2_error > 0 ? 
                                         <ul className="text-danger">
                                             <li>XXXXDDDS.YYo</li>

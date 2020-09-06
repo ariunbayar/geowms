@@ -755,9 +755,11 @@ def tsegPersonal(request):
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
         mpoint = Mpoint.objects.using('postgis_db').create(
-                    id=unique_id, objectid='null', point_id=point_id,
+                    id=unique_id, 
+                    objectid='null', point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
-                    pid=request.POST.get('pid'), point_class=8, point_type='M', center_typ=request.POST.get('center_typ'),
+                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), 
+                    center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
                     sheet3=request.POST.get('LA'), t_type='g109',
