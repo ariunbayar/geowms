@@ -506,10 +506,24 @@ def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     tseg_display = []
     tseg = TsegPersonal.objects.filter(id = pk).first()
-    data = Mpoint.objects.using('postgis_db').filter(id=pk).first()
+    data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
+    LA = int(float(tseg.latlongy))
+    LB = int((float(tseg.latlongy)-LA)*60)
+    LC = float("{:.6f}".format(((float(tseg.latlongy))-LA-LB/60)*3600 ))
+    BA = int(data.sheet2)
+    BB = int((data.sheet2-BA)*60)
+    BC = (float(data.sheet2)-BA-BB/60)*3600 
+    print("L", LA,LB, LC, )
+    print("B", BA,BB, BC, )
     tseg_display.append({
         'latlongx': tseg.latlongx,
         'latlongy': tseg.latlongy,
+        'LA':LA,
+        'LB':LB,
+        'LC':LC,
+        'BA':BA,
+        'BB':BB,
+        'BC':BC,
         'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg.tseg_oiroos_img_url else '',
         'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg.tseg_holoos_img_url else '',
         'barishil_tuhai': tseg.barishil_tuhai,
@@ -633,6 +647,9 @@ def tsegPersonal(request):
             date = request.POST.get('date')
         x = float(request.POST.get('latlongx'))
         y = float(request.POST.get('latlongy'))
+        print("x,y", x,y)
+        print("x,y", x,y)
+        print("x,y", x,y)
         cursor = connections['postgis_db'].cursor()
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
@@ -648,6 +665,7 @@ def tsegPersonal(request):
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
                     sheet3=request.POST.get('latlongy'), t_type='g109',
         )
+
         TsegPersonal.objects.filter(id=pk).update(
 
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
@@ -694,10 +712,6 @@ def tsegPersonal(request):
         tesgiin_ner = request.POST.get('tesgiin_ner')
         objectid = request.POST.get('toviin_dugaar')
         tesgiin_ner_check = Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
-        print("tesgiiner1", tesgiin_ner)
-        print("tesgiiner1", tesgiin_ner)
-        print("tesgiiner1", tesgiin_ner)
-        print("tesgiiner1", tesgiin_ner)
         objectid_check = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
         if tesgiin_ner_check or objectid_check:
             name = False
@@ -706,10 +720,6 @@ def tsegPersonal(request):
                 name = True
             if objectid_check:
                 ids = True
-            print("name1", name)
-            print("name1", name)
-
-            print("name1", name)
             return JsonResponse({'success': False, 'name': name, 'ids':ids})
         Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
         date = None

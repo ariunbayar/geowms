@@ -141,7 +141,6 @@ export class Forms extends Component {
         setStatus('checking')
         setSubmitting(true)
         const form_datas = new FormData() 
-
         this.setState({values})
         const latlongx = ((this.state.BA+(this.state.BB/60))+((this.state.BC/3600)*60))
         const latlongy = ((this.state.LA+(this.state.LB/60))+((this.state.LC/3600)*60))
@@ -216,7 +215,7 @@ export class Forms extends Component {
                             center_typ: item.center_typ,
                             latlongx: item.sheet2,
                             latlongy: item.sheet3,
-                            suljeenii_torol: item.point_type,
+                            suljeenii_torol: item.suljeenii_torol,
                             utmx: item.utmx,
                             utmy: item.utmy,
                             latlongx: item.latlongx,    
@@ -228,6 +227,12 @@ export class Forms extends Component {
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
                         },
+                        LA:item.LA,
+                        LB:item.LB,
+                        LC:item.LC,
+                        BA:item.BA,
+                        BB:item.BB,
+                        BC:item.BC,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
                         trapetsiin_dugaar: item.point_type,
@@ -249,6 +254,7 @@ export class Forms extends Component {
     }
 
     render() {
+
         return (
         <Formik
             enableReinitialize
