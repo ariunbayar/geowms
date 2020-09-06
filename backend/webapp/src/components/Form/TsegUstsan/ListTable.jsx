@@ -58,8 +58,8 @@ export default class ListTable extends Component {
                     <Modal
                         modalClose={this.handleModalDeleteClose}
                         modalAction={this.props.handleTsegDelete}
-                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                        title="Тохиргоог устгах"
+                        text={`Та "${name}" устгахдаа итгэлтэй байна уу?`}
+                        title="Устгах"
                     />
                 }
             </td>

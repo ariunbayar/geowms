@@ -1,8 +1,9 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from '../service'
+import {service} from './service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaDan} from './validationSchema'
+
 export class DanForm extends Component {
 
     constructor(props) {
@@ -11,7 +12,6 @@ export class DanForm extends Component {
         this.datalist = []
         this.error_msg = []
         this.state = {
-            id: -1,
             values:{
                 oiroltsoo_bairlal: '',
                 evdersen_baidal: '',
@@ -47,24 +47,16 @@ export class DanForm extends Component {
         this.onDrop = this.onDrop.bind(this)
         this.handleCheck = this.handleCheck.bind(this)
         this.handleCheckGroup = this.handleCheckGroup.bind(this)
-        this.handleGetAll=this.handleGetAll.bind(this)
         this.handleSearchWithTseg = this.handleSearchWithTseg.bind(this)
         this.optionVal = this.optionVal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.checkAldaa = this.checkAldaa.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
-        this.checkUser = this.checkUser.bind(this)
     }
 
     componentDidMount(){
         this._isMounted = true;
-        const id = this.props.match.params.id
-        if(id){
-            this._isMounted && this.setState({id})
-        }
-        this._isMounted && this.handleGetAll(id)
-        this.checkUser()
         setTimeout(() => {
             this._isMounted && this.setState({ showBox: false })
         }, 1500);
@@ -86,7 +78,7 @@ export class DanForm extends Component {
         else{
             this.error_msg = []
         }
-        if(e.target.value.length > 2){
+        if(e.target.value.length > 1){
             this.error_msg = []
             service.searchTseg(e.target.value).then(({items}) => {
                 
@@ -118,58 +110,11 @@ export class DanForm extends Component {
         }
     }
 
-    async handleGetAll(id){
-        if(id){
-            this._isMounted && this.setState({id})
-            service.tsegustsanEdit(id).then(({ form_data }) => {
-                if (form_data) {
-                    form_data.map((tseg, key) => {
-                        this._isMounted && this.setState({
-                            values:{
-                                oiroltsoo_bairlal:tseg.oiroltsoo_bairlal,
-                                evdersen_baidal:tseg.evdersen_baidal,
-                                nohtsol_baidal:tseg.nohtsol_baidal,
-                                sergeeh_sanal: tseg.sergeeh_sanal,
-                            },
-                            tsegiin_dugaar:tseg.tseg_id,
-                            hemjilt_hiih_bolomj: tseg.gps_hemjilt,
-                            zurag_hol_prev: tseg.img_holoos,
-                            zurag_oir_prev: tseg.img_oiroos,
-                            zurag_baruun_prev: tseg.img_baruun,
-                            zurag_zuun_prev: tseg.img_zuun,
-                            zurag_hoid_prev: tseg.img_hoino,
-                            zurag_omno_prev: tseg.img_omno,
-                            zurag_hol: tseg.img_holoos,
-                            zurag_oir: tseg.img_oiroos,
-                            zurag_baruun: tseg.img_baruun,
-                            zurag_zuun: tseg.img_zuun,
-                            zurag_hoid: tseg.img_hoino,
-                            zurag_omno: tseg.img_omno,
-                            edit:true,
-                            checkError:[]
-                        })
-                    })
-                }
-            })
-        }
-    }
-
-    checkUser(){
-        service.checkDan().then(({success}) => {
-            this.setState({ is_dan: success })
-        })
-    }
-
     handleSubmit(values, { setStatus, setSubmitting }){
         setStatus('checking')
         setSubmitting(true)
         const form_datas = new FormData() 
         this.setState({values})
-        const is_dan = this.state.is_dan
-        if (is_dan == true) {
-            form_datas.append('is_dan', this.state.is_dan)
-        }
-        form_datas.append('id', this.state.id)
         form_datas.append('tsegiin_dugaar', this.state.tsegiin_dugaar)
         form_datas.append('oiroltsoo_bairlal', values.oiroltsoo_bairlal)
         form_datas.append('evdersen_baidal', values.evdersen_baidal)
@@ -188,7 +133,11 @@ export class DanForm extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                 }, 1000)
-                this.props.history.push( `/back/froms/tseg-ustsan/`)
+                this.props.history.push( `/profile/api/`)
+            }
+            if(!success){
+                setStatus('failed')
+                setSubmitting(false)
             }
         })
     }
@@ -254,13 +203,18 @@ export class DanForm extends Component {
                     const error_bn = Object.keys(checkError).length > 0
                     return (
                     <Form>
-                        <div className="row container  my-4">
-                        <div className="col-md-12 mb-4">
-                            <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </a>
+                        <div className="container border-top">
+                            
+                        <div>
+                            <div className="col-md-12 mb-4">
+                                <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                                </a>
+                                <div className="float-right h4">Цэгийн мэдээлэл</div>
+                            </div>
+                            
                         </div>
-                        <h4>Цэгийн мэдээлэл</h4>
+                       
                         <table className="table table-bordered">
                             <tbody>
                                 <tr>
@@ -274,7 +228,6 @@ export class DanForm extends Component {
                                             list="tsegList"
                                             className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
                                             onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
-                                            value = {this.state.tsegiin_dugaar}
                                         />
                                         {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
                                         {this.error_msg}
@@ -308,17 +261,15 @@ export class DanForm extends Component {
                                                 (errors.evdersen_baidal && 
                                                     touched.evdersen_baidal ? ' is-invalid' : '')} 
                                         >
-                                            <option>--- Сонгоно уу ---</option>
-                                            <option>Эвдэрсэн</option>
-                                            <option>Төв гэмтсэн</option>
-                                            <option>Хазайсан</option>
-                                            <option>Дарагдсан</option>
+                                            <option value="">--- Сонгоно уу ---</option>
+                                            <option value="Эвдэрсэн">Эвдэрсэн</option>
+                                            <option value="Төв гэмтсэн">Төв гэмтсэн</option>
+                                            <option value="Хазайсан">Хазайсан</option>
+                                            <option value="Дарагдсан">Дарагдсан</option>
                                         </Field>
                                         <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
                                     </td>
                                 </tr>
-
-
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">4.</th>
                                     <th style={{width: "15%"}}>Нөхцөл/шалтгаан:</th>
@@ -344,6 +295,10 @@ export class DanForm extends Component {
                                         style={{width: "15%"}}
                                     >
                                         Орчны фото зураг:
+                                        <i className="fa pl-5">
+                                            
+                                           
+                                        </i>
                                         <div 
                                             type="button" 
                                             onMouseOver={(e) => this.handleBoxOver(e)}
@@ -351,11 +306,12 @@ export class DanForm extends Component {
                                             className="float-right"
                                         >
                                         <i className="fa fa-exclamation-circle float-right">
-                                            <div
-                                                className={`p-3 mb-2 bg-secondary text-white rounded `+
-                                                    `position-absolute d-none ${this.state.showBox ? " d-block" : ""}`}
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox ? " d-block" : ""}`}
+                                                        role="alert"
                                             >
-                                                300x300 байх шаардлагатай .jpg .png байх ёстой
+                                                <h6 className="alert-heading">Санамж!</h6>
+                                                <p>".jpeg" болон ".png" байх ёстой</p>
                                             </div>
                                         </i>
                                         </div>
@@ -381,14 +337,6 @@ export class DanForm extends Component {
                                             fileSizeError='Хэт их байна'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
-                                        {
-                                            id >= 0 ? 
-                                            zurag_hol_prev ?
-                                            <center><img src={zurag_hol_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
-                                            :
-                                            null
-                                        }
                                     </th>
                                     <th colSpan="2" scope="rowgroup">
                                         <ImageUploader
@@ -403,15 +351,6 @@ export class DanForm extends Component {
                                             fileSizeError='Хэт их байна'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
-                                        {
-                                            id >= 0 
-                                            ? 
-                                            zurag_oir_prev ?
-                                            <center><img src={zurag_oir_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
-                                            :
-                                            null
-                                        }
                                     </th>
                                 </tr>
                                 <tr>
@@ -434,15 +373,6 @@ export class DanForm extends Component {
                                             fileSizeError='Хэт их байна'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
-                                        {
-                                            id >= 0 
-                                            ? 
-                                            zurag_baruun_prev ?
-                                            <center><img src={zurag_baruun_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
-                                            :
-                                            null
-                                        }
                                     </th>
                                     <th colSpan="2" scope="rowgroup">
                                         <ImageUploader
@@ -457,16 +387,6 @@ export class DanForm extends Component {
                                             fileSizeError='Хэт их байна'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
-                                        {
-                                            id >= 0 
-                                            ? 
-                                            zurag_zuun_prev ?
-                                            <center><img src={zurag_zuun_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
-                                            :
-                                            null
-                                        }
-                                        
                                     </th>
                                 </tr>
                                 <tr>
@@ -489,15 +409,6 @@ export class DanForm extends Component {
                                             fileSizeError='Хэт их байна'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
-                                        {
-                                            id >= 0 
-                                            ? 
-                                            zurag_hoid_prev ?
-                                            <center><img src={zurag_hoid_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
-                                            :
-                                            null
-                                        }
                                     </th>
                                     <th colSpan="2" scope="rowgroup">
                                         <ImageUploader
@@ -512,15 +423,6 @@ export class DanForm extends Component {
                                             fileSizeError='Хэт их байна'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
-                                        {
-                                            id >= 0 
-                                            ? 
-                                            zurag_omno_prev ?
-                                            <center><img src={zurag_omno_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-danger">Зураг байхгүй байна.</label></center>
-                                            :
-                                            null
-                                        }
                                     </th>
                                 </tr>
                                 <tr>
@@ -536,11 +438,11 @@ export class DanForm extends Component {
                                             id="sergeeh_sanal"
                                             type="textarea"
                                         >
-                                            <option>--- Сонгоно уу ---</option>
-                                            <option>Шаардлагагүй</option>
-                                            <option>Сэргээх</option>
-                                            <option>Шилжүүлэх</option>
-                                            <option>Шинээр байгуулах</option>
+                                            <option value="">--- Сонгоно уу ---</option>
+                                            <option value="Шаардлагагүй">Шаардлагагүй</option>
+                                            <option value="Сэргээх">Сэргээх</option>
+                                            <option value="Шилжүүлэх">Шилжүүлэх</option>
+                                            <option value="Шинээр байгуулах">Шинээр байгуулах</option>
                                         </Field>
                                         <ErrorMessage name="sergeeh_sanal" component="div" className="invalid-feedback"/>
                                     </td>
@@ -552,22 +454,23 @@ export class DanForm extends Component {
                                         <div className="col-md-12">
                                             <input 
                                                 type="checkbox" 
+                                                id="hemjilt_hiih_bolomj1"
                                                 checked={this.state.hemjilt_hiih_bolomj ? true : false}
                                                 onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, true)}
-                                                value={this.state.hemjilt_hiih_bolomj}
                                             ></input>
-                                            <label>Тийм</label>
+                                            <label htmlFor="hemjilt_hiih_bolomj1">Тийм</label>
                                         </div>
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
                                         <div className="col-md-12">
                                             <input 
                                                 type="checkbox" 
+                                                id="hemjilt_hiih_bolomj2"
                                                 checked={this.state.hemjilt_hiih_bolomj ? false : true}
                                                 onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, false)}
-                                                value={this.state.hemjilt_hiih_bolomj}
-                                            ></input>
-                                            <label>Үгүй</label>
+                                            >
+                                            </input>
+                                            <label htmlFor="hemjilt_hiih_bolomj2">Үгүй</label>
                                         </div>
                                     </td>
                                 </tr>
@@ -578,7 +481,7 @@ export class DanForm extends Component {
                             disabled={isSubmitting || has_error || error_bn}>
                             {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                             {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                            {!isSubmitting && (id == -1)?'Нэмэх': 'засах'}
+                            {!isSubmitting && 'Нэмэх'}
                         </button>
                         </div>
                         <datalist id="tsegList">
