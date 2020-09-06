@@ -2,7 +2,7 @@ export const service = {
     paginatedList
 }
 
-function handleResponse(response) {
+export function handleResponse(response) {
     return response.text().then(text => {
         const data = text && JSON.parse(text)
         if (!response.ok) {
@@ -18,7 +18,7 @@ function handleResponse(response) {
     })
 }
 
-function getCookie(name) {
+export function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         var cookies = document.cookie.split(';');
@@ -43,7 +43,7 @@ export function getGetOptions() {
     }
 }
 
-function _getPostOptions() {
+export function getPostOptions() {
     return {
         method: 'POST',
         headers: {
@@ -55,7 +55,7 @@ function _getPostOptions() {
 
 function paginatedList(page, per_page) {
     const requestOptions = {
-        ..._getPostOptions(),
+        ...getPostOptions(),
     body: JSON.stringify({ page, per_page }),
     }
 
