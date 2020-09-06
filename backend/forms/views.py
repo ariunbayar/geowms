@@ -623,14 +623,14 @@ def findSum(request, payload):
 @ajax_required
 def tsegPersonal(request):
     pk = request.POST.get('idx')
+    point_id = request.POST.get('toviin_dugaar')
+    if(len(point_id)<4):
+        point_id.zfill(4)
     if pk:
         date = None
         tseg_personal = get_object_or_404(TsegPersonal, id=pk)
         if request.POST.get('date'):
             date = request.POST.get('date')
-        point_id = request.POST.get('toviin_dugaar')
-        if(len(point_id)<4):
-            point_id.zfill(4)
         x = float(request.POST.get('latlongx'))
         y = float(request.POST.get('latlongy'))
         cursor = connections['postgis_db'].cursor()
@@ -694,6 +694,10 @@ def tsegPersonal(request):
         tesgiin_ner = request.POST.get('tesgiin_ner')
         objectid = request.POST.get('toviin_dugaar')
         tesgiin_ner_check = Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
+        print("tesgiiner1", tesgiin_ner)
+        print("tesgiiner1", tesgiin_ner)
+        print("tesgiiner1", tesgiin_ner)
+        print("tesgiiner1", tesgiin_ner)
         objectid_check = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
         if tesgiin_ner_check or objectid_check:
             name = False
@@ -702,6 +706,10 @@ def tsegPersonal(request):
                 name = True
             if objectid_check:
                 ids = True
+            print("name1", name)
+            print("name1", name)
+
+            print("name1", name)
             return JsonResponse({'success': False, 'name': name, 'ids':ids})
         Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
         date = None
@@ -743,11 +751,10 @@ def tsegPersonal(request):
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        
         mpoint = Mpoint.objects.using('postgis_db').create(
-                    id=unique_id, objectid='null' ,point_id=point_id,
+                    id=unique_id, objectid='null', point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
-                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                    pid=request.POST.get('pid'), point_class=8, point_type='M', center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
                     sheet3=request.POST.get('latlongy'), t_type='g109',

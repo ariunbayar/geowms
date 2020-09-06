@@ -145,12 +145,13 @@ export class Forms extends Component {
         this.setState({values})
         const latlongx = ((this.state.BA+(this.state.BB/60))+((this.state.BC/3600)*60))
         const latlongy = ((this.state.LA+(this.state.LB/60))+((this.state.LC/3600)*60))
+        const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
-        form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
+        form_datas.append('tesgiin_ner', this.state.values.tesgiin_ner)
         form_datas.append('idx', this.state.id)
         form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
-        form_datas.append('trapetsiin_dugaar', this.state.values.trapetsiin_dugaar)
+        form_datas.append('trapetsiin_dugaar', trapetsiin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
@@ -249,7 +250,6 @@ export class Forms extends Component {
     }
 
     render() {
-        console.log("")
         return (
         <Formik
             initialValues={this.state.values}
@@ -293,7 +293,6 @@ export class Forms extends Component {
                                             name='tesgiin_ner'
                                             id="id_tesgiin_ner"
                                             type="text"
-                                            defaultValue={this.state.values.tesgiin_ner}
                                         />
                                         <ErrorMessage name="tesgiin_ner" component="div" className="invalid-feedback"/>
                                             {this.state.name_error ? <a className='text-danger'>Давхцаж байна.</a> : null}
