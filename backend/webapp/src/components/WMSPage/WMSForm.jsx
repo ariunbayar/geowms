@@ -226,12 +226,6 @@ export class WMSForm extends Component {
 
 
                                 <dl>
-                                    <dt> Endpoint </dt>
-                                    <dd>
-                                        {this.state.id && this.state.public_url}
-                                        {!this.state.id && 'Хадгалсаны дараагаар Endpoint URL үүснэ!'}
-                                    </dd>
-
                                     <dt> Давхаргууд </dt>
                                     <dd>
                                         {this.state.id && this.state.layer_choices.map((layer, idx) =>

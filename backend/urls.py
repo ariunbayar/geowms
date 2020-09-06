@@ -55,6 +55,7 @@ urlpatterns = [
 
     path('api/суурь-давхарга/', include(([
         path('', суурь_давхарга.жагсаалт, name=''),
+        path('wms-preview/<int:pk>/', суурь_давхарга.wms_preview, name='wms-preview'),
         path('үүсгэх/', суурь_давхарга.үүсгэх, name='үүсгэх'),
         path('move/', суурь_давхарга.move, name='move'),
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),

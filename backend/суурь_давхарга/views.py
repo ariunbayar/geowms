@@ -1,8 +1,9 @@
 import json
+import requests
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, reverse
 
 from main.utils import resize_b64_to_sizes
@@ -10,7 +11,7 @@ from .models import BaseLayer
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 
 
@@ -24,6 +25,7 @@ def _get_base_layer_display(base_layer):
     }
 
 
+@require_GET
 @user_passes_test(lambda u: u.is_superuser)
 def жагсаалт(request):
 
@@ -31,14 +33,14 @@ def жагсаалт(request):
 
     wms_list = []
 
-    for wms in WMS.objects.all():
+    for wms in WMS.objects.filter(is_active=True):
         layers = []
         for layer in WMSLayer.objects.filter(wms=wms):
             layers.append(layer.code)
 
         wms_list.append({
             'name': wms.name,
-            'url': request.build_absolute_uri(reverse('api:service:wms_proxy', args=[wms.pk])),
+            'url': request.build_absolute_uri(reverse('backend:суурь-давхарга:wms-preview', args=[wms.pk])),
             'layers': layers,
         })
 
@@ -48,6 +50,25 @@ def жагсаалт(request):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@user_passes_test(lambda u: u.is_superuser)
+def wms_preview(request, pk):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+
+    wms = get_object_or_404(WMS, pk=pk)
+
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    rsp = requests.get(wms.url, queryargs, headers=headers)
+
+    content_type = rsp.headers.get('content-type')
+
+    return HttpResponse(rsp.content, content_type=content_type)
 
 
 @require_POST

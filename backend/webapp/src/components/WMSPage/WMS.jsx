@@ -57,7 +57,7 @@ export default class WMS extends Component {
 
     render() {
 
-        const {id, name, url, public_url, created_at} = this.props.values
+        const {id, name, url, created_at} = this.props.values
         const {is_active,is_modal_limit_open} = this.state
         const idx=this.props.idx
         return (
@@ -73,9 +73,6 @@ export default class WMS extends Component {
 
                 </td>
 
-                <td>
-                    {public_url}
-                </td>
                 <td>
                     {created_at}
                 </td>

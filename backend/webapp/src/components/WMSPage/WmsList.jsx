@@ -170,7 +170,6 @@ export class WmsList extends Component {
                                 <tr>
                                     <th scope="col"> # </th>
                                     <th scope="col"> Нэр </th>
-                                    <th scope="col"> Endpoint </th>
                                     <th scope="col"> Огноо</th>
                                     <th scope="col"> Идэвхтэй эсэх</th>
                                     <th scope="col"></th>
@@ -193,7 +192,7 @@ export class WmsList extends Component {
                         </table>
                     </div>
                 </div>
-                <Pagination paginate={this.paginate} 
+                <Pagination paginate={this.paginate}
                     searchQuery = { this.state.searchQuery }
                 />
             </div>
