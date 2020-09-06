@@ -9,10 +9,12 @@ export default class FormTable extends Component {
 
         this.state = {
             is_modal_delete_open: false,
+            is_modal_success_open: false,
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.handleModalSuccessOpen = this.handleModalSuccessOpen.bind(this)
     }
 
     handleModalDeleteOpen(event) {
@@ -24,8 +26,19 @@ export default class FormTable extends Component {
         this.setState({is_modal_delete_open: false})
     }
 
+    handleModalSuccessOpen(event) {
+        event.preventDefault()
+        this.setState({is_modal_success_open: true})
+    }
+
+    handleModalSuccessClose() {
+        this.setState({is_modal_success_open: false})
+    }
+
     componentDidUpdate(prevProps){
-        if(prevProps.values !== this.props.values) this.setState({is_modal_delete_open: false})
+        if(prevProps.values !== this.props.values){
+            this.setState({is_modal_delete_open: false, is_modal_success_open: false})
+        } 
     }
 
     render() {
@@ -57,6 +70,20 @@ export default class FormTable extends Component {
                             modalAction={this.props.handleRemove}
                             text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
+                        />
+                    }
+                </th>
+                <th>
+                    <button className="btn gp-btn-primary" onClick={this.handleModalSuccessOpen}>
+                        Баталгаажуулах
+                    </button>
+                    {this.state.is_modal_success_open &&
+                        <Modal
+                            modalClose={this.handleModalSuccessClose}
+                            modalAction={this.props.handleSuccess}
+                            text={`Та "${point_type}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
+                            title="Баталгаажуулах"
+                            actionName="Баталгаажуул"
                         />
                     }
                 </th>

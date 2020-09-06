@@ -12,3 +12,5 @@ cryptography==2.8
 pycrypto==2.6.1
 pycryptodome==3.6.1
 django-easy-audit==1.2.3
+psycopg2==2.8.5
+pyproj==2.5.0

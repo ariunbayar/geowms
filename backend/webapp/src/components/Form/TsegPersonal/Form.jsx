@@ -150,8 +150,8 @@ export class Forms extends Component {
         form_datas.append('file2', this.state.file_path2)
         form_datas.append('tesgiin_ner', this.state.values.tesgiin_ner)
         form_datas.append('idx', this.state.id)
-        form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('trapetsiin_dugaar', trapetsiin_dugaar)
+        form_datas.append('toviin_dugaar', this.state.values.toviin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
@@ -333,13 +333,13 @@ export class Forms extends Component {
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 
                                                 <option>...</option>
-                                                <option>GPS</option>
-                                                <option>GPS1</option>
-                                                <option>GPS2</option>
-                                                <option>GPS3</option>
-                                                <option>GPS4</option>
-                                                <option>GPS5</option>
-                                                <option>GPS6</option>
+                                                <option value="1">GPS</option>
+                                                <option value="2">GPS1</option>
+                                                <option value="3">GPS2</option>
+                                                <option value="4">GPS3</option>
+                                                <option value="5">GPS4</option>
+                                                <option value="6">GPS5</option>
+                                                <option value="7">GPS6</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
                                         </Fragment>
