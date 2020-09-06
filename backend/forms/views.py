@@ -12,7 +12,6 @@ from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 import math
 import pyproj
-import psycopg2
 import uuid
 # Create your models here.
 
@@ -507,14 +506,16 @@ def tsegPersonalUpdate(request, payload):
     tseg_display = []
     tseg = TsegPersonal.objects.filter(id = pk).first()
     data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
-    LA = int(float(tseg.latlongy))
-    LB = int((float(tseg.latlongy)-LA)*60)
-    LC = float("{:.6f}".format(((float(tseg.latlongy))-LA-LB/60)*3600 ))
-    BA = int(data.sheet2)
-    BB = int((data.sheet2-BA)*60)
-    BC = (float(data.sheet2)-BA-BB/60)*3600 
-    print("L", LA,LB, LC, )
-    print("B", BA,BB, BC, )
+
+
+    LA = int(float(tseg.latlongx))
+    LB = int((float(tseg.latlongx)-LA)*60)
+    LC = float("{:.6f}".format(((float(tseg.latlongx))-LA-LB/60)*3600 ))
+    BA = int(float(tseg.latlongy))
+    BB = int((float(tseg.latlongy)-BA)*60)
+    BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
+    
+    
     tseg_display.append({
         'latlongx': tseg.latlongx,
         'latlongy': tseg.latlongy,
@@ -537,6 +538,7 @@ def tsegPersonalUpdate(request, payload):
         'file_path2': tseg.file_path2.name if tseg.file_path2 else '',
         'alban_tushaal': tseg.alban_tushaal,
         'alban_baiguullga': tseg.alban_baiguullga,
+        'suljeenii_torol': tseg.suljeenii_torol,
         'id': data.id,
         'objectid': data.objectid,
         'point_id': data.point_id,
@@ -565,8 +567,6 @@ def findSum(request, payload):
     info = []
     L = payload.get("y")
     B = payload.get("x")
-    print("L", L)
-    print("B", B)
     cursor = connections['postgis_db'].cursor()
     cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [L, B])
     geom = cursor.fetchone()
@@ -592,7 +592,6 @@ def findSum(request, payload):
 
     zone=int(L/6)+31
     Lmin=(zone-30)*6-6
-    #print(Bmin,Lmin)
 
     c=0
     while Lmin<L:
@@ -604,9 +603,7 @@ def findSum(request, payload):
         cc=cc+1
 
         
-   # print(c,cc)
     cc = (12-cc)*12+c
-    print(B0,"-",zone, "-",cc)
 
     LA = int(L)
     LB = int((L-LA)*60)
@@ -615,7 +612,6 @@ def findSum(request, payload):
     BA = int(B)
     BB = int((B-BA)*60)
     BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
-    # butsaj hurwvvleh print("hurwvvlsen", ((BA+(BB/60))+((BC/3600)*60)))
     info.append({
         'aimag': geom[0],
         'sum': geom[1],
@@ -647,9 +643,6 @@ def tsegPersonal(request):
             date = request.POST.get('date')
         x = float(request.POST.get('latlongx'))
         y = float(request.POST.get('latlongy'))
-        print("x,y", x,y)
-        print("x,y", x,y)
-        print("x,y", x,y)
         cursor = connections['postgis_db'].cursor()
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
@@ -662,8 +655,8 @@ def tsegPersonal(request):
                     point_name=request.POST.get('tesgiin_ner'),
                     pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
-                    sheet3=request.POST.get('latlongy'), t_type='g109',
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
+                    sheet3=request.POST.get('LA'), t_type='g109',
         )
 
         TsegPersonal.objects.filter(id=pk).update(
@@ -712,7 +705,7 @@ def tsegPersonal(request):
         tesgiin_ner = request.POST.get('tesgiin_ner')
         objectid = request.POST.get('toviin_dugaar')
         tesgiin_ner_check = Mpoint.objects.using('postgis_db').filter(point_name=tesgiin_ner)
-        objectid_check = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
+        objectid_check = Mpoint.objects.using('postgis_db').filter(point_id=objectid)
         if tesgiin_ner_check or objectid_check:
             name = False
             ids = False
@@ -766,8 +759,8 @@ def tsegPersonal(request):
                     point_name=request.POST.get('tesgiin_ner'),
                     pid=request.POST.get('pid'), point_class=8, point_type='M', center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('latlongx'),
-                    sheet3=request.POST.get('latlongy'), t_type='g109',
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
+                    sheet3=request.POST.get('LA'), t_type='g109',
         )
         update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, str(unique_id)])
 
@@ -1121,7 +1114,7 @@ def tsegPersonalSearch(request, payload):
 def tsegPersonalSuccess(request, payload):
     try:
         point_type = int(payload.get('point_type'))
-        objectid = int(payload.get('objectid'))
+        objectid = payload.get('objectid')
         point_class = int(payload.get('point_class'))
         mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
         if point_class == point_type:

@@ -85,26 +85,26 @@ export class Forms extends Component {
     }
 
     handleXY(values, info){
-        info.map(e=>this.setState({
-            utmx:e.E,
-            utmy:e.N,
-            trapetsiin_dugaar: e.vseg,
-            sum_name:e.sum,
-            cc:e.cc,
-            zone:e.zone,
-            BA:e.BA,
-            BB:e.BB,
-            BC:e.BC,
-            LA:e.LA,
-            LB:e.LB,
-            LC:e.LC
-        }))
         this.setState({
             latlongy:values[0],
             latlongx:values[1],
             aimag_name:info[0]['aimag'],
+            utmx: info[0].E,
+            utmy: info[0].N,
+            trapetsiin_dugaar: info[0].vseg,
+            sum_name: info[0].sum,
+            cc: info[0].cc,
+            zone: info[0].zone,
+            BA: info[0].BA,
+            BB: info[0].BB,
+            BC: info[0].BC,
+            LA: info[0].LA,
+            LB: info[0].LB,
+            LC: info[0].LC
 
         })
+        const barishil_tuhai = info[0]['aimag'] + ', ' + info[0].sum
+        this.setState({barishil_tuhai})
     }
 
     onDrop([icon], name) {
@@ -118,7 +118,6 @@ export class Forms extends Component {
     }
 
     onChangeHandler(e, name){
-        console.log("name", name)
         const file = e.target.files[0]
         var re = /^[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[a-z A-Z 0-9]+[0-9]+[0-9]+[0-9]+[a-z A-Z 0-9]+[.]+[0-9]+[0-9]+[a-z A-Z 0-9]+$/
         this.setState({[name+'_error']: false, [name]: file })
@@ -142,8 +141,6 @@ export class Forms extends Component {
         setSubmitting(true)
         const form_datas = new FormData() 
         this.setState({values})
-        const latlongx = ((this.state.BA+(this.state.BB/60))+((this.state.BC/3600)*60))
-        const latlongy = ((this.state.LA+(this.state.LB/60))+((this.state.LC/3600)*60))
         const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
@@ -158,16 +155,18 @@ export class Forms extends Component {
         form_datas.append('sum_name', this.state.sum_name)
         form_datas.append('utmx', this.state.values.utmx)
         form_datas.append('utmy', this.state.values.utmy)
-        form_datas.append('latlongx', latlongx)
-        form_datas.append('latlongy', latlongy)
+        form_datas.append('latlongx', this.state.latlongx)
+        form_datas.append('latlongy', this.state.latlongy)
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
-        form_datas.append('barishil_tuhai', this.state.values.barishil_tuhai)
+        form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
         form_datas.append('bairshil_tseg_oiroos_img_url', this.state.bairshil_tseg_oiroos_img_url)
         form_datas.append('bairshil_tseg_holoos_img_url', this.state.bairshil_tseg_holoos_img_url)
         form_datas.append('sudalga_or_shine', this.state.values.sudalga_or_shine)
         form_datas.append('hors_shinj_baidal', this.state.values.hors_shinj_baidal)
         form_datas.append('date', this.state.values.date)
+        form_datas.append('BA', this.state.BA)
+        form_datas.append('LA', this.state.LA)
         form_datas.append('hotolson', this.state.values.hotolson)
         form_datas.append('alban_tushaal', this.state.values.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.values.alban_baiguullga)
@@ -212,6 +211,7 @@ export class Forms extends Component {
                             ...this.state.values,
                             tesgiin_ner: item.point_name,
                             pid: item.pid,
+                            toviin_dugaar: item.point_id,
                             center_typ: item.center_typ,
                             latlongx: item.sheet2,
                             latlongy: item.sheet3,
@@ -246,10 +246,9 @@ export class Forms extends Component {
                         file_path11: item.file_path1,
                         file_path22: item.file_path2,
                         
-                    }, ()=>console.log(this.state.values, 'values'))
+                    })
                 )
             }
-            console.log("tseg_display", tseg_display)
         } )
     }
 
@@ -339,13 +338,13 @@ export class Forms extends Component {
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 
                                                 <option>...</option>
-                                                <option value="1">GPS</option>
-                                                <option value="2">GPS1</option>
-                                                <option value="3">GPS2</option>
-                                                <option value="4">GPS3</option>
-                                                <option value="5">GPS4</option>
-                                                <option value="6">GPS5</option>
-                                                <option value="7">GPS6</option>
+                                                <option value="1">GPS-ийн сүлжээний цэг</option>
+                                                <option value="2">Гравиметрийн сүлжээний Цэг</option>
+                                                <option value="3">Өндрийн сүлжээний цэг</option>
+                                                <option value="4">Триангуляцийн сүлжээний цэг</option>
+                                                <option value="5">Полигометрийн сүлжээний цэг</option>
+                                                <option value="6">Зураглалын сүлжээний цэг</option>
+                                                <option value="7">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
                                         </Fragment>
@@ -523,7 +522,7 @@ export class Forms extends Component {
                                             id="id_barishil_tuhai"
                                             type="textarea"
                                             onChange = {(e) => this.handleOnchange(e)}
-                                            value={`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${this.state.barishil_tuhai}`}
+                                            value={this.state.barishil_tuhai}
                                         />
 
                                     </th>

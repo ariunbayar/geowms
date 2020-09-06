@@ -54,7 +54,6 @@ export default class FormTable extends Component {
                 <th>{center_typ}</th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
-                <th>{t_type}</th>
                 <th>
                     <NavLink to={`/back/froms/tseg-personal/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
