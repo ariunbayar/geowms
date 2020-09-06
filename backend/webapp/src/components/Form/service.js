@@ -248,7 +248,7 @@ function tseg_remove(id) {
             ...getPostOptions(),
             body: JSON.stringify({id}),
         }
-        return fetch(`${prefix}/tseg-ustsan_remove/`, opts).then(handleResponse)    
+        return fetch(`${prefix}/tseg-ustsan-remove/`, opts).then(handleResponse)    
 }
 
 

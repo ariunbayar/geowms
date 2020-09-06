@@ -43,7 +43,7 @@ export default class ListTable extends Component {
                     {alban_tushaal}
                 </td>
                 <td>
-                    {utas}
+                    {tseg_id}
                 </td>
                 <td>
                 <NavLink to={`/back/froms/tseg-ustsan/${id}/засах`}>
@@ -52,7 +52,7 @@ export default class ListTable extends Component {
                 </td>
                 <td>
                 <a href="#" onClick={this.handleModalDeleteOpen}>
-                    <i className="fa fa-trash-o" aria-hidden="true"></i>
+                    <i className="fa fa-check" aria-hidden="true"></i>
                 </a>
                 {is_modal_delete_open &&
                     <Modal
@@ -60,6 +60,7 @@ export default class ListTable extends Component {
                         modalAction={this.props.handleTsegDelete}
                         text={`Та "${name}" устгахдаа итгэлтэй байна уу?`}
                         title="Устгах"
+                        actionName="Баталгаажуул"
                     />
                 }
             </td>
