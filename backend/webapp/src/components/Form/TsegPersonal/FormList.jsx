@@ -14,7 +14,7 @@ export class FormList extends Component {
             length:null,
             currentPage:1,
             PerPage:50,
-            searchQuery: 'g109',
+            searchQuery: '',
             query_min: false,
             error: false,
             error_msg: [],
@@ -69,9 +69,7 @@ export class FormList extends Component {
                 setTimeout(() => {
                     this.setState({ error: false, error_msg: [] })
                 }, 1500);
-                
             }
-            
         })
     }
 

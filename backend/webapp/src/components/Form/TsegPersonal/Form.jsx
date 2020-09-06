@@ -80,7 +80,6 @@ export class Forms extends Component {
     handleOnchange(e){
         this.setState({
             [e.target.name]:e.target.value,
-            //sum:`${this.state.aimag_name}` + ', ' + `${this.state.sum_name}` + ' ' + `${e.target.value}`   
         })
     }
 
