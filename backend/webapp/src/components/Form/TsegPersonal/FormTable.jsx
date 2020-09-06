@@ -34,7 +34,6 @@ export default class FormTable extends Component {
         return (
             <tr>
                 <th>{idx + 1}</th>
-                <th>{objectid}</th>
                 <th>{point_name}</th>
                 <th>{pid}</th>
                 <th>{point_class}</th>

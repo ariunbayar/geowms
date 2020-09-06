@@ -127,7 +127,7 @@ export class Forms extends Component {
             if(re.test(file['name']) )
             {
                 
-                this.setState({[name+'_error']: false, [name]: name })
+                this.setState({[name+'_error']: false, [name]: file })
             }
             else{
                 this.setState({[name+'_error']: true})
@@ -137,11 +137,11 @@ export class Forms extends Component {
             this.setState({[name+'_error']: true})
         }
     }
-
     handleSubmit(values, { setStatus, setSubmitting }) {
         setStatus('checking')
         setSubmitting(true)
         const form_datas = new FormData() 
+
         this.setState({values})
         const latlongx = ((this.state.BA+(this.state.BB/60))+((this.state.BC/3600)*60))
         const latlongy = ((this.state.LA+(this.state.LB/60))+((this.state.LC/3600)*60))
@@ -156,7 +156,7 @@ export class Forms extends Component {
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
-        form_datas.append('sum_name', this.state.values.sum_name)
+        form_datas.append('sum_name', this.state.sum_name)
         form_datas.append('utmx', this.state.values.utmx)
         form_datas.append('utmy', this.state.values.utmy)
         form_datas.append('latlongx', latlongx)
@@ -205,26 +205,22 @@ export class Forms extends Component {
     }
 
     tsegUpdate(id){
-
         service.updateTseg(id).then(({tseg_display}) =>{
-            if(tseg_display){
+            if(tseg_display){                
                 tseg_display.map((item, idx) =>
                     this.setState({ 
                         values : {
+                            ...this.state.values,
                             tesgiin_ner: item.point_name,
                             pid: item.pid,
                             center_typ: item.center_typ,
-                            
-                            trapetsiin_dugaar: item.sheet1,
-                            toviin_dugaar: item.objectid,
                             latlongx: item.sheet2,
                             latlongy: item.sheet3,
                             suljeenii_torol: item.point_type,
                             utmx: item.utmx,
                             utmy: item.utmy,
-                            latlongx: item.latlongx,
+                            latlongx: item.latlongx,    
                             latlongy: item.latlongy,
-                            barishil_tuhai: item.barishil_tuhai,
                             sudalga_or_shine: item.sudalga_or_shine,
                             hors_shinj_baidal: item.hors_shinj_baidal,
                             date: item.date,
@@ -234,6 +230,8 @@ export class Forms extends Component {
                         },
                         sum_name: item.sum,
                         aimag_name: item.aimag,
+                        trapetsiin_dugaar: item.point_type,
+                        barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
                 
@@ -243,15 +241,17 @@ export class Forms extends Component {
                         file_path11: item.file_path1,
                         file_path22: item.file_path2,
                         
-                    })
+                    }, ()=>console.log(this.state.values, 'values'))
                 )
             }
-        })
+            console.log("tseg_display", tseg_display)
+        } )
     }
 
     render() {
         return (
         <Formik
+            enableReinitialize
             initialValues={this.state.values}
             validationSchema={validationSchema}
             onSubmit={this.handleSubmit}
