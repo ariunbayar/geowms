@@ -7,7 +7,7 @@ export class DanForm extends Component {
 
     constructor(props) {
         super(props)
-
+        this._isMounted = false;
         this.datalist = []
         this.error_msg = []
         this.state = {
@@ -40,6 +40,7 @@ export class DanForm extends Component {
             showBox: true,
             error:{error:''},
             is_dan: false,
+            isLoading: true
         }
 
         this.handleInput = this.handleInput.bind(this)
@@ -57,33 +58,41 @@ export class DanForm extends Component {
     }
 
     componentDidMount(){
+        this._isMounted = true;
         const id = this.props.match.params.id
         if(id){
-            this.setState({id})
+            this._isMounted && this.setState({id})
         }
-        this.handleGetAll(id)
+        this._isMounted && this.handleGetAll(id)
         this.checkUser()
         setTimeout(() => {
-            this.setState({ showBox: false })
+            this._isMounted && this.setState({ showBox: false })
         }, 1500);
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     handleSearchWithTseg(field, e) {
         this.setState({ [field]: e.target.value })
-        if(e.target.value == ''){
+        if(e.target.value.length == 0){
             this.error_msg = []
             this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
             if(this.error_msg.length > 0){
                 this.setState({ checkError: this.state.error })
             }   
         }
+        else{
+            this.error_msg = []
+        }
         if(e.target.value.length > 2){
             this.error_msg = []
-            service.searchTseg(e.target.value).then(items => {
+            service.searchTseg(e.target.value).then(({items}) => {
                 
-                if(items.items !== false){
-                    this.setState({items: items.items, tseg_dugaar_error:false , checkError:[] })
-                    this.optionVal(items.items)
+                if(items !== false){
+                    this.setState({items, tseg_dugaar_error:false , checkError:[] })
+                    this.optionVal(items)
                 }
                 else{
                     this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
@@ -109,13 +118,13 @@ export class DanForm extends Component {
         }
     }
 
-    handleGetAll(id){
+    async handleGetAll(id){
         if(id){
-            this.setState({id:id})
+            this._isMounted && this.setState({id})
             service.tsegustsanEdit(id).then(({ form_data }) => {
                 if (form_data) {
-                    form_data.map((tseg) => {
-                        this.setState({
+                    form_data.map((tseg, key) => {
+                        this._isMounted && this.setState({
                             values:{
                                 oiroltsoo_bairlal:tseg.oiroltsoo_bairlal,
                                 evdersen_baidal:tseg.evdersen_baidal,
@@ -146,8 +155,8 @@ export class DanForm extends Component {
     }
 
     checkUser(){
-        service.checkDan().then(success => {
-            this.setState({ is_dan: success.success })
+        service.checkDan().then(({success}) => {
+            this.setState({ is_dan: success })
         })
     }
 

@@ -23,10 +23,10 @@ export default class User extends Component {
                     {email}
                 </td>
                 <td>
-                    {roles.map(role=>role.name)}
+                    { roles.map(role=>role.name) }
                 </td>
-                <td>
-                    {is_active ? <p className="text-primary">Идэвхтэй </p>: <p className="text-muted">Идэвхгүй</p>}
+                <td className={ is_active ? "text-primary" : "text-muted" }>
+                    { is_active ? "Идэвхтэй" : "Идэвхгүй" }
                 </td>
                 <td>
                     {is_sso &&

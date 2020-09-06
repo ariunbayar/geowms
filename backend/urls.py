@@ -120,6 +120,7 @@ urlpatterns = [
         path('create/', forms_views.create, name='create'),
         path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
         path('tseg-personal/findSum/', forms_views.findSum, name='findSum'),
+        path('tseg-personal/batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
         path('check-dan/', forms_views.checkDan, name='tseg-checkDan'),
         path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
         path('tseg-personal/search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),

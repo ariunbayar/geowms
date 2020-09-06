@@ -79,14 +79,6 @@ export class Жагсаалт extends Component {
 
                         {!this.state.is_form_open &&
                             <>
-                                <div className="text-left">
-                                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                        <p className="btn gp-outline-primary">
-                                            <i className="fa fa-angle-double-left"></i> Буцах
-                                        </p>
-                                    </NavLink>
-                                </div>
-
                                 <div className="text-right">
                                     <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
                                         Нэмэх
@@ -128,7 +120,7 @@ export class Жагсаалт extends Component {
                                         )}
                                     </tbody>
                                 </table>
-                                <Pagination 
+                                <Pagination
                                     paginate = {this.paginate}
                                     searchQuery = {this.state.searchQuery}
                                     load = {this.state.load}
