@@ -78,17 +78,21 @@ export class DanForm extends Component {
         else{
             this.error_msg = []
         }
-        if(e.target.value.length > 1){
+        if(e.target.value.length >= 1){
+            const error = this.state.error
             this.error_msg = []
+            this.setState({ checkError: error })
             service.searchTseg(e.target.value).then(({items}) => {
-                
                 if(items !== false){
                     this.setState({items, tseg_dugaar_error:false , checkError:[] })
                     this.optionVal(items)
                 }
                 else{
-                    this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
+                    this.setState({ tseg_dugaar_error: true, checkError: error })
                 }
+            }).catch(error => {
+                console.log("Алдаа гарсан байна. " ,error.text)
+                this.props.history.push('/profile/api/')
             })
         }   
     }
@@ -102,7 +106,7 @@ export class DanForm extends Component {
 
     checkAldaa(){
         const error = this.state.tseg_dugaar_error
-        if(!error){
+        if(error == true){
             this.setState({ tseg_dugaar_error: true, checkError: error })
         }
         else{
@@ -223,7 +227,7 @@ export class DanForm extends Component {
                                     <td colSpan="4" scope="rowgroup">
                                         <input 
                                             name="tsegiin_dugaar" 
-                                            type="number" 
+                                            type="text"
                                             id="tsegiin_dugaar"
                                             list="tsegList"
                                             className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
@@ -266,6 +270,7 @@ export class DanForm extends Component {
                                             <option value="Төв гэмтсэн">Төв гэмтсэн</option>
                                             <option value="Хазайсан">Хазайсан</option>
                                             <option value="Дарагдсан">Дарагдсан</option>
+                                            <option value="Бусад">Бусад</option>
                                         </Field>
                                         <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
                                     </td>

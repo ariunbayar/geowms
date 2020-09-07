@@ -29,8 +29,9 @@ export const validationSchemaAdmin = Yup.object().shape({
         .max(50, 'Хэт урт байна!')
         .required('Албан тушаал хоосон байна!'),
     utas: Yup.number()
-        .integer('Заавал тоо байх ёстой')
-        .positive()
+        .integer('Буруу байна')
+        .positive('Буруу байна!')
+        .typeError('Заавал тоо байх ёстой')
         .required('Утас бичээгүй байна!'),
     oiroltsoo_bairlal: Yup.string()
         .min(2, 'Хэт богионо байна!')

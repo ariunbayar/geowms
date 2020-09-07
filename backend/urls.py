@@ -129,6 +129,7 @@ urlpatterns = [
         path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
         path('tseg-ustsan_all/', forms_views.tsegUstsanAll, name='tseg-ustsan_all'),
+        path('tseg-ustsan-success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
         path('tseg-ustsan-remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
         path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
         path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
