@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 import {FormTseg} from './Form'
 import {List} from './List'
-import { service } from "../service"
+import { service } from "./service"
 
 export class TsegUstsan extends Component {
 

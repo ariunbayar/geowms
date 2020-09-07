@@ -735,7 +735,11 @@ def tsegUstsan(request):
     evdersen_baidal = request.POST.get('evdersen_baidal')
     shaltgaan = request.POST.get('nohtsol_baidal')
     sergeeh_sanal = request.POST.get('sergeeh_sanal')
-    TorF = bool(request.POST.get('hemjilt_hiih_bolomj'))
+    TorF = request.POST.get('hemjilt_hiih_bolomj')
+    if TorF == 'false':
+        TorF = False
+    else:
+        TorF = True
     img_holoos = request.POST.get('zurag_hol')
     img_oiroos = request.POST.get('zurag_oir')
     img_baruun = request.POST.get('zurag_baruun')
@@ -783,25 +787,35 @@ def tsegUstsan(request):
             [image_x2] = resize_b64_to_sizes(img_zuun, [(200, 200)])
             Tsegs.img_zuun = SimpleUploadedFile('icon.png', image_x2)
             Tsegs.save()
+        if img_omno and len(img_omno) > 2000:
+            Tsegs.img_omno.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(img_omno, [(200, 200)])
+            Tsegs.img_omno = SimpleUploadedFile('icon.png', image_x2)
+            Tsegs.save()
+        if img_hoino and len(img_hoino) > 2000:
+            Tsegs.img_hoino.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(img_hoino, [(200, 200)])
+            Tsegs.img_hoino = SimpleUploadedFile('icon.png', image_x2)
+            Tsegs.save()
         return JsonResponse({'success': True})
     else:
         if img_holoos:
-            [image_x2] = resize_b64_to_sizes(img_holoos, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_holoos, [(720, 720)])
             img_holoos = SimpleUploadedFile('img.png', image_x2)
         if img_oiroos:
-            [image_x2] = resize_b64_to_sizes(img_oiroos, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_oiroos, [(720, 720)])
             img_oiroos = SimpleUploadedFile('img.png', image_x2)
         if img_baruun:
-            [image_x2] = resize_b64_to_sizes(img_baruun, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_baruun, [(720, 720)])
             img_baruun = SimpleUploadedFile('img.png', image_x2)
         if img_zuun:
-            [image_x2] = resize_b64_to_sizes(img_zuun, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_zuun, [(720, 720)])
             img_zuun = SimpleUploadedFile('img.png', image_x2)
         if img_hoino:
-            [image_x2] = resize_b64_to_sizes(img_hoino, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_hoino, [(720, 720)])
             img_hoino = SimpleUploadedFile('img.png', image_x2)
         if img_omno:
-            [image_x2] = resize_b64_to_sizes(img_omno, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_omno, [(720, 720)])
             img_omno = SimpleUploadedFile('img.png', image_x2)
         TsegUstsan.objects.create(
             email=email,
@@ -847,7 +861,7 @@ def tsegUstsanAll(request):
 
 @require_POST
 @ajax_required
-def tsegUstsanRemove(request, payload):
+def tsegUstsanSuccess(request, payload):
     pk = payload.get('id')
     tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
     mpoint = Mpoint.objects.using('postgis_db').filter(point_id=tseg_ustsan.tseg_id).first()
@@ -869,16 +883,41 @@ def tsegUstsanRemove(request, payload):
 
 @require_POST
 @ajax_required
-def hureeCreate(request, payload):
+def tsegUstsanRemove(request, payload):
+    pk = payload.get('id')
+    tseg_ustsan = TsegUstsan.objects.get(pk=pk)
+    if tseg_ustsan:
+        if tseg_ustsan.img_holoos:
+            tseg_ustsan.img_holoos.delete(save=False)
+        if tseg_ustsan.img_oiroos:
+            tseg_ustsan.img_oiroos.delete(save=False)
+        if tseg_ustsan.img_baruun:
+            tseg_ustsan.img_baruun.delete(save=False)
+        if tseg_ustsan.img_zuun:
+            tseg_ustsan.img_zuun.delete(save=False)
+        if tseg_ustsan.img_hoino:
+            tseg_ustsan.img_hoino.delete(save=False)
+        if tseg_ustsan.img_omno:
+            tseg_ustsan.img_omno.delete(save=False)
+        tseg_ustsan.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
+
+
+@require_POST
+@ajax_required
+def hureeUpdate(request, payload):
+    tuuhen_ov = payload.get('tuuhen_ov')
+    idx = payload.get('id')
+    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     x = payload.get('x')
     y = payload.get('y')
-    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
-    dursgalt_id = payload.get('dursgalt_id')
     x_t=float(x)
     y_t=float(y)
-    TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
-    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     cursor = connections['postgis_db'].cursor()
     geom_data = 'LINESTRING( '
     if tuuh_hure_datas.count() > 2:
@@ -889,14 +928,10 @@ def hureeCreate(request, payload):
         geom_data = geom_data + ' )'
         cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
         geom = cursor.fetchone()
-        check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
-        if not check:
-            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
         update_cursor = connections['postgis_db'].cursor()
-        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, dursgalt_id,tuuh_soyl_huree_id])
+        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, tuuhen_ov,tuuh_soyl_huree_id])
 
     return JsonResponse({'success': True})
-
 
 @require_POST
 @ajax_required
@@ -1125,8 +1160,8 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
-    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)
-    if(mpoint):
+    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
+    if mpoint:
         for tseg in mpoint:
             items.append({
                 "tseg": tseg.point_id
