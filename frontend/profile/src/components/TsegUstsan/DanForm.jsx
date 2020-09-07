@@ -404,7 +404,7 @@ export class DanForm extends Component {
                                     <td colSpan="4" scope="rowgroup">
                                         <a className="d-flex p-2 bd-highlight border border-danger" onClick={(e) => this.showMore(e)}>
                                             <span className="text-center">
-                                                {showMore? "Hide" : "MORE"}
+                                                {showMore? "Хаах" : "Илүү олон"}
                                             </span>
                                         </a>
                                     </td>

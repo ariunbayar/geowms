@@ -96,8 +96,8 @@ export class FormTseg extends Component {
             service.searchTseg(e.target.value).then(({items, names}) => {
                 if(items !== false){
                     this.setState({items, tseg_dugaar_error:false , checkError:[] })
-                    const ners = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
-                    this.setState({ners})
+                    const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
+                    this.setState({oiroltsoo_bairlal})
                     this.optionVal(items)
                 }
                 else{
@@ -398,7 +398,7 @@ export class FormTseg extends Component {
                                             id="oiroltsoo_bairlal"
                                             className={'form-control' + (bairlal_error ? ' is-invalid' : '')}
                                             onChange = {(e) => this.handleInput('oiroltsoo_bairlal', e)}
-                                            value = {ners != '' ? ners + ' ' + oiroltsoo_bairlal: oiroltsoo_bairlal}
+                                            value = {oiroltsoo_bairlal}
                                         />
                                         {bairlal_error ? <div className="invalid-feedback">Хоосон байна.</div> : null}
                                     </td>

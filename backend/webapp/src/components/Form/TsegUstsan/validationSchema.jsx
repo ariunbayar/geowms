@@ -27,12 +27,10 @@ export const validationSchemaAdmin = Yup.object().shape({
     utas: Yup.number()
         .integer('Буруу байна')
         .positive('Буруу байна!')
-        .typeError('Заавал тоо байх ёстой')
-        .required('Утас бичээгүй байна!'),
+        .typeError('Заавал тоо байх ёстой'),
     oiroltsoo_bairlal: Yup.string()
         .min(2, 'Хэт богионо байна!')
-        .max(50, 'Хэт урт байна!')
-        .required('Ойролцоо цэгийн байрлал хоосон байна!'),
+        .max(50, 'Хэт урт байна!'),
     evdersen_baidal: Yup.string()
         .required('Ойролцоо цэгийн байрлал хоосон байна!'),
     nohtsol_baidal: Yup.string()
