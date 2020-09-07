@@ -10,11 +10,9 @@ export class TuuhenOv extends Component {
 
     constructor(props) {
         super(props)
-        
     }
 
     render() {
-        
         return (
             <Switch>
                 <Route exact path={"/gov/tuuhen-ov/add/"} component={Forms}/>
@@ -22,11 +20,7 @@ export class TuuhenOv extends Component {
                 <Route exact path={"/gov/tuuhen-ov/:id/update/"} component={Forms}/>
                 <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/"} component={DursgaltGazar}/>
                 <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/update/:idx/"} component={DursgaltGazar}/>
-               
                 <Route exact path={"/gov/tuuhen-ov/"} component={FormList}/>
-
-
-
             </Switch>
         )
     }
