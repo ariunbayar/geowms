@@ -1227,3 +1227,36 @@ def tsegPersonalSuccess(request, payload):
             'msg': "Амжилтгүй боллоо",
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def tuuhenOvList(request, payload):
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
+    display_item = []
+    tuuhs = TuuhSoyol.objects.using('postgis_db').annotate(search=SearchVector(
+        'dugaar',
+        'burtgegch',
+        )).filter(search__icontains=query)
+    total_items = Paginator(tuuhs, per_page)
+    items_page = total_items.page(page)
+    for item in items_page.object_list:
+        display_item.append({
+            'id' : item.id,
+            'dugaar': item.dugaar,
+            'date': item.date,
+            'inspireid': item.inspireid,
+            'too_shirheg': item.too_shirheg,
+            'aimagname': item.aimagname,
+            'sumname': item.sumname,
+            'burtgegch': item.burtgegch,
+        })
+    total_page = total_items.num_pages
+    rsp = {
+        'items': display_item,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
