@@ -845,27 +845,6 @@ def tsegUstsan(request):
         return JsonResponse({'success': True})
 
 
-@require_GET
-@ajax_required
-def tsegUstsanAll(request):
-    tseg_ustsan = []
-    for tseg in TsegUstsan.objects.all():
-        tseg_ustsan.append({
-            'id': tseg.id,
-            'tseg_id': tseg.tseg_id,
-            'email': tseg.email,
-            'name': tseg.name,
-            'alban_tushaal': tseg.alban_tushaal,
-            'utas': tseg.phone,
-            'oiroltsoo_bairlal': tseg.oiroltsoo_bairlal,
-            'evdersen_baidal': tseg.evdersen_baidal,
-            'nohtsol_baidal': tseg.shaltgaan,
-        })
-    return JsonResponse({
-        'tseg_ustsan_all': tseg_ustsan,
-        'success': True
-    })
-
 @require_POST
 @ajax_required
 def tsegUstsanSuccess(request, payload):
@@ -886,6 +865,40 @@ def tsegUstsanSuccess(request, payload):
         tseg_ustsan.delete()
         Mpoint.objects.using('postgis_db').filter(point_id=tseg_ustsan.tseg_id).update(point_class=9)
     return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+def tsegUstsanList(request, payload):
+    page = payload.get('page')
+    per_page = payload.get('perpage')
+    query = payload.get('query')
+    display_items = []
+    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query)
+
+    total_items = Paginator(tsegs, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for item in items_page.object_list:
+        display_items.append({
+            'id': item.id,
+            'tseg_id': item.tseg_id,
+            'email': item.email,
+            'name': item.name,
+            'alban_tushaal': item.alban_tushaal,
+            'phone': item.phone,
+            'oiroltsoo_bairlal': item.oiroltsoo_bairlal,
+            'evdersen_baidal': item.evdersen_baidal,
+            'nohtsol_baidal': item.shaltgaan,
+        })
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': display_items,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST

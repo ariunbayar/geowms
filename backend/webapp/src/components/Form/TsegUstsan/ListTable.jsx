@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import Modal from '../../Modal'
+
 export default class ListTable extends Component {
 
     constructor(props) {

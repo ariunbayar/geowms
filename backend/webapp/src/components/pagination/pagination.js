@@ -80,7 +80,7 @@ export class Pagination extends Component {
                     is_loading: false,
                 })
             })
-        }    
+        }
     }
 
     render() {
