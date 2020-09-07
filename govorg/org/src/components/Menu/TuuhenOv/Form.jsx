@@ -144,7 +144,7 @@ export class Forms extends Component {
             return (
                 <Form>
                      <Maps handleXY={this.handleXY} coordinatCheck={false} />
-                    <div >
+                    <div className='container my-4'>
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
