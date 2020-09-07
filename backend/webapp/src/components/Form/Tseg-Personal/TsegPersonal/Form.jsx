@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from '../service'
+import {service} from '../../service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import Maps from '../../map/Map'
+import Maps from '../../../map/Map'
 import { coordinateRelationship } from "ol/extent"
 
 export class Forms extends Component {
@@ -67,6 +67,15 @@ export class Forms extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
         this.handleOnchange = this.handleOnchange.bind(this)
+        this.handleBoxLeave = this.handleBoxLeave.bind(this)
+        this.handleBoxOver = this.handleBoxOver.bind(this)
+    }
+    handleBoxOver (e){
+        this.setState({ showBox: true })
+    }
+
+    handleBoxLeave(e){
+        this.setState({ showBox: false })
     }
 
     componentDidMount(){
@@ -175,7 +184,7 @@ export class Forms extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push('/back/froms/tseg-personal/')
+                    this.props.history.push('/back/froms/tseg-info/tsegpersonal/tseg-personal/')
                 }, 1000)
             }
             else{
@@ -212,7 +221,7 @@ export class Forms extends Component {
                             pid: item.pid,
                             toviin_dugaar: item.point_id,
                             center_typ: item.center_typ,
-                            suljeenii_torol: item.suljeenii_torol,
+                            suljeenii_torol: item.point_type,
                             utmx: item.utmx,
                             utmy: item.utmy,
                             sudalga_or_shine: item.sudalga_or_shine,
@@ -232,7 +241,7 @@ export class Forms extends Component {
                         latlongy: item.latlongy,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
-                        trapetsiin_dugaar: item.point_type,
+                        trapetsiin_dugaar: item.sheet1,
                         barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
@@ -246,11 +255,12 @@ export class Forms extends Component {
                     })
                 )
             }
-        } )
+
+        }
+         )
     }
 
     render() {
-
         return (
         <Formik
             enableReinitialize
@@ -272,7 +282,7 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row container  my-1">
+                    <div className="row container  m-l">
                         <div className="float-left">
                             <Maps
                                 handleXY={this.handleXY}
@@ -336,12 +346,12 @@ export class Forms extends Component {
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 
                                                 <option>...</option>
-                                                <option value="1">GPS-ийн сүлжээний цэг</option>
-                                                <option value="2">Гравиметрийн сүлжээний Цэг</option>
-                                                <option value="3">Өндрийн сүлжээний цэг</option>
-                                                <option value="4">Триангуляцийн сүлжээний цэг</option>
-                                                <option value="5">Полигометрийн сүлжээний цэг</option>
-                                                <option value="6">Зураглалын сүлжээний цэг</option>
+                                                <option value="1">GPS-ийн сүлжээ</option>
+                                                <option value="2">Гравиметрийн сүлжээ</option>
+                                                <option value="3">Өндрийн сүлжээ</option>
+                                                <option value="4">Триангуляцийн сүлжээ</option>
+                                                <option value="5">Полигометрийн сүлжээ</option>
+                                                <option value="6">Зураглалын сүлжээ</option>
                                                 <option value="7">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
@@ -378,11 +388,11 @@ export class Forms extends Component {
 
                                 <tr>
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
-                                    <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /UTM/</th>
+                                    <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /DMS/</th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг -B</th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг -L</th>
+                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг(B)</th>
+                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг(L)</th>
                                 </tr>
                                 <tr>
                                     <td colSpan="2" className="pl-3">
@@ -451,11 +461,33 @@ export class Forms extends Component {
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>7. Цэгийн фото зураг</th>
+                                    <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>
+                                        7. Цэгийн фото зураг
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver(e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                                <h6 className="alert-heading">Санамж!</h6>
+                                                <p>".jpeg" болон ".png" байх ёстой</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                 </tr>
                                 <tr>
-                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">ойроос</th>
-                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">холоос</th>
+                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
+                                        ойроос
+                                    </th>
+                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
+                                        холоос
+                                    </th>
                                 </tr>
                                 <tr>
                                     <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
@@ -514,8 +546,12 @@ export class Forms extends Component {
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>9. Байршлын тойм зураг</th>
-                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>10. Төв цэгийн хэлбэр</th>
+                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>
+                                        9. Байршлын тойм зураг
+                                    </th>
+                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>
+                                        10. Төв цэгийн хэлбэр
+                                    </th>
                                 </tr>
                                 <tr>
                                     <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
@@ -596,19 +632,6 @@ export class Forms extends Component {
                                 </tr>
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
-                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
-                                            name='hotolson'
-                                            id="id_hotolson"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         {this.state.file_path11 === '' ? null : <a href={`/media/${this.state.file_path11}`}>{this.state.file_path11}</a>}
@@ -630,7 +653,7 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">16.</th>
+                                    <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         {this.state.file_path22 === '' ? null : <a href={`/media/${this.state.file_path22}`}>{this.state.file_path22}</a>}
@@ -654,7 +677,7 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">17.</th>
+                                    <th colSpan="1" scope="rowgroup">16.</th>
                                     <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -667,7 +690,7 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">18.</th>
+                                    <th colSpan="1" scope="rowgroup">17.</th>
                                     <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -677,6 +700,19 @@ export class Forms extends Component {
                                             type="text"
                                         />
                                         <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colSpan="1" scope="rowgroup">18.</th>
+                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
+                                    <td colSpan="3" scope="rowgroup">
+                                        <Field
+                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
+                                            name='hotolson'
+                                            id="id_hotolson"
+                                            type="text"
+                                        />
+                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                             

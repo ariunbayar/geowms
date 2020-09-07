@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from './service'
+import {service} from '../../service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaAdmin} from './validationSchema'
 export class FormTseg extends Component {
@@ -201,7 +201,7 @@ export class FormTseg extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                 }, 1000)
-                this.props.history.push( `/back/froms/tseg-ustsan/`)
+                this.props.history.push( `/back/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
             }
         })
     }

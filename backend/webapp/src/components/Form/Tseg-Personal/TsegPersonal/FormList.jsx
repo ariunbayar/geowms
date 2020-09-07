@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
-import {service} from '../service'
-import { Pagination } from "../../pagination/pagination"
+import {service} from '../../service'
+import { Pagination } from "../../../pagination/pagination"
 
 export class FormList extends Component {
 
@@ -14,14 +14,15 @@ export class FormList extends Component {
             length:null,
             currentPage:1,
             PerPage:50,
-            searchQuery: '',
+            searchQuery: 'g109',
             query_min: false,
             error: false,
             error_msg: [],
         }
 
         this.paginate = this.paginate.bind(this)
-        this.handleSearch=this.handleSearch.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
     paginate (page, query) {
@@ -92,12 +93,12 @@ export class FormList extends Component {
                             </div>
                         }
                         <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={`/back/froms/tseg-personal/add/`}>
+                            <NavLink className="btn gp-btn-primary" to={"/back/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
                             </NavLink>
                         </div>
                         <div className="form-row text-right">
-                        <div className="form-group col-md-8">
+                        <div className="form-group col-md-4">
                                 <input
                                     type="text"
                                     className="form-control"
@@ -114,9 +115,8 @@ export class FormList extends Component {
                                     <th scope="col"> № </th>
                                     <th scope="col">Цэгийн нэр</th>
                                     <th scope="col">Цэгийн дугаар</th>
-                                    <th scope="col">Полигон дугаар</th>
                                     <th scope="col">Төвийн төрөл</th>
-                                    <th scope="col">Цэгийн төрөл</th>
+                                    <th scope="col">Шинэ төрөл</th>
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
                                     <th scope="col">Засах</th>

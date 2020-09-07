@@ -434,7 +434,6 @@ def dursgaltGazarRemove(request, payload):
         return JsonResponse({'success': False})
 
 
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -491,51 +490,52 @@ def tsegPersonalRemove(request, payload):
 def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     tseg_display = []
-    tseg = TsegPersonal.objects.filter(id = pk).first()
-    data = Mpoint.objects.using('postgis_db').filter(id=pk).first()
-    LA = int(float(tseg.latlongx))
-    LB = int((float(tseg.latlongx)-LA)*60)
-    LC = float("{:.6f}".format(((float(tseg.latlongx))-LA-LB/60)*3600 ))
-    BA = int(float(tseg.latlongy))
-    BB = int((float(tseg.latlongy)-BA)*60)
-    BC = (float(float(tseg.latlongy))-BA-BB/60)*3600
+    tseg = TsegPersonal.objects.filter(id = pk).first() 
+    data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
+    if(tseg):
+            LA = int(float(tseg.latlongx))
+            LB = int((float(tseg.latlongx)-LA)*60)
+            LC = float("{:.6f}".format(((float(tseg.latlongx))-LA-LB/60)*3600 ))
+            BA = int(float(tseg.latlongy))
+            BB = int((float(tseg.latlongy)-BA)*60)
+            BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
     tseg_display.append({
-        'latlongx': tseg.latlongx,
-        'latlongy': tseg.latlongy,
-        'LA':LA,
-        'LB':LB,
-        'LC':LC,
-        'BA':BA,
-        'BB':BB,
-        'BC':BC,
-        'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg.tseg_oiroos_img_url else '',
-        'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg.tseg_holoos_img_url else '',
-        'barishil_tuhai': tseg.barishil_tuhai,
-        'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg.bairshil_tseg_oiroos_img_url else '',
-        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_holoos_img_url.url if tseg.bairshil_tseg_holoos_img_url else '',
-        'sudalga_or_shine':  tseg.sudalga_or_shine,
-        'hors_shinj_baidal': tseg.hors_shinj_baidal,
-        'date': tseg.date.strftime("%Y-%m-%d") if tseg.date else '',
-        'hotolson': tseg.hotolson,
-        'file_path1': tseg.file_path1.name if tseg.file_path1 else '',
-        'file_path2': tseg.file_path2.name if tseg.file_path2 else '',
-        'alban_tushaal': tseg.alban_tushaal,
-        'alban_baiguullga': tseg.alban_baiguullga,
-        'suljeenii_torol': tseg.suljeenii_torol,
-        'id': data.id,
-        'objectid': data.objectid,
-        'point_id': data.point_id,
-        'point_name': data.point_name,
-        'pid': data.pid,
-        'point_class': data.point_class,
-        'point_type': data.point_type,
-        'center_typ': data.center_typ,
-        'aimag': data.aimag,
-        'sum': data.sum,
-        'sheet1': data.sheet1,
-        'sheet2': data.sheet2,
-        'sheet3': data.sheet3,
-        't_type': data.t_type,
+        'latlongx': tseg.latlongx if tseg and tseg.latlongx else '',
+        'latlongy': tseg.latlongy if tseg and tseg.latlongy else '',
+        'LA':LA if tseg else '',
+        'LB':LB if tseg else "",
+        'LC':LC if tseg else '',
+        'BA':BA if tseg else "",
+        'BB':BB if tseg else "",
+        'BC':BC if tseg else "",
+        'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg and tseg.tseg_oiroos_img_url else '',
+        'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg and tseg.tseg_holoos_img_url  else '',
+        'barishil_tuhai': tseg.barishil_tuhai if tseg else '',
+        'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg and tseg.bairshil_tseg_oiroos_img_url else '',
+        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg and tseg.bairshil_tseg_oiroos_img_url else '',
+        'sudalga_or_shine':  tseg.sudalga_or_shine if tseg else '',
+        'hors_shinj_baidal': tseg.hors_shinj_baidal if tseg else '',
+        'date': tseg.date.strftime("%Y-%m-%d") if tseg else '',
+        'hotolson': tseg.hotolson if tseg else '',
+        'file_path1': tseg.file_path1.name if tseg else '',
+        'file_path2': tseg.file_path2.name if tseg else '',
+        'alban_tushaal': tseg.alban_tushaal if tseg else '',
+        'alban_baiguullga': tseg.alban_baiguullga if tseg else '',
+        'suljeenii_torol': tseg.suljeenii_torol if tseg else '',
+        'id': data.id if data.id else '',
+        'objectid': data.objectid if data.objectid else '',
+        'point_id': data.point_id if  data.point_id else '',
+        'point_name': data.point_name if data.point_name else '',
+        'pid': data.pid if data.pid else '',
+        'point_class': data.point_class if data.point_class else '',
+        'point_type': data.point_type if data.point_type else '',
+        'center_typ': data.center_typ if data.center_typ else '',
+        'aimag': data.aimag if data.aimag else '',
+        'sum': data.sum if data.sum else '',
+        'sheet1': data.sheet1 if data.sheet1 else '',
+        'sheet2': data.sheet2 if data.sheet2 else '',
+        'sheet3': data.sheet3 if data.sheet3 else '',
+        't_type': data.t_type if data.t_type else '',
     })
     rsp = {
         'tseg_display': tseg_display,
@@ -552,60 +552,55 @@ def findSum(request, payload):
     cursor = connections['postgis_db'].cursor()
     cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
     geom = cursor.fetchone()
-    if geom:
-        aimag_name = geom[0]
-        sum_name = geom[0]
-    else:
-        aimag_name = 'Координатийг зөв оруулна уу.'
-        sum_name = 'Координатийг зөв оруулна уу.'
-
-    zoneout=int(L)/6+31
-    instr = ("+proj=longlat +datum=WGS84 +no_defs")
-    outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-    inproj = pyproj.Proj(instr)
-    outproj = pyproj.Proj(outstr)
-    val= pyproj.transform(inproj, outproj, L,B)
-    Brange=[40,44,48,52,56]
-    Letter=['K','L','M','N','O']
-    for k in Brange:
-        if k>B:
-            ind=Brange.index(k)
-            B0=Letter[ind-1]
-            Bmin=Brange[ind-1]
-            break
-        else:
-            B0 = "aldaa"
-    zone=int(L/6)+31
-    Lmin=(zone-30)*6-6
-    c=0
-    while Lmin<L:
-        Lmin=Lmin+0.5
-        c=c+1
-    cc=0
-    while Bmin<B:
-        Bmin=Bmin+1/3
-        cc=cc+1
-    cc = (12-cc)*12+c
-    LA = int(L)
-    LB = int((L-LA)*60)
-    LC = float("{:.6f}".format((L-LA-LB/60)*3600 ))
-    BA = int(B)
-    BB = int((B-BA)*60)
-    BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
-    info.append({
-        'aimag': aimag_name,
-        'sum': sum_name,
-        "vseg": B0,
-        'zone': zone,
-        'cc': cc,
-        'BA': BA,
-        'BB': BB,
-        'BC': BC,
-        'LA': LA,
-        'LB': LB,
-        'LC': LC
-    })
-    return JsonResponse({"info":info})
+    if(geom):
+            
+        zoneout=int(L)/6+31
+        instr = ("+proj=longlat +datum=WGS84 +no_defs")
+        outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+        inproj = pyproj.Proj(instr)
+        outproj = pyproj.Proj(outstr)
+        val= pyproj.transform(inproj, outproj, L,B)
+        Brange=[40,44,48,52,56]
+        Letter=['K','L','M','N','O']
+        for k in Brange:
+            if k>B:
+                ind=Brange.index(k)
+                B0=Letter[ind-1]
+                Bmin=Brange[ind-1]
+                break
+            else:
+                B0 = "aldaa"
+        zone=int(L/6)+31
+        Lmin=(zone-30)*6-6
+        c=0
+        while Lmin<L:
+            Lmin=Lmin+0.5
+            c=c+1
+        cc=0
+        while Bmin<B:
+            Bmin=Bmin+1/3
+            cc=cc+1
+        cc = (12-cc)*12+c
+        LA = int(L)
+        LB = int((L-LA)*60)
+        LC = float("{:.6f}".format((L-LA-LB/60)*3600 ))
+        BA = int(B)
+        BB = int((B-BA)*60)
+        BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
+        info.append({
+            'aimag': geom[0],
+            'sum': geom[1],
+            "vseg": B0,
+            'zone': zone,
+            'cc': cc,
+            'BA': BA,
+            'BB': BB,
+            'BC': BC,
+            'LA': LA,
+            'LB': LB,
+            'LC': LC
+        })
+        return JsonResponse({"info":info})
 
 
 @require_POST
@@ -615,9 +610,15 @@ def tsegPersonal(request):
     point_id = request.POST.get('toviin_dugaar')
     if(len(point_id)<4):
         point_id.zfill(4)
+
     if pk:
         date = None
-        tseg_personal = get_object_or_404(TsegPersonal, id=pk)
+        tseg_personal = TsegPersonal.objects.filter(id=pk)
+        if not tseg_personal:
+            TsegPersonal.objects.create(
+                    id=pk,
+         )
+
         if request.POST.get('date'):
             date = request.POST.get('date')
         x = float(request.POST.get('latlongx'))
