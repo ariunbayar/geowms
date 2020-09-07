@@ -515,8 +515,15 @@ def findSum(request, payload):
     L = payload.get("y")
     B = payload.get("x")
     cursor = connections['postgis_db'].cursor()
-    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [L, B])
+    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
     geom = cursor.fetchone()
+    if geom:
+        aimag_name = geom[0]
+        sum_name = geom[0]
+    else:
+        aimag_name = 'Координатийг зөв оруулна уу.'
+        sum_name = 'Координатийг зөв оруулна уу.'
+
     zoneout=int(L)/6+31
     instr = ("+proj=longlat +datum=WGS84 +no_defs")
     outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
@@ -551,8 +558,8 @@ def findSum(request, payload):
     BB = int((B-BA)*60)
     BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
     info.append({
-        'aimag': geom[0],
-        'sum': geom[1],
+        'aimag': aimag_name,
+        'sum': sum_name,
         "vseg": B0,
         'zone': zone,
         'cc': cc,

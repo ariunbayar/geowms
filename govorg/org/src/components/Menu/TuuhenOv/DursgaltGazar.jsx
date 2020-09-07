@@ -586,7 +586,7 @@ export class DursgaltGazar extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div>
+                    <div className='container my-4'>
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}

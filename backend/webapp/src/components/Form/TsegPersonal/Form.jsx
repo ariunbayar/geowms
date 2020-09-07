@@ -3,7 +3,7 @@ import ImageUploader from 'react-images-upload'
 import {service} from '../service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import BundleMap from '../../map/BundleMap'
+import Maps from '../../map/Map'
 import { coordinateRelationship } from "ol/extent"
 
 export class Forms extends Component {
@@ -274,8 +274,9 @@ export class Forms extends Component {
                 <Form>
                     <div className="row container  my-1">
                         <div className="float-left">
-                            <BundleMap
-                            handleXY={this.handleXY}
+                            <Maps
+                                handleXY={this.handleXY}
+                                coordinatCheck={false}
                             />
                         </div>
                         <div className="col-md-12 mb-4">
