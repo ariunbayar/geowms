@@ -449,6 +449,7 @@ def tsegPersonalUpdate(request, payload):
     tseg_display = []
     tseg = TsegPersonal.objects.filter(id = pk).first() 
     data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
+
     if(tseg):
             LA = int(float(tseg.latlongx))
             LB = int((float(tseg.latlongx)-LA)*60)
@@ -479,20 +480,20 @@ def tsegPersonalUpdate(request, payload):
         'alban_tushaal': tseg.alban_tushaal if tseg else '',
         'alban_baiguullga': tseg.alban_baiguullga if tseg else '',
         'suljeenii_torol': tseg.suljeenii_torol if tseg else '',
-        'id': data.id if tseg else '',
-        'objectid': data.objectid if tseg else '',
-        'point_id': data.point_id if tseg else "",
-        'point_name': data.point_name if tseg else '',
-        'pid': data.pid if tseg else '',
-        'point_class': data.point_class if tseg else '',
-        'point_type': data.point_type if tseg else '',
-        'center_typ': data.center_typ if tseg else '',
-        'aimag': data.aimag if tseg else '',
-        'sum': data.sum if tseg else '',
-        'sheet1': data.sheet1 if tseg else '',
-        'sheet2': data.sheet2 if tseg else "",
-        'sheet3': data.sheet3 if tseg else "",
-        't_type': data.t_type if tseg else '',
+        'id': data.id if data.id else '',
+        'objectid': data.objectid if data.objectid else '',
+        'point_id': data.point_id if  data.point_id else '',
+        'point_name': data.point_name if data.point_name else '',
+        'pid': data.pid if data.pid else '',
+        'point_class': data.point_class if data.point_class else '',
+        'point_type': data.point_type if data.point_type else '',
+        'center_typ': data.center_typ if data.center_typ else '',
+        'aimag': data.aimag if data.aimag else '',
+        'sum': data.sum if data.sum else '',
+        'sheet1': data.sheet1 if data.sheet1 else '',
+        'sheet2': data.sheet2 if data.sheet2 else '',
+        'sheet3': data.sheet3 if data.sheet3 else '',
+        't_type': data.t_type if data.t_type else '',
     })
     rsp = {
         'tseg_display': tseg_display,
