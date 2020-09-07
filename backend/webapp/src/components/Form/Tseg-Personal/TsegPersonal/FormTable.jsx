@@ -51,7 +51,6 @@ export default class FormTable extends Component {
                 <th>{pid}</th>
                 <th>{point_class}</th>
                 <th>{point_type}</th>
-                <th>{center_typ}</th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 <th>

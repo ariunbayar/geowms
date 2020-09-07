@@ -434,7 +434,6 @@ def dursgaltGazarRemove(request, payload):
         return JsonResponse({'success': False})
 
 
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -500,7 +499,6 @@ def tsegPersonalUpdate(request, payload):
             BA = int(float(tseg.latlongy))
             BB = int((float(tseg.latlongy)-BA)*60)
             BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
-
     tseg_display.append({
         'latlongx': tseg.latlongx if tseg and tseg.latlongx else '',
         'latlongy': tseg.latlongy if tseg and tseg.latlongy else '',

@@ -66,8 +66,16 @@ export default class Forms extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
         this.handleOnchange = this.handleOnchange.bind(this)
+        this.handleBoxLeave = this.handleBoxLeave.bind(this)
+        this.handleBoxOver = this.handleBoxOver.bind(this)
+    }
+    handleBoxOver (e){
+        this.setState({ showBox: true })
     }
 
+    handleBoxLeave(e){
+        this.setState({ showBox: false })
+    }
     componentDidMount(){
         const id = this.props.match.params.id
         if(id) {
@@ -211,7 +219,7 @@ export default class Forms extends Component {
                             pid: item.pid,
                             toviin_dugaar: item.point_id,
                             center_typ: item.center_typ,
-                            suljeenii_torol: item.suljeenii_torol,
+                            suljeenii_torol: item.point_type,
                             utmx: item.utmx,
                             utmy: item.utmy,
                             sudalga_or_shine: item.sudalga_or_shine,
@@ -449,7 +457,25 @@ export default class Forms extends Component {
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>7. Цэгийн фото зураг</th>
+                                    <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>
+                                        7. Цэгийн фото зураг
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver(e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                                <h6 className="alert-heading">Санамж!</h6>
+                                                <p>".jpeg" болон ".png" байх ёстой</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                 </tr>
                                 <tr>
                                     <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">ойроос</th>

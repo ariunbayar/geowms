@@ -14,7 +14,7 @@ export class FormList extends Component {
             length:null,
             currentPage:1,
             PerPage:50,
-            searchQuery: '',
+            searchQuery: 'g109',
             query_min: false,
             error: false,
             error_msg: [],
@@ -115,9 +115,8 @@ export class FormList extends Component {
                                     <th scope="col"> № </th>
                                     <th scope="col">Цэгийн нэр</th>
                                     <th scope="col">Цэгийн дугаар</th>
-                                    <th scope="col">Полигон дугаар</th>
                                     <th scope="col">Төвийн төрөл</th>
-                                    <th scope="col">Цэгийн төрөл</th>
+                                    <th scope="col">Шинэ төрөл</th>
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
                                     <th scope="col">Засах</th>
