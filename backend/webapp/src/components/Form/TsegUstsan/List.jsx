@@ -18,9 +18,9 @@ export class List extends Component {
             list: [],
             list_length: null,
         }
-            this.paginate = this.paginate.bind(this)
-            this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
-            this.handleRemove = this.handleRemove.bind(this)
+        this.paginate = this.paginate.bind(this)
+        this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
     paginate (page, query) {
@@ -68,7 +68,7 @@ export class List extends Component {
 
     render() {
         return (
-            <div className="container ">
+            <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12">
                           <NavLink className="btn gp-btn-primary float-right" to={"/back/froms/tseg-ustsan/add/"}>
