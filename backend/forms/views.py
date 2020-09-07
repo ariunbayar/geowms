@@ -85,15 +85,46 @@ def update(request, payload):
 @ajax_required
 def remove(request, payload):
     pk = payload.get('id')
-    tuuhSoyol = get_object_or_404(TuuhSoyol, pk=pk)
-    TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
-    TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
-    TuuhSoyolHureePol.objects.filter(tuuh_soyl=pk).delete()
-    TuuhSoyolAyuulHuree.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
-    TuuhSoyolAyuulHureePol.objects.filter(tuuh_soyl=pk).delete()
-    tuuhSoyol.delete()
+    tuuhSoyol = TuuhSoyol.objects.filter(id=pk)
+    tuuhSoyol = TuuhSoyol.objects.using('postgis_db').filter(id=pk)
+    if tuuhSoyol:
+        tuuhsoylPoint = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if tuuhsoylPoint:
+            tuuhsoylPoint.delete()
 
-    return JsonResponse({'success': True})
+        point = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if point:
+            point.delete()
+
+        hureePol = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if hureePol:
+            hureePol.delete()
+
+        HureePolAyul = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if HureePolAyul:
+            HureePolAyul.delete()
+
+        AyulHuree = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=pk)
+        if AyulHuree:
+            AyulHuree.delete()
+
+        huree = TuuhSoyolHuree.objects.filter(tuuh_soyl=pk)
+        if huree:
+            huree.delete()
+
+    else:
+        rsp = {
+            'success': False,
+            'msg': "Амжилтгүй"
+        }
+        return JsonResponse(rsp)
+
+    tuuhSoyol.delete()
+    rsp = {
+        'success': True,
+        'msg': "Амжилттай устгасан"
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -395,9 +426,13 @@ def dursgaltGazarAbout(request, payload):
 @ajax_required
 def dursgaltGazarRemove(request, payload):
     pk = payload.get('id')
-    tseg_personal = get_object_or_404(TuuhSoyolPoint, pk=pk)
-    tseg_personal.delete()
-    return JsonResponse({'success': True})
+    tuuhsoylPoint = TuuhSoyolPoint.objects.using('postgis_db').filter(id=pk)
+    if tuuhsoylPoint:
+        tuuhsoylPoint.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
+
 
 
 @require_POST
@@ -1185,14 +1220,21 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
+    names = []
     mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
-    if mpoint:
+    if(mpoint):
         for tseg in mpoint:
             items.append({
                 "tseg": tseg.point_id
             })
+        for name in mpoint[:1]:
+            names.append({
+                'aimag_ner': name.aimag,
+                'sum_ner': name.sum,
+            })
         rsp = {
-            'items': items
+            'items': items,
+            'names': names
         }
         return JsonResponse(rsp)
     else:
@@ -1230,3 +1272,36 @@ def tsegPersonalSuccess(request, payload):
             'msg': "Амжилтгүй боллоо",
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def tuuhenOvList(request, payload):
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
+    display_item = []
+    tuuhs = TuuhSoyol.objects.using('postgis_db').annotate(search=SearchVector(
+        'dugaar',
+        'burtgegch',
+        )).filter(search__icontains=query)
+    total_items = Paginator(tuuhs, per_page)
+    items_page = total_items.page(page)
+    for item in items_page.object_list:
+        display_item.append({
+            'id' : item.id,
+            'dugaar': item.dugaar,
+            'date': item.date,
+            'inspireid': item.inspireid,
+            'too_shirheg': item.too_shirheg,
+            'aimagname': item.aimagname,
+            'sumname': item.sumname,
+            'burtgegch': item.burtgegch,
+        })
+    total_page = total_items.num_pages
+    rsp = {
+        'items': display_item,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)

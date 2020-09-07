@@ -22,12 +22,21 @@ export const service = {
     ayulCreate,
     ayulUpdate,
     ayulDelete,
+    list,
 }
 function all() {
     const requestOptions = {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
+}
+
+function list(page,perpage,query) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({page,perpage,query}),
+    }
+    return fetch(`${prefix}/list/`, opts).then(handleResponse)
 }
 
 function about(id) {
