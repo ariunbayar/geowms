@@ -10,6 +10,8 @@ export class FormList extends Component {
         super(props)
         this.state = {
             tuuh_soyl: [],
+            msg: [],
+            alert: false,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -28,17 +30,33 @@ export class FormList extends Component {
     }
 
     handleRemove(id) {
-        service.remove(id).then(({success}) => {
-            if (success) this.handleListUpdated()
+        service.remove(id).then(({success, msg}) => {
+            if (success){
+                this.setState({ msg, alert: success })
+                setTimeout(() => {
+                    this.setState({ alert: false, msg: [] })
+                }, 3000);
+                this.handleListUpdated()
+            }else{
+                this.setState({ msg, alert: false })
+                setTimeout(() => {
+                    this.setState({ alert: false, msg: [] })
+                }, 3000);
+            }
         })
     }
 
 
     render() {
+        const {alert, msg} = this.state
+        const error_bn = Object.keys(msg).length > 0
         return (
             <div  className="container my-4">
                 <div className="row">
-
+                    <div className={`text-left position-absolute` +
+                        (error_bn ? ' d-show': ' d-none') + (alert && error_bn? ' alert alert-success': ' alert alert-danger')} role="alert">
+                        <div className={alert && error_bn?"text-success":"text-danger"}>{msg}</div>
+                    </div>
                     <div className="col-md-12">
                         <div className="text-right">
                             <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/add/`}>
