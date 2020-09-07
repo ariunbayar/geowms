@@ -115,6 +115,7 @@ urlpatterns = [
 
     path('tuuhen_ov/', include(([
         path('', forms_views.all, name='all'),
+        path('list/', forms_views.tuuhenOvList, name='list'),
         path('about/', forms_views.about, name='about'),
         path('update/', forms_views.update, name='update'),
         path('remove/', forms_views.remove, name='remove'),
