@@ -778,6 +778,16 @@ def tsegUstsan(request):
             [image_x2] = resize_b64_to_sizes(img_zuun, [(200, 200)])
             Tsegs.img_zuun = SimpleUploadedFile('icon.png', image_x2)
             Tsegs.save()
+        if img_omno and len(img_omno) > 2000:
+            Tsegs.img_omno.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(img_omno, [(200, 200)])
+            Tsegs.img_omno = SimpleUploadedFile('icon.png', image_x2)
+            Tsegs.save()
+        if img_hoino and len(img_hoino) > 2000:
+            Tsegs.img_hoino.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(img_hoino, [(200, 200)])
+            Tsegs.img_hoino = SimpleUploadedFile('icon.png', image_x2)
+            Tsegs.save()
         return JsonResponse({'success': True})
     else:
         if img_holoos:
@@ -868,6 +878,18 @@ def tsegUstsanRemove(request, payload):
     pk = payload.get('id')
     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
     if tseg_ustsan:
+        if tseg_ustsan.img_holoos:
+            tseg_ustsan.img_holoos.delete(save=False)
+        if tseg_ustsan.img_oiroos:
+            tseg_ustsan.img_oiroos.delete(save=False)
+        if tseg_ustsan.img_baruun:
+            tseg_ustsan.img_baruun.delete(save=False)
+        if tseg_ustsan.img_zuun:
+            tseg_ustsan.img_zuun.delete(save=False)
+        if tseg_ustsan.img_hoino:
+            tseg_ustsan.img_hoino.delete(save=False)
+        if tseg_ustsan.img_omno:
+            tseg_ustsan.img_omno.delete(save=False)
         tseg_ustsan.delete()
         return JsonResponse({'success': True})
     else:
@@ -1082,7 +1104,7 @@ def tsegPersonalSuccess(request, payload):
         mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
         if point_class == point_type:
             rsp = {
-                'success': False, 
+                'success': False,
                 'msg': "Төлөв адилхан тул боломжгүй",
             }
             return JsonResponse(rsp)
@@ -1090,13 +1112,13 @@ def tsegPersonalSuccess(request, payload):
             point_class=point_type
         )
         rsp = {
-            'success': True, 
+            'success': True,
             'msg': "Амжилттай боллоо",
         }
         return JsonResponse(rsp)
     except Exception:
         rsp = {
-            'success': False, 
+            'success': False,
             'msg': "Амжилтгүй боллоо",
         }
         return JsonResponse(rsp)

@@ -428,15 +428,15 @@ export class FormTseg extends Component {
                                 </tr>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">5.</th>
-                                    <th 
-                                        className="text-center" 
-                                        colSpan="4" 
-                                        scope="rowgroup" 
+                                    <th
+                                        className="text-center"
+                                        colSpan="4"
+                                        scope="rowgroup"
                                         style={{width: "15%"}}
                                     >
                                         Орчны фото зураг:
-                                        <div 
-                                            type="button" 
+                                        <div
+                                            type="button"
                                             onMouseOver={(e) => this.handleBoxOver(e)}
                                             onMouseLeave={(e) => this.handleBoxLeave(e)}
                                             className="float-right"
@@ -474,7 +474,7 @@ export class FormTseg extends Component {
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
-                                            id >= 0 ? 
+                                            id >= 0 ?
                                                 zurag_hol_prev ?
                                                     <center><img src={zurag_hol_prev} width="150px" height="100px"/></center>
                                                 :
@@ -497,8 +497,8 @@ export class FormTseg extends Component {
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
-                                            id >= 0 
-                                            ? 
+                                            id >= 0
+                                            ?
                                             zurag_oir_prev ?
                                             <center><img src={zurag_oir_prev} width="150px" height="100px"/></center>:
                                             <center><label className="text-primary">Зураг байхгүй байна.</label></center>
@@ -528,8 +528,8 @@ export class FormTseg extends Component {
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
-                                            id >= 0 
-                                            ? 
+                                            id >= 0
+                                            ?
                                             zurag_baruun_prev ?
                                             <center><img src={zurag_baruun_prev} width="150px" height="100px"/></center>:
                                             <center><label className="text-primary">Зураг байхгүй байна.</label></center>
@@ -551,15 +551,14 @@ export class FormTseg extends Component {
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
-                                            id >= 0 
-                                            ? 
+                                            id >= 0
+                                            ?
                                             zurag_zuun_prev ?
                                             <center><img src={zurag_zuun_prev} width="150px" height="100px"/></center>:
                                             <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
-                                        
                                     </th>
                                 </tr>
                                 <tr>
@@ -583,8 +582,8 @@ export class FormTseg extends Component {
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
-                                            id >= 0 
-                                            ? 
+                                            id >= 0
+                                            ?
                                             zurag_hoid_prev ?
                                             <center><img src={zurag_hoid_prev} width="150px" height="100px"/></center>:
                                             <center><label className="text-primary">Зураг байхгүй байна.</label></center>
@@ -606,8 +605,8 @@ export class FormTseg extends Component {
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
-                                            id >= 0 
-                                            ? 
+                                            id >= 0
+                                            ?
                                             zurag_omno_prev ?
                                             <center><img src={zurag_omno_prev} width="150px" height="100px"/></center>:
                                             <center><label className="text-primary">Зураг байхгүй байна.</label></center>
@@ -621,8 +620,8 @@ export class FormTseg extends Component {
                                     <th style={{width: "15%"}}>Сэргээх талаар таны санал:</th>
                                     <td colSpan="4" scope="rowgroup">
                                         <Field
-                                            className={'form-control ' + 
-                                                (errors.sergeeh_sanal && 
+                                            className={'form-control ' +
+                                                (errors.sergeeh_sanal &&
                                                     touched.sergeeh_sanal ? ' is-invalid' : '')}
                                             as="select"
                                             name='sergeeh_sanal'
@@ -643,7 +642,7 @@ export class FormTseg extends Component {
                                     <th style={{width: "15%"}}>GPS-ийн хэмжилт хийх боломжтой эсэх:</th>
                                     <td colSpan="2" scope="rowgroup">
                                         <div className="col-md-12">
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 id="hemjilt_hiih_bolomj1"
                                                 checked={this.state.hemjilt_hiih_bolomj ? true : false}
@@ -655,7 +654,7 @@ export class FormTseg extends Component {
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
                                         <div className="col-md-12">
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 id="hemjilt_hiih_bolomj2"
                                                 checked={this.state.hemjilt_hiih_bolomj ? false : true}
@@ -670,7 +669,6 @@ export class FormTseg extends Component {
                             </tbody>
                         </table>
                         <div>
-                            
                             <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
                                 disabled={isSubmitting || has_error || error_bn}>
                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
