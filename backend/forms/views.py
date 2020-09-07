@@ -905,19 +905,17 @@ def tsegUstsanRemove(request, payload):
         return JsonResponse({'success': False})
 
 
-
 @require_POST
 @ajax_required
-def hureeUpdate(request, payload):
-    tuuhen_ov = payload.get('tuuhen_ov')
-    idx = payload.get('id')
-    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
+def hureeCreate(request, payload):
     x = payload.get('x')
     y = payload.get('y')
+    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
+    dursgalt_id = payload.get('dursgalt_id')
     x_t=float(x)
     y_t=float(y)
-    TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
-    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     cursor = connections['postgis_db'].cursor()
     geom_data = 'LINESTRING( '
     if tuuh_hure_datas.count() > 2:
@@ -928,10 +926,14 @@ def hureeUpdate(request, payload):
         geom_data = geom_data + ' )'
         cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
         geom = cursor.fetchone()
+        check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+        if not check:
+            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
         update_cursor = connections['postgis_db'].cursor()
-        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, tuuhen_ov,tuuh_soyl_huree_id])
+        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, dursgalt_id,tuuh_soyl_huree_id])
 
     return JsonResponse({'success': True})
+
 
 @require_POST
 @ajax_required

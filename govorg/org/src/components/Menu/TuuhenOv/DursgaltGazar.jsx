@@ -683,7 +683,7 @@ export class DursgaltGazar extends Component {
                                         name='torol_zuil_dursgalt_gazriin_coordinatx'
                                         id="id_torol_zuil_dursgalt_gazriin_coordinatx"
                                         value={this.state.torol_zuil_dursgalt_gazriin_coordinatx}
-                                        type="text"
+                                        type="number"
                                     />
                                 </td>
                                 <td scope="row" colSpan="2">
@@ -692,7 +692,7 @@ export class DursgaltGazar extends Component {
                                         name='torol_zuil_dursgalt_gazriin_coordinaty'
                                         value={this.state.torol_zuil_dursgalt_gazriin_coordinaty}
                                         id="id_torol_zuil_dursgalt_gazriin_coordinaty"
-                                        type="text"
+                                        type="number"
                                     />
                                 </td>
                                 <td scope="row" colSpan="1">
@@ -700,7 +700,7 @@ export class DursgaltGazar extends Component {
                                         className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinatalt ? 'is-invalid' : '')}
                                         name='torol_zuil_dursgalt_gazriin_coordinatalt'
                                         id="id_torol_zuil_dursgalt_gazriin_coordinatalt"
-                                        type="text"
+                                        type="number"
                                     />
                                     <ErrorMessage name="torol_zuil_dursgalt_gazriin_coordinatalt" component="div" className="invalid-feedback"/>
                                 </td>
