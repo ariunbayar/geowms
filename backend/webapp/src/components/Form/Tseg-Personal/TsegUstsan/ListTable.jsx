@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from '../../Modal'
+import Modal from '../../.././Modal'
 
 export default class ListTable extends Component {
 
@@ -59,7 +59,7 @@ export default class ListTable extends Component {
                     {tseg_id}
                 </td>
                 <td>
-                <NavLink to={`/back/froms/tseg-ustsan/${id}/засах`}>
+                <NavLink to={`/back/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                 </NavLink>
                 </td>

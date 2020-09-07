@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
-import {service} from '../service'
-import { Pagination } from "../../pagination/pagination"
+import {service} from '../../service'
+import { Pagination } from "../../../pagination/pagination"
 
 export class FormList extends Component {
 
@@ -93,7 +93,7 @@ export class FormList extends Component {
                             </div>
                         }
                         <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={`/back/froms/tseg-personal/add/`}>
+                            <NavLink className="btn gp-btn-primary" to={"/back/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
                             </NavLink>
                         </div>

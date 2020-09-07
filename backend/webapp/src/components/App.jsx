@@ -49,7 +49,7 @@ export default class App extends Component {
             <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
               <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li className="nav-item">
-                  <NavLink className="nav-link" activeClassName="active" to={"/back/froms/"}>Маягт</NavLink>
+                  <NavLink className="nav-link" activeClassName="active" to={"/back/froms/"}>Хүсэлт</NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" activeClassName="active" to={"/back/access/"}>Хандалт</NavLink>

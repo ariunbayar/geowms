@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../../Modal"
+import Modal from "../../../Modal"
 
 export default class FormTable extends Component {
 
@@ -55,7 +55,7 @@ export default class FormTable extends Component {
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 <th>
-                    <NavLink to={`/back/froms/tseg-personal/${id}/засах/`}>
+                    <NavLink to={`/back/froms/tseg-info/tsegpersonal/tseg-personal/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>

@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from '../service'
+import {service} from '../../service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import Maps from '../../map/Map'
+import Maps from '../../../map/Map'
 import { coordinateRelationship } from "ol/extent"
 
 export class Forms extends Component {
@@ -175,7 +175,7 @@ export class Forms extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push('/back/froms/tseg-personal/')
+                    this.props.history.push('/back/froms/tseg-info/tsegpersonal/tseg-personal/')
                 }, 1000)
             }
             else{
@@ -273,7 +273,7 @@ export class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row container  my-1">
+                    <div className="row container  m-l">
                         <div className="float-left">
                             <Maps
                                 handleXY={this.handleXY}
@@ -337,12 +337,12 @@ export class Forms extends Component {
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 
                                                 <option>...</option>
-                                                <option value="1">GPS-ийн сүлжээний цэг</option>
-                                                <option value="2">Гравиметрийн сүлжээний Цэг</option>
-                                                <option value="3">Өндрийн сүлжээний цэг</option>
-                                                <option value="4">Триангуляцийн сүлжээний цэг</option>
-                                                <option value="5">Полигометрийн сүлжээний цэг</option>
-                                                <option value="6">Зураглалын сүлжээний цэг</option>
+                                                <option value="1">GPS-ийн сүлжээ</option>
+                                                <option value="2">Гравиметрийн сүлжээ</option>
+                                                <option value="3">Өндрийн сүлжээ</option>
+                                                <option value="4">Триангуляцийн сүлжээ</option>
+                                                <option value="5">Полигометрийн сүлжээ</option>
+                                                <option value="6">Зураглалын сүлжээ</option>
                                                 <option value="7">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
@@ -379,11 +379,11 @@ export class Forms extends Component {
 
                                 <tr>
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
-                                    <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /UTM/</th>
+                                    <th rowSpan="4" scope="rowgroup">Солбилцол WGS-84 /DMS/</th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг -B</th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг -L</th>
+                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг(B)</th>
+                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг(L)</th>
                                 </tr>
                                 <tr>
                                     <td colSpan="2" className="pl-3">
@@ -597,19 +597,6 @@ export class Forms extends Component {
                                 </tr>
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
-                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
-                                            name='hotolson'
-                                            id="id_hotolson"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         {this.state.file_path11 === '' ? null : <a href={`/media/${this.state.file_path11}`}>{this.state.file_path11}</a>}
@@ -631,7 +618,7 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">16.</th>
+                                    <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         {this.state.file_path22 === '' ? null : <a href={`/media/${this.state.file_path22}`}>{this.state.file_path22}</a>}
@@ -655,7 +642,7 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">17.</th>
+                                    <th colSpan="1" scope="rowgroup">16.</th>
                                     <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -668,7 +655,7 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">18.</th>
+                                    <th colSpan="1" scope="rowgroup">17.</th>
                                     <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -678,6 +665,19 @@ export class Forms extends Component {
                                             type="text"
                                         />
                                         <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colSpan="1" scope="rowgroup">18.</th>
+                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
+                                    <td colSpan="3" scope="rowgroup">
+                                        <Field
+                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
+                                            name='hotolson'
+                                            id="id_hotolson"
+                                            type="text"
+                                        />
+                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                             

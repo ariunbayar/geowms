@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
 import {service} from './service'
-import {Pagination} from '../../pagination/pagination'
+import {Pagination} from '../../../pagination/pagination'
 
 export class List extends Component {
 
@@ -71,7 +71,7 @@ export class List extends Component {
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12">
-                          <NavLink className="btn gp-btn-primary float-right" to={"/back/froms/tseg-ustsan/add/"}>
+                          <NavLink className="btn gp-btn-primary float-right" to={"/back/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
                         <input
@@ -99,7 +99,7 @@ export class List extends Component {
                             {
                                 this.state.list_length == 0
                                 ?
-                                    "Бүртгэл байхгүй байна"
+                                    <tr><td>"Бүртгэл байхгүй байна"</td></tr>
                                 :
                                 (this.state.list.map((tseg, idx) =>
                                     <ListTable

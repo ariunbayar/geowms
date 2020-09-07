@@ -1,9 +1,6 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
-
-import { TsegPersonal } from './TsegPersonal'
-import { TsegUstsan } from './TsegUstsan'
-
+import {Bar} from './Tseg-Personal/Bar'
 export class Forms extends Component {
 
     constructor(props) {
@@ -14,29 +11,26 @@ export class Forms extends Component {
 
     render() {
         return (
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
-                <div className="row container p-0">
-                    <div className="col-md-12 p-1 m-1 ">
-                        <ul className="list-group list-group-horizontal col-md-12 ">
-                            <NavLink to="/back/froms/tseg-personal/" className="list-group-item col-md-6 ml-3 text-center" activeClassName="text-white gp-bg-primary">
-                                Цэг бүртгэлийн хүсэлт
+            <div className="container my-3 p-3 mb-5">
+            <div className="row">
+                <div className="col-md-2 p-0">
+                    <div className="my-0">
+                        <div className="list-group border">
+                            <NavLink className="menu" exact to={'/back/froms/tseg-info/'} activeClassName="active">
+                                <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
+                                    Цэгийн мэдээлэл
+                                </div>
                             </NavLink>
-                            <NavLink to="/back/froms/tseg-ustsan/" className="list-group-item col-md-6 text-center" activeClassName="text-white gp-bg-primary">
-                                Цэг устсан хүсэлт
-                            </NavLink>
-                        </ul>
+                        </div>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <Switch>
-                            <Route path="/back/froms/tseg-personal/" component={TsegPersonal}/>
-                            <Route path="/back/froms/tseg-ustsan/" component={TsegUstsan}/>
-                            <Route exact path="/back/froms/"/>
-                        </Switch>
-                    </div>
+                <div className="col-md-10 p-0">
+                     <Switch>
+                        <Route path="/back/froms/tseg-info/" component={Bar}/>
+                    </Switch>
                 </div>
             </div>
+        </div>
         )
     }
 }
