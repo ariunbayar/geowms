@@ -114,7 +114,7 @@ export class DursgaltGazar extends Component {
 
     handleXY(values, info){
         this.setState({
-                torol_zuil_dursgalt_gazriin_coordinatx: values[0], 
+                torol_zuil_dursgalt_gazriin_coordinatx: values[0],
                 torol_zuil_dursgalt_gazriin_coordinaty: values[1],
         })
     }
@@ -179,54 +179,52 @@ export class DursgaltGazar extends Component {
         for(var i = 0; i<humanArray.length; i++)
         {
             if(humanArray[i] == 'Тоносон') {
-                this.setState({dgh_gemtliin_tonoson: true}) 
-                dgh_gemtliin_all.push('Тоносон') 
+                this.setState({dgh_gemtliin_tonoson: true})
+                dgh_gemtliin_all.push('Тоносон')
             }
             if(humanArray[i] == 'Сүйтгэсэн') {
-                this.setState({dgh_gemtliin_suitgesen: true}) 
-                dgh_gemtliin_all.push('Сүйтгэсэн') 
+                this.setState({dgh_gemtliin_suitgesen: true})
+                dgh_gemtliin_all.push('Сүйтгэсэн')
             }
             if(humanArray[i] == 'Будаж балласан') {
-                this.setState({dgh_gemtliin_budaj_ballasan: true}) 
-                dgh_gemtliin_all.push('Будаж балласан') 
-            
+                this.setState({dgh_gemtliin_budaj_ballasan: true})
+                dgh_gemtliin_all.push('Будаж балласан')
             }
             if(humanArray[i] == 'Хулгайлсан') {
-                this.setState({dgh_gemtliin_hugalsan: true}) 
-                dgh_gemtliin_all.push('Хулгайлсан') 
+                this.setState({dgh_gemtliin_hugalsan: true})
+                dgh_gemtliin_all.push('Хулгайлсан')
             }
             if(humanArray[i] == 'Сийлсэн') {
-                this.setState({dgh_gemtliin_siilsen: true}) 
-                dgh_gemtliin_all.push('Сийлсэн') 
+                this.setState({dgh_gemtliin_siilsen: true})
+                dgh_gemtliin_all.push('Сийлсэн')
             }
             if(humanArray[i] == 'Зөөгдсөн') {
-                this.setState({dgh_gemtliin_zoogdson: true}) 
-                dgh_gemtliin_all.push('Зөөгдсөн') 
+                this.setState({dgh_gemtliin_zoogdson: true})
+                dgh_gemtliin_all.push('Зөөгдсөн')
             }
             if(humanArray[i] == 'Алга болсон') {
-                this.setState({dgh_gemtliin_alga_bolson: true}) 
-                dgh_gemtliin_all.push('Алга болсон') 
+                this.setState({dgh_gemtliin_alga_bolson: true})
+                dgh_gemtliin_all.push('Алга болсон')
             }
             if(humanArray[i] == 'Тос сүүний бохирдолтой') {
-                this.setState({dgh_gemtliin_tos_suu_bohirdol: true}) 
-                dgh_gemtliin_all.push('Тос сүүний бохирдолтой') 
-            
+                this.setState({dgh_gemtliin_tos_suu_bohirdol: true})
+                dgh_gemtliin_all.push('Тос сүүний бохирдолтой')
             }
             if(humanArray[i] == 'Буруу зассан') {
-                this.setState({dgh_gemtliin_buruu_zassan: true}) 
-                dgh_gemtliin_all.push('Буруу зассан') 
+                this.setState({dgh_gemtliin_buruu_zassan: true})
+                dgh_gemtliin_all.push('Буруу зассан')
             }
             if(humanArray[i] == 'Халаг, бөс даавуу ороосон, уясан') {
-                this.setState({dgh_gemtliin_hadag_bos_daavuu: true}) 
-                dgh_gemtliin_all.push('Халаг, бөс даавуу ороосон, уясан') 
+                this.setState({dgh_gemtliin_hadag_bos_daavuu: true})
+                dgh_gemtliin_all.push('Халаг, бөс даавуу ороосон, уясан')
             }
             if(humanArray[i] == 'Дэд бүтцийн аюулд орсон') {
-                this.setState({dgh_gemtliin_ded_buttsiin_ayuul: true}) 
-                dgh_gemtliin_all.push('Дэд бүтцийн аюулд орсон') 
+                this.setState({dgh_gemtliin_ded_buttsiin_ayuul: true})
+                dgh_gemtliin_all.push('Дэд бүтцийн аюулд орсон')
             }
             if(humanArray[i] == 'Аж ахуйн үйл ажиллагаанд өртсөн') {
-                this.setState({dgh_gemtliin_aj_ahuin_ajillagaand: true}) 
-                dgh_gemtliin_all.push('Аж ахуйн үйл ажиллагаанд өртсөн') 
+                this.setState({dgh_gemtliin_aj_ahuin_ajillagaand: true})
+                dgh_gemtliin_all.push('Аж ахуйн үйл ажиллагаанд өртсөн')
             }
         }
         this.setState({dgh_gemtliin_all})
@@ -237,48 +235,48 @@ export class DursgaltGazar extends Component {
         for(var i = 0; i<naturalArray.length; i++)
         {
             if(naturalArray[i] == 'Нарны нөлөөлөл') {
-                this.setState({dgh_baigaliin_huchin_zuil_nar: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Нарны нөлөөлөл') 
+                this.setState({dgh_baigaliin_huchin_zuil_nar: true})
+                dgh_baigaliin_huchin_zuil_all.push('Нарны нөлөөлөл')
             }
             if(naturalArray[i] == 'Салхиний нөлөөлөл') {
-                this.setState({dgh_baigaliin_huchin_zuil_salhi: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Салхиний нөлөөлөл') 
+                this.setState({dgh_baigaliin_huchin_zuil_salhi: true})
+                dgh_baigaliin_huchin_zuil_all.push('Салхиний нөлөөлөл')
             }
             if(naturalArray[i] == 'Эрдэс шохойн нөлөөлөл') {
-                this.setState({dgh_baigaliin_huchin_zuil_erdes_shohoin: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Эрдэс шохойн нөлөөлөл') 
+                this.setState({dgh_baigaliin_huchin_zuil_erdes_shohoin: true})
+                dgh_baigaliin_huchin_zuil_all.push('Эрдэс шохойн нөлөөлөл')
             }
             if(naturalArray[i] == 'Үер усны нөлөөлөл') {
-                this.setState({dgh_baigaliin_huchin_zuil_uer_us: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Үер усны нөлөөлөл') 
+                this.setState({dgh_baigaliin_huchin_zuil_uer_us: true})
+                dgh_baigaliin_huchin_zuil_all.push('Үер усны нөлөөлөл')
             }
             if(naturalArray[i] == 'Аянга цахилгаанд өртсөн') {
-                this.setState({dgh_baigaliin_huchin_zuil_aynga: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Аянга цахилгаанд өртсөн') 
+                this.setState({dgh_baigaliin_huchin_zuil_aynga: true})
+                dgh_baigaliin_huchin_zuil_all.push('Аянга цахилгаанд өртсөн')
             }
             if(naturalArray[i] == 'Гал түймэрт өртсөн') {
-                this.setState({dgh_baigaliin_huchin_zuil_gal_tuimer: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Гал түймэрт өртсөн') 
+                this.setState({dgh_baigaliin_huchin_zuil_gal_tuimer: true})
+                dgh_baigaliin_huchin_zuil_all.push('Гал түймэрт өртсөн')
             }
             if(naturalArray[i] == 'Газар хөдлөлт') {
-                this.setState({dgh_baigaliin_huchin_zuil_gazar_hodlolt: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Газар хөдлөлт') 
+                this.setState({dgh_baigaliin_huchin_zuil_gazar_hodlolt: true})
+                dgh_baigaliin_huchin_zuil_all.push('Газар хөдлөлт')
             }
             if(naturalArray[i] == 'Хаг ургамлын нөлөө') {
-                this.setState({dgh_baigaliin_huchin_zuil_hag_urgamliin: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Хаг ургамлын нөлөө') 
+                this.setState({dgh_baigaliin_huchin_zuil_hag_urgamliin: true})
+                dgh_baigaliin_huchin_zuil_all.push('Хаг ургамлын нөлөө')
             }
             if(naturalArray[i] == 'Биологийн бохирдолтой') {
-                this.setState({dgh_baigaliin_huchin_zuil_biologiin: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Биологийн бохирдолтой') 
+                this.setState({dgh_baigaliin_huchin_zuil_biologiin: true})
+                dgh_baigaliin_huchin_zuil_all.push('Биологийн бохирдолтой')
             }
             if(naturalArray[i] == 'Чулууны өгөршил') {
-                this.setState({dgh_baigaliin_huchin_zuil_chuluuni_ogorshil: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Чулууны өгөршил') 
+                this.setState({dgh_baigaliin_huchin_zuil_chuluuni_ogorshil: true})
+                dgh_baigaliin_huchin_zuil_all.push('Чулууны өгөршил')
             }
             if(naturalArray[i] == 'Мал амьтны нөлөөлөл') {
-                this.setState({dgh_baigaliin_huchin_zuil_mal_amitnii: true}) 
-                dgh_baigaliin_huchin_zuil_all.push('Мал амьтны нөлөөлөл') 
+                this.setState({dgh_baigaliin_huchin_zuil_mal_amitnii: true})
+                dgh_baigaliin_huchin_zuil_all.push('Мал амьтны нөлөөлөл')
             }
         }
         this.setState({dgh_baigaliin_huchin_zuil_all})
@@ -295,7 +293,7 @@ export class DursgaltGazar extends Component {
                 if(form_data){
                     form_data.map((tuuh) => (
 
-                        this.setState({ 
+                        this.setState({
                             values:{
                                 tuuhin_ov_date: tuuh['created_at'],
                                 torol_zuiltorol_zuil_name: tuuh['stone'],
@@ -330,7 +328,7 @@ export class DursgaltGazar extends Component {
                                 dgh_baigaliin_huchin_zuil_temdeglel: tuuh['natural_comment'],
                                 dgh_hashaa_baigaa_eseh_temdeglel: tuuh['hashaa_comment'],
                                 dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel: tuuh['protecti_2_comment'],
-                                dgh_hamgaalaltiin_zereg_oorchloh_sanal:tuuh['protecti_2'], 
+                                dgh_hamgaalaltiin_zereg_oorchloh_sanal:tuuh['protecti_2'],
                                 dgh_sergeen_zasvarlasan_eseh_temdeglel: tuuh['recover_comment'],
                                 dgh_sergeen_zasvarlah_eseh_temdeglel: tuuh['recover1_comment'],
                                 dgh_saravchtai_eseh_temdeglel: tuuh['saravch_comment'],
@@ -352,7 +350,7 @@ export class DursgaltGazar extends Component {
             })
         }
     }
-  
+
     handleCheckSelect(field, e, name) {
         let dgh_baigaliin_huchin_zuil_all = this.state.dgh_baigaliin_huchin_zuil_all
 
@@ -412,7 +410,6 @@ export class DursgaltGazar extends Component {
             {
                 bulsh_orshuulga.push(<option value={`3.${i+1}`}>{bulsh_orshuulga_array[i]}</option>);
             }
-    
             this.setState({ [field]: name , torol_zuil_torol_zuil_level1: bulsh_orshuulga})
         }
         if(name == '4'){
@@ -428,13 +425,11 @@ export class DursgaltGazar extends Component {
         if(name == '5'){
             var barilga_arhitektur = []
             var barilga_arhitektur_array = ["5.1 Суурьшлын ул мөр бүхий газар", "5.2 Эртний хот", "5.3 Хэрмэн зам", "5.4 Шуудуу", "5.5 Сүм хийдийн туурь", "5.6 суврага", "5.7 Түүхэн дурсгалт байшин", "5.8 Агуй, оромж, түр сууц", "5.9 Архитектурын дурсгал", "5.10 Бусад"]
-    
             for (var i = 0; i < barilga_arhitektur_array.length; i++)
             {
                 barilga_arhitektur.push(<option value={`5.${i+1}`}>{barilga_arhitektur_array[i]}</option>);
             }
             this.setState({ [field]: name , torol_zuil_torol_zuil_level1: barilga_arhitektur})
-        
         }
 
         if(name == '6'){
@@ -445,7 +440,6 @@ export class DursgaltGazar extends Component {
                 hoshoo_dursgal.push(<option value={`6.${i+1}`}>{hoshoo_dursgal_array[i]}</option>);
             }
             this.setState({ [field]: name , torol_zuil_torol_zuil_level1: hoshoo_dursgal})
-        
         }
         if(name == '7'){
             var uildverleliin_ul_mor = []
@@ -457,8 +451,6 @@ export class DursgaltGazar extends Component {
             this.setState({ [field]: name , torol_zuil_torol_zuil_level1: uildverleliin_ul_mor})
         }
         this.setState({ [field]: name})
-
-
     }
     handleInputSelectTwo(field, name){
         this.setState({ torol_zuil_torol_zuil_level2: []})
@@ -511,8 +503,6 @@ export class DursgaltGazar extends Component {
             this.setState({ [field]: name , torol_zuil_torol_zuil_level2: ertnii_hot})
         }
         this.setState({ [field]: name})
-
-
     }
 
     handleTextArea(field, e) {
@@ -531,7 +521,7 @@ export class DursgaltGazar extends Component {
             this.setState({ [field]: false })
         }
     }
-    
+
     handleSubmit(values, { setStatus, setSubmitting }) {
 
         setStatus('checking')
@@ -554,6 +544,7 @@ export class DursgaltGazar extends Component {
                 }
             })
         }
+
         else{
             service.dursgaltGazarCreate(form_datas_values, form_datas).then(({success}) => {
                 if (success) {
@@ -567,6 +558,7 @@ export class DursgaltGazar extends Component {
             })
         }
     }
+
     setDataFormik(values){
         this.setState({values})
     }
@@ -594,7 +586,7 @@ export class DursgaltGazar extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div>
+                    <div className='container my-4'>
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}
@@ -691,7 +683,7 @@ export class DursgaltGazar extends Component {
                                         name='torol_zuil_dursgalt_gazriin_coordinatx'
                                         id="id_torol_zuil_dursgalt_gazriin_coordinatx"
                                         value={this.state.torol_zuil_dursgalt_gazriin_coordinatx}
-                                        type="text"
+                                        type="number"
                                     />
                                 </td>
                                 <td scope="row" colSpan="2">
@@ -700,7 +692,7 @@ export class DursgaltGazar extends Component {
                                         name='torol_zuil_dursgalt_gazriin_coordinaty'
                                         value={this.state.torol_zuil_dursgalt_gazriin_coordinaty}
                                         id="id_torol_zuil_dursgalt_gazriin_coordinaty"
-                                        type="text"
+                                        type="number"
                                     />
                                 </td>
                                 <td scope="row" colSpan="1">
@@ -708,7 +700,7 @@ export class DursgaltGazar extends Component {
                                         className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_coordinatalt ? 'is-invalid' : '')}
                                         name='torol_zuil_dursgalt_gazriin_coordinatalt'
                                         id="id_torol_zuil_dursgalt_gazriin_coordinatalt"
-                                        type="text"
+                                        type="number"
                                     />
                                     <ErrorMessage name="torol_zuil_dursgalt_gazriin_coordinatalt" component="div" className="invalid-feedback"/>
                                 </td>
@@ -718,7 +710,7 @@ export class DursgaltGazar extends Component {
 
 
                         <table className="table table-bordered">
-                            <tbody>
+                            <thead>
                                 <tr>
                                     <td colSpan="8">
                                         <Field
@@ -732,11 +724,11 @@ export class DursgaltGazar extends Component {
                                     </td>
                                     <th style={{width: "20%"}}>Дурсгалт газрын шинж чанар, хэлбэр хэмжээ, тоо ширхэг, хийсэн матерал, хадгалалт хамгаалалтын байдал зэргийг тоочин тэмдэглэл бичнэ.</th>
                                 </tr>
-                            </tbody>
+                            </thead>
                         </table>
 
                         <table className="table table-bordered">
-                            <tbody>
+                            <thead>
                                 <tr>
                                     <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "10%"}}>Хэмжээ</th>
                                     <td>Талбай</td>
@@ -829,7 +821,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="2" scope="rowgroup" scope="row">Хэрэв дурсгалт газрыг тоймлон тоолсон бол "Тоо ширхэг" хэсэгт тоон утгаар оруулж, "Тэмдэглэл" хэсэгт бичнэ.</th>
                                 </tr>
                                 <tr>
-                                    <th>                                
+                                    <th>
                                         Тэмдэглэл
                                     </th>
                                     <td colSpan="6">
@@ -843,14 +835,13 @@ export class DursgaltGazar extends Component {
                                         <ErrorMessage name="hemjee_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
-                            </tbody>
+                            </thead>
                         </table>
 
                         <table className="table table-bordered">
-                            <tbody>
+                            <thead>
                                 <tr>
                                     <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.</th>
-                                    
                                     <td>
                                         <Fragment>
                                             <Field name="dg_ezen_dursgalt_gazar_ezen" as="select" className="form-control"
@@ -875,14 +866,13 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dg_ezen_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
-                                    
                                     <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
-                            </tbody>
+                            </thead>
                         </table>
 
                         <table className="table table-bordered">
-                            <tbody>
+                            <thead>
                                 <tr>
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Хамгаалалтын ангилал.</th>
                                     <td>
@@ -917,12 +907,12 @@ export class DursgaltGazar extends Component {
                                 </tr>
                                 <tr>
                                 </tr>
-                            </tbody>
+                            </thead>
                         </table>
 
 
                         <table className="table table-bordered">
-                            <tbody>
+                            <thead>
                                 <tr>
                                     <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Тусгай хамгаалалтад авах шаардлагатай эсэх.</th>
                                     <td>
@@ -947,7 +937,7 @@ export class DursgaltGazar extends Component {
                                             id="id_dgh_tusgai_temdeglel"
                                             type="textarea"
                                         />
-                                        <ErrorMessage name="dgh_tusgai_temdeglel" component="div" className="invalid-feedback"/>                             
+                                        <ErrorMessage name="dgh_tusgai_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
                                     <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
@@ -966,9 +956,8 @@ export class DursgaltGazar extends Component {
                                     </td>
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
-                            
                                 <tr>
-                                <td>     
+                                <td>
                                     <Field
                                         className={'form-control ' + (errors.dgh_yaaraltai_temdeglel ? 'is-invalid' : '')}
                                         component="textarea"
@@ -976,7 +965,7 @@ export class DursgaltGazar extends Component {
                                         id="id_dgh_yaaraltai_temdeglel"
                                         type="textarea"
                                     />
-                                    <ErrorMessage name="dgh_yaaraltai_temdeglel" component="div" className="invalid-feedback"/>                              
+                                    <ErrorMessage name="dgh_yaaraltai_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                     <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
@@ -996,7 +985,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                <td>    
+                                <td>
                                     <Field
                                         className={'form-control ' + (errors.dgh_omchlol_ezemshih_omchlol_sanal_temdeglel ? 'is-invalid' : '')}
                                         component="textarea"
@@ -1004,7 +993,7 @@ export class DursgaltGazar extends Component {
                                         id="id_dgh_omchlol_ezemshih_omchlol_sanal_temdeglel"
                                         type="textarea"
                                     />
-                                    <ErrorMessage name="dgh_omchlol_ezemshih_omchlol_sanal_temdeglel" component="div" className="invalid-feedback"/>                                    
+                                    <ErrorMessage name="dgh_omchlol_ezemshih_omchlol_sanal_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                     <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
@@ -1024,7 +1013,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                <td>      
+                                <td>
                                     <Field
                                         className={'form-control ' + (errors.dgh_maltan_sudaltan_temdeglel ? 'is-invalid' : '')}
                                         component="textarea"
@@ -1032,7 +1021,7 @@ export class DursgaltGazar extends Component {
                                         id="id_dgh_maltan_sudaltan_temdeglel"
                                         type="textarea"
                                     />
-                                    <ErrorMessage name="dgh_maltan_sudaltan_temdeglel" component="div" className="invalid-feedback"/>                           
+                                    <ErrorMessage name="dgh_maltan_sudaltan_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                     <th>Хэрэв хууль бусаар ухаж, тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</th>
                                 </tr>
@@ -1041,8 +1030,8 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="13" scope="rowgroup" scope="row" style={{width: "30%"}}>Гэмтлийн тухай мэдээлэл.</th>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_tonoson"
                                                 checked={this.state.dgh_gemtliin_tonoson}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_tonoson', e, 'Тоносон')}
@@ -1056,8 +1045,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_suitgesen"
                                                 checked={this.state.dgh_gemtliin_suitgesen}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_suitgesen', e, 'Сүйтгэсэн')}
@@ -1070,8 +1059,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_budaj_ballasan"
                                                 checked={this.state.dgh_gemtliin_budaj_ballasan}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_budaj_ballasan', e, 'Будаж балласан')}
@@ -1084,8 +1073,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_hugalsan"
                                                 checked={this.state.dgh_gemtliin_hugalsan}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_hugalsan', e, 'Хулгайлсан')}
@@ -1098,8 +1087,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_siilsen"
                                                 checked={this.state.dgh_gemtliin_siilsen}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_siilsen', e, 'Сийлсэн')}
@@ -1112,8 +1101,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_zoogdson"
                                                 checked={this.state.dgh_gemtliin_zoogdson}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_zoogdson', e, 'Зөөгдсөн')}
@@ -1126,8 +1115,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_alga_bolson"
                                                 checked={this.state.dgh_gemtliin_alga_bolson}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_alga_bolson', e, 'Алга болсон')}
@@ -1140,8 +1129,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_tos_suu_bohirdol"
                                                 checked={this.state.dgh_gemtliin_tos_suu_bohirdol}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_tos_suu_bohirdol', e, 'Тос сүүний бохирдолтой')}
@@ -1154,8 +1143,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_buruu_zassan"
                                                 checked={this.state.dgh_gemtliin_buruu_zassan}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_buruu_zassan', e, 'Буруу зассан')}
@@ -1168,8 +1157,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_hadag_bos_daavuu"
                                                 checked={this.state.dgh_gemtliin_hadag_bos_daavuu}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_hadag_bos_daavuu', e, 'Халаг, бөс даавуу ороосон, уясан')}
@@ -1182,7 +1171,7 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 id="id_dgh_gemtliin_ded_buttsiin_ayuul"
                                                 checked={this.state.dgh_gemtliin_ded_buttsiin_ayuul}
@@ -1196,8 +1185,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_gemtliin_aj_ahuin_ajillagaand"
                                                 checked={this.state.dgh_gemtliin_aj_ahuin_ajillagaand}
                                                 onChange={(e) => this.handleCheckSelectHun('dgh_gemtliin_aj_ahuin_ajillagaand', e, 'Аж ахуйн үйл ажиллагаанд өртсөн')}
@@ -1208,7 +1197,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                <td>                  
+                                <td>
                                     <Field
                                         className={'form-control ' + (errors.dgh_gemtliin_temdeglel ? 'is-invalid' : '')}
                                         component="textarea"
@@ -1216,7 +1205,7 @@ export class DursgaltGazar extends Component {
                                         id="id_dgh_gemtliin_temdeglel"
                                         type="textarea"
                                     />
-                                    <ErrorMessage name="dgh_gemtliin_temdeglel" component="div" className="invalid-feedback"/>                    
+                                    <ErrorMessage name="dgh_gemtliin_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                     <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
@@ -1225,8 +1214,8 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}}> Байгалийн хүчин зүйл.</th>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_baigaliin_huchin_zuil_nar"
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_nar}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_nar', e, 'Нарны нөлөөлөл')}
@@ -1240,8 +1229,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_salhi}
                                                 id="id_dgh_baigaliin_huchin_zuil_salhi"
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_salhi', e, 'Салхиний нөлөөлөл')}
@@ -1254,8 +1243,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_erdes_shohoin'
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_erdes_shohoin', e, 'Эрдэс шохойн нөлөөлөл')}
                                                 value={this.state.dgh_baigaliin_huchin_zuil_erdes_shohoin}
@@ -1267,8 +1256,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="id_dgh_baigaliin_huchin_zuil_uer_us"
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_uer_us}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_uer_us', e, 'Үер усны нөлөөлөл')}
@@ -1281,8 +1270,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_aynga'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_aynga}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_aynga', e, 'Аянга цахилгаанд өртсөн')}
@@ -1295,8 +1284,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_gal_tuimer'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_gal_tuimer}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_gal_tuimer', e, 'Гал түймэрт өртсөн')}
@@ -1309,8 +1298,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_gazar_hodlolt'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_gazar_hodlolt}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_gazar_hodlolt', e, 'Газар хөдлөлт')}
@@ -1323,8 +1312,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_hag_urgamliin'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_hag_urgamliin}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_hag_urgamliin', e, 'Хаг ургамлын нөлөө')}
@@ -1337,8 +1326,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_biologiin'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_biologiin}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_biologiin', e, 'Биологийн бохирдолтой')}
@@ -1351,8 +1340,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_chuluuni_ogorshil'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_chuluuni_ogorshil}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_chuluuni_ogorshil', e, 'Чулууны өгөршил')}
@@ -1365,8 +1354,8 @@ export class DursgaltGazar extends Component {
                                 <tr>
                                     <td>
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_mal_amitnii'
                                                 checked={this.state.dgh_baigaliin_huchin_zuil_mal_amitnii}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_mal_amitnii', e, 'Мал амьтны нөлөөлөл')}
@@ -1378,7 +1367,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
 
                                 <tr>
-                                    <td>         
+                                    <td>
                                         <Field
                                             className={'form-control ' + (errors.dgh_baigaliin_huchin_zuil_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -1386,10 +1375,10 @@ export class DursgaltGazar extends Component {
                                             id="id_dgh_baigaliin_huchin_zuil_temdeglel"
                                             type="textarea"
                                         />
-                                        <ErrorMessage name="dgh_baigaliin_huchin_zuil_temdeglel" component="div" className="invalid-feedback"/>                       
+                                        <ErrorMessage name="dgh_baigaliin_huchin_zuil_temdeglel" component="div" className="invalid-feedback"/>
 
                                     </td>
-                                    <th>       
+                                    <th>
                                         Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно
                                     </th>
                                 </tr>
@@ -1410,7 +1399,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                    <td>    
+                                    <td>
                                         <Field
                                             className={'form-control ' + (errors.dgh_sergeen_zasvarlasan_eseh_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -1418,7 +1407,7 @@ export class DursgaltGazar extends Component {
                                             id="id_dgh_sergeen_zasvarlasan_eseh_temdeglel"
                                             type="textarea"
                                         />
-                                        <ErrorMessage name="dgh_sergeen_zasvarlasan_eseh_temdeglel" component="div" className="invalid-feedback"/>                            
+                                        <ErrorMessage name="dgh_sergeen_zasvarlasan_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
                                     <th>
                                     Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.
@@ -1437,12 +1426,12 @@ export class DursgaltGazar extends Component {
                                             </Field>
                                             <ErrorMessage name="dgh_sergeen_zasvarlah_eseh_nenshaardlaga" component="div" className="invalid-feedback"/>
                                         </Fragment>
-                                        
+
                                     </td>
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                    <td>      
+                                    <td>
                                         <Field
                                             className={'form-control ' + (errors.dgh_sergeen_zasvarlah_eseh_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -1452,8 +1441,7 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dgh_sergeen_zasvarlah_eseh_temdeglel" component="div" className="invalid-feedback"/>                          
                                     </td>
-                                    <th>                                
-
+                                    <th>
                                         Шалтгааныг товч бичнэ.
                                     </th>
                                 </tr>
@@ -1475,9 +1463,8 @@ export class DursgaltGazar extends Component {
                                     </td>
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Нэгийг сонгоно.</th>
                                 </tr>
-                    
                                 <tr>
-                                <td>  
+                                <td>
                                     <Field
                                             className={'form-control ' + (errors.dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -1505,7 +1492,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                <td>          
+                                <td>
                                 <Field
                                             className={'form-control ' + (errors.dgh_hashaa_baigaa_eseh_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -1533,7 +1520,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                <td>   
+                                <td>
                                     <Field
                                         className={'form-control ' + (errors.dgh_saravchtai_eseh_temdeglel ? 'is-invalid' : '')}
                                         component="textarea"
@@ -1541,7 +1528,7 @@ export class DursgaltGazar extends Component {
                                         id="id_dgh_saravchtai_eseh_temdeglel"
                                         type="textarea"
                                     />
-                                    <ErrorMessage name="dgh_saravchtai_eseh_temdeglel" component="div" className="invalid-feedback"/>                             
+                                    <ErrorMessage name="dgh_saravchtai_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                     <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
@@ -1561,7 +1548,7 @@ export class DursgaltGazar extends Component {
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                <td> 
+                                <td>
                                     <Field
                                         className={'form-control ' + (errors.dgh_hayg_tailbar_eseh_temdeglel ? 'is-invalid' : '')}
                                         component="textarea"
@@ -1569,7 +1556,7 @@ export class DursgaltGazar extends Component {
                                         id="id_dgh_hayg_tailbar_eseh_temdeglel"
                                         type="textarea"
                                     />
-                                    <ErrorMessage name="dgh_hayg_tailbar_eseh_temdeglel" component="div" className="invalid-feedback"/>                               
+                                    <ErrorMessage name="dgh_hayg_tailbar_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                     <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
@@ -1579,7 +1566,7 @@ export class DursgaltGazar extends Component {
 
                                 <tr>
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Бусад тэмдэглэл.</th>
-                                    <td>    
+                                    <td>
                                         <Field
                                             className={'form-control ' + (errors.last_busad_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -1587,11 +1574,11 @@ export class DursgaltGazar extends Component {
                                             id="id_last_busad_temdeglel"
                                             type="textarea"
                                         />
-                                        <ErrorMessage name="last_busad_temdeglel" component="div" className="invalid-feedback"/>                            
+                                        <ErrorMessage name="last_busad_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
                                     <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Дээр асуулгад хамрагдаагүй бусад мэдээллийг тэмдэгтээр бичнэ.</th>
                                 </tr>
-                            </tbody>
+                            </thead>
                         </table>
                         <div className="span3">
                             {has_error
@@ -1610,7 +1597,7 @@ export class DursgaltGazar extends Component {
                                 </button>
                             </div>
                         </div>
-                    </div> 
+                    </div>
                 </Form>
                 )
             }}

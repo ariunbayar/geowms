@@ -28,7 +28,6 @@ export class AddForm extends Component {
     }
 
     handleXY(values, info){
-        console.log(values)
         this.setState({x:values[0], y:values[1]})
     }
 
@@ -52,9 +51,9 @@ export class AddForm extends Component {
         const id = this.props.match.params.id
         service.about(id).then(({tuuh_soyl}) => {
             if(tuuh_soyl){
-                tuuh_soyl.map((tuuh) => 
+                tuuh_soyl.map((tuuh) =>
                     this.setState({
-                        huree_len: tuuh['too_shirheg'], 
+                        huree_len: tuuh['too_shirheg'],
                     })
                 )
             }
@@ -73,7 +72,7 @@ export class AddForm extends Component {
         const huree_components = []
         for(var i=1; i<=huree_len; i++)
         {
-            huree_components.push(<HureeForm dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y}></HureeForm>)
+            huree_components.push(<HureeForm key={i} dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y}></HureeForm>)
         }
         return (
             <div  className="container my-4">
@@ -95,16 +94,18 @@ export class AddForm extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th scope="col"> № </th>
+                                    <th scope="col">№</th>
                                     <th scope="col">Дурсгалт газрын нэр</th>
                                     <th scope="col">Чулуулгын төрөл</th>
-                                    <th scope="col">type</th>
+                                    <th scope="col">X</th>
+                                    <th scope="col">Y</th>
+                                    <th scope="col">Хамрах хүрээнд багтсан</th>
                                     <th scope="col">created_at</th>
                                     <th scope="col">Засах</th>
                                     <th scope="col">Устгах</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tfoot>
                                 {this.state.form_data.map((values, idx) =>
                                     <DursgaltGazarTable
                                         key={idx}
@@ -115,21 +116,16 @@ export class AddForm extends Component {
                                         handleMove={this.handleMove}
                                     />
                                 )}
-                            </tbody>
+                            </tfoot>
                         </table>
-
                         <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4>
                         {huree_components}
-                        <AyulForm 
+                        <AyulForm
                             dursgalt_id={dursgalt_id}
                             x={this.state.x}
                             y={this.state.y}
                         >
                         </AyulForm>
-                         
-
-                       
-
                     </div>
                 </div>
             </div>

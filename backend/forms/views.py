@@ -56,7 +56,7 @@ def hureeCountEdit(request, payload):
                 count = data.tuuh_soyl_huree_id - 1
                 TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuh_id, id=data.id).update(tuuh_soyl_huree_id=count)
 
-        too_shirheg = int(tuuh.too_shirheg) - 1 
+        too_shirheg = int(tuuh.too_shirheg) - 1
         TuuhSoyol.objects.using('postgis_db').filter(id=tuuh_id).update(too_shirheg=too_shirheg)
     return JsonResponse({'success': True})
 
@@ -312,13 +312,25 @@ def dursgaltGazarAll(request, payload):
             'id': data.id,
             'dursgal': data.dursgal,
             'tuuh_soyl': data.tuuh_soyl,
-            'type': data.type1,
+            'x': data.x,
+            'y': data.y,
             'stone': data.stone,
             'dursgal': data.dursgal,
             'protection': data.protection,
+            'point_check': findPoint(data.x, data.y, tuug_soyol),
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
     return JsonResponse({'form_data': form_data})
+
+
+def findPoint(x,y, tuug_soyol):
+    find_cursor = connections['postgis_db'].cursor()
+    find_cursor.execute(''' select * from tuuhsoyolhureepol where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1) and tuuh_soyl = %s ''', [y, x, tuug_soyol])
+    check = find_cursor.fetchone()
+    if check:
+        return True
+    else:
+        return False
 
 
 @require_POST
@@ -392,9 +404,6 @@ def dursgaltGazarRemove(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def tseg_personal_list(request, payload):
-    # cursor = connections['postgis_db'].cursor()
-    # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [108.1232, 95.12312])
-    # geoms= cursor.fetchone()
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
@@ -456,6 +465,7 @@ def tsegPersonalUpdate(request, payload):
             BA = int(float(tseg.latlongy))
             BB = int((float(tseg.latlongy)-BA)*60)
             BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
+
     tseg_display.append({
         'latlongx': tseg.latlongx if tseg and tseg.latlongx else '',
         'latlongy': tseg.latlongy if tseg and tseg.latlongy else '',
@@ -507,7 +517,7 @@ def findSum(request, payload):
     L = payload.get("y")
     B = payload.get("x")
     cursor = connections['postgis_db'].cursor()
-    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1000)''', [L, B])
+    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
     geom = cursor.fetchone()
     if(geom):
             
@@ -690,7 +700,7 @@ def tsegPersonal(request):
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
         mpoint = Mpoint.objects.using('postgis_db').create(
-                    id=unique_id, 
+                    id=unique_id,
                     objectid='null', point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
                     pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), 
@@ -709,7 +719,7 @@ def tsegPersonal(request):
                     barishil_tuhai=request.POST.get('barishil_tuhai'),
                     sudalga_or_shine=request.POST.get('sudalga_or_shine'),
                     hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
-                    date=date, hotolson=request.POST.get('hotolson'), 
+                    date=date, hotolson=request.POST.get('hotolson'),
                     file_path1=file1,file_path2=file2,
                     bairshil_tseg_oiroos_img_url=bairshil_tseg_oiroos_img_url,
                     bairshil_tseg_holoos_img_url=bairshil_tseg_holoos_img_url,
@@ -735,7 +745,11 @@ def tsegUstsan(request):
     evdersen_baidal = request.POST.get('evdersen_baidal')
     shaltgaan = request.POST.get('nohtsol_baidal')
     sergeeh_sanal = request.POST.get('sergeeh_sanal')
-    TorF = bool(request.POST.get('hemjilt_hiih_bolomj'))
+    TorF = request.POST.get('hemjilt_hiih_bolomj')
+    if TorF == 'false':
+        TorF = False
+    else:
+        TorF = True
     img_holoos = request.POST.get('zurag_hol')
     img_oiroos = request.POST.get('zurag_oir')
     img_baruun = request.POST.get('zurag_baruun')
@@ -783,25 +797,35 @@ def tsegUstsan(request):
             [image_x2] = resize_b64_to_sizes(img_zuun, [(200, 200)])
             Tsegs.img_zuun = SimpleUploadedFile('icon.png', image_x2)
             Tsegs.save()
+        if img_omno and len(img_omno) > 2000:
+            Tsegs.img_omno.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(img_omno, [(200, 200)])
+            Tsegs.img_omno = SimpleUploadedFile('icon.png', image_x2)
+            Tsegs.save()
+        if img_hoino and len(img_hoino) > 2000:
+            Tsegs.img_hoino.delete(save=False)
+            [image_x2] = resize_b64_to_sizes(img_hoino, [(200, 200)])
+            Tsegs.img_hoino = SimpleUploadedFile('icon.png', image_x2)
+            Tsegs.save()
         return JsonResponse({'success': True})
     else:
         if img_holoos:
-            [image_x2] = resize_b64_to_sizes(img_holoos, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_holoos, [(720, 720)])
             img_holoos = SimpleUploadedFile('img.png', image_x2)
         if img_oiroos:
-            [image_x2] = resize_b64_to_sizes(img_oiroos, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_oiroos, [(720, 720)])
             img_oiroos = SimpleUploadedFile('img.png', image_x2)
         if img_baruun:
-            [image_x2] = resize_b64_to_sizes(img_baruun, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_baruun, [(720, 720)])
             img_baruun = SimpleUploadedFile('img.png', image_x2)
         if img_zuun:
-            [image_x2] = resize_b64_to_sizes(img_zuun, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_zuun, [(720, 720)])
             img_zuun = SimpleUploadedFile('img.png', image_x2)
         if img_hoino:
-            [image_x2] = resize_b64_to_sizes(img_hoino, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_hoino, [(720, 720)])
             img_hoino = SimpleUploadedFile('img.png', image_x2)
         if img_omno:
-            [image_x2] = resize_b64_to_sizes(img_omno, [(300, 300)])
+            [image_x2] = resize_b64_to_sizes(img_omno, [(720, 720)])
             img_omno = SimpleUploadedFile('img.png', image_x2)
         TsegUstsan.objects.create(
             email=email,
@@ -824,30 +848,9 @@ def tsegUstsan(request):
         return JsonResponse({'success': True})
 
 
-@require_GET
-@ajax_required
-def tsegUstsanAll(request):
-    tseg_ustsan = []
-    for tseg in TsegUstsan.objects.all():
-        tseg_ustsan.append({
-            'id': tseg.id,
-            'tseg_id': tseg.tseg_id,
-            'email': tseg.email,
-            'name': tseg.name,
-            'alban_tushaal': tseg.alban_tushaal,
-            'utas': tseg.phone,
-            'oiroltsoo_bairlal': tseg.oiroltsoo_bairlal,
-            'evdersen_baidal': tseg.evdersen_baidal,
-            'nohtsol_baidal': tseg.shaltgaan,
-        })
-    return JsonResponse({
-        'tseg_ustsan_all': tseg_ustsan,
-        'success': True
-    })
-
 @require_POST
 @ajax_required
-def tsegUstsanRemove(request, payload):
+def tsegUstsanSuccess(request, payload):
     pk = payload.get('id')
     tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
     mpoint = Mpoint.objects.using('postgis_db').filter(point_id=tseg_ustsan.tseg_id).first()
@@ -869,19 +872,89 @@ def tsegUstsanRemove(request, payload):
 
 @require_POST
 @ajax_required
-def hureeCreate(request, payload):
+def tsegUstsanList(request, payload):
+    page = payload.get('page')
+    per_page = payload.get('perpage')
+    query = payload.get('query')
+    display_items = []
+    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query)
 
+    total_items = Paginator(tsegs, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for item in items_page.object_list:
+        display_items.append({
+            'id': item.id,
+            'tseg_id': item.tseg_id,
+            'email': item.email,
+            'name': item.name,
+            'alban_tushaal': item.alban_tushaal,
+            'phone': item.phone,
+            'oiroltsoo_bairlal': item.oiroltsoo_bairlal,
+            'evdersen_baidal': item.evdersen_baidal,
+            'nohtsol_baidal': item.shaltgaan,
+        })
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': display_items,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def tsegUstsanRemove(request, payload):
+    pk = payload.get('id')
+    tseg_ustsan = TsegUstsan.objects.get(pk=pk)
+    if tseg_ustsan:
+        if tseg_ustsan.img_holoos:
+            tseg_ustsan.img_holoos.delete(save=False)
+        if tseg_ustsan.img_oiroos:
+            tseg_ustsan.img_oiroos.delete(save=False)
+        if tseg_ustsan.img_baruun:
+            tseg_ustsan.img_baruun.delete(save=False)
+        if tseg_ustsan.img_zuun:
+            tseg_ustsan.img_zuun.delete(save=False)
+        if tseg_ustsan.img_hoino:
+            tseg_ustsan.img_hoino.delete(save=False)
+        if tseg_ustsan.img_omno:
+            tseg_ustsan.img_omno.delete(save=False)
+        tseg_ustsan.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
+
+
+@require_POST
+@ajax_required
+def hureeCreate(request, payload):
     x = payload.get('x')
     y = payload.get('y')
     tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     dursgalt_id = payload.get('dursgalt_id')
     x_t=float(x)
     y_t=float(y)
-    # cursor = connections['postgis_db'].cursor()
-    # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
-    # geom = 
     TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
-    
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    cursor = connections['postgis_db'].cursor()
+    geom_data = 'LINESTRING( '
+    if tuuh_hure_datas.count() > 2:
+        geom_data = 'LINESTRING( '
+        for tuuh_hure in tuuh_hure_datas:
+            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
+        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
+        geom_data = geom_data + ' )'
+        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
+        geom = cursor.fetchone()
+        check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+        if not check:
+            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+        update_cursor = connections['postgis_db'].cursor()
+        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, dursgalt_id,tuuh_soyl_huree_id])
+
     return JsonResponse({'success': True})
 
 
@@ -889,15 +962,27 @@ def hureeCreate(request, payload):
 @ajax_required
 def hureeUpdate(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
-    huree_id = payload.get('id')
+    idx = payload.get('id')
+    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     x = payload.get('x')
     y = payload.get('y')
     x_t=float(x)
     y_t=float(y)
-    # cursor = connections['postgis_db'].cursor()
-    # cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [x, y])
-    # geom = 
-    TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, pk=huree_id).update(x=x, y=y)
+    TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    cursor = connections['postgis_db'].cursor()
+    geom_data = 'LINESTRING( '
+    if tuuh_hure_datas.count() > 2:
+        geom_data = 'LINESTRING( '
+        for tuuh_hure in tuuh_hure_datas:
+            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
+        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
+        geom_data = geom_data + ' )'
+        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
+        geom = cursor.fetchone()
+        update_cursor = connections['postgis_db'].cursor()
+        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, tuuhen_ov,tuuh_soyl_huree_id])
+
     return JsonResponse({'success': True})
 
 
@@ -906,9 +991,25 @@ def hureeUpdate(request, payload):
 def hureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
+    tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     tuuhsoyl = TuuhSoyolHuree.objects.filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    cursor = connections['postgis_db'].cursor()
     if tuuhsoyl:
         tuuhsoyl.delete()
+        geom_data = 'LINESTRING( '
+        if tuuh_hure_datas.count() > 2:
+            geom_data = 'LINESTRING( '
+            for tuuh_hure in tuuh_hure_datas:
+                geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
+            geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
+            geom_data = geom_data + ' )'
+            cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
+            geom = cursor.fetchone()
+            update_cursor = connections['postgis_db'].cursor()
+            update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, tuuhen_ov,tuuh_soyl_huree_id])
+        else:
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
@@ -954,16 +1055,23 @@ def ayulHureeCreate(request, payload):
     idx = payload.get('dursgalt_id')
     x_t=float(x)
     y_y=float(y)
-    cursor = connections['postgis_db'].cursor()
-    # xy_array = [ '95 102' , '12 , 123']
-    # cursor.execute('''SELECT ST_MakePolygon( ST_AddPoint(foo.open_line, ST_StartPoint(foo.open_line)) ) FROM (SELECT ST_GeomFromText('LINESTRING(%s)') As open_line) As foo;''', [xy_array]) 
-    # geom = cursor.fetchone()
     TuuhSoyolAyuulHuree.objects.create(tuuh_soyl = idx, x=x, y=y)
-    # check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
-    # if not check:
-    #     TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx)
-    # update_cursor = connections['postgis_db'].cursor()
-    # update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, idx])
+    cursor = connections['postgis_db'].cursor()
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = idx)
+    geom_data = 'LINESTRING( '
+    if tuuh_hure_datas.count() > 2:
+        geom_data = 'LINESTRING( '
+        for tuuh_hure in tuuh_hure_datas:
+            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
+        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
+        geom_data = geom_data + ' )'
+        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
+        geom = cursor.fetchone()
+        check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
+        if not check:
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx)
+        update_cursor = connections['postgis_db'].cursor()
+        update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, idx])
 
     return JsonResponse({'success': True})
 
@@ -978,6 +1086,19 @@ def ayulHureeUpdate(request, payload):
     x_t=float(x)
     y_t=float(y)
     TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, pk=huree_id).update(x=x, y=y)
+    cursor = connections['postgis_db'].cursor()
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov)
+    geom_data = 'LINESTRING( '
+    if tuuh_hure_datas.count() > 2:
+        geom_data = 'LINESTRING( '
+        for tuuh_hure in tuuh_hure_datas:
+            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
+        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
+        geom_data = geom_data + ' )'
+        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
+        geom = cursor.fetchone()
+        update_cursor = connections['postgis_db'].cursor()
+        update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, tuuhen_ov])
     return JsonResponse({'success': True})
 
 
@@ -987,13 +1108,29 @@ def ayulHureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
     tuuhsoyl = TuuhSoyolAyuulHuree.objects.filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov)
+    cursor = connections['postgis_db'].cursor()
     if tuuhsoyl:
         tuuhsoyl.delete()
+        geom_data = 'LINESTRING( '
+        if tuuh_hure_datas.count() > 2:
+            geom_data = 'LINESTRING( '
+            for tuuh_hure in tuuh_hure_datas:
+                geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
+
+            geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
+            geom_data = geom_data + ' )'
+            cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
+            geom = cursor.fetchone()
+            update_cursor = connections['postgis_db'].cursor()
+            update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, tuuhen_ov])
+        else:
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
 
-    
+
 @require_POST
 @ajax_required
 def tsegUstsanEdit(request, payload):
@@ -1048,8 +1185,8 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
-    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)
-    if(mpoint):
+    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
+    if mpoint:
         for tseg in mpoint:
             items.append({
                 "tseg": tseg.point_id
@@ -1075,7 +1212,7 @@ def tsegPersonalSuccess(request, payload):
         mpoints = Mpoint.objects.using('postgis_db').filter(objectid=objectid)
         if point_class == point_type:
             rsp = {
-                'success': False, 
+                'success': False,
                 'msg': "Төлөв адилхан тул боломжгүй",
             }
             return JsonResponse(rsp)
@@ -1083,13 +1220,13 @@ def tsegPersonalSuccess(request, payload):
             point_class=point_type
         )
         rsp = {
-            'success': True, 
+            'success': True,
             'msg': "Амжилттай боллоо",
         }
         return JsonResponse(rsp)
     except Exception:
         rsp = {
-            'success': False, 
+            'success': False,
             'msg': "Амжилтгүй боллоо",
         }
         return JsonResponse(rsp)

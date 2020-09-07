@@ -244,13 +244,12 @@ function tsegUstsanAll(id) {
 }
 
 function tseg_remove(id) {
-        const opts = {
-            ...getPostOptions(),
-            body: JSON.stringify({id}),
-        }
-        return fetch(`${prefix}/tseg-ustsan-remove/`, opts).then(handleResponse)    
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/tseg-ustsan-remove/`, opts).then(handleResponse)
 }
-
 
 function tsegustsanEdit(id) {
     const opts = {

@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import Modal from '../../Modal'
+
 export default class ListTable extends Component {
 
     constructor(props) {
@@ -8,11 +9,23 @@ export default class ListTable extends Component {
 
         this.state = {
             is_modal_delete_open: false,
+            is_modal_success_open: false,
         }
 
+        this.handleModalSuccessOpen = this.handleModalSuccessOpen.bind(this)
+        this.handleModalSuccessClose = this.handleModalSuccessClose.bind(this)
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
 
+    }
+
+    handleModalSuccessOpen(event) {
+        event.preventDefault()
+        this.setState({is_modal_success_open: true})
+    }
+
+    handleModalSuccessClose() {
+        this.setState({is_modal_success_open: false})
     }
 
     handleModalDeleteOpen(event) {
@@ -27,7 +40,7 @@ export default class ListTable extends Component {
     render() {
         const idx = this.props.idx
         const {id,email,name,alban_tushaal,utas,tseg_id} = this.props.values
-        const {is_modal_delete_open}=this.state
+        const {is_modal_success_open, is_modal_delete_open}=this.state
         return (
             <tr>
                 <td scope="col">
@@ -51,19 +64,32 @@ export default class ListTable extends Component {
                 </NavLink>
                 </td>
                 <td>
-                <a href="#" onClick={this.handleModalDeleteOpen}>
-                    <i className="fa fa-check" aria-hidden="true"></i>
-                </a>
-                {is_modal_delete_open &&
+                <button href="#" className="btn gp-btn-primary" aria-hidden="true" onClick={this.handleModalSuccessOpen}>
+                    Баталгаажуулах
+                </button>
+                {is_modal_success_open &&
                     <Modal
-                        modalClose={this.handleModalDeleteClose}
-                        modalAction={this.props.handleTsegDelete}
-                        text={`Та "${name}" устгахдаа итгэлтэй байна уу?`}
+                        modalClose={this.handleModalSuccessOpen}
+                        modalAction={this.props.handleTsegSuccess}
+                        text={`Та "${name}" цэгийг устгахдаа итгэлтэй байна уу?`}
                         title="Устгах"
                         actionName="Баталгаажуул"
                     />
                 }
-            </td>
+                </td>
+                <td>
+                    <a href="#" onClick={this.handleModalDeleteOpen}>
+                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                    </a>
+                    {is_modal_delete_open &&
+                        <Modal
+                            modalClose={this.handleModalDeleteClose}
+                            modalAction={this.props.handleRemove}
+                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            title="Тохиргоог устгах"
+                        />
+                    }
+                </td>
             </tr>
         )
     }

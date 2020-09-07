@@ -1,9 +1,7 @@
 import React, { Component, Fragment } from "react"
-
 import 'ol/ol.css'
 import {Map, View, Feature} from 'ol'
 import {transform as transformCoordinate} from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
@@ -11,10 +9,8 @@ import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
 import {Point} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
-import OSM from 'ol/source/OSM'
 import {format as coordinateFormat} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import "./styles.css"
@@ -28,7 +24,6 @@ export default class Maps extends Component {
         this.state = {
             projection: 'EPSG:3857',
             projection_display: 'EPSG:4326',
-            map_wms_list: [],
             is_sidebar_open: true,
             coordinate_clicked: '',
             vector_layer: null,
@@ -47,9 +42,7 @@ export default class Maps extends Component {
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
-        this.handleSetCenter = this.handleSetCenter.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
-        this.getCurrentUtmZone = this.getCurrentUtmZone.bind(this)
     }
 
     initMarker() {
@@ -65,53 +58,20 @@ export default class Maps extends Component {
         const point = new Point([0, 0])
         const feature = new Feature({geometry: point})
         feature.setStyle(style)
-
         return {feature: feature, point: point}
-
     }
 
     componentDidMount() {
-        this.loadMapData(9)
+        this.loadMapData()
     }
 
-    componentDidUpdate(prevProps, prevState) {
-    }
-
-    loadMapData(bundle_id) {
-        Promise.all([
-            service.loadBaseLayers(),
-            service.loadWMSLayers(bundle_id),
-        ]).then(([{base_layer_list}, {wms_list}]) => {
-            this.handleMapDataLoaded(base_layer_list, wms_list)
+    loadMapData() {
+            service.loadBaseLayers().then(({base_layer_list}) => {
+            this.handleMapDataLoaded(base_layer_list)
         })
-
-
     }
 
-
-    handleMapDataLoaded(base_layer_list, wms_list) {
-        const map_wms_list = wms_list.map(({name, url, layers}) => {
-
-            return {
-                name,
-                layers: layers.map((layer) => {
-                    return{
-                        ...layer,
-                        tile: new Tile({
-                            source: new TileWMS({
-                                projection: this.state.projection,
-                                url: url,
-                                params: {
-                                    'LAYERS': layer.code,
-                                    //'FORMAT': 'image/svg+xml',
-                                    'FORMAT': 'image/png',
-                                }
-                            }),
-                        })
-                    }
-                }),
-            }
-        })
+    handleMapDataLoaded(base_layer_list) {
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
@@ -146,9 +106,7 @@ export default class Maps extends Component {
                         thumbnail_2x: base_layer_info.thumbnail_2x,
                         layer: layer,
                     })
-
                     return acc
-
                 },
                 {
                     base_layers: [],
@@ -190,11 +148,6 @@ export default class Maps extends Component {
             ]),
             layers: [
                 ...base_layers,
-                ...map_wms_list.reduce((acc_main, wms) =>
-                {
-                        const tiles = wms.layers.map((layer) => layer.tile)
-                        return [...acc_main, ...tiles]
-                }, []),
                 vector_layer,
                 marker_layer,
             ],
@@ -210,10 +163,6 @@ export default class Maps extends Component {
         this.map = map
 
     }
-    getCurrentUtmZone() {
-            var position = transform(mapObj.getView().getCenter(), mapObj.getView().getProjection(), "EPSG:4326");
-            return getUtmZoneFromPosition(position[0]);
-    };
 
     handleMapClick(event) {
         this.marker.point.setCoordinates(event.coordinate)
@@ -221,29 +170,26 @@ export default class Maps extends Component {
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
         this.setState({coordinate_clicked})
-        this.showFeaturesAt(coordinate_clicked) 
+        this.showFeaturesAt(coordinate_clicked)
     }
 
     showFeaturesAt(coordinate) {
         var array = coordinate.split(',').map(function(n) {
             return Number(n);
         });
-        service.findSum(array).then(({info}) => {
-           if(info){
-            this.props.handleXY(array, info)
-           }
-        })
-    }
+        if(this.props.coordinatCheck)
+        {
+            this.props.handleXY(array, null)
 
-
-    handleSetCenter(coord) {
-        const view = this.map.getView()
-        const map_projection = view.getProjection()
-        const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.marker.point.setCoordinates(map_coord)
-        view.setCenter(map_coord)
+        }
+        else{
+            service.findSum(array).then(({info}) => {
+                if(info){
+                 this.props.handleXY(array, info)
+                }
+             })
+        }
     }
-    
 
     render() {
         return (

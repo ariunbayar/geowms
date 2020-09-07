@@ -1,7 +1,8 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
-import {service} from '../service'
+import {service} from './service'
+import {Pagination} from '../../pagination/pagination'
 
 export class List extends Component {
 
@@ -11,44 +12,76 @@ export class List extends Component {
         super(props)
 
         this.state = {
+            currentPage: 1,
+            TsegPerPage: 20,
+            searchQuery: '',
             list: [],
-
-            }
-            this.handlelistall = this.handlelistall.bind(this)
-            this.handleTsegDelete = this.handleTsegDelete.bind(this) 
-    }   
-
-    componentDidMount() {
-        this.handlelistall()
+            list_length: null,
+        }
+        this.paginate = this.paginate.bind(this)
+        this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
-    
-    handlelistall(){
-        service.tsegUstsanAll().then(({tseg_ustsan_all, success }) => {
-            if (success) {
-                this.setState({
-                    list:tseg_ustsan_all
+
+    paginate (page, query) {
+        const perpage = this.state.TsegPerPage
+        this.setState({ currentPage: page })
+            return service
+                .paginatedList(page, perpage, query)
+                .then(page => {
+                    this.setState({ list: page.items, list_length: page.items.length})
+                    return page
                 })
+    }
+
+    handleSearch(field, e) {
+        if(e.target.value.length >= 1)
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(1, e.target.value)
+        }
+    }
+
+    handleTsegSuccess(id){
+        service.tseg_success(id).then(({ success }) => {
+            if (success) {
+                this.paginate(1,"")
             }
         })
-    
     }
 
-    handleTsegDelete(id){
+    handleRemove(id){
         service.tseg_remove(id).then(({ success }) => {
             if (success) {
-                this.handlelistall()
+                this.paginate(1,"")
+            }
+            else {
+                alert("Aldaa")
             }
         })
     }
 
     render() {
         return (
-            <div className="container ">
+            <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12">
                           <NavLink className="btn gp-btn-primary float-right" to={"/back/froms/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
+                        <input
+                            type="text"
+                            className="form-control col-md-4  mb-1 float-left"
+                            id="searchQuery"
+                            placeholder="Хайх"
+                            onChange={(e) => this.handleSearch('searchQuery', e)}
+                            value={this.state.searchQuery}
+                        />
                         <table className="table table-fluid">
                             <thead>
                                 <tr>
@@ -59,21 +92,31 @@ export class List extends Component {
                                     <th scope="col">Цэгийн дугаар</th>
                                     <th>Засах</th>
                                     <th>Баталгаажуулах</th>
+                                    <th>Устгах</th>
                                 </tr>
                                </thead>
                              <tbody>
-                             { 
-                                this.state.list.map((tseg, idx) =>
+                            {
+                                this.state.list_length == 0
+                                ?
+                                    "Бүртгэл байхгүй байна"
+                                :
+                                (this.state.list.map((tseg, idx) =>
                                     <ListTable
                                         key={idx}
                                         idx={idx}
                                         values={tseg}
-                                        handleTsegDelete={() => this.handleTsegDelete(tseg.id)}
+                                        handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
+                                        handleRemove={() => this.handleRemove(tseg.id)}
                                     />
-
-                                )}
+                                ))
+                            }
                             </tbody>
                         </table>
+                        <Pagination
+                            paginate = {this.paginate}
+                            searchQuery = {this.state.searchQuery}
+                        />
                     </div>
                 </div>
             </div>

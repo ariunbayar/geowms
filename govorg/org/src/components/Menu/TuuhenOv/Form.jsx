@@ -55,7 +55,6 @@ export class Forms extends Component {
             }
         })
     }
-    
     componentDidMount(){
         const id = this.props.match.params.id
         if(id) this.handleRefresh()
@@ -65,16 +64,16 @@ export class Forms extends Component {
         const id = this.props.match.params.id
         service.about(id).then(({tuuh_soyl}) => {
             if(tuuh_soyl){
-                tuuh_soyl.map((tuuh) => 
+                tuuh_soyl.map((tuuh) =>
                     this.setState({
                         values:{
                             dugaar: tuuh['dugaar'],date: tuuh['date'],
-                            too_shirheg: tuuh['too_shirheg'], 
+                            too_shirheg: tuuh['too_shirheg'],
                             burtgegch: tuuh['burtgegch'],
-                            id :id 
+                            id :id
                         },
                         aimagname: tuuh['aimagname'],
-                        sumname: tuuh['sumname'], 
+                        sumname: tuuh['sumname'],
                     })
                 )
             }
@@ -83,7 +82,7 @@ export class Forms extends Component {
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
     }
-    
+
     handleSubmit(values, { setStatus, setSubmitting }) {
         setStatus('checking')
         setSubmitting(true)
@@ -96,7 +95,7 @@ export class Forms extends Component {
                 if (success) {
                     setTimeout(() => {
                         setStatus('saved')
-                        this.props.history.push( `/back/froms/tuuhen-ov/`)
+                        this.props.history.push( `/gov/tuuhen-ov/`)
                     }, 1000)
                 }
             })
@@ -107,13 +106,13 @@ export class Forms extends Component {
                 if (success) {
                     setTimeout(() => {
                         setStatus('saved')
-                        this.props.history.push( `/back/froms/tuuhen-ov/`)
+                        this.props.history.push( `/gov/tuuhen-ov/`)
                     }, 1000)
                 }
             })
         }
     }
-    
+
     render() {
         const huree_components = []
         const huree_len = this.state.values.too_shirheg
@@ -145,7 +144,7 @@ export class Forms extends Component {
             return (
                 <Form>
                      <Maps handleXY={this.handleXY} coordinatCheck={false} />
-                    <div >
+                    <div className='container my-4'>
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
