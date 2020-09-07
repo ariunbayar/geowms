@@ -17,13 +17,12 @@ export class FormTseg extends Component {
                 baiguulaga: '',
                 alban_tushaal: '',
                 utas: '',
-                oiroltsoo_bairlal: '',
                 evdersen_baidal: '',
                 nohtsol_baidal: '',
                 sergeeh_sanal: '',
             },
             tsegiin_dugaar: '',
-
+            oiroltsoo_bairlal: '',
             zurag_hol: '',
             zurag_oir: '',
             zurag_baruun: '',
@@ -45,6 +44,8 @@ export class FormTseg extends Component {
             checkError: [],
             showBox: true,
             error:{error:''},
+            bairlal_error: false,
+            ners:'',
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleInputEmail = this.handleInputEmail.bind(this)
@@ -92,18 +93,21 @@ export class FormTseg extends Component {
         if(e.target.value.length >= 1){
             this.error_msg = []
             this.setState({ checkError: this.state.error })
-            service.searchTseg(e.target.value).then(({items}) => {
+            service.searchTseg(e.target.value).then(({items, names}) => {
                 if(items !== false){
                     this.setState({items, tseg_dugaar_error:false , checkError:[] })
+                    const ners = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
+                    this.setState({ners})
                     this.optionVal(items)
                 }
                 else{
                     this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
                 }
-            }).catch(error => {
-                console.log("Алдаа гарсан байна. " ,error.text)
-                this.props.history.push('/back/froms/')
             })
+            // .catch(error => {
+            //     console.log("Алдаа гарсан байна. " ,error.text)
+            //     this.props.history.push('/back/froms/')
+            // })
         }
     }
 
@@ -130,18 +134,23 @@ export class FormTseg extends Component {
             service.tsegustsanEdit(id).then(({ form_data }) => {
                 if (form_data) {
                     form_data.map((tseg) => {
+                        service.searchTseg(tseg.tseg_id).then(({success, names})=>{
+                            if(success){
+                                this.setState({ ners: names})
+                            }
+                        })
                         this._isMounted && this.setState({
                             values:{
                                 email:tseg.email,
                                 baiguulaga:tseg.name,
                                 alban_tushaal:tseg.alban_tushaal,
                                 utas: tseg.utas,
-                                oiroltsoo_bairlal:tseg.oiroltsoo_bairlal,
                                 evdersen_baidal:tseg.evdersen_baidal,
                                 nohtsol_baidal:tseg.nohtsol_baidal,
                                 sergeeh_sanal: tseg.sergeeh_sanal,
                             },
-                            tsegiin_dugaar:tseg.tseg_id,
+                            oiroltsoo_bairlal: tseg.oiroltsoo_bairlal,
+                            tsegiin_dugaar: tseg.tseg_id,
                             hemjilt_hiih_bolomj: tseg.gps_hemjilt,
                             zurag_hol_prev: tseg.img_holoos,
                             zurag_oir_prev: tseg.img_oiroos,
@@ -175,7 +184,7 @@ export class FormTseg extends Component {
         form_datas.append('alban_tushaal', values.alban_tushaal)
         form_datas.append('utas', values.utas)
         form_datas.append('tsegiin_dugaar', this.state.tsegiin_dugaar)
-        form_datas.append('oiroltsoo_bairlal', values.oiroltsoo_bairlal)
+        form_datas.append('oiroltsoo_bairlal', this.state.oiroltsoo_bairlal)
         form_datas.append('evdersen_baidal', values.evdersen_baidal)
         form_datas.append('nohtsol_baidal', values.nohtsol_baidal)
         form_datas.append('hemjilt_hiih_bolomj', this.state.hemjilt_hiih_bolomj)
@@ -199,6 +208,12 @@ export class FormTseg extends Component {
 
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
+        if(e.target.value.length == 0){
+            this.setState({ bairlal_error: true })
+        }
+        else{
+            this.setState({ bairlal_error: false })
+        }
     }
 
     handleInputEmail(field, e) {
@@ -248,7 +263,10 @@ export class FormTseg extends Component {
     }
 
     render() {
-        const{id,zurag_hol_prev, zurag_oir_prev, zurag_baruun_prev, zurag_zuun_prev, zurag_hoid_prev, zurag_omno_prev, tseg_dugaar_error} = this.state
+        const{id,zurag_hol_prev, zurag_oir_prev, zurag_baruun_prev,
+            zurag_zuun_prev, zurag_hoid_prev, zurag_omno_prev,
+            tseg_dugaar_error, oiroltsoo_bairlal, bairlal_error, ners
+        } = this.state
         return (
             <Formik
                 initialValues={this.state.values}
@@ -278,7 +296,7 @@ export class FormTseg extends Component {
                             </a>
                         </div>
                         <div className="row container  my-4">
-                        <h4>Цэгийн хувийн хэргийн дугаар</h4>
+                        <h4>Таны мэдээлэл</h4>
                         <table className="table table-bordered">
                             <tbody>
                                 <tr>
@@ -343,7 +361,7 @@ export class FormTseg extends Component {
                                 </tr>
                             </tbody>
                         </table>
-                        <h4>Цэгийн мэдээлэл</h4>
+                        <h4>Устсан цэгт тэмдэгтийн мэдээлэл</h4>
                         <table className="table table-bordered">
                             <tbody>
                                 <tr>
@@ -374,15 +392,15 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">2.</th>
                                     <th style={{width: "15%"}}>Ойролцоо байрлал:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <Field
+                                        <input
                                             name="oiroltsoo_bairlal"
                                             type="text"
-                                            id="id_oiroltsoo_bairlal"
-                                            className={'form-control' +
-                                                (errors.oiroltsoo_bairlal &&
-                                                    touched.oiroltsoo_bairlal ? ' is-invalid' : '')}
+                                            id="oiroltsoo_bairlal"
+                                            className={'form-control' + (bairlal_error ? ' is-invalid' : '')}
+                                            onChange = {(e) => this.handleInput('oiroltsoo_bairlal', e)}
+                                            value = {ners != '' ? ners + ' ' + oiroltsoo_bairlal: oiroltsoo_bairlal}
                                         />
-                                        <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
+                                        {bairlal_error ? <div className="invalid-feedback">Хоосон байна.</div> : null}
                                     </td>
                                 </tr>
                                 <tr>
@@ -650,10 +668,8 @@ export class FormTseg extends Component {
                                                 value={this.state.hemjilt_hiih_bolomj}
                                             ></input>
                                             <label htmlFor="hemjilt_hiih_bolomj1">Тийм</label>
-                                        </div>
-                                    </td>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <div className="col-md-12">
+                                            <br/>
+                                            <br/>
                                             <input
                                                 type="checkbox"
                                                 id="hemjilt_hiih_bolomj2"

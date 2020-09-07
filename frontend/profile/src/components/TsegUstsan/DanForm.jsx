@@ -13,11 +13,11 @@ export class DanForm extends Component {
         this.error_msg = []
         this.state = {
             values:{
-                oiroltsoo_bairlal: '',
                 evdersen_baidal: '',
                 nohtsol_baidal: '',
                 sergeeh_sanal: '',
             },
+            oiroltsoo_bairlal: '',
             tsegiin_dugaar: '',
             zurag_hol: '',
             zurag_oir: '',
@@ -33,6 +33,7 @@ export class DanForm extends Component {
             zurag_omno_prev: '',
             hemjilt_hiih_bolomj: false,
             tseg_dugaar_error: false,
+            bairlal_error: false,
             list:[],
             items:[],
             parse: [],
@@ -40,7 +41,7 @@ export class DanForm extends Component {
             showBox: true,
             error:{error:''},
             is_dan: false,
-            isLoading: true
+            isLoading: true,
         }
 
         this.handleInput = this.handleInput.bind(this)
@@ -73,7 +74,7 @@ export class DanForm extends Component {
             this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
             if(this.error_msg.length > 0){
                 this.setState({ checkError: this.state.error })
-            }   
+            }
         }
         else{
             this.error_msg = []
@@ -82,19 +83,22 @@ export class DanForm extends Component {
             const error = this.state.error
             this.error_msg = []
             this.setState({ checkError: error })
-            service.searchTseg(e.target.value).then(({items}) => {
+            service.searchTseg(e.target.value).then(({items, names}) => {
                 if(items !== false){
                     this.setState({items, tseg_dugaar_error:false , checkError:[] })
+                    const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
+                    this.setState({oiroltsoo_bairlal})
                     this.optionVal(items)
                 }
                 else{
                     this.setState({ tseg_dugaar_error: true, checkError: error })
                 }
-            }).catch(error => {
-                console.log("Алдаа гарсан байна. " ,error.text)
-                this.props.history.push('/profile/api/')
             })
-        }   
+            // .catch(error => {
+            //     console.log("Алдаа гарсан байна. " ,error.text)
+            //     this.props.history.push('/profile/api/')
+            // })
+        }
     }
 
     optionVal(items){
@@ -117,10 +121,10 @@ export class DanForm extends Component {
     handleSubmit(values, { setStatus, setSubmitting }){
         setStatus('checking')
         setSubmitting(true)
-        const form_datas = new FormData() 
+        const form_datas = new FormData()
         this.setState({values})
         form_datas.append('tsegiin_dugaar', this.state.tsegiin_dugaar)
-        form_datas.append('oiroltsoo_bairlal', values.oiroltsoo_bairlal)
+        form_datas.append('oiroltsoo_bairlal', this.state.oiroltsoo_bairlal)
         form_datas.append('evdersen_baidal', values.evdersen_baidal)
         form_datas.append('nohtsol_baidal', values.nohtsol_baidal)
         form_datas.append('hemjilt_hiih_bolomj', this.state.hemjilt_hiih_bolomj)
@@ -148,8 +152,14 @@ export class DanForm extends Component {
 
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
+        if(e.target.value.length == 0){
+            this.setState({ bairlal_error: true })
+        }
+        else{
+            this.setState({ bairlal_error: false })
+        }
     }
-    
+
     handleCheck(field, e) {
         if (e.target.checked) {
             this.setState({ [field]: true })
@@ -177,13 +187,17 @@ export class DanForm extends Component {
 
     handleBoxOver (e){
         this.setState({ showBox: true })
-    } 
+    }
     handleBoxLeave(e){
         this.setState({ showBox: false })
     }
 
     render() {
-        const{id,zurag_hol_prev, zurag_oir_prev, zurag_baruun_prev, zurag_zuun_prev, zurag_hoid_prev, zurag_omno_prev, tseg_dugaar_error} = this.state
+        const{id, zurag_hol_prev, zurag_oir_prev,
+            zurag_baruun_prev, zurag_zuun_prev, zurag_hoid_prev,
+            zurag_omno_prev, tseg_dugaar_error, oiroltsoo_bairlal,
+            bairlal_error
+        } = this.state
         return (
             <Formik
                 initialValues={this.state.values}
@@ -208,7 +222,6 @@ export class DanForm extends Component {
                     return (
                     <Form>
                         <div className="container border-top">
-                            
                         <div>
                             <div className="col-md-12 mb-4">
                                 <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -216,21 +229,19 @@ export class DanForm extends Component {
                                 </a>
                                 <div className="float-right h4">Цэгийн мэдээлэл</div>
                             </div>
-                            
                         </div>
-                       
                         <table className="table table-bordered">
                             <tbody>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">1.</th>
                                     <th style={{width: "15%"}}>Цэгийн дугаар:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <input 
-                                            name="tsegiin_dugaar" 
+                                        <input
+                                            name="tsegiin_dugaar"
                                             type="text"
                                             id="tsegiin_dugaar"
                                             list="tsegList"
-                                            className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                            className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
                                             onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
                                         />
                                         {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
@@ -241,29 +252,29 @@ export class DanForm extends Component {
                                     <th style={{width: "5%"}} scope="row">2.</th>
                                     <th style={{width: "15%"}}>Ойролцоо байрлал:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <Field 
-                                            name="oiroltsoo_bairlal" 
-                                            type="text" 
+                                        <input
+                                            name="oiroltsoo_bairlal"
+                                            type="text"
                                             id="oiroltsoo_bairlal"
-                                            className={'form-control' + 
-                                                (errors.oiroltsoo_bairlal && 
-                                                    touched.oiroltsoo_bairlal ? ' is-invalid' : '')} 
+                                            className={'form-control' + (bairlal_error ? ' is-invalid' : '')}
+                                            onChange = {(e) => this.handleInput('oiroltsoo_bairlal', e)}
+                                            value = {oiroltsoo_bairlal}
                                         />
-                                        <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
+                                        {bairlal_error ? <div className="invalid-feedback">Хоосон байна.</div> : null}
                                     </td>
                                 </tr>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">3.</th>
                                     <th style={{width: "15%"}}>Эвдэрсэн байдал:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <Field 
+                                        <Field
                                             as = "select"
-                                            name="evdersen_baidal" 
-                                            type="text" 
+                                            name="evdersen_baidal"
+                                            type="text"
                                             id="evdersen_baidal"
-                                            className={'form-control' + 
-                                                (errors.evdersen_baidal && 
-                                                    touched.evdersen_baidal ? ' is-invalid' : '')} 
+                                            className={'form-control' +
+                                                (errors.evdersen_baidal &&
+                                                    touched.evdersen_baidal ? ' is-invalid' : '')}
                                         >
                                             <option value="">--- Сонгоно уу ---</option>
                                             <option value="Эвдэрсэн">Эвдэрсэн</option>
@@ -280,8 +291,8 @@ export class DanForm extends Component {
                                     <th style={{width: "15%"}}>Нөхцөл/шалтгаан:</th>
                                     <td colSpan="4" scope="rowgroup">
                                         <Field
-                                            className={'form-control ' + 
-                                                (errors.nohtsol_baidal && 
+                                            className={'form-control ' +
+                                                (errors.nohtsol_baidal &&
                                                     touched.nohtsol_baidal ? ' is-invalid' : '')}
                                             component="textarea"
                                             name='nohtsol_baidal'
@@ -293,19 +304,15 @@ export class DanForm extends Component {
                                 </tr>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">5.</th>
-                                    <th 
-                                        className="text-center" 
-                                        colSpan="4" 
-                                        scope="rowgroup" 
+                                    <th
+                                        className="text-center"
+                                        colSpan="4"
+                                        scope="rowgroup"
                                         style={{width: "15%"}}
                                     >
                                         Орчны фото зураг:
-                                        <i className="fa pl-5">
-                                            
-                                           
-                                        </i>
-                                        <div 
-                                            type="button" 
+                                        <div
+                                            type="button"
                                             onMouseOver={(e) => this.handleBoxOver(e)}
                                             onMouseLeave={(e) => this.handleBoxLeave(e)}
                                             className="float-right"
@@ -435,8 +442,8 @@ export class DanForm extends Component {
                                     <th style={{width: "15%"}}>Сэргээх талаар таны санал:</th>
                                     <td colSpan="4" scope="rowgroup">
                                         <Field
-                                            className={'form-control ' + 
-                                                (errors.sergeeh_sanal && 
+                                            className={'form-control ' +
+                                                (errors.sergeeh_sanal &&
                                                     touched.sergeeh_sanal ? ' is-invalid' : '')}
                                             as="select"
                                             name='sergeeh_sanal'
@@ -457,19 +464,17 @@ export class DanForm extends Component {
                                     <th style={{width: "15%"}}>GPS-ийн хэмжилт хийх боломжтой эсэх:</th>
                                     <td colSpan="2" scope="rowgroup">
                                         <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 id="hemjilt_hiih_bolomj1"
                                                 checked={this.state.hemjilt_hiih_bolomj ? true : false}
                                                 onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, true)}
                                             ></input>
                                             <label htmlFor="hemjilt_hiih_bolomj1">Тийм</label>
-                                        </div>
-                                    </td>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <div className="col-md-12">
-                                            <input 
-                                                type="checkbox" 
+                                            <br/>
+                                            <br/>
+                                            <input
+                                                type="checkbox"
                                                 id="hemjilt_hiih_bolomj2"
                                                 checked={this.state.hemjilt_hiih_bolomj ? false : true}
                                                 onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, false)}
@@ -483,7 +488,7 @@ export class DanForm extends Component {
                         </table>
                         <div>
                         <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
-                            disabled={isSubmitting || has_error || error_bn}>
+                            disabled={isSubmitting || has_error || error_bn || bairlal_error}>
                             {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                             {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                             {!isSubmitting && 'Нэмэх'}

@@ -1182,14 +1182,21 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
+    names = []
     mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
-    if mpoint:
+    if(mpoint):
         for tseg in mpoint:
             items.append({
                 "tseg": tseg.point_id
             })
+        for name in mpoint[:1]:
+            names.append({
+                'aimag_ner': name.aimag,
+                'sum_ner': name.sum,
+            })
         rsp = {
-            'items': items
+            'items': items,
+            'names': names
         }
         return JsonResponse(rsp)
     else:
