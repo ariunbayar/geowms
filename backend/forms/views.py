@@ -426,9 +426,13 @@ def dursgaltGazarAbout(request, payload):
 @ajax_required
 def dursgaltGazarRemove(request, payload):
     pk = payload.get('id')
-    tseg_personal = get_object_or_404(TuuhSoyolPoint, pk=pk)
-    tseg_personal.delete()
-    return JsonResponse({'success': True})
+    tuuhsoylPoint = TuuhSoyolPoint.objects.using('postgis_db').filter(id=pk)
+    if tuuhsoylPoint:
+        tuuhsoylPoint.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
+
 
 
 @require_POST
