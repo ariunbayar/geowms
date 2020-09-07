@@ -85,15 +85,46 @@ def update(request, payload):
 @ajax_required
 def remove(request, payload):
     pk = payload.get('id')
-    tuuhSoyol = get_object_or_404(TuuhSoyol, pk=pk)
-    TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
-    TuuhSoyolHuree.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
-    TuuhSoyolHureePol.objects.filter(tuuh_soyl=pk).delete()
-    TuuhSoyolAyuulHuree.objects.using('postgis_db').filter(tuuh_soyl=pk).delete()
-    TuuhSoyolAyuulHureePol.objects.filter(tuuh_soyl=pk).delete()
-    tuuhSoyol.delete()
+    tuuhSoyol = TuuhSoyol.objects.filter(id=pk)
+    tuuhSoyol = TuuhSoyol.objects.using('postgis_db').filter(id=pk)
+    if tuuhSoyol:
+        tuuhsoylPoint = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if tuuhsoylPoint:
+            tuuhsoylPoint.delete()
 
-    return JsonResponse({'success': True})
+        point = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if point:
+            point.delete()
+
+        hureePol = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if hureePol:
+            hureePol.delete()
+
+        HureePolAyul = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=pk)
+        if HureePolAyul:
+            HureePolAyul.delete()
+
+        AyulHuree = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=pk)
+        if AyulHuree:
+            AyulHuree.delete()
+
+        huree = TuuhSoyolHuree.objects.filter(tuuh_soyl=pk)
+        if huree:
+            huree.delete()
+
+    else:
+        rsp = {
+            'success': False,
+            'msg': "Амжилтгүй"
+        }
+        return JsonResponse(rsp)
+
+    tuuhSoyol.delete()
+    rsp = {
+        'success': True,
+        'msg': "Амжилттай устгасан"
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST

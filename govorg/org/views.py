@@ -62,7 +62,7 @@ def all(request):
     org = Org.objects.filter(employee__user=request.user).first()
 
     context = {
-        'org': {"org_name": org.name},
+        'org': {"org_name": "org.name"},
     }
 
     return render(request, 'org/index.html', context)
