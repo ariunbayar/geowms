@@ -251,7 +251,7 @@ export default class Maps extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
-                            <div id="map"></div>
+                            <div className=" mt-5" id="map"></div>
                         </div>
                     </div>
                 </div>

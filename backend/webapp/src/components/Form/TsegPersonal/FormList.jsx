@@ -21,7 +21,8 @@ export class FormList extends Component {
         }
 
         this.paginate = this.paginate.bind(this)
-        this.handleSearch=this.handleSearch.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
     paginate (page, query) {

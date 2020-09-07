@@ -80,7 +80,7 @@ export default class FormTable extends Component {
                         <Modal
                             modalClose={this.handleModalSuccessClose}
                             modalAction={this.props.handleSuccess}
-                            text={`Та "${point_type}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
+                            text={`Та "${point_name }" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
                             title="Баталгаажуулах"
                             actionName="Баталгаажуул"
                         />

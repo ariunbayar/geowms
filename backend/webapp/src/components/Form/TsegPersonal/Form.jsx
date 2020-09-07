@@ -232,7 +232,7 @@ export class Forms extends Component {
                         latlongy: item.latlongy,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
-                        trapetsiin_dugaar: item.point_type,
+                        trapetsiin_dugaar: item.sheet1,
                         barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
@@ -250,7 +250,6 @@ export class Forms extends Component {
     }
 
     render() {
-
         return (
         <Formik
             enableReinitialize
@@ -273,7 +272,7 @@ export class Forms extends Component {
             return (
                 <Form>
                     <div className="row container  my-1">
-                        <div className="float-left">
+                        <div className="float-left pt-5">
                             <BundleMap
                             handleXY={this.handleXY}
                             />

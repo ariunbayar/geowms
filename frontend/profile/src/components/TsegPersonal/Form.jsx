@@ -174,7 +174,7 @@ export default class Forms extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push('/back/froms/tseg-personal/')
+                    this.props.history.push('/profile/api/')
                 }, 1000)
             }
             else{
@@ -271,8 +271,8 @@ export default class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row container  my-1">
-                        <div className="float-left">
+                    <div className="row container  my-1 ml-1">
+                        <div className="float-left mt-5 pt-7">
                             <Maps
                             handleXY={this.handleXY}
                             />

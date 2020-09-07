@@ -258,7 +258,7 @@ export default class BundleMap extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
-                            <div id="map"></div>
+                            <div id="map" className="mt-2"></div>
                         </div>
                     </div>
                 </div>

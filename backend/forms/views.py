@@ -447,51 +447,52 @@ def tsegPersonalRemove(request, payload):
 def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     tseg_display = []
-    tseg = TsegPersonal.objects.filter(id = pk).first()
+    tseg = TsegPersonal.objects.filter(id = pk).first() 
     data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
-    LA = int(float(tseg.latlongx))
-    LB = int((float(tseg.latlongx)-LA)*60)
-    LC = float("{:.6f}".format(((float(tseg.latlongx))-LA-LB/60)*3600 ))
-    BA = int(float(tseg.latlongy))
-    BB = int((float(tseg.latlongy)-BA)*60)
-    BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
+    if(tseg):
+            LA = int(float(tseg.latlongx))
+            LB = int((float(tseg.latlongx)-LA)*60)
+            LC = float("{:.6f}".format(((float(tseg.latlongx))-LA-LB/60)*3600 ))
+            BA = int(float(tseg.latlongy))
+            BB = int((float(tseg.latlongy)-BA)*60)
+            BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
     tseg_display.append({
-        'latlongx': tseg.latlongx,
-        'latlongy': tseg.latlongy,
-        'LA':LA,
-        'LB':LB,
-        'LC':LC,
-        'BA':BA,
-        'BB':BB,
-        'BC':BC,
-        'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg.tseg_oiroos_img_url else '',
-        'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg.tseg_holoos_img_url else '',
-        'barishil_tuhai': tseg.barishil_tuhai,
-        'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg.bairshil_tseg_oiroos_img_url else '',
-        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_holoos_img_url.url if tseg.bairshil_tseg_holoos_img_url else '',
-        'sudalga_or_shine':  tseg.sudalga_or_shine,
-        'hors_shinj_baidal': tseg.hors_shinj_baidal,
-        'date': tseg.date.strftime("%Y-%m-%d") if tseg.date else '',
-        'hotolson': tseg.hotolson,
-        'file_path1': tseg.file_path1.name if tseg.file_path1 else '',
-        'file_path2': tseg.file_path2.name if tseg.file_path2 else '',
-        'alban_tushaal': tseg.alban_tushaal,
-        'alban_baiguullga': tseg.alban_baiguullga,
-        'suljeenii_torol': tseg.suljeenii_torol,
-        'id': data.id,
-        'objectid': data.objectid,
-        'point_id': data.point_id,
-        'point_name': data.point_name,
-        'pid': data.pid,
-        'point_class': data.point_class,
-        'point_type': data.point_type,
-        'center_typ': data.center_typ,
-        'aimag': data.aimag,
-        'sum': data.sum,
-        'sheet1': data.sheet1,
-        'sheet2': data.sheet2,
-        'sheet3': data.sheet3,
-        't_type': data.t_type,
+        'latlongx': tseg.latlongx if tseg else '',
+        'latlongy': tseg.latlongy if tseg else '',
+        'LA':LA if tseg else '',
+        'LB':LB if tseg else "",
+        'LC':LC if tseg else '',
+        'BA':BA if tseg else "",
+        'BB':BB if tseg else "",
+        'BC':BC if tseg else "",
+        'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg else '',
+        'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg else '',
+        'barishil_tuhai': tseg.barishil_tuhai if tseg else '',
+        'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg else '',
+        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_holoos_img_url.url if tseg else '',
+        'sudalga_or_shine':  tseg.sudalga_or_shine if tseg else '',
+        'hors_shinj_baidal': tseg.hors_shinj_baidal if tseg else '',
+        'date': tseg.date.strftime("%Y-%m-%d") if tseg else '',
+        'hotolson': tseg.hotolson if tseg else '',
+        'file_path1': tseg.file_path1.name if tseg else '',
+        'file_path2': tseg.file_path2.name if tseg else '',
+        'alban_tushaal': tseg.alban_tushaal if tseg else '',
+        'alban_baiguullga': tseg.alban_baiguullga if tseg else '',
+        'suljeenii_torol': tseg.suljeenii_torol if tseg else '',
+        'id': data.id if tseg else '',
+        'objectid': data.objectid if tseg else '',
+        'point_id': data.point_id if tseg else "",
+        'point_name': data.point_name if tseg else '',
+        'pid': data.pid if tseg else '',
+        'point_class': data.point_class if tseg else '',
+        'point_type': data.point_type if tseg else '',
+        'center_typ': data.center_typ if tseg else '',
+        'aimag': data.aimag if tseg else '',
+        'sum': data.sum if tseg else '',
+        'sheet1': data.sheet1 if tseg else '',
+        'sheet2': data.sheet2 if tseg else "",
+        'sheet3': data.sheet3 if tseg else "",
+        't_type': data.t_type if tseg else '',
     })
     rsp = {
         'tseg_display': tseg_display,
