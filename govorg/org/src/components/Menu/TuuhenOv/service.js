@@ -1,5 +1,4 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../helpers/service'
-         
 
 const prefix = '/back/tuuhen_ov'
 
@@ -125,18 +124,18 @@ function hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id) {
     return fetch(`${prefix}/dursgalt-gazar/huree-create/`, opts).then(handleResponse)
 }
 
-function hureeUpdate(tuuhen_ov,  x, y, id) {
+function hureeUpdate(tuuhen_ov,  x, y, id, tuuh_soyl_huree_id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({tuuhen_ov,  x, y, id}),
+        body: JSON.stringify({tuuhen_ov,  x, y, id, tuuh_soyl_huree_id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/huree-update/`, opts).then(handleResponse)
 }
 
-function hureeDelete(ayul_id, tuuhen_ov) {
+function hureeDelete(ayul_id, tuuhen_ov, tuuh_soyl_huree_id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ayul_id, tuuhen_ov}),
+        body: JSON.stringify({ayul_id, tuuhen_ov, tuuh_soyl_huree_id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/huree-delete/`, opts).then(handleResponse)
 }

@@ -1,4 +1,4 @@
-import {object, string} from 'yup'
+import {object, string, number} from 'yup'
 
 
 export const validationSchema = object().shape({
@@ -9,7 +9,11 @@ export const validationSchema = object().shape({
     date: string()
         .max(50, '50-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
-    too_shirheg: string()
+    too_shirheg: number()
+        .max(5, '5-с илүүгүй урттай оруулна уу!')
+        .integer('Буруу байна')
+        .positive('Буруу байна!')
+        .typeError('Заавал тоо байх ёстой')
         .required('Хоосон байна!'),
     burtgegch: string()
         .max(100, '100-с илүүгүй урттай оруулна уу!')

@@ -228,14 +228,19 @@ export default class Maps extends Component {
         var array = coordinate.split(',').map(function(n) {
             return Number(n);
         });
-        service.findSum(array).then(({info}) => {
-           if(info){
-            this.props.handleXY(array, info)
-           }
-        })
+        if(this.props.coordinatCheck)
+        {
+            this.props.handleXY(array, null)
+
+        }
+        else{
+            service.findSum(array).then(({info}) => {
+                if(info){
+                 this.props.handleXY(array, info)
+                }
+             })
+        }
     }
-
-
     handleSetCenter(coord) {
         const view = this.map.getView()
         const map_projection = view.getProjection()

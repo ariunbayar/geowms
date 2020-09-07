@@ -15,7 +15,6 @@ export default class DursgaltGazarTable extends Component {
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
 
-
     handleModalDeleteOpen(event) {
         event.preventDefault()
         this.setState({is_modal_delete_open: true})
@@ -32,14 +31,21 @@ export default class DursgaltGazarTable extends Component {
     render() {
         const dursgalt_id = this.props.dursgalt_id
 
-        const { id, dursgal, tuuh_soyl_id, type, stone, protection, created_at} = this.props.values
+        const { id, dursgal, tuuh_soyl_id, x,y, stone, protection, created_at, point_check} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
                 <th>{idx + 1}</th>
                 <th>{dursgal}</th>
                 <th>{stone}</th>
-                <th>{type}</th>
+                <th>{x}</th>
+                <th>{y}</th>
+                <th>
+                    {point_check ?
+                        <a className="text-success">Багтсан</a> :
+                        <a className="text-danger">Багтаагүй</a>
+                    }
+                </th>
                 <th>{created_at}</th>
                 <th>
                     <NavLink to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/update/${id}/`}>
@@ -54,7 +60,7 @@ export default class DursgaltGazarTable extends Component {
                         <Modal
                             modalClose={this.handleModalDeleteClose}
                             modalAction={this.props.handleRemove}
-                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            text={`Та "${dursgal}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
                         />
                     }

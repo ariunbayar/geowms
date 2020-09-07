@@ -12,6 +12,7 @@ export default class HureeFormTable extends Component {
             x: 0,
             y: 0,
             is_modal_delete_open: false,
+            tuuh_soyl_huree_id: props.tuuh_soyl_huree_id,
             disable: false,
             save_is_load: false,
             save_is_error: false,
@@ -61,15 +62,15 @@ export default class HureeFormTable extends Component {
     handleSubmit() {
 
         if(this.state.disable)
-        {   
+        {
             this.setState({save_is_load: true})
             const tuuhen_ov = this.props.tuuhen_ov
-            const { x, y, id} = this.state
+            const { x, y, id, tuuh_soyl_huree_id} = this.state
             if(x == 0 || y==0){
                 this.setState({save_is_error:true, save_is_load: false})
             }
             else{
-                service.hureeUpdate(tuuhen_ov,  x, y, id).then(({success}) => {
+                service.hureeUpdate(tuuhen_ov,  x, y, id, tuuh_soyl_huree_id).then(({success}) => {
                     if (success) {
                         setTimeout(() => {
                             this.setState({disable: false, save_is_load: false, save_is_error:false})
@@ -88,7 +89,6 @@ export default class HureeFormTable extends Component {
         // const values = this.props.values
         const idx = this.props.idx
         return (
-           
             <tr key={idx}>
                 <th scope="row">{idx+1}</th>
                 <td scope="row">
@@ -137,7 +137,7 @@ export default class HureeFormTable extends Component {
                         <Modal
                             modalClose={this.handleModalDeleteClose}
                             modalAction={this.props.handleRemove}
-                            text={`Та "${this.props.values.id}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
                         />
                     }

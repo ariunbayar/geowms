@@ -62,7 +62,7 @@ export default class AyulFormTable extends Component {
     handleSubmit() {
 
         if(this.state.disable)
-        {   
+        {
             this.setState({save_is_load: true})
             const tuuhen_ov = this.props.tuuhen_ov
             const {x, y, id} = this.state
@@ -92,7 +92,6 @@ export default class AyulFormTable extends Component {
         // const values = this.props.values
         const idx = this.props.idx
         return (
-           
             <tr key={idx}>
                 <th scope="row">{idx+1}</th>
                 <td scope="row">
@@ -115,7 +114,6 @@ export default class AyulFormTable extends Component {
                         value={this.state.y}
                     />
                 </td>
-                
                 <td>
                     {this.state.disable ?
                     (this.state.save_is_load ?
@@ -143,7 +141,7 @@ export default class AyulFormTable extends Component {
                         <Modal
                             modalClose={this.handleModalDeleteClose}
                             modalAction={this.props.handleRemove}
-                            text={`Та "${this.props.values.id}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
                         />
                     }

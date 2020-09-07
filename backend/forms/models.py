@@ -84,6 +84,7 @@ class TuuhSoyolHuree(models.Model):
 
 class TuuhSoyolHureePol(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
+    tuuh_soyl_huree_id = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'tuuhsoyolhureepol'

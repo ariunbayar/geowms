@@ -48,8 +48,8 @@ export class HureeForm extends Component {
     handleRemove(id) {
         const tuuhen_ov = this.props.dursgalt_id
         const ayul_id = id
-        console.log(tuuhen_ov, ayul_id)
-        service.hureeDelete(ayul_id, tuuhen_ov).then(({success}) => {
+        const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
+        service.hureeDelete(ayul_id, tuuhen_ov, tuuh_soyl_huree_id).then(({success}) => {
             if(success){
                 this.hureeData()
             }
@@ -82,24 +82,31 @@ export class HureeForm extends Component {
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         return (
             <div>
-                <h6>Хүрээ  {tuuh_soyl_huree_id}.</h6>
+                {this.state.huree_data.length > 2 ?
+                    <h6 className="text-success">Хүрээ  {tuuh_soyl_huree_id}.</h6>:
+                    <h6 className="text-danger">Хүрээ  {tuuh_soyl_huree_id}.</h6>
+                }
                 <table className="table table-bordered">
-                    <tr>
-                        <th rowSpan="2" scope="rowgroup" scope="row">№</th>
-                        <td colSpan="2">Latitude Longitude</td>
-                        <td rowSpan="2">Засах</td>
-                        <td rowSpan="2">Устгах</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">X</th>
-                        <th scope="row">Y</th>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th rowSpan="2" scope="rowgroup" scope="row">№</th>
+                            <td colSpan="2">Latitude Longitude</td>
+                            <td rowSpan="2">Засах</td>
+                            <td rowSpan="2">Устгах</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">X</th>
+                            <th scope="row">Y</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     {this.state.huree_data.map((data, idx) =>
-                            <HureeFormTable 
-                                key={idx} 
-                                values={data} 
+                            <HureeFormTable
+                                key={idx}
+                                values={data}
                                 idx={idx}
                                 tuuhen_ov={tuuhen_ov}
+                                tuuh_soyl_huree_id={tuuh_soyl_huree_id}
                                 handleRemove={() => this.handleRemove(data.id)}
                             ></HureeFormTable>
                         )}
@@ -127,16 +134,16 @@ export class HureeForm extends Component {
                             <td colSpan="2" scope="rowgroup" scope="row">
                                 { this.state.handle_save_succes_huree ?
                                         <a className="spinner-border gp-text-primary" role="status">
-                                            <span className="sr-only">Loading...</span> 
+                                            <span className="sr-only">Loading...</span>
                                         </a>
                                     :
                                     <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
-                                }   
+                                }
                                 <br></br>
                                 {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
                             </td>
                         </tr>
-
+                    </tbody>
                 </table>
             </div>
         )

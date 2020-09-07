@@ -10,11 +10,9 @@ export class TuuhenOv extends Component {
 
     constructor(props) {
         super(props)
-        
     }
 
     render() {
-        
         return (
             <Switch>
                 <Route exact path={"/gov/tuuhen-ov/add/"} component={Forms}/>

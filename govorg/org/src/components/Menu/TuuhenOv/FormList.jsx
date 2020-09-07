@@ -69,7 +69,6 @@ export class FormList extends Component {
                                         values={values}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
-                                        
                                     />
                                 )}
                             </tbody>
