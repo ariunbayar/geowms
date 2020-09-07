@@ -38,7 +38,7 @@ export default class FormTable extends Component {
     componentDidUpdate(prevProps){
         if(prevProps.values !== this.props.values){
             this.setState({is_modal_delete_open: false, is_modal_success_open: false})
-        } 
+        }
     }
 
     render() {

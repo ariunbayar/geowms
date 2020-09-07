@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from '../service'
+import {service} from './service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaAdmin} from './validationSchema'
 export class FormTseg extends Component {
@@ -44,7 +44,7 @@ export class FormTseg extends Component {
             parse: [],
             checkError: [],
             showBox: true,
-            error:{error:''}
+            error:{error:''},
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleInputEmail = this.handleInputEmail.bind(this)
@@ -84,13 +84,14 @@ export class FormTseg extends Component {
             this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
             if(this.error_msg.length > 0){
                 this.setState({ checkError: this.state.error })
-            }   
+            }
         }
         else{
             this.error_msg = []
         }
-        if(e.target.value.length > 2){
+        if(e.target.value.length >= 1){
             this.error_msg = []
+            this.setState({ checkError: this.state.error })
             service.searchTseg(e.target.value).then(({items}) => {
                 if(items !== false){
                     this.setState({items, tseg_dugaar_error:false , checkError:[] })
@@ -99,8 +100,11 @@ export class FormTseg extends Component {
                 else{
                     this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
                 }
+            }).catch(error => {
+                console.log("Алдаа гарсан байна. " ,error.text)
+                this.props.history.push('/back/froms/')
             })
-        }   
+        }
     }
 
     optionVal(items){
@@ -112,7 +116,7 @@ export class FormTseg extends Component {
 
     checkAldaa(){
         const error = this.state.tseg_dugaar_error
-        if(!error){
+        if(error == true){
             this.setState({ tseg_dugaar_error: true, checkError: error })
         }
         else{
@@ -163,7 +167,7 @@ export class FormTseg extends Component {
     handleSubmit(values, { setStatus, setSubmitting }){
         setStatus('checking')
         setSubmitting(true)
-        const form_datas = new FormData() 
+        const form_datas = new FormData()
         this.setState({values})
         form_datas.append('id', this.state.id)
         form_datas.append('email', values.email)
@@ -206,7 +210,6 @@ export class FormTseg extends Component {
         }
         else{
             this.setState({email_error_messege: true, checkError: this.state.error })
-            
         }
 
     }
@@ -238,7 +241,7 @@ export class FormTseg extends Component {
 
     handleBoxOver (e){
         this.setState({ showBox: true })
-    } 
+    }
 
     handleBoxLeave(e){
         this.setState({ showBox: false })
@@ -282,29 +285,28 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">1.</th>
                                 <th style={{width: "15%"}}>Имэйл хаяг</th>
                                <td>
-                                    <Field 
-                                        name="email" 
-                                        type="text" 
+                                    <Field
+                                        name="email"
+                                        type="text"
                                         id="id_email"
-                                        className={'form-control' + 
-                                            (errors.email && 
-                                                touched.email ? ' is-invalid' : '')} 
+                                        className={'form-control' +
+                                            (errors.email &&
+                                                touched.email ? ' is-invalid' : '')}
                                     />
                                     <ErrorMessage name="email" component="div" className="invalid-feedback" />
-                                    {this.state.email_error_messege ? <a className="text-primary">Имэйл хаяг буруу байна.</a> : null}
                                     </td>
                                 </tr>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">2.</th>
                                     <th style={{width: "15%"}}>Албан байгууллага</th>
                                     <td>
-                                        <Field 
-                                            name="baiguulaga" 
-                                            type="text" 
+                                        <Field
+                                            name="baiguulaga"
+                                            type="text"
                                             id="id_baiguulaga"
-                                            className={'form-control' + 
-                                                (errors.baiguulaga && 
-                                                    touched.baiguulaga ? ' is-invalid' : '')} 
+                                            className={'form-control' +
+                                                (errors.baiguulaga &&
+                                                    touched.baiguulaga ? ' is-invalid' : '')}
                                         />
                                         <ErrorMessage name="baiguulaga" component="div" className="invalid-feedback" />
                                     </td>
@@ -313,13 +315,13 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">2.</th>
                                     <th style={{width: "15%"}}>Албан тушаал</th>
                                     <td>
-                                        <Field 
-                                            name="alban_tushaal" 
-                                            type="text" 
+                                        <Field
+                                            name="alban_tushaal"
+                                            type="text"
                                             id='id_alban_tushaal'
-                                            className={'form-control' + 
-                                                (errors.alban_tushaal && 
-                                                    touched.alban_tushaal ? ' is-invalid' : '')} 
+                                            className={'form-control' +
+                                                (errors.alban_tushaal &&
+                                                    touched.alban_tushaal ? ' is-invalid' : '')}
                                         />
                                         <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback" />
                                     </td>
@@ -328,13 +330,13 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">2.</th>
                                     <th style={{width: "15%"}}>Утасны дугаар</th>
                                     <td>
-                                        <Field 
-                                            name="utas" 
-                                            type="text" 
+                                        <Field
+                                            name="utas"
+                                            type="text"
                                             id="id_utas"
-                                            className={'form-control' + 
-                                                (errors.alban_tushaal && 
-                                                    touched.alban_tushaal ? ' is-invalid' : '')} 
+                                            className={'form-control' +
+                                                (errors.alban_tushaal &&
+                                                    touched.alban_tushaal ? ' is-invalid' : '')}
                                         />
                                         <ErrorMessage name="utas" component="div" className="invalid-feedback" />
                                     </td>
@@ -348,9 +350,9 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">1.</th>
                                     <th style={{width: "15%"}}>Цэгийн дугаар:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <input 
-                                            name="tsegiin_dugaar" 
-                                            type="number" 
+                                        <input
+                                            name="tsegiin_dugaar"
+                                            type="text"
                                             id="tsegiin_dugaar"
                                             list="tsegList"
                                             className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
@@ -358,11 +360,11 @@ export class FormTseg extends Component {
                                             value = {this.state.tsegiin_dugaar}
                                         />
                                         {tseg_dugaar_error
-                                            ? 
+                                            ?
                                             <div className="invalid-feedback">
                                                 Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.
-                                            </div> 
-                                            : 
+                                            </div>
+                                            :
                                             null
                                         }
                                         {this.error_msg}
@@ -372,13 +374,13 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">2.</th>
                                     <th style={{width: "15%"}}>Ойролцоо байрлал:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <Field 
-                                            name="oiroltsoo_bairlal" 
-                                            type="text" 
+                                        <Field
+                                            name="oiroltsoo_bairlal"
+                                            type="text"
                                             id="id_oiroltsoo_bairlal"
-                                            className={'form-control' + 
-                                                (errors.oiroltsoo_bairlal && 
-                                                    touched.oiroltsoo_bairlal ? ' is-invalid' : '')} 
+                                            className={'form-control' +
+                                                (errors.oiroltsoo_bairlal &&
+                                                    touched.oiroltsoo_bairlal ? ' is-invalid' : '')}
                                         />
                                         <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
                                     </td>
@@ -387,20 +389,21 @@ export class FormTseg extends Component {
                                     <th style={{width: "5%"}} scope="row">3.</th>
                                     <th style={{width: "15%"}}>Эвдэрсэн байдал:</th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <Field 
+                                        <Field
                                             as = "select"
-                                            name="evdersen_baidal" 
-                                            type="text" 
+                                            name="evdersen_baidal"
+                                            type="text"
                                             id="id_evdersen_baidal"
-                                            className={'form-control' + 
-                                                (errors.evdersen_baidal && 
-                                                    touched.evdersen_baidal ? ' is-invalid' : '')} 
+                                            className={'form-control' +
+                                                (errors.evdersen_baidal &&
+                                                    touched.evdersen_baidal ? ' is-invalid' : '')}
                                         >
                                             <option value="">--- Сонгоно уу ---</option>
                                             <option value="Эвдэрсэн">Эвдэрсэн</option>
                                             <option value="Төв гэмтсэн">Төв гэмтсэн</option>
                                             <option value="Хазайсан">Хазайсан</option>
                                             <option value="Дарагдсан">Дарагдсан</option>
+                                            <option value="Бусад">Бусад</option>
                                         </Field>
                                         <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
                                     </td>
@@ -412,8 +415,8 @@ export class FormTseg extends Component {
                                     <th style={{width: "15%"}}>Нөхцөл/шалтгаан:</th>
                                     <td colSpan="4" scope="rowgroup">
                                         <Field
-                                            className={'form-control ' + 
-                                                (errors.nohtsol_baidal && 
+                                            className={'form-control ' +
+                                                (errors.nohtsol_baidal &&
                                                     touched.nohtsol_baidal ? ' is-invalid' : '')}
                                             component="textarea"
                                             name='nohtsol_baidal'
@@ -439,12 +442,12 @@ export class FormTseg extends Component {
                                             className="float-right"
                                         >
                                         <i className="fa fa-exclamation-circle float-right">
-                                            <div 
-                                                style={{ transition: "width 2s, height 4s"}}
-                                                className={`p-3 mb-2 bg-secondary text-white rounded `+
-                                                    `position-absolute d-none ${this.state.showBox ? " d-block" : ""}`}
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox ? " d-block" : ""}`}
+                                                        role="alert"
                                             >
-                                                300x300 байх шаардлагатай .jpg .png байх ёстой
+                                                <h6 className="alert-heading">Санамж!</h6>
+                                                <p>".jpeg" болон ".png" байх ёстой</p>
                                             </div>
                                         </i>
                                         </div>
@@ -472,9 +475,10 @@ export class FormTseg extends Component {
                                         />
                                         {
                                             id >= 0 ? 
-                                            zurag_hol_prev ?
-                                            <center><img src={zurag_hol_prev} width="150px" height="100px"/></center>:
-                                            <center><label className="text-primary">Зураг байхгүй байна.</label></center>
+                                                zurag_hol_prev ?
+                                                    <center><img src={zurag_hol_prev} width="150px" height="100px"/></center>
+                                                :
+                                                <center><label className="text-primary">Зураг байхгүй байна.</label></center>
                                             :
                                             null
                                         }
@@ -640,23 +644,25 @@ export class FormTseg extends Component {
                                     <td colSpan="2" scope="rowgroup">
                                         <div className="col-md-12">
                                             <input 
-                                                type="checkbox" 
+                                                type="checkbox"
+                                                id="hemjilt_hiih_bolomj1"
                                                 checked={this.state.hemjilt_hiih_bolomj ? true : false}
                                                 onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, true)}
                                                 value={this.state.hemjilt_hiih_bolomj}
                                             ></input>
-                                            <label>Тийм</label>
+                                            <label htmlFor="hemjilt_hiih_bolomj1">Тийм</label>
                                         </div>
                                     </td>
                                     <td colSpan="2" scope="rowgroup">
                                         <div className="col-md-12">
                                             <input 
-                                                type="checkbox" 
+                                                type="checkbox"
+                                                id="hemjilt_hiih_bolomj2"
                                                 checked={this.state.hemjilt_hiih_bolomj ? false : true}
                                                 onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, false)}
                                                 value={this.state.hemjilt_hiih_bolomj}
                                             ></input>
-                                            <label>Үгүй</label>
+                                            <label htmlFor="hemjilt_hiih_bolomj2">Үгүй</label>
                                         </div>
                                     </td>
                                 </tr>

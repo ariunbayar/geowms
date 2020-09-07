@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
-import {service} from '../service'
+import {service} from './service'
 
 export class List extends Component {
 
@@ -15,13 +15,14 @@ export class List extends Component {
 
             }
             this.handlelistall = this.handlelistall.bind(this)
-            this.handleTsegDelete = this.handleTsegDelete.bind(this) 
-    }   
+            this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
+            this.handleRemove = this.handleRemove.bind(this)
+    }
 
     componentDidMount() {
         this.handlelistall()
     }
-    
+
     handlelistall(){
         service.tsegUstsanAll().then(({tseg_ustsan_all, success }) => {
             if (success) {
@@ -30,13 +31,23 @@ export class List extends Component {
                 })
             }
         })
-    
     }
 
-    handleTsegDelete(id){
+    handleTsegSuccess(id){
+        service.tseg_success(id).then(({ success }) => {
+            if (success) {
+                this.handlelistall()
+            }
+        })
+    }
+
+    handleRemove(id){
         service.tseg_remove(id).then(({ success }) => {
             if (success) {
                 this.handlelistall()
+            }
+            else {
+                alert("Aldaa")
             }
         })
     }
@@ -59,18 +70,19 @@ export class List extends Component {
                                     <th scope="col">Цэгийн дугаар</th>
                                     <th>Засах</th>
                                     <th>Баталгаажуулах</th>
+                                    <th>Устгах</th>
                                 </tr>
                                </thead>
                              <tbody>
-                             { 
+                             {
                                 this.state.list.map((tseg, idx) =>
                                     <ListTable
                                         key={idx}
                                         idx={idx}
                                         values={tseg}
-                                        handleTsegDelete={() => this.handleTsegDelete(tseg.id)}
+                                        handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
+                                        handleRemove={() => this.handleRemove(tseg.id)}
                                     />
-
                                 )}
                             </tbody>
                         </table>
