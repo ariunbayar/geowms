@@ -42,6 +42,8 @@ export class DanForm extends Component {
             error:{error:''},
             is_dan: false,
             isLoading: true,
+            showMore: false,
+            showTsegAlert: true,
         }
 
         this.handleInput = this.handleInput.bind(this)
@@ -54,13 +56,15 @@ export class DanForm extends Component {
         this.checkAldaa = this.checkAldaa.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
+        this.showMore = this.showMore.bind(this)
     }
 
     componentDidMount(){
         this._isMounted = true;
         setTimeout(() => {
             this._isMounted && this.setState({ showBox: false })
-        }, 1500);
+            this._isMounted && this.setState({ showTsegAlert: false })
+        }, 3000);
     }
 
     componentWillUnmount() {
@@ -116,6 +120,10 @@ export class DanForm extends Component {
         else{
             this.setState({ tseg_dugaar_error:false , checkError:[] })
         }
+    }
+
+    showMore(){
+        this.setState({showMore: !this.state.showMore})
     }
 
     handleSubmit(values, { setStatus, setSubmitting }){
@@ -185,18 +193,28 @@ export class DanForm extends Component {
         this.setState({ [field]: check })
     }
 
-    handleBoxOver (e){
-        this.setState({ showBox: true })
+    handleBoxOver (field, e){
+        if(field == 'evdersen_baidal'){
+            this.setState({ showTsegAlert: true})
+        }
+        if(field == 'zurag'){
+            this.setState({ showBox: true })
+        }
     }
-    handleBoxLeave(e){
-        this.setState({ showBox: false })
+    handleBoxLeave(field, e){
+        if(field == 'evdersen_baidal'){
+            this.setState({ showTsegAlert: false})
+        }
+        if(field == 'zurag'){
+            this.setState({ showBox: false })
+        }
     }
 
     render() {
         const{id, zurag_hol_prev, zurag_oir_prev,
             zurag_baruun_prev, zurag_zuun_prev, zurag_hoid_prev,
             zurag_omno_prev, tseg_dugaar_error, oiroltsoo_bairlal,
-            bairlal_error
+            bairlal_error, showMore
         } = this.state
         return (
             <Formik
@@ -246,6 +264,22 @@ export class DanForm extends Component {
                                         />
                                         {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
                                         {this.error_msg}
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('evdersen_baidal',e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('evdersen_baidal',e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showTsegAlert ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                                <h6 className="alert-heading">Санамж!</h6>
+                                                <p>Бүртгэлтэй Цэгийн дугаарыг хийх ёстойг анхаарна уу</p>
+                                            </div>
+                                        </i>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -283,7 +317,7 @@ export class DanForm extends Component {
                                             <option value="Дарагдсан">Дарагдсан</option>
                                             <option value="Бусад">Бусад</option>
                                         </Field>
-                                        <ErrorMessage name="oiroltsoo_bairlal" component="div" className="invalid-feedback" />
+                                        <ErrorMessage name="evdersen_baidal" component="div" className="invalid-feedback" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -313,8 +347,8 @@ export class DanForm extends Component {
                                         Орчны фото зураг:
                                         <div
                                             type="button"
-                                            onMouseOver={(e) => this.handleBoxOver(e)}
-                                            onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                            onMouseOver={(e) => this.handleBoxOver('zurag', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('zurag', e)}
                                             className="float-right"
                                         >
                                         <i className="fa fa-exclamation-circle float-right">
@@ -367,10 +401,20 @@ export class DanForm extends Component {
                                 </tr>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row"></th>
+                                    <td colSpan="4" scope="rowgroup">
+                                        <a className="d-flex p-2 bd-highlight border border-danger" onClick={(e) => this.showMore(e)}>
+                                            <span className="text-center">
+                                                {showMore? "Hide" : "MORE"}
+                                            </span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr className={showMore ? 'd-show' : "d-none"}>
+                                    <th style={{width: "5%"}} scope="row"></th>
                                     <th className="text-center" colSpan="2" scope="rowgroup">Баруун</th>
                                     <th className="text-center" colSpan="2" scope="rowgroup">Зүүн</th>
                                 </tr>
-                                <tr>
+                                <tr className={showMore ? 'd-show' : "d-none"}>
                                     <th style={{width: "5%"}} scope="row"></th>
                                     <th colSpan="2" scope="rowgroup">
                                         <ImageUploader
@@ -401,12 +445,12 @@ export class DanForm extends Component {
                                         />
                                     </th>
                                 </tr>
-                                <tr>
+                                <tr className={showMore ? 'd-show' : "d-none"}>
                                     <th style={{width: "5%"}} scope="row"></th>
                                     <th className="text-center" colSpan="2" scope="rowgroup">Хойно</th>
                                     <th className="text-center" colSpan="2" scope="rowgroup">Өмнө</th>
                                 </tr>
-                                <tr>
+                                <tr className={showMore ? 'd-show' : "d-none"}>
                                     <th style={{width: "5%"}} scope="row"></th>
                                     <th colSpan="2" scope="rowgroup">
                                         <ImageUploader
