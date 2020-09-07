@@ -73,7 +73,7 @@ export default class FormTable extends Component {
                     }
                 </th>
                 <th>
-                    <button className="btn gp-btn-primary" onClick={this.handleModalSuccessOpen}>
+                    <button className="btn gp-btn-primary m-1" onClick={this.handleModalSuccessOpen}>
                         Баталгаажуулах
                     </button>
                     {this.state.is_modal_success_open &&

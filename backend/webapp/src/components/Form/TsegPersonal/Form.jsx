@@ -246,7 +246,7 @@ export class Forms extends Component {
                     })
                 )
             }
-            console.log(tseg_display)
+
         }
          )
     }

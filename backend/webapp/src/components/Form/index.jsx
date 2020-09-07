@@ -15,13 +15,13 @@ export class Forms extends Component {
     render() {
         return (
             <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
-                <div className="row container">
-                    <div className="col-md-12">
-                        <ul className="list-group list-group-horizontal col-md-12">
-                            <NavLink to="/back/froms/tseg-personal/" className="list-group-item col-md-6" activeClassName="text-white gp-bg-primary">
+                <div className="row container p-0">
+                    <div className="col-md-12 p-1 m-1 ">
+                        <ul className="list-group list-group-horizontal col-md-12 ">
+                            <NavLink to="/back/froms/tseg-personal/" className="list-group-item col-md-6 ml-3 text-center" activeClassName="text-white gp-bg-primary">
                                 Цэг бүртгэлийн хүсэлт
                             </NavLink>
-                            <NavLink to="/back/froms/tseg-ustsan/" className="list-group-item col-md-6" activeClassName="text-white gp-bg-primary">
+                            <NavLink to="/back/froms/tseg-ustsan/" className="list-group-item col-md-6 text-center" activeClassName="text-white gp-bg-primary">
                                 Цэг устсан хүсэлт
                             </NavLink>
                         </ul>

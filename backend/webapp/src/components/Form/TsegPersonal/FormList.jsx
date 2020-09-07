@@ -98,7 +98,7 @@ export class FormList extends Component {
                             </NavLink>
                         </div>
                         <div className="form-row text-right">
-                        <div className="form-group col-md-8">
+                        <div className="form-group col-md-4">
                                 <input
                                     type="text"
                                     className="form-control"
