@@ -14,7 +14,7 @@ export class FormList extends Component {
             length:null,
             currentPage:1,
             PerPage:50,
-            searchQuery: 'g109',
+            searchQuery: '',
             query_min: false,
             error: false,
             error_msg: [],
@@ -56,6 +56,7 @@ export class FormList extends Component {
     }
 
     handleSuccess(point_type, objectid, point_class) {
+        console.log(point_type, objectid, point_class)
         service.tsegPersonalSuccess(point_type, objectid, point_class).then(({success, msg}) => {
             if(success){
                 this.paginate(1, this.state.searchQuery)
@@ -132,12 +133,12 @@ export class FormList extends Component {
                                         values={values}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
-                                        handleSuccess = {() => this.handleSuccess(values.point_type, values.objectid, values.point_class)}
+                                        handleSuccess = {() => this.handleSuccess(values.point_type, values.id, values.point_class)}
                                     />
                                 )}
                             </tbody>
                         </table>
-                        <Pagination 
+                        <Pagination
                                 paginate = {this.paginate}
                                 searchQuery = {this.state.searchQuery}
                         />

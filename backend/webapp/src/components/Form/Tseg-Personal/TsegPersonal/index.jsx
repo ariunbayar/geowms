@@ -8,11 +8,9 @@ export class TsegPersonal extends Component {
 
     constructor(props) {
         super(props)
-        
-    }            
+    }
 
     render() {
-        
         return (
             <Switch>
                 <Route exact path={"/back/froms/tseg-info/tsegpersonal/tseg-personal/"} component={FormList}/>

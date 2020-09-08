@@ -159,7 +159,7 @@ class TsegUstsanLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Mpoint(models.Model):
+class Mpoint1(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
@@ -178,4 +178,200 @@ class Mpoint(models.Model):
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
-        db_table = 'mpoint'
+        db_table = 'mpoint1'
+
+
+class Mpoint2(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint2'
+
+
+class Mpoint3(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint3'
+
+class Mpoint4(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint4'
+
+
+class Mpoint5(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint5'
+
+
+class Mpoint6(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint6'
+
+
+class Mpoint7(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint7'
+
+
+class Mpoint8(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint8'
+
+class Mpoint9(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint9'
+
+
+class Mpoint_view(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    objectid = models.CharField(max_length=4)
+    point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
+    point_name = models.CharField(max_length=50)
+    pid = models.CharField(max_length=20)
+    point_class = models.BigIntegerField()
+    point_type = models.CharField(max_length=100)
+    center_typ = models.CharField(max_length=10)
+    aimag = models.CharField(max_length=50)
+    sum = models.CharField(max_length=50)
+    sheet1 = models.CharField(max_length=1)
+    sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
+    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    t_type = models.CharField(max_length=100)
+    class Meta:
+        managed = False
+        db_table = 'mpoint_view'
