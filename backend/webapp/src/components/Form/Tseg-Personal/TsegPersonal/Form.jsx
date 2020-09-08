@@ -289,8 +289,8 @@ export class Forms extends Component {
                                 coordinatCheck={false}
                             />
                         </div>
-                        <div className="col-md-12 mb-4">
-                            <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
+                        <div className="col-md-12 mb-4 my-4 pl-0">
+                            <a href="#" className="btn gp-outline-primary " onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
                         </div>
@@ -630,6 +630,7 @@ export class Forms extends Component {
                                         <ErrorMessage name="date" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
+                                {values.suljeenii_torol == '1' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
@@ -651,7 +652,8 @@ export class Forms extends Component {
                                         </ul>
                                         : null}
                                     </td>
-                                </tr>
+                                </tr>: null}
+                                {values.suljeenii_torol == '1' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
@@ -676,6 +678,7 @@ export class Forms extends Component {
 
                                     </td>
                                 </tr>
+                                : null}
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">16.</th>
                                     <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>

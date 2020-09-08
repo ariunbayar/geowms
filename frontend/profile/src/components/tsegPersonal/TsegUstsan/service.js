@@ -1,4 +1,4 @@
-import {handleResponse, getPostOptions, getGetOptions} from '../service'
+import {handleResponse, getPostOptions, getGetOptions} from '../../service'
 
 
 const prefix = '/profile/api/tseg-ustsan'

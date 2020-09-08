@@ -80,7 +80,7 @@ export class FormList extends Component {
         return (
             <div  className="container my-4">
                 <div className="row">
-                    <div className="col-md-12">
+                    <div className="col-md-12 ">
                         {
                             error && error_bn
                             ?
@@ -92,8 +92,8 @@ export class FormList extends Component {
                                 <div className="text-success">{error_msg}</div>
                             </div>
                         }
-                        <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={"/back/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
+                        <div className="text-right mb-">
+                            <NavLink className="btn gp-btn-primary my-8 mb-0" to={"/back/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
                             </NavLink>
                         </div>
