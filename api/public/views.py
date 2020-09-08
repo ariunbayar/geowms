@@ -1,10 +1,10 @@
 import requests
 
 from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET
 
-from api.utils import filter_layers
+from api.utils import filter_layers, replace_src_url
 from backend.bundle.models import Bundle
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
@@ -18,6 +18,12 @@ def _get_user_roles(user):
     return roles
 
 
+def _get_service_url(request, bundle, wms):
+    url = reverse('api:service:wms_proxy', args=[bundle.pk, wms.pk])
+    absolute_url = request.build_absolute_uri(url)
+    return absolute_url
+
+
 @require_GET
 def proxy(request, bundle_id, wms_id):
 
@@ -28,26 +34,27 @@ def proxy(request, bundle_id, wms_id):
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     wms = get_object_or_404(WMS, pk=wms_id)
 
-    if wms.is_active:
+    if not wms.is_active:
+        raise Http404
 
-        queryargs = request.GET
-        headers = {**BASE_HEADERS}
-        rsp = requests.get(wms.url, queryargs, headers=headers)
-        content = rsp.content
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    rsp = requests.get(wms.url, queryargs, headers=headers)
+    content = rsp.content
 
+    if request.GET.get('REQUEST') == 'GetCapabilities':
         user_roles = _get_user_roles(request.user)
         wms_layers = wms.wmslayer_set.filter(
                 bundlelayer__bundle=bundle,
                 bundlelayer__role_id__in=user_roles,
             )
         allowed_layers = set([layer.code for layer in wms_layers])
-        if request.GET.get('REQUEST') == 'GetCapabilities':
-            content = filter_layers(content, allowed_layers)
 
-        content_type = rsp.headers.get('content-type')
+        content = filter_layers(content, allowed_layers)
 
-        return HttpResponse(rsp.content, content_type=content_type)
+        service_url = _get_service_url(request, bundle, wms)
+        content = replace_src_url(content, wms.url, service_url)
 
-    else:
+    content_type = rsp.headers.get('content-type')
 
-        raise Http404
+    return HttpResponse(content, content_type=content_type)
