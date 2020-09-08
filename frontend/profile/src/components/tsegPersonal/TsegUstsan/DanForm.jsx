@@ -181,6 +181,7 @@ export class DanForm extends Component {
         if(icon){
             let reader = new FileReader();
             reader.onload = (upload) => {
+                console.log(upload.target.result.length)
                 this.setState({
                     [name]: btoa(upload.target.result)
                 })
@@ -239,7 +240,7 @@ export class DanForm extends Component {
                     const error_bn = Object.keys(checkError).length > 0
                     return (
                     <Form>
-                        <div className="container border-top">
+                        <div className="container">
                         <div>
                             <div className="col-md-12 mb-4 my-3">
                                 <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
@@ -252,33 +253,41 @@ export class DanForm extends Component {
                             <tbody>
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">1.</th>
-                                    <th style={{width: "15%"}}>Цэгийн дугаар:</th>
+                                    <th style={{width: "15%"}}>Цэгийн дугаар:
+                                    <br/>
+                                    </th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <input
-                                            name="tsegiin_dugaar"
-                                            type="text"
-                                            id="tsegiin_dugaar"
-                                            list="tsegList"
-                                            className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
-                                            onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
-                                        />
-                                        {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
-                                        {this.error_msg}
-                                        <div
-                                            type="button"
-                                            onMouseOver={(e) => this.handleBoxOver('evdersen_baidal',e)}
-                                            onMouseLeave={(e) => this.handleBoxLeave('evdersen_baidal',e)}
-                                            className="float-right"
-                                        >
-                                        <i className="fa fa-exclamation-circle float-right">
-                                            <div className={`alert alert-dark rounded position-absolute d-none`+
-                                                        `${this.state.showTsegAlert ? " d-block" : ""}`}
-                                                        role="alert"
+                                        <div className="input-group">
+                                            <input
+                                                name="tsegiin_dugaar"
+                                                type="text"
+                                                id="tsegiin_dugaar"
+                                                list="tsegList"
+                                                className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
+                                                onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
+                                            />
+                                            {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
+                                            {this.error_msg}
+                                            <div
+                                                type="button"
+                                                onMouseOver={(e) => this.handleBoxOver('evdersen_baidal',e)}
+                                                onMouseLeave={(e) => this.handleBoxLeave('evdersen_baidal',e)}
+                                                className="d-flex justify-content-center"
                                             >
-                                                <h6 className="alert-heading">Санамж!</h6>
-                                                <p>Бүртгэлтэй Цэгийн дугаарыг хийх ёстойг анхаарна уу</p>
+                                            <span className="mb-1 input-group-addon fa-stack fa-lg">
+                                                <i className="fa fa-square fa-stack-2x"  style={{color: `${this.state.showTsegAlert ? "#1969c3" : `#034ea2`}`}} aria-hidden="true"></i>
+                                                <i className="fa fa-exclamation fa-stack-1x fa-inverse" style={{color:'white'}}></i>
+                                                <i className="fa">
+                                                <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                            `${this.state.showTsegAlert ? " d-block" : ""}`}
+                                                            role="alert"
+                                                >
+                                                    <p className="alert-heading h6">Санамж!</p>
+                                                    <p className="small">Бүртгэлтэй Цэгийн дугаарыг хийх ёстойг анхаарна уу</p>
+                                                </div>
+                                                </i>
+                                            </span>
                                             </div>
-                                        </i>
                                         </div>
                                     </td>
                                 </tr>
@@ -355,9 +364,10 @@ export class DanForm extends Component {
                                             <div className={`alert alert-dark rounded position-absolute d-none`+
                                                         `${this.state.showBox ? " d-block" : ""}`}
                                                         role="alert"
+                                                        style={{zIndex:'1'}}
                                             >
                                                 <h6 className="alert-heading">Санамж!</h6>
-                                                <p>".jpeg" болон ".png" байх ёстой</p>
+                                                <p>Зургийн хэмжээ "1MB" байна. ".jpg" ".jpeg" болон ".png" байх ёстой</p>
                                             </div>
                                         </i>
                                         </div>
@@ -376,11 +386,11 @@ export class DanForm extends Component {
                                             withIcon={false}
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_hol')}
-                                            imgExtension={['.jepg', '.png']}
-                                            maxFileSize={5242880}
+                                            imgExtension={['.jepg', '.jpg', '.png']}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -390,11 +400,11 @@ export class DanForm extends Component {
                                             withIcon={false}
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_oir')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            imgExtension={['.jepg', '.jpg', '.png']}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -402,11 +412,14 @@ export class DanForm extends Component {
                                 <tr>
                                     <th style={{width: "5%"}} scope="row"></th>
                                     <td colSpan="4" scope="rowgroup">
-                                        <a className="d-flex p-2 bd-highlight border border-danger" onClick={(e) => this.showMore(e)}>
-                                            <span className="text-center">
-                                                {showMore? "Хаах" : "Илүү олон"}
-                                            </span>
-                                        </a>
+                                    <button type="button" className="btn gp-btn-primary btn-block" onClick={(e) => this.showMore(e)}>
+                                        {showMore
+                                        ?
+                                        <div><i className="fa fa-caret-up" aria-hidden="true"></i> <b>Хаах</b></div>
+                                        :
+                                        <div><i className="fa fa-caret-down" aria-hidden="true"></i> <b>Илүү олон</b></div>
+                                        }
+                                    </button>
                                     </td>
                                 </tr>
                                 <tr className={showMore ? 'd-show' : "d-none"}>
@@ -422,11 +435,11 @@ export class DanForm extends Component {
                                             withIcon={false}
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_baruun')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            imgExtension={['.jepg', '.jpg', '.png']}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -436,11 +449,11 @@ export class DanForm extends Component {
                                             withIcon={false}
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_zuun')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            imgExtension={['.jepg', '.jpg', '.png']}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -458,11 +471,11 @@ export class DanForm extends Component {
                                             withIcon={false}
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_hoid')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            imgExtension={['.jepg', '.jpg', '.png']}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -472,11 +485,11 @@ export class DanForm extends Component {
                                             withIcon={false}
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_omno')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            imgExtension={['.jepg', '.jpg', '.png']}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
