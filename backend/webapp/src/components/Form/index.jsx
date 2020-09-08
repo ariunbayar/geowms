@@ -11,9 +11,9 @@ export class Forms extends Component {
 
     render() {
         return (
-            <div className="container my-3 p-3 mb-5">
+            <div className="container my-3 p-3 mb-5 shadow">
             <div className="row">
-                <div className="col-md-2 p-0">
+                <div className="col-md-2 ">
                     <div className="my-0">
                         <div className="list-group border">
                             <NavLink className="menu" exact to={'/back/froms/tseg-info/'} activeClassName="active">

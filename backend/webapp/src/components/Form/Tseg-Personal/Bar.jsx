@@ -17,15 +17,15 @@ export class Bar extends Component {
                     <div className="container">
                     <div className="row">
                         <div className="col-md-12 py-0 my-0 ">
-                            <ul className="list-group list-group-horizontal col-md-8 my-0 ml-5 pl-5  list-unstyled">
-                                <li >
-                                <NavLink to="/back/froms/tseg-info/tsegpersonal/tseg-personal/" className="list-group-item col-md-12 mr-2" activeClassName="text-white gp-bg-primary">
-                                        Цэг тэмдэгтийн мэдээллийг засах болон нэмэх үйлдлүүдийг хийн 
+                            <ul className="list-group list-group-horizontal col-md-8 my-0   list-unstyled">
+                                <li className="col-md-9" >
+                                <NavLink to="/back/froms/tseg-info/tsegpersonal/tseg-personal/" className="list-group-item col-md-12 mr-2 text-center" activeClassName="text-white gp-bg-primary">
+                                        Цэг тэмдэгтийн мэдээллийг <br/>засах болон нэмэх үйлдлүүдийг хийн 
                                 </NavLink>
                                 </li>
-                                <li>
-                                <NavLink to="/back/froms/tseg-info/tsegpersonal/tseg-ustsan/" className="list-group-item col-md-12 ml-2 " activeClassName="text-white gp-bg-primary">
-                                            Устсан цэгийн  мэдээллийг засах болон нэмэх үйлдлүүдийг хийн 
+                                <li className="col-md-9">
+                                <NavLink to="/back/froms/tseg-info/tsegpersonal/tseg-ustsan/" className="list-group-item col-md-12 ml-2 text-center " activeClassName="text-white gp-bg-primary">
+                                            Устсан цэгийн  мэдээллийг <br/>засах болон нэмэх үйлдлүүдийг хийн 
                                 </NavLink>
                                 </li>
                             </ul>

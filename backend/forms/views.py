@@ -491,6 +491,7 @@ def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     tseg_display = []
     tseg = TsegPersonal.objects.filter(id = pk).first() 
+
     data = Mpoint.objects.using('postgis_db').filter(id=pk).first() 
     if(tseg):
             LA = int(float(tseg.latlongx))
@@ -499,6 +500,7 @@ def tsegPersonalUpdate(request, payload):
             BA = int(float(tseg.latlongy))
             BB = int((float(tseg.latlongy)-BA)*60)
             BC = (float(float(tseg.latlongy))-BA-BB/60)*3600 
+
     tseg_display.append({
         'latlongx': tseg.latlongx if tseg and tseg.latlongx else '',
         'latlongy': tseg.latlongy if tseg and tseg.latlongy else '',
