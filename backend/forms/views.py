@@ -551,7 +551,7 @@ def tsegPersonalUpdate(request, payload):
         'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg and tseg.tseg_holoos_img_url  else '',
         'barishil_tuhai': tseg.barishil_tuhai if tseg else '',
         'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg and tseg.bairshil_tseg_oiroos_img_url else '',
-        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg and tseg.bairshil_tseg_oiroos_img_url else '',
+        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_holoos_img_url.url if tseg and tseg.bairshil_tseg_holoos_img_url else '',
         'sudalga_or_shine':  tseg.sudalga_or_shine if tseg else '',
         'hors_shinj_baidal': tseg.hors_shinj_baidal if tseg else '',
         'date': tseg.date.strftime("%Y-%m-%d") if tseg and tseg.date else '',
