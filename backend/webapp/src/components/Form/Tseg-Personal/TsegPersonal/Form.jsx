@@ -42,6 +42,7 @@ export class Forms extends Component {
             real_sum: '',
             aimag_name: '',
             sum_ners: '',
+            point_class: '',
             file_path1: null,
             file_path11: null,
             file_path1_error: false,
@@ -163,6 +164,7 @@ export class Forms extends Component {
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
         form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
+        form_datas.append('point_class', this.state.point_class)
         form_datas.append('bairshil_tseg_oiroos_img_url', this.state.bairshil_tseg_oiroos_img_url)
         form_datas.append('bairshil_tseg_holoos_img_url', this.state.bairshil_tseg_holoos_img_url)
         form_datas.append('sudalga_or_shine', this.state.values.sudalga_or_shine)
@@ -170,6 +172,8 @@ export class Forms extends Component {
         form_datas.append('date', this.state.values.date)
         form_datas.append('BA', this.state.BA)
         form_datas.append('LA', this.state.LA)
+        form_datas.append('LA', this.state.zone)
+        form_datas.append('LA', this.state.cc)
         form_datas.append('hotolson', this.state.values.hotolson)
         form_datas.append('alban_tushaal', this.state.values.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.values.alban_baiguullga)
@@ -231,10 +235,13 @@ export class Forms extends Component {
                         BA:item.BA,
                         BB:item.BB,
                         BC:item.BC,
+                        zone:item.zone,
+                        cc:item.cc,
                         latlongx: item.latlongx,
                         latlongy: item.latlongy,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
+                        point_class: item.point_class,
                         trapetsiin_dugaar: item.sheet1,
                         barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
