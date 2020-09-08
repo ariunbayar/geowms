@@ -34,8 +34,6 @@ export class Forms extends Component {
             LC:0,
             zone: '',
             cc:'',
-            utmx: '',
-            utmy: '',
             latlongx: "",
             latlongy: '',
             trapetsiin_dugaar: '',
@@ -98,8 +96,6 @@ export class Forms extends Component {
             latlongy:values[0],
             latlongx:values[1],
             aimag_name:info[0]['aimag'],
-            utmx: info[0].E,
-            utmy: info[0].N,
             trapetsiin_dugaar: info[0].vseg,
             sum_name: info[0].sum,
             cc: info[0].cc,
@@ -162,8 +158,6 @@ export class Forms extends Component {
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
         form_datas.append('sum_name', this.state.sum_name)
-        form_datas.append('utmx', this.state.values.utmx)
-        form_datas.append('utmy', this.state.values.utmy)
         form_datas.append('latlongx', this.state.latlongx)
         form_datas.append('latlongy', this.state.latlongy)
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
@@ -224,8 +218,6 @@ export class Forms extends Component {
                             center_typ: item.center_typ,
                             ondor: item.ondor,
                             suljeenii_torol: item.point_type,
-                            utmx: item.utmx,
-                            utmy: item.utmy,
                             sudalga_or_shine: item.sudalga_or_shine,
                             hors_shinj_baidal: item.hors_shinj_baidal,
                             date: item.date,

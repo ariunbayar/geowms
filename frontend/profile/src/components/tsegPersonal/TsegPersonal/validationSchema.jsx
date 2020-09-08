@@ -11,6 +11,8 @@ export const validationSchema = object().shape({
         .required('Хоосон байна!'),
     suljeenii_torol: string()
         .required('Хоосон байна!'),
+    ondor: string()
+        .required('Хоосон байна!'),
     center_typ: string()
         .max(10, '10-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),

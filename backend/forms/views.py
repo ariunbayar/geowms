@@ -538,7 +538,7 @@ def tsegPersonalUpdate(request, payload):
         'sheet2': data.sheet2 if data.sheet2 else '',
         'sheet3': data.sheet3 if data.sheet3 else '',
         't_type': data.t_type if data.t_type else '',
-        'ondor': data.ondor if data.ondor else '',
+        'ondor': data.ondor if data.ondor else 0,
     })
     rsp = {
         'tseg_display': tseg_display,
@@ -629,11 +629,11 @@ def tsegPersonal(request):
         geom = cursor.fetchone()
 
         update_cursor.execute(''' UPDATE mpoint SET geom = %s WHERE id = %s ''', [geom, pk])
-
+        ondor = int(request.POST.get('ondor'))
         Mpoint.objects.using('postgis_db').filter(id=pk).update(
                     objectid="null" ,point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
-                    ondor=request.POST.get('ondor'),
+                    ondor=ondor,
                     pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
@@ -642,7 +642,6 @@ def tsegPersonal(request):
 
         TsegPersonal.objects.filter(id=pk).update(
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
-                    utmx=request.POST.get('utmx'), utmy=request.POST.get('utmy'),
                     latlongx=request.POST.get('latlongx'),
                     latlongy=request.POST.get('latlongy'),
                     barishil_tuhai=request.POST.get('barishil_tuhai'),
@@ -724,10 +723,11 @@ def tsegPersonal(request):
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
+        ondor = int(request.POST.get('ondor'))
         mpoint = Mpoint.objects.using('postgis_db').create(
                     id=unique_id,
                     objectid='null', point_id=point_id,
-                    ondor=request.POST.get('ondor'),
+                    ondor=ondor,
                     point_name=request.POST.get('tesgiin_ner'),
                     pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'), 
                     center_typ=request.POST.get('center_typ'),
@@ -739,7 +739,6 @@ def tsegPersonal(request):
         tsegPersenal = TsegPersonal.objects.create(
                     id=unique_id,
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
-                    utmx=request.POST.get('utmx'), utmy=request.POST.get('utmy'),
                     latlongx=request.POST.get('latlongx'),
                     latlongy=request.POST.get('latlongy'),
                     barishil_tuhai=request.POST.get('barishil_tuhai'),
