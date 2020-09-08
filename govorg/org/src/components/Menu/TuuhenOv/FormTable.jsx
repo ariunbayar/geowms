@@ -30,7 +30,7 @@ export default class FormTable extends Component {
     }
 
     render() {
-        const { id, dugaar, date, inspireid, too_shirheg, aimagname, sumname, burtgegch,created_at} = this.props.values
+        const { id, dugaar, date, inspireid, too_shirheg, aimagname, sumname, burtgegch, created_at} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
