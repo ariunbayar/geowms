@@ -8,13 +8,13 @@ export class Bar extends Component {
 
     constructor(props) {
         super(props)
-        
+
     }
 
-    render() {    
-        return (             
+    render() {
+        return (
             <div>
-                    <div className="container">
+                <div className="container">
                     <div className="row">
                         <div className="col-md-12 py-0 my-0 ">
                             <ul className="list-group list-group-horizontal col-md-8 my-0   list-unstyled">

@@ -116,7 +116,7 @@ export class FormList extends Component {
                                     <th scope="col">Цэгийн нэр</th>
                                     <th scope="col">Цэгийн дугаар</th>
                                     <th scope="col">Төвийн төрөл</th>
-                                    <th scope="col">Шинэ төрөл</th>
+                                    <th scope="col">Зэрэг</th>
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
                                     <th scope="col">Засах</th>

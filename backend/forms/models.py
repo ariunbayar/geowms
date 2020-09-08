@@ -110,8 +110,6 @@ class TuuhSoyolAyuulHureePol(models.Model):
 class TsegPersonal(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     suljeenii_torol = models.CharField(max_length=20)
-    utmx = models.CharField(max_length=50)
-    utmy = models.CharField(max_length=50)
     latlongx = models.CharField(max_length=100)
     latlongy = models.CharField(max_length=100)
     tseg_oiroos_img_url = models.ImageField(upload_to='tseg-personal/')
@@ -165,6 +163,7 @@ class Mpoint(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
     point_name = models.CharField(max_length=50)
     pid = models.CharField(max_length=20)
     point_class = models.BigIntegerField()
