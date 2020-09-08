@@ -3,7 +3,7 @@ import ImageUploader from 'react-images-upload'
 import {service} from './service'
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import Maps from '../map/Map'
+import Maps from '../../map/Map'
 
 export default class Forms extends Component {
 
@@ -182,7 +182,7 @@ export default class Forms extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push('/profile/api/')
+                    this.props.history.push('/profile/tseg-personal/')
                 }, 1000)
             }
             else{
@@ -257,7 +257,6 @@ export default class Forms extends Component {
     }
 
     render() {
-
         return (
         <Formik
             enableReinitialize
@@ -280,12 +279,12 @@ export default class Forms extends Component {
             return (
                 <Form>
                     <div className="row container  my-1 ml-1">
-                        <div className="float-left mt-5 pt-7">
+                        <div className="float-left mt-5 pt-3">
                             <Maps
                             handleXY={this.handleXY}
                             />
                         </div>
-                        <div className="col-md-12 mb-4">
+                        <div className="col-md-12 mb-4 my-3">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
@@ -618,21 +617,9 @@ export default class Forms extends Component {
                                         <ErrorMessage name="date" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
+                                { values.suljeenii_torol == '1' ? 
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
-                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
-                                            name='hotolson'
-                                            id="id_hotolson"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         {this.state.file_path11 === '' ? null : <a href={`/media/${this.state.file_path11}`}>{this.state.file_path11}</a>}
@@ -652,9 +639,10 @@ export default class Forms extends Component {
                                         </ul>
                                         : null}
                                     </td>
-                                </tr>
+                                </tr> : null }
+                                  { values.suljeenii_torol == '1' ? 
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">16.</th>
+                                    <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         {this.state.file_path22 === '' ? null : <a href={`/media/${this.state.file_path22}`}>{this.state.file_path22}</a>}
@@ -677,9 +665,9 @@ export default class Forms extends Component {
                                         : null}
 
                                     </td>
-                                </tr>
+                                </tr> : null}
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">17.</th>
+                                    <th colSpan="1" scope="rowgroup">16.</th>
                                     <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -692,7 +680,7 @@ export default class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">18.</th>
+                                    <th colSpan="1" scope="rowgroup">17.</th>
                                     <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -704,7 +692,19 @@ export default class Forms extends Component {
                                         <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
-                            
+                                <tr>
+                                    <th colSpan="1" scope="rowgroup">17.</th>
+                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
+                                    <td colSpan="3" scope="rowgroup">
+                                        <Field
+                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
+                                            name='hotolson'
+                                            id="id_hotolson"
+                                            type="text"
+                                        />
+                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                         <div className="span3">

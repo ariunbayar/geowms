@@ -149,7 +149,7 @@ export class DanForm extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                 }, 1000)
-                this.props.history.push( `/profile/api/`)
+                this.props.history.push( `/profile/tseg-personal/`)
             }
             if(!success){
                 setStatus('failed')
@@ -241,7 +241,7 @@ export class DanForm extends Component {
                     <Form>
                         <div className="container border-top">
                         <div>
-                            <div className="col-md-12 mb-4">
+                            <div className="col-md-12 mb-4 my-3">
                                 <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                     <i className="fa fa-angle-double-left"></i> Буцах
                                 </a>

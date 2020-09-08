@@ -92,7 +92,7 @@ export class FormList extends Component {
                                 <div className="text-success">{error_msg}</div>
                             </div>
                         }
-                        <div className="text-right ">
+                        <div className="text-right mb-">
                             <NavLink className="btn gp-btn-primary my-8 mb-0" to={"/back/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
                             </NavLink>

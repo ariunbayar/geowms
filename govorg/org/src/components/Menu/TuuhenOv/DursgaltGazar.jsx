@@ -110,8 +110,17 @@ export class DursgaltGazar extends Component {
         this.baigalCheck = this.baigalCheck.bind(this)
         this.handleXY = this.handleXY.bind(this)
         this.setDataFormik = this.setDataFormik.bind(this)
+        this.handleBoxLeave = this.handleBoxLeave.bind(this)
+        this.handleBoxOver = this.handleBoxOver.bind(this)
     }
 
+    handleBoxOver (field){
+        this.setState({ [field]: true })
+    }
+
+    handleBoxLeave(field){
+        this.setState({ [field]: false })
+    }
     handleXY(values, info){
         this.setState({
                 torol_zuil_dursgalt_gazriin_coordinatx: values[0],
@@ -602,7 +611,25 @@ export class DursgaltGazar extends Component {
 
                         <table className="table table-bordered">
                             <tr>
-                                <th scope="row" style={{width: "20%"}}>Төрөл зүйл</th>
+                                <th scope="row" style={{width: "20%"}} className="align-middle">
+                                    Төрөл зүйл
+                                    <div
+                                        type="button"
+                                        onMouseOver={(e) => this.handleBoxOver('showBox', e)}
+                                        onMouseLeave={(e) => this.handleBoxLeave('showBox', e)}
+                                        className="float-right"
+                                    >
+                                    <i className="fa fa-exclamation-circle float-right">
+                                        <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                    `${this.state.showBox ? " d-block" : ""}`}
+                                                    role="alert"
+                                        >
+                                        <h6 className="alert-heading">Санамж!</h6>
+                                        <p>Ерөнхий төрлийн код, нэрийг бичнэ.</p>
+                                        </div>
+                                    </i>
+                                    </div>
+                                </th>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <div className="form-group">
                                         <select className="form-control" id="torol_zuil_torol_zuil" value={this.state.torol_zuil_torol_zuil} onChange={(e) => this.handleInput('torol_zuil_torol_zuil', e)}>
@@ -625,10 +652,27 @@ export class DursgaltGazar extends Component {
                                         </select>)}
                                     </div>
                                 </td>
-                                <th scope="row" style={{width: "20%"}}>Ерөнхий төрлийн код, нэрийг бичнэ.</th>
                             </tr>
                             <tr>
-                                <th scope="row">Чулуулгын төрөл</th>
+                                <th scope="row" className="align-middle">
+                                    Чулуулгын төрөл
+                                    <div
+                                        type="button"
+                                        onMouseOver={(e) => this.handleBoxOver('showBox1', e)}
+                                        onMouseLeave={(e) => this.handleBoxLeave('showBox1', e)}
+                                        className="float-right"
+                                    >
+                                    <i className="fa fa-exclamation-circle float-right">
+                                        <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                    `${this.state.showBox1 ? " d-block" : ""}`}
+                                                    role="alert"
+                                        >
+                                        <h6 className="alert-heading">Санамж!</h6>
+                                        <p>Чулуун дурсгалыг урласан материалыг сонгоно.</p>
+                                        </div>
+                                    </i>
+                                    </div>
+                                </th>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <Fragment>
                                         <Field name="torol_zuiltorol_zuil_name" as="select" className="form-control"
@@ -648,10 +692,27 @@ export class DursgaltGazar extends Component {
                                         <ErrorMessage name="torol_zuiltorol_zuil_name" component="div" className="invalid-feedback"/>
                                     </Fragment>
                                 </td>
-                                <th scope="row">Чулуун дурсгалыг урласан материалыг сонгоно.</th>
                             </tr>
                             <tr>
-                                <th scope="row">Дурсгалт газрын нэр.</th>
+                                <th scope="row">
+                                    Дурсгалт газрын нэр.
+                                    <div
+                                        type="button"
+                                        onMouseOver={(e) => this.handleBoxOver('showBox2', e)}
+                                        onMouseLeave={(e) => this.handleBoxLeave('showBox2', e)}
+                                        className="float-right"
+                                    >
+                                    <i className="fa fa-exclamation-circle float-right">
+                                        <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                    `${this.state.showBox2 ? " d-block" : ""}`}
+                                                    role="alert"
+                                        >
+                                        <h6 className="alert-heading">Санамж!</h6>
+                                        <p>Ерөнхий төрлийн код, нэрийг бичнэ.</p>
+                                        </div>
+                                    </i>
+                                    </div>
+                                </th>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <Field
                                         className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_ner ? 'is-invalid' : '')}
@@ -661,13 +722,29 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="torol_zuil_dursgalt_gazriin_ner" component="div" className="invalid-feedback"/>
                                 </td>
-                                <th scope="row">Ерөнхий төрлийн код, нэрийг бичнэ.</th>
                             </tr>
                             <tr>
-                                <th rowSpan="20" scope="rowgroup" scope="row">Солбилцол</th>
+                                <th rowSpan="20" scope="rowgroup" scope="row">
+                                    Солбилцол
+                                    <div
+                                        type="button"
+                                        onMouseOver={(e) => this.handleBoxOver('showBox3', e)}
+                                        onMouseLeave={(e) => this.handleBoxLeave('showBox3', e)}
+                                        className="float-right"
+                                    >
+                                    <i className="fa fa-exclamation-circle float-left">
+                                        <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                    `${this.state.showBox3 ? " d-block" : ""}`}
+                                                    role="alert"
+                                        >
+                                        <h6 className="alert-heading">Санамж!</h6>
+                                        <p>UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</p>
+                                        </div>
+                                    </i>
+                                    </div>
+                                </th>
                                 <th rowSpan="2" colSpan="2" scope="rowgroup" scope="row">№</th>
                                 <td colSpan="5">Latitude Longitude</td>
-                                <th rowSpan="20" scope="rowgroup">UTM стандартаар авсан Солбилцлын дагуу оруулна. Хэрэв Latitude Longitude стандартаар давхар авсан бол мөн тэмдэглэнэ.</th>
                             </tr>
                             <tr>
                                 <td colSpan="2" scope="row">X</td>
@@ -712,7 +789,26 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <td colSpan="8">
+                                    <th scope="row" style={{width: "20%"}} className="align-middle">
+                                        Тодорхойлолт
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox4', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox4', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-left">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox4 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Дурсгалт газрын шинж чанар, хэлбэр хэмжээ, тоо ширхэг, хийсэн матерал, хадгалалт хамгаалалтын байдал зэргийг тоочин тэмдэглэл бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
+                                    <td colSpan="5" scope="row" style={{width: "80%"}}>
                                         <Field
                                             className={'form-control ' + (errors.torol_zuil_todorhoilolt ? 'is-invalid' : '')}
                                             component="textarea"
@@ -722,7 +818,6 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="torol_zuil_todorhoilolt" component="div" className="invalid-feedback"/>
                                     </td>
-                                    <th style={{width: "20%"}}>Дурсгалт газрын шинж чанар, хэлбэр хэмжээ, тоо ширхэг, хийсэн матерал, хадгалалт хамгаалалтын байдал зэргийг тоочин тэмдэглэл бичнэ.</th>
                                 </tr>
                             </thead>
                         </table>
@@ -730,14 +825,31 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "10%"}}>Хэмжээ</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "10%"}} className="align-middle">
+                                        Хэмжээ
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox5', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox5', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox5 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Дурсгалт газрын ерөнхий хэмжээсийг метрийн нэгжид шилжүүлэн тохирох нүдэнд бичнэ. Бусад хэмжээний мэдээллийг "Бусад хэмжээс" хэсэгт бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>Талбай</td>
                                     <td>Урт</td>
                                     <td>Өргөн</td>
                                     <td>Өндөр</td>
                                     <td>Зузаан</td>
                                     <td>Голч</td>
-                                    <th rowSpan="3" scope="rowgroup" scope="row" style={{width: "20%"}}>Дурсгалт газрын ерөнхий хэмжээсийг метрийн нэгжид шилжүүлэн тохирох нүдэнд бичнэ. Бусад хэмжээний мэдээллийг "Бусад хэмжээс" хэсэгт бичнэ.</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -796,7 +908,25 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row">Бусад хэмжээ</th>
+                                    <th scope="row" className="align-middle">
+                                        Бусад хэмжээ
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox6', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox6', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox6 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Дурсгалт газрын ерөнхий хэмжээсийг метрийн нэгжид шилжүүлэн тохирох нүдэнд бичнэ. Бусад хэмжээний мэдээллийг "Бусад хэмжээс" хэсэгт бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td colSpan="6" scope="rowgroup">
                                         <Field
                                             className={'form-control ' + (errors.hemjee_busad_hemjee ? 'is-invalid' : '')}
@@ -808,7 +938,25 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Тоо ширхэг</th>
+                                    <th className="align-middle">
+                                        Тоо ширхэг
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox7', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox7', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox7 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Хэрэв дурсгалт газрыг тоймлон тоолсон бол "Тоо ширхэг" хэсэгт тоон утгаар оруулж, "Тэмдэглэл" хэсэгт бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td colSpan="6">
                                         <Field
                                             className={'form-control ' + (errors.hemjee_too_shirheg ? 'is-invalid' : '')}
@@ -818,11 +966,26 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="hemjee_too_shirheg" component="div" className="invalid-feedback"/>
                                     </td>
-                                    <th rowSpan="2" scope="rowgroup" scope="row">Хэрэв дурсгалт газрыг тоймлон тоолсон бол "Тоо ширхэг" хэсэгт тоон утгаар оруулж, "Тэмдэглэл" хэсэгт бичнэ.</th>
                                 </tr>
                                 <tr>
-                                    <th>
+                                    <th className="align-middle">
                                         Тэмдэглэл
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox8', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox8', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox8 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Хэрэв дурсгалт газрыг тоймлон тоолсон бол "Тоо ширхэг" хэсэгт тоон утгаар оруулж, "Тэмдэглэл" хэсэгт бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
                                     </th>
                                     <td colSpan="6">
                                         <Field
@@ -841,7 +1004,26 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox9', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox9', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox9 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг нь сонгоно.</p>
+                                            <p>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dg_ezen_dursgalt_gazar_ezen" as="select" className="form-control"
@@ -853,7 +1035,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dg_ezen_dursgalt_gazar_ezen" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг нь сонгоно.</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -866,7 +1047,6 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dg_ezen_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
-                                    <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                             </thead>
                         </table>
@@ -874,7 +1054,25 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Хамгаалалтын ангилал.</th>
+                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Хамгаалалтын ангилал.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox10', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox10', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox10 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг нь сонгоно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_angilal" as="select" className="form-control"
@@ -888,10 +1086,27 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_angilal" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="4" scope="rowgroup" scope="row">Хамгаалалтын бүс тогтоох шаардлагатай эсэх.</th>
+                                    <th rowSpan="4" scope="rowgroup" scope="row" className="align-middle">
+                                        Хамгаалалтын бүс тогтоох шаардлагатай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox11', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox11', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox11 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Нэгийг сонгоно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_bus_togtooh_shaardlaga" as="select" className="form-control"
@@ -903,7 +1118,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_bus_togtooh_shaardlaga" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="4" scope="rowgroup" scope="row">Нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 </tr>
@@ -914,7 +1128,26 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Тусгай хамгаалалтад авах шаардлагатай эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Тусгай хамгаалалтад авах шаардлагатай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox12', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox12', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox12 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_tusgai_hamgaalalt" as="select" className="form-control"
@@ -926,10 +1159,9 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_tusgai_hamgaalalt" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
-                                    <td>   
+                                    <td>
                                         <Field
                                             className={'form-control ' + (errors.dgh_tusgai_temdeglel ? 'is-invalid' : '')}
                                             component="textarea"
@@ -939,10 +1171,28 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dgh_tusgai_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
-                                    <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Яаралтай авран хамгаалах шаардлагатай эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Яаралтай авран хамгаалах шаардлагатай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox13', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox13', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox13 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_yaaraltai_hamgaalalt" as="select" className="form-control"
@@ -954,7 +1204,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_yaaraltai_hamgaalalt" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -967,10 +1216,28 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="dgh_yaaraltai_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
-                                    <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Өмчлөл, эзэмших ашиглалтын байдлыг өөрчлөх саналтай эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Өмчлөл, эзэмших ашиглалтын байдлыг өөрчлөх саналтай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox14', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox14', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox14 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt" as="select" className="form-control"
@@ -982,7 +1249,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -995,10 +1261,28 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="dgh_omchlol_ezemshih_omchlol_sanal_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
-                                    <th>Дээр дурдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ. Хэрэв хууль бусаар ухаж тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>
+                                        Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ. Хэрэв хууль бусаар ухаж тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox15', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox15', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox15 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Хэрэв хууль бусаар ухаж, тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_maltan_sudaltan_hamgaalalt" as="select" className="form-control"
@@ -1010,7 +1294,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_maltan_sudaltan_hamgaalalt" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -1023,11 +1306,29 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="dgh_maltan_sudaltan_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
-                                    <th>Хэрэв хууль бусаар ухаж, тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.</th>
                                 </tr>
 
                                 <tr>
-                                    <th rowSpan="13" scope="rowgroup" scope="row" style={{width: "30%"}}>Гэмтлийн тухай мэдээлэл.</th>
+                                    <th rowSpan="13" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Гэмтлийн тухай мэдээлэл.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox16', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox16', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox16 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Хэд хэдэн сонголт хийж болно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <div className="col-md-12">
                                             <input
@@ -1040,7 +1341,6 @@ export class DursgaltGazar extends Component {
                                             <label htmlFor="id_dgh_gemtliin_tonoson"> Тоносон</label>
                                         </div>
                                     </td>
-                                    <th rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}}>Хэд хэдэн сонголт хийж болно.</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -1207,11 +1507,29 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="dgh_gemtliin_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
-                                    <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
 
                                 <tr>
-                                    <th rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}}> Байгалийн хүчин зүйл.</th>
+                                    <th rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Байгалийн хүчин зүйл.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox17', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox17', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox17 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Хэд хэдэн сонголт хийж болно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <div className="col-md-12">
                                             <input
@@ -1224,7 +1542,6 @@ export class DursgaltGazar extends Component {
                                             <label htmlFor="id_dgh_baigaliin_huchin_zuil_nar"> Нарны нөлөөлөл</label>
                                         </div>
                                     </td>
-                                    <th rowSpan="11" scope="rowgroup" scope="row" style={{width: "30%"}}> Хэд хэдэн сонголт хийж болно.</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -1378,13 +1695,29 @@ export class DursgaltGazar extends Component {
                                         <ErrorMessage name="dgh_baigaliin_huchin_zuil_temdeglel" component="div" className="invalid-feedback"/>
 
                                     </td>
-                                    <th>
-                                        Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно
-                                    </th>
                                 </tr>
 
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Сэргээн засварласан эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Сэргээн засварласан эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox18', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox18', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox18 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_sergeen_zasvarlasan_eseh_hamgaalalt" as="select" className="form-control"
@@ -1396,7 +1729,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_sergeen_zasvarlasan_eseh_hamgaalalt" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -1409,12 +1741,28 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dgh_sergeen_zasvarlasan_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
-                                    <th>
-                                    Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.
-                                    </th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Сэргээн засварлах эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Сэргээн засварлах эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox19', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox19', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox19 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Шалтгааныг товч бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_sergeen_zasvarlah_eseh_nenshaardlaga" as="select" className="form-control"
@@ -1428,7 +1776,6 @@ export class DursgaltGazar extends Component {
                                         </Fragment>
 
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -1441,12 +1788,28 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dgh_sergeen_zasvarlah_eseh_temdeglel" component="div" className="invalid-feedback"/>                          
                                     </td>
-                                    <th>
-                                        Шалтгааныг товч бичнэ.
-                                    </th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Хамгаалалтын зэрэг өөрчлөх санал.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Хамгаалалтын зэрэг өөрчлөх санал.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox20', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox20', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox20 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Нэгийг сонгоно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_hamgaalaltiin_zereg_oorchloh_sanal" as="select" className="form-control"
@@ -1461,7 +1824,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_hamgaalaltiin_zereg_oorchloh_sanal" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -1474,10 +1836,28 @@ export class DursgaltGazar extends Component {
                                         />
                                     <ErrorMessage name="dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel" component="div" className="invalid-feedback"/>                              
                                 </td>
-                                    <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Хашаа хайстай эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Хашаа хайстай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox21', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox21', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox21 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Нэгийг сонгоно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_hashaa_baigaa_eseh_hashaa" as="select" className="form-control"
@@ -1489,7 +1869,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_hashaa_baigaa_eseh_hashaa" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -1502,10 +1881,28 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="dgh_hashaa_baigaa_eseh_temdeglel" component="div" className="invalid-feedback"/>                      
                                 </td>
-                                    <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Саравчтай эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Саравчтай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox22', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox22', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox22 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_saravchtai_eseh_saravch" as="select" className="form-control"
@@ -1517,7 +1914,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_saravchtai_eseh_saravch" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -1530,10 +1926,28 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="dgh_saravchtai_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
-                                    <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>Хаяг тайлбартай эсэх.</th>
+                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                        Хаяг тайлбартай эсэх.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox23', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox23', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox23 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Аль нэгийг сонгоно.</p>
+                                            <p>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_hayg_tailbar_eseh_hayg" as="select" className="form-control"
@@ -1545,7 +1959,6 @@ export class DursgaltGazar extends Component {
                                             <ErrorMessage name="dgh_hayg_tailbar_eseh_hayg" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Аль нэгийг сонгоно.</th>
                                 </tr>
                                 <tr>
                                 <td>
@@ -1558,14 +1971,31 @@ export class DursgaltGazar extends Component {
                                     />
                                     <ErrorMessage name="dgh_hayg_tailbar_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
-                                    <th>Дээр дэрдсан сонголтоос бусад тохиолдолд энэ хэсэгт үсгээр бичиж болно.</th>
                                 </tr>
 
 
 
 
                                 <tr>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Бусад тэмдэглэл.</th>
+                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>
+                                        Бусад тэмдэглэл.
+                                        <div
+                                            type="button"
+                                            onMouseOver={(e) => this.handleBoxOver('showBox23', e)}
+                                            onMouseLeave={(e) => this.handleBoxLeave('showBox23', e)}
+                                            className="float-right"
+                                        >
+                                        <i className="fa fa-exclamation-circle float-right">
+                                            <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                        `${this.state.showBox23 ? " d-block" : ""}`}
+                                                        role="alert"
+                                            >
+                                            <h6 className="alert-heading">Санамж!</h6>
+                                            <p>Дээр асуулгад хамрагдаагүй бусад мэдээллийг тэмдэгтээр бичнэ.</p>
+                                            </div>
+                                        </i>
+                                        </div>
+                                    </th>
                                     <td>
                                         <Field
                                             className={'form-control ' + (errors.last_busad_temdeglel ? 'is-invalid' : '')}
@@ -1576,7 +2006,6 @@ export class DursgaltGazar extends Component {
                                         />
                                         <ErrorMessage name="last_busad_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>Дээр асуулгад хамрагдаагүй бусад мэдээллийг тэмдэгтээр бичнэ.</th>
                                 </tr>
                             </thead>
                         </table>

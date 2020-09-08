@@ -1310,6 +1310,7 @@ def tuuhenOvList(request, payload):
             'aimagname': item.aimagname,
             'sumname': item.sumname,
             'burtgegch': item.burtgegch,
+            'created_at': item.created_at.strftime('%Y-%m-%d'),
         })
     total_page = total_items.num_pages
     rsp = {

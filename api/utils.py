@@ -42,3 +42,10 @@ def filter_layers(content, allowed_layers):
             )
 
     return content.encode()
+
+
+def replace_src_url(content, old_url, new_url):
+    if isinstance(content, bytes):
+        content = content.decode()
+    content = content.replace(old_url, new_url)
+    return content.encode()
