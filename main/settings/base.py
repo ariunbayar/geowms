@@ -148,6 +148,7 @@ LOGIN_REDIRECT_URL = 'bundle:all'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 9175040 #70mb
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
 MEDIA_URL = '/media/'

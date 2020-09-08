@@ -181,6 +181,7 @@ export class DanForm extends Component {
         if(icon){
             let reader = new FileReader();
             reader.onload = (upload) => {
+                console.log(upload.target.result.length)
                 this.setState({
                     [name]: btoa(upload.target.result)
                 })
@@ -366,7 +367,7 @@ export class DanForm extends Component {
                                                         style={{zIndex:'1'}}
                                             >
                                                 <h6 className="alert-heading">Санамж!</h6>
-                                                <p>".jpg" ".jpeg" болон ".png" байх ёстой</p>
+                                                <p>Зургийн хэмжээ "1MB" байна. ".jpg" ".jpeg" болон ".png" байх ёстой</p>
                                             </div>
                                         </i>
                                         </div>
@@ -386,10 +387,10 @@ export class DanForm extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_hol')}
                                             imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -400,10 +401,10 @@ export class DanForm extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_oir')}
                                             imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -435,10 +436,10 @@ export class DanForm extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_baruun')}
                                             imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -449,10 +450,10 @@ export class DanForm extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_zuun')}
                                             imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -471,10 +472,10 @@ export class DanForm extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_hoid')}
                                             imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>
@@ -485,10 +486,10 @@ export class DanForm extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_omno')}
                                             imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                     </th>

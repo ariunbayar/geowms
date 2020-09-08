@@ -505,7 +505,7 @@ export class FormTseg extends Component {
                                                         role="alert"
                                             >
                                                 <h6 className="alert-heading">Санамж!</h6>
-                                                <p>".jpeg" болон ".png" байх ёстой</p>
+                                                <p> Зургийн хэмжээ "1MB" байна. ".jpeg" болон ".png" байх ёстой</p>
                                             </div>
                                         </i>
                                         </div>
@@ -525,10 +525,10 @@ export class FormTseg extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_hol')}
                                             imgExtension={['.jepg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
@@ -548,10 +548,10 @@ export class FormTseg extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_oir')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
@@ -592,10 +592,10 @@ export class FormTseg extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_baruun')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
@@ -615,10 +615,10 @@ export class FormTseg extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_zuun')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
@@ -646,10 +646,10 @@ export class FormTseg extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_hoid')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
@@ -669,10 +669,10 @@ export class FormTseg extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'zurag_omno')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={1529173}
                                             singleImage={true}
                                             label=''
-                                            fileSizeError='Хэт их байна'
+                                            fileSizeError='Хэт их байна "1MB" зураг'
                                             fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
                                         />
                                         {
