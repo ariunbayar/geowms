@@ -11,6 +11,7 @@ export class DanForm extends Component {
         this._isMounted = false;
         this.datalist = []
         this.error_msg = []
+        this.bairlal_msg = []
         this.state = {
             values:{
                 evdersen_baidal: '',
@@ -181,7 +182,6 @@ export class DanForm extends Component {
         if(icon){
             let reader = new FileReader();
             reader.onload = (upload) => {
-                console.log(upload.target.result.length)
                 this.setState({
                     [name]: btoa(upload.target.result)
                 })
@@ -235,6 +235,19 @@ export class DanForm extends Component {
                     isValid,
                     dirty,
                 }) => {
+                    if(isSubmitting == true){
+                        if(this.state.tseg_dugaar_error == ''){
+                            this.error_msg = []
+                            this.error_msg.push(<div></div>)
+                        }
+                        if(this.state.oiroltsoo_bairlal == ''){
+                            this.bairlal_msg = []
+                            this.bairlal_msg.push(<div></div>)
+                        }
+                    }
+                    if(this.state.oiroltsoo_bairlal != ''){
+                        this.bairlal_msg = []
+                    }
                     const checkError = this.state.checkError
                     const has_error = Object.keys(errors).length > 0
                     const error_bn = Object.keys(checkError).length > 0
@@ -263,11 +276,9 @@ export class DanForm extends Component {
                                                 type="text"
                                                 id="tsegiin_dugaar"
                                                 list="tsegList"
-                                                className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
+                                                className={'form-control ' + (tseg_dugaar_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
                                                 onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
                                             />
-                                            {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
-                                            {this.error_msg}
                                             <div
                                                 type="button"
                                                 onMouseOver={(e) => this.handleBoxOver('evdersen_baidal',e)}
@@ -288,6 +299,8 @@ export class DanForm extends Component {
                                                 </i>
                                             </span>
                                             </div>
+                                            {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
+                                            {this.error_msg}
                                         </div>
                                     </td>
                                 </tr>
@@ -299,11 +312,12 @@ export class DanForm extends Component {
                                             name="oiroltsoo_bairlal"
                                             type="text"
                                             id="oiroltsoo_bairlal"
-                                            className={'form-control' + (bairlal_error ? ' is-invalid' : '')}
+                                            className={'form-control' + (bairlal_error || this.bairlal_msg.length > 0 ? ' is-invalid' : '')}
                                             onChange = {(e) => this.handleInput('oiroltsoo_bairlal', e)}
                                             value = {oiroltsoo_bairlal}
                                         />
                                         {bairlal_error ? <div className="invalid-feedback">Хоосон байна.</div> : null}
+                                        {this.bairlal_msg}
                                     </td>
                                 </tr>
                                 <tr>
