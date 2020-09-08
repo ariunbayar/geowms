@@ -1,5 +1,5 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../service'
-         
+
 
 const prefix = '/profile/api/tseg-ustsan'
 

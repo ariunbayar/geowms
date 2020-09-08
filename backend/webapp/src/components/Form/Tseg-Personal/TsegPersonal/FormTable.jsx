@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../../Modal"
+import Modal from "../../../Modal"
 
 export default class FormTable extends Component {
 
@@ -51,11 +51,10 @@ export default class FormTable extends Component {
                 <th>{pid}</th>
                 <th>{point_class}</th>
                 <th>{point_type}</th>
-                <th>{center_typ}</th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 <th>
-                    <NavLink to={`/back/froms/tseg-personal/${id}/засах/`}>
+                    <NavLink to={`/back/froms/tseg-info/tsegpersonal/tseg-personal/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>
@@ -73,14 +72,14 @@ export default class FormTable extends Component {
                     }
                 </th>
                 <th>
-                    <button className="btn gp-btn-primary" onClick={this.handleModalSuccessOpen}>
+                    <button className="btn gp-btn-primary m-1" onClick={this.handleModalSuccessOpen}>
                         Баталгаажуулах
                     </button>
                     {this.state.is_modal_success_open &&
                         <Modal
                             modalClose={this.handleModalSuccessClose}
                             modalAction={this.props.handleSuccess}
-                            text={`Та "${point_type}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
+                            text={`Та "${point_name }" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
                             title="Баталгаажуулах"
                             actionName="Баталгаажуул"
                         />

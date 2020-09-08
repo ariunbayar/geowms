@@ -115,6 +115,7 @@ urlpatterns = [
 
     path('tuuhen_ov/', include(([
         path('', forms_views.all, name='all'),
+        path('list/', forms_views.tuuhenOvList, name='list'),
         path('about/', forms_views.about, name='about'),
         path('update/', forms_views.update, name='update'),
         path('remove/', forms_views.remove, name='remove'),
@@ -128,8 +129,8 @@ urlpatterns = [
         path('tseg-personal/list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
         path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
-        path('tseg-ustsan_all/', forms_views.tsegUstsanAll, name='tseg-ustsan_all'),
         path('tseg-ustsan-success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
+        path('tseg-ustsan-list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
         path('tseg-ustsan-remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
         path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
         path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),

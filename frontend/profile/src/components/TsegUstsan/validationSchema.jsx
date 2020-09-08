@@ -1,10 +1,6 @@
 import * as Yup from 'yup'
 
 export const validationSchemaDan = Yup.object().shape({
-    oiroltsoo_bairlal: Yup.string()
-        .min(2, 'Хэт богионо байна!')
-        .max(50, 'Хэт урт байна!')
-        .required('Ойролцоо цэгийн байрлал хоосон байна!'),
     evdersen_baidal: Yup.string()
         .required('Ойролцоо цэгийн байрлал хоосон байна!'),
     nohtsol_baidal: Yup.string()
@@ -34,8 +30,7 @@ export const validationSchemaAdmin = Yup.object().shape({
         .required('Утас бичээгүй байна!'),
     oiroltsoo_bairlal: Yup.string()
         .min(2, 'Хэт богионо байна!')
-        .max(50, 'Хэт урт байна!')
-        .required('Ойролцоо цэгийн байрлал хоосон байна!'),
+        .max(50, 'Хэт урт байна!'),
     evdersen_baidal: Yup.string()
         .required('Ойролцоо цэгийн байрлал хоосон байна!'),
     nohtsol_baidal: Yup.string()

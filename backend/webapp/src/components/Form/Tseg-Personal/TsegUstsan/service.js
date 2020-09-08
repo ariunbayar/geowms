@@ -1,4 +1,4 @@
-import {handleResponse, getPostOptions, getGetOptions} from '../../../helpers/service'
+import {handleResponse, getPostOptions, getGetOptions} from '../../../../helpers/service'
 
 const prefix = '/back/tuuhen_ov'
 
@@ -7,8 +7,8 @@ export const service = {
     searchTseg,
     tsegUstsan,
     tseg_success,
-    tsegUstsanAll,
     tseg_remove,
+    paginatedList
 }
 
 function tsegustsanEdit(id) {
@@ -35,13 +35,6 @@ function tsegUstsan(form_datas) {
     return fetch(`${prefix}/tseg-ustsan/`, opts).then(handleResponse)
 }
 
-function tsegUstsanAll(id) {
-    const opts = {
-        ...getGetOptions(id),
-    }
-    return fetch(`${prefix}/tseg-ustsan_all/`, opts).then(handleResponse)
-}
-
 function tseg_success(id) {
     const opts = {
         ...getPostOptions(),
@@ -56,4 +49,12 @@ function tseg_remove(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/tseg-ustsan-remove/`, opts).then(handleResponse)
+}
+
+function paginatedList(page,perpage,query) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({page,perpage,query}),
+    }
+    return fetch(`${prefix}/tseg-ustsan-list/`, opts).then(handleResponse)
 }

@@ -23,17 +23,17 @@ export class App extends Component {
                                     </li>
                                     <li className="nav-item m-1 pb-1">
                                         <NavLink  to={'/gov/'} activeClassName="active">
-                                        <i className="fas fa-users text-primary" ></i>&nbsp;ХЭРЭГЛЭГЧ
+                                        <i className="fa fa-users text-primary" ></i>&nbsp;ХЭРЭГЛЭГЧ
                                         </NavLink>
                                     </li>
                                     <li className="nav-item m-1">
                                         <NavLink  to={'/gov/system/'} activeClassName="active">
-                                        <i className='fas fa-university text-primary'></i>&nbsp;СИСТЕМ
+                                        <i className='fa fa-university text-primary'></i>&nbsp;СИСТЕМ
                                         </NavLink>
                                     </li>
                                     <li className="nav-item m-1">
                                         <NavLink  to={'/gov/tuuhen-ov/'} activeClassName="active">
-                                        <i className='fas fa-university text-primary'></i>&nbsp;Түүхэн өв бүртгэлийн хүсэлт
+                                            <i className='fa fa-history  text-primary'></i>&nbsp;Түүхэн өв бүртгэл
                                         </NavLink>
                                     </li>
                                 </ul>
