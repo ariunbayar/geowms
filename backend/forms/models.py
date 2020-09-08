@@ -165,6 +165,7 @@ class Mpoint(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
+    ondor = models.IntegerField()
     point_name = models.CharField(max_length=50)
     pid = models.CharField(max_length=20)
     point_class = models.BigIntegerField()

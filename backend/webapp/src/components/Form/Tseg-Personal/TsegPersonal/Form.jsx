@@ -23,6 +23,7 @@ export class Forms extends Component {
                 alban_tushaal: '',
                 alban_baiguullga: '',
                 center_typ: '',
+                ondor: '',
                 pid: '',
             },
             BA:0,
@@ -133,7 +134,6 @@ export class Forms extends Component {
         {
             if(re.test(file['name']) )
             {
-                
                 this.setState({[name+'_error']: false, [name]: file })
             }
             else{
@@ -147,7 +147,7 @@ export class Forms extends Component {
     handleSubmit(values, { setStatus, setSubmitting }) {
         setStatus('checking')
         setSubmitting(true)
-        const form_datas = new FormData() 
+        const form_datas = new FormData()
         this.setState({values})
         const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
@@ -157,6 +157,7 @@ export class Forms extends Component {
         form_datas.append('trapetsiin_dugaar', trapetsiin_dugaar)
         form_datas.append('toviin_dugaar', this.state.values.toviin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
+        form_datas.append('ondor', this.state.values.ondor)
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
@@ -212,15 +213,16 @@ export class Forms extends Component {
 
     tsegUpdate(id){
         service.updateTseg(id).then(({tseg_display}) =>{
-            if(tseg_display){                
+            if(tseg_display){
                 tseg_display.map((item, idx) =>
-                    this.setState({ 
+                    this.setState({
                         values : {
                             ...this.state.values,
                             tesgiin_ner: item.point_name,
                             pid: item.pid,
                             toviin_dugaar: item.point_id,
                             center_typ: item.center_typ,
+                            ondor: item.ondor,
                             suljeenii_torol: item.point_type,
                             utmx: item.utmx,
                             utmy: item.utmy,
@@ -237,7 +239,7 @@ export class Forms extends Component {
                         BA:item.BA,
                         BB:item.BB,
                         BC:item.BC,
-                        latlongx: item.latlongx,    
+                        latlongx: item.latlongx,
                         latlongy: item.latlongy,
                         sum_name: item.sum,
                         aimag_name: item.aimag,
@@ -245,13 +247,10 @@ export class Forms extends Component {
                         barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
-                
                         bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
                         bairshil_tseg_holoos_img_url_zurag: item.bairshil_tseg_holoos_img_url,
-            
                         file_path11: item.file_path1,
                         file_path22: item.file_path2,
-                        
                     })
                 )
             }
@@ -324,9 +323,9 @@ export class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th style={{width: "5%"}} scope="row">3</th>
-                                    <th>Трапецийн дугаар(1:100000)</th>
-                                    <td>
+                                    <th rowSpan="2" style={{width: "5%"}} scope="row">3</th>
+                                    <th rowSpan="2">Трапецийн дугаар(1:100000)</th>
+                                    <td rowSpan="2">
                                         <input
                                             className={'form-control ' + (errors.trapetsiin_dugaar ? 'is-invalid' : '')}
                                             name='trapetsiin_dugaar'
@@ -336,15 +335,13 @@ export class Forms extends Component {
                                             value={this.state.trapetsiin_dugaar }
                                             value={`${this.state.trapetsiin_dugaar}` + '- ' + `${this.state.zone}` + ' -' + `${this.state.cc}`}
                                         />
-                                       
                                     </td>
-                                    <th style={{width: "5%"}} scope="row">4</th>
+                                    <th style={{width: "5%"}} scope="row" rowSpan="2">4</th>
                                     <th>Сүлжээний төрөл</th>
                                     <td>
                                         <Fragment>
                                             <Field name="suljeenii_torol" as="select" className="form-control"
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
-                                                
                                                 <option>...</option>
                                                 <option value="1">GPS-ийн сүлжээ</option>
                                                 <option value="2">Гравиметрийн сүлжээ</option>
@@ -355,6 +352,22 @@ export class Forms extends Component {
                                                 <option value="7">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
+                                        </Fragment>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Зэрэг</th>
+                                    <td>
+                                        <Fragment>
+                                            <Field name="center_typ" as="select" className="form-control"
+                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                <option>...</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                            </Field>
+                                            <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
                                 </tr>
@@ -370,7 +383,7 @@ export class Forms extends Component {
                                             disabled={true}
                                             type="text"
                                             value={this.state.aimag_name}
-                                        />      
+                                        />
 
                                     </td>
                                     <th>Сум</th>
@@ -452,12 +465,12 @@ export class Forms extends Component {
                                     <th colSpan="2" scope="rowgroup">Өндөр</th>
                                     <th colSpan="4" scope="rowgroup">
                                         <Field
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}
-                                            name='center_typ'
-                                            id="id_center_typ"
+                                            className={'form-control ' + (errors.ondor ? 'is-invalid' : '')}
+                                            name='ondor'
+                                            id="id_ondor"
                                             type="text"
                                         />
-                                        <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="ondor" component="div" className="invalid-feedback"/>
                                     </th>
                                 </tr>
                                 <tr>
@@ -467,6 +480,7 @@ export class Forms extends Component {
                                             type="button"
                                             onMouseOver={(e) => this.handleBoxOver(e)}
                                             onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                            style={{backgroundColor:"white"}}
                                             className="float-right"
                                         >
                                         <i className="fa fa-exclamation-circle float-right">
@@ -491,8 +505,6 @@ export class Forms extends Component {
                                 </tr>
                                 <tr>
                                     <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
-                                        
-
                                     <div className="form-group">
                                         <ImageUploader
                                             withPreview={true}
@@ -500,7 +512,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'tseg_oiroos_img_url')}
                                             imgExtension={['.jpeg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={500000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -519,7 +531,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'tseg_holoos_img_url')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={500000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -561,7 +573,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'bairshil_tseg_oiroos_img_url')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={500000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -578,7 +590,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'bairshil_tseg_holoos_img_url')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={5242880}
+                                            maxFileSize={500000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -595,7 +607,6 @@ export class Forms extends Component {
                                         <Fragment>
                                             <Field name="sudalga_or_shine" as="select" className="form-control"
                                             className={'form-control ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
-                                                
                                                 <option>...</option>
                                                 <option>Сэргээсэн</option>
                                                 <option>Шинээр суулгасан</option>
@@ -642,7 +653,7 @@ export class Forms extends Component {
                                             disabled={values.suljeenii_torol == '1' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                         />
-                                        {this.state.file_path1_error > 0 ? 
+                                        {this.state.file_path1_error > 0 ?
                                         <ul className="text-danger">
                                             <li>XXXXDDDS.YYo</li>
                                             <li>XXXX – Хэмжсэн цэгийн нэр</li>
@@ -666,7 +677,7 @@ export class Forms extends Component {
                                             disabled={values.suljeenii_torol == '1' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                         />
-                                        {this.state.file_path2_error > 0 ? 
+                                        {this.state.file_path2_error > 0 ?
                                         <ul className="text-danger">
                                             <li>XXXXDDDS.YYo</li>
                                             <li>XXXX – Хэмжсэн цэгийн нэр</li>
@@ -718,7 +729,6 @@ export class Forms extends Component {
                                         <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
-                            
                             </tbody>
                         </table>
                         <div className="span3">
