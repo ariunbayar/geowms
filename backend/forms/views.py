@@ -553,7 +553,6 @@ def findSum(request, payload):
     cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
     geom = cursor.fetchone()
     if(geom):
-            
         zoneout=int(L)/6+31
         instr = ("+proj=longlat +datum=WGS84 +no_defs")
         outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
@@ -1295,6 +1294,7 @@ def tuuhenOvList(request, payload):
             'aimagname': item.aimagname,
             'sumname': item.sumname,
             'burtgegch': item.burtgegch,
+            'created_at': item.created_at.strftime('%Y-%m-%d'),
         })
     total_page = total_items.num_pages
     rsp = {
