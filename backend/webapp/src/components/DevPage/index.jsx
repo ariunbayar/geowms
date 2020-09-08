@@ -19,7 +19,7 @@ class LinkExternal extends Component {
 export class DevPage extends Component {
   render() {
     return (
-      <div className="container my-4">
+      <div className="container my-4 shadow-lg">
         <div className="row">
           <div className="col-md-12">
             <h1>Libraries</h1>

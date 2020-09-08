@@ -97,15 +97,15 @@ export class CrudEvenLog extends Component {
                                     { crud_length === 0 ?
                                     <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
                                     crud_event_display.map((logout, idx) =>
-                                        <CrudEvenLogTable 
-                                            key = {idx} 
-                                            idx = {(currentPage*crudPerPage)-crudPerPage+idx+1} 
+                                        <CrudEvenLogTable
+                                            key = {idx}
+                                            idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
                                             values={logout}>
                                         </CrudEvenLogTable>
                                     )}
                                 </tbody>
                             </table>
-                            <Pagination 
+                            <Pagination
                                 paginate = {this.paginate}
                                 searchQuery = {this.state.searchQuery}
                             />
