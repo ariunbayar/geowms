@@ -229,6 +229,8 @@ export default class Forms extends Component {
                         BA:item.BA,
                         BB:item.BB,
                         BC:item.BC,
+                        zone:item.zone,
+                        cc:item.cc,
                         latlongx: item.latlongx,
                         latlongy: item.latlongy,
                         sum_name: item.sum,
