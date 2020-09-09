@@ -500,7 +500,7 @@ def tsegPersonalRemove(request, payload):
     if class_type.t_type == 'g108':
         data = Mpoint8.objects.using('postgis_db').filter(id=pk).first()
     if data:
-        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, point_class_name='Устсан төлөв', pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ,aimag=data.aimag, sum=data.sum, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,ondor=data.ondor)
+        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, point_class_name='Устсан төлөв', pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ,aimag=data.aimag, sum=data.sum, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,ondor=data.ondor, t_type='g109')
         if mpoint9:
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint9.id)])
@@ -663,8 +663,12 @@ def tsegPersonal(request):
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
         ondor = int(request.POST.get('ondor'))
-        point_class = int(request.POST.get('point_class'))
-        if point_class == 1:
+        mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+        if request.POST.get('suljeenii_torol'):
+            point_class = int(request.POST.get('suljeenii_torol'))
+        else:
+            point_class = 0
+        if mpoints.t_type == 'g101':
             Mpoint1.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -679,7 +683,7 @@ def tsegPersonal(request):
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint1 SET geom = %s WHERE id = %s ''', [geom, pk])
 
-        if point_class == 2:
+        if mpoints.t_type == 'g102':
             Mpoint2.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -693,7 +697,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint2 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 3:
+        if mpoints.t_type == 'g103':
             Mpoint3.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -707,7 +711,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint3 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 4:
+        if mpoints.t_type == 'g104':
             Mpoint4.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -721,7 +725,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 5:
+        if mpoints.t_type == 'g105':
             Mpoint5.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -735,7 +739,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint5 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 6:
+        if mpoints.t_type == 'g106':
             Mpoint6.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -749,7 +753,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint6 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 7:
+        if mpoints.t_type == 'g107':
             Mpoint7.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -763,7 +767,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint7 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 8:
+        if mpoints.t_type == 'g108':
             Mpoint8.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
@@ -777,7 +781,7 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 9:
+        if mpoints.t_type == 'g109':
             Mpoint9.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
