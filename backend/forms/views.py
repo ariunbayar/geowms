@@ -1061,28 +1061,27 @@ def tsegUstsanSuccess(request, payload):
                     img_zuun = tseg_ustsan.img_zuun.url if tseg_ustsan.img_zuun else '',
                     img_hoino = tseg_ustsan.img_hoino.url if tseg_ustsan.img_hoino else '',
                     img_omno = tseg_ustsan.img_omno.url if tseg_ustsan.img_omno else '',
-
             )
     class_type = Mpoint_view.objects.using('postgis_db').filter(id=mpoint.id).first()
     data = None
-    if class_type.point_class == 1:
+    if class_type.t_type == 'g101':
         data = Mpoint1.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 2:
+    if class_type.t_type == 'g102':
         data = Mpoint2.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 3:
+    if class_type.t_type == 'g103':
         data = Mpoint3.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 4:
+    if class_type.t_type == 'g104':
         data = Mpoint4.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 5:
+    if class_type.t_type == 'g105':
         data = Mpoint5.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 6:
+    if class_type.t_type == 'g106':
         data = Mpoint6.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 7:
+    if class_type.t_type == 'g107':
         data = Mpoint7.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 8:
+    if class_type.t_type == 'g108':
         data = Mpoint8.objects.using('postgis_db').filter(id=mpoint.id).first()
     if data:
-        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g109')
         if mpoint9:
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint9.id)])
