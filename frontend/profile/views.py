@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from backend.payment.models import Payment
 from geoportal_app.models import User
-from backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint1
+from backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -70,8 +70,8 @@ def tsegSearch(request, payload):
     query = payload.get('query')
     items = []
     names = []
-    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
-    if(mpoint):
+    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
+    if mpoint:
         for tseg in mpoint:
             items.append({
                 "tseg": tseg.point_id
@@ -99,7 +99,7 @@ def tsegSearch(request, payload):
 def tsegAdd(request):
     tseg_dugaar = request.POST.get('tsegiin_dugaar')
 
-    mpoint = Mpoint.objects.using('postgis_db').filter(point_id__icontains=tseg_dugaar).first()
+    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=tseg_dugaar).first()
     if mpoint.point_id != tseg_dugaar:
         return JsonResponse({'success': False})
 
