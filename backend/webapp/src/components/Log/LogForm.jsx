@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {LogFormTable} from './LogFormTable'
 import {service} from './service'
-import { Pagination } from "../pagination/pagination"
+import { Pagination } from "../../../../../src/components/Pagination/index"
 
 export class LogForm extends Component {
 
