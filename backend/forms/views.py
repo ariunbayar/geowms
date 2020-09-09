@@ -574,71 +574,93 @@ def tsegPersonalUpdate(request, payload):
         'zone': data.sheet2 if sheet2 else '',
         'cc': data.sheet3 if sheet3 else '',
         't_type': data.t_type if data.t_type else '',
-        'ondor': data.ondor if data.ondor else 0,
+        'ondor': data.ondor if data.ondor else '',
     })
     rsp = {
         'tseg_display': tseg_display,
     }
     return JsonResponse(rsp)
 
+class UnAcceptedValueError(Exception):
+    def __init__(self, data):
+        self.data = data
+    def __str__(self):
+        return repr(self.data)
 
 @require_POST
 @ajax_required
 def findSum(request, payload):
-    info = []
-    L = payload.get("y")
-    B = payload.get("x")
-    cursor = connections['postgis_db'].cursor()
-    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
-    geom = cursor.fetchone()
-    if(geom):
-        zoneout=int(L)/6+31
-        instr = ("+proj=longlat +datum=WGS84 +no_defs")
-        outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-        inproj = pyproj.Proj(instr)
-        outproj = pyproj.Proj(outstr)
-        val= pyproj.transform(inproj, outproj, L,B)
-        Brange=[40,44,48,52,56]
-        Letter=['K','L','M','N','O']
-        for k in Brange:
-            if k>B:
-                ind=Brange.index(k)
-                B0=Letter[ind-1]
-                Bmin=Brange[ind-1]
-                break
-            else:
-                B0 = "aldaa"
-        zone=int(L/6)+31
-        Lmin=(zone-30)*6-6
-        c=0
-        while Lmin<L:
-            Lmin=Lmin+0.5
-            c=c+1
-        cc=0
-        while Bmin<B:
-            Bmin=Bmin+1/3
-            cc=cc+1
-        cc = (12-cc)*12+c
-        LA = int(L)
-        LB = int((L-LA)*60)
-        LC = float("{:.6f}".format((L-LA-LB/60)*3600 ))
-        BA = int(B)
-        BB = int((B-BA)*60)
-        BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
-        info.append({
-            'aimag': geom[0],
-            'sum': geom[1],
-            "vseg": B0,
-            'zone': zone,
-            'cc': cc,
-            'BA': BA,
-            'BB': BB,
-            'BC': BC,
-            'LA': LA,
-            'LB': LB,
-            'LC': LC
-        })
-        return JsonResponse({"info":info})
+    try:
+        info = []
+        L = payload.get("y")
+        B = payload.get("x")
+        cursor = connections['postgis_db'].cursor()
+        cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
+        geom = cursor.fetchone()
+        if(geom):
+            zoneout=int(L)/6+31
+            instr = ("+proj=longlat +datum=WGS84 +no_defs")
+            outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+            inproj = pyproj.Proj(instr)
+            outproj = pyproj.Proj(outstr)
+            val = pyproj.transform(inproj, outproj, L,B)
+            Brange=[40,44,48,52,56]
+            Letter=['K','L','M','N','O']
+            for k in Brange:
+                if k>B:
+                    ind=Brange.index(k)
+                    B0=Letter[ind-1]
+                    Bmin=Brange[ind-1]
+                    break
+                else:
+                    B0 = "aldaa"
+            zone=int(L/6)+31
+            Lmin=(zone-30)*6-6
+            c=0
+            while Lmin<L:
+                Lmin=Lmin+0.5
+                c=c+1
+            cc=0
+            while Bmin<B:
+                Bmin=Bmin+1/3
+                cc=cc+1
+            cc = (12-cc)*12+c
+            LA = int(L)
+            LB = int((L-LA)*60)
+            LC = float((L-LA-LB/60)*3600 )
+            BA = int(B)
+            BB = int((B-BA)*60)
+            BC = float((B-BA-BB/60)*3600 )
+            info.append({
+                'aimag': geom[0],
+                'sum': geom[1],
+                "vseg": B0,
+                'zone': zone,
+                'cc': cc,
+                'BA': BA,
+                'BB': BB,
+                'BC': BC,
+                'LA': LA,
+                'LB': LB,
+                'LC': LC
+            })
+            rsp = {
+                'success': True,
+                'info': info
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Уучлаарай энэ цэгт мэдээлэл олдсонгүй",
+            }
+            return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
 
 
 @require_POST
@@ -662,7 +684,7 @@ def tsegPersonal(request):
         cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        ondor = int(request.POST.get('ondor'))
+        ondor = request.POST.get('ondor')
         mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
         if request.POST.get('suljeenii_torol'):
             point_class = int(request.POST.get('suljeenii_torol'))
@@ -877,7 +899,7 @@ def tsegPersonal(request):
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        ondor = int(request.POST.get('ondor'))
+        ondor = request.POST.get('ondor')
         mpoint = Mpoint8.objects.using('postgis_db').create(
                     id=unique_id,
                     objectid='null', point_id=point_id,
