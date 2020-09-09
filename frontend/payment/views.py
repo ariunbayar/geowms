@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
@@ -55,21 +56,22 @@ def dictionaryResponse(request):
 @require_POST
 @ajax_required
 def purchaseDraw(request, payload):
-    user = get_object_or_404(User, pk=request.user.id)
+
+    user = get_object_or_404(get_user_model(), pk=request.user.id)
     price = payload.get('price')
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
     count = Payment.objects.all().count()
-    payment = Payment.objects.create(geo_unique_number=count, 
-                                        amount=price, 
-                                        description=description, 
-                                        user=user, 
-                                        is_success=False, 
-                                        coodrinatLeftTopX=coodrinatLeftTop[0], 
-                                        coodrinatLeftTopY=coodrinatLeftTop[1], 
+    payment = Payment.objects.create(geo_unique_number=count,
+                                        amount=price,
+                                        description=description,
+                                        user=user,
+                                        is_success=False,
+                                        coodrinatLeftTopX=coodrinatLeftTop[0],
+                                        coodrinatLeftTopY=coodrinatLeftTop[1],
                                         coodrinatRightBottomX=coodrinatRightBottom[0],
-                                        coodrinatRightBottomY=coodrinatRightBottom[1] 
+                                        coodrinatRightBottomY=coodrinatRightBottom[1],
                                     )
 
     return JsonResponse({'payment_id': payment.id})
