@@ -1,6 +1,6 @@
 from io import BytesIO
 import base64
-import PIL
+from PIL import Image
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -14,6 +14,6 @@ def resize_b64_to_sizes(src_b64, sizes):
         image.save(dst, format='PNG')
         return dst
 
-    image = PIL.Image.open(src_io)
+    image = Image.open(src_io)
 
     return map(lambda size: _resize(image, size).getvalue(), sizes)
