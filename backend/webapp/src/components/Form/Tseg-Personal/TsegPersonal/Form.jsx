@@ -467,7 +467,7 @@ export class Forms extends Component {
                                             className={'form-control ' + (errors.ondor ? 'is-invalid' : '')}
                                             name='ondor'
                                             id="id_ondor"
-                                            type="text"
+                                            type="number"
                                         />
                                         <ErrorMessage name="ondor" component="div" className="invalid-feedback"/>
                                     </th>
