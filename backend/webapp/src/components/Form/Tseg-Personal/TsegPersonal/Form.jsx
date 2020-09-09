@@ -511,7 +511,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'tseg_oiroos_img_url')}
                                             imgExtension={['.jpeg', '.png']}
-                                            maxFileSize={500000}
+                                            maxFileSize={2250000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -530,7 +530,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'tseg_holoos_img_url')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={500000}
+                                            maxFileSize={2250000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -572,7 +572,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'bairshil_tseg_oiroos_img_url')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={500000}
+                                            maxFileSize={2250000}
                                             singleImage={true}
                                             label=''
                                         />
@@ -589,7 +589,7 @@ export class Forms extends Component {
                                             buttonText='Зураг оруулах'
                                             onChange={(e) =>this.onDrop(e, 'bairshil_tseg_holoos_img_url')}
                                             imgExtension={['.jpg', '.png']}
-                                            maxFileSize={500000}
+                                            maxFileSize={2250000}
                                             singleImage={true}
                                             label=''
                                         />
