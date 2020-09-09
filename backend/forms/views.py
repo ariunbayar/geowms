@@ -1092,7 +1092,7 @@ def tsegUstsanList(request, payload):
     per_page = payload.get('perpage')
     query = payload.get('query')
     display_items = []
-    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query)
+    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by('id')
 
     total_items = Paginator(tsegs, per_page)
     items_page = total_items.page(page)
