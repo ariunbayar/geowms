@@ -20,7 +20,7 @@ export class Жагсаалт extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-            }     
+            }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
     }
@@ -52,9 +52,9 @@ export class Жагсаалт extends Component {
     render() {
         const { user_list, user_length } = this.state
         return (
-            <div className="container shadow-lg p-3 mb-5 bg-white rounded">
+            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="row">
-                    <div className="col-md-4  mb-1" >                 
+                    <div className="col-md-4  mb-1">
                         <input
                             type="text"
                             className="form-control"

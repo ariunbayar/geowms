@@ -30,10 +30,10 @@ export class Access extends Component {
     render() {
 
         return (
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
-                <div className="row container">
-                    <div className="col-md-12">
-                        <ul className="list-group list-group-horizontal col-md-12">
+            <div className="container my-4 shadow-lg mb-5 bg-white rounded">
+                <div className="row">
+                    <div className="col-md-12 px-0">
+                        <ul className="list-group list-group-horizontal col-md-12 pr-0">
                             <NavLink to="/back/access/login/" className="list-group-item col-md-4" activeClassName="text-white gp-bg-primary">
                                 Хэрэглэгчийн оролт гаралтын тэмдэглэл
                             </NavLink>

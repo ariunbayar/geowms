@@ -22,7 +22,6 @@ export class LoginLog extends Component {
     }
 
     paginate (page, query) {
-       
         const perpage = this.state.loginPerPage
         this.setState({ currentPage: page })
             return service
@@ -51,14 +50,14 @@ export class LoginLog extends Component {
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
-                    <div className="row rounded container">
+                    <div className="rounded container">
                         <div className="col-md-6">
                             <h5 className="mb-3">Хандалтын тоогоор</h5>
                             <Charts></Charts>
                         </div>
                     </div>
                     <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-12 ">
                             <hr />
                         </div>
                     </div>
@@ -75,7 +74,7 @@ export class LoginLog extends Component {
                             />
                         </div>
                     </div>
-                    <div className="row rounded">
+                    <div className="row rounded p-0">
                         <div className="col-md-12">
                             <table className="table example" id="example">
                                     <thead>
@@ -92,16 +91,16 @@ export class LoginLog extends Component {
                                         { login_length === 0 ?
                                         <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:
                                         login_log_all.map((login, idx) =>
-                                        
+
                                             <LoginLogTable
-                                                key = {idx} 
-                                                idx = {(currentPage*loginPerPage)-loginPerPage+idx+1} 
+                                                key = {idx}
+                                                idx = {(currentPage*loginPerPage)-loginPerPage+idx+1}
                                                 values={login}>
                                             </LoginLogTable>
                                         )}
                                     </tbody>
                             </table>
-                            <Pagination 
+                            <Pagination
                                 paginate = {this.paginate}
                                 searchQuery = {this.state.searchQuery}
                             />

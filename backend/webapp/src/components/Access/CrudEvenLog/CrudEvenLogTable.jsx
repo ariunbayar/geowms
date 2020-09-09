@@ -20,13 +20,13 @@ export class CrudEvenLogTable extends Component {
                 <td>{event_type==1 ? 'Create' : event_type==2 ? 'Update' : event_type==3 ? 'Delete' : event_type==4 ? 'Many-to-Many Change' : 'Reverse Many-to-Many Change'}</td>
                 <td>{object_id}</td>
                 <td>
-                    {user_id ? 
+                    {user_id ?
                     <NavLink to={`/back/user/${user_id}/дэлгэрэнгүй/`}>
                         <strong>{username}</strong>
                     </NavLink>:
                     <a>{username}</a>
                     }
-                
+
                 </td>
                 <td>{datetime}</td>
 
