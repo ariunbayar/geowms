@@ -14,8 +14,8 @@ export class HuulgaForm extends Component {
         return (
             <div className="main-content">
                 <div className="container page-container my-4">
-                    <h5 className="mb-3">Гүйлгээний хуулга</h5>
                     <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer shadow-lg p-3 mb-5 bg-white rounded">
+                    <h5 className="mb-3">Гүйлгээний хуулга</h5>
                     <table className="table example" id="example">
                         <thead>
                             <tr>
