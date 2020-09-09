@@ -31,7 +31,7 @@ DATABASES = {
     }
 }
 
-XYP_DAN = {
+SSO_GOV_MN = {
     'ENDPOINTS': {
         'LOGIN': 'https://<domain>/api/login/?',
         'AUTHORIZE': 'https://<domain>/api/auth/?',
