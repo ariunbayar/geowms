@@ -17,8 +17,9 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
-import {Modal} from './controls/Modal'
+import {Modal} from './ShopControls/Modal'
 import {DrawPayModal} from './controls/DrawPayModal'
+import {ShopCart} from './ShopControls/ShopCart'
 import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
@@ -50,6 +51,7 @@ export default class BundleMap extends Component {
             modal: new Modal(),
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
+            cart: new ShopCart(),
         }
 
         this.marker = this.initMarker()
@@ -225,6 +227,7 @@ export default class BundleMap extends Component {
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
+                this.controls.cart,
             ]),
             layers: [
                 ...base_layers,
@@ -260,7 +263,7 @@ export default class BundleMap extends Component {
         this.setState({coordinate_clicked})
 
         this.showFeaturesAt(event.coordinate)
-
+        this.controls.cart.showModal(coordinate_clicked, true)
     }
 
     showFeaturesAt(coordinate) {
@@ -288,7 +291,6 @@ export default class BundleMap extends Component {
                 if (url) {
 
                     this.controls.modal.showModal(null, false)
-
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
@@ -307,7 +309,7 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            this.controls.modal.showModal(feature_info, true)
+                            this.controls.modal.showModal(feature_info, true, this.state.coordinate_clicked)
                         })
                 } else {
                     /* TODO */

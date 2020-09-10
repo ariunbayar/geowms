@@ -56,7 +56,7 @@ def dictionaryResponse(request):
 @require_POST
 @ajax_required
 def purchaseDraw(request, payload):
-
+    print("purchase DARAW")
     user = get_object_or_404(get_user_model(), pk=request.user.id)
     price = payload.get('price')
     description = payload.get('description')
@@ -75,3 +75,17 @@ def purchaseDraw(request, payload):
                                     )
 
     return JsonResponse({'payment_id': payment.id})
+
+
+@require_POST
+@ajax_required
+def purchaseFromCart(request, payload):
+
+    print("hello fRom view")
+    datas = payload.get('data')
+    print(datas)
+
+    rsp={
+        'success': True
+    }
+    return JsonResponse(rsp)

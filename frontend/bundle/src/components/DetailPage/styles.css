@@ -179,3 +179,40 @@ element.style {
     color: white;
     line-height: unset;
 }
+
+
+.root{
+    padding-top: 50px;
+    padding-right: 30px;
+    padding-bottom: 50px;
+    padding-left: 80px;
+}
+
+.gp-button-primary{
+    margin-top: 40px;
+    background-color: aqua;
+}
+
+.cart-size{
+    font-size: 24px;
+    color: aqua;
+}
+
+.cart-count{
+    color: aqua;
+    margin-top: -40px;
+    margin-left: 15px;
+}
+
+.cart-count-span{
+    padding: 5px;
+    background-color: rgb(136, 81, 189);
+    border-radius: 25px;
+}
+
+.cart-list{
+}
+
+.cart{
+    z-index: 1;
+}

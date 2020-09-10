@@ -2,7 +2,8 @@ export const service = {
     loadWMSLayers,
     loadBaseLayers,
     payment,
-    paymentDraw
+    paymentDraw,
+    purchaseFromCart
 }
 
 function getCookie(name) {
@@ -79,9 +80,20 @@ function payment(price, description, data_id) {
 }
 
 function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom) {
+    alert("servoce")
     const requestOptions = {
         ..._getPostOptions(),
         body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
     }
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
+}
+
+function purchaseFromCart(data){
+    var level = 1
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({level})
+    }
+    console.log("service", data)
+    return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
 }
