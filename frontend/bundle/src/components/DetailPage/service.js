@@ -2,7 +2,10 @@ export const service = {
     loadWMSLayers,
     loadBaseLayers,
     payment,
-    paymentDraw
+    paymentDraw,
+    searchPoint,
+    getAimags,
+    getSum
 }
 
 function getCookie(name) {
@@ -84,4 +87,27 @@ function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom)
         body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
     }
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
+}
+
+function searchPoint(point_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({point_id})
+    }
+    return fetch('/back/tuuhen_ov/tseg-personal/find-point/', requestOptions).then(handleResponse)
+}
+
+function getAimags() {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch('/api/aimag/', requestOptions).then(handleResponse)
+}
+
+function getSum(aimag_name) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({aimag_name})
+    }
+    return fetch('/api/sum/', requestOptions).then(handleResponse)
 }

@@ -123,6 +123,7 @@ urlpatterns = [
         path('huree-count/', forms_views.hureeCountEdit, name='huree-count'),
         path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
         path('tseg-personal/findSum/', forms_views.findSum, name='findSum'),
+        path('tseg-personal/find-point/', forms_views.findPoints, name='find-point'),
         path('tseg-personal/batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
         path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
         path('tseg-personal/search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
