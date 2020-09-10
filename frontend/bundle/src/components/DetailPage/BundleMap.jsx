@@ -23,6 +23,8 @@ import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
 import {Sidebar} from './Sidebar'
+import {SearchBar} from './searchControl/SearchBar'
+import {SearchBarButton} from './searchControl/SearchBarButton'
 import {DrawButton} from './controls/Draw'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 
@@ -37,6 +39,7 @@ export default class BundleMap extends Component {
             bundle: props.bundle,
             map_wms_list: [],
             is_sidebar_open: true,
+            is_search_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
             is_draw_open: false,
@@ -50,6 +53,7 @@ export default class BundleMap extends Component {
             modal: new Modal(),
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
+            searchbar: new SearchBar(),
         }
 
         this.marker = this.initMarker()
@@ -59,6 +63,7 @@ export default class BundleMap extends Component {
         this.handleMapClick = this.handleMapClick.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
         this.toggleSidebar = this.toggleSidebar.bind(this)
+        this.searchSidebar = this.searchSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
@@ -219,12 +224,14 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new SidebarButton({toggleSidebar: this.toggleSidebar}),
+                new SearchBarButton({searchSidebar: this.searchSidebar}),
                 new DrawButton({toggleDraw: this.toggleDraw}),
                 new ScaleLine(),
                 this.controls.modal,
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
+                this.controls.searchbar,
             ]),
             layers: [
                 ...base_layers,
@@ -323,13 +330,13 @@ export default class BundleMap extends Component {
         layer.setVisible(!layer.getVisible())
     }
 
-    handleSetCenter(coord) {
+    handleSetCenter(coord, zoom) {
 
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
-        view.setCenter(map_coord)
+        view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
     }
 
     toggleSidebar(event) {
@@ -337,9 +344,20 @@ export default class BundleMap extends Component {
             is_sidebar_open: !prevState.is_sidebar_open,
         }))
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(null, null, true)
+            this.controls.sidebar.showSideBar(null, true)
         }else{
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, this.handleSetCenter, false)
+            this.controls.sidebar.showSideBar(this.state.map_wms_list, false)
+        }
+    }
+
+    searchSidebar(event) {
+        this.setState(prevState => ({
+            is_search_sidebar_open: !prevState.is_search_sidebar_open,
+        }))
+        if(this.state.is_search_sidebar_open){
+            this.controls.searchbar.showSideBar(null, true)
+        }else{
+            this.controls.searchbar.showSideBar(this.handleSetCenter, false)
         }
     }
 

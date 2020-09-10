@@ -2,12 +2,13 @@ from itertools import groupby
 
 from django.http import JsonResponse
 from django.shortcuts import render, reverse, get_object_or_404
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from main.decorators import ajax_required
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
+from django.db import connections
 
 
 def all(request):
@@ -84,3 +85,60 @@ def wms_layers(request, pk):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def aimag(request):
+    try:
+        find_cursor = connections['postgis_db'].cursor()
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "AimagMon" as aimag FROM public."AdmUnitCenter_Aimag" ''')
+        data = find_cursor.fetchall()
+        if(data):
+
+            rsp = {
+                'success': True,
+                'info': data
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
+            }
+            return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def sumfind(request, payload):
+    try:
+        aimag_name = payload.get('aimag_name')
+        find_cursor = connections['postgis_db'].cursor()
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ''', [aimag_name])
+        data = find_cursor.fetchall()
+        if(data):
+
+            rsp = {
+                'success': True,
+                'info': data
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
+            }
+            return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
