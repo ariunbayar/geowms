@@ -11,6 +11,7 @@ from backend.org import views as org_views
 from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
+from backend.qpay import views as qpay_views
 
 
 app_name = 'backend'
@@ -149,6 +150,10 @@ urlpatterns = [
         path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
 
     ], 'tuuhen_ov'))),
+
+    path('qpay/', include(([
+        path('create/', qpay_views.create, name='create'),
+    ], 'qpay'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 ]
