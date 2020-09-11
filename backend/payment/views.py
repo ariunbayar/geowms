@@ -88,14 +88,14 @@ def purchaseAll(request, payload):
         purchase_all.append({
             'id': payment.id,
             'geo_unique_number': payment.geo_unique_number,
-            'data_id': payment.data_id,
             'description': payment.description,
-            'amount': payment.amount,
+            'total_amount': payment.total_amount,
             'created_at': payment.created_at.strftime('%Y-%m-%d'),
-            'error_message': payment.error_message,
+            'message': payment.message,
             'failed_at': payment.failed_at,
             'bank_unique_number': payment.bank_unique_number,
             'success_at': payment.success_at,
+            'is_success': payment.is_success,
             'user': user.username,
         })
         return JsonResponse({'purchase_all': purchase_all})
