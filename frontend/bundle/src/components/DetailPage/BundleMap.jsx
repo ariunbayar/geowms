@@ -48,6 +48,8 @@ export default class BundleMap extends Component {
             draw: null,
             source_draw: null,
             is_cart: false,
+            y: null,
+            x: null,
         }
 
         this.controls = {
@@ -264,12 +266,16 @@ export default class BundleMap extends Component {
     handleMapClick(event) {
 
         this.marker.point.setCoordinates(event.coordinate)
-
+        console.log("coord", event.coordinate)
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+        console.log("maap_coord", map_coord)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-        this.setState({coordinate_clicked})
+        const y = coordinateFormat(map_coord, '{y}', 6)
+        const x = coordinateFormat(map_coord, '{x}', 6)
+
+        this.setState({coordinate_clicked, x, y})
 
         this.showFeaturesAt(event.coordinate)
     }
@@ -391,10 +397,8 @@ export default class BundleMap extends Component {
     cartButton(is_cart){
         console.log(this.state.coordinate_clicked)
         if(is_cart == true){
-            console.log("is true")
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart)
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y)
         }
-        console.log("hahahahahaha oltson doo", is_cart)
     }
 
     toggleDraw() {

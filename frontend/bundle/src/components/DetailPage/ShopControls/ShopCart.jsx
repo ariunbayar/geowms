@@ -19,6 +19,8 @@ export class Cart extends Component{
             coordinate: [],
             torf: false,
             data: [],
+            x: null,
+            y: null,
         }
         // this.addItem = this.addItem.bind(this)
         // this.showItem = this.showItem.bind(this)
@@ -26,6 +28,7 @@ export class Cart extends Component{
         // this.handlePurchase = this.handlePurchase.bind(this)
         // this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
           // this.cart = this.cart.bind(this)
+        this.removeList = this.removeList.bind(this)
     }
 
     componentDidMount(){
@@ -41,14 +44,16 @@ export class Cart extends Component{
         }
     }
 
-    componentWillReceiveProps(){
-        if(this.props.torf == true){
-            if(this.props.coordinate){
-                var array = [this.props.coordinate]
-                console.log("Array ", array)
-                this.setState({
-                    data: this.state.data.concat(array)
-                })
+    componentDidUpdate(pP){
+        if(pP.coordinate !== this.props.coordinate){
+            if(this.props.torf == true){
+                if(this.props.coordinate){
+                    var array = [this.props.coordinate]
+                    console.log("Array ", array)
+                    this.setState({
+                        data: this.state.data.concat(array)
+                    })
+                }
             }
         }
     }
@@ -62,6 +67,28 @@ export class Cart extends Component{
     //     }
     // }
 
+    removeList(data){
+        console.log("ustgah", data)
+        console.log(this.state.data)
+        const list = this.state.data
+        console.log("list", list)
+        if(list.length == 1){
+            this.setState({
+                data: []
+            })
+        }
+        if(list.length > 1){
+            for(var i = 0; i < list.length; i++){
+                if(list[i] == data){
+                    console.log("tentsuu data: ", data)
+                    this.setState({
+                        data: this.state.data.splice(data, 1)
+                    })
+                }
+            }
+        }
+    }
+
     checkDataForPurchase(){
         console.log("hudaldaj awah", this.state.data)
         service.purchaseFromCart(this.state.data)
@@ -73,10 +100,21 @@ export class Cart extends Component{
     }
 
     render(){
-        const {coordinate, torf} = this.state
+        const {coordinate, torf, data} = this.state
+        const {x, y} = this.props
         console.log("in render",this.state.data)
+        if(data.length > 0){
+            this.div = []
+            data.map((data, key) =>{
+                this.div.push(<li key={key}>{data} <button type="button" className="fa fa-trash" onClick={() => this.removeList(data)}>Устгах</button></li>)
+            })
+        }
+        else{
+            this.div = []
+        }
         return(
             <div className="root">
+                <div ></div>
                 <div className="cart-list">
                 <i className="fa fa-shopping-cart cart-size cart"></i>
                 <div className="cart-count">
@@ -84,7 +122,9 @@ export class Cart extends Component{
                         {this.state.data.length}
                     </span>
                 </div>
-                    {this.state.data}
+                    <ul>
+                        {this.div}
+                    </ul>
                 </div>
                 <button type="button" className="btn gp-button-primary" onClick={() => this.checkDataForPurchase()}>
                     Худалдаж авах
@@ -124,9 +164,9 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf) {
+    showModal(coordinate, torf, x, y) {
         console.log("from Cart", coordinate)
-        this.renderComponent({coordinate, torf})
+        this.renderComponent({coordinate, torf, x, y})
         if(torf){
             // this.setClass()
         }

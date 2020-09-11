@@ -150,6 +150,7 @@ export class Modal extends Control {
 
     handlePointToCart(func){
         func(true)
+        this.toggleControl(false)
     }
 
     renderComponent(props) {
