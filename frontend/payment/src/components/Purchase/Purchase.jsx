@@ -1,5 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
+import {QPay} from '../QPay/Qpay'
+
 export class Purchase extends Component {
 
     constructor(props) {
@@ -8,7 +10,8 @@ export class Purchase extends Component {
         this.state = {
             purchase: props.purchase,
             price: 3000,
-            purchase_all: []
+            purchase_all: [],
+            qpay_modal_is: false,
         }
     }
     componentDidMount(){
@@ -33,12 +36,17 @@ export class Purchase extends Component {
         })
 
     }
-
+    handleQpay(){
+        this.setState(prevState => ({
+            qpay_modal_is: !prevState.qpay_modal_is,
+        }))
+    }
     render() {
+        const purchase_id = this.props.match.params.id
         const { purchase, purchase_all } = this.state
         return (
-        <div className="container">
-            <div className="row">
+        <div className="container my-4">
+            <div className="row shadow-lg p-3 mb-5 bg-white rounded">
                 <div className="col-md-12 py-0 my-3">
                     <h5 className="mb-3">Лавлах</h5>
 
@@ -86,19 +94,41 @@ export class Purchase extends Component {
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Мөнгөн дүн</td>
-                                <td>{purchase_all.amount}₮</td>
+                                <td>{purchase_all.total_amount}₮</td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>НИЙТ МӨНГӨН ДҮН</td>
-                                <td>{purchase_all.amount}₮</td>
+                                <td>{purchase_all.total_amount}₮</td>
                             </tr>
                         </tbody>
                     </table>
-                    <button  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handlePayment()}>
-                            <a className="fa fa-shopping-cart mr-2"> Худалдаж авах</a>
-                    </button>
+                    <div className="row text-center">
+                        <div className="col-md-6">
+                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handlePayment()}>
+                                <h4 className="text-succes ">Монгол банкаар төлбөр</h4>
+                                <h4 className="text-succes "> төлөх.</h4>
+                            </button>
+                        </div>
+                        <div className="col-md-6">
+                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
+                                <h4 className="text-succes ">QPAY ээр төлбөр</h4>
+                                <h4 className="text-succes "> төлөх.</h4>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div className={this.state.qpay_modal_is ? 'show d-block modal fade bd-example-modal-lg' : 'd-none' } tabIndex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} history={this.props.history.push} ></QPay>
+                        <button className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
+                            <a className="text-succes ">Гарах</a>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div className={this.state.qpay_modal_is ? 'modal-backdrop fade show' : 'd-none'}></div>
         </div>
         )
     }

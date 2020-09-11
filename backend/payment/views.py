@@ -98,6 +98,7 @@ def purchaseAll(request, payload):
             'user_id': user.username,
             'total_amount': payment.total_amount,
             'card_number': payment.card_number,
+            'is_success': payment.is_success,
         })
         rsp = {
             'success': True,
