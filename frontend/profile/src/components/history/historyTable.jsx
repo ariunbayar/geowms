@@ -3,7 +3,7 @@ import React, { Component } from "react"
 export class HistoryTable extends Component {
     render() {
         const idx = this.props.idx
-        const {amount,description,created_at,is_success,success_at,user_id,geo_unique_number,bank_unique_number,id}=this.props.values
+        const {id, geo_unique_number, total_amount, description, created_at, is_success, success_at, bank_unique_number}=this.props.values
         return (
             <tr>
                 <td>
@@ -16,7 +16,7 @@ export class HistoryTable extends Component {
                     {geo_unique_number}
                 </td>
                 <td>
-                    {amount}
+                    {total_amount}
                 </td>
                 <td>
                     {description}
@@ -35,7 +35,5 @@ export class HistoryTable extends Component {
                 </td>
             </tr>
         )
-
     }
-
 }

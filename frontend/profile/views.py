@@ -26,15 +26,18 @@ def _datetime_display(dt):
 def _get_payment_display(payment):
 
     return {
-        'id': payment.id,
-        'amount': payment.amount,
-        'description': payment.description,
+        'id':payment.id,
+        'geo_unique_number':payment.geo_unique_number,
+        'bank_unique_number':payment.bank_unique_number,
+        'description':payment.description,
+        'total_amount':payment.total_amount,
+        'user':payment.user.username,
+        'is_success':payment.is_success,
+        'card_number':payment.card_number,
+        'message':payment.message,
+        'code':payment.code,
         'created_at': _datetime_display(payment.created_at),
-        'is_success': payment.is_success,
-        'user_id': payment.user_id,
-        'bank_unique_number': payment.bank_unique_number,
-        'data_id': payment.data_id,
-        'geo_unique_number': payment.geo_unique_number,
+        'failed_at': _datetime_display(payment.failed_at),
         'success_at': _datetime_display(payment.success_at),
     }
 
