@@ -30,7 +30,7 @@ export class Cart extends Component{
 
     componentDidMount(){
         console.log("",this.props.torf)
-        const {coordinate, torf, content} = this.props
+        const {coordinate, torf} = this.props
         if(torf == true){
             if(coordinate){
                 var arr = [coordinate]
@@ -124,8 +124,9 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, content) {
-        this.renderComponent({coordinate, torf, content})
+    showModal(coordinate, torf) {
+        console.log("from Cart", coordinate)
+        this.renderComponent({coordinate, torf})
         if(torf){
             // this.setClass()
         }

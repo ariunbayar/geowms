@@ -148,13 +148,13 @@ export class Modal extends Control {
         this.element.classList.toggle('d-block', is_visible)
     }
 
-    handlePointToCart(coordinate, content, torf){
-            this.comp.cart.showModal(coordinate, true, content)
+    handlePointToCart(func){
+        func(true)
     }
 
     renderComponent(props) {
         props.handleClose = () => this.toggleControl(false)
-        props.handlePointToCart =() => this.handlePointToCart(props.coordinate, props.content, false)
+        props.handlePointToCart =() => this.handlePointToCart(props.func)
         props.is_button = true
         if (!this.is_component_initialized) {
             ReactDOM.render(<ModalComponent {...props}/>, this.element)
@@ -164,9 +164,9 @@ export class Modal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(content, is_complete, coordinate) {
+    showModal(content, is_complete, func) {
         this.toggleControl(true)
-        this.renderComponent({content, is_complete, coordinate})
+        this.renderComponent({content, is_complete, func})
     }
 
 }

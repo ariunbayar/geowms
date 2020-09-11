@@ -44,6 +44,7 @@ export default class BundleMap extends Component {
             draw_layer: null,
             draw: null,
             source_draw: null,
+            is_cart: false,
         }
 
         this.controls = {
@@ -66,6 +67,7 @@ export default class BundleMap extends Component {
         this.toggleDraw = this.toggleDraw.bind(this)
         this.toggleDrawed = this.toggleDrawed.bind(this)
         this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
+        this.cartButton = this.cartButton.bind(this)
     }
 
     initMarker() {
@@ -263,7 +265,6 @@ export default class BundleMap extends Component {
         this.setState({coordinate_clicked})
 
         this.showFeaturesAt(event.coordinate)
-        this.controls.cart.showModal(coordinate_clicked, true)
     }
 
     showFeaturesAt(coordinate) {
@@ -309,7 +310,7 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            this.controls.modal.showModal(feature_info, true, this.state.coordinate_clicked)
+                            this.controls.modal.showModal(feature_info, true, this.cartButton)
                         })
                 } else {
                     /* TODO */
@@ -367,6 +368,15 @@ export default class BundleMap extends Component {
             const lastFeature = features[features.length - 1];
             this.state.source_draw.removeFeature(lastFeature);
         }
+    }
+
+    cartButton(is_cart){
+        console.log(this.state.coordinate_clicked)
+        if(is_cart == true){
+            console.log("is true")
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart)
+        }
+        console.log("hahahahahaha oltson doo", is_cart)
     }
 
     toggleDraw() {
