@@ -24,6 +24,7 @@ urlpatterns = [
         path('update/', wms_views.update, name='update'),
         path('delete/', wms_views.delete, name='delete'),
         path('wmsLayerall/', wms_views.wms_layer_all, name='layer-all'),
+        path('WMS/<int:wms_id>/', wms_views.proxy, name='proxy'),
         path('titleUpdate/', wms_views.titleUpdate, name='titleUpdate'),
         path('layerAdd/', wms_views.layerAdd, name='layerAdd'),
         path('layerRemove/', wms_views.layerRemove, name='layerRemove'),
