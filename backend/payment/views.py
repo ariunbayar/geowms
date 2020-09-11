@@ -36,21 +36,22 @@ def paymentList(request, payload):
         else:
             failed_date = None
         payment_all.append({
-            'id': payment.id,
-            'amount': payment.amount,
-            'description': payment.description,
-            'created_at': created_date,
-            'is_success': payment.is_success,
-            'success_at': success_date,
+            'id':payment.id,
+            'geo_unique_number':payment.geo_unique_number,
+            'bank_unique_number':payment.bank_unique_number,
+            'description':payment.description,
+            'total_amount':payment.total_amount,
+            'user':payment.user.username,
             'user_id': payment.user_id,
             'user_firstname': payment.user.first_name,
             'user_lastname': payment.user.last_name,
-            'bank_unique_number': payment.bank_unique_number,
-            'data_id': payment.data_id,
-            'error_code': payment.error_code,
-            'error_message': payment.error_message,
-            'failed_at': failed_date,
-            'geo_unique_number': payment.geo_unique_number,
+            'is_success':payment.is_success,
+            'card_number':payment.card_number,
+            'message':payment.message,
+            'code':payment.code,
+            'created_at':created_date,
+            'success_at':success_date,
+            'failed_at':failed_date,
         })
     total_page = total_items.num_pages
     rsp = {
