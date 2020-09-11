@@ -83,7 +83,6 @@ function payment(price, description, data_id) {
 }
 
 function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom) {
-    alert("servoce")
     const requestOptions = {
         ..._getPostOptions(),
         body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
@@ -92,12 +91,10 @@ function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom)
 }
 
 function purchaseFromCart(data){
-    var level = 1
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({level})
+        body: JSON.stringify({data})
     }
-    console.log("service", data)
     return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
 }
 

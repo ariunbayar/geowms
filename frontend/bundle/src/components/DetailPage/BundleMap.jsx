@@ -394,10 +394,10 @@ export default class BundleMap extends Component {
         }
     }
 
-    cartButton(is_cart){
+    cartButton(is_cart, content){
         console.log(this.state.coordinate_clicked)
         if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y)
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content)
         }
     }
 

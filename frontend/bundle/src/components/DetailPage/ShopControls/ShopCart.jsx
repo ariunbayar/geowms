@@ -8,7 +8,8 @@ import { array } from "yup"
 import { CompilationStatus } from "webpack-build-notifier/dist/types"
 import OverlayPositioning from "ol/OverlayPositioning"
 import { set } from "ol/transform"
-
+import { withRouter } from 'react-router-dom';
+import { Route, Link, BrowserRouter as Router, Switch } from "react-router-dom";
 export class Cart extends Component{
 
     constructor(props) {
@@ -33,31 +34,38 @@ export class Cart extends Component{
 
     componentDidMount(){
         console.log("",this.props.torf)
-        const {coordinate, torf} = this.props
+        const {coordinate, torf, content} = this.props
         if(torf == true){
-            if(coordinate){
-                var arr = [coordinate]
-                console.log("didmount", arr)
-
-                this.setState({data: arr})
+            if(content){
+                var arr = [content[0][0]]
+                this.setState({ data: arr })
             }
+        //     if(coordinate){
+        //         var arr = [coordinate]
+        //         console.log("didmount", arr)
+
+        //         this.setState({data: arr})
+        //     }
         }
     }
 
     componentDidUpdate(pP){
         if(pP.coordinate !== this.props.coordinate){
             if(this.props.torf == true){
-                if(this.props.coordinate){
-                    var array = [this.props.coordinate]
-                    console.log("Array ", array)
-                    this.setState({
-                        data: this.state.data.concat(array)
-                    })
-                }
+                var arr = [this.props.content[0][0]]
+                this.setState({
+                    data: this.state.data.concat(arr)
+                })
+                // if(this.props.coordinate){
+                //     var array = [this.props.coordinate]
+                //     console.log("Array ", array)
+                //     this.setState({
+                //         data: this.state.data.concat(array)
+                //     })
+                // }
             }
         }
     }
-
     // componentWillUpdate(pP,pS){
     //     console.log("------------------------------")
     //     console.log(pP.coordinate, this.props.coordinate)
@@ -67,36 +75,46 @@ export class Cart extends Component{
     //     }
     // }
 
-    removeList(data){
-        console.log("ustgah", data)
-        console.log(this.state.data)
-        const list = this.state.data
-        console.log("list", list)
-        if(list.length == 1){
+    removeList(coordinate){
+        const {data} = this.state
+        console.log("ustgah", coordinate)
+        if(data.length == 1){
             this.setState({
                 data: []
             })
         }
-        if(list.length > 1){
-            for(var i = 0; i < list.length; i++){
-                if(list[i] == data){
-                    console.log("tentsuu data: ", data)
-                    this.setState({
-                        data: this.state.data.splice(data, 1)
-                    })
-                }
+        if(data.length > 1){
+            const isBelowThreshold = (coordinateFromArray) => coordinateFromArray = coordinate;
+            if(data.every(isBelowThreshold)){
+                console.log("tentsuu data: ", coordinate)
+                var array = data.filter((item) =>{
+                    return item !== coordinate
+                })
+                this.setState({
+                    data: array
+                })
             }
         }
     }
 
     checkDataForPurchase(){
         console.log("hudaldaj awah", this.state.data)
-        service.purchaseFromCart(this.state.data)
-            .then(({success}) => {
-                if(success){
-                    alert("Ajillasan")
-                }
-            }).catch(error => alert(error.text))
+        if(name !== ''){
+            service.purchaseFromCart(this.state.data)
+                .then(({success, msg, payment}) => {
+                    if(success){
+                        this.setState({ data: []})
+                        setTimeout(() => {
+                            // this.props.history.push(`/payment/purchase/${payment}/`)
+                            window.location.href=`/payment/purchase/${payment}/`;
+                        }, 1000);
+                        console.log(msg)
+                    }
+                    if(!success){
+                        alert(msg)
+                    }
+                }).catch(error => alert(error.text))
+        }
     }
 
     render(){
@@ -116,7 +134,7 @@ export class Cart extends Component{
             <div className="root">
                 <div ></div>
                 <div className="cart-list">
-                <i className="fa fa-shopping-cart cart-size cart"></i>
+                <i className="cart-count fa fa-shopping-cart cart-size cart"></i>
                 <div className="cart-count">
                     <span className="cart-count-span">
                         {this.state.data.length}
@@ -164,9 +182,9 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, x, y) {
+    showModal(coordinate, torf, x, y, content) {
         console.log("from Cart", coordinate)
-        this.renderComponent({coordinate, torf, x, y})
+        this.renderComponent({coordinate, torf, x, y, content})
         if(torf){
             // this.setClass()
         }

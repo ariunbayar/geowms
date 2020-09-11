@@ -265,6 +265,17 @@ element.style {
 }
 
 .cart-list{
+
+}
+.cart-count{
+    position: absolute;
+    top: 105px;
+    left: -2px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
 }
 
 .cart{

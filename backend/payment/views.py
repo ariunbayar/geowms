@@ -80,24 +80,33 @@ def purchase(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
-    user = get_object_or_404(User, pk=request.user.id)
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
+        user = User.objects.filter(id=payment.user_id).first()
+        point = Payment.objects.filter(payment_id=payment.id)
         purchase_all = []
         purchase_all.append({
             'id': payment.id,
             'geo_unique_number': payment.geo_unique_number,
-            'data_id': payment.data_id,
             'description': payment.description,
-            'amount': payment.amount,
             'created_at': payment.created_at.strftime('%Y-%m-%d'),
-            'error_message': payment.error_message,
+            'message': payment.message,
             'failed_at': payment.failed_at,
             'bank_unique_number': payment.bank_unique_number,
             'success_at': payment.success_at,
-            'user': user.username,
+            'user_id': user.username,
+            'total_amount': payment.total_amount,
+            'card_number': payment.card_number,
         })
-        return JsonResponse({'purchase_all': purchase_all})
+        rsp = {
+            'success': True,
+            'purchase_all': purchase_all
+        }
+        return JsonResponse(rsp)
     else:
-        raise Http404
+        rsp = {
+            'success': False,
+            'msg': 'Алдаа гарсан байна'
+        }
+        return JsonResponse(rsp)

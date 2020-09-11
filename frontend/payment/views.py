@@ -8,7 +8,11 @@ from django.contrib.auth import get_user_model
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
-from backend.payment.models import Payment
+from backend.payment.models import Payment, PaymentPoint
+from geoportal_app.models import User
+from backend.forms.models import Mpoint_view
+
+import uuid
 
 def index(request):
 
@@ -56,7 +60,6 @@ def dictionaryResponse(request):
 @require_POST
 @ajax_required
 def purchaseDraw(request, payload):
-    print("purchase DARAW")
     user = get_object_or_404(get_user_model(), pk=request.user.id)
     price = payload.get('price')
     description = payload.get('description')
@@ -81,11 +84,73 @@ def purchaseDraw(request, payload):
 @ajax_required
 def purchaseFromCart(request, payload):
 
-    print("hello fRom view")
     datas = payload.get('data')
     print(datas)
 
-    rsp={
-        'success': True
+    check_id = True
+    while check_id:
+        uniq_id = uuid.uuid4()
+        if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0:
+            check_id = False
+        else:
+            check_id = True
+    print(uniq_id)
+    user_id = request.user.id
+    userList = User.objects.filter(id=user_id)
+    for user in userList:
+        userID = user.id
+    print(userID)
+    # mpoint = Mpoint_view.objects.using('postgis_db').filter()
+    amount = 1000
+    total_amount = amount * len(datas)
+
+    try:
+        payment = Payment.objects.create(
+            geo_unique_number = uniq_id,
+            bank_unique_number = '',
+            description = 'Цэг худалдаж авах хүсэлт',
+            total_amount = total_amount,
+            user_id = userID,
+            is_success = False,
+            message = 'Худалдаж авахыг хүсэж байна',
+            code = '',
+        )
+        print("payment")
+        pay_id = payment.id
+        check_id = True
+        print(payment.geo_unique_number)
+        while check_id:
+            uniq_id = uuid.uuid4()
+            if payment.geo_unique_number == uniq_id:
+                check_id = True
+            else:
+                check_id = False
+        print(check_id)
+        print("geo_unique_number")
+        for i in range(len(datas)):
+            if pay_id > 0:
+                point = PaymentPoint.objects.create(
+                    payment_id = pay_id,
+                    point_id = uniq_id,
+                    point_name = datas[i],
+                    amount = amount,
+                    pdf_id = 'pdf',
+                )
+            else:
+                rsp = {
+                    'success': False,
+                    'msg': "Амжилтгүй"
+                }
+                return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+                'success': False,
+                'msg': "Алдаа гарсан тул цуцлагдлаа"
+            }
+        return JsonResponse(rsp)
+    rsp = {
+        'success': True,
+        'msg': 'Амжилттай боллоо',
+        'payment': pay_id
     }
     return JsonResponse(rsp)

@@ -148,14 +148,14 @@ export class Modal extends Control {
         this.element.classList.toggle('d-block', is_visible)
     }
 
-    handlePointToCart(func){
-        func(true)
+    handlePointToCart(func, content){
+        func(true, content)
         this.toggleControl(false)
     }
 
     renderComponent(props) {
         props.handleClose = () => this.toggleControl(false)
-        props.handlePointToCart =() => this.handlePointToCart(props.func)
+        props.handlePointToCart =() => this.handlePointToCart(props.func, props.content)
         props.is_button = true
         if (!this.is_component_initialized) {
             ReactDOM.render(<ModalComponent {...props}/>, this.element)
