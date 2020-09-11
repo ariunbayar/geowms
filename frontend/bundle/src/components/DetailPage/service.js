@@ -3,7 +3,10 @@ export const service = {
     loadBaseLayers,
     payment,
     paymentDraw,
-    purchaseFromCart
+    purchaseFromCart,
+    searchPoint,
+    getAimags,
+    getSum,
 }
 
 function getCookie(name) {
@@ -96,4 +99,27 @@ function purchaseFromCart(data){
     }
     console.log("service", data)
     return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
+}
+
+function searchPoint(point_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({point_id})
+    }
+    return fetch('/back/tuuhen_ov/tseg-personal/find-point/', requestOptions).then(handleResponse)
+}
+
+function getAimags() {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch('/api/aimag/', requestOptions).then(handleResponse)
+}
+
+function getSum(aimag_name) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({aimag_name})
+    }
+    return fetch('/api/sum/', requestOptions).then(handleResponse)
 }

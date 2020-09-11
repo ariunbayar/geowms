@@ -447,7 +447,7 @@ def tseg_personal_list(request, payload):
         'pid',
         't_type',
         'point_type',
-        ) + SearchVector('point_name')).filter(search__contains=query)
+        ) + SearchVector('point_name')).filter(search__contains=query).order_by("id")
     total_items = Paginator(mpoint, per_page)
     items_page = total_items.page(page)
     for mpoint_all in items_page.object_list:
@@ -483,24 +483,24 @@ def tsegPersonalRemove(request, payload):
     pk = payload.get('id')
     class_type = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
     data = None
-    if class_type.point_class == 1:
+    if class_type.t_type == 'g101':
         data = Mpoint1.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 2:
+    if class_type.t_type == 'g102':
         data = Mpoint2.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 3:
+    if class_type.t_type == 'g103':
         data = Mpoint3.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 4:
+    if class_type.t_type == 'g104':
         data = Mpoint4.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 5:
+    if class_type.t_type == 'g105':
         data = Mpoint5.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 6:
+    if class_type.t_type == 'g106':
         data = Mpoint6.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 7:
+    if class_type.t_type == 'g107':
         data = Mpoint7.objects.using('postgis_db').filter(id=pk).first()
-    if class_type.point_class == 8:
+    if class_type.t_type == 'g108':
         data = Mpoint8.objects.using('postgis_db').filter(id=pk).first()
     if data:
-        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, point_class_name='Устсан төлөв', pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ,aimag=data.aimag, sum=data.sum, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,ondor=data.ondor)
+        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, point_class_name='Устсан төлөв', pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ,aimag=data.aimag, sum=data.sum, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,ondor=data.ondor, t_type='g109')
         if mpoint9:
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint9.id)])
@@ -566,80 +566,131 @@ def tsegPersonalUpdate(request, payload):
         'point_id': data.point_id if  data.point_id else '',
         'point_name': data.point_name if data.point_name else '',
         'pid': data.pid if data.pid else '',
-        'point_class': data.point_class if data.point_class else '',
-        'point_type': data.point_type if data.point_type else '',
-        'center_typ': data.center_typ if data.center_typ else '',
+        'point_type': data.point_class if data.point_class else '',
+        'center_typ': data.point_type if data.point_type else '',
         'aimag': data.aimag if data.aimag else '',
         'sum': data.sum if data.sum else '',
         'sheet1': data.sheet1 if data.sheet1 else '',
         'zone': data.sheet2 if sheet2 else '',
         'cc': data.sheet3 if sheet3 else '',
         't_type': data.t_type if data.t_type else '',
-        'ondor': data.ondor if data.ondor else 0,
+        'ondor': data.ondor if data.ondor else '',
     })
     rsp = {
         'tseg_display': tseg_display,
     }
     return JsonResponse(rsp)
 
+class UnAcceptedValueError(Exception):
+    def __init__(self, data):
+        self.data = data
+    def __str__(self):
+        return repr(self.data)
+
+
+@require_POST
+@ajax_required
+def findPoints(request, payload):
+    try:
+        point_id = str(payload.get("point_id"))
+        find_cursor = connections['postgis_db'].cursor()
+        find_cursor.execute(''' SELECT ST_X(ST_TRANSFORM(ST_CENTROID(geom),4327)) AS X,  ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4327))) AS Y FROM mpoint_view where point_id = %s limit 1 ''', [point_id])
+        data = find_cursor.fetchone()
+        if(data):
+
+            rsp = {
+                'success': True,
+                'info': data
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
+            }
+            return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
 
 @require_POST
 @ajax_required
 def findSum(request, payload):
-    info = []
-    L = payload.get("y")
-    B = payload.get("x")
-    cursor = connections['postgis_db'].cursor()
-    cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
-    geom = cursor.fetchone()
-    if(geom):
-        zoneout=int(L)/6+31
-        instr = ("+proj=longlat +datum=WGS84 +no_defs")
-        outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-        inproj = pyproj.Proj(instr)
-        outproj = pyproj.Proj(outstr)
-        val= pyproj.transform(inproj, outproj, L,B)
-        Brange=[40,44,48,52,56]
-        Letter=['K','L','M','N','O']
-        for k in Brange:
-            if k>B:
-                ind=Brange.index(k)
-                B0=Letter[ind-1]
-                Bmin=Brange[ind-1]
-                break
-            else:
-                B0 = "aldaa"
-        zone=int(L/6)+31
-        Lmin=(zone-30)*6-6
-        c=0
-        while Lmin<L:
-            Lmin=Lmin+0.5
-            c=c+1
-        cc=0
-        while Bmin<B:
-            Bmin=Bmin+1/3
-            cc=cc+1
-        cc = (12-cc)*12+c
-        LA = int(L)
-        LB = int((L-LA)*60)
-        LC = float("{:.6f}".format((L-LA-LB/60)*3600 ))
-        BA = int(B)
-        BB = int((B-BA)*60)
-        BC = float("{:.6f}".format((B-BA-BB/60)*3600 ))
-        info.append({
-            'aimag': geom[0],
-            'sum': geom[1],
-            "vseg": B0,
-            'zone': zone,
-            'cc': cc,
-            'BA': BA,
-            'BB': BB,
-            'BC': BC,
-            'LA': LA,
-            'LB': LB,
-            'LC': LC
-        })
-        return JsonResponse({"info":info})
+    try:
+        info = []
+        L = payload.get("y")
+        B = payload.get("x")
+        cursor = connections['postgis_db'].cursor()
+        cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
+        geom = cursor.fetchone()
+        if(geom):
+            zoneout=int(L)/6+31
+            instr = ("+proj=longlat +datum=WGS84 +no_defs")
+            outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+            inproj = pyproj.Proj(instr)
+            outproj = pyproj.Proj(outstr)
+            val = pyproj.transform(inproj, outproj, L,B)
+            Brange=[40,44,48,52,56]
+            Letter=['K','L','M','N','O']
+            for k in Brange:
+                if k>B:
+                    ind=Brange.index(k)
+                    B0=Letter[ind-1]
+                    Bmin=Brange[ind-1]
+                    break
+                else:
+                    B0 = "aldaa"
+            zone=int(L/6)+31
+            Lmin=(zone-30)*6-6
+            c=0
+            while Lmin<L:
+                Lmin=Lmin+0.5
+                c=c+1
+            cc=0
+            while Bmin<B:
+                Bmin=Bmin+1/3
+                cc=cc+1
+            cc = (12-cc)*12+c
+            LA = int(L)
+            LB = int((L-LA)*60)
+            LC = float((L-LA-LB/60)*3600 )
+            BA = int(B)
+            BB = int((B-BA)*60)
+            BC = float((B-BA-BB/60)*3600 )
+            info.append({
+                'aimag': geom[0],
+                'sum': geom[1],
+                "vseg": B0,
+                'zone': zone,
+                'cc': cc,
+                'BA': BA,
+                'BB': BB,
+                'BC': BC,
+                'LA': LA,
+                'LB': LB,
+                'LC': LC
+            })
+            rsp = {
+                'success': True,
+                'info': info
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Уучлаарай энэ цэгт мэдээлэл олдсонгүй",
+            }
+            return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
 
 
 @require_POST
@@ -663,14 +714,19 @@ def tsegPersonal(request):
         cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        ondor = int(request.POST.get('ondor'))
-        point_class = int(request.POST.get('point_class'))
-        if point_class == 1:
+        ondor = request.POST.get('ondor')
+        mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+        if request.POST.get('suljeenii_torol'):
+            point_class = int(request.POST.get('suljeenii_torol'))
+        else:
+            point_class = 0
+        if mpoints.t_type == 'g101':
             Mpoint1.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -679,12 +735,13 @@ def tsegPersonal(request):
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint1 SET geom = %s WHERE id = %s ''', [geom, pk])
 
-        if point_class == 2:
+        if mpoints.t_type == 'g102':
             Mpoint2.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -692,12 +749,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint2 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 3:
+        if mpoints.t_type == 'g103':
             Mpoint3.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -705,12 +763,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint3 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 4:
+        if mpoints.t_type == 'g104':
             Mpoint4.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -718,12 +777,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 5:
+        if mpoints.t_type == 'g105':
             Mpoint5.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -731,12 +791,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint5 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 6:
+        if mpoints.t_type == 'g106':
             Mpoint6.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -744,12 +805,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint6 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 7:
+        if mpoints.t_type == 'g107':
             Mpoint7.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -757,12 +819,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint7 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 8:
+        if mpoints.t_type == 'g108':
             Mpoint8.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -770,12 +833,13 @@ def tsegPersonal(request):
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [geom, pk])
-        if point_class == 9:
+        if mpoints.t_type == 'g109':
             Mpoint9.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
-                        pid=request.POST.get('pid'), point_type=request.POST.get('suljeenii_torol'), center_typ=request.POST.get('center_typ'),
+                        point_class=point_class,
+                        pid=request.POST.get('pid'), point_type=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -865,17 +929,17 @@ def tsegPersonal(request):
         update_cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
-        ondor = int(request.POST.get('ondor'))
+        ondor = request.POST.get('ondor')
         mpoint = Mpoint8.objects.using('postgis_db').create(
                     id=unique_id,
                     objectid='null', point_id=point_id,
                     ondor=ondor,
                     point_name=request.POST.get('tesgiin_ner'),
-                    pid=request.POST.get('pid'), point_class=8, point_type=request.POST.get('suljeenii_torol'),
-                    center_typ=request.POST.get('center_typ'),
+                    pid=request.POST.get('pid'), point_class=request.POST.get('suljeenii_torol'), point_type=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
                     sheet3=request.POST.get('LA'),
+                    t_type='g108',
                     point_class_name='Шинээр нэмэгдсэн төлөв'
         )
         update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [geom, str(unique_id)])
@@ -1053,28 +1117,27 @@ def tsegUstsanSuccess(request, payload):
                     img_zuun = tseg_ustsan.img_zuun.url if tseg_ustsan.img_zuun else '',
                     img_hoino = tseg_ustsan.img_hoino.url if tseg_ustsan.img_hoino else '',
                     img_omno = tseg_ustsan.img_omno.url if tseg_ustsan.img_omno else '',
-
             )
     class_type = Mpoint_view.objects.using('postgis_db').filter(id=mpoint.id).first()
     data = None
-    if class_type.point_class == 1:
+    if class_type.t_type == 'g101':
         data = Mpoint1.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 2:
+    if class_type.t_type == 'g102':
         data = Mpoint2.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 3:
+    if class_type.t_type == 'g103':
         data = Mpoint3.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 4:
+    if class_type.t_type == 'g104':
         data = Mpoint4.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 5:
+    if class_type.t_type == 'g105':
         data = Mpoint5.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 6:
+    if class_type.t_type == 'g106':
         data = Mpoint6.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 7:
+    if class_type.t_type == 'g107':
         data = Mpoint7.objects.using('postgis_db').filter(id=mpoint.id).first()
-    if class_type.point_class == 8:
+    if class_type.t_type == 'g108':
         data = Mpoint8.objects.using('postgis_db').filter(id=mpoint.id).first()
     if data:
-        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+        mpoint9 = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=9, point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g109')
         if mpoint9:
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint9.id)])
@@ -1431,62 +1494,81 @@ def tsegPersonalSuccess(request, payload):
         point_type = int(payload.get('point_type'))
         objectid = payload.get('objectid')
         point_class = int(payload.get('point_class'))
-        class_type = Mpoint_view.objects.using('postgis_db').filter(id=objectid).first()
-        if point_class == point_type:
-            rsp = {
-                'success': False,
-                'msg': "Төлөв адилхан тул боломжгүй",
-            }
-            return JsonResponse(rsp)
+        t_type = payload.get('t_type')
         data = None
-        if point_class == 1:
-            data = Mpoint1.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 2:
-            data = Mpoint2.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 3:
-            data = Mpoint3.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 4:
-            data = Mpoint4.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 5:
-            data = Mpoint5.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 6:
-            data = Mpoint6.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 7:
-            data = Mpoint7.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 8:
-            data = Mpoint8.objects.using('postgis_db').filter(id=class_type.id).first()
-        if point_class == 9:
-            data = Mpoint9.objects.using('postgis_db').filter(id=class_type.id).first()
+        if t_type == 'g101':
+            data = Mpoint1.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 1:
+                data = None
+        if t_type == 'g102':
+            data = Mpoint2.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 2:
+                data = None
+        if t_type == 'g103':
+            data = Mpoint3.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 3:
+                data = None
+        if t_type == 'g104':
+            data = Mpoint4.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 4:
+                data = None
+        if t_type == 'g105':
+            data = Mpoint5.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 5:
+                data = None
+        if t_type == 'g106':
+            data = Mpoint6.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 6:
+                data = None
+        if t_type == 'g107':
+            data = Mpoint7.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 7:
+                data = None
+        if t_type == 'g108':
+            data = Mpoint8.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 8:
+                data = None
+        if t_type == 'g109':
+            data = Mpoint9.objects.using('postgis_db').filter(id=objectid).first()
+            if data.point_class == 9:
+                data = None
         if data:
             update_cursor = connections['postgis_db'].cursor()
-            if point_type == 1:
-                mpoint_data = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=1, point_class_name='GPS-ийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+            if data.point_class == 1:
+                mpoint_data = Mpoint1.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=1, point_class_name='GPS-ийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g101')
                 update_cursor.execute(''' UPDATE mpoint1 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 2:
-                mpoint_data = Mpoint2.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=2, point_class_name='Гравиметрийн сүлжээний Цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 2:
+                mpoint_data = Mpoint2.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=2, point_class_name='Гравиметрийн сүлжээний Цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g102')
                 update_cursor.execute(''' UPDATE mpoint2 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 3:
-                mpoint_data = Mpoint43.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=3, point_class_name='Өндрийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 3:
+                mpoint_data = Mpoint3.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=3, point_class_name='Өндрийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g103')
                 update_cursor.execute(''' UPDATE mpoint3 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 4:
-                mpoint_data = Mpoint4.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=4, point_class_name='Триангуляцийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 4:
+                mpoint_data = Mpoint4.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=4, point_class_name='Триангуляцийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g104')
                 update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 5:
-                mpoint_data = Mpoint5.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=5, point_class_name='Полигометрийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 5:
+                mpoint_data = Mpoint5.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=5, point_class_name='Полигометрийн сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g105')
                 update_cursor.execute(''' UPDATE mpoint5 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 6:
-                mpoint_data = Mpoint6.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=6, point_class_name='Зураглалын сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 6:
+                mpoint_data = Mpoint6.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=6, point_class_name='Зураглалын сүлжээний цэг', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g106')
                 update_cursor.execute(''' UPDATE mpoint6 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 7:
-                mpoint_data = Mpoint7.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=7, point_class_name='GNSS-ийн байнгын ажиллагаатай станц', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 7:
+                mpoint_data = Mpoint7.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=7, point_class_name='GNSS-ийн байнгын ажиллагаатай станц', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g107')
                 update_cursor.execute(''' UPDATE mpoint7 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 8:
-                mpoint_data = Mpoint8.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=8, point_class_name='Шинээр нэмэгдсэн төлөв', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 8:
+                mpoint_data = Mpoint8.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=8, point_class_name='Шинээр нэмэгдсэн төлөв', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g108')
                 update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            if point_type == 9:
-                mpoint_data = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=9, point_class_name='Устсан төлөв', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor)
+                data.delete()
+            if data.point_class == 9:
+                mpoint_data = Mpoint9.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=9, point_class_name='Устсан төлөв', point_type=data.point_type, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g109')
                 update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
-            data.delete()
             rsp = {
                 'success': True,
                 'msg': "Амжилттай боллоо",
@@ -1516,7 +1598,7 @@ def tuuhenOvList(request, payload):
     tuuhs = TuuhSoyol.objects.using('postgis_db').annotate(search=SearchVector(
         'dugaar',
         'burtgegch',
-        )).filter(search__icontains=query)
+        )).filter(search__icontains=query).order_by('id')
     total_items = Paginator(tuuhs, per_page)
     items_page = total_items.page(page)
     for item in items_page.object_list:

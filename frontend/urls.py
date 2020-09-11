@@ -13,6 +13,8 @@ urlpatterns = [
 
     path('', include(([
         path('', bundle_views.all, name='all'),
+        path('api/aimag/', bundle_views.aimag, name='aimag'),
+        path('api/sum/', bundle_views.sumfind, name='sum'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
     ], 'bundle'))),

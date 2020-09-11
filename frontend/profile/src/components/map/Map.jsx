@@ -179,14 +179,11 @@ export default class Maps extends Component {
         });
         if(this.props.coordinatCheck)
         {
-            this.props.handleXY(array, null)
-
+            this.props.handleXY(array, null, null)
         }
         else{
-            service.findSum(array).then(({info}) => {
-                if(info){
-                 this.props.handleXY(array, info)
-                }
+            service.findSum(array).then(({success, info}) => {
+                this.props.handleXY(array, info, success)
              })
         }
     }

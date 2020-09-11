@@ -1,5 +1,4 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../helpers/service'
-         
 
 const prefix = '/back/tuuhen_ov'
 
@@ -14,6 +13,7 @@ export const service = {
     updateTseg,
     searchTseg,
     tsegPersonalSuccess,
+    findSum,
 }
 
 function tsegPersonalList(page, perpage, query){
@@ -93,10 +93,18 @@ function searchTseg(query){
     return fetch(`${prefix}/tseg-personal/search/`, opts).then(handleResponse)
 }
 
-function tsegPersonalSuccess(point_type, objectid, point_class){
+function tsegPersonalSuccess(point_type, objectid, point_class, t_type){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({point_type, objectid, point_class}),
+        body: JSON.stringify({point_type, objectid, point_class, t_type}),
     }
     return fetch(`${prefix}/tseg-personal/batalgaajuulah/`, opts).then(handleResponse)
+}
+
+function findSum(X, niitB) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({"x":niitB, "y":X})
+    }
+    return fetch(`/back/tuuhen_ov/tseg-personal/findSum/`, requestOptions).then(handleResponse)
 }
