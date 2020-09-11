@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import user_passes_test
 
 from main.decorators import ajax_required
 from geoportal_app.models import User
-from .models import Payment
+from .models import Payment, PaymentPoint
+from backend.forms.models import Mpoint_view
 
 
 @require_POST
@@ -84,8 +85,12 @@ def purchaseAll(request, payload):
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
         user = User.objects.filter(id=payment.user_id).first()
-        point = Payment.objects.filter(payment_id=payment.id)
+        pointList = PaymentPoint.objects.filter(payment_id=payment.id)
+        point_id = 9885
+        mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id=point_id).first()
+        print(mpoint)
         purchase_all = []
+        point_data = []
         purchase_all.append({
             'id': payment.id,
             'geo_unique_number': payment.geo_unique_number,
@@ -99,10 +104,27 @@ def purchaseAll(request, payload):
             'total_amount': payment.total_amount,
             'card_number': payment.card_number,
             'is_success': payment.is_success,
+            'mpoint_aimag': mpoint.aimag,
+            'mpoint_sum': mpoint.sum,
+            'undur': mpoint.ondor,
+            'point_name': mpoint.point_name,
         })
+        if len(pointList) > 0:
+            for point in pointList:
+                point_data.append({
+                    'name': point.point_name,
+                    'amount': point.amount,
+                })
+        else:
+            rsp = {
+                'success': False,
+                'msg': "Уучлаарай цэгийн мэдээлэл олдсонгүй"
+            }
+            return JsonResponse(rsp)
         rsp = {
             'success': True,
-            'purchase_all': purchase_all
+            'purchase_all': purchase_all,
+            'point_data': point_data
         }
         return JsonResponse(rsp)
     else:

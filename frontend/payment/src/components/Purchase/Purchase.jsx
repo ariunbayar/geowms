@@ -12,21 +12,32 @@ export class Purchase extends Component {
             price: 3000,
             purchase_all: [],
             qpay_modal_is: false,
+            point_data: [],
+            names: [],
         }
     }
     componentDidMount(){
         const purchase_id = this.props.match.params.id
-        service.purchaseAll(purchase_id).then(({ purchase_all }) => {
-            if (purchase_all) {
-                purchase_all.map((purchase_all) =>
-                this.setState({purchase_all})
-                )
-            }
+        service.purchaseAll(purchase_id).then(({ success, purchase_all, point_data, msg }) => {
+                    if(success){
+                        if (purchase_all) {
+                            purchase_all.map(( purchase_all ) =>
+                                this.setState({purchase_all})
+                            )
+                        }
+                        if(point_data){
+                            this.setState({point_data})
+                        }
+                    }
+                    else{
+                        alert(msg)
+                    }
         })
     }
     handlePayment (){
         const purchase_id = this.props.match.params.id
         const {purchase_all} = this.state
+        console.log(purchase_all)
         service.payment(purchase_all).then(({ success }) => {
             if (success) {
                 this.props.history.push(`/payment/success/${purchase_id}/`)
@@ -43,7 +54,8 @@ export class Purchase extends Component {
     }
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all } = this.state
+        const { purchase, purchase_all, point_data, names } = this.state
+        console.log(purchase_all)
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -54,15 +66,20 @@ export class Purchase extends Component {
                         <tbody>
                             <tr>
                                 <td><i className="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
-                                <td>{purchase_all.description}</td>
+                                <td>
+                                        {
+                                            point_data.map((value, key) => <b key={key}>{'"'+ value.name + '" '}</b>)
+                                        }
+                                        {purchase_all.point_name}
+                                </td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
-                                <td>Дорноговь</td>
+                                <td>{purchase_all.mpoint_aimag}</td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Сум</td>
-                                <td>Даланжаргалан</td>
+                                <td>{purchase_all.mpoint_sum}</td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Планшет</td>
@@ -86,7 +103,7 @@ export class Purchase extends Component {
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өндөр</td>
-                                <td>1113.268</td>
+                                <td>{purchase_all.undur}</td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Гүйлгээний дугаар</td>
@@ -94,7 +111,7 @@ export class Purchase extends Component {
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Мөнгөн дүн</td>
-                                <td>{purchase_all.total_amount}₮</td>
+                                <td>{point_data.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>НИЙТ МӨНГӨН ДҮН</td>

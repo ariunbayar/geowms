@@ -27,14 +27,19 @@ def index(request):
 @ajax_required
 def dictionaryRequest(request, payload):
     purchase_all = payload.get('purchase_all')
-    # Хүсэлт илгээх xml датаг бэлтгэх
-    mbutil = MBUtil(purchase_all['amount'], purchase_all['description'])
-    finalRequest = mbutil.xmlConvert()
-
-    # Банкруу хүсэлт илгээж байна.
-    payReq = PaymentMethod(request, finalRequest)
-    paymentRequest = payReq.paymentMethod()
-
+    try:
+        # Хүсэлт илгээх xml датаг бэлтгэх
+        mbutil = MBUtil(purchase_all['total_amount'], purchase_all['description'])
+        finalRequest = mbutil.xmlConvert()
+        # Банкруу хүсэлт илгээж байна.
+        payReq = PaymentMethod(request, finalRequest)
+        paymentRequest = payReq.paymentMethod()
+    except Exception:
+        rsp = {
+            'success': False,
+            'message': "Алдаа гарсан байна."
+        }
+        return JsonResponse(rsp)
     # Хүсэлт илгээж байна
     if not paymentRequest:
         return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False})
@@ -85,8 +90,6 @@ def purchaseDraw(request, payload):
 def purchaseFromCart(request, payload):
 
     datas = payload.get('data')
-    print(datas)
-
     check_id = True
     while check_id:
         uniq_id = uuid.uuid4()
@@ -94,12 +97,11 @@ def purchaseFromCart(request, payload):
             check_id = False
         else:
             check_id = True
-    print(uniq_id)
+
     user_id = request.user.id
     userList = User.objects.filter(id=user_id)
     for user in userList:
         userID = user.id
-    print(userID)
     # mpoint = Mpoint_view.objects.using('postgis_db').filter()
     amount = 1000
     total_amount = amount * len(datas)
@@ -115,18 +117,15 @@ def purchaseFromCart(request, payload):
             message = 'Худалдаж авахыг хүсэж байна',
             code = '',
         )
-        print("payment")
         pay_id = payment.id
         check_id = True
-        print(payment.geo_unique_number)
         while check_id:
             uniq_id = uuid.uuid4()
             if payment.geo_unique_number == uniq_id:
                 check_id = True
             else:
                 check_id = False
-        print(check_id)
-        print("geo_unique_number")
+
         for i in range(len(datas)):
             if pay_id > 0:
                 point = PaymentPoint.objects.create(
@@ -148,6 +147,7 @@ def purchaseFromCart(request, payload):
                 'msg': "Алдаа гарсан тул цуцлагдлаа"
             }
         return JsonResponse(rsp)
+
     rsp = {
         'success': True,
         'msg': 'Амжилттай боллоо',

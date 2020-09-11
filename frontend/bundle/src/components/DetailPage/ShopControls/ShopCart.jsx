@@ -22,6 +22,7 @@ export class Cart extends Component{
             data: [],
             x: null,
             y: null,
+            is_purchase: false,
         }
         // this.addItem = this.addItem.bind(this)
         // this.showItem = this.showItem.bind(this)
@@ -33,10 +34,10 @@ export class Cart extends Component{
     }
 
     componentDidMount(){
-        console.log("",this.props.torf)
+        console.log("did mount",this.props.content)
         const {coordinate, torf, content} = this.props
         if(torf == true){
-            if(content){
+            if(content.length !== 0){
                 var arr = [content[0][0]]
                 this.setState({ data: arr })
             }
@@ -52,10 +53,12 @@ export class Cart extends Component{
     componentDidUpdate(pP){
         if(pP.coordinate !== this.props.coordinate){
             if(this.props.torf == true){
-                var arr = [this.props.content[0][0]]
-                this.setState({
-                    data: this.state.data.concat(arr)
-                })
+                if(this.props.content.length !== 0){
+                    var arr = [this.props.content[0][0]]
+                    this.setState({
+                        data: this.state.data.concat(arr)
+                    })
+                }
                 // if(this.props.coordinate){
                 //     var array = [this.props.coordinate]
                 //     console.log("Array ", array)
@@ -98,12 +101,13 @@ export class Cart extends Component{
     }
 
     checkDataForPurchase(){
+        this.setState({ is_purchase: true })
         console.log("hudaldaj awah", this.state.data)
-        if(name !== ''){
+        if(this.state.data.length > 0){
             service.purchaseFromCart(this.state.data)
                 .then(({success, msg, payment}) => {
                     if(success){
-                        this.setState({ data: []})
+                        this.setState({ data: [], is_purchase: false })
                         setTimeout(() => {
                             // this.props.history.push(`/payment/purchase/${payment}/`)
                             window.location.href=`/payment/purchase/${payment}/`;
@@ -111,9 +115,13 @@ export class Cart extends Component{
                         console.log(msg)
                     }
                     if(!success){
+                        this.setState({ is_purchase: false })
                         alert(msg)
                     }
                 }).catch(error => alert(error.text))
+        }
+        else{
+            alert("Уучлаарай сагс хоосон байна")
         }
     }
 
@@ -144,9 +152,17 @@ export class Cart extends Component{
                         {this.div}
                     </ul>
                 </div>
-                <button type="button" className="btn gp-button-primary" onClick={() => this.checkDataForPurchase()}>
-                    Худалдаж авах
-                </button>
+                {this.state.is_purchase ?
+                    <button className="btn gp-btn-primary" disabled>
+                        <div className="spinner-border" role="status">
+                            <span className="sr-only"></span>
+                        </div>
+                        {} Түр хүлээнэ үү...
+                    </button> :
+                    <button className="btn gp-btn-primary" onClick={() => this.checkDataForPurchase()}>
+                        Худалдаж авах
+                    </button>
+                }
             </div>
         )
     }
