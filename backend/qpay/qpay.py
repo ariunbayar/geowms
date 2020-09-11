@@ -17,7 +17,6 @@ class Qpay():
         self.access_token = None
         self.token_type = None
         self.token_data = None
-        
         self.price = price
         self.token_url = 'https://api.qpay.mn/v1/payment/token'
         self.create_url = 'https://api.qpay.mn/v1/bill/create'
@@ -26,14 +25,13 @@ class Qpay():
 
         self.create_data = None
 
- 
     def authenticate(self):
 
         headers = {
                 **self.BASE_HEADERS,
         }
 
-        body = { 
+        body = {
             "client_id": settings.QPAY['CLIENT_ID'],
             "client_secret": settings.QPAY['CLIENT_SECRET'],
             "grant_type": "client",
@@ -47,13 +45,13 @@ class Qpay():
             self.access_token = self.token_data['access_token']
             self.token_type = self.token_data['token_type']
 
+        return self.access_token
 
     def create(self):
         headers = {
                 **self.BASE_HEADERS,
                 'Authorization': 'Bearer %s' % self.access_token
         }
-        
         data = {
                 "id": "CUST_001",
                 "register_no": "ddf",
@@ -62,7 +60,6 @@ class Qpay():
                 "phone_number":"99888899",
                 "note" : "davaa"
         }
-
         body = {
             "template_id": settings.QPAY['TEMPLATE_ID'],
             "merchant_id": settings.QPAY['MERCHANT_ID'],
@@ -89,16 +86,11 @@ class Qpay():
                 **self.BASE_HEADERS,
                 'Authorization': 'Bearer %s' % self.access_token
         }
-        
         body = {
             "merchant_id": settings.QPAY['MERCHANT_ID'],
             "bill_no": self.purhcase.geo_unique_number
         }
 
         rsp = requests.post(self.check_url, body, headers=headers)
-        print(rsp.json())
         if rsp.status_code == 200:
-            print(rsp.json())
-
-    
-
+            return rsp.json()

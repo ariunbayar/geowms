@@ -30,12 +30,26 @@ def create(request, payload):
     data = qpay.create()
     json_data = data.json()
     if data.status_code == 200:
-        return JsonResponse({'qPay_QRimage': json_data['qPay_QRimage'], "error_message": ''})
+        return JsonResponse({'qPay_QRimage': json_data['qPay_QRimage'], "error_message": '', 'success': False})
     else:
         if json_data['name'] == 'INVOICE_PAID':
-            return JsonResponse({'qPay_QRimage': '', "error_message": json_data['message']})
+            return JsonResponse({'qPay_QRimage': '', "error_message": json_data['message'], 'success': True})
 
-            
-    # qpay.check()
+
+@require_POST
+@ajax_required
+def check(request, payload):
+
+    purchase_id = payload.get('purchase_id')
+    purhcase = Payment.objects.filter(id=purchase_id).first()
+    qpay = Qpay(request, 0, purhcase)
+    #Токен үүсгэж байна.
+    qpay.authenticate()
+    data = qpay.check()
+    if data['payment_info']['payment_status'] == 'PAID':
+        return JsonResponse({'success': True, 'error_message':'Төлөгдсөн төлбөрийн дугаар'})
+    else:
+        return JsonResponse({'success': False, 'error_message':' '})
+
 
 

@@ -153,6 +153,7 @@ urlpatterns = [
 
     path('qpay/', include(([
         path('create/', qpay_views.create, name='create'),
+        path('check/', qpay_views.check, name='check'),
     ], 'qpay'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
