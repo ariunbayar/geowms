@@ -27,19 +27,13 @@ def index(request):
 @ajax_required
 def dictionaryRequest(request, payload):
     purchase_all = payload.get('purchase_all')
-    try:
-        # Хүсэлт илгээх xml датаг бэлтгэх
-        mbutil = MBUtil(purchase_all['total_amount'], purchase_all['description'])
-        finalRequest = mbutil.xmlConvert()
-        # Банкруу хүсэлт илгээж байна.
-        payReq = PaymentMethod(request, finalRequest)
-        paymentRequest = payReq.paymentMethod()
-    except Exception:
-        rsp = {
-            'success': False,
-            'message': "Алдаа гарсан байна."
-        }
-        return JsonResponse(rsp)
+    print(purchase_all['total_amount'])
+    # Хүсэлт илгээх xml датаг бэлтгэх
+    mbutil = MBUtil(purchase_all['total_amount'], purchase_all['description'])
+    finalRequest = mbutil.xmlConvert()
+    # Банкруу хүсэлт илгээж байна.
+    payReq = PaymentMethod(request, finalRequest)
+    paymentRequest = payReq.paymentMethod()
     # Хүсэлт илгээж байна
     if not paymentRequest:
         return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False})
