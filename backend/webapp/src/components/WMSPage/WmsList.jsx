@@ -90,8 +90,7 @@ export class WmsList extends Component {
         if (values.id) {
             service.update(values).then(({success, item}) => {
                 if (success){
-                    const currentPage=this.state.currentPage
-                    this.handleListCal(currentPage)
+                    this.paginate(1, "")
                 }
             })
 
@@ -99,12 +98,11 @@ export class WmsList extends Component {
 
             service.create(values).then(({success, item}) => {
                 if (success){
-                    const currentPage=this.state.currentPage
-                    this.handleListCal(currentPage)}
+                    this.paginate(1, "")
+            }
             })
 
         }
-
     }
 
     modalClose() {
@@ -114,8 +112,7 @@ export class WmsList extends Component {
     handleRemove(id) {
         service.remove(id).then(({success}) => {
             if (success) {
-                const currentPage=this.state.currentPage
-                this.handleListCal(currentPage)
+                this.paginate(1, "")
             }
         })
         this.modalClose()
