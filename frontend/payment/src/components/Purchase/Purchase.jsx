@@ -16,9 +16,11 @@ export class Purchase extends Component {
             names: [],
         }
     }
+
     componentDidMount(){
         const purchase_id = this.props.match.params.id
         service.purchaseAll(purchase_id).then(({ success, purchase_all, point_data, msg }) => {
+            console.log("haha",point_data)
                     if(success){
                         if (purchase_all) {
                             purchase_all.map(( purchase_all ) =>
@@ -32,7 +34,7 @@ export class Purchase extends Component {
                     else{
                         alert(msg)
                     }
-        })
+        }).catch(error => console.log(error))
     }
     handlePayment (){
         const purchase_id = this.props.match.params.id

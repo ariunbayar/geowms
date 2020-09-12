@@ -49,12 +49,9 @@ class ModalComponent extends Component{
         return (
             <div className="modal-dialog modal-dialog-scrollable trans" style={{zIndex:"101"}}>
                 <div className="modal-content">
-                    <div className="modal-header" onClick={this.props.handleClose}>
-                        <h5 className="modal-title">Дэлгэрэнгүй мэдээлэл</h5>
-                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" className="close border border-danger" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
                             <span aria-hidden="true">&times;</span>
                         </button>
-                    </div>
                     <div className="modal-body">
                         {!is_complete &&
                             <div className="d-flex align-items-center">
@@ -79,7 +76,7 @@ class ModalComponent extends Component{
                                     disabled = {is_button}
                                 >
                                     <i className="fa fa-shopping-cart"></i>
-                                    Сагсанд нэмэх
+                                    &nbsp; Сагсанд нэмэх
                                 </button>
                                 </div>
                                 <div className="col-4 col-sm-6 d-flex justify-content-center">
@@ -116,7 +113,6 @@ class ModalComponent extends Component{
                         </button>
                     </div>
                 </div>
-                <div className="modal-backdrop fade show"></div>
             </div>
         )
     }

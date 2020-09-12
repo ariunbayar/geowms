@@ -23,7 +23,6 @@ def create(request, payload):
 
     purhcase = Payment.objects.filter(id=purchase_id).first()
 
-
     qpay = Qpay(request, price, purhcase)
     #Токен үүсгэж байна.
     qpay.authenticate()

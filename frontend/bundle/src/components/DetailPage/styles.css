@@ -248,20 +248,26 @@ element.style {
 }
 
 .cart-size{
-    font-size: 24px;
-    color: aqua;
+    font-size: 40px;
+    margin-left: 5px;
+    color: white;
+    line-height: unset;
 }
 
 .cart-count{
-    color: aqua;
+    color: rgb(255, 255, 255);
     margin-top: -40px;
     margin-left: 15px;
 }
 
 .cart-count-span{
     padding: 5px;
+    font-size: 20px;
+    color: red;
     background-color: rgb(136, 81, 189);
     border-radius: 25px;
+    margin-left: -40px;
+    margin-bottom: 20px;
 }
 
 .cart-list{

@@ -140,29 +140,33 @@ export class Cart extends Component{
         }
         return(
             <div className="root">
-                <div ></div>
+                <div>
                 <div className="cart-list">
-                <i className="cart-count fa fa-shopping-cart cart-size cart"></i>
-                <div className="cart-count">
-                    <span className="cart-count-span">
-                        {this.state.data.length}
-                    </span>
+                    <i className="cart-count fa fa-shopping-cart cart-size cart" aria-hidden="true">
+                        <span classname="cart-count-span">
+                            {this.state.data.length}
+                        </span>
+                    </i>
                 </div>
+                <div>
                     <ul>
                         {this.div}
                     </ul>
                 </div>
-                {this.state.is_purchase ?
-                    <button className="btn gp-btn-primary" disabled>
-                        <div className="spinner-border" role="status">
-                            <span className="sr-only"></span>
-                        </div>
-                        {} Түр хүлээнэ үү...
-                    </button> :
-                    <button className="btn gp-btn-primary" onClick={() => this.checkDataForPurchase()}>
-                        Худалдаж авах
-                    </button>
-                }
+                    <div>
+                    {this.state.is_purchase ?
+                        <button className="btn gp-btn-primary" disabled>
+                            <div className="spinner-border" role="status">
+                                <span className="sr-only"></span>
+                            </div>
+                            {} Түр хүлээнэ үү...
+                        </button> :
+                        <button className="btn gp-btn-primary" onClick={() => this.checkDataForPurchase()}>
+                            Худалдаж авах
+                        </button>
+                    }
+                    </div>
+                </div>
             </div>
         )
     }
