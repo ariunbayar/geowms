@@ -1,7 +1,9 @@
+import requests
+from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 
@@ -21,6 +23,7 @@ def _get_wms_display(request, wms):
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+        'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }
 
@@ -264,3 +267,18 @@ def paginatedList(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+def proxy(request, wms_id):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    wms = get_object_or_404(WMS, pk=wms_id)
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    rsp = requests.get(wms.url, queryargs, headers=headers)
+    content = rsp.content
+    content_type = rsp.headers.get('content-type')
+    return HttpResponse(content, content_type=content_type)
