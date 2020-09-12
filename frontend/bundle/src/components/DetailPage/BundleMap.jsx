@@ -17,9 +17,8 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
-import {Modal} from './ShopControls/Modal'
+import {Modal} from './controls/Modal'
 import {DrawPayModal} from './controls/DrawPayModal'
-import {ShopCart} from './ShopControls/ShopCart'
 import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
@@ -47,9 +46,6 @@ export default class BundleMap extends Component {
             draw_layer: null,
             draw: null,
             source_draw: null,
-            is_cart: false,
-            y: null,
-            x: null,
         }
 
         this.controls = {
@@ -57,7 +53,6 @@ export default class BundleMap extends Component {
             modal: new Modal(),
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
-            cart: new ShopCart(),
             searchbar: new SearchBar(),
         }
 
@@ -74,7 +69,6 @@ export default class BundleMap extends Component {
         this.toggleDraw = this.toggleDraw.bind(this)
         this.toggleDrawed = this.toggleDrawed.bind(this)
         this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
-        this.cartButton = this.cartButton.bind(this)
     }
 
     initMarker() {
@@ -237,7 +231,6 @@ export default class BundleMap extends Component {
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
-                this.controls.cart,
                 this.controls.searchbar,
             ]),
             layers: [
@@ -266,18 +259,15 @@ export default class BundleMap extends Component {
     handleMapClick(event) {
 
         this.marker.point.setCoordinates(event.coordinate)
-        console.log("coord", event.coordinate)
+
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
-        console.log("maap_coord", map_coord)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-        const y = coordinateFormat(map_coord, '{y}', 6)
-        const x = coordinateFormat(map_coord, '{x}', 6)
-
-        this.setState({coordinate_clicked, x, y})
+        this.setState({coordinate_clicked})
 
         this.showFeaturesAt(event.coordinate)
+
     }
 
     showFeaturesAt(coordinate) {
@@ -305,6 +295,7 @@ export default class BundleMap extends Component {
                 if (url) {
 
                     this.controls.modal.showModal(null, false)
+
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
@@ -323,7 +314,7 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            this.controls.modal.showModal(feature_info, true, this.cartButton)
+                            this.controls.modal.showModal(feature_info, true)
                         })
                 } else {
                     /* TODO */
@@ -391,13 +382,6 @@ export default class BundleMap extends Component {
         {
             const lastFeature = features[features.length - 1];
             this.state.source_draw.removeFeature(lastFeature);
-        }
-    }
-
-    cartButton(is_cart, content){
-        console.log(this.state.coordinate_clicked)
-        if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content)
         }
     }
 

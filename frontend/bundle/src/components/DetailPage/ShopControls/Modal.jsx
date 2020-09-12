@@ -118,7 +118,7 @@ class ModalComponent extends Component{
     }
 }
 
-export class Modal extends Control {
+export class ShopModal extends Control {
 
     constructor(opt_options) {
 
