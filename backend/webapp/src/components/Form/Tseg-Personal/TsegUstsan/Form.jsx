@@ -109,7 +109,7 @@ export class FormTseg extends Component {
                     this.optionVal(items)
                 }
                 else{
-                    this.setState({ tseg_dugaar_error: true, checkError: this.state.error  })
+                    this.setState({ tseg_dugaar_error: true, checkError: error })
                 }
             })
             // .catch(error => {
@@ -321,7 +321,7 @@ export class FormTseg extends Component {
                     const error_bn = Object.keys(checkError).length > 0
                     return (
                     <Form>
-                        <div className="col-md-12 mb-4">
+                        <div className="col-md-12 mb-4 mt-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
@@ -404,6 +404,7 @@ export class FormTseg extends Component {
                                                 name="tsegiin_dugaar"
                                                 type="text"
                                                 id="tsegiin_dugaar"
+                                                autoComplete="off"
                                                 list="tsegList"
                                                 className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
@@ -746,12 +747,11 @@ export class FormTseg extends Component {
                             </tbody>
                         </table>
                         <div>
-                            <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
-                                disabled={isSubmitting || has_error || error_bn}>
-                                {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                {!isSubmitting && (id == -1)?'Нэмэх': 'засах'}
-                            </button>
+                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
+                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                    {!isSubmitting && 'Нэмэх' }
+                        </button>
                         </div>
                         <datalist id="tsegList">
                             {this.datalist}

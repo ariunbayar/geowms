@@ -9,22 +9,25 @@ export default class Forms extends Component {
 
     constructor(props) {
         super(props)
+        this.datalist = []
+        this.error_msg = []
+        this.x = []
         this.state = {
             id: '',
             values:{
-                tesgiin_ner: '',
-                toviin_dugaar: '',
                 suljeenii_torol: '',
                 sudalga_or_shine: '',
-                hors_shinj_baidal: '',
-                ondor: '',
                 date: '',
                 hotolson: '',
                 alban_tushaal: '',
                 alban_baiguullga: '',
                 center_typ: '',
+                ondor: '',
                 pid: '',
             },
+            tesgiin_ner: '',
+            toviin_dugaar: '',
+            hors_shinj_baidal: '',
             BA:'',
             BB:'',
             BC:'',
@@ -41,6 +44,7 @@ export default class Forms extends Component {
             real_sum: '',
             aimag_name: '',
             sum_ners: '',
+            point_class: '',
             file_path1: null,
             file_path11: null,
             file_path1_error: false,
@@ -58,10 +62,15 @@ export default class Forms extends Component {
             name_error: false,
             id_error: false,
             error_msg: '',
+            hors_error:false,
+            names:[],
+            points_ids:[],
+            hors_shinj_baidal_list:[],
+            checkError: [],
+            error:{error:''},
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
-        this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
         this.handleOnchange = this.handleOnchange.bind(this)
@@ -69,25 +78,79 @@ export default class Forms extends Component {
         this.handleBoxOver = this.handleBoxOver.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.handleCoordinatCheck = this.handleCoordinatCheck.bind(this)
+        this.handleSearchWithName = this.handleSearchWithName.bind(this)
     }
     handleBoxOver (e){
         this.setState({ showBox: true })
-    }
-    handleInput(e){
-        this.setState({
-            [e.target.name]:e.target.value,
-        })
     }
 
     handleBoxLeave(e){
         this.setState({ showBox: false })
     }
+
     componentDidMount(){
-        const id = this.props.match.params.id
-        if(id) {
-            this.setState({id})
-            this.tsegUpdate(id)
+    }
+
+    optionVal(items){
+        this.datalist = []
+        items.map((item, key) => {
+            this.datalist.push(<option key={key} value={item.tseg}></option>)
+        })
+    }
+
+    handleSearchWithName(field, e) {
+        this.setState({ [field]: e.target.value })
+        if(e.target.value.length == 0){
+            this.error_msg = []
+            this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
+            if(this.error_msg.length > 0){
+                this.setState({ checkError: this.state.error })
+            }
         }
+        else{
+            this.error_msg = []
+        }
+        if(e.target.value.length >= 1){
+            const error = this.state.error
+            this.error_msg = []
+            this.setState({ checkError: this.state.error })
+            service.searchTsegName(e.target.name, e.target.value).then(({hors_shinj_baidal_list, point_ids, names}) => {
+                if(names){
+                    this.setState({names, name_error:true, checkError: error})
+                    this.optionVal(names)
+                }
+                else if(names == false){
+                    this.setState({ name_error: false, checkError:[]})
+                }
+
+                else if(point_ids){
+                    this.setState({point_ids, id_error:true, checkError: error})
+                    this.optionVal(point_ids)
+                }
+                else if(point_ids == false){
+                    this.setState({ id_error: false , checkError:[] })
+                }
+
+                else if(hors_shinj_baidal_list){
+                    this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
+                    this.optionVal(hors_shinj_baidal_list)
+                }
+                else{
+                    this.setState({ hors_error: true, checkError: error})
+                }
+            })
+            // .catch(error => {
+            //     console.log("Алдаа гарсан байна. " ,error.text)
+            //     this.props.history.push('/back/froms/')
+            // })
+        }
+
+    }
+
+    handleInput(e){
+        this.setState({
+            [e.target.name]:e.target.value,
+        })
     }
 
     handleOnchange(e){
@@ -131,7 +194,6 @@ export default class Forms extends Component {
 
     handleXY(values, info, success){
         if(success){
-            alert(success)
             this.setState({
                 latlongy:values[0],
                 latlongx:values[1],
@@ -147,8 +209,14 @@ export default class Forms extends Component {
                 LB: info[0].LB,
                 LC: info[0].LC
             })
-            const barishil_tuhai = info[0]['aimag'] + ', ' + info[0].sum
-            this.setState({barishil_tuhai})
+            if(info[0]['aimag'] == 'Улаанбаатар'){
+                const barishil_tuhai = info[0]['aimag'] +' '+ 'хотын'
+                this.setState({barishil_tuhai})
+            }
+            else{
+                const barishil_tuhai = info[0]['aimag'] +' '+ 'аймгийн' +' '+ info[0].sum +' '+ 'сум' 
+                this.setState({barishil_tuhai})
+            }
         }
         else{
             this.setState({
@@ -171,6 +239,7 @@ export default class Forms extends Component {
             }, 2000);
         }
     }
+
     onDrop([icon], name) {
         if(icon){
             let reader = new FileReader();
@@ -207,12 +276,12 @@ export default class Forms extends Component {
         const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
-        form_datas.append('tesgiin_ner', this.state.values.tesgiin_ner)
+        form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
         form_datas.append('idx', this.state.id)
-        form_datas.append('trapetsiin_dugaar', trapetsiin_dugaar)
-        form_datas.append('toviin_dugaar', this.state.values.toviin_dugaar)
-        form_datas.append('ondor', parseFloat(this.state.values.ondor))
+        form_datas.append('trapetsiin_dugaar',trapetsiin_dugaar)
+        form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
+        form_datas.append('ondor', parseFloat(this.state.values.ondor))
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
@@ -222,10 +291,11 @@ export default class Forms extends Component {
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
         form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
+        form_datas.append('point_class', this.state.point_class)
         form_datas.append('bairshil_tseg_oiroos_img_url', this.state.bairshil_tseg_oiroos_img_url)
         form_datas.append('bairshil_tseg_holoos_img_url', this.state.bairshil_tseg_holoos_img_url)
         form_datas.append('sudalga_or_shine', this.state.values.sudalga_or_shine)
-        form_datas.append('hors_shinj_baidal', this.state.values.hors_shinj_baidal)
+        form_datas.append('hors_shinj_baidal', this.state.hors_shinj_baidal)
         form_datas.append('date', this.state.values.date)
         form_datas.append('BA', this.state.BA)
         form_datas.append('LA', this.state.LA)
@@ -266,54 +336,8 @@ export default class Forms extends Component {
         })
     }
 
-    tsegUpdate(id){
-        service.updateTseg(id).then(({tseg_display}) =>{
-            if(tseg_display){
-                tseg_display.map((item, idx) =>
-                    this.setState({
-                        values : {
-                            ...this.state.values,
-                            tesgiin_ner: item.point_name,
-                            pid: item.pid,
-                            toviin_dugaar: item.point_id,
-                            center_typ: item.center_typ,
-                            suljeenii_torol: item.point_type,
-                            ondor: item.ondor,
-                            sudalga_or_shine: item.sudalga_or_shine,
-                            hors_shinj_baidal: item.hors_shinj_baidal,
-                            date: item.date,
-                            hotolson: item.hotolson,
-                            alban_tushaal: item.alban_tushaal,
-                            alban_baiguullga: item.alban_baiguullga,
-                        },
-                        LA:item.LA,
-                        LB:item.LB,
-                        LC:item.LC,
-                        BA:item.BA,
-                        BB:item.BB,
-                        BC:item.BC,
-                        zone:item.zone,
-                        cc:item.cc,
-                        latlongx: item.latlongx,
-                        latlongy: item.latlongy,
-                        sum_name: item.sum,
-                        aimag_name: item.aimag,
-                        trapetsiin_dugaar: item.point_type,
-                        barishil_tuhai: item.barishil_tuhai,
-                        tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
-                        tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
-                        bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
-                        bairshil_tseg_holoos_img_url_zurag: item.bairshil_tseg_holoos_img_url,
-                        file_path11: item.file_path1,
-                        file_path22: item.file_path2,
-                    })
-                )
-            }
-        } )
-    }
-
     render() {
-        const {error_msg} = this.state
+       const error_msg = this.state.error_msg
         return (
         <Formik
             enableReinitialize
@@ -334,17 +358,19 @@ export default class Forms extends Component {
         }) => {
             const has_error = Object.keys(errors).length > 0
             return (
-                <Form>
-                    <div className="row container  my-1 ml-1">
-                        <div className="float-left mt-5 pt-3">
+                <Form >
+                    <div className="row container  m-l">
+                        <div className="float-left">
                             <Maps
-                            handleXY={this.handleXY}
+                                handleXY={this.handleXY}
+                                coordinatCheck={false}
+                                x={this.x}
                             />
                         </div>
                         <div className="col-md-12 mb-4 mt-4 pl-0">
-                            <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
+                            <a href="#" className="btn gp-outline-primary " onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
-                            </a>
+                            </a>    
                         </div>
                         <div
                             style={{right:'0'}}
@@ -358,27 +384,40 @@ export default class Forms extends Component {
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">1</th>
                                     <th style={{width: "15%"}}>Цэгийн нэр</th>
-                                    <td>
-                                        <Field
-                                            className={'form-control ' + (errors.tesgiin_ner ? 'is-invalid' : '')}
-                                            name='tesgiin_ner'
-                                            id="id_tesgiin_ner"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="tesgiin_ner" component="div" className="invalid-feedback"/>
-                                            {this.state.name_error ? <a className='text-danger'>Давхцаж байна.</a> : null}
+                                    <td  scope="rowgroup">
+                                        {this.state.name_error ? <a className="text-danger">Цэгийн нэр давхцаж байна !!!</a> : this.state.tesgiin_ner == '' ? '' : ''}
+                                        <div className="input-group">
+                                            <input
+                                                name="tesgiin_ner"
+                                                type="text"
+                                                id="tesgiin_ner"
+                                                list="tsegList"
+                                                autoComplete="off"
+                                                className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
+                                                value = {this.state.tesgiin_ner}
+                                            />
+                                        </div>
+                                        
                                     </td>
                                     <th style={{width: "5%"}} scope="row">2</th>
                                     <th>Төвийн дугаар</th>
-                                    <td>
-                                        <Field
-                                            className={'form-control ' + (errors.toviin_dugaar ? 'is-invalid' : '')}
-                                            name='toviin_dugaar'
-                                            id="id_toviin_dugaar"
-                                            type="number"
-                                        />
-                                        {this.state.id_error ? <a className='text-danger'>Давхцаж байна.</a>  : null}
-                                        <ErrorMessage name="toviin_dugaar" component="div" className="invalid-feedback"/>
+                                    <td  scope="rowgroup">
+                                        {this.state.id_error ? <a className="text-danger">Төвийн дугаар давхцаж байна !!! </a> : this.state.toviin_dugaar == '' ? '' : ''}
+                                        <div className="input-group">
+                                            <input
+                                                name="toviin_dugaar"
+                                                type="text"
+                                                id="toviin_dugaar"
+                                                list="tsegList"
+                                                autoComplete="off"
+                                                className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
+                                                value = {this.state.toviin_dugaar}
+                                            />
+                                            <div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -395,40 +434,60 @@ export default class Forms extends Component {
                                             value={(this.state.trapetsiin_dugaar == ''? '' : `${this.state.trapetsiin_dugaar}` + '- ' + `${this.state.zone}` + ' -' + `${this.state.cc}`)}
                                         />
                                     </td>
-                                    <th rowSpan="2" style={{width: "5%"}} scope="row">4</th>
+                                    <th style={{width: "5%"}} scope="row" rowSpan="2">4</th>
                                     <th>Сүлжээний төрөл</th>
                                     <td>
                                         <Fragment>
                                             <Field name="suljeenii_torol" as="select" className="form-control"
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">GPS-ийн сүлжээний цэг</option>
-                                                <option value="2">Гравиметрийн сүлжээний Цэг</option>
-                                                <option value="3">Өндрийн сүлжээний цэг</option>
-                                                <option value="4">Триангуляцийн сүлжээний цэг</option>
-                                                <option value="5">Полигометрийн сүлжээний цэг</option>
-                                                <option value="6">Зураглалын сүлжээний цэг</option>
-                                                <option value="7">GNSS-ийн байнгын ажиллагаатай станц</option>
+                                                <option value="2">GPS-ийн сүлжээ</option>
+                                                <option value="3">Гравиметрийн сүлжээ</option>
+                                                <option value="4">Өндрийн сүлжээ</option>
+                                                <option value="5">Триангуляцийн сүлжээ</option>
+                                                <option value="6">Полигометрийн сүлжээ</option>
+                                                <option value="7">Зураглалын сүлжээ</option>
+                                                <option value="8">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Зэрэг</th>
-                                    <td>
+                                <th>Зэрэг</th>
+                                    {values.suljeenii_torol == '2' ? 
+                                        <td>
                                         <Fragment>
                                             <Field name="center_typ" as="select" className="form-control"
                                             className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                                <option value="4">4</option>
+                                                <option value="1">AA анги</option>
+                                                <option value="2">A анги</option>
+                                                <option value="3">B анги</option>
+                                                <option value="4">C анги</option>
+                                                <option value="5">I зэрэг</option>
+                                                <option value="6">II зэрэг</option>
+                                                <option value="7">III зэрэг</option>
+                                            </Field>
+                                            <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
+                                        </Fragment>
+                                    </td> :
+                                        <td>
+                                        <Fragment>
+                                            <Field name="center_typ" as="select" className="form-control"
+                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                <option>...</option>
+                                                <option value="1">1 анги</option>
+                                                <option value="2">2 анги</option>
+                                                <option value="3">3 анги</option>
+                                                <option value="4">4 анги</option>
+                                                <option value="5">I зэрэг</option>
+                                                <option value="6">II зэрэг</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
                                         </Fragment>
                                     </td>
+                                    }
                                 </tr>
 
                                 <tr>
@@ -443,6 +502,7 @@ export default class Forms extends Component {
                                             type="text"
                                             value={this.state.aimag_name}
                                         />
+
                                     </td>
                                     <th>Сум</th>
                                     <td colSpan="2" scope="rowgroup">
@@ -456,18 +516,19 @@ export default class Forms extends Component {
                                         />
                                     </td>
                                 </tr>
+
                                 <tr>
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">
-                                        Солбилцол WGS-84 /UTM/
+                                        Солбилцол WGS-84 /DMS/
                                         <button className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
                                             Шалгах
                                         </button>
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг -B</th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг -L</th>
+                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг(B)</th>
+                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг(L)</th>
                                 </tr>
                                 <tr>
                                     <td colSpan="2" className="pl-3">
@@ -554,6 +615,7 @@ export default class Forms extends Component {
                                             type="button"
                                             onMouseOver={(e) => this.handleBoxOver(e)}
                                             onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                            style={{backgroundColor:"white"}}
                                             className="float-right"
                                         >
                                         <i className="fa fa-exclamation-circle float-right">
@@ -569,8 +631,12 @@ export default class Forms extends Component {
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">ойроос</th>
-                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">холоос</th>
+                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
+                                        ойроос
+                                    </th>
+                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
+                                        холоос
+                                    </th>
                                 </tr>
                                 <tr>
                                     <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
@@ -623,12 +689,15 @@ export default class Forms extends Component {
                                             onChange = {(e) => this.handleInput(e)}
                                             value={this.state.barishil_tuhai}
                                         />
-
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>9. Байршлын тойм зураг</th>
-                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>10. Төв цэгийн хэлбэр</th>
+                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>
+                                        9. Байршлын тойм зураг
+                                    </th>
+                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>
+                                        10. Төв цэгийн хэлбэр
+                                    </th>
                                 </tr>
                                 <tr>
                                     <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
@@ -683,14 +752,22 @@ export default class Forms extends Component {
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">12.</th>
                                     <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.hors_shinj_baidal ? 'is-invalid' : '')}
-                                            name='hors_shinj_baidal'
-                                            id="id_hors_shinj_baidal"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="hors_shinj_baidal" component="div" className="invalid-feedback"/>
+                                    <td colSpan="4" scope="rowgroup">
+                                    {this.state.hors_error ? <a className="text-danger">Бүртгэлгүй хөрсний мэдээлэл байна</a> : ''}
+                                        <div className="input-group"> 
+                                            <input
+                                                name="hors_shinj_baidal"
+                                                type="text"
+                                                id="hors_shinj_baidal"
+                                                list="tsegList"
+                                                autoComplete="off"
+                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
+                                                value = {this.state.hors_shinj_baidal}
+                                            />
+                                            <div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -706,7 +783,7 @@ export default class Forms extends Component {
                                         <ErrorMessage name="date" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
-                                { values.suljeenii_torol == '1' ?
+                                {values.suljeenii_torol == '2' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
@@ -715,7 +792,7 @@ export default class Forms extends Component {
                                         <input
                                             type="file"
                                             className={'form-control ' + (this.state.file_path1_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '1' ? false : true}
+                                            disabled={values.suljeenii_torol == '2' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                         />
                                         {this.state.file_path1_error > 0 ?
@@ -728,8 +805,8 @@ export default class Forms extends Component {
                                         </ul>
                                         : null}
                                     </td>
-                                </tr> : null }
-                                  { values.suljeenii_torol == '1' ?
+                                </tr>: null}
+                                {values.suljeenii_torol == '2' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
@@ -739,7 +816,7 @@ export default class Forms extends Component {
                                             type="file"
                                             className="form-control"
                                             className={'form-control ' + (this.state.file_path2_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '1' ? false : true}
+                                            disabled={values.suljeenii_torol == '2' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                         />
                                         {this.state.file_path2_error > 0 ?
@@ -753,7 +830,8 @@ export default class Forms extends Component {
                                         : null}
 
                                     </td>
-                                </tr> : null}
+                                </tr>
+                                : null}
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">16.</th>
                                     <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
@@ -781,7 +859,7 @@ export default class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="1" scope="rowgroup">17.</th>
+                                    <th colSpan="1" scope="rowgroup">18.</th>
                                     <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
                                     <td colSpan="3" scope="rowgroup">
                                         <Field
@@ -796,7 +874,7 @@ export default class Forms extends Component {
                             </tbody>
                         </table>
                         <div className="span3">
-                            {has_error
+                            {has_error 
                                 ?
                                     <p> </p>
                                 : status == 'saved' && !dirty &&
@@ -805,12 +883,15 @@ export default class Forms extends Component {
                                     </p>
                             }
                             <div>
-                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
+                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                     {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                     {!isSubmitting && 'Нэмэх' }
                                 </button>
                             </div>
+                            <datalist id="tsegList">
+                                {this.datalist}
+                            </datalist>
                         </div>
                     </div>
                  </Form>

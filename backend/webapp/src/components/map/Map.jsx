@@ -20,7 +20,7 @@ export default class Maps extends Component {
 
     constructor(props) {
         super(props)
-
+        this.map={}
         this.state = {
             projection: 'EPSG:3857',
             projection_display: 'EPSG:4326',
@@ -31,7 +31,7 @@ export default class Maps extends Component {
             draw_layer: null,
             draw: null,
             source_draw: null,
-            info:[]
+            info:[],
         }
 
         this.controls = {
@@ -43,6 +43,7 @@ export default class Maps extends Component {
         this.handleMapClick = this.handleMapClick.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+       // this.handMarker = this.handMarker.bind(this)
     }
 
     initMarker() {
@@ -161,16 +162,15 @@ export default class Maps extends Component {
         map.on('click', this.handleMapClick)
 
         this.map = map
-
     }
 
-    handleMapClick(event) {
-        this.marker.point.setCoordinates(event.coordinate)
-        const projection = event.map.getView().getProjection()
-        const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
-        const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
-        this.setState({coordinate_clicked})
-        this.showFeaturesAt(coordinate_clicked)
+    handleMapClick(event) { 
+            this.marker.point.setCoordinates(event.coordinate)
+            const projection = event.map.getView().getProjection()
+            const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+            const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
+            this.setState({coordinate_clicked})
+            this.showFeaturesAt(coordinate_clicked)
     }
 
     showFeaturesAt(coordinate) {
@@ -183,12 +183,20 @@ export default class Maps extends Component {
         }
         else{
             service.findSum(array).then(({success, info}) => {
-                console.log(info)
                 this.props.handleXY(array, info, success)
              })
         }
-    }
 
+    }
+    
+    handleSetCenter(coord) {
+
+        const view = this.map.getView()
+        const map_projection = view.getProjection()
+        const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+        this.marker.point.setCoordinates(map_coord)
+        view.setCenter(map_coord)
+    }
     render() {
         return (
             <div>

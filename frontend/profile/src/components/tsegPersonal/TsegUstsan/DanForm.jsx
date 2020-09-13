@@ -54,7 +54,6 @@ export class DanForm extends Component {
         this.handleSearchWithTseg = this.handleSearchWithTseg.bind(this)
         this.optionVal = this.optionVal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.checkAldaa = this.checkAldaa.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
         this.showMore = this.showMore.bind(this)
@@ -113,15 +112,6 @@ export class DanForm extends Component {
         })
     }
 
-    checkAldaa(){
-        const error = this.state.tseg_dugaar_error
-        if(error == true){
-            this.setState({ tseg_dugaar_error: true, checkError: error })
-        }
-        else{
-            this.setState({ tseg_dugaar_error:false , checkError:[] })
-        }
-    }
 
     showMore(){
         this.setState({showMore: !this.state.showMore})
@@ -558,12 +548,11 @@ export class DanForm extends Component {
                             </tbody>
                         </table>
                         <div>
-                        <button type="submit" className="btn gp-btn-primary" onClick={this.checkAldaa}
-                            disabled={isSubmitting || has_error || error_bn || bairlal_error}>
-                            {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                            {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                            {!isSubmitting && 'Нэмэх'}
-                        </button>
+                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
+                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                    {!isSubmitting && 'Нэмэх' }
+                                </button>
                         </div>
                         <datalist id="tsegList">
                             {this.datalist}

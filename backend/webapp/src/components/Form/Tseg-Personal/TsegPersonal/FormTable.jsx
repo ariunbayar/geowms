@@ -68,15 +68,16 @@ export default class FormTable extends Component {
 
 
     render() {
+
         const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ,aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
                 <th>{idx + 1}</th>
                 <th>{point_name}</th>
-                <th>{pid}</th>
+                <th>{point_id}</th>
                 <th>{this.state.point_class}</th>
-                <th>{this.state.point_type}</th>
+                <th>{ point_type > 4 && point_type ? <a>{point_type} зэрэг</a> : point_type < 4 && point_type ? <a>{point_type} анги</a> :''} </th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 <th>
@@ -92,7 +93,7 @@ export default class FormTable extends Component {
                         <Modal
                             modalClose={this.handleModalDeleteClose}
                             modalAction={this.props.handleRemove}
-                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            text={`Та "${point_name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
                         />
                     }
@@ -120,7 +121,7 @@ export default class FormTable extends Component {
                         <Modal
                             modalClose={this.handleModalSuccessClose}
                             modalAction={this.props.handleSuccess}
-                            text={`Та "${point_name }" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
+                            text={`Та "${point_name}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
                             title="Баталгаажуулах"
                             actionName="Баталгаажуул"
                         />
