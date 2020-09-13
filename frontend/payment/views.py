@@ -17,6 +17,7 @@ from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
 
+
 import uuid
 
 def index(request):
@@ -200,7 +201,7 @@ def purchaseFromCart(request, payload):
     for user in userList:
         userID = user.id
     # mpoint = Mpoint_view.objects.using('postgis_db').filter()
-    amount = 1000
+    amount = settings.PURCHASE['point_price']
     total_amount = amount * len(datas)
 
     try:

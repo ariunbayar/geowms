@@ -5,38 +5,16 @@ export class HistoryTable extends Component {
         const idx = this.props.idx
         const {id, geo_unique_number, total_amount, description, created_at, is_success, success_at, bank_unique_number}=this.props.values
         return (
-            <tr>
-                <td>
-                    {idx}
-                </td>
-                <td>
-                    {id}
-                </td>
-                <td>
-                    {geo_unique_number}
-                </td>
-                <td>
-                    {total_amount}
-                </td>
-                <td>
-                    {description}
-                </td>
-                <td>
-                    {created_at}
-                </td>
-                <td>
-                    {is_success}
-                </td>
-                <td>
-                    {success_at}
-                </td>
-                <td>
-                    {bank_unique_number}
-                </td>
-                <td>
-                    <a className="btn gp-btn-primary" href='#' onClick={this.props.handleDownload}>Татах</a>
-                </td>
-            </tr>
+            <div className="col-4 my-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class={ is_success ? "card-title text-success" : "card-title text-danger"}>{geo_unique_number}</h5>
+                        <p class="card-text">{description}</p>
+                        <p class="card-text">Нийт үнэ {total_amount}</p>
+                        <a className="btn gp-btn-primary" href='#' onClick={this.props.handleDownload}>Татах</a>
+                    </div>
+                </div>
+            </div>
         )
     }
 }

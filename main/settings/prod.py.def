@@ -48,6 +48,13 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 
+
+
+PURCHASE = {
+    'point_price': 1000,
+}
+
+
 PAYMENT = {
     'SIGN_KEY_LOCATION': '',
     'DES3_ENCRYPTION_KEY': ''
