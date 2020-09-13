@@ -282,3 +282,57 @@ def proxy(request, wms_id):
     content = rsp.content
     content_type = rsp.headers.get('content-type')
     return HttpResponse(content, content_type=content_type)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_geo(requist, payload):
+    wms_id = payload.get('id')
+    code = payload.get('code')
+
+    item = WMSLayer.objects.filter(wms_id=wms_id, code=code).first()
+    items = []
+    items.append({
+        'schema': item.geodb_schema,
+        'pk_field': item.geodb_pk_field,
+        'export_field': item.geodb_export_field,
+        'price': item.feature_price,
+        'table': item.geodb_table,
+    })
+    rsp = {
+        'success': True,
+        'items': items
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def save_geo(request, payload):
+    datas = payload.get('data')
+    wms_id = payload.get('id')
+    code = payload.get('code')
+    schema = None
+    pk_field = None
+    export_field = None
+    price = None
+    table = None
+    schema = str(datas[0]['schema'])
+    pk_field = str(datas[0]['pk_field'])
+    export_field = str(datas[0]['export_field'])
+    price = int(datas[0]['price'])
+    table = str(datas[0]['table'])
+
+    WMSLayer.objects.filter(wms_id=wms_id, code=code).update(
+        geodb_schema = schema,
+        geodb_table = table,
+        geodb_pk_field = pk_field,
+        geodb_export_field = export_field,
+        feature_price = price,
+    )
+    rsp = {
+        'success': True
+    }
+    return JsonResponse(rsp)

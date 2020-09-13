@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import {service} from './service'
+import GeoData from "./GeoData"
 
 export default class WMSCheckFormTable extends Component {
 
@@ -11,9 +12,11 @@ export default class WMSCheckFormTable extends Component {
             wmsId: props.wmsId,
             title: props.layer.title || '',
             titleDisabled: false,
+            toggleButton: false,
         }
         this.titleSave = this.titleSave.bind(this)
         this.handleChange = this.handleChange.bind(this);
+        this.openGeoData = this.openGeoData.bind(this)
     }
 
     componentDidMount() {
@@ -51,9 +54,12 @@ export default class WMSCheckFormTable extends Component {
         this.setState({title: event.target.value});
     }
 
+    openGeoData(){
+        this.setState({ toggleButton: !this.state.toggleButton })
+    }
 
     render() {
-        const {layer, wmsId, title, titleDisabled} = this.state
+        const { layer, wmsId, title, titleDisabled, toggleButton } = this.state
         return (
 
             <tr>
@@ -63,6 +69,30 @@ export default class WMSCheckFormTable extends Component {
                 <td >
                     <input type="text" name={name} value={title}  onChange={this.handleChange} disabled = {(this.state.titleDisabled)? "" : "disabled"}/>
                 </td>
+                <td>
+                    <a href="#" onClick={() => this.openGeoData()} data-toggle="tooltip" data-placement="top" title="geo">
+                        {
+                            toggleButton
+                            ?
+                            <i className="fa fa-window-close-o" aria-hidden="true"></i>
+                            :
+                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        }
+                    </a>
+                        {
+                            toggleButton
+                            ?
+                                <GeoData
+                                    wmsId = {wmsId}
+                                    handleClose = {this.openGeoData}
+                                    handleChange = {() => this.handleChange()}
+                                    code = {layer.name}
+                                >
+                                </GeoData>
+                            :
+                            null
+                        }
+                </td>
                 <td >
                     {titleDisabled ?
                     <a href="#" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
@@ -71,7 +101,6 @@ export default class WMSCheckFormTable extends Component {
                     <a href="#" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </a>
-
                     }
                 </td>
                 <td >

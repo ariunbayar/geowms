@@ -15,7 +15,9 @@ export const service = {
     detail,
     wmsIsActiveUpdate,
     pagination,
-    paginatedList
+    paginatedList,
+    getData,
+    saveData,
 }
 
 const prefix = '/back'
@@ -206,4 +208,22 @@ function getLayers(wms_url) {
             })
             .catch(reject)
     })
+}
+
+function getData(id, code) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, code}),
+    }
+
+    return fetch(`${prefix}/wms/get-geo/`, opts).then(handleResponse)
+}
+
+function saveData(data, id, code) {
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({data, id, code}),
+    }
+
+    return fetch(`${prefix}/wms/save-geo/`, opts).then(handleResponse)
 }
