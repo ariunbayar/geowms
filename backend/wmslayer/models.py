@@ -18,6 +18,11 @@ class WMSLayer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     sort_order = models.PositiveIntegerField()
 
+    geodb_schema = models.CharField(max_length=200, null=True)
+    geodb_table = models.CharField(max_length=200, null=True)
+    geodb_pk_field = models.CharField(max_length=200, null=True)
+    geodb_export_field = models.CharField(max_length=200, null=True)
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.sort_order = WMSLayer.objects.count()
