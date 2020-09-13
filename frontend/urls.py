@@ -50,7 +50,9 @@ urlpatterns = [
         path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
-        path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart')
+        path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
+        path('api/download-purchase/<int:pk>/', payment_views.download_purchase),
+
     ], 'payment'))),
 
     path('profile/api/', include(([
@@ -60,7 +62,7 @@ urlpatterns = [
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
     ], 'profile'))),
 
-    re_path('^.*', payment_views.index, name='payment'),
-    re_path('^.*', profile_views.history, name='history'),
+    re_path('^payment/.*', payment_views.index, name='payment'),
+    re_path('^profile/.*', profile_views.history, name='history'),
 
 ]
