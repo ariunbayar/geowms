@@ -1,5 +1,5 @@
 import os
-
+from django.db import connection
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from zipfile import ZipFile
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
@@ -85,24 +86,43 @@ def purchaseDraw(request, payload):
     return JsonResponse({'payment_id': payment.id})
 
 
+def get_all_file_paths(directory):
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files: 
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+
+    return file_paths
+
+
+def get_all_file_remove(directory): 
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            if filename != 'export.zip':
+                filepath = os.path.join(root, filename)
+                os.remove(filepath)
+
+
 def _export_shp(payment):
-    import os # This is is needed in the pyqgis console also
     import sys
     sys.path.append('/usr/lib/python3/dist-packages/')
     from qgis.utils import iface
     from qgis.core import \
         QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
 
-    url = '../../geoportal_app/files/payment/'
-
     fields = QgsFields()
 
     qgs = QgsApplication([], False)
     QgsApplication.setPrefixPath("/usr", True)
     QgsApplication.initQgis()
-
     uri = QgsDataSourceUri()
-    uri.setConnection("localhost", "5432", "geoportal", "postgres", "geo")
+    uri.setConnection("localhost", "5432", "geoportal", "postgres", connection.settings_dict['PASSWORD'])
 
     sql = """
     select
@@ -127,11 +147,26 @@ def _export_shp(payment):
     else:
         print("Layer success to load!")
 
-        writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, url + 'shp1.shp', 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+        path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+        os.mkdir(path)
+        filename = os.path.join(path, 'shp2.shp')
 
+        writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+
+        file_paths = get_all_file_paths(path)
+
+        zip_path = os.path.join(path, 'export.zip')
+        with ZipFile(zip_path,'w') as zip:
+            for file in file_paths:
+                zip.write(file, os.path.basename(file))
+
+        get_all_file_remove(path)
+        payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
+        payment.save()
         del(writer)
 
     qgs.exitQgis()
+    return os.path.join(path, 'export.zip')
 
 
 @require_GET
@@ -141,9 +176,7 @@ def download_purchase(request, pk):
 
     payment = get_object_or_404(Payment, pk=pk)
 
-    _export_shp(payment)
-
-    download_url = 'dfgjjgjgjgjgjgj'
+    download_url = _export_shp(payment)
 
     return JsonResponse({'download_url': download_url})
 
