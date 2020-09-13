@@ -101,3 +101,10 @@ def purchaseAll(request, payload):
         return JsonResponse({'purchase_all': purchase_all})
     else:
         raise Http404
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def download_pdf(request, payment_id):
+    print("hello from view")
+
