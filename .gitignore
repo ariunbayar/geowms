@@ -31,8 +31,6 @@ geoportal_app/media/суурь_давхарга/thumbnail_2x/*
 
 geoportal_app/media/tseg-ustsan/*
 !geoportal_app/media/tseg-ustsan/.keep
-geoportal_app/media/tseg-personal-file/*
-!geoportal_app/media/tseg-personal-file/.keep
 geoportal_app/media/tseg-personal-img/*
 !geoportal_app/media/tseg-personal-img/.keep
 geoportal_app/media/tseg-personal/*

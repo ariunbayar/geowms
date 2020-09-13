@@ -149,3 +149,12 @@ def purchaseAll(request, payload):
             'msg': 'Алдаа гарсан байна'
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def purchase(request, payment_id):
+    print("hello from view")
+    print(payment_id)
+    return JsonResponse({'success': True})
