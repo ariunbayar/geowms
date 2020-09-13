@@ -37,7 +37,8 @@ geoportal_app/media/tseg-personal-img/*
 !geoportal_app/media/tseg-personal-img/.keep
 geoportal_app/media/tseg-personal/*
 !geoportal_app/media/tseg-personal/.keep
-
+geoportal_app/files/payment/*
+!geoportal_app/files/payment/.keep
 
 package-lock.json
 node_modules/
