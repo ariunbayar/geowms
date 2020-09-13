@@ -233,3 +233,76 @@ element.style {
     color: white;
     line-height: unset;
 }
+
+
+.root{
+    padding-top: 50px;
+    padding-right: 30px;
+    padding-bottom: 50px;
+    padding-left: 80px;
+}
+
+
+.cart-size{
+    font-size: 40px;
+    margin-left: 5px;
+    color: white;
+    line-height: unset;
+}
+
+.cart-count{
+    color: rgb(255, 255, 255);
+    margin-top: -40px;
+    margin-left: 15px;
+}
+
+.cart-count-span{
+    padding: 5px;
+    font-size: 20px;
+    color: red;
+    background-color: rgb(136, 81, 189);
+    border-radius: 25px;
+    margin-left: -40px;
+    margin-bottom: 20px;
+}
+
+.cart-button{
+    position: absolute;
+    top: 70px;
+    left: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+}
+.cart-button .card-icon{
+    position: absolute;
+    padding: 9px 3px;
+    font-size: 28px;
+    color: white;
+}
+
+.cart-button .card-count{
+    padding: 0px 27px;
+    font-size: 22px;
+    color: white;
+    position: absolute;
+}
+.cart-list {
+    padding: 2px 3px;
+    position: absolute;
+    left: 10px;
+    top: 130px;
+}
+
+.card-baraa {
+    height: 40px;
+    width: 240px;
+    background-color: rgba(0,60,136,0.5);
+    margin-top: 7px;
+    padding: 9px 7px;
+}
+.cart{
+    z-index: 1;
+}

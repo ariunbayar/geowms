@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import user_passes_test
 
 from main.decorators import ajax_required
 from geoportal_app.models import User
-from .models import Payment
+from .models import Payment, PaymentPoint
+from backend.forms.models import Mpoint_view
 
 
 @require_POST
@@ -80,24 +81,71 @@ def purchase(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def purchaseAll(request, payload):
-    user = get_object_or_404(User, pk=request.user.id)
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()
     if payment.user_id == request.user.id:
-        purchase_all = []
-        purchase_all.append({
-            'id': payment.id,
-            'geo_unique_number': payment.geo_unique_number,
-            'description': payment.description,
-            'total_amount': payment.total_amount,
-            'created_at': payment.created_at.strftime('%Y-%m-%d'),
-            'message': payment.message,
-            'failed_at': payment.failed_at,
-            'bank_unique_number': payment.bank_unique_number,
-            'success_at': payment.success_at,
-            'is_success': payment.is_success,
-            'user': user.username,
-        })
-        return JsonResponse({'purchase_all': purchase_all})
+        user = User.objects.filter(id=payment.user_id).first()
+        pointList = PaymentPoint.objects.filter(payment_id=payment.id)
+        point_id = 1211
+        GPSB00003 = 'GPSB00003'
+        GPSB00004 = 'GPSB00004'
+        GPSB00005 = 'GPSB00005'
+        GPSB00006 = 'GPSB00006'
+        GPSB00007 = 'GPSB00007'
+        GPSB00008 = 'GPSB00008'
+        GPSB00009 = 'GPSB00009'
+        GPSB00010 = 'GPSB00010'
+        GPSB00011 = 'GPSB00011'
+        mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=GPSB00003).first()
+        if mpoint:
+            purchase_all = []
+            point_data = []
+            purchase_all.append({
+                'id': payment.id,
+                'geo_unique_number': payment.geo_unique_number,
+                'description': payment.description,
+                'created_at': payment.created_at.strftime('%Y-%m-%d'),
+                'message': payment.message,
+                'failed_at': payment.failed_at,
+                'bank_unique_number': payment.bank_unique_number,
+                'success_at': payment.success_at,
+                'user_id': user.username,
+                'total_amount': payment.total_amount,
+                'card_number': payment.card_number,
+                'is_success': payment.is_success,
+                'mpoint_aimag': mpoint.aimag,
+                'mpoint_sum': mpoint.sum,
+                'undur': mpoint.ondor if mpoint.ondor else 'Өндөр байхгүй',
+                'point_name': mpoint.point_name,
+                'pdf': mpoint.pid
+            })
+            if len(pointList) > 0:
+                for point in pointList:
+                    point_data.append({
+                        'name': point.point_name,
+                        'amount': point.amount,
+                    })
+            else:
+                rsp = {
+                    'success': False,
+                    'msg': "Уучлаарай цэгийн мэдээлэл олдсонгүй"
+                }
+                return JsonResponse(rsp)
+            rsp = {
+                'success': True,
+                'purchase_all': purchase_all,
+                'point_data': point_data
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'msg': 'Мэдээлэл олдсонгүй'
+            }
+            return JsonResponse(rsp)
     else:
-        raise Http404
+        rsp = {
+            'success': False,
+            'msg': 'Алдаа гарсан байна'
+        }
+        return JsonResponse(rsp)
