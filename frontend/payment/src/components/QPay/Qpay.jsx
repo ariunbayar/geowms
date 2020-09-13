@@ -16,21 +16,14 @@ export class QPay extends Component {
         }
         this.payCheck = this.payCheck.bind(this)
         this.close = this.close.bind(this)
+        this.timerRemaining = this.timerRemaining.bind(this)
     }
 
     componentDidMount(){
-        if(this.props.qpay_open)
-        {
-            this.timerRemaining()
-            this.payCheck(true)
-            this.HandleCreateQpay()
-        }
     }
 
     close(callback){
-        setTimeout(() => {
             callback()
-        }, 2000);
     }
 
     componentDidUpdate(prevProps){
@@ -39,10 +32,13 @@ export class QPay extends Component {
             if(this.props.qpay_open)
             {
                 this.payCheck(this.props.qpay_open)
+                this.setState({minutes:5, seconds:0})
+                this.timerRemaining()
                 this.HandleCreateQpay()
             }
             else{
                 this.payCheck(this.props.qpay_open)
+                clearInterval(this.myInterval)
             }
         }
     }
@@ -58,12 +54,10 @@ export class QPay extends Component {
             else
             {
                 if(msg){
-                    console.log("msg", msg)
                     this.setState({msg})
                     this.close(this.props.handleClose)
                 }
                 this.setState({qPay_QRimage, error_message})
-
             }
         })
 
@@ -76,11 +70,13 @@ export class QPay extends Component {
                 if(success)
                 {
                     this.setState({error_message:error_message})
+                    this.close(this.props.handleClose)
+                    this.timerRemaining()
+
                     this.props.history(`/payment/success/${purchase_id}/`)
                 }
                 else{
                     if(msg){
-                        console.log("msg", msg)
                         this.setState({msg})
                         this.close(this.props.handleClose)
                     }

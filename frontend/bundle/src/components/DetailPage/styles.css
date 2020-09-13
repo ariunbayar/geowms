@@ -242,10 +242,6 @@ element.style {
     padding-left: 80px;
 }
 
-.gp-button-primary{
-    margin-top: 40px;
-    background-color: aqua;
-}
 
 .cart-size{
     font-size: 40px;
@@ -270,20 +266,43 @@ element.style {
     margin-bottom: 20px;
 }
 
-.cart-list{
-
-}
-.cart-count{
+.cart-button{
     position: absolute;
-    top: 105px;
-    left: -2px;
+    top: 70px;
+    left: 12px;
     width: 50px;
     height: 50px;
     background-color: rgba(0,60,136,0.5);
     border-radius: 4px;
     padding: 2px;
 }
+.cart-button .card-icon{
+    position: absolute;
+    padding: 9px 3px;
+    font-size: 28px;
+    color: white;
+}
 
+.cart-button .card-count{
+    padding: 0px 27px;
+    font-size: 22px;
+    color: white;
+    position: absolute;
+}
+.cart-list {
+    padding: 2px 3px;
+    position: absolute;
+    left: 10px;
+    top: 130px;
+}
+
+.card-baraa {
+    height: 40px;
+    width: 240px;
+    background-color: rgba(0,60,136,0.5);
+    margin-top: 7px;
+    padding: 9px 7px;
+}
 .cart{
     z-index: 1;
 }

@@ -108,7 +108,7 @@ def purchaseFromCart(request, payload):
             total_amount = total_amount,
             user_id = userID,
             is_success = False,
-            message = 'Худалдаж авахыг хүсэж байна',
+            message = 'Цэг худалдаж авах хүсэлт',
             code = '',
         )
         pay_id = payment.id
@@ -127,7 +127,7 @@ def purchaseFromCart(request, payload):
                     point_id = uniq_id,
                     point_name = datas[i],
                     amount = amount,
-                    pdf_id = 'pdf',
+                    pdf_id = 'GPSB00003',
                 )
             else:
                 rsp = {

@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from geoportal_app.models import User
 from .qpay import Qpay
 from backend.payment.models import Payment
-
+from datetime import datetime
 
 
 # Create your views here.
@@ -45,7 +45,6 @@ def create(request, payload):
 def check(request, payload):
 
     purchase_id = payload.get('purchase_id')
-    print(purchase_id)
     purhcase = Payment.objects.filter(id=purchase_id).first()
     if purhcase:
         qpay = Qpay(request, 0, purhcase)
@@ -55,6 +54,13 @@ def check(request, payload):
             data = qpay.check()
             if data:
                 if data['payment_info']['payment_status'] == 'PAID':
+                    pay_info = data['payment_info']
+                    if pay_info['transaction_id']:
+                        customer_id = pay_info['transaction_id']
+                    else:
+                        customer_id = ' '
+                    card_number = ' '
+                    Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=datetime.now(),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.")
                     return JsonResponse({'success': True, 'error_message':'Төлөгдсөн төлбөрийн дугаар'})
                 else:
                     return JsonResponse({'success': False, 'error_message':' '})

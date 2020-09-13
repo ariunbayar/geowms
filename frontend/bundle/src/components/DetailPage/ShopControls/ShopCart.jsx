@@ -132,7 +132,12 @@ export class Cart extends Component{
         if(data.length > 0){
             this.div = []
             data.map((data, key) =>{
-                this.div.push(<li key={key}>{data} <button type="button" className="fa fa-trash" onClick={() => this.removeList(data)}>Устгах</button></li>)
+                this.div.push(
+                    <div className="rounded bg-light card-baraa row shadow-sm bg-white"  key={key}>
+                        <div className="col-md-9 name">{data} </div>
+                        <div className="col-md-2 icon"> <i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data)}></i></div>
+                    </div>
+                )
             })
         }
         else{
@@ -141,19 +146,19 @@ export class Cart extends Component{
         return(
             <div className="root">
                 <div>
-                <div className="cart-list">
-                    <i className="cart-count fa fa-shopping-cart cart-size cart" aria-hidden="true">
-                        <span classname="cart-count-span">
+                <div className="cart-button">
+                    <div className="card-count">
+                        <span classname="cart-count-span text-success">
                             {this.state.data.length}
                         </span>
-                    </i>
+                    </div>
+                    <div className="card-icon">
+                        <i className="fa fa-shopping-cart" aria-hidden="true"></i>
+                    </div>
                 </div>
-                <div>
-                    <ul>
-                        {this.div}
-                    </ul>
-                </div>
-                    <div>
+                <div className="cart-list">
+                    {this.div}
+
                     {this.state.is_purchase ?
                         <button className="btn gp-btn-primary" disabled>
                             <div className="spinner-border" role="status">
@@ -161,7 +166,7 @@ export class Cart extends Component{
                             </div>
                             {} Түр хүлээнэ үү...
                         </button> :
-                        <button className="btn gp-btn-primary" onClick={() => this.checkDataForPurchase()}>
+                        <button className="btn gp-btn-primary pay-button my-4" onClick={() => this.checkDataForPurchase()}>
                             Худалдаж авах
                         </button>
                     }
