@@ -10,7 +10,7 @@ function handleCreateQpay(price, purchase_id) {
         ...getPostOptions(),
         body: JSON.stringify({price, purchase_id})
     }
-    return fetch('/back/qpay/create/', requestOptions).then(handleResponse)
+    return fetch('/qpay/create/', requestOptions).then(handleResponse)
 }
 
 
@@ -19,5 +19,5 @@ function check(purchase_id) {
         ...getPostOptions(),
         body: JSON.stringify({purchase_id})
     }
-    return fetch('/back/qpay/check/', requestOptions).then(handleResponse)
+    return fetch('/qpay/check/', requestOptions).then(handleResponse)
 }

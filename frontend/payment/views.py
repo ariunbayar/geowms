@@ -1,10 +1,13 @@
-from django.http import JsonResponse
+import os
+
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
@@ -27,6 +30,7 @@ def index(request):
 
 @require_POST
 @ajax_required
+@login_required
 def dictionaryRequest(request, payload):
     purchase_all = payload.get('purchase_all')
     print(purchase_all['total_amount'])
@@ -60,6 +64,7 @@ def dictionaryResponse(request):
 
 @require_POST
 @ajax_required
+@login_required
 def purchaseDraw(request, payload):
     user = get_object_or_404(get_user_model(), pk=request.user.id)
     price = payload.get('price')
@@ -81,8 +86,73 @@ def purchaseDraw(request, payload):
     return JsonResponse({'payment_id': payment.id})
 
 
+def _export_shp(payment):
+    import os # This is is needed in the pyqgis console also
+    from qgis.utils import iface
+    from qgis.core import \
+        QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
+
+    fn = '../shpfile/shpLine.shp'
+
+    fields = QgsFields()
+
+    qgs = QgsApplication([], False)
+    QgsApplication.setPrefixPath("/usr", True)
+    QgsApplication.initQgis()
+
+    uri = QgsDataSourceUri()
+    uri.setConnection("localhost", "5432", "geoportal", "postgres", "geo")
+
+    sql = """
+    select
+     *
+    from (
+        SELECT
+             id,
+             st_intersection(st_transform(geom,4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
+        FROM public."Road_MGL"
+
+    ) as t
+    where st_geometrytype(geom) != 'ST_GeometryCollection'
+
+    """
+
+    uri.setDataSource('', f'({sql})', 'geom', '', 'id')
+
+    vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
+
+    import pprint
+    if not vlayer.isValid():
+        print("Layer failed to load!")
+    else:
+        print("Layer success to load!")
+
+        for field in vlayer.fields():
+            print(field.name(), field.typeName())
+        writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, fn, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+
+        del(writer)
+
+    qgs.exitQgis()
+
+
+@require_GET
+@ajax_required
+@login_required
+def download_purchase(request, pk):
+
+    payment = get_object_or_404(Payment, pk=pk)
+
+    _export_shp(payment)
+
+    download_url = 'dfgjjgjgjgjgjgj'
+
+    return JsonResponse({'download_url': download_url})
+
+
 @require_POST
 @ajax_required
+@login_required
 def purchaseFromCart(request, payload):
 
     datas = payload.get('data')
@@ -109,6 +179,8 @@ def purchaseFromCart(request, payload):
             description = 'Цэг худалдаж авах хүсэлт',
             total_amount = total_amount,
             user_id = userID,
+            kind=2,
+            export_kind=1,
             is_success = False,
             message = 'Цэг худалдаж авах хүсэлт',
             code = '',
@@ -150,3 +222,14 @@ def purchaseFromCart(request, payload):
         'payment': pay_id
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@login_required
+def download_pdf(request, pk):
+    payment = get_object_or_404(Payment, user=request.user, pk=pk, is_success=True)
+
+    # generate the file
+    src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', 'GPSB00003.pdf')
+    response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="tseg-medeelel.pdf")
+    return response

@@ -16,8 +16,16 @@ export default class HistoryForm extends Component {
             paymentPerPage:25,
         }
         this.paginate = this.paginate.bind(this)
+        this.handleDownload = this.handleDownload.bind(this)
 
     }
+
+    handleDownload(payment_id){
+        service.downloadPurchase(payment_id).then(({download_url}) => {
+            console.log(download_url)
+        })
+    }
+
     paginate (page) {
         const perpage = this.state.paymentPerPage
         this.setState({ currentPage: page })
@@ -33,42 +41,20 @@ export default class HistoryForm extends Component {
         return (
         <div className="container">
             <div className="row">
-                <div className="col-md-12 py-0">
-                    <table className="table table-bordered">
-                         <thead>
-                            <tr>
-                                <th scope="col">№</th>
-                                <th scope="col">#</th>
-                                <th scope="col">Дугаар</th>
-                                <th scope="col">Хэмжээ(Amount)</th >
-                                <th scope="col">Танилцуулга (description)</th >
-                                <th scope="col">created_at</th >
-                                <th scope="col">is_success</th >
-                                <th scope="col">success_at</th >
-                                <th scope="col">bank_unique_number</th >
-                            </tr>
-                        </thead>
-                        <tbody>
-                        { payment_length ===0 ?
-                                    <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
-
-                                    payment.map((p, idx) =>
-                                        <HistoryTable
-                                            key={idx}
-                                            idx={(this.state.currentPage*25)-25+idx+1}
-                                            values={p}
-                                        >
-                                        </HistoryTable>
-
-                                )}
-                        </tbody>
-                       </table>
-                       <Pagination
-                        paginate = { this.paginate }
-                         />
-                    </div>
-                  </div>
+                { payment_length ===0 ?
+                            <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
+                            payment.map((p, idx) =>
+                                <HistoryTable
+                                    key={idx}
+                                    idx={(this.state.currentPage*25)-25+idx+1}
+                                    handleDownload={e => this.handleDownload(p.id)}
+                                    values={p}
+                                >
+                                </HistoryTable>
+                        )}
             </div>
+            <Pagination paginate = { this.paginate }/>
+        </div>
         )
     }
 }

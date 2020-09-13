@@ -84,9 +84,9 @@ export default class Modal extends Component {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" onClick={() => this.handleClose()} className="btn gp-outline-primary">Буцах</button>
-                                <button 
-                                    type="button" 
-                                    onClick={this.handleProceed} 
+                                <button
+                                    type="button"
+                                    onClick={this.handleProceed}
                                     className="btn gp-btn-primary text-white"
                                 >
                                     {this.props.actionName ? this.props.actionName : "Устгах"}

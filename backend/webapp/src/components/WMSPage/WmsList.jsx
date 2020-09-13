@@ -5,7 +5,7 @@ import WMSForm from './WMSForm'
 import WMS from './WMS'
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
-import { Pagination } from "../pagination/pagination"
+import { Pagination } from "../../../../../src/components/Pagination/index"
 
 export class WmsList extends Component {
 

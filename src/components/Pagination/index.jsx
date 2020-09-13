@@ -25,7 +25,7 @@ export class Pagination extends Component {
 
     componentDidUpdate(prevProps) {
         if(prevProps.searchQuery !== this.props.searchQuery)
-        {   
+        {
             const query = this.props.searchQuery
             this.setState({ searchQuery: query })
             this.loadPage(1, query)

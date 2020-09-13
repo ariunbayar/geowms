@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
 import {service} from './service'
-import {Pagination} from '../../../pagination/pagination'
+import {Pagination} from '../../../../../../../src/components/Pagination/index'
 
 export class List extends Component {
 
