@@ -1,32 +1,68 @@
 import React, { Component } from "react"
+import {Details} from './details'
+import {Link} from "react-router-dom"
 
 export class HistoryTable extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state={
+            form_is_loading: false,
+        }
+        this.handleDownload = this.handleDownload.bind(this)
+
+    }
+
+    handleDownload(payment_id){
+        service.downloadPurchase(payment_id).then(({success}) => {
+            this.setState({form_is_loading: success})
+        })
+    }
+
     render() {
         const idx = this.props.idx
         const {id, geo_unique_number, total_amount, description, created_at, is_success, success_at, bank_unique_number, export_file}=this.props.values
         return (
             <div className="col-4 my-2">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class={ is_success ? "card-title text-success" : "card-title text-danger"}>{geo_unique_number}</h5>
-                        <p class="card-text">{description}</p>
-                        <p class="card-text">Нийт үнэ {total_amount}</p>
-                        {export_file &&
-                            <a className="btn gp-btn-primary" href={`/payment/download-zip/${id}/`}>Татах</a>
-                        }
-                        {!export_file &&
+                <div className="card">
+                    <div className="card-body">
+                        <Link to={`/profile/all/api/details/${id}/`}>
+                            <h5>
+                                { is_success
+                                    ?
+                                        <i className="fa fa-check-circle text-success"></i>
+                                    :
+                                        <i className="fa fa-exclamation-triangle text-warning"></i>
+                                }
+                                &nbsp; {description}
+                            </h5>
+                        </Link>
+                        <p className="card-text">{geo_unique_number}</p>
+                        <p className="card-text">Нийт үнэ: {total_amount}₮</p>
+                        <p className="card-text text-muted">{created_at}</p>
+                        {
+                            export_file
+                            ?
+                            null
+                            :
                             <div>
-                                {this.props.form_is_loading ?
+                                {this.state.form_is_loading ?
                                     <button className="btn gp-btn-primary" onClick={this.handleForm}>
                                         <div className="spinner-border" role="status">
                                             <span className="sr-only"></span>
                                         </div>
                                         {} Түр хүлээнэ үү...
                                     </button> :
-                                    <a className="btn gp-btn-primary" href='#' onClick={this.props.handleDownload}>shp файл үүсгэх</a>
+                                    <a className="btn gp-outline-primary" href='#' onClick={e => this.handleDownload(id)}>shp файл үүсгэх</a>
                                 }
                             </div>
-
+                        }
+                        {
+                            export_file
+                            ?
+                            <a className="btn gp-btn-primary" href={`/payment/download-zip/${id}/`}>Файл</a>
+                            :
+                            null
                         }
                     </div>
                 </div>
