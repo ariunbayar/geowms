@@ -31,14 +31,12 @@ geoportal_app/media/суурь_давхарга/thumbnail_2x/*
 
 geoportal_app/media/tseg-ustsan/*
 !geoportal_app/media/tseg-ustsan/.keep
-geoportal_app/media/tseg-personal-file/*
-!geoportal_app/media/tseg-personal-file/.keep
 geoportal_app/media/tseg-personal-img/*
 !geoportal_app/media/tseg-personal-img/.keep
 geoportal_app/media/tseg-personal/*
 !geoportal_app/media/tseg-personal/.keep
 geoportal_app/files/payment/*
-!geoportal_app/files/payment/.keep
+!geoportal_app/files/payment/tseg-personal-file/.keep
 
 package-lock.json
 node_modules/

@@ -7,12 +7,13 @@ export class QPay extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            qPay_QRimage: [],
+            qPay_QRimage: '',
             purchase_id: props.purchase_id,
             qpay_open: false,
             msg: '',
             minutes: 5,
             seconds: 0,
+            error_message: ''
         }
         this.payCheck = this.payCheck.bind(this)
         this.close = this.close.bind(this)
@@ -20,10 +21,15 @@ export class QPay extends Component {
     }
 
     componentDidMount(){
+        if(this.state.qpay_open){
+            this.payCheck(this.props.qpay_open)
+            this.timerRemaining()
+            this.HandleCreateQpay()
+        }
     }
 
     close(callback){
-            callback()
+        callback()
     }
 
     componentDidUpdate(prevProps){
@@ -46,18 +52,17 @@ export class QPay extends Component {
     HandleCreateQpay(){
         const { purchase_id } = this.state
         const { price } = this.props
-        service.handleCreateQpay(price, purchase_id).then(({qPay_QRimage, error_message, success, msg}) => {
+        service.handleCreateQpay(price, purchase_id).then(({qPay_QRimage, success, error_message}) => {
             if(success)
             {
                 this.props.history(`/payment/success/${purchase_id}/`)
             }
             else
             {
-                if(msg){
-                    this.setState({msg})
-                    this.close(this.props.handleClose)
+                if(error_message){
+                    this.setState({error_message})
                 }
-                this.setState({qPay_QRimage, error_message})
+                this.setState({qPay_QRimage})
             }
         })
 
@@ -66,13 +71,10 @@ export class QPay extends Component {
     payCheck(check){
         const { purchase_id } = this.state
         if(check){
-            service.check(purchase_id).then(({success, error_messag, msg}) => {
+            service.check(purchase_id).then(({success, msg}) => {
                 if(success)
                 {
-                    this.setState({error_message:error_message})
                     this.close(this.props.handleClose)
-                    this.timerRemaining()
-
                     this.props.history(`/payment/success/${purchase_id}/`)
                 }
                 else{
@@ -111,7 +113,7 @@ export class QPay extends Component {
     }
 
     render() {
-        const {error_message, msg, minutes, seconds, qPay_QRimage} = this.state
+        const { msg, minutes, seconds, qPay_QRimage, error_message} = this.state
         return (
             <div className="container text-center">
                 <div>

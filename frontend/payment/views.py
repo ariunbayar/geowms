@@ -1,9 +1,13 @@
-from django.http import JsonResponse
+import os
+
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
@@ -25,6 +29,7 @@ def index(request):
 
 @require_POST
 @ajax_required
+@login_required
 def dictionaryRequest(request, payload):
     purchase_all = payload.get('purchase_all')
     print(purchase_all['total_amount'])
@@ -58,6 +63,7 @@ def dictionaryResponse(request):
 
 @require_POST
 @ajax_required
+@login_required
 def purchaseDraw(request, payload):
     user = get_object_or_404(get_user_model(), pk=request.user.id)
     price = payload.get('price')
@@ -130,6 +136,7 @@ def _export_shp(payment):
 
 @require_GET
 @ajax_required
+@login_required
 def download_purchase(request, pk):
 
     payment = get_object_or_404(Payment, pk=pk)
@@ -143,6 +150,7 @@ def download_purchase(request, pk):
 
 @require_POST
 @ajax_required
+@login_required
 def purchaseFromCart(request, payload):
 
     datas = payload.get('data')
@@ -169,6 +177,8 @@ def purchaseFromCart(request, payload):
             description = 'Цэг худалдаж авах хүсэлт',
             total_amount = total_amount,
             user_id = userID,
+            kind=2,
+            export_kind=1,
             is_success = False,
             message = 'Цэг худалдаж авах хүсэлт',
             code = '',
@@ -210,3 +220,14 @@ def purchaseFromCart(request, payload):
         'payment': pay_id
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@login_required
+def download_pdf(request, pk):
+    payment = get_object_or_404(Payment, user=request.user, pk=pk, is_success=True)
+
+    # generate the file
+    src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', 'GPSB00003.pdf')
+    response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="tseg-medeelel.pdf")
+    return response
