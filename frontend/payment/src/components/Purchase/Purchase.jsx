@@ -52,7 +52,7 @@ export class Purchase extends Component {
         console.log(purchase_all)
         service.payment(purchase_all).then(({ success }) => {
             if (success) {
-                this.props.history.push(`/payment/success/${purchase_id}/`)
+                this.props.history.push(`/profile/all/api/details/${purchase_id}/`)
             } else {
                 this.props.history.push(`/payment/failed/${purchase_id}/`)
             }

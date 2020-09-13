@@ -13,7 +13,7 @@ export default class HistoryForm extends Component {
             payment:[],
             payment_length:null,
             currentPage:1,
-            paymentPerPage:25,
+            paymentPerPage:12,
         }
         this.paginate = this.paginate.bind(this)
         this.handleDownload = this.handleDownload.bind(this)
