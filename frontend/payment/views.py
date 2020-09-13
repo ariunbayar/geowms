@@ -79,7 +79,6 @@ def purchaseDraw(request, payload):
     return JsonResponse({'payment_id': payment.id})
 
 
-<<<<<<< Updated upstream
 @require_POST
 @ajax_required
 def purchaseFromCart(request, payload):
