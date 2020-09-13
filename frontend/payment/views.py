@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -75,3 +75,14 @@ def purchaseDraw(request, payload):
                                     )
 
     return JsonResponse({'payment_id': payment.id})
+
+
+@require_GET
+@ajax_required
+def download_purchase(request, pk):
+
+    payment = get_object_or_404(Payment, pk=pk)
+
+    download_url = 'dfgjjgjgjgjgjgj'
+
+    return JsonResponse({'download_url': download_url})

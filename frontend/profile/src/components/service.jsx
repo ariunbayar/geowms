@@ -1,5 +1,6 @@
 export const service = {
-    paginatedList
+    paginatedList,
+    downloadPurchase,
 }
 
 export function handleResponse(response) {
@@ -60,4 +61,12 @@ function paginatedList(page, per_page) {
     }
 
     return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
+}
+
+function downloadPurchase(payment_id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`/payment/api/download-purchase/${payment_id}/`, requestOptions).then(handleResponse)
 }
