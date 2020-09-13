@@ -64,3 +64,11 @@ PAYMENT = {
     'SIGN_KEY_LOCATION': '',
     'DES3_ENCRYPTION_KEY': ''
 }
+
+
+QPAY = {
+    'MERCHANT_ID': '',
+    'TEMPLATE_ID': '',
+    'CLIENT_ID': '',
+    'CLIENT_SECRET': '',
+}

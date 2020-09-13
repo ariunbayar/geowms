@@ -18,6 +18,8 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
+import {ShopModal} from './ShopControls/Modal'
+import {ShopCart} from './ShopControls/ShopCart'
 import {DrawPayModal} from './controls/DrawPayModal'
 import "./styles.css"
 import {service} from './service'
@@ -46,11 +48,16 @@ export default class BundleMap extends Component {
             draw_layer: null,
             draw: null,
             source_draw: null,
+            is_cart: false,
+            y: null,
+            x: null,
         }
 
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
             modal: new Modal(),
+            shopmodal: new ShopModal(),
+            cart: new ShopCart(),
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
             searchbar: new SearchBar(),
@@ -69,6 +76,7 @@ export default class BundleMap extends Component {
         this.toggleDraw = this.toggleDraw.bind(this)
         this.toggleDrawed = this.toggleDrawed.bind(this)
         this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
+        this.cartButton = this.cartButton.bind(this)
     }
 
     initMarker() {
@@ -90,6 +98,12 @@ export default class BundleMap extends Component {
 
         return {feature: feature, point: point}
 
+    }
+
+    cartButton(is_cart, content){
+        if(is_cart == true){
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content)
+        }
     }
 
     componentDidMount() {
@@ -228,10 +242,12 @@ export default class BundleMap extends Component {
                 new DrawButton({toggleDraw: this.toggleDraw}),
                 new ScaleLine(),
                 this.controls.modal,
+                this.controls.shopmodal,
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
                 this.controls.searchbar,
+                this.controls.cart,
             ]),
             layers: [
                 ...base_layers,
@@ -295,6 +311,7 @@ export default class BundleMap extends Component {
                 if (url) {
 
                     this.controls.modal.showModal(null, false)
+                    this.controls.shopmodal.showModal(null, false)
 
                     fetch(url)
                         .then((response) => response.text())
@@ -314,7 +331,8 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            this.controls.modal.showModal(feature_info, true)
+                            // this.controls.modal.showModal(feature_info, true)
+                            this.controls.shopmodal.showModal(feature_info, true, this.cartButton)
                         })
                 } else {
                     /* TODO */

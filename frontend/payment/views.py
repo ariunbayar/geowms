@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -8,7 +8,11 @@ from django.contrib.auth import get_user_model
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
-from backend.payment.models import Payment
+from backend.payment.models import Payment, PaymentPoint
+from geoportal_app.models import User
+from backend.forms.models import Mpoint_view
+
+import uuid
 
 def index(request):
 
@@ -23,14 +27,13 @@ def index(request):
 @ajax_required
 def dictionaryRequest(request, payload):
     purchase_all = payload.get('purchase_all')
+    print(purchase_all['total_amount'])
     # Хүсэлт илгээх xml датаг бэлтгэх
-    mbutil = MBUtil(purchase_all['amount'], purchase_all['description'])
+    mbutil = MBUtil(purchase_all['total_amount'], purchase_all['description'])
     finalRequest = mbutil.xmlConvert()
-
     # Банкруу хүсэлт илгээж байна.
     payReq = PaymentMethod(request, finalRequest)
     paymentRequest = payReq.paymentMethod()
-
     # Хүсэлт илгээж байна
     if not paymentRequest:
         return JsonResponse({'message': "Банкны сервертэй холбогдох үед алдаа гарлаа", "success": False})
@@ -56,7 +59,6 @@ def dictionaryResponse(request):
 @require_POST
 @ajax_required
 def purchaseDraw(request, payload):
-
     user = get_object_or_404(get_user_model(), pk=request.user.id)
     price = payload.get('price')
     description = payload.get('description')
@@ -75,3 +77,85 @@ def purchaseDraw(request, payload):
                                     )
 
     return JsonResponse({'payment_id': payment.id})
+
+
+@require_POST
+@ajax_required
+def purchaseFromCart(request, payload):
+
+    datas = payload.get('data')
+    check_id = True
+    while check_id:
+        uniq_id = uuid.uuid4()
+        if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0:
+            check_id = False
+        else:
+            check_id = True
+
+    user_id = request.user.id
+    userList = User.objects.filter(id=user_id)
+    for user in userList:
+        userID = user.id
+    # mpoint = Mpoint_view.objects.using('postgis_db').filter()
+    amount = 1000
+    total_amount = amount * len(datas)
+
+    try:
+        payment = Payment.objects.create(
+            geo_unique_number = uniq_id,
+            bank_unique_number = '',
+            description = 'Цэг худалдаж авах хүсэлт',
+            total_amount = total_amount,
+            user_id = userID,
+            is_success = False,
+            message = 'Цэг худалдаж авах хүсэлт',
+            code = '',
+        )
+        pay_id = payment.id
+        check_id = True
+        while check_id:
+            uniq_id = uuid.uuid4()
+            if payment.geo_unique_number == uniq_id:
+                check_id = True
+            else:
+                check_id = False
+
+        for i in range(len(datas)):
+            if pay_id > 0:
+                point = PaymentPoint.objects.create(
+                    payment_id = pay_id,
+                    point_id = uniq_id,
+                    point_name = datas[i],
+                    amount = amount,
+                    pdf_id = 'GPSB00003',
+                )
+            else:
+                rsp = {
+                    'success': False,
+                    'msg': "Амжилтгүй"
+                }
+                return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+                'success': False,
+                'msg': "Алдаа гарсан тул цуцлагдлаа"
+            }
+        return JsonResponse(rsp)
+
+    rsp = {
+        'success': True,
+        'msg': 'Амжилттай боллоо',
+        'payment': pay_id
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def download_purchase(request, pk):
+
+    payment = get_object_or_404(Payment, pk=pk)
+
+    download_url = 'dfgjjgjgjgjgjgj'
+
+    return JsonResponse({'download_url': download_url})
