@@ -66,7 +66,7 @@ export class QPay extends Component {
     payCheck(check){
         const { purchase_id } = this.state
         if(check){
-            service.check(purchase_id).then(({success, error_messag, msg}) => {
+            service.check(purchase_id).then(({success, error_message, msg}) => {
                 if(success)
                 {
                     this.setState({error_message:error_message})

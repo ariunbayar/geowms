@@ -4,6 +4,7 @@ from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
@@ -11,6 +12,7 @@ from .PaymentMethodMB import PaymentMethodMB
 from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
+
 
 import uuid
 
@@ -97,7 +99,7 @@ def purchaseFromCart(request, payload):
     for user in userList:
         userID = user.id
     # mpoint = Mpoint_view.objects.using('postgis_db').filter()
-    amount = 1000
+    amount = settings.PURCHASE['point_price']
     total_amount = amount * len(datas)
 
     try:
