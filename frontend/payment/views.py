@@ -227,6 +227,6 @@ def download_pdf(request, pk):
     payment = get_object_or_404(Payment, user=request.user, pk=pk, is_success=True)
 
     # generate the file
-    src_file = os.path.join(settings.FILES_ROOT, 'GPSB00003.pdf')
+    src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', 'GPSB00003.pdf')
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="tseg-medeelel.pdf")
     return response
