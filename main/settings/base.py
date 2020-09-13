@@ -143,6 +143,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'geoportal_app', 'static')
+FILES_ROOT = os.path.join(BASE_DIR, 'geoportal_app', 'files', 'payment')
+
 LOGIN_URL = 'secure:login'
 LOGIN_REDIRECT_URL = 'bundle:all'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'

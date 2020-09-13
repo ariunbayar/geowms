@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, Http404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
@@ -9,9 +9,9 @@ from geoportal_app.models import User
 from .models import Payment, PaymentPoint
 from backend.forms.models import Mpoint_view
 
-
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def paymentList(request, payload):
 
     page = payload.get('page')
@@ -149,12 +149,3 @@ def purchaseAll(request, payload):
             'msg': 'Алдаа гарсан байна'
         }
         return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def purchase(request, payment_id):
-    print("hello from view")
-    print(payment_id)
-    return JsonResponse({'success': True})
