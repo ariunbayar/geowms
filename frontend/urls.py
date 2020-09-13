@@ -52,6 +52,7 @@ urlpatterns = [
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
         path('api/download-purchase/<int:pk>/', payment_views.download_purchase),
         path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
+        path('download-pdf/<int:pk>/', payment_views.download_pdf, name='download-pdf'),
     ], 'payment'))),
 
     path('qpay/', include(([

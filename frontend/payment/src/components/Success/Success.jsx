@@ -10,10 +10,11 @@ export class Success extends Component {
             check_error: false,
             error_msg: '',
             point_data: [],
+            payment_id: this.props.match.params.id,
         }
     }
     componentDidMount(){
-        const purchase_id = this.props.match.params.id
+        const purchase_id = this.state.payment_id
         service.purchaseAll(purchase_id).then(({ success, purchase_all, point_data, msg  }) => {
                 if(success){
                     if (purchase_all) {
@@ -34,10 +35,8 @@ export class Success extends Component {
         }).catch(error => console.log(error))
     }
 
-
     render() {
         const { purchase_all, check_error, error_msg, point_data } = this.state
-        console.log(purchase_all)
         return (
         <div className="container">
             <div className="row">
@@ -72,7 +71,8 @@ export class Success extends Component {
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Планшет</td>
-                                <td><a className="text-info" href={`/media/tseg-personal-file/${purchase_all.pdf}.pdf`}>файл</a></td>
+                                <td><a className="text-info" href={`/payment/download-pdf/${this.state.payment_id}/`}>файл</a>
+                                </td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Уртраг</td>
