@@ -13,7 +13,7 @@ export default class HistoryForm extends Component {
             payment:[],
             payment_length:null,
             currentPage:1,
-            paymentPerPage:25,
+            paymentPerPage:25,form_is_loading: false,
         }
         this.paginate = this.paginate.bind(this)
         this.handleDownload = this.handleDownload.bind(this)
@@ -21,8 +21,8 @@ export default class HistoryForm extends Component {
     }
 
     handleDownload(payment_id){
-        service.downloadPurchase(payment_id).then(({download_url}) => {
-            console.log(download_url)
+        service.downloadPurchase(payment_id).then(({success}) => {
+            this.setState({form_is_loading: success})
         })
     }
 
@@ -48,6 +48,7 @@ export default class HistoryForm extends Component {
                                     key={idx}
                                     idx={(this.state.currentPage*25)-25+idx+1}
                                     handleDownload={e => this.handleDownload(p.id)}
+                                    form_is_loading={this.state.form_is_loading}
                                     values={p}
                                 >
                                 </HistoryTable>
