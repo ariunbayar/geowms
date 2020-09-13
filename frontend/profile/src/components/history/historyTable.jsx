@@ -33,6 +33,9 @@ export class HistoryTable extends Component {
                 <td>
                     {bank_unique_number}
                 </td>
+                <td>
+                    <a className="btn gp-btn-primary" href='#' onClick={this.props.handleDownload}>Татах</a>
+                </td>
             </tr>
         )
     }
