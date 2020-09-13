@@ -81,11 +81,13 @@ def purchaseDraw(request, payload):
 
 def _export_shp(payment):
     import os # This is is needed in the pyqgis console also
+    import sys
+    sys.path.append('/usr/lib/python3/dist-packages/')
     from qgis.utils import iface
     from qgis.core import \
         QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
 
-    fn = '../shpfile/shpLine.shp'
+    url = '../../geoportal_app/files/payment/'
 
     fields = QgsFields()
 
@@ -114,15 +116,12 @@ def _export_shp(payment):
 
     vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
 
-    import pprint
     if not vlayer.isValid():
         print("Layer failed to load!")
     else:
         print("Layer success to load!")
 
-        for field in vlayer.fields():
-            print(field.name(), field.typeName())
-        writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, fn, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+        writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, url + 'shp1.shp', 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
 
         del(writer)
 
