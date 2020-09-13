@@ -180,28 +180,39 @@ def tseg_details(requist, payload):
     if payment:
         pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
         if pay_point:
-            points = []
-            for point in pay_point:
-                points.append({
-                    'name': point.point_name,
-                    'amount': point.amount,
+            mpoint = Mpoint_view.objects.using('postgis_db').filter(pid='GPSB00008').first()
+            if mpoint:
+                points = []
+                for point in pay_point:
+                    points.append({
+                        'name': point.point_name,
+                        'amount': point.amount,
+                    })
+                items = []
+                items.append({
+                    'description': payment.description,
+                    'created_at': _datetime_display(payment.created_at),
+                    'success_at': payment.success_at,
+                    'is_success': payment.is_success,
+                    'user_id': payment.user_id,
+                    'geo_unique_number': payment.geo_unique_number,
+                    'total': payment.total_amount,
+                    'mpoint_aimag': mpoint.aimag,
+                    'mpoint_sum': mpoint.sum,
+                    'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
+                    'point_name': mpoint.point_name,
                 })
-            items = []
-            items.append({
-                'description': payment.description,
-                'created_at': payment.created_at,
-                'success_at': payment.success_at,
-                'is_success': payment.is_success,
-                'user_id': payment.user_id,
-                'geo_unique_number': payment.geo_unique_number,
-                'total': payment.total_amount
-            })
-            rsp = {
-                'success': True,
-                'items': items,
-                'points': points
-            }
-            return JsonResponse(rsp)
+                rsp = {
+                    'success': True,
+                    'items': items,
+                    'points': points
+                }
+                return JsonResponse(rsp)
+            else:
+                rsp = {
+                    'success': False,
+                }
+                return JsonResponse(rsp)
         else:
             rsp = {
                 'success': False,

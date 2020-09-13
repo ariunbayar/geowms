@@ -58,6 +58,7 @@ export class Details extends Component {
                                     {
                                         points.map((value, key) => <b key={key}>{'"'+ value.name + '" '}</b>)
                                     }
+                                    {items.point_name}
                                 </td>
                             </tr>
                             <tr>
@@ -66,11 +67,39 @@ export class Details extends Component {
                                 </td>
                             </tr>
                             <tr>
+                                <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
+                                <td>{items.mpoint_aimag}</td>
+                            </tr>
+                            <tr>
+                                <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Сум</td>
+                                <td>{items.mpoint_sum}</td>
+                            </tr>
+                            <tr>
+                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Уртраг</td>
+                                <td>109 03 43.83379</td>
+                            </tr>
+                            <tr>
+                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өргөрөг</td>
+                                <td>45 55 24.90433</td>
+                            </tr>
+                            <tr>
+                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>N_UTM</td>
+                                <td>5087383.048</td>
+                            </tr>
+                            <tr>
+                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>E_UTM</td>
+                                <td>349744.265</td>
+                            </tr>
+                            <tr>
+                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өндөр</td>
+                                <td>{items.undur}</td>
+                            </tr>
+                            <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
                                 <td>{points.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
                             </tr>
                             <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
+                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Огноо:</td>
                                 <td>{items.created_at}</td>
                             </tr>
                         </tbody>
@@ -90,6 +119,10 @@ export class Details extends Component {
                                 </li>
                             </ul>
                             <button className="btn btn-primary">Хэвлэх</button>
+                        </div>
+                        <div className="col-md-6 py-0 my-3">
+                            <h5 className="mb-3">QR Code </h5>
+                            <img src="/static/assets/image/lavlakh.png"></img>
                         </div>
                     </div>
                 </div>
