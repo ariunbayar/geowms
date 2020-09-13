@@ -65,6 +65,7 @@ urlpatterns = [
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
+        path('get-details/', profile_views.tseg_details, name='tseg-details'),
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
