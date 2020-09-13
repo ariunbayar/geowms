@@ -1,11 +1,14 @@
+import { setNestedObjectValues } from "formik";
+
 export const service = {
     loadWMSLayers,
     loadBaseLayers,
     payment,
     paymentDraw,
+    purchaseFromCart,
     searchPoint,
     getAimags,
-    getSum
+    getSum,
 }
 
 function getCookie(name) {
@@ -87,6 +90,14 @@ function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom)
         body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
     }
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
+}
+
+function purchaseFromCart(data){
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({data})
+    }
+    return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
 }
 
 function searchPoint(point_id) {
