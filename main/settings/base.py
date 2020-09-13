@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'frontend.payment.apps.PaymentConfig',
     'frontend.page.apps.PageConfig',
     'frontend.profile.apps.ProfileConfig',
-
+    'frontend.qpay.apps.QpayConfig',
     # Backend apps
 
     'backend.webapp.apps.WebappConfig',
@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'backend.log.apps.LogConfig',
     'backend.payment.apps.PaymentConfig',
     'backend.forms.apps.FormsConfig',
-    'backend.qpay.apps.QpayConfig',
     # API apps
 
     'api.govorg.apps.GovOrgConfig',

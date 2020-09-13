@@ -7,7 +7,7 @@ from frontend.secure import views as secure_views
 from frontend.payment import views as payment_views
 from frontend.page import views as page_views
 from frontend.profile import views as profile_views
-
+from frontend.qpay import views as qpay_views
 
 urlpatterns = [
 
@@ -53,6 +53,11 @@ urlpatterns = [
         path('api/download-purchase/<int:pk>/', payment_views.download_purchase),
         path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
     ], 'payment'))),
+
+    path('qpay/', include(([
+        path('create/', qpay_views.create, name='create'),
+        path('check/', qpay_views.check, name='check'),
+    ], 'qpay'))),
 
     path('profile/api/', include(([
         path('', profile_views.history, name='history'),

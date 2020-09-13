@@ -59,15 +59,18 @@ def check(request, payload):
                         customer_id = pay_info['transaction_id']
                     else:
                         customer_id = ' '
-                    card_number = ' '
-                    Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=datetime.now(),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.")
+                    if data['payment_info']['transactions'][0]['beneficiary_account_number']:
+                        card_number = data['payment_info']['transactions'][0]['beneficiary_account_number']
+                    else:
+                        card_number = ' '
+                    if not purhcase.is_success:
+                        Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=datetime.now(),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.", qpay_rsp=data)
                     return JsonResponse({'success': True, 'error_message':'Төлөгдсөн төлбөрийн дугаар'})
                 else:
                     return JsonResponse({'success': False, 'error_message':' '})
             else:
                 rsp = {
                     'success': False,
-                    'msg': 'Qpay үүсэхэд алдаа гарсан тул дахин оролдоно уу'
                 }
                 return JsonResponse(rsp)
         except Exception:

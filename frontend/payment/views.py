@@ -170,6 +170,8 @@ def purchaseFromCart(request, payload):
             description = 'Цэг худалдаж авах хүсэлт',
             total_amount = total_amount,
             user_id = userID,
+            kind=2,
+            export_kind=1,
             is_success = False,
             message = 'Цэг худалдаж авах хүсэлт',
             code = '',
