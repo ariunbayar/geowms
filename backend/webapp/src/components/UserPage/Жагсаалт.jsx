@@ -3,7 +3,7 @@ import "./style.css"
 import {service} from './service'
 import User from './User'
 import { toSize } from "ol/size"
-import { Pagination } from "../pagination/pagination"
+import { Pagination } from "../../../../../src/components/Pagination/index"
 
 export class Жагсаалт extends Component {
 
