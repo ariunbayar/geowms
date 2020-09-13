@@ -109,13 +109,9 @@ export class FormTseg extends Component {
                     this.optionVal(items)
                 }
                 else{
-                    this.setState({ tseg_dugaar_error: true, checkError: error })
+                    this.setState({ tseg_dugaar_error: true, checkError: this.state.error })
                 }
             })
-            // .catch(error => {
-            //     console.log("Алдаа гарсан байна. " ,error.text)
-            //     this.props.history.push('/back/froms/')
-            // })
         }
     }
 

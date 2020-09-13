@@ -67,7 +67,8 @@ export class Forms extends Component {
             hors_error:false,
             names:[],
             points_ids:[],
-            hors_shinj_baidal_list:[]
+            hors_shinj_baidal_list:[],
+            checkNull:[]
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -80,6 +81,7 @@ export class Forms extends Component {
         this.handleInput = this.handleInput.bind(this)
         this.handleCoordinatCheck = this.handleCoordinatCheck.bind(this)
         this.handleSearchWithName = this.handleSearchWithName.bind(this)
+        this.checkError = this.checkError.bind(this)
     }
     handleBoxOver (e){
         this.setState({ showBox: true })
@@ -97,12 +99,13 @@ export class Forms extends Component {
         }
     }
 
-    optionVal(items){
+    optionVal(items){      
         this.datalist = []
         items.map((item, key) => {
             this.datalist.push(<option key={key} value={item.tseg}></option>)
         })
     }
+
 
     handleSearchWithName(field, e) {
         this.setState({ [field]: e.target.value })
@@ -121,38 +124,41 @@ export class Forms extends Component {
             const error =  this.state.error
             this.setState({ checkError: this.state.error })
             service.searchTsegName(e.target.name, e.target.value).then(({hors_shinj_baidal_list, point_ids, names}) => {
-                if(names){
-                    this.setState({names, name_error:true, checkError: error})
+                if(names){                    
                     this.optionVal(names)
+                    this.setState({names, name_error:true, checkError: error})
                 }
                 else if(names == false){
                     this.setState({ name_error: false, checkError:[]})
                 }
 
                 else if(point_ids){
-                    this.setState({point_ids, id_error:true, checkError: error})
                     this.optionVal(point_ids)
+                    this.setState({id_error:true, checkError: error})
                 }
                 else if(point_ids == false){
                     this.setState({ id_error: false , checkError:[] })
                 }
 
                 else if(hors_shinj_baidal_list){
-                    this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
                     this.optionVal(hors_shinj_baidal_list)
+                    this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
                 }
                 else{
                     this.setState({ hors_error: true, checkError: error})
                 }
             })
-            // .catch(error => {
-            //     console.log("Алдаа гарсан байна. " ,error.text)
-            //     this.props.history.push('/back/froms/')
-            // })
         }
 
     }
-
+    checkError(){
+        const error = this.state.error
+        if(this.state.tesgiin_ner == '' || this.state.toviin_dugaar == '' || this.state.hors_shinj_baidal == ''){
+            this.setState({
+                checkError:error
+            })
+        }
+    }
     handleInput(e){
         this.setState({
             [e.target.name]:e.target.value,
@@ -468,7 +474,7 @@ export class Forms extends Component {
                                                 id="tesgiin_ner"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.name_error || this.error_msg.length || this.state.tesgiin_ner =='' > 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
                                                 value = {this.state.tesgiin_ner}
                                             />
@@ -486,7 +492,7 @@ export class Forms extends Component {
                                                 id="toviin_dugaar"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.id_error || this.error_msg.length || this.state.tesgiin_ner == ''> 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
                                                 value = {this.state.toviin_dugaar}
                                             />
@@ -835,7 +841,7 @@ export class Forms extends Component {
                                                 id="hors_shinj_baidal"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.hors_error || this.state.hors_shinj_baidal == '' || this.error_msg.length > 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                 value = {this.state.hors_shinj_baidal}
                                             />
@@ -957,13 +963,13 @@ export class Forms extends Component {
                                     </p>
                             }
                             <div>
-                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
+                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                     {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                     {!isSubmitting && 'Нэмэх' }
                                 </button>
                             </div>
-                            <datalist id="tsegList">
+                            <datalist id="tsegList">                               
                                 {this.datalist}
                             </datalist>
                         </div>

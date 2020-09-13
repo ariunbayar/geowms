@@ -13,6 +13,7 @@ from django.core.paginator import Paginator
 import math
 import pyproj
 import uuid
+from django.db.models import Q
 import re
 # Create your models here.
 
@@ -1438,7 +1439,7 @@ def tsegPersonalNameSearch(request, payload):
     List = open("/home/delgermaa/project/geoWMS/backend/forms/soil.txt").read().splitlines()
     if(name == 'tesgiin_ner'):
         names = []
-        mpoint = Mpoint_view.objects.using('postgis_db').filter(point_name__icontains=query)[:10]
+        mpoint = Mpoint_view.objects.using('postgis_db').filter(Q(point_name__iexact=query))[:10]
         if(mpoint):
             for tseg in mpoint:
                 names.append({
@@ -1455,7 +1456,7 @@ def tsegPersonalNameSearch(request, payload):
             return JsonResponse(rsp)
     elif(name == 'toviin_dugaar'):
         point_ids = []
-        mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
+        mpoint = Mpoint_view.objects.using('postgis_db').filter(Q(point_id__iexact=query))[:10]
         if(mpoint):
             for tseg in mpoint:
                 point_ids.append({
@@ -1495,7 +1496,7 @@ def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
     names = []
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=query)[:10]
+    mpoint = Mpoint_view.objects.using('postgis_db').get(Q(point_id__iexact=query))[:10]
     if(mpoint):
         for tseg in mpoint:
             items.append({
@@ -1564,7 +1565,6 @@ def tsegPersonalSuccess(request, payload):
                 data = None
 
         if data:
-            print("data-tai", data)
             update_cursor = connections['postgis_db'].cursor()
             if data.point_class == 2:
                 mpoint_data = Mpoint2.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=2, point_class_name='GPS-ийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g102')
@@ -1607,14 +1607,12 @@ def tsegPersonalSuccess(request, payload):
             }
             return JsonResponse(rsp)
         else:
-            print("data bhgvi bn ", data)
             rsp = {
                 'success': False,
                 'msg': "Төлөв адилхан тул боломжгүй",
             }
             return JsonResponse(rsp)
     except Exception:
-        print("except", data)
         rsp = {
             'success': False,
             'msg': "Амжилтгүй боллоо",
