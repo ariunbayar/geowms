@@ -96,7 +96,7 @@ def wms_layers(request, pk):
 def aimag(request):
     try:
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "AimagMon" as aimag FROM public."AdmUnitCenter_Aimag" ''')
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "AimagMon" as aimag FROM public."AdmUnitCenter_Aimag" ORDER BY "AimagMon"  ASC ''')
         data = find_cursor.fetchall()
         if(data):
 
@@ -125,7 +125,7 @@ def sumfind(request, payload):
     try:
         aimag_name = payload.get('aimag_name')
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ''', [aimag_name])
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ORDER BY "SoumMon"  ASC ''', [aimag_name])
         data = find_cursor.fetchall()
         if(data):
 
