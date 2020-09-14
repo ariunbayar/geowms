@@ -102,7 +102,6 @@ export default class BundleMap extends Component {
     }
 
     cartButton(is_cart, content,  code){
-        console.log("2dohi", code)
         if(is_cart == true){
             this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code)
         }
@@ -145,7 +144,7 @@ export default class BundleMap extends Component {
             return {
                 name,
                 layers: layers.map((layer) => {
-                    return{
+                    return {
                         ...layer,
                         tile: new Tile({
                             source: new TileWMS({
@@ -405,7 +404,26 @@ export default class BundleMap extends Component {
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
         const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
-        this.controls.drawModal.showModal(coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+        const { bundle, map_wms_list } = this.state
+
+        const layer_info = {
+            bundle: { id: bundle.id },
+            wms_list: map_wms_list.reduce((acc, { name, layers }) => {
+                const wms = {
+                    name,
+                    layers: layers.reduce((acc, { id, name, tile }) => {
+                        if (tile.getVisible())
+                            acc.push({ id, name })
+                        return acc
+                    }, []),
+                }
+                if (wms.layers.length)
+                    acc.push(wms)
+                return acc
+            }, [])
+        }
+
+        this.controls.drawModal.showModal(coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info)
     }
 
     toggleDrawRemove(){

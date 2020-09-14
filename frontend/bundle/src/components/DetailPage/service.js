@@ -84,10 +84,10 @@ function payment(price, description, data_id) {
     return fetch('/back/payment/purchase/', requestOptions).then(handleResponse)
 }
 
-function paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom) {
+function paymentDraw(values) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({price, description, coodrinatLeftTop, coodrinatRightBottom})
+        body: JSON.stringify(values)
     }
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
 }
