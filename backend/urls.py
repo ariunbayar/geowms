@@ -31,6 +31,8 @@ urlpatterns = [
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
         path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
+        path('get-geo/', wms_views.get_geo, name='get-geo'),
+        path('save-geo/', wms_views.save_geo, name='save-geo'),
     ], 'wms'))),
 
     path('bundle/', include(([
@@ -128,6 +130,7 @@ urlpatterns = [
         path('tseg-personal/batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
         path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
         path('tseg-personal/search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
+        path('tseg-personal/searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
         path('tseg-personal/list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
         path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
         path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
