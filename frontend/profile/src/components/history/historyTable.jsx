@@ -8,27 +8,26 @@ export class HistoryTable extends Component {
     constructor(props) {
         super(props)
         this.state={
-            export_file: false,
+            export_state: this.props.values.export_file ? 'success' : 'initial',
         }
         this.handleDownload = this.handleDownload.bind(this)
-
     }
 
     handleDownload(payment_id){
 
-        setTimeout(()=>{
-            this.setState({form_is_loading: true})
-        }
-        , 2000)
-        // service.downloadPurchase(payment_id).then(({success}) => {
-            // this.setState({form_is_loading: false})
-        // })
+        this.setState({ export_state: 'loading' })
+
+        service.downloadPurchase(payment_id).then(({success}) => {
+            this.setState({
+                export_state: 'success',
+            })
+        })
     }
 
     render() {
-        const idx = this.props.idx
-        const form_is_loading = this.state.form_is_loading
-        const {id, geo_unique_number, total_amount, description, created_at, is_success, success_at, bank_unique_number, export_file}=this.props.values
+        const {id, geo_unique_number, total_amount, description, created_at, is_success, success_at, bank_unique_number} = this.props.values
+        const { export_state } = this.state
+
         return (
             <div className="col-4 my-2">
                 <div className="card">
@@ -47,19 +46,22 @@ export class HistoryTable extends Component {
                         <p className="card-text">{geo_unique_number}</p>
                         <p className="card-text">Нийт үнэ: {total_amount}₮</p>
                         <p className="card-text text-muted">{created_at}</p>
-                        {
-                            export_file
-                            ?
-                            null
-                            :
-                            <a className="btn gp-outline-primary" href='#' onClick={e => this.handleDownload(id)}>shp файл үүсгэх</a>
+
+                        {export_state == 'initial' &&
+                            <a className="btn gp-outline-primary" href='#' onClick={e => this.handleDownload(id)}>Shape үүсгэх</a>
                         }
-                        {
-                            export_file
-                            ?
-                            <a className="btn gp-btn-primary" href={`/payment/download-zip/${id}/`}>Файл</a>
-                            :
-                            null
+
+                        {export_state == 'loading' &&
+                            <button className="btn gp-outline-primary">
+                                <div className="spinner-border" role="status">
+                                    <span className="sr-only"></span>
+                                </div>
+                                {} Түр хүлээнэ үү...
+                            </button>
+                        }
+
+                        {export_state == 'success' &&
+                            <a href={`/payment/download-zip/${id}/`}>Энд дарж татаж авна уу!</a>
                         }
                     </div>
                 </div>

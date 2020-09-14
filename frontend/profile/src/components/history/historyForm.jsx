@@ -39,7 +39,6 @@ export default class HistoryForm extends Component {
                             payment.map((p, idx) =>
                                 <HistoryTable
                                     key={idx}
-                                    idx={(this.state.currentPage*25)-25+idx+1}
                                     values={p}
                                 >
                                 </HistoryTable>

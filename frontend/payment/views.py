@@ -1,24 +1,23 @@
+from zipfile import ZipFile
 import os
-from django.db import connection
+import uuid
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
-from main.decorators import ajax_required
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from zipfile import ZipFile
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
+from backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
-from backend.forms.models import Mpoint_view
+from main.decorators import ajax_required
 
-
-import uuid
 
 def index(request):
 
@@ -92,14 +91,14 @@ def get_all_file_paths(directory):
     file_paths = []
 
     for root, directories, files in os.walk(directory):
-        for filename in files: 
+        for filename in files:
             filepath = os.path.join(root, filename)
             file_paths.append(filepath)
 
     return file_paths
 
 
-def get_all_file_remove(directory): 
+def get_all_file_remove(directory):
 
     file_paths = []
 
@@ -111,6 +110,7 @@ def get_all_file_remove(directory):
 
 
 def _export_shp(payment):
+
     import sys
     sys.path.append('/usr/lib/python3/dist-packages/')
     from qgis.utils import iface
@@ -123,20 +123,20 @@ def _export_shp(payment):
         QgsApplication.setPrefixPath("/usr", True)
         QgsApplication.initQgis()
         uri = QgsDataSourceUri()
-        uri.setConnection("localhost", "5432", "geoportal", "postgres", connection.settings_dict['PASSWORD'])
+        db_config = settings.DATABASES['postgis_db']
+
+        uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
 
         sql = """
-        select
-         *
-        from (
+        SELECT
+            *
+        FROM (
             SELECT
                  id,
-                 st_intersection(st_transform(geom,4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
+                 st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
             FROM public."Road_MGL"
-
         ) as t
-        where st_geometrytype(geom) != 'ST_GeometryCollection'
-
+        WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
         """
 
         uri.setDataSource('', f'({sql})', 'geom', '', 'id')
@@ -179,13 +179,21 @@ def _export_shp(payment):
 @login_required
 def download_purchase(request, pk):
 
-    payment = get_object_or_404(Payment, pk=pk)
+    payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
+    # if payment.export_file:
+        # is_created = True
+    # else:
+        # is_created = _export_shp(payment)
+    import time
+    time.sleep(1.5)
+    is_created = True  # TODO
 
-    create_shp = _export_shp(payment)
-    if create_shp:
-        return JsonResponse({'success': True})
+    rsp = {
+        'success': is_created,
+        'export_file': payment.export_file,
+    }
 
-    return JsonResponse({'success': False})
+    return JsonResponse(rsp)
 
 
 @require_POST
