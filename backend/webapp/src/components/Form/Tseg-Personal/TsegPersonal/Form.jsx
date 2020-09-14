@@ -585,13 +585,13 @@ export  class Forms extends Component {
                                             <Field name="suljeenii_torol" as="select" className="form-control"
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="2">GPS-ийн сүлжээ</option>
-                                                <option value="3">Гравиметрийн сүлжээ</option>
-                                                <option value="4">Өндрийн сүлжээ</option>
-                                                <option value="5">Триангуляцийн сүлжээ</option>
-                                                <option value="6">Полигометрийн сүлжээ</option>
-                                                <option value="7">Зураглалын сүлжээ</option>
-                                                <option value="8">GNSS-ийн байнгын ажиллагаатай станц</option>
+                                                <option value="3">GPS-ийн сүлжээ</option>
+                                                <option value="6">Гравиметрийн сүлжээ</option>
+                                                <option value="7">Өндрийн сүлжээ</option>
+                                                <option value="4">Триангуляцийн сүлжээ</option>
+                                                <option value="5">Полигометрийн сүлжээ</option>
+                                                <option value="8">Зураглалын сүлжээ</option>
+                                                <option value="2">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
                                             <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
                                         </Fragment>
@@ -927,7 +927,7 @@ export  class Forms extends Component {
                                         <ErrorMessage name="date" component="div" className="text-dange"/>
                                     </td>
                                 </tr>
-                                {values.suljeenii_torol == '2' ?
+                                {values.suljeenii_torol == '3' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
@@ -936,7 +936,7 @@ export  class Forms extends Component {
                                         <input
                                             type="file"
                                             className={'form-control ' + (this.state.file_path1_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '2' ? false : true}
+                                            disabled={values.suljeenii_torol == '3' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                         />
                                         {this.state.file_path1_error > 0 ?
@@ -950,7 +950,7 @@ export  class Forms extends Component {
                                         : null}
                                     </td>
                                 </tr>: null}
-                                {values.suljeenii_torol == '2' ?
+                                {values.suljeenii_torol == '3' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
@@ -960,7 +960,7 @@ export  class Forms extends Component {
                                             type="file"
                                             className="form-control"
                                             className={'form-control ' + (this.state.file_path2_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '2' ? false : true}
+                                            disabled={values.suljeenii_torol == '3' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                         />
                                         {this.state.file_path2_error > 0 ?

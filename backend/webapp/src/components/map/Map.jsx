@@ -65,7 +65,6 @@ export default class Maps extends Component {
 
     componentDidMount() {
         this.loadMapData()
-        console.log(this.props.xy)
     }
 
     loadMapData() {
@@ -199,6 +198,7 @@ export default class Maps extends Component {
     
     handleSetCenter() {
         const coord = this.props.xy
+        console.log(coord[0])
         if(coord[0]>60){
             const view = this.map.getView()
             const map_projection = view.getProjection()
