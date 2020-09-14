@@ -66,9 +66,13 @@ def wms_layers(request, pk):
                 'name': ob.name,
                 'code': ob.code,
                 'legendURL': ob.legend_url,
+                'feature_price': ob.feature_price,
+                'geodb_schema': ob.geodb_schema,
+                'geodb_table': ob.geodb_table,
+                'geodb_pk_field': ob.geodb_pk_field,
+                'geodb_export_field': ob.geodb_export_field,
                 'defaultCheck': bundle_layers.values('defaultCheck')[0]['defaultCheck']
             }
-
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         if wms.is_active:
             url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk))
@@ -92,7 +96,7 @@ def wms_layers(request, pk):
 def aimag(request):
     try:
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "AimagMon" as aimag FROM public."AdmUnitCenter_Aimag" ''')
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "AimagMon" as aimag FROM public."AdmUnitCenter_Aimag" ORDER BY "AimagMon"  ASC ''')
         data = find_cursor.fetchall()
         if(data):
 
@@ -121,7 +125,7 @@ def sumfind(request, payload):
     try:
         aimag_name = payload.get('aimag_name')
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ''', [aimag_name])
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ORDER BY "SoumMon"  ASC ''', [aimag_name])
         data = find_cursor.fetchall()
         if(data):
 

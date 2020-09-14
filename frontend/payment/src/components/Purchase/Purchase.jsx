@@ -96,21 +96,7 @@ export class Purchase extends Component {
                     <table className="table table-bordered">
                         <tbody>
                             <tr>
-                                <td><i className="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
-                                <td>
-                                    {purchase_all.point_name}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
-                                <td>{purchase_all.mpoint_aimag}</td>
-                            </tr>
-                            <tr>
-                                <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Сум</td>
-                                <td>{purchase_all.mpoint_sum}</td>
-                            </tr>
-                            <tr>
-                                <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup"><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Цэгийн мэдээлэл</th>
+                                <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup"><i className="fa fa-map mr-2 mr-2" aria-hidden="true"></i>Цэгийн мэдээлэл</th>
                             </tr>
                             <tr>
                                 <th style={{textAlign: "center"}} scope="">
@@ -133,10 +119,6 @@ export class Purchase extends Component {
                                     }
                                     </div>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өндөр</td>
-                                <td>{purchase_all.undur}</td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Гүйлгээний дугаар</td>

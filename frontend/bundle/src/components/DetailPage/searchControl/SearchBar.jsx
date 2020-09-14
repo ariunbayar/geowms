@@ -67,6 +67,16 @@ class SearchBarComponent extends Component {
         service.getAimags().then(({info, success}) => {
             if(success){
                 this.setState({aimag: info})
+                service.getSum("Хөвсгөл").then(({info, success}) => {
+                    if(success){
+                        this.setState({sum: info})
+                    }
+                    else{
+                        this.setState({error_msg: info})
+                    }setTimeout(() => {
+                        this.setState({error_msg: ''})
+                    }, 2222);
+                })
             }
             else{
                 this.setState({error_msg: info})
@@ -129,7 +139,7 @@ class SearchBarComponent extends Component {
         const {error_msg} = this.state
         return (
             <div>
-                <div className="form-group  rounded shadow-sm p-3 mb-5 bg-white rounded">
+                {/* <div className="form-group  rounded shadow-sm p-3 mb-5 bg-white rounded">
                     <label className="font-weight-bold" htmlFor="formGroupInput">Нэрэлбэрээр хайх</label>
                     <div className="input-group mb-3">
 
@@ -138,7 +148,7 @@ class SearchBarComponent extends Component {
                             <button className="btn gp-btn-primary" type="button"><i className="fa fa-search mr-1" aria-hidden="true"></i>Хайх</button>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <form onSubmit={this.handleSubmitCoordinateAimag} className=" rounded shadow-sm p-3 mb-5 bg-white rounded">
                     <div className="form-group">
