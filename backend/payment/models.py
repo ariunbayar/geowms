@@ -4,7 +4,7 @@ from geoportal_app.models import User
 
 
 class Payment(models.Model):
-    
+
     KIND_MONGOLBANK = 1
     KIND_QPAY = 2
 

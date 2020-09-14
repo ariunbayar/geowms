@@ -15,6 +15,7 @@ from .PaymentMethodMB import PaymentMethodMB
 from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
+from backend.wmslayer.models import WMSLayer
 
 
 import uuid
@@ -33,7 +34,6 @@ def index(request):
 @login_required
 def dictionaryRequest(request, payload):
     purchase_all = payload.get('purchase_all')
-    print(purchase_all['total_amount'])
     # Хүсэлт илгээх xml датаг бэлтгэх
     mbutil = MBUtil(purchase_all['total_amount'], purchase_all['description'])
     finalRequest = mbutil.xmlConvert()
@@ -57,8 +57,6 @@ def dictionaryRequest(request, payload):
 def dictionaryResponse(request):
 
     if request.method == 'GET':
-        print("Dsdfsdfsddfgdf")
-
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
@@ -168,18 +166,16 @@ def purchaseFromCart(request, payload):
     userList = User.objects.filter(id=user_id)
     for user in userList:
         userID = user.id
-    # mpoint = Mpoint_view.objects.using('postgis_db').filter()
-    amount = settings.PURCHASE['point_price']
-    total_amount = amount * len(datas)
-
+    amount = 1
+    total_amount = 0
     try:
         payment = Payment.objects.create(
             geo_unique_number = uniq_id,
-            bank_unique_number = '',
+            bank_unique_number = ' ',
             description = 'Цэг худалдаж авах хүсэлт',
-            total_amount = total_amount,
             user_id = userID,
             kind=2,
+            total_amount=0,
             export_kind=1,
             is_success = False,
             message = 'Цэг худалдаж авах хүсэлт',
@@ -193,15 +189,30 @@ def purchaseFromCart(request, payload):
                 check_id = True
             else:
                 check_id = False
-
+        total_amount = 0
         for i in range(len(datas)):
             if pay_id > 0:
+                mpoint = Mpoint_view.objects.using('postgis_db').filter(id = datas[i][1]).first()
+                amount=0
+                if datas[i][0]:
+                   wms_layer = WMSLayer.objects.filter(code = datas[i][0]).first()
+                   if wms_layer:
+                       amount = wms_layer.feature_price
+
+                total_amount = total_amount + amount
+                pdf_id = ''
+                point_name = 'Нэр алга'
+                if mpoint:
+                    if mpoint.pid:
+                        pdf_id = mpoint.pid
+                    if mpoint.point_name:
+                        point_name = mpoint.point_name
                 point = PaymentPoint.objects.create(
                     payment_id = pay_id,
-                    point_id = uniq_id,
-                    point_name = datas[i],
+                    point_id = datas[i][1],
+                    point_name = point_name,
                     amount = amount,
-                    pdf_id = 'GPSB00003',
+                    pdf_id = pdf_id,
                 )
             else:
                 rsp = {
@@ -209,6 +220,7 @@ def purchaseFromCart(request, payload):
                     'msg': "Амжилтгүй"
                 }
                 return JsonResponse(rsp)
+        Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
     except Exception:
         rsp = {
                 'success': False,
