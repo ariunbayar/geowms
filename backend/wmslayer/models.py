@@ -17,12 +17,11 @@ class WMSLayer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sort_order = models.PositiveIntegerField()
-
+    feature_price = models.PositiveIntegerField()
     geodb_schema = models.CharField(max_length=200, null=True)
     geodb_table = models.CharField(max_length=200, null=True)
     geodb_pk_field = models.CharField(max_length=200, null=True)
     geodb_export_field = models.CharField(max_length=200, null=True)
-    feature_price = models.PositiveIntegerField()
 
     def save(self, *args, **kwargs):
         if not self.pk:
