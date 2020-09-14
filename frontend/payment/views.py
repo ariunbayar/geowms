@@ -3,6 +3,7 @@ import os
 import uuid
 
 from django.conf import settings
+from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse
@@ -14,7 +15,7 @@ from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 from backend.forms.models import Mpoint_view
-from backend.payment.models import Payment, PaymentPoint
+from backend.payment.models import Payment, PaymentPoint, PaymentPolygon
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
 from backend.wmslayer.models import WMSLayer
@@ -65,24 +66,53 @@ def dictionaryResponse(request):
 @ajax_required
 @login_required
 def purchaseDraw(request, payload):
-    user = get_object_or_404(get_user_model(), pk=request.user.id)
+
+    user = request.user
+
     price = payload.get('price')
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
-    count = Payment.objects.all().count()
-    payment = Payment.objects.create(geo_unique_number=count,
-                                        amount=price,
-                                        description=description,
-                                        user=user,
-                                        is_success=False,
-                                        coodrinatLeftTopX=coodrinatLeftTop[0],
-                                        coodrinatLeftTopY=coodrinatLeftTop[1],
-                                        coodrinatRightBottomX=coodrinatRightBottom[0],
-                                        coodrinatRightBottomY=coodrinatRightBottom[1],
-                                    )
+    layer_id = payload.get('layer_id')
 
-    return JsonResponse({'payment_id': payment.id})
+    wmslayer = get_object_or_404(WMSLayer, pk=layer_id)
+
+    with transaction.atomic():
+
+        payment = Payment()
+        payment.geo_unique_number = uuid.uuid4()
+        payment.bank_unique_number = ' '
+        payment.description = 'Хэсэгчлэн худалдаж авах хүсэлт'
+        payment.user = user
+        payment.kind = Payment.KIND_QPAY
+        payment.total_amount = 0
+        payment.export_kind = Payment.EXPORT_KIND_POLYGON
+        payment.is_success = False
+        payment.message = 'Хэсэгчлэн худалдаж авах хүсэлт'
+        payment.code = ''
+        payment.save()
+
+        payment_polygon = PaymentPolygon()
+        payment_polygon.payment = payment
+        payment_polygon.data_id = ''
+        payment_polygon.pdf_id = ''
+        payment_polygon.amount = 1  # TODO
+        payment_polygon.coodrinatLeftTopX = coodrinatLeftTop[0]
+        payment_polygon.coodrinatLeftTopY = coodrinatLeftTop[1]
+        payment_polygon.coodrinatRightBottomX = coodrinatRightBottom[0]
+        payment_polygon.coodrinatRightBottomY = coodrinatRightBottom[1]
+        payment_polygon.save()
+
+        payment_layer = PaymentLayer()
+        payment_layer.payment = payment
+        payment_layer.wms_layer = wmslayer
+        payment_layer.save()
+
+    return JsonResponse({
+        'success': True,
+        'payment_id': payment.id,
+        'msg': 'Амжилттай боллоо',
+    })
 
 
 def get_all_file_paths(directory):
