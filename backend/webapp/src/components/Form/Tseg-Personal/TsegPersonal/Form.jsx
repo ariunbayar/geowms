@@ -112,7 +112,7 @@ export  class Forms extends Component {
         this.setState({ [field]: e.target.value })
         if(e.target.value.length == 0){
             this.error_msg = []
-            this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
+            this.error_msg.push(<div className="text-danger">Хоосон байна.</div>)
             if(this.error_msg.length > 0){
                 this.setState({ checkError: this.state.error })
             }
@@ -400,6 +400,20 @@ export  class Forms extends Component {
         service.updateTseg(id).then(({tseg_display}) =>{
             if(tseg_display){
                 tseg_display.map((item, idx) =>
+                {
+                    const value = item.date
+                    const d = value.split("-")
+                    const daydhkf = parseInt(d[2])+1
+                    if(daydhkf<=10){
+                        var dated = '0' +`${daydhkf}`
+                    }
+                    else{
+                        var dated = `${daydhkf}`
+                    }
+                    const m =d[1]
+                    const y = d[0]
+                    var dateStr = y+ "-" + m + "-" + dated; 
+
                     this.setState({
                         values : {
                             ...this.state.values,
@@ -408,7 +422,7 @@ export  class Forms extends Component {
                             ondor: item.ondor,
                             suljeenii_torol: item.point_type,
                             sudalga_or_shine: item.sudalga_or_shine,
-                            date: item.date.replace(/\//g, "-"),
+                            date: dateStr,
                             hotolson: item.hotolson,
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
@@ -438,6 +452,7 @@ export  class Forms extends Component {
                         file_path11: item.file_path1,
                         file_path22: item.file_path2,
                     })
+                    }
                 )
             }
 
@@ -578,7 +593,7 @@ export  class Forms extends Component {
                                                 <option value="7">Зураглалын сүлжээ</option>
                                                 <option value="8">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
-                                            <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                 </tr>
@@ -598,7 +613,7 @@ export  class Forms extends Component {
                                                 <option value="6">II зэрэг</option>
                                                 <option value="7">III зэрэг</option>
                                             </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td> :
                                         <td>
@@ -613,7 +628,7 @@ export  class Forms extends Component {
                                                 <option value="5">I зэрэг</option>
                                                 <option value="6">II зэрэг</option>
                                             </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                     }
@@ -734,7 +749,7 @@ export  class Forms extends Component {
                                             id="id_ondor"
                                             type="number"
                                         />
-                                        <ErrorMessage name="ondor" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="ondor" component="div" className="text-dange"/>
                                     </th>
                                 </tr>
                                 <tr>
@@ -874,7 +889,7 @@ export  class Forms extends Component {
                                                 <option>Сэргээсэн</option>
                                                 <option>Шинээр суулгасан</option>
                                             </Field>
-                                            <ErrorMessage name="sudalga_or_shine" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="sudalga_or_shine" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                 </tr>
@@ -890,7 +905,7 @@ export  class Forms extends Component {
                                                 id="hors_shinj_baidal"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                 value = {this.state.hors_shinj_baidal}
                                             />
@@ -902,14 +917,14 @@ export  class Forms extends Component {
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">13.</th>
                                     <th colSpan="2" scope="rowgroup">Цэг тэмдэгт судалгасан огноо:</th>
-                                    <td colSpan="3" scope="rowgroup">
+                                    <td colSpan="3" scope="input-group date">
                                         <Field
                                             className={'form-control ' + (errors.date ? 'is-invalid' : '')}
                                             name='date'
                                             id="id_date"
                                             type="date"
                                         />
-                                        <ErrorMessage name="date" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="date" component="div" className="text-dange"/>
                                     </td>
                                 </tr>
                                 {values.suljeenii_torol == '2' ?
@@ -971,7 +986,7 @@ export  class Forms extends Component {
                                             id="id_alban_baiguullga"
                                             type="text"
                                         />
-                                        <ErrorMessage name="alban_baiguullga" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="alban_baiguullga" component="div" className="text-danger"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -984,7 +999,7 @@ export  class Forms extends Component {
                                             id="id_alban_tushaal"
                                             type="text"
                                         />
-                                        <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="alban_tushaal" component="div" className="=text-danger"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -997,7 +1012,7 @@ export  class Forms extends Component {
                                             id="id_hotolson"
                                             type="text"
                                         />
-                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="hotolson" component="div" className="textt-danger"/>
                                     </td>
                                 </tr>
                             </tbody>

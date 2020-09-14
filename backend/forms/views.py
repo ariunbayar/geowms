@@ -718,6 +718,7 @@ def tsegPersonal(request):
 
         if request.POST.get('date'):
             date = request.POST.get('date')
+
         y = float(request.POST.get('latlongx'))
         x = float(request.POST.get('latlongy'))
         cursor = connections['postgis_db'].cursor()
@@ -1313,7 +1314,7 @@ def hureeAll(request, payload):
             'id': data.id,
             'x': data.x,
             'y': data.y,
-            'created_at': data.created_at.strftime('%Y-%m-%d'),
+            'created_at': data.created_at.strftime('%m-%d-%Y'),
         })
     return JsonResponse({'huree_data': huree_data})
 
@@ -1532,7 +1533,7 @@ def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
     names = []
-    mpoint = Mpoint_view.objects.using('postgis_db').get(Q(point_id__iexact=query))[:10]
+    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__iexact=query)[:10]
     if(mpoint):
         for tseg in mpoint:
             items.append({
