@@ -865,8 +865,8 @@ def tsegPersonal(request):
         if request.POST.get('date'):
             date = request.POST.get('date')
 
-        y = float(request.POST.get('latlongx'))
-        x = float(request.POST.get('latlongy'))
+        y = float(request.POST.get('latlongy'))
+        x = float(request.POST.get('latlongx'))
         cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()

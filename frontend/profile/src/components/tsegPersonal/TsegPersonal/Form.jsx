@@ -371,7 +371,7 @@ export default class Forms extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push('/back/froms/tseg-info/tsegpersonal/tseg-personal/')
+                    this.props.history.push('/profile/tseg-personal/')
                 }, 1000)
             }
             else{
