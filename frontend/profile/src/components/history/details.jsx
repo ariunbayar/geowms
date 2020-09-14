@@ -34,7 +34,6 @@ export class Details extends Component {
 
     render() {
         const { items, check_error, error_msg, points, check_info } = this.state
-        console.log(items)
         return (
         <div className="container">
             <div className="row">
@@ -49,7 +48,7 @@ export class Details extends Component {
                         :
                             <div></div>
                     }
-                    <h5 className="mb-3">hha</h5>
+                    <h5 className="mb-3">Лавлах</h5>
                     <table className="table table-bordered">
                         <tbody>
                             <tr>
@@ -90,7 +89,7 @@ export class Details extends Component {
                                     <div>
                                     {
                                         points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>
-                                            <a className="text-info" href={`/payment/download-pdf/${this.state.payment_id}/`}>файл</a></li>)
+                                            <a className="text-info" href={`/payment/download-pdf/${value.file_name}/`}>файл</a></li>)
                                     }
                                     </div>
                                 </td>
