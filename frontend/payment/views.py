@@ -15,7 +15,7 @@ from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 from backend.forms.models import Mpoint_view
-from backend.payment.models import Payment, PaymentPoint, PaymentPolygon
+from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
 from backend.wmslayer.models import WMSLayer
@@ -73,9 +73,8 @@ def purchaseDraw(request, payload):
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
-    layer_id = payload.get('layer_id')
-
-    wmslayer = get_object_or_404(WMSLayer, pk=layer_id)
+    layer_ids = payload.get('layer_ids')
+    bundle_id = payload.get('bundle_id')
 
     with transaction.atomic():
 
@@ -103,10 +102,11 @@ def purchaseDraw(request, payload):
         payment_polygon.coodrinatRightBottomY = coodrinatRightBottom[1]
         payment_polygon.save()
 
-        payment_layer = PaymentLayer()
-        payment_layer.payment = payment
-        payment_layer.wms_layer = wmslayer
-        payment_layer.save()
+        for layer_id in layer_ids:
+            payment_layer = PaymentLayer()
+            payment_layer.payment = payment
+            payment_layer.wms_layer = get_object_or_404(WMSLayer, pk=layer_id)
+            payment_layer.save()
 
     return JsonResponse({
         'success': True,
@@ -138,69 +138,77 @@ def get_all_file_remove(directory):
                 os.remove(filepath)
 
 
+# def create_shp_file(layer, polygon):
+#     import sys
+#     sys.path.append('/usr/lib/python3/dist-packages/')
+#     from qgis.utils import iface
+#     from qgis.core import \
+#         QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
+
+#     try:
+#         qgs = QgsApplication([], False)
+#         QgsApplication.setPrefixPath("/usr", True)
+#         QgsApplication.initQgis()
+#         uri = QgsDataSourceUri()
+#         db_config = settings.DATABASES['postgis_db']
+
+#         uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
+
+#         sql = """
+#         SELECT
+#             *
+#         FROM (
+#             SELECT
+#                  id,
+#                  st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
+#             FROM public."Road_MGL"
+#         ) as t
+#         WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
+#         """
+
+#         uri.setDataSource('', f'({sql})', 'geom', '', 'id')
+
+#         vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
+
+#         if not vlayer.isValid():
+#             print("Layer failed to load!")
+#         else:
+#             print("Layer success to load!")
+
+#             path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+#             os.mkdir(path)
+#             filename = os.path.join(path, 'shp2.shp')
+
+#             writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+#             del(writer)
+
+#             qgs.exitQgis()
+
+
 def _export_shp(payment):
+    pass
+    # layers = PaymentLayer.objects.filter(payment=payment)
+    # polygon = PaymentPolygon.objects.filter(payment=payment).first()
 
-    import sys
-    sys.path.append('/usr/lib/python3/dist-packages/')
-    from qgis.utils import iface
-    from qgis.core import \
-        QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
+    # for layer in layers:
+    #     create_shp_file(layer, polygon)
+        
+    # file_paths = get_all_file_paths(path)
 
-    fields = QgsFields()
-    try:
-        qgs = QgsApplication([], False)
-        QgsApplication.setPrefixPath("/usr", True)
-        QgsApplication.initQgis()
-        uri = QgsDataSourceUri()
-        db_config = settings.DATABASES['postgis_db']
+    # zip_path = os.path.join(path, 'export.zip')
+    # with ZipFile(zip_path,'w') as zip:
+    #     for file in file_paths:
+    #         zip.write(file, os.path.basename(file))
 
-        uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
+    # get_all_file_remove(path)
+    # payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
+    # payment.save()
 
-        sql = """
-        SELECT
-            *
-        FROM (
-            SELECT
-                 id,
-                 st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
-            FROM public."Road_MGL"
-        ) as t
-        WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
-        """
 
-        uri.setDataSource('', f'({sql})', 'geom', '', 'id')
+    #     return True
 
-        vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
-
-        if not vlayer.isValid():
-            print("Layer failed to load!")
-        else:
-            print("Layer success to load!")
-
-            path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-            os.mkdir(path)
-            filename = os.path.join(path, 'shp2.shp')
-
-            writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
-
-            file_paths = get_all_file_paths(path)
-
-            zip_path = os.path.join(path, 'export.zip')
-            with ZipFile(zip_path,'w') as zip:
-                for file in file_paths:
-                    zip.write(file, os.path.basename(file))
-
-            get_all_file_remove(path)
-            payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
-            payment.save()
-            del(writer)
-
-        qgs.exitQgis()
-
-        return True
-
-    except Exception as e:
-        return False
+    # except Exception as e:
+    #     return False
 
 
 @require_GET
