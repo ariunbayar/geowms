@@ -38,7 +38,7 @@ class Payment(models.Model):
     mongolbank_rsp = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     export_file = models.CharField(max_length=250, null=True)
-    bundle = models.OneToOneField('backend_bundle.Bundle', on_delete=models.PROTECT, null=True)
+    bundle = models.ForeignKey('backend_bundle.Bundle', on_delete=models.PROTECT, null=True)
 
 
 class PaymentPoint(models.Model):

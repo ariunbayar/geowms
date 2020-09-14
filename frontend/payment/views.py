@@ -156,19 +156,22 @@ def _create_shp_file(payment, layer, polygon):
 
         uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
 
+        x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+
+        x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+
         sql = f"""
         SELECT
             *
         FROM (
-            SELECT *,
+            SELECT id,
                  st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((
-                     {polygon.coodrinatLeftTopX} {polygon.coodrinatLeftTopY},
-                     {polygon.coodrinatRightBottomX} {polygon.coodrinatLeftTopY},
-                     {polygon.coodrinatLeftTopX} {polygon.coodrinatRightBottomY},
-                     {polygon.coodrinatRightBottomX} {polygon.coodrinatRightBottomY},
-                     {polygon.coodrinatLeftTopX} {polygon.coodrinatLeftTopY}
+                     {x1} {y1},
+                     {x2} {y1},
+                     {x2} {y2},
+                     {x1} {y2},
+                     {x1} {y1}
                  ))'), 4326)) AS geom
-            EXCEPT geom
             FROM {layer.geodb_schema}."{layer.geodb_table}"
         ) as t
         WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
@@ -184,7 +187,9 @@ def _create_shp_file(payment, layer, polygon):
             print("Layer success to load!")
 
             path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-            os.mkdir(path)
+            if not os.path.isdir(path):
+                os.mkdir(path)
+
             filename = os.path.join(path, str(layer.pk) + '.shp')
             writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
             del(writer)
