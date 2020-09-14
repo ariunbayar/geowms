@@ -16,6 +16,7 @@ import uuid
 from django.db.models import Q
 import re
 from django.conf import settings
+import datetime
 # Create your models here.
 
 
@@ -514,6 +515,10 @@ def tsegPersonalRemove(request, payload):
         return JsonResponse({'success': False})
 
 
+def UtcNow():
+    now = datetime.datetime.utcnow()
+    return int(now.strftime("%s"))
+
 @require_POST
 @ajax_required
 def tsegPersonalUpdate(request, payload):
@@ -522,11 +527,6 @@ def tsegPersonalUpdate(request, payload):
     tseg = TsegPersonal.objects.filter(id = pk).first()
     search_cursor = connections['postgis_db'].cursor()
     data = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
-    
-    print("date", tseg.date.strftime("%Y-%m-%d"))
-    print("date", tseg.date.strftime("%Y-%m-%d"))
-    print("date", tseg.date.strftime("%Y-%m-%d"))
-    print("date", tseg.date.strftime("%Y-%m-%d"))
     search_cursor.execute(''' SELECT ST_X(ST_TRANSFORM(ST_CENTROID(%s),4326)) AS x,  ST_Y(ST_CENTROID(ST_TRANSFORM(%s,4326))) AS y FROM mpoint_view where id = %s ''', [data.geom, data.geom, str(pk)])
     search_cursor_data = search_cursor.fetchone()
     if search_cursor_data:

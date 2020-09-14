@@ -68,7 +68,8 @@ export  class Forms extends Component {
             names:[],
             points_ids:[],
             hors_shinj_baidal_list:[],
-            checkNull:[]
+            checkNull:[],
+            bairshil_error:false
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -159,29 +160,49 @@ export  class Forms extends Component {
                 checkError:error,
             })
         }
-
-        else if(this.state.toviin_dugaar == ''){
+        if(this.state.toviin_dugaar == ''){
             alert("Төвийн дугаарыг оруулна уу !!!")
             this.setState({
                 checkError:error,
             })
         }
 
-        else if(this.state.hors_shinj_baidal == ''){
+         if(this.state.hors_shinj_baidal == ''){
             alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
             this.setState({
                 checkError:error,
             })
         }
-        else if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
+
+        if(this.state.barishil_tuhai.length <50){
+            alert("Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна !!!")
+            this.setState({
+                checkError:error,
+            })
+        }
+        if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
             alert("Уртраг эсвэл Өргөрөгийн мэдээллийг оруулна уу !!!")
             this.setState({
                 checkError:error
             })
         }
+
     }
 
     handleInput(e){
+        if(e.target.name == 'barishil_tuhai'){
+            if(e.target.value.length > 50){
+                this.setState({
+                    checkError:[]
+                })
+            }
+
+        }
+        if(e.target.name == 'BA' || e.target.name == 'BB' || e.target.name == 'BC' || e.target.name == 'LA' || e.target.name == 'LB' ||e.target.name == 'BB'){
+            this.setState({
+                checkError:[]
+            })
+        }
         this.setState({
             [e.target.name]:e.target.value,
         })
@@ -387,7 +408,7 @@ export  class Forms extends Component {
                             ondor: item.ondor,
                             suljeenii_torol: item.point_type,
                             sudalga_or_shine: item.sudalga_or_shine,
-                            date: item.date,
+                            date: item.date.replace(/\//g, "-"),
                             hotolson: item.hotolson,
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
@@ -445,6 +466,7 @@ export  class Forms extends Component {
        if(this.state.latlongy == ''){
         this.getItem()
        }
+
        const error_msg = this.state.error_msg
         return (
         <Formik
@@ -628,7 +650,7 @@ export  class Forms extends Component {
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">
                                         Солбилцол WGS-84 /DMS/
-                                        <button type='button' className="btn gp-outline-primary " onClick={() => this.handleCoordinatCheck}>
+                                        <button type='button' className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
                                             Шалгах
                                         </button>
                                     </th>
@@ -789,7 +811,7 @@ export  class Forms extends Component {
                                     <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
                                          {this.state.barishil_tuhai.length < 50 ? <a className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </a> : ''}
                                         <input
-                                            className={'form-control' + ( this.state.barishil_tuhai.length < 50? ' is-invalid' : '')} 
+                                            className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')} 
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
