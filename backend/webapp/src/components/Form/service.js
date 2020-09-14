@@ -14,6 +14,7 @@ export const service = {
     searchTseg,
     tsegPersonalSuccess,
     findSum,
+    searchTsegName
 }
 
 function tsegPersonalList(page, perpage, query){
@@ -107,4 +108,11 @@ function findSum(X, niitB) {
         body: JSON.stringify({"x":niitB, "y":X})
     }
     return fetch(`/back/tuuhen_ov/tseg-personal/findSum/`, requestOptions).then(handleResponse)
+}
+function searchTsegName(name, query){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({name,query}),
+    }
+    return fetch(`${prefix}/tseg-personal/searchName/`, opts).then(handleResponse)
 }
