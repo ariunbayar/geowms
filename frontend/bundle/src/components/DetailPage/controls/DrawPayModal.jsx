@@ -15,25 +15,40 @@ class ModalComponent extends Component{
             payLoad: false,
         }
 
+        this.handlePayment = this.handlePayment.bind(this)
+
     }
 
     handlePayment(){
 
         this.setState({payLoad: true})
+
         const {price, description} = this.state
-        const {coodrinatLeftTop, coodrinatRightBottom} = this.props
-        service.paymentDraw(price, description, coodrinatLeftTop, coodrinatRightBottom).then(({ payment_id }) => {
-            if(payment_id){
-                setTimeout(() => {
-                    window.location.href=`/payment/purchase/${payment_id}/`;
-                }, 1000)
+        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }} = this.props
+
+        const values = {
+            price,
+            description,
+            coodrinatLeftTop,
+            coodrinatRightBottom,
+            bundle_id: bundle.id,
+            layer_ids: wms_list.reduce((acc, { layers }) => {
+                return [...acc, ...layers.map((layer) => layer.id)]
+            }, []),
+        }
+
+        service.paymentDraw(values).then(({ success, payment_id }) => {
+            if (success) {
+                window.location.href = `/payment/purchase/${payment_id}/`;
             }
         })
+
     }
 
     render() {
         const {payLoad} = this.state
-        const { coodrinatLeftTop, coodrinatRightBottom} = this.props
+        const { coodrinatLeftTop, coodrinatRightBottom, layer_info } = this.props
+
         return (
             <div className="modal-dialog modal-dialog-scrollable" style={{zIndex:"5"}}>
                 <div className="modal-content">
@@ -44,16 +59,27 @@ class ModalComponent extends Component{
                         </button>
                     </div>
                     <div className="modal-body">
-                        <div className="containner">
-                            <div className="row">X = {coodrinatLeftTop[0]}</div>
-                            <div className="row">Y = {coodrinatLeftTop[1]}</div>
-                            <div className="row">X = {coodrinatRightBottom[0]}</div>
-                            <div className="row">Y = {coodrinatRightBottom[1]}</div>
+                        <div className="container">
+                            <div className="row">
+                                <ul>
+                                    {layer_info.wms_list.map(({ name, layers }, idx) =>
+                                        <li key={ idx }>{ name }
+                                            <ul>
+                                                {layers.map(({ name }, idx) =>
+                                                    <li key={ idx }>{ name }</li>
+                                                )}
+                                            </ul>
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+                            <div className="row"><code>{coodrinatLeftTop[0]}</code>, <code>{coodrinatLeftTop[1]}</code></div>
+                            <div className="row"><code>{coodrinatRightBottom[0]}</code>, <code>{coodrinatRightBottom[1]}</code></div>
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
-                        <button type="button" onClick={() => this.handlePayment()} className="btn btn-secondary" data-dismiss="modal">Худалдаж авах</button>
+                        <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
+                        <button type="button" onClick={this.handlePayment} className="btn btn-secondary">Худалдаж авах</button>
                     </div>
                 </div>
             </div>
@@ -70,7 +96,6 @@ export class DrawPayModal extends Control {
             element: document.createElement('div'),
             target: options.target,
         })
-        console.log(options)
 
         this.is_component_initialized = false
 
@@ -98,9 +123,9 @@ export class DrawPayModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(coodrinatLeftTop, coodrinatRightBottom) {
+    showModal(coodrinatLeftTop, coodrinatRightBottom, layer_info) {
         this.toggleControl(true)
-        this.renderComponent({coodrinatLeftTop, coodrinatRightBottom})
+        this.renderComponent({coodrinatLeftTop, coodrinatRightBottom, layer_info})
     }
 
 }

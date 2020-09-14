@@ -63,6 +63,7 @@ def wms_layers(request, pk):
                 role_id__in=roles
             )
         return {
+                'id': ob.pk,
                 'name': ob.name,
                 'code': ob.code,
                 'legendURL': ob.legend_url,
