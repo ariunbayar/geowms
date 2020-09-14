@@ -68,7 +68,8 @@ export  class Forms extends Component {
             names:[],
             points_ids:[],
             hors_shinj_baidal_list:[],
-            checkNull:[]
+            checkNull:[],
+            bairshil_error:false
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -111,7 +112,7 @@ export  class Forms extends Component {
         this.setState({ [field]: e.target.value })
         if(e.target.value.length == 0){
             this.error_msg = []
-            this.error_msg.push(<div className="invalid-feedback">Хоосон байна.</div>)
+            this.error_msg.push(<div className="text-danger">Хоосон байна.</div>)
             if(this.error_msg.length > 0){
                 this.setState({ checkError: this.state.error })
             }
@@ -159,29 +160,49 @@ export  class Forms extends Component {
                 checkError:error,
             })
         }
-
-        else if(this.state.toviin_dugaar == ''){
+        if(this.state.toviin_dugaar == ''){
             alert("Төвийн дугаарыг оруулна уу !!!")
             this.setState({
                 checkError:error,
             })
         }
 
-        else if(this.state.hors_shinj_baidal == ''){
+         if(this.state.hors_shinj_baidal == ''){
             alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
             this.setState({
                 checkError:error,
             })
         }
-        else if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
+
+        if(this.state.barishil_tuhai.length <50){
+            alert("Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна !!!")
+            this.setState({
+                checkError:error,
+            })
+        }
+        if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
             alert("Уртраг эсвэл Өргөрөгийн мэдээллийг оруулна уу !!!")
             this.setState({
                 checkError:error
             })
         }
+
     }
 
     handleInput(e){
+        if(e.target.name == 'barishil_tuhai'){
+            if(e.target.value.length > 50){
+                this.setState({
+                    checkError:[]
+                })
+            }
+
+        }
+        if(e.target.name == 'BA' || e.target.name == 'BB' || e.target.name == 'BC' || e.target.name == 'LA' || e.target.name == 'LB' ||e.target.name == 'BB'){
+            this.setState({
+                checkError:[]
+            })
+        }
         this.setState({
             [e.target.name]:e.target.value,
         })
@@ -379,6 +400,20 @@ export  class Forms extends Component {
         service.updateTseg(id).then(({tseg_display}) =>{
             if(tseg_display){
                 tseg_display.map((item, idx) =>
+                {
+                    const value = item.date
+                    const d = value.split("-")
+                    const daydhkf = parseInt(d[2])+1
+                    if(daydhkf<=10){
+                        var dated = '0' +`${daydhkf}`
+                    }
+                    else{
+                        var dated = `${daydhkf}`
+                    }
+                    const m =d[1]
+                    const y = d[0]
+                    var dateStr = y+ "-" + m + "-" + dated; 
+
                     this.setState({
                         values : {
                             ...this.state.values,
@@ -387,7 +422,7 @@ export  class Forms extends Component {
                             ondor: item.ondor,
                             suljeenii_torol: item.point_type,
                             sudalga_or_shine: item.sudalga_or_shine,
-                            date: item.date,
+                            date: dateStr,
                             hotolson: item.hotolson,
                             alban_tushaal: item.alban_tushaal,
                             alban_baiguullga: item.alban_baiguullga,
@@ -417,6 +452,7 @@ export  class Forms extends Component {
                         file_path11: item.file_path1,
                         file_path22: item.file_path2,
                     })
+                    }
                 )
             }
 
@@ -445,6 +481,7 @@ export  class Forms extends Component {
        if(this.state.latlongy == ''){
         this.getItem()
        }
+
        const error_msg = this.state.error_msg
         return (
         <Formik
@@ -548,15 +585,15 @@ export  class Forms extends Component {
                                             <Field name="suljeenii_torol" as="select" className="form-control"
                                             className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="2">GPS-ийн сүлжээ</option>
-                                                <option value="3">Гравиметрийн сүлжээ</option>
-                                                <option value="4">Өндрийн сүлжээ</option>
-                                                <option value="5">Триангуляцийн сүлжээ</option>
-                                                <option value="6">Полигометрийн сүлжээ</option>
-                                                <option value="7">Зураглалын сүлжээ</option>
-                                                <option value="8">GNSS-ийн байнгын ажиллагаатай станц</option>
+                                                <option value="3">GPS-ийн сүлжээ</option>
+                                                <option value="6">Гравиметрийн сүлжээ</option>
+                                                <option value="7">Өндрийн сүлжээ</option>
+                                                <option value="4">Триангуляцийн сүлжээ</option>
+                                                <option value="5">Полигометрийн сүлжээ</option>
+                                                <option value="8">Зураглалын сүлжээ</option>
+                                                <option value="2">GNSS-ийн байнгын ажиллагаатай станц</option>
                                             </Field>
-                                            <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                 </tr>
@@ -576,7 +613,7 @@ export  class Forms extends Component {
                                                 <option value="6">II зэрэг</option>
                                                 <option value="7">III зэрэг</option>
                                             </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td> :
                                         <td>
@@ -591,7 +628,7 @@ export  class Forms extends Component {
                                                 <option value="5">I зэрэг</option>
                                                 <option value="6">II зэрэг</option>
                                             </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                     }
@@ -628,7 +665,7 @@ export  class Forms extends Component {
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">
                                         Солбилцол WGS-84 /DMS/
-                                        <button type='button' className="btn gp-outline-primary " onClick={() => this.handleCoordinatCheck}>
+                                        <button type='button' className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
                                             Шалгах
                                         </button>
                                     </th>
@@ -712,7 +749,7 @@ export  class Forms extends Component {
                                             id="id_ondor"
                                             type="number"
                                         />
-                                        <ErrorMessage name="ondor" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="ondor" component="div" className="text-dange"/>
                                     </th>
                                 </tr>
                                 <tr>
@@ -787,8 +824,9 @@ export  class Forms extends Component {
                                 <tr>
                                     <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">8. Байршлын тухай: </th>
                                     <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
+                                         {this.state.barishil_tuhai.length < 50 ? <a className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </a> : ''}
                                         <input
-                                            className={'form-control' }
+                                            className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')} 
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
@@ -851,7 +889,7 @@ export  class Forms extends Component {
                                                 <option>Сэргээсэн</option>
                                                 <option>Шинээр суулгасан</option>
                                             </Field>
-                                            <ErrorMessage name="sudalga_or_shine" component="div" className="invalid-feedback"/>
+                                            <ErrorMessage name="sudalga_or_shine" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                 </tr>
@@ -867,7 +905,7 @@ export  class Forms extends Component {
                                                 id="hors_shinj_baidal"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                 value = {this.state.hors_shinj_baidal}
                                             />
@@ -879,17 +917,17 @@ export  class Forms extends Component {
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">13.</th>
                                     <th colSpan="2" scope="rowgroup">Цэг тэмдэгт судалгасан огноо:</th>
-                                    <td colSpan="3" scope="rowgroup">
+                                    <td colSpan="3" scope="input-group date">
                                         <Field
                                             className={'form-control ' + (errors.date ? 'is-invalid' : '')}
                                             name='date'
                                             id="id_date"
                                             type="date"
                                         />
-                                        <ErrorMessage name="date" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="date" component="div" className="text-dange"/>
                                     </td>
                                 </tr>
-                                {values.suljeenii_torol == '2' ?
+                                {values.suljeenii_torol == '3' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">14.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 1:</th>
@@ -898,7 +936,7 @@ export  class Forms extends Component {
                                         <input
                                             type="file"
                                             className={'form-control ' + (this.state.file_path1_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '2' ? false : true}
+                                            disabled={values.suljeenii_torol == '3' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path1')}
                                         />
                                         {this.state.file_path1_error > 0 ?
@@ -912,7 +950,7 @@ export  class Forms extends Component {
                                         : null}
                                     </td>
                                 </tr>: null}
-                                {values.suljeenii_torol == '2' ?
+                                {values.suljeenii_torol == '3' ?
                                 <tr>
                                     <th colSpan="1" scope="rowgroup">15.</th>
                                     <th colSpan="2" scope="rowgroup">Файл 2:</th>
@@ -922,7 +960,7 @@ export  class Forms extends Component {
                                             type="file"
                                             className="form-control"
                                             className={'form-control ' + (this.state.file_path2_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '2' ? false : true}
+                                            disabled={values.suljeenii_torol == '3' ? false : true}
                                             onChange={(e) => this.onChangeHandler(e, 'file_path2')}
                                         />
                                         {this.state.file_path2_error > 0 ?
@@ -948,7 +986,7 @@ export  class Forms extends Component {
                                             id="id_alban_baiguullga"
                                             type="text"
                                         />
-                                        <ErrorMessage name="alban_baiguullga" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="alban_baiguullga" component="div" className="text-danger"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -961,7 +999,7 @@ export  class Forms extends Component {
                                             id="id_alban_tushaal"
                                             type="text"
                                         />
-                                        <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="alban_tushaal" component="div" className="=text-danger"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -974,7 +1012,7 @@ export  class Forms extends Component {
                                             id="id_hotolson"
                                             type="text"
                                         />
-                                        <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
+                                        <ErrorMessage name="hotolson" component="div" className="text-danger"/>
                                     </td>
                                 </tr>
                             </tbody>
