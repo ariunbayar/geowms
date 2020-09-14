@@ -1012,7 +1012,7 @@ export  class Forms extends Component {
                                             id="id_hotolson"
                                             type="text"
                                         />
-                                        <ErrorMessage name="hotolson" component="div" className="textt-danger"/>
+                                        <ErrorMessage name="hotolson" component="div" className="text-danger"/>
                                     </td>
                                 </tr>
                             </tbody>

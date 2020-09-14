@@ -16,7 +16,6 @@ import uuid
 from django.db.models import Q
 import re
 from django.conf import settings
-import datetime
 # Create your models here.
 
 
@@ -514,10 +513,6 @@ def tsegPersonalRemove(request, payload):
     else:
         return JsonResponse({'success': False})
 
-
-def UtcNow():
-    now = datetime.datetime.utcnow()
-    return int(now.strftime("%s"))
 
 @require_POST
 @ajax_required
