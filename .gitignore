@@ -21,6 +21,9 @@ frontend/profile/static/
 
 geoportal_app/static/dist_dev
 
+geoportal_app/media/DejaVuSansCondensed.cw127.pkl
+geoportal_app/media/DejaVuSansCondensed.pkl
+
 geoportal_app/media/дэд-сан/*
 geoportal_app/media/суурь_давхарга/thumbnail_1x/*
 geoportal_app/media/суурь_давхарга/thumbnail_2x/*

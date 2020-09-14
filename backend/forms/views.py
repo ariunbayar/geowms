@@ -1,3 +1,5 @@
+import os
+
 from django.db import connections
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
@@ -16,7 +18,156 @@ import uuid
 from django.db.models import Q
 import re
 from django.conf import settings
+from fpdf import FPDF
 # Create your models here.
+
+def createPdf(pk):
+
+    tseg = TsegPersonal.objects.filter(id=pk).first()
+    data = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+    if tseg.latlongy and tseg.latlongx:
+        L = float(tseg.latlongy)
+        B = float(tseg.latlongx)
+        LA = int(L)
+        LB = int((L-LA)*60)
+        LC = float((L-LA-LB/60)*3600 )
+        LC = "%.6f" % LC
+        BA = int(B)
+        BB = int((B-BA)*60)
+        BC = float((B-BA-BB/60)*3600 )
+        BC = "%.6f" % BC
+        Bchar = str(BA) + '°' + str(BB) + "'" + str(float(BC))  + '"'
+        Lchar = str(LA) + '°' + str(LB) + "'" + str(float(LC))  + '"'
+        zoneout = int(L)/6+31
+        instr = ("+proj=longlat +datum=WGS84 +no_defs")
+        outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+        inproj = pyproj.Proj(instr)
+        outproj = pyproj.Proj(outstr)
+        val1 = pyproj.transform(inproj, outproj, L,B)
+        utmx = val1[0]
+        utmx = str("%.6f" % utmx)
+        utmy = val1[1]
+        utmy = str("%.6f" % utmy)
+    else:
+        Bchar = ''
+        Lchar = ''
+        utmx = ''
+        utmy = ''
+    data = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_xy(0, 0)
+    pdf.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font('DejaVu', '', 10)
+    pdf.ln(10)
+    pdf.cell(50)
+    pdf.cell(75, 8, "ГЕОДЕЗИЙН БАЙНГЫН ЦЭГ ТЭМДЭГТИЙН", 0, 2, 'D')
+    pdf.cell(75, 8, " ХУВИЙН ХЭРЭГ", 0, 2, 'C')
+    pdf.cell(90, 8, " ", 0, 2, 'C')
+
+    # tseg ner ehni mor
+    pdf.cell(-50)
+    pdf.cell(10, 8, '1.', 1, 0, 'C')
+    pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
+    pdf.cell(43, 8, data.point_name, 1, 0, 'C')
+
+    pdf.cell(10, 8, '2.', 1, 0, 'C')
+    pdf.cell(41, 8, 'Төвийн дугаар', 1, 0, 'C')
+    pdf.cell(43, 8, data.point_id, 1, 0, 'C')
+    pdf.cell(90, 8, " ", 0, 2, 'C')
+    pdf.cell(-188)
+    # tseg ner ehni mor
+    pdf.cell(10, 8, '3.', 1, 0, 'C')
+    pdf.cell(51, 8, 'Трапцийн дугаар', 1, 0, 'C')
+    if data.sheet1:
+        trapets = data.sheet1 + '-' + str(int(data.sheet2)) + '-' + str(int(data.sheet3))
+    pdf.cell(33, 8, trapets, 1, 0, 'C')
+
+    pdf.cell(10, 8, '4.', 1, 0, 'C')
+    pdf.cell(41, 8, 'Сүлжээний төрөл', 1, 0, 'C')
+    pdf.cell(43, 8, tseg.suljeenii_torol, 1, 0, 'C')
+    pdf.cell(90, 8, " ", 0, 2, 'C')
+    # mor 3
+    pdf.ln(0)
+    pdf.cell(10, 8, '5.', 1, 0, 'C')
+    pdf.cell(84, 8, 'Байршил (Аймаг, сум, дүүрэг, хороо)', 1, 0, 'C')
+    pdf.cell(94, 8, data. aimag + ' ' + data.sum, 1, 1, 'C')
+
+    # 4
+
+    pdf.ln(0)
+    pdf.cell(10, 8, '6.', 1, 0, 'C')
+    pdf.cell(33, 8, 'Цэгийн солбилцол', 1, 0, 'C')
+    pdf.cell(45, 8, 'B= ' + Bchar, 1, 0, 'C')
+    pdf.cell(33, 8, 'L= ' + Lchar, 1, 0, 'C')
+    pdf.cell(33, 8, 'X= ' + utmx, 1, 0, 'C')
+    pdf.cell(34, 8, 'Y= ' + utmy, 1, 0, 'C')
+
+    # mor 5
+    pdf.ln(0)
+    pdf.cell(10, 8, '', 1, 1, 'C')
+    pdf.cell(188, 8, '7. Цэгийн фото зураг', 1, 1, 'C')
+
+
+    # mor 6
+    pdf.cell(94, 8, 'Холоос', 1, 0, 'C')
+    pdf.cell(94, 8, 'Ойроос', 1, 0, 'C')
+    pdf.ln(0)
+    pdf.cell(94, 70, '', 1, 0, 'C')
+    pdf.cell(94, 70, '', 1, 0, 'C')
+    pdf.ln(70)
+    if tseg.tseg_oiroos_img_url:
+        pdf.image(settings.MEDIA_ROOT + '/' + tseg.tseg_oiroos_img_url.name, x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+    if tseg.tseg_holoos_img_url:
+        pdf.image(settings.MEDIA_ROOT + '/' + tseg.tseg_holoos_img_url.name, x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+    # mor 6
+    pdf.ln(0)
+    pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
+    pdf.ln(8)
+    pdf.multi_cell(188, 5, tseg.barishil_tuhai, 1, 0, 'C')
+    newH = pdf.get_y()
+    # mor 6
+    if tseg.bairshil_tseg_holoos_img_url != '' and tseg.bairshil_tseg_oiroos_img_url:
+        pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
+        pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
+        pdf.ln(8)
+        pdf.cell(94, 62, '', 1, 0, 'C')
+        pdf.cell(94, 62, '', 1, 0, 'C')
+        pdf.ln(62)
+        pdf.image(settings.MEDIA_ROOT + '/' + tseg.bairshil_tseg_oiroos_img_url.name, x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        pdf.image(settings.MEDIA_ROOT + '/' + tseg.bairshil_tseg_holoos_img_url.name, x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+    else:
+        pdf.ln(0)
+    # mor 6
+    pdf.cell(10, 8, '11.', 1, 0, 'C')
+    if tseg.sudalga_or_shine:
+        sudalgaa = tseg.sudalga_or_shine
+    else:
+        sudalgaa = 'байхгүй'
+    pdf.cell(84, 8, 'Судалгаа: ' + sudalgaa, 1, 0, 'C')
+    pdf.cell(10, 8, '12.', 1, 0, 'C')
+    if tseg.date:
+        date = tseg.date.strftime("%Y-%m-%d")
+    else:
+        date = ''
+    pdf.cell(84, 8, 'Огноо: ' +  date, 1, 0, 'C')
+
+    # mor 6
+    pdf.ln(8)
+    pdf.cell(10, 8, '13.', 1, 0, 'C')
+    pdf.cell(84, 8, 'Хөрсний шинж байдал:', 1, 0, 'C')
+    pdf.cell(94, 8, tseg.hors_shinj_baidal, 1, 0, 'C')
+    # mor 6
+    pdf.ln(8)
+    pdf.cell(10, 8, '14.', 1, 0, 'C')
+    pdf.cell(84, 8, 'Хувийн хэрэг хөтөлсөн:', 1, 0, 'C')
+    pdf.cell(94, 8, tseg.hotolson, 1, 0, 'C')
+    # mor 6
+    pdf.ln(8)
+    pdf.cell(10, 8, '15.', 1, 0, 'C')
+    pdf.cell(84, 8, 'Байгууллага', 1, 0, 'C')
+    pdf.cell(94, 8, tseg.alban_baiguullga, 1, 0, 'C')
+    return pdf
 
 
 @require_POST
@@ -713,8 +864,9 @@ def tsegPersonal(request):
 
         if request.POST.get('date'):
             date = request.POST.get('date')
-        y = float(request.POST.get('latlongx'))
-        x = float(request.POST.get('latlongy'))
+
+        y = float(request.POST.get('latlongy'))
+        x = float(request.POST.get('latlongx'))
         cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
@@ -896,10 +1048,17 @@ def tsegPersonal(request):
             tseg_personal.file_path2.delete(save=False)
             tseg_personal.file_path2 = request.FILES['file2']
             tseg_personal.save()
+        pdf_id = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+        file_name = 'PDF'+ pdf_id.pid + '.pdf'
+        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        pdf = createPdf(pk)
+        pdf.output(src_file, 'F')
         return JsonResponse({'success': True, 'name': False, 'ids':False})
     else:
         tesgiin_ner = request.POST.get('tesgiin_ner')
         objectid = request.POST.get('toviin_dugaar')
+        file_name = 'PDF'+ objectid + '.pdf'
+        for_db_pdf_name = 'PDF' + objectid
         tesgiin_ner_check = Mpoint_view.objects.using('postgis_db').filter(point_name=tesgiin_ner)
         objectid_check = Mpoint_view.objects.using('postgis_db').filter(point_id=objectid)
         if tesgiin_ner_check or objectid_check:
@@ -939,7 +1098,7 @@ def tsegPersonal(request):
                     objectid='null', point_id=point_id,
                     ondor=ondor,
                     point_name=request.POST.get('tesgiin_ner'),
-                    pid=request.POST.get('pid'), point_class=request.POST.get('suljeenii_torol'), mclass=request.POST.get('center_typ'),
+                    pid=for_db_pdf_name, point_class=request.POST.get('suljeenii_torol'), mclass=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
                     sheet3=request.POST.get('LA'),
@@ -986,6 +1145,9 @@ def tsegPersonal(request):
             file2 = request.FILES['file2']
         if request.POST.get('date'):
             date = request.POST.get('date')
+        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        pdf = createPdf(tsegPersenal.id)
+        pdf.output(src_file, 'F')
     return JsonResponse({'success': True, 'name': False, 'ids':False})
 
 
@@ -1308,7 +1470,7 @@ def hureeAll(request, payload):
             'id': data.id,
             'x': data.x,
             'y': data.y,
-            'created_at': data.created_at.strftime('%Y-%m-%d'),
+            'created_at': data.created_at.strftime('%m-%d-%Y'),
         })
     return JsonResponse({'huree_data': huree_data})
 
@@ -1527,7 +1689,7 @@ def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
     names = []
-    mpoint = Mpoint_view.objects.using('postgis_db').get(Q(point_id__iexact=query))[:10]
+    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__iexact=query)[:10]
     if(mpoint):
         for tseg in mpoint:
             items.append({
