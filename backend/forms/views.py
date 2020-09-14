@@ -61,8 +61,8 @@ def createPdf(pk):
     pdf.set_font('DejaVu', '', 10)
     pdf.ln(10)
     pdf.cell(50)
-    pdf.cell(75, 8, "ГЕОДЕЗИЙН БАЙНГЫН ЦЭГ ТЭМДЭГТИЙН", 0, 2, 'D')
-    pdf.cell(75, 8, " ХУВИЙН ХЭРЭГ", 0, 2, 'C')
+    pdf.cell(75, 8, "ГЕОДЕЗИЙН БАЙНГЫН ЦЭГ ТЭМДЭГТИЙН ХУВИЙН ХЭРЭГ", 0, 2, 'D')
+    pdf.cell(75, 8, "", 0, 2, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
 
     # tseg ner ehni mor
@@ -882,7 +882,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -897,7 +897,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -911,7 +911,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -925,7 +925,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -939,7 +939,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -953,7 +953,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -967,7 +967,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -981,7 +981,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -995,7 +995,7 @@ def tsegPersonal(request):
                         point_name=request.POST.get('tesgiin_ner'),
                         ondor=ondor,
                         point_class=point_class,
-                        pid=request.POST.get('pid'), mclass=request.POST.get('center_typ'),
+                        mclass=request.POST.get('center_typ'),
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
@@ -1049,7 +1049,7 @@ def tsegPersonal(request):
             tseg_personal.file_path2 = request.FILES['file2']
             tseg_personal.save()
         pdf_id = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
-        file_name = 'PDF'+ pdf_id.pid + '.pdf'
+        file_name = pdf_id.pid + '.pdf'
         src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
         pdf = createPdf(pk)
         pdf.output(src_file, 'F')
