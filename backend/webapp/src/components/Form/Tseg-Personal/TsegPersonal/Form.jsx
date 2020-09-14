@@ -179,12 +179,6 @@ export  class Forms extends Component {
                 checkError:error
             })
         }
-        else if(this.state.barishil_tuhai.length < 50){
-            alert("Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна !!!")
-            this.setState({
-                checkError:error
-            })
-        }
     }
 
     handleInput(e){
