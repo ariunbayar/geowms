@@ -20,7 +20,20 @@ import re
 from django.conf import settings
 from fpdf import FPDF
 # Create your models here.
-
+pdf = FPDF()
+pdf.add_page()
+pdf.set_xy(0, 0)
+pdf.set_xy(0, 0)
+pdf.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+pdf.set_font('DejaVu', '', 10)
+pdf.ln(10)
+pdf.cell(50)
+pdf.multi_cell(75, 5, "ГЕОДЕЗИЙН БАЙНГЫН ЦЭГ  dasd asd asdsa das dasd asd asd asdas  dsa dasd asdas ТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙН", 0, 2, 'D')
+newH = pdf.get_y()
+print(newH)
+pdf.cell(94, 62, '', 1, 0, 'C')
+pdf.image(settings.MEDIA_ROOT + '/' + 'tseg-personal-img/img.png', x = 11, y = newH, w = 92, h = 60, type = '', link = '')
+pdf.output('height.pdf','F')
 def createPdf(pk):
 
     tseg = TsegPersonal.objects.filter(id=pk).first()
@@ -97,11 +110,11 @@ def createPdf(pk):
 
     pdf.ln(0)
     pdf.cell(10, 8, '6.', 1, 0, 'C')
-    pdf.cell(41, 8, 'Цэгийн солбилцол', 1, 0, 'C')
-    pdf.cell(43, 8, 'B= ' + Bchar, 1, 0, 'C')
-    pdf.cell(31, 8, 'L= ' + Lchar, 1, 0, 'C')
-    pdf.cell(31, 8, 'X= ' + str(utmx), 1, 0, 'C')
-    pdf.cell(32, 8, 'Y= ' + str(utmy), 1, 0, 'C')
+    pdf.cell(33, 8, 'Цэгийн солбилцол', 1, 0, 'C')
+    pdf.cell(45, 8, 'B= ' + Bchar, 1, 0, 'C')
+    pdf.cell(33, 8, 'L= ' + Lchar, 1, 0, 'C')
+    pdf.cell(33, 8, 'X= ' + str(utmx), 1, 0, 'C')
+    pdf.cell(34, 8, 'Y= ' + str(utmy), 1, 0, 'C')
 
     # mor 5
     pdf.ln(0)
@@ -115,28 +128,27 @@ def createPdf(pk):
     pdf.ln(0)
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.cell(94, 70, '', 1, 0, 'C')
+    pdf.ln(70)
     if tseg.tseg_oiroos_img_url:
         pdf.image(settings.MEDIA_ROOT + '/' + tseg.tseg_oiroos_img_url.name, x = 11, y = 83, w = 92, h = 60, type = '', link = '')
     if tseg.tseg_holoos_img_url:
         pdf.image(settings.MEDIA_ROOT + '/' + tseg.tseg_holoos_img_url.name, x = 105, y = 83, w = 92, h = 60, type = '', link = '')
-
     # mor 6
-    effective_page_width = pdf.w - 2 * pdf.l_margin
-    pdf.ln(70)
+    pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
     pdf.ln(8)
     pdf.multi_cell(188, 5, tseg.barishil_tuhai, 1, 0, 'C')
+    newH = pdf.get_y()
     # mor 6
-    if tseg.bairshil_tseg_oiroos_img_url != '' and tseg.bairshil_tseg_holoos_img_url != '':
-        pdf.ln(20)
+    if tseg.bairshil_tseg_holoos_img_url != '' and tseg.bairshil_tseg_oiroos_img_url:
         pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
         pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
         pdf.ln(8)
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
-        pdf.image(settings.MEDIA_ROOT + '/' + tseg.bairshil_tseg_oiroos_img_url.name, x = 11, y = 173, w = 92, h =60, type = '', link = '')
-        pdf.image(settings.MEDIA_ROOT + '/' + tseg.bairshil_tseg_holoos_img_url.name, x = 105, y = 173, w = 92, h =60, type = '', link = '')
         pdf.ln(62)
+        pdf.image(settings.MEDIA_ROOT + '/' + tseg.bairshil_tseg_oiroos_img_url.name, x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        pdf.image(settings.MEDIA_ROOT + '/' + tseg.bairshil_tseg_holoos_img_url.name, x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6
@@ -1048,6 +1060,10 @@ def tsegPersonal(request):
             tseg_personal.file_path2.delete(save=False)
             tseg_personal.file_path2 = request.FILES['file2']
             tseg_personal.save()
+        file_name = 'PDF'+ point_id + '.pdf'
+        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        pdf = createPdf(pk)
+        pdf.output(src_file, 'F')
         return JsonResponse({'success': True, 'name': False, 'ids':False})
     else:
         tesgiin_ner = request.POST.get('tesgiin_ner')
