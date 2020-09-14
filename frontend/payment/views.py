@@ -7,7 +7,7 @@ from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse, Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 
@@ -19,6 +19,7 @@ from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, Paymen
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
 from backend.wmslayer.models import WMSLayer
+from backend.bundle.models import Bundle
 from main.decorators import ajax_required
 
 
@@ -67,8 +68,6 @@ def dictionaryResponse(request):
 @login_required
 def purchaseDraw(request, payload):
 
-    user = request.user
-
     price = payload.get('price')
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
@@ -76,13 +75,16 @@ def purchaseDraw(request, payload):
     layer_ids = payload.get('layer_ids')
     bundle_id = payload.get('bundle_id')
 
+    bundle = get_object_or_404(Bundle, pk=bundle_id)
+    layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
     with transaction.atomic():
 
         payment = Payment()
         payment.geo_unique_number = uuid.uuid4()
         payment.bank_unique_number = ' '
         payment.description = 'Хэсэгчлэн худалдаж авах хүсэлт'
-        payment.user = user
+        payment.user = request.user
+        payment.bundle = bundle
         payment.kind = Payment.KIND_QPAY
         payment.total_amount = 0
         payment.export_kind = Payment.EXPORT_KIND_POLYGON
@@ -102,10 +104,10 @@ def purchaseDraw(request, payload):
         payment_polygon.coodrinatRightBottomY = coodrinatRightBottom[1]
         payment_polygon.save()
 
-        for layer_id in layer_ids:
+        for layer in layers:
             payment_layer = PaymentLayer()
             payment_layer.payment = payment
-            payment_layer.wms_layer = get_object_or_404(WMSLayer, pk=layer_id)
+            payment_layer.wms_layer = layer
             payment_layer.save()
 
     return JsonResponse({
@@ -138,7 +140,7 @@ def get_all_file_remove(directory):
                 os.remove(filepath)
 
 
-# def create_shp_file(layer, polygon):
+# def _create_shp_file(layer, polygon):
 #     import sys
 #     sys.path.append('/usr/lib/python3/dist-packages/')
 #     from qgis.utils import iface
@@ -154,13 +156,13 @@ def get_all_file_remove(directory):
 
 #         uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
 
-#         sql = """
+#         sql = f"""
 #         SELECT
 #             *
 #         FROM (
 #             SELECT
 #                  id,
-#                  st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
+#                  st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon(({kjlkj}103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
 #             FROM public."Road_MGL"
 #         ) as t
 #         WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
@@ -183,15 +185,17 @@ def get_all_file_remove(directory):
 #             del(writer)
 
 #             qgs.exitQgis()
+#     except Exception as e:
+        # pass
 
 
-def _export_shp(payment):
-    pass
+# def _export_shp(payment):
+#     pass
     # layers = PaymentLayer.objects.filter(payment=payment)
     # polygon = PaymentPolygon.objects.filter(payment=payment).first()
 
     # for layer in layers:
-    #     create_shp_file(layer, polygon)
+    #     _create_shp_file(layer, polygon)
         
     # file_paths = get_all_file_paths(path)
 
@@ -203,12 +207,6 @@ def _export_shp(payment):
     # get_all_file_remove(path)
     # payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
     # payment.save()
-
-
-    #     return True
-
-    # except Exception as e:
-    #     return False
 
 
 @require_GET

@@ -39,7 +39,7 @@ class ModalComponent extends Component{
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
-                window.location.href = `/payment/purchase/${payment_id}/`;
+                window.location.href = `/profile/all/api/details/${payment_id}/`;
             }
         })
 
