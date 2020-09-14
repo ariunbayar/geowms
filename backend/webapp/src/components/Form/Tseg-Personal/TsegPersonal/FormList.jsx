@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
 import {service} from '../../service'
-import { Pagination } from "../../../pagination/pagination"
+import { Pagination } from "../../../../../../../src/components/Pagination/index"
 
 export class FormList extends Component {
 

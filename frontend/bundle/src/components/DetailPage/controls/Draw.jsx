@@ -3,10 +3,6 @@ import {Control} from 'ol/control'
 import ReactDOM from 'react-dom'
 import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
 
-
-
-
-
 export class DrawButton extends Control {
 
     constructor(opt_options) {

@@ -4,7 +4,7 @@ import {service} from './service'
 import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
 import {NavLink} from "react-router-dom"
-import { Pagination } from '../../pagination/pagination'
+import { Pagination } from '../../../../../../src/components/Pagination/index'
 
 export class Жагсаалт extends Component {
 

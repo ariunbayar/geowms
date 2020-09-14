@@ -7,12 +7,14 @@ from frontend.secure import views as secure_views
 from frontend.payment import views as payment_views
 from frontend.page import views as page_views
 from frontend.profile import views as profile_views
-
+from frontend.qpay import views as qpay_views
 
 urlpatterns = [
 
     path('', include(([
         path('', bundle_views.all, name='all'),
+        path('api/aimag/', bundle_views.aimag, name='aimag'),
+        path('api/sum/', bundle_views.sumfind, name='sum'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
     ], 'bundle'))),
@@ -48,17 +50,25 @@ urlpatterns = [
         path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
-
+        path('api/download-purchase/<int:pk>/', payment_views.download_purchase),
+        path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
+        path('download-pdf/<int:pk>/', payment_views.download_pdf, name='download-pdf'),
     ], 'payment'))),
+
+    path('qpay/', include(([
+        path('create/', qpay_views.create, name='create'),
+        path('check/', qpay_views.check, name='check'),
+    ], 'qpay'))),
 
     path('profile/api/', include(([
         path('', profile_views.history, name='history'),
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
+        path('get-details/', profile_views.tseg_details, name='tseg-details'),
     ], 'profile'))),
 
-    re_path('^.*', payment_views.index, name='payment'),
-    re_path('^.*', profile_views.history, name='history'),
+    re_path('^payment/.*', payment_views.index, name='payment'),
+    re_path('^profile/.*', profile_views.history, name='history'),
 
 ]

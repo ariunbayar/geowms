@@ -4,6 +4,7 @@ import 'ol/ol.css'
 import {Map, View, Feature} from 'ol'
 import {transform as transformCoordinate} from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
+
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
@@ -18,11 +19,15 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
+import {ShopModal} from './ShopControls/Modal'
+import {ShopCart} from './ShopControls/ShopCart'
 import {DrawPayModal} from './controls/DrawPayModal'
 import "./styles.css"
 import {service} from './service'
 import {SidebarButton} from './SidebarButton'
 import {Sidebar} from './Sidebar'
+import {SearchBar} from './searchControl/SearchBar'
+import {SearchBarButton} from './searchControl/SearchBarButton'
 import {DrawButton} from './controls/Draw'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 
@@ -37,19 +42,26 @@ export default class BundleMap extends Component {
             bundle: props.bundle,
             map_wms_list: [],
             is_sidebar_open: true,
+            is_search_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
             is_draw_open: false,
             draw_layer: null,
             draw: null,
             source_draw: null,
+            is_cart: false,
+            y: null,
+            x: null,
         }
 
         this.controls = {
             coordinateCopy: new CoordinateCopy(),
             modal: new Modal(),
+            shopmodal: new ShopModal(),
+            cart: new ShopCart(),
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
+            searchbar: new SearchBar(),
         }
 
         this.marker = this.initMarker()
@@ -59,11 +71,13 @@ export default class BundleMap extends Component {
         this.handleMapClick = this.handleMapClick.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
         this.toggleSidebar = this.toggleSidebar.bind(this)
+        this.searchSidebar = this.searchSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
         this.toggleDrawed = this.toggleDrawed.bind(this)
         this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
+        this.cartButton = this.cartButton.bind(this)
     }
 
     initMarker() {
@@ -85,6 +99,12 @@ export default class BundleMap extends Component {
 
         return {feature: feature, point: point}
 
+    }
+
+    cartButton(is_cart, content){
+        if(is_cart == true){
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content)
+        }
     }
 
     componentDidMount() {
@@ -219,12 +239,16 @@ export default class BundleMap extends Component {
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
                 new SidebarButton({toggleSidebar: this.toggleSidebar}),
+                new SearchBarButton({searchSidebar: this.searchSidebar}),
                 new DrawButton({toggleDraw: this.toggleDraw}),
                 new ScaleLine(),
                 this.controls.modal,
+                this.controls.shopmodal,
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
                 this.controls.sidebar,
+                this.controls.searchbar,
+                this.controls.cart,
             ]),
             layers: [
                 ...base_layers,
@@ -272,6 +296,10 @@ export default class BundleMap extends Component {
         this.state.map_wms_list.forEach(({layers}) => {
             layers.forEach(({tile}) => {
 
+                if (tile.getVisible() == false) {
+                    return
+                }
+
                 const wms_source = tile.getSource()
 
                 const url = wms_source.getFeatureInfoUrl(
@@ -288,6 +316,7 @@ export default class BundleMap extends Component {
                 if (url) {
 
                     this.controls.modal.showModal(null, false)
+                    this.controls.shopmodal.showModal(null, false)
 
                     fetch(url)
                         .then((response) => response.text())
@@ -307,7 +336,8 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            this.controls.modal.showModal(feature_info, true)
+                            // this.controls.modal.showModal(feature_info, true)
+                            this.controls.shopmodal.showModal(feature_info, true, this.cartButton)
                         })
                 } else {
                     /* TODO */
@@ -323,13 +353,12 @@ export default class BundleMap extends Component {
         layer.setVisible(!layer.getVisible())
     }
 
-    handleSetCenter(coord) {
-        console.log(coord)
+    handleSetCenter(coord, zoom) {
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
-        view.setCenter(map_coord)
+        view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
     }
 
     toggleSidebar(event) {
@@ -337,9 +366,20 @@ export default class BundleMap extends Component {
             is_sidebar_open: !prevState.is_sidebar_open,
         }))
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(null, null, true)
+            this.controls.sidebar.showSideBar(null, true)
         }else{
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, this.handleSetCenter, false)
+            this.controls.sidebar.showSideBar(this.state.map_wms_list, false)
+        }
+    }
+
+    searchSidebar(event) {
+        this.setState(prevState => ({
+            is_search_sidebar_open: !prevState.is_search_sidebar_open,
+        }))
+        if(this.state.is_search_sidebar_open){
+            this.controls.searchbar.showSideBar(null, true)
+        }else{
+            this.controls.searchbar.showSideBar(this.handleSetCenter, false)
         }
     }
 

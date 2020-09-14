@@ -24,13 +24,66 @@ element.style {
     -moz-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
     box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
     opacity: 1;
-
-
 }
+
 .⚙.ol-hidden {
     opacity: 0;
     visibility: hidden;
     transition: opacity .1s linear, visibility 0s linear .1s;
+}
+
+.⚙-search {
+    position: absolute;
+    top: 1%;
+    left: 70px;
+    bottom: 150px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    overflow-y: auto;
+    background-color: white;
+    -webkit-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    -moz-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    opacity: 1;
+}
+.⚙-search.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .1s linear, visibility 0s linear .1s;
+}
+
+
+.⚙-toggle-search{
+    position: absolute;
+    top: 7px;
+    left: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+}
+.⚙-toggle-search:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-search:focus{
+    background-color: rgba(0,60,136,0.7);
+
+}
+
+.⚙-toggle-search a{
+    position: absolute;
+    top: -6px;
+    left: 7px;
+    width: 50px;
+    height: 50px;
+
+}
+
+.fa-lg{
+    font-size: 40px;
+    color: white;
+    line-height: unset;
 }
 
 .⚙-toggle{
@@ -65,6 +118,7 @@ element.style {
     color: white;
     line-height: unset;
 }
+
 .суурь-давхаргууд{
     right: .5rem;
     bottom: 70px;
@@ -178,4 +232,77 @@ element.style {
     font-size: 30px;
     color: white;
     line-height: unset;
+}
+
+
+.root{
+    padding-top: 50px;
+    padding-right: 30px;
+    padding-bottom: 50px;
+    padding-left: 80px;
+}
+
+
+.cart-size{
+    font-size: 40px;
+    margin-left: 5px;
+    color: white;
+    line-height: unset;
+}
+
+.cart-count{
+    color: rgb(255, 255, 255);
+    margin-top: -40px;
+    margin-left: 15px;
+}
+
+.cart-count-span{
+    padding: 5px;
+    font-size: 20px;
+    color: red;
+    background-color: rgb(136, 81, 189);
+    border-radius: 25px;
+    margin-left: -40px;
+    margin-bottom: 20px;
+}
+
+.cart-button{
+    position: absolute;
+    top: 70px;
+    left: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+}
+.cart-button .card-icon{
+    position: absolute;
+    padding: 9px 3px;
+    font-size: 28px;
+    color: white;
+}
+
+.cart-button .card-count{
+    padding: 0px 27px;
+    font-size: 22px;
+    color: white;
+    position: absolute;
+}
+.cart-list {
+    padding: 2px 3px;
+    position: absolute;
+    left: 10px;
+    top: 130px;
+}
+
+.card-baraa {
+    height: 40px;
+    width: 240px;
+    background-color: rgba(0,60,136,0.5);
+    margin-top: 7px;
+    padding: 9px 7px;
+}
+.cart{
+    z-index: 1;
 }

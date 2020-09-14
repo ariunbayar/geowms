@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST, require_GET
 
 from django.core.paginator import Paginator
 from main.decorators import ajax_required
-from backend.payment.models import Payment
+from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
 from backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view
 from main.utils import resize_b64_to_sizes
@@ -20,22 +20,27 @@ def history(request):
 
 
 def _datetime_display(dt):
-    return dt.strftime('%Y-%m-%d') if dt else None
+    return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
+def _date_display(dt):
+    return dt.strftime('%Y-%m-%d') if dt else None
 
 def _get_payment_display(payment):
 
     return {
-        'id': payment.id,
-        'amount': payment.amount,
-        'description': payment.description,
+        'id':payment.id,
+        'geo_unique_number':payment.geo_unique_number,
+        'bank_unique_number':payment.bank_unique_number,
+        'description':payment.description,
+        'total_amount':payment.total_amount,
+        'user':payment.user.username,
+        'is_success':payment.is_success,
+        'card_number':payment.card_number,
+        'message':payment.message,
+        'code':payment.code,
         'created_at': _datetime_display(payment.created_at),
-        'is_success': payment.is_success,
-        'user_id': payment.user_id,
-        'bank_unique_number': payment.bank_unique_number,
-        'data_id': payment.data_id,
-        'geo_unique_number': payment.geo_unique_number,
-        'success_at': _datetime_display(payment.success_at),
+        'failed_at': _date_display(payment.failed_at),
+        'success_at': _date_display(payment.success_at),
     }
 
 
@@ -46,7 +51,7 @@ def all(request, payload):
 
     page = payload.get('page')
     per_page = payload.get('per_page')
-    total_items = Paginator(Payment.objects.all(), per_page)
+    total_items = Paginator(Payment.objects.all().order_by('-created_at'), per_page)
     items_page = total_items.page(page)
     items = [
         _get_payment_display(pay)
@@ -163,3 +168,55 @@ def tsegAdd(request):
         gps_hemjilt=TorF,
     )
     return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+@login_required
+def tseg_details(requist, payload):
+    pk = payload.get('id')
+    payment = Payment.objects.filter(id=pk).first()
+    print(payment)
+    if payment:
+        pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
+        if pay_point:
+            mpoint = Mpoint_view.objects.using('postgis_db').filter(pid='GPSB00008').first()
+            if mpoint:
+                points = []
+                for point in pay_point:
+                    points.append({
+                        'name': point.point_name,
+                        'amount': point.amount,
+                    })
+                items = []
+                items.append({
+                    'description': payment.description,
+                    'created_at': _datetime_display(payment.created_at),
+                    'success_at': payment.success_at,
+                    'is_success': payment.is_success,
+                    'user_id': payment.user_id,
+                    'geo_unique_number': payment.geo_unique_number,
+                    'total': payment.total_amount,
+                    'mpoint_aimag': mpoint.aimag,
+                    'mpoint_sum': mpoint.sum,
+                    'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
+                    'point_name': mpoint.point_name,
+                })
+                rsp = {
+                    'success': True,
+                    'items': items,
+                    'points': points
+                }
+                return JsonResponse(rsp)
+            else:
+                rsp = {
+                    'success': False,
+                }
+                return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+            }
+            return JsonResponse(rsp)
+    else:
+        return JsonResponse({'success': False})
