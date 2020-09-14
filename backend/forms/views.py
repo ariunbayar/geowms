@@ -20,20 +20,7 @@ import re
 from django.conf import settings
 from fpdf import FPDF
 # Create your models here.
-pdf = FPDF()
-pdf.add_page()
-pdf.set_xy(0, 0)
-pdf.set_xy(0, 0)
-pdf.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
-pdf.set_font('DejaVu', '', 10)
-pdf.ln(10)
-pdf.cell(50)
-pdf.multi_cell(75, 5, "ГЕОДЕЗИЙН БАЙНГЫН ЦЭГ  dasd asd asdsa das dasd asd asd asdas  dsa dasd asdas ТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙНТЭМДЭГТИЙН", 0, 2, 'D')
-newH = pdf.get_y()
-print(newH)
-pdf.cell(94, 62, '', 1, 0, 'C')
-pdf.image(settings.MEDIA_ROOT + '/' + 'tseg-personal-img/img.png', x = 11, y = newH, w = 92, h = 60, type = '', link = '')
-pdf.output('height.pdf','F')
+
 def createPdf(pk):
 
     tseg = TsegPersonal.objects.filter(id=pk).first()
