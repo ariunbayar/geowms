@@ -285,7 +285,7 @@ def download_pdf(request, pk):
     mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=pk).first()
     if mpoint:
         point = get_object_or_404(PaymentPoint, point_id=mpoint.id)
-        payment = get_object_or_404(Payment, user=request.user, pk=pk, id=point.payment_id, is_success=False)
+        payment = get_object_or_404(Payment, user=request.user, id=point.payment_id, is_success=True)
         # generate the file
         file_name = pk + '.pdf'
         src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)

@@ -45,9 +45,9 @@ def createPdf(pk):
         outproj = pyproj.Proj(outstr)
         val1 = pyproj.transform(inproj, outproj, L,B)
         utmx = val1[0]
-        utmx = "%.6f" % utmx
-        utmy = val1[0]
-        utmy = "%.6f" % utmy
+        utmx = str("%.6f" % utmx)
+        utmy = val1[1]
+        utmy = str("%.6f" % utmy)
     else:
         Bchar = ''
         Lchar = ''
@@ -100,8 +100,8 @@ def createPdf(pk):
     pdf.cell(33, 8, 'Цэгийн солбилцол', 1, 0, 'C')
     pdf.cell(45, 8, 'B= ' + Bchar, 1, 0, 'C')
     pdf.cell(33, 8, 'L= ' + Lchar, 1, 0, 'C')
-    pdf.cell(33, 8, 'X= ' + str(utmx), 1, 0, 'C')
-    pdf.cell(34, 8, 'Y= ' + str(utmy), 1, 0, 'C')
+    pdf.cell(33, 8, 'X= ' + utmx, 1, 0, 'C')
+    pdf.cell(34, 8, 'Y= ' + utmy, 1, 0, 'C')
 
     # mor 5
     pdf.ln(0)
