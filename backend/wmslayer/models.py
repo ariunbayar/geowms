@@ -22,7 +22,7 @@ class WMSLayer(models.Model):
     geodb_table = models.CharField(max_length=200, null=True)
     geodb_pk_field = models.CharField(max_length=200, null=True)
     geodb_export_field = models.CharField(max_length=200, null=True)
-    feature_price = models.PositiveIntegerField(null=True)
+    feature_price = models.PositiveIntegerField()
 
     def save(self, *args, **kwargs):
         if not self.pk:
