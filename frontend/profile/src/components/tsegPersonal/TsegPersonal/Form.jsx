@@ -61,16 +61,18 @@ export default class Forms extends Component {
             bairshil_tseg_oiroos_img_url_zurag: '',
             name_error: false,
             id_error: false,
+            checkError:[],
             error_msg: '',
+            error:{error:''},
             hors_error:false,
             names:[],
             points_ids:[],
             hors_shinj_baidal_list:[],
-            checkError: [],
-            error:{error:''},
+            checkNull:[]
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
+        this.tsegUpdate = this.tsegUpdate.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleXY = this.handleXY.bind(this)
         this.handleOnchange = this.handleOnchange.bind(this)
@@ -79,6 +81,7 @@ export default class Forms extends Component {
         this.handleInput = this.handleInput.bind(this)
         this.handleCoordinatCheck = this.handleCoordinatCheck.bind(this)
         this.handleSearchWithName = this.handleSearchWithName.bind(this)
+        this.checkError = this.checkError.bind(this)
     }
     handleBoxOver (e){
         this.setState({ showBox: true })
@@ -89,14 +92,20 @@ export default class Forms extends Component {
     }
 
     componentDidMount(){
+        const id = this.props.match.params.id
+        if(id) {
+            this.setState({id})
+            this.tsegUpdate(id)
+        }
     }
 
-    optionVal(items){
+    optionVal(items){      
         this.datalist = []
         items.map((item, key) => {
             this.datalist.push(<option key={key} value={item.tseg}></option>)
         })
     }
+
 
     handleSearchWithName(field, e) {
         this.setState({ [field]: e.target.value })
@@ -111,40 +120,65 @@ export default class Forms extends Component {
             this.error_msg = []
         }
         if(e.target.value.length >= 1){
-            const error = this.state.error
             this.error_msg = []
+            const error =  this.state.error
             this.setState({ checkError: this.state.error })
             service.searchTsegName(e.target.name, e.target.value).then(({hors_shinj_baidal_list, point_ids, names}) => {
-                if(names){
-                    this.setState({names, name_error:true, checkError: error})
+                if(names){                    
                     this.optionVal(names)
+                    this.setState({names, name_error:true, checkError: error})
                 }
                 else if(names == false){
                     this.setState({ name_error: false, checkError:[]})
                 }
 
                 else if(point_ids){
-                    this.setState({point_ids, id_error:true, checkError: error})
                     this.optionVal(point_ids)
+                    this.setState({id_error:true, checkError: error})
                 }
                 else if(point_ids == false){
                     this.setState({ id_error: false , checkError:[] })
                 }
 
                 else if(hors_shinj_baidal_list){
-                    this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
                     this.optionVal(hors_shinj_baidal_list)
+                    this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
                 }
                 else{
                     this.setState({ hors_error: true, checkError: error})
                 }
             })
-            // .catch(error => {
-            //     console.log("Алдаа гарсан байна. " ,error.text)
-            //     this.props.history.push('/back/froms/')
-            // })
+        }
+    }
+
+    checkError(){
+        const error = this.state.error
+        if(this.state.tesgiin_ner == ''){
+            alert("Цэгийн нэрийг оруулна уу  !!! ")
+            this.setState({
+                checkError:error,
+            })
         }
 
+        else if(this.state.toviin_dugaar == ''){
+            alert("Төвийн дугаарыг оруулна уу !!!")
+            this.setState({
+                checkError:error,
+            })
+        }
+
+        else if(this.state.hors_shinj_baidal == ''){
+            alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
+            this.setState({
+                checkError:error,
+            })
+        }
+        else if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
+            alert("Уртраг эсвэл Өргөрөгийн мэдээллийг оруулна уу !!!")
+            this.setState({
+                checkError:error
+            })
+        }
     }
 
     handleInput(e){
@@ -210,12 +244,12 @@ export default class Forms extends Component {
                 LC: info[0].LC
             })
             if(info[0]['aimag'] == 'Улаанбаатар'){
-                const barishil_tuhai = info[0]['aimag'] +' '+ 'хотын'
-                this.setState({barishil_tuhai})
+                const barishil_tuhai = info[0]['aimag'] +' '+ 'хотын' 
+                this.setState({barishil_tuhai:barishil_tuhai})
             }
             else{
-                const barishil_tuhai = info[0]['aimag'] +' '+ 'аймгийн' +' '+ info[0].sum +' '+ 'сум' 
-                this.setState({barishil_tuhai})
+                const barishil_tuhai = info[0]['aimag'] +' '+ 'аймгийн' +' '+ info[0].sum +' '+ 'сум'
+                this.setState({barishil_tuhai:barishil_tuhai})
             }
         }
         else{
@@ -273,6 +307,11 @@ export default class Forms extends Component {
         setSubmitting(true)
         const form_datas = new FormData()
         this.setState({values})
+        var LL=(this.state.LB/60+this.state.LA)
+        var X=((this.state.LC/3600)+(this.state.LB/60)+this.state.LA-LL) + LL
+        var BBB=(this.state.BB/60+this.state.BA)
+        var Bbut=(this.state.BC/3600)+(this.state.BB/60)+this.state.BA-BBB
+        var niitB=Bbut+BBB
         const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
@@ -286,8 +325,8 @@ export default class Forms extends Component {
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
         form_datas.append('sum_name', this.state.sum_name)
-        form_datas.append('latlongx', this.state.latlongx)
-        form_datas.append('latlongy', this.state.latlongy)
+        form_datas.append('latlongx', niitB)
+        form_datas.append('latlongy', X )
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
         form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
@@ -318,7 +357,7 @@ export default class Forms extends Component {
             }
 
             if( name){
-                alert('Энэхүү цэг мэдээллийн санд байна.')
+                alert('Цэгийн нэр хоосон байна')
                 this.setState({name_error:true})
             }
             else{
@@ -326,7 +365,7 @@ export default class Forms extends Component {
             }
 
             if(ids){
-                alert('Энэхүү төвийн дугаар мэдээллийн санд байна.')
+                alert('Төвийн дугаар хоосон байна ')
                 this.setState({id_error:true})
             }
             else{
@@ -336,7 +375,74 @@ export default class Forms extends Component {
         })
     }
 
+    tsegUpdate(id){
+        service.updateTseg(id).then(({tseg_display}) =>{
+            if(tseg_display){
+                tseg_display.map((item, idx) =>
+                    this.setState({
+                        values : {
+                            ...this.state.values,
+                            pid: item.pid,
+                            center_typ: item.center_typ,
+                            ondor: item.ondor,
+                            suljeenii_torol: item.point_type,
+                            sudalga_or_shine: item.sudalga_or_shine,
+                            date: item.date,
+                            hotolson: item.hotolson,
+                            alban_tushaal: item.alban_tushaal,
+                            alban_baiguullga: item.alban_baiguullga,
+                        },
+                        hors_shinj_baidal: item.hors_shinj_baidal,
+                        toviin_dugaar: item.point_id,
+                        tesgiin_ner: item.point_name,
+                        LA:item.LA,
+                        LB:item.LB,
+                        LC:item.LC,
+                        BA:item.BA, 
+                        BB:item.BB,
+                        BC:item.BC,
+                        zone:item.zone,
+                        cc:item.cc,
+                        latlongx: item.latlongx,
+                        latlongy: item.latlongy,
+                        sum_name: item.sum,
+                        aimag_name: item.aimag,
+                        point_class: item.point_class,
+                        trapetsiin_dugaar: item.sheet1,
+                        barishil_tuhai: item.barishil_tuhai, 
+                        tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
+                        tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
+                        bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
+                        bairshil_tseg_holoos_img_url_zurag: item.bairshil_tseg_holoos_img_url,
+                        file_path11: item.file_path1,
+                        file_path22: item.file_path2,
+                    })
+                )
+            }
+
+        }
+         )
+    }
+
+    getItem(){
+        const id = this.props.match.params.id
+        if(id){
+            service.updateTseg(id).then(({tseg_display})=> {
+                if(tseg_display){
+                    const latx = tseg_display[0]["latlongx"]
+                    const laty = tseg_display[0]["latlongy"]
+                    const x= []
+                    this.x.push(latx, laty)
+                }   
+                
+            })
+            
+        }
+        
+    }
+
     render() {
+
        const error_msg = this.state.error_msg
         return (
         <Formik
@@ -358,7 +464,7 @@ export default class Forms extends Component {
         }) => {
             const has_error = Object.keys(errors).length > 0
             return (
-                <Form >
+                <Form>
                     <div className="row container  m-l">
                         <div className="float-left">
                             <Maps
@@ -454,7 +560,7 @@ export default class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                <th>Зэрэг</th>
+                                    <th>Зэрэг</th>
                                     {values.suljeenii_torol == '2' ? 
                                         <td>
                                         <Fragment>
@@ -521,7 +627,7 @@ export default class Forms extends Component {
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">
                                         Солбилцол WGS-84 /DMS/
-                                        <button className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
+                                        <button type="button" className="btn gp-outline-primary " onClick={()=>this.handleCoordinatCheck}>
                                             Шалгах
                                         </button>
                                     </th>
@@ -537,15 +643,15 @@ export default class Forms extends Component {
                                             style={{width:"90%"}}
                                             name='BA'
                                             id="BA"
-                                            placeholder="BA = "
+                                            placeholder="D"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
                                             value ={this.state.BA}
                                         />
                                         <input
-                                            className={'form-control row float-left m-2'}
+                                            className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="BB = "
+                                            placeholder="M"
                                             name='BB'
                                             id="BB"
                                             type="number"
@@ -555,7 +661,7 @@ export default class Forms extends Component {
                                         <input
                                             className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="BC = "
+                                            placeholder="S"
                                             name='BC'
                                             id="BC"
                                             type="number"
@@ -567,17 +673,17 @@ export default class Forms extends Component {
                                         <input
                                             className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="LA = "
-                                            name='LA'
+                                            placeholder="D"
+                                            name="LA"
                                             id="LA"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
                                             value ={this.state.LA}
                                         />
                                         <input
-                                            className={'form-control row float-left m-2'}
+                                            className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="LB = "
+                                            placeholder="M"
                                             name='LB'
                                             id="LB"
                                             type="number"
@@ -587,7 +693,7 @@ export default class Forms extends Component {
                                         <input
                                             className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="LC = "
+                                            placeholder="S"
                                             name='LC'
                                             id="LC"
                                             type="number"
@@ -681,8 +787,7 @@ export default class Forms extends Component {
                                     <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">8. Байршлын тухай: </th>
                                     <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
                                         <input
-                                            className={'form-control ' }
-                                            component="textarea"
+                                            className={'form-control' }
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
@@ -874,7 +979,7 @@ export default class Forms extends Component {
                             </tbody>
                         </table>
                         <div className="span3">
-                            {has_error 
+                            {has_error
                                 ?
                                     <p> </p>
                                 : status == 'saved' && !dirty &&
@@ -883,13 +988,13 @@ export default class Forms extends Component {
                                     </p>
                             }
                             <div>
-                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
+                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                     {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                     {!isSubmitting && 'Нэмэх' }
                                 </button>
                             </div>
-                            <datalist id="tsegList">
+                            <datalist id="tsegList">                               
                                 {this.datalist}
                             </datalist>
                         </div>

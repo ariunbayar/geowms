@@ -324,7 +324,7 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord) {
-
+        console.log(coord)
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)

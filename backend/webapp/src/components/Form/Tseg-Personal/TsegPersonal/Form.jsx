@@ -5,7 +5,7 @@ import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import Maps from '../../../map/Map'
 
-export class Forms extends Component {
+export  class Forms extends Component {
 
     constructor(props) {
         super(props)
@@ -149,16 +149,38 @@ export class Forms extends Component {
                 }
             })
         }
-
     }
+
     checkError(){
         const error = this.state.error
-        if(this.state.tesgiin_ner == '' || this.state.toviin_dugaar == '' || this.state.hors_shinj_baidal == ''){
+        if(this.state.tesgiin_ner == ''){
+            alert("Цэгийн нэрийг оруулна уу  !!! ")
+            this.setState({
+                checkError:error,
+            })
+        }
+
+        else if(this.state.toviin_dugaar == ''){
+            alert("Төвийн дугаарыг оруулна уу !!!")
+            this.setState({
+                checkError:error,
+            })
+        }
+
+        else if(this.state.hors_shinj_baidal == ''){
+            alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
+            this.setState({
+                checkError:error,
+            })
+        }
+        else if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
+            alert("Уртраг эсвэл Өргөрөгийн мэдээллийг оруулна уу !!!")
             this.setState({
                 checkError:error
             })
         }
     }
+
     handleInput(e){
         this.setState({
             [e.target.name]:e.target.value,
@@ -285,6 +307,11 @@ export class Forms extends Component {
         setSubmitting(true)
         const form_datas = new FormData()
         this.setState({values})
+        var LL=(this.state.LB/60+this.state.LA)
+        var X=((this.state.LC/3600)+(this.state.LB/60)+this.state.LA-LL) + LL
+        var BBB=(this.state.BB/60+this.state.BA)
+        var Bbut=(this.state.BC/3600)+(this.state.BB/60)+this.state.BA-BBB
+        var niitB=Bbut+BBB
         const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
@@ -298,8 +325,8 @@ export class Forms extends Component {
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
         form_datas.append('sum_name', this.state.sum_name)
-        form_datas.append('latlongx', this.state.latlongx)
-        form_datas.append('latlongy', this.state.latlongy)
+        form_datas.append('latlongx', niitB)
+        form_datas.append('latlongy', X )
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
         form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
@@ -415,6 +442,7 @@ export class Forms extends Component {
     }
 
     render() {
+        var arr = [this.state.latlongy, this.state.latlongx]
        if(this.state.latlongy == ''){
         this.getItem()
        }
@@ -445,7 +473,7 @@ export class Forms extends Component {
                             <Maps
                                 handleXY={this.handleXY}
                                 coordinatCheck={false}
-                                x={this.x}
+                                xy={arr}
                             />
                         </div>
                         <div className="col-md-12 mb-4 mt-4 pl-0">
@@ -474,7 +502,7 @@ export class Forms extends Component {
                                                 id="tesgiin_ner"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.name_error || this.error_msg.length || this.state.tesgiin_ner =='' > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
                                                 value = {this.state.tesgiin_ner}
                                             />
@@ -492,7 +520,7 @@ export class Forms extends Component {
                                                 id="toviin_dugaar"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.id_error || this.error_msg.length || this.state.tesgiin_ner == ''> 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
                                                 value = {this.state.toviin_dugaar}
                                             />
@@ -602,7 +630,7 @@ export class Forms extends Component {
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">
                                         Солбилцол WGS-84 /DMS/
-                                        <button className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
+                                        <button type='button' className="btn gp-outline-primary " onClick={() => this.handleCoordinatCheck}>
                                             Шалгах
                                         </button>
                                     </th>
@@ -618,15 +646,15 @@ export class Forms extends Component {
                                             style={{width:"90%"}}
                                             name='BA'
                                             id="BA"
-                                            placeholder="BA = "
+                                            placeholder="D"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
                                             value ={this.state.BA}
                                         />
                                         <input
-                                            className={'form-control row float-left m-2'}
+                                            className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="BB = "
+                                            placeholder="M"
                                             name='BB'
                                             id="BB"
                                             type="number"
@@ -636,7 +664,7 @@ export class Forms extends Component {
                                         <input
                                             className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="BC = "
+                                            placeholder="S"
                                             name='BC'
                                             id="BC"
                                             type="number"
@@ -648,17 +676,17 @@ export class Forms extends Component {
                                         <input
                                             className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="LA = "
-                                            name='LA'
+                                            placeholder="D"
+                                            name="LA"
                                             id="LA"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
                                             value ={this.state.LA}
                                         />
                                         <input
-                                            className={'form-control row float-left m-2'}
+                                            className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="LB = "
+                                            placeholder="M"
                                             name='LB'
                                             id="LB"
                                             type="number"
@@ -668,7 +696,7 @@ export class Forms extends Component {
                                         <input
                                             className={'form-control row float-left m-2' }
                                             style={{width:"90%"}}
-                                            placeholder="LC = "
+                                            placeholder="S"
                                             name='LC'
                                             id="LC"
                                             type="number"
@@ -841,7 +869,7 @@ export class Forms extends Component {
                                                 id="hors_shinj_baidal"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.hors_error || this.state.hors_shinj_baidal == '' || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
                                                 onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                 value = {this.state.hors_shinj_baidal}
                                             />
