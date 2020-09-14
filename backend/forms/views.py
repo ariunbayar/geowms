@@ -1047,7 +1047,8 @@ def tsegPersonal(request):
             tseg_personal.file_path2.delete(save=False)
             tseg_personal.file_path2 = request.FILES['file2']
             tseg_personal.save()
-        file_name = 'PDF'+ point_id + '.pdf'
+        pdf_id = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+        file_name = 'PDF'+ pdf_id.pid + '.pdf'
         src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
         pdf = createPdf(pk)
         pdf.output(src_file, 'F')
@@ -1055,6 +1056,8 @@ def tsegPersonal(request):
     else:
         tesgiin_ner = request.POST.get('tesgiin_ner')
         objectid = request.POST.get('toviin_dugaar')
+        file_name = 'PDF'+ objectid + '.pdf'
+        for_db_pdf_name = 'PDF' + objectid
         tesgiin_ner_check = Mpoint_view.objects.using('postgis_db').filter(point_name=tesgiin_ner)
         objectid_check = Mpoint_view.objects.using('postgis_db').filter(point_id=objectid)
         if tesgiin_ner_check or objectid_check:
@@ -1094,7 +1097,7 @@ def tsegPersonal(request):
                     objectid='null', point_id=point_id,
                     ondor=ondor,
                     point_name=request.POST.get('tesgiin_ner'),
-                    pid=request.POST.get('pid'), point_class=request.POST.get('suljeenii_torol'), mclass=request.POST.get('center_typ'),
+                    pid=for_db_pdf_name, point_class=request.POST.get('suljeenii_torol'), mclass=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                     sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
                     sheet3=request.POST.get('LA'),
@@ -1141,7 +1144,6 @@ def tsegPersonal(request):
             file2 = request.FILES['file2']
         if request.POST.get('date'):
             date = request.POST.get('date')
-        file_name = 'PDF'+ objectid + '.pdf'
         src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
         pdf = createPdf(tsegPersenal.id)
         pdf.output(src_file, 'F')

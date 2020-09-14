@@ -176,7 +176,6 @@ def tsegAdd(request):
 def tseg_details(requist, payload):
     pk = payload.get('id')
     payment = Payment.objects.filter(id=pk).first()
-    print(payment)
     if payment:
         pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
         if pay_point:
