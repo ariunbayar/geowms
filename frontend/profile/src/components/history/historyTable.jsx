@@ -1,26 +1,33 @@
 import React, { Component } from "react"
 import {Details} from './details'
 import {Link} from "react-router-dom"
+import {service} from '../service'
 
 export class HistoryTable extends Component {
 
     constructor(props) {
         super(props)
         this.state={
-            form_is_loading: false,
+            export_file: false,
         }
         this.handleDownload = this.handleDownload.bind(this)
 
     }
 
     handleDownload(payment_id){
-        service.downloadPurchase(payment_id).then(({success}) => {
-            this.setState({form_is_loading: success})
-        })
+
+        setTimeout(()=>{
+            this.setState({form_is_loading: true})
+        }
+        , 2000)
+        // service.downloadPurchase(payment_id).then(({success}) => {
+            // this.setState({form_is_loading: false})
+        // })
     }
 
     render() {
         const idx = this.props.idx
+        const form_is_loading = this.state.form_is_loading
         const {id, geo_unique_number, total_amount, description, created_at, is_success, success_at, bank_unique_number, export_file}=this.props.values
         return (
             <div className="col-4 my-2">
@@ -45,17 +52,7 @@ export class HistoryTable extends Component {
                             ?
                             null
                             :
-                            <div>
-                                {this.state.form_is_loading ?
-                                    <button className="btn gp-btn-primary" onClick={this.handleForm}>
-                                        <div className="spinner-border" role="status">
-                                            <span className="sr-only"></span>
-                                        </div>
-                                        {} Түр хүлээнэ үү...
-                                    </button> :
-                                    <a className="btn gp-outline-primary" href='#' onClick={e => this.handleDownload(id)}>shp файл үүсгэх</a>
-                                }
-                            </div>
+                            <a className="btn gp-outline-primary" href='#' onClick={e => this.handleDownload(id)}>shp файл үүсгэх</a>
                         }
                         {
                             export_file

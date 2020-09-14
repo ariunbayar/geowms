@@ -276,7 +276,7 @@ def download_pdf(request, pk):
 @require_GET
 @login_required
 def download_zip(request, pk):
-    payment = get_object_or_404(Payment, user=request.user, pk=pk, is_success=True)
+    payment = get_object_or_404(Payment, user=request.user, pk=pk)
     # generate the file
     src_file = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id), 'export.zip')
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="export.zip")
