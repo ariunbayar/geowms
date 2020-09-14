@@ -37,6 +37,7 @@ class Payment(models.Model):
     qpay_rsp = models.TextField(null=True)
     mongolbank_rsp = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    export_file = models.CharField(max_length=250, null=True)
 
 
 class PaymentPoint(models.Model):

@@ -1,24 +1,25 @@
+from zipfile import ZipFile
 import os
+import uuid
 
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
-from main.decorators import ajax_required
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
+from backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
 from backend.forms.models import Mpoint_view
 from backend.wmslayer.models import WMSLayer
+from main.decorators import ajax_required
 
-
-import uuid
 
 def index(request):
 
@@ -84,54 +85,92 @@ def purchaseDraw(request, payload):
     return JsonResponse({'payment_id': payment.id})
 
 
+def get_all_file_paths(directory):
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+
+    return file_paths
+
+
+def get_all_file_remove(directory):
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            if filename != 'export.zip':
+                filepath = os.path.join(root, filename)
+                os.remove(filepath)
+
+
 def _export_shp(payment):
-    import os # This is is needed in the pyqgis console also
+
+    import sys
+    sys.path.append('/usr/lib/python3/dist-packages/')
     from qgis.utils import iface
     from qgis.core import \
         QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
 
-    fn = '../shpfile/shpLine.shp'
-
     fields = QgsFields()
+    try:
+        qgs = QgsApplication([], False)
+        QgsApplication.setPrefixPath("/usr", True)
+        QgsApplication.initQgis()
+        uri = QgsDataSourceUri()
+        db_config = settings.DATABASES['postgis_db']
 
-    qgs = QgsApplication([], False)
-    QgsApplication.setPrefixPath("/usr", True)
-    QgsApplication.initQgis()
+        uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
 
-    uri = QgsDataSourceUri()
-    uri.setConnection("localhost", "5432", "geoportal", "postgres", "geo")
-
-    sql = """
-    select
-     *
-    from (
+        sql = """
         SELECT
-             id,
-             st_intersection(st_transform(geom,4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
-        FROM public."Road_MGL"
+            *
+        FROM (
+            SELECT
+                 id,
+                 st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
+            FROM public."Road_MGL"
+        ) as t
+        WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
+        """
 
-    ) as t
-    where st_geometrytype(geom) != 'ST_GeometryCollection'
+        uri.setDataSource('', f'({sql})', 'geom', '', 'id')
 
-    """
+        vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
 
-    uri.setDataSource('', f'({sql})', 'geom', '', 'id')
+        if not vlayer.isValid():
+            print("Layer failed to load!")
+        else:
+            print("Layer success to load!")
 
-    vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
+            path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+            os.mkdir(path)
+            filename = os.path.join(path, 'shp2.shp')
 
-    import pprint
-    if not vlayer.isValid():
-        print("Layer failed to load!")
-    else:
-        print("Layer success to load!")
+            writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
 
-        for field in vlayer.fields():
-            print(field.name(), field.typeName())
-        writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, fn, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+            file_paths = get_all_file_paths(path)
 
-        del(writer)
+            zip_path = os.path.join(path, 'export.zip')
+            with ZipFile(zip_path,'w') as zip:
+                for file in file_paths:
+                    zip.write(file, os.path.basename(file))
 
-    qgs.exitQgis()
+            get_all_file_remove(path)
+            payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
+            payment.save()
+            del(writer)
+
+        qgs.exitQgis()
+
+        return True
+
+    except Exception as e:
+        return False
 
 
 @require_GET
@@ -139,13 +178,17 @@ def _export_shp(payment):
 @login_required
 def download_purchase(request, pk):
 
-    payment = get_object_or_404(Payment, pk=pk)
+    payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
+    if payment.export_file:
+        is_created = True
+    else:
+        is_created = _export_shp(payment)
 
-    _export_shp(payment)
+    rsp = {
+        'success': is_created,
+    }
 
-    download_url = 'dfgjjgjgjgjgjgj'
-
-    return JsonResponse({'download_url': download_url})
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -244,4 +287,14 @@ def download_pdf(request, pk):
     # generate the file
     src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', 'GPSB00003.pdf')
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="tseg-medeelel.pdf")
+    return response
+
+
+@require_GET
+@login_required
+def download_zip(request, pk):
+    payment = get_object_or_404(Payment, user=request.user, pk=pk)
+    # generate the file
+    src_file = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id), 'export.zip')
+    response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="export.zip")
     return response
