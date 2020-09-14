@@ -140,73 +140,87 @@ def get_all_file_remove(directory):
                 os.remove(filepath)
 
 
-# def _create_shp_file(layer, polygon):
-#     import sys
-#     sys.path.append('/usr/lib/python3/dist-packages/')
-#     from qgis.utils import iface
-#     from qgis.core import \
-#         QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
+def _create_shp_file(payment, layer, polygon):
+    import sys
+    sys.path.append('/usr/lib/python3/dist-packages/')
+    from qgis.utils import iface
+    from qgis.core import \
+        QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
 
-#     try:
-#         qgs = QgsApplication([], False)
-#         QgsApplication.setPrefixPath("/usr", True)
-#         QgsApplication.initQgis()
-#         uri = QgsDataSourceUri()
-#         db_config = settings.DATABASES['postgis_db']
+    try:
+        qgs = QgsApplication([], False)
+        QgsApplication.setPrefixPath("/usr", True)
+        QgsApplication.initQgis()
+        uri = QgsDataSourceUri()
+        db_config = settings.DATABASES['postgis_db']
 
-#         uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
+        uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
 
-#         sql = f"""
-#         SELECT
-#             *
-#         FROM (
-#             SELECT
-#                  id,
-#                  st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon(({kjlkj}103.08984284113619 47.61581843634127, 112.6063853980155 47.61581843634127, 112.6063853980155 47.11072628526145, 103.08984284113619 47.11072628526145, 103.08984284113619 47.61581843634127))'), 4326)) AS geom
-#             FROM public."Road_MGL"
-#         ) as t
-#         WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
-#         """
+        sql = f"""
+        SELECT
+            *
+        FROM (
+            SELECT *,
+                 st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((
+                     {polygon.coodrinatLeftTopX} {polygon.coodrinatLeftTopY},
+                     {polygon.coodrinatRightBottomX} {polygon.coodrinatLeftTopY},
+                     {polygon.coodrinatLeftTopX} {polygon.coodrinatRightBottomY},
+                     {polygon.coodrinatRightBottomX} {polygon.coodrinatRightBottomY},
+                     {polygon.coodrinatLeftTopX} {polygon.coodrinatLeftTopY}
+                 ))'), 4326)) AS geom
+            EXCEPT geom
+            FROM {layer.geodb_schema}."{layer.geodb_table}"
+        ) as t
+        WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
+        """
 
-#         uri.setDataSource('', f'({sql})', 'geom', '', 'id')
+        uri.setDataSource('', f'({sql})', 'geom', '', 'id')
 
-#         vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
+        vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
 
-#         if not vlayer.isValid():
-#             print("Layer failed to load!")
-#         else:
-#             print("Layer success to load!")
+        if not vlayer.isValid():
+            print("Layer failed to load!")
+        else:
+            print("Layer success to load!")
 
-#             path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-#             os.mkdir(path)
-#             filename = os.path.join(path, 'shp2.shp')
+            path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+            os.mkdir(path)
+            filename = os.path.join(path, str(layer.pk) + '.shp')
+            writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+            del(writer)
 
-#             writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
-#             del(writer)
-
-#             qgs.exitQgis()
-#     except Exception as e:
-        # pass
+        qgs.exitQgis()
+    except Exception as e:
+        raise e
+        pass
 
 
-# def _export_shp(payment):
-#     pass
-    # layers = PaymentLayer.objects.filter(payment=payment)
-    # polygon = PaymentPolygon.objects.filter(payment=payment).first()
+def _export_shp(payment):
 
-    # for layer in layers:
-    #     _create_shp_file(layer, polygon)
-        
-    # file_paths = get_all_file_paths(path)
+    try:
+        layers = PaymentLayer.objects.filter(payment=payment)
+        polygon = PaymentPolygon.objects.filter(payment=payment).first()
 
-    # zip_path = os.path.join(path, 'export.zip')
-    # with ZipFile(zip_path,'w') as zip:
-    #     for file in file_paths:
-    #         zip.write(file, os.path.basename(file))
+        for layer in layers:
+            _create_shp_file(payment, layer.wms_layer, polygon)
 
-    # get_all_file_remove(path)
-    # payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
-    # payment.save()
+        path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+        file_paths = get_all_file_paths(path)
+
+        zip_path = os.path.join(path, 'export.zip')
+        with ZipFile(zip_path,'w') as zip:
+            for file in file_paths:
+                zip.write(file, os.path.basename(file))
+
+        get_all_file_remove(path)
+        payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
+        payment.save()
+
+        return True
+
+    except Exception as e:
+        raise e
+        return False
 
 
 @require_GET
