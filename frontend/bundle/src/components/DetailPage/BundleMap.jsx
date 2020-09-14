@@ -101,9 +101,10 @@ export default class BundleMap extends Component {
 
     }
 
-    cartButton(is_cart, content){
+    cartButton(is_cart, content,  code){
+        console.log("2dohi", code)
         if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content)
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code)
         }
     }
 
@@ -292,16 +293,14 @@ export default class BundleMap extends Component {
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
-
+        this.setState({pay_modal_check: false})
         this.state.map_wms_list.forEach(({layers}) => {
-            layers.forEach(({tile}) => {
-
-                if (tile.getVisible() == false) {
+            layers.forEach(({tile, feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                if (tile.getVisible() != true) {
                     return
                 }
 
                 const wms_source = tile.getSource()
-
                 const url = wms_source.getFeatureInfoUrl(
                     coordinate,
                     resolution,
@@ -314,10 +313,8 @@ export default class BundleMap extends Component {
                 )
 
                 if (url) {
-
-                    this.controls.modal.showModal(null, false)
-                    this.controls.shopmodal.showModal(null, false)
-
+                    if(!this.state.is_draw_open){
+                    }
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
@@ -326,7 +323,6 @@ export default class BundleMap extends Component {
                             const source = new VectorSource({
                                 features: features
                             });
-                            this.state.vector_layer.setSource(source)
 
                             const feature_info = features.map((feature) => {
                                 const geometry_name = feature.getGeometryName()
@@ -336,8 +332,22 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            // this.controls.modal.showModal(feature_info, true)
-                            this.controls.shopmodal.showModal(feature_info, true, this.cartButton)
+
+                            if(!this.state.is_draw_open){
+                                if(geodb_table == 'mpoint_view'){
+                                    if(feature_info.length){
+                                        this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
+                                        this.setState({pay_modal_check: true})
+                                        this.state.vector_layer.setSource(null)
+                                    }
+                                }
+                                else{
+                                    if(!this.state.pay_modal_check) {
+                                        this.state.vector_layer.setSource(source)
+                                        this.controls.modal.showModal(feature_info, true)
+                                    }
+                                }
+                            }
                         })
                 } else {
                     /* TODO */
@@ -366,7 +376,7 @@ export default class BundleMap extends Component {
             is_sidebar_open: !prevState.is_sidebar_open,
         }))
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(null, true)
+            this.controls.sidebar.showSideBar(this.state.map_wms_list, true)
         }else{
             this.controls.sidebar.showSideBar(this.state.map_wms_list, false)
         }
