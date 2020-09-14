@@ -34,7 +34,6 @@ export class Details extends Component {
 
     render() {
         const { items, check_error, error_msg, points, check_info } = this.state
-        console.log(items)
         return (
         <div className="container">
             <div className="row">
@@ -53,17 +52,12 @@ export class Details extends Component {
                     <table className="table table-bordered">
                         <tbody>
                             <tr>
-                                <td><i className="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
+                                <td ><i className="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
                                 <td>
                                     {
                                         points.map((value, key) => <b key={key}>{'"'+ value.name + '" '}</b>)
                                     }
                                     {items.point_name}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Планшет</td>
-                                <td><a className="text-info" href={`/payment/download-pdf/${this.state.payment_id}/`}>файл</a>
                                 </td>
                             </tr>
                             <tr>
@@ -75,24 +69,30 @@ export class Details extends Component {
                                 <td>{items.mpoint_sum}</td>
                             </tr>
                             <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Уртраг</td>
-                                <td>109 03 43.83379</td>
+                                <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup"><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Цэгийн мэдээлэл</th>
                             </tr>
                             <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өргөрөг</td>
-                                <td>45 55 24.90433</td>
+                                <th style={{textAlign: "center"}} scope="3">
+                                    Цэгийн нэр
+                                </th>
+                                <th style={{textAlign: "center"}} scope="3">
+                                    Файл
+                                </th>
                             </tr>
                             <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>N_UTM</td>
-                                <td>5087383.048</td>
-                            </tr>
-                            <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>E_UTM</td>
-                                <td>349744.265</td>
-                            </tr>
-                            <tr>
-                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Өндөр</td>
-                                <td>{items.undur}</td>
+                                <td scope="">
+                                    {
+                                        points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>{value.name}</li>)
+                                    }
+                                </td>
+                                <td scope="">
+                                    <div>
+                                    {
+                                        points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>
+                                            <a className="text-info" href={`/payment/download-pdf/${value.file_name}/`}>файл</a></li>)
+                                    }
+                                    </div>
+                                </td>
                             </tr>
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>

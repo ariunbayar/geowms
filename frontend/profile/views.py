@@ -177,43 +177,40 @@ def tsegAdd(request):
 def tseg_details(requist, payload):
     pk = payload.get('id')
     payment = Payment.objects.filter(id=pk).first()
-    print(payment)
     if payment:
         pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
         if pay_point:
-            mpoint = Mpoint_view.objects.using('postgis_db').filter(pid='GPSB00008').first()
-            if mpoint:
-                points = []
-                for point in pay_point:
-                    points.append({
-                        'name': point.point_name,
-                        'amount': point.amount,
-                    })
-                items = []
-                items.append({
-                    'description': payment.description,
-                    'created_at': _datetime_display(payment.created_at),
-                    'success_at': payment.success_at,
-                    'is_success': payment.is_success,
-                    'user_id': payment.user_id,
-                    'geo_unique_number': payment.geo_unique_number,
-                    'total': payment.total_amount,
-                    'mpoint_aimag': mpoint.aimag,
-                    'mpoint_sum': mpoint.sum,
-                    'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
-                    'point_name': mpoint.point_name,
+            points = []
+            for point in pay_point:
+                mpoint = Mpoint_view.objects.using('postgis_db').filter(id=point.point_id).first()
+                if mpoint.pid:
+                    pdf = mpoint.pid
+                else:
+                    pdf = 'файл байхгүй байна'
+                points.append({
+                    'name': point.point_name,
+                    'amount': point.amount,
+                    'file_name': pdf
                 })
-                rsp = {
-                    'success': True,
-                    'items': items,
-                    'points': points
-                }
-                return JsonResponse(rsp)
-            else:
-                rsp = {
-                    'success': False,
-                }
-                return JsonResponse(rsp)
+            items = []
+            items.append({
+                'description': payment.description,
+                'created_at': _datetime_display(payment.created_at),
+                'success_at': payment.success_at,
+                'is_success': payment.is_success,
+                'user_id': payment.user_id,
+                'geo_unique_number': payment.geo_unique_number,
+                'total': payment.total_amount,
+                'mpoint_aimag': mpoint.aimag,
+                'mpoint_sum': mpoint.sum,
+                'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
+            })
+            rsp = {
+                'success': True,
+                'items': items,
+                'points': points
+            }
+            return JsonResponse(rsp)
         else:
             rsp = {
                 'success': False,

@@ -5,7 +5,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
@@ -282,12 +282,17 @@ def purchaseFromCart(request, payload):
 @require_GET
 @login_required
 def download_pdf(request, pk):
-    payment = get_object_or_404(Payment, user=request.user, pk=pk, is_success=True)
-
-    # generate the file
-    src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', 'GPSB00003.pdf')
-    response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="tseg-medeelel.pdf")
-    return response
+    mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=pk).first()
+    if mpoint:
+        point = get_object_or_404(PaymentPoint, point_id=mpoint.id)
+        payment = get_object_or_404(Payment, user=request.user, id=point.payment_id, is_success=True)
+        # generate the file
+        file_name = pk + '.pdf'
+        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
+        return response
+    else:
+        raise Http404
 
 
 @require_GET
