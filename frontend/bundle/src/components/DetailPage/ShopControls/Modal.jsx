@@ -44,8 +44,13 @@ class ModalComponent extends Component{
     }
 
     render() {
-        const { content, is_complete } = this.props
+        const { content, is_complete, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table } = this.props
         const { payload, is_button } = this.state
+        console.log(content)
+        console.log(content[1])
+        console.log(content[1])
+        console.log(content[1])
+        console.log(content[1])
         return (
             <div className="modal-dialog modal-dialog-scrollable trans" style={{zIndex:"101"}}>
                 <div className="modal-content">
@@ -61,7 +66,34 @@ class ModalComponent extends Component{
                         }
                         {is_complete && content.map(([layer_name, values], idx) =>
                             <div key={idx}>
-                                <h6>{layer_name}</h6>
+                                <h6>Цэгийн мэдээлэл</h6>
+                                <table className="table">
+                                    <tbody>
+                                        {values.map(([field, value], val_idx) =>
+                                            field == 'id' ?
+                                            <tr key={val_idx}>
+                                                <th>Дугаар:</th>
+                                                <td>{value}</td>
+                                            </tr>: field == 'point_name' ?
+                                            <tr key={val_idx}>
+                                                <th>Нэр:</th>
+                                                <td>{value}</td>
+                                            </tr>: field == 'aimag' ?
+                                            <tr key={val_idx}>
+                                                <th>Аймаг:</th>
+                                                <td>{value}</td>
+                                            </tr>: field == 'sum' ?
+                                            <tr key={val_idx}>
+                                                <th>Сум:</th>
+                                                <td>{value}</td>
+                                            </tr>: null
+                                        )}
+                                        <tr key="price">
+                                            <th>Үнэ</th>
+                                            <td>{feature_price}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                     </div>
@@ -90,15 +122,7 @@ class ModalComponent extends Component{
                                             <span class="sr-only">Loading...</span>
                                         </a>
                                     </button>
-                                    :
-                                    <button
-                                        type="button"
-                                        onClick={() => this.handlePayment()}
-                                        className="btn btn-secondary"
-                                        data-dismiss="modal"
-                                    >
-                                        Худалдаж авах
-                                    </button>
+                                    : null
                                 }
                                 </div>
                             </div>
@@ -144,14 +168,14 @@ export class ShopModal extends Control {
         this.element.classList.toggle('d-block', is_visible)
     }
 
-    handlePointToCart(func, content){
-        func(true, content)
+    handlePointToCart(func, content, code){
+        func(true, content, code)
         this.toggleControl(false)
     }
 
     renderComponent(props) {
         props.handleClose = () => this.toggleControl(false)
-        props.handlePointToCart =() => this.handlePointToCart(props.func, props.content)
+        props.handlePointToCart =() => this.handlePointToCart(props.func, props.content, props.code)
         props.is_button = true
         if (!this.is_component_initialized) {
             ReactDOM.render(<ModalComponent {...props}/>, this.element)
@@ -161,9 +185,9 @@ export class ShopModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(content, is_complete, func) {
+    showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,content, is_complete, func) {
         this.toggleControl(true)
-        this.renderComponent({content, is_complete, func})
+        this.renderComponent({feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table,code, content, is_complete, func})
     }
 
 }

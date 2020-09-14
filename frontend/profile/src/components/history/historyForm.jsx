@@ -16,14 +16,7 @@ export default class HistoryForm extends Component {
             paymentPerPage:12,
         }
         this.paginate = this.paginate.bind(this)
-        this.handleDownload = this.handleDownload.bind(this)
 
-    }
-
-    handleDownload(payment_id){
-        service.downloadPurchase(payment_id).then(({download_url}) => {
-            console.log(download_url)
-        })
     }
 
     paginate (page) {
@@ -46,8 +39,6 @@ export default class HistoryForm extends Component {
                             payment.map((p, idx) =>
                                 <HistoryTable
                                     key={idx}
-                                    idx={(this.state.currentPage*25)-25+idx+1}
-                                    handleDownload={e => this.handleDownload(p.id)}
                                     values={p}
                                 >
                                 </HistoryTable>

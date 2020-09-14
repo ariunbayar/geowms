@@ -38,6 +38,7 @@ def _get_payment_display(payment):
         'card_number':payment.card_number,
         'message':payment.message,
         'code':payment.code,
+        'export_file':payment.export_file,
         'created_at': _datetime_display(payment.created_at),
         'failed_at': _date_display(payment.failed_at),
         'success_at': _date_display(payment.success_at),
