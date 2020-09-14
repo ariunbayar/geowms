@@ -5,11 +5,11 @@ const prefix = '/back/tuuhen_ov/tseg-personal'
 export const service = {
     tsegPersonal,
     updateTseg,
-    findSum
+    findSum,
+    searchTsegName
 }
 
 function tsegPersonal(form_datas) {
-
     const opts = {
         ...getPostOptions(),
         body: form_datas,
@@ -33,4 +33,12 @@ function findSum(X, niitB) {
         body: JSON.stringify({"x":niitB, "y":X})
     }
     return fetch(`/back/tuuhen_ov/tseg-personal/findSum/`, requestOptions).then(handleResponse)
+}
+
+function searchTsegName(name, query) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({name, query})
+    }
+    return fetch(`/back/tuuhen_ov/tseg-personal/searchName/`, requestOptions).then(handleResponse)
 }

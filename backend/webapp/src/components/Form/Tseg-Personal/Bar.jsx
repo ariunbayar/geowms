@@ -20,12 +20,12 @@ export class Bar extends Component {
                             <ul className="list-group list-group-horizontal col-md-8 my-0   list-unstyled">
                                 <li className="col-md-9" >
                                 <NavLink to="/back/froms/tseg-info/tsegpersonal/tseg-personal/" className="list-group-item col-md-12 mr-2 text-center" activeClassName="text-white gp-bg-primary">
-                                        Цэг тэмдэгтийн мэдээллийг <br/>засах болон нэмэх үйлдлүүдийг хийн 
+                                        Шинээр байгуулсан цэг тэмдэгтийн <br/>мэдээллийг илгээх
                                 </NavLink>
                                 </li>
                                 <li className="col-md-9">
                                 <NavLink to="/back/froms/tseg-info/tsegpersonal/tseg-ustsan/" className="list-group-item col-md-12 ml-2 text-center " activeClassName="text-white gp-bg-primary">
-                                            Устсан цэгийн  мэдээллийг <br/>засах болон нэмэх үйлдлүүдийг хийн 
+                                            Устсан цэг тэмдэгтийн <br/>мэдээллийг илгээх
                                 </NavLink>
                                 </li>
                             </ul>

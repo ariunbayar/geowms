@@ -3,12 +3,6 @@ import {object, string} from 'yup'
 
 export const validationSchema = object().shape({
 
-    tesgiin_ner: string()
-        .max(50, '50-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
-    toviin_dugaar: string()
-        .max(4, '4-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна!'),
     suljeenii_torol: string()
         .required('Хоосон байна!'),
     ondor: string()
@@ -19,9 +13,6 @@ export const validationSchema = object().shape({
     sudalga_or_shine: string()
         .required('Хоосон байна!'),
     date: string()
-        .required('Хоосон байна!'),
-    hors_shinj_baidal: string()
-        .max(200, '200-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
     hotolson: string()
         .max(100, '100-с илүүгүй урттай оруулна уу!')

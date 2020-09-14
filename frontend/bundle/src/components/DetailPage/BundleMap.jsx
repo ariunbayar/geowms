@@ -4,6 +4,7 @@ import 'ol/ol.css'
 import {Map, View, Feature} from 'ol'
 import {transform as transformCoordinate} from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
+
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
@@ -295,6 +296,10 @@ export default class BundleMap extends Component {
         this.state.map_wms_list.forEach(({layers}) => {
             layers.forEach(({tile}) => {
 
+                if (tile.getVisible() == false) {
+                    return
+                }
+
                 const wms_source = tile.getSource()
 
                 const url = wms_source.getFeatureInfoUrl(
@@ -349,7 +354,6 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord, zoom) {
-
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
