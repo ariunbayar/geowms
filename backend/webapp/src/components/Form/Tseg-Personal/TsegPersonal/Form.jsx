@@ -99,7 +99,7 @@ export  class Forms extends Component {
         }
     }
 
-    optionVal(items){      
+    optionVal(items){
         this.datalist = []
         items.map((item, key) => {
             this.datalist.push(<option key={key} value={item.tseg}></option>)
@@ -124,7 +124,7 @@ export  class Forms extends Component {
             const error =  this.state.error
             this.setState({ checkError: this.state.error })
             service.searchTsegName(e.target.name, e.target.value).then(({hors_shinj_baidal_list, point_ids, names}) => {
-                if(names){                    
+                if(names){
                     this.optionVal(names)
                     this.setState({names, name_error:true, checkError: error})
                 }
@@ -244,7 +244,7 @@ export  class Forms extends Component {
                 LC: info[0].LC
             })
             if(info[0]['aimag'] == 'Улаанбаатар'){
-                const barishil_tuhai = info[0]['aimag'] +' '+ 'хотын' 
+                const barishil_tuhai = info[0]['aimag'] +' '+ 'хотын'
                 this.setState({barishil_tuhai:barishil_tuhai})
             }
             else{
@@ -325,8 +325,8 @@ export  class Forms extends Component {
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
         form_datas.append('sum_name', this.state.sum_name)
-        form_datas.append('latlongx', niitB)
-        form_datas.append('latlongy', X )
+        form_datas.append('latlongx', X)
+        form_datas.append('latlongy', niitB)
         form_datas.append('tseg_oiroos_img_url', this.state.tseg_oiroos_img_url)
         form_datas.append('tseg_holoos_img_url', this.state.tseg_holoos_img_url)
         form_datas.append('barishil_tuhai', this.state.barishil_tuhai)
@@ -398,7 +398,7 @@ export  class Forms extends Component {
                         LA:item.LA,
                         LB:item.LB,
                         LC:item.LC,
-                        BA:item.BA, 
+                        BA:item.BA,
                         BB:item.BB,
                         BC:item.BC,
                         zone:item.zone,
@@ -409,7 +409,7 @@ export  class Forms extends Component {
                         aimag_name: item.aimag,
                         point_class: item.point_class,
                         trapetsiin_dugaar: item.sheet1,
-                        barishil_tuhai: item.barishil_tuhai, 
+                        barishil_tuhai: item.barishil_tuhai,
                         tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
                         tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
                         bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
@@ -431,18 +431,17 @@ export  class Forms extends Component {
                 if(tseg_display){
                     const latx = tseg_display[0]["latlongx"]
                     const laty = tseg_display[0]["latlongy"]
-                    const x= []
+                    this.x = []
                     this.x.push(latx, laty)
-                }   
-                
+                }
+
             })
-            
+
         }
-        
+
     }
 
     render() {
-        var arr = [this.state.latlongy, this.state.latlongx]
        if(this.state.latlongy == ''){
         this.getItem()
        }
@@ -473,13 +472,13 @@ export  class Forms extends Component {
                             <Maps
                                 handleXY={this.handleXY}
                                 coordinatCheck={false}
-                                xy={arr}
+                                xy={this.x}
                             />
                         </div>
                         <div className="col-md-12 mb-4 mt-4 pl-0">
                             <a href="#" className="btn gp-outline-primary " onClick={this.props.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
-                            </a>    
+                            </a>
                         </div>
                         <div
                             style={{right:'0'}}
@@ -507,7 +506,6 @@ export  class Forms extends Component {
                                                 value = {this.state.tesgiin_ner}
                                             />
                                         </div>
-                                        
                                     </td>
                                     <th style={{width: "5%"}} scope="row">2</th>
                                     <th>Төвийн дугаар</th>

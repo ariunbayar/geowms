@@ -15,6 +15,7 @@ import pyproj
 import uuid
 from django.db.models import Q
 import re
+from django.conf import settings
 # Create your models here.
 
 
@@ -456,7 +457,7 @@ def tseg_personal_list(request, payload):
         tseg_personal.append({
             'id': mpoint_all.id,
             'objectid': mpoint_all.objectid,
-            'point_id':mpoint_all.point_id.zfill(4) if mpoint_all.point_id and len(mpoint_all.point_id)<4 else '',
+            'point_id':mpoint_all.point_id.zfill(4) if mpoint_all.point_id and len(mpoint_all.point_id)<4 else mpoint_all.point_id,
             'point_name': mpoint_all.point_name,
             'pid': mpoint_all.pid,
             'point_class': mpoint_all.point_class,
@@ -712,8 +713,8 @@ def tsegPersonal(request):
 
         if request.POST.get('date'):
             date = request.POST.get('date')
-        x = float(request.POST.get('latlongx'))
-        y = float(request.POST.get('latlongy'))
+        y = float(request.POST.get('latlongx'))
+        x = float(request.POST.get('latlongy'))
         cursor = connections['postgis_db'].cursor()
         cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
         geom = cursor.fetchone()
@@ -1466,7 +1467,7 @@ def tsegUstsanEdit(request, payload):
 def tsegPersonalNameSearch(request, payload):
     query = payload.get('query')
     name = payload.get('name')
-    List = open("/home/delgermaa/project/geoWMS/backend/forms/soil.txt").read().splitlines()
+    List = open(settings.MEDIA_ROOT + '/soil.txt').read().splitlines()
     if(name == 'tesgiin_ner'):
         names = []
         mpoint = Mpoint_view.objects.using('postgis_db').filter(Q(point_name__iexact=query))[:10]

@@ -43,6 +43,7 @@ export default class Maps extends Component {
         this.handleMapClick = this.handleMapClick.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.handleSetCenter = this.handleSetCenter.bind(this)
        // this.handMarker = this.handMarker.bind(this)
     }
 
@@ -64,8 +65,6 @@ export default class Maps extends Component {
 
     componentDidMount() {
         this.loadMapData()
-
-        
     }
 
     loadMapData() {
@@ -163,20 +162,16 @@ export default class Maps extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        this.handleSetCenter()
     }
-    
-    componentDidUpdate(prevProps){
-        if(prevProps.xy !== this.props.xy){
-            if(this.props.xy[0] > 0){
-                alert(this.props.xy)
-                const xy = this.props.xy
-                this.setState({xy})
-            } 
 
+    componentDidUpdate(pP){
+        if(pP.xy !== this.props.xy){
+            this.handleSetCenter()
         }
     }
 
-    handleMapClick(event) { 
+    handleMapClick(event) {
             this.marker.point.setCoordinates(event.coordinate)
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
@@ -200,15 +195,16 @@ export default class Maps extends Component {
         }
 
     }
-    
+
     handleSetCenter() {
-        const coord = this.state.xy
-        alert(coord)
-        const view = this.map.getView()
-        const map_projection = view.getProjection()
-        const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.marker.point.setCoordinates(map_coord)
-        view.setCenter(map_coord)
+        const coord = this.props.xy
+        if(coord[0] >40){
+            const view = this.map.getView()
+            const map_projection = view.getProjection()
+            const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+            this.marker.point.setCoordinates(map_coord)
+            view.setCenter(map_coord)
+        }
     }
 
     render() {
