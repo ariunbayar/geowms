@@ -180,17 +180,13 @@ def _export_shp(payment):
 def download_purchase(request, pk):
 
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
-    # if payment.export_file:
-        # is_created = True
-    # else:
-        # is_created = _export_shp(payment)
-    import time
-    time.sleep(1.5)
-    is_created = True  # TODO
+    if payment.export_file:
+        is_created = True
+    else:
+        is_created = _export_shp(payment)
 
     rsp = {
         'success': is_created,
-        'export_file': payment.export_file,
     }
 
     return JsonResponse(rsp)
