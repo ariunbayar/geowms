@@ -70,7 +70,7 @@ export default class WMSCheckFormTable extends Component {
                     <input type="text" name={name} value={title}  onChange={this.handleChange} disabled = {(this.state.titleDisabled)? "" : "disabled"}/>
                 </td>
                 <td>
-                    <a href="#" onClick={() => this.openGeoData()} data-toggle="tooltip" data-placement="top" title="geo">
+                    <a className="btn" onClick={() => this.openGeoData()} data-toggle="tooltip" data-placement="top" title="geo">
                         {
                             toggleButton
                             ?
@@ -86,7 +86,7 @@ export default class WMSCheckFormTable extends Component {
                                     wmsId = {wmsId}
                                     handleClose = {this.openGeoData}
                                     handleChange = {() => this.handleChange()}
-                                    code = {layer.name}
+                                    code = {layer.code}
                                 >
                                 </GeoData>
                             :
@@ -95,21 +95,21 @@ export default class WMSCheckFormTable extends Component {
                 </td>
                 <td >
                     {titleDisabled ?
-                    <a href="#" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
+                    <a className="btn" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
                         <i className="fa fa-floppy-o" aria-hidden="true"></i>
                     </a>:
-                    <a href="#" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
+                    <a className="btn" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </a>
                     }
                 </td>
                 <td >
-                    <a href="#" onClick={event => this.props.handleMove(layer.id, 'up', wmsId)}>
+                    <a className="btn" onClick={event => this.props.handleMove(layer.id, 'up', wmsId)}>
                         <i className="fa fa-chevron-up" aria-hidden="true"></i>
                     </a>
                 </td>
                 <td>
-                    <a href="#" onClick={event => this.props.handleMove(layer.id, 'down', wmsId)}>
+                    <a className="btn" onClick={event => this.props.handleMove(layer.id, 'down', wmsId)}>
                         <i className="fa fa-chevron-down" aria-hidden="true"></i>
                     </a>
                 </td>

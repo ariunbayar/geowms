@@ -290,16 +290,16 @@ def proxy(request, wms_id):
 def get_geo(requist, payload):
     wms_id = payload.get('id')
     code = payload.get('code')
-
     item = WMSLayer.objects.filter(wms_id=wms_id, code=code).first()
     items = []
-    items.append({
-        'schema': item.geodb_schema,
-        'pk_field': item.geodb_pk_field,
-        'export_field': item.geodb_export_field,
-        'price': item.feature_price,
-        'table': item.geodb_table,
-    })
+    if item:
+        items.append({
+            'schema': item.geodb_schema,
+            'pk_field': item.geodb_pk_field,
+            'export_field': item.geodb_export_field,
+            'price': item.feature_price,
+            'table': item.geodb_table,
+        })
     rsp = {
         'success': True,
         'items': items
@@ -319,11 +319,14 @@ def save_geo(request, payload):
     export_field = None
     price = None
     table = None
-    schema = str(datas[0]['schema'])
-    pk_field = str(datas[0]['pk_field'])
-    export_field = str(datas[0]['export_field'])
-    price = int(datas[0]['price'])
-    table = str(datas[0]['table'])
+    schema = datas[0]['schema']
+    pk_field = datas[0]['pk_field']
+    export_field = datas[0]['export_field']
+    if datas[0]['price']:
+        price = datas[0]['price']
+    else:
+        price = 0
+    table = datas[0]['table']
 
     WMSLayer.objects.filter(wms_id=wms_id, code=code).update(
         geodb_schema = schema,
