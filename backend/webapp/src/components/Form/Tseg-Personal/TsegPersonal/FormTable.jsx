@@ -57,15 +57,14 @@ export default class FormTable extends Component {
         }
     }
     handlePointSetName(field, id){
-        if(id == 1) this.setState({[field]: 'GPS-ийн сүлжээ'})
-        if(id == 2) this.setState({[field]: 'Гравиметрийн сүлжээ'})
-        if(id == 3) this.setState({[field]: 'Өндрийн сүлжээ'})
+        if(id == 3) this.setState({[field]: 'GPS-ийн сүлжээ'})
+        if(id == 6) this.setState({[field]: 'Гравиметрийн сүлжээ'})
+        if(id == 7) this.setState({[field]: 'Өндрийн сүлжээ'})
         if(id == 4) this.setState({[field]: 'Триангуляцийн сүлжээ'})
         if(id == 5) this.setState({[field]: 'Полигометрийн сүлжээ'})
-        if(id == 6) this.setState({[field]: 'Зураглалын сүлжээ'})
-        if(id == 7) this.setState({[field]: 'GNSS-ийн байнгын ажиллагаатай станц'})
+        if(id == 8) this.setState({[field]: 'Зураглалын сүлжээ'})
+        if(id == 2) this.setState({[field]: 'GNSS-ийн байнгын ажиллагаатай станц'})
     }
-
 
     render() {
 

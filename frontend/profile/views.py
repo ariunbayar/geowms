@@ -52,7 +52,7 @@ def all(request, payload):
 
     page = payload.get('page')
     per_page = payload.get('per_page')
-    total_items = Paginator(Payment.objects.all().order_by('-created_at'), per_page)
+    total_items = Paginator(Payment.objects.filter(user=request.user).order_by('-created_at'), per_page)
     items_page = total_items.page(page)
     items = [
         _get_payment_display(pay)

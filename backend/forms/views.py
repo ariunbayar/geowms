@@ -886,7 +886,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='GPS-ийн сүлжээний цэг'
+                        point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint2 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -901,7 +901,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                         point_class_name='Гравиметрийн сүлжээний Цэг'
+                         point_class_name='GPS-ийн сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint3 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -915,7 +915,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Өндрийн сүлжээний цэг'
+                        point_class_name='GPS-ийн сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -929,7 +929,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Триангуляцийн сүлжээний цэг'
+                        point_class_name='Полигонометрийн сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint5 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -943,7 +943,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Полигометрийн сүлжээний цэг'
+                        point_class_name='Гравиметрийн сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint6 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -957,7 +957,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Зураглалын сүлжээний цэг'
+                        point_class_name='Өндрийн сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint7 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -971,7 +971,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
+                        point_class_name='Зураглалын сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [geom, pk])
@@ -1760,31 +1760,31 @@ def tsegPersonalSuccess(request, payload):
         if data:
             update_cursor = connections['postgis_db'].cursor()
             if data.point_class == 2:
-                mpoint_data = Mpoint2.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=2, point_class_name='GPS-ийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g102')
+                mpoint_data = Mpoint2.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=2, point_class_name='GNSS-ийн байнгын ажиллагаатай станц', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g102')
                 update_cursor.execute(''' UPDATE mpoint2 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 3:
-                mpoint_data = Mpoint3.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=3, point_class_name='Гравиметрийн сүлжээний Цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g103')
+                mpoint_data = Mpoint3.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=3, point_class_name='GPS-ийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g103')
                 update_cursor.execute(''' UPDATE mpoint3 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 4:
-                mpoint_data = Mpoint4.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=4, point_class_name='Өндрийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g104')
+                mpoint_data = Mpoint4.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=4, point_class_name='Триангуляцийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g104')
                 update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 5:
-                mpoint_data = Mpoint5.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=5, point_class_name='Триангуляцийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g105')
+                mpoint_data = Mpoint5.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=5, point_class_name='Полигонометрийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g105')
                 update_cursor.execute(''' UPDATE mpoint5 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 6:
-                mpoint_data = Mpoint6.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=6, point_class_name='Полигометрийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g106')
+                mpoint_data = Mpoint6.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=6, point_class_name='Гравиметрийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g106')
                 update_cursor.execute(''' UPDATE mpoint6 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 7:
-                mpoint_data = Mpoint7.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=7, point_class_name='Зураглалын сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g107')
+                mpoint_data = Mpoint7.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=7, point_class_name='Өндрийн сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g107')
                 update_cursor.execute(''' UPDATE mpoint7 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 8:
-                mpoint_data = Mpoint8.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=8, point_class_name='GNSS-ийн байнгын ажиллагаатай станц', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g108')
+                mpoint_data = Mpoint8.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=8, point_class_name='Зураглалын сүлжээний цэг', mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g108')
                 update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint_data.id)])
                 data.delete()
             if data.point_class == 9:
