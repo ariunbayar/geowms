@@ -22,7 +22,9 @@ export default class WMSItem extends Component {
     toggle(e) {
         const is_visible = e.target.checked
         this.setState({is_visible})
-        this.state.tile.setVisible(is_visible)
+        this.state.layers.map((layer) =>
+            layer.tile.setVisible(is_visible)
+        )
     }
 
     render() {
