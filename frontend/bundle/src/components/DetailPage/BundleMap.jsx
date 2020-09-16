@@ -165,6 +165,11 @@ export default class BundleMap extends Component {
         })
 
         this.setState({map_wms_list})
+        map_wms_list.map((wms, idx) =>
+            wms.layers.map((layer, idx) =>
+                layer.tile.setVisible(false)
+            )
+        )
 
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
