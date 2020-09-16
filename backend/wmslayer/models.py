@@ -12,7 +12,7 @@ class WMSLayer(models.Model):
     name = models.CharField(max_length=200)
     title = models.CharField(max_length=200, null=True)
     code = models.CharField(max_length=200)
-    legend_url = models.CharField(max_length=999)
+    legend_url = models.ImageField(upload_to='legentUrlImage/')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
