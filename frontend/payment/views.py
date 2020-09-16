@@ -252,6 +252,7 @@ def download_purchase(request, pk):
 def purchaseFromCart(request, payload):
 
     datas = payload.get('data')
+    code = payload.get('code')
     check_id = True
     while check_id:
         uniq_id = uuid.uuid4()
@@ -288,14 +289,15 @@ def purchaseFromCart(request, payload):
             else:
                 check_id = False
         total_amount = 0
-        for i in range(len(datas)):
+        for data in datas:
+            dId = data['id']
             if pay_id > 0:
-                mpoint = Mpoint_view.objects.using('postgis_db').filter(id = datas[i][1]).first()
+                mpoint = Mpoint_view.objects.using('postgis_db').filter(id=dId).first()
                 amount=0
-                if datas[i][0]:
-                   wms_layer = WMSLayer.objects.filter(code = datas[i][0]).first()
-                   if wms_layer:
-                       amount = wms_layer.feature_price
+                if dId:
+                    wms_layer = WMSLayer.objects.filter(code=code).first()
+                    if wms_layer:
+                        amount = wms_layer.feature_price
 
                 total_amount = total_amount + amount
                 pdf_id = ''
@@ -307,7 +309,7 @@ def purchaseFromCart(request, payload):
                         point_name = mpoint.point_name
                 point = PaymentPoint.objects.create(
                     payment_id = pay_id,
-                    point_id = datas[i][1],
+                    point_id = dId,
                     point_name = point_name,
                     amount = amount,
                     pdf_id = pdf_id,
@@ -321,9 +323,9 @@ def purchaseFromCart(request, payload):
         Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
     except Exception:
         rsp = {
-                'success': False,
-                'msg': "Алдаа гарсан тул цуцлагдлаа"
-            }
+            'success': False,
+            'msg': 'Алдаа гарсан байна'
+        }
         return JsonResponse(rsp)
 
     rsp = {

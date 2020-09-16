@@ -92,10 +92,10 @@ function paymentDraw(values) {
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
 }
 
-function purchaseFromCart(data){
+function purchaseFromCart(data, code){
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({data})
+        body: JSON.stringify({data, code})
     }
     return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
 }

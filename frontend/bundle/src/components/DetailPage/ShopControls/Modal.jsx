@@ -20,6 +20,13 @@ class ModalComponent extends Component{
         }
     }
 
+    componentDidMount(){
+        const { content, is_button } = this.props
+        if(content){
+            this.setState({ is_button: !is_button})
+        }
+    }
+
     componentDidUpdate(pP){
         const {content, is_button} = this.props
         if(pP.content !== content){
@@ -46,97 +53,83 @@ class ModalComponent extends Component{
     render() {
         const { content, is_complete, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table } = this.props
         const { payload, is_button } = this.state
-        console.log(content)
-        console.log(content[1])
-        console.log(content[1])
-        console.log(content[1])
-        console.log(content[1])
         return (
-            <div className="modal-dialog modal-dialog-scrollable trans" style={{zIndex:"101"}}>
-                <div className="modal-content">
-                        <button type="button" className="close border border-danger" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    <div className="modal-body">
-                        {!is_complete &&
-                            <div className="d-flex align-items-center">
-                                <strong>Түр хүлээнэ үү...</strong>
-                                <div className="spinner-border ml-auto" role="status" aria-hidden="true"></div>
-                            </div>
-                        }
-                        {is_complete && content.map(([layer_name, values], idx) =>
-                            <div key={idx}>
-                                <h6>Цэгийн мэдээлэл</h6>
-                                <table className="table">
-                                    <tbody>
-                                        {values.map(([field, value], val_idx) =>
-                                            field == 'id' ?
-                                            <tr key={val_idx}>
-                                                <th>Дугаар:</th>
-                                                <td>{value}</td>
-                                            </tr>: field == 'point_name' ?
-                                            <tr key={val_idx}>
-                                                <th>Нэр:</th>
-                                                <td>{value}</td>
-                                            </tr>: field == 'aimag' ?
-                                            <tr key={val_idx}>
-                                                <th>Аймаг:</th>
-                                                <td>{value}</td>
-                                            </tr>: field == 'sum' ?
-                                            <tr key={val_idx}>
-                                                <th>Сум:</th>
-                                                <td>{value}</td>
-                                            </tr>: null
-                                        )}
-                                        <tr key="price">
-                                            <th>Үнэ</th>
-                                            <td>{feature_price}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                    <div className="row">
-                        <div className="col-sm-12">
-                            <div className="row">
-                                <div className="col-8 col-sm-6 d-flex justify-content-center">
-                                <button
-                                    type="button"
-                                    className="btn btn-lg gp-btn-primary"
-                                    onClick={this.props.handlePointToCart}
-                                    disabled = {is_button}
-                                >
-                                    <i className="fa fa-shopping-cart"></i>
-                                    &nbsp; Сагсанд нэмэх
-                                </button>
+            <div>
+                <div className="show d-block modal modal-dialog modal-dialog-scrollable ">
+                    <div className="modal-content">
+                            <button type="button" className="close border" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <div className="modal-body">
+                            {!is_complete &&
+                                <div className="d-flex align-items-center">
+                                    <strong>Түр хүлээнэ үү...</strong>
+                                    <div className="spinner-border ml-auto" role="status" aria-hidden="true"></div>
                                 </div>
-                                <div className="col-4 col-sm-6 d-flex justify-content-center">
-                                {payload ?
-                                    <button type="button"
-                                        className="btn btn-lg btn-secondary"
-                                        data-dismiss="modal"
+                            }
+                            {is_complete && content.map(([layer_name, values], idx) =>
+                                <div key={idx}>
+                                    <h6>Цэгийн мэдээлэл</h6>
+                                    <table className="table">
+                                        <tbody>
+                                            {values.map(([field, value], val_idx) =>
+                                                field == 'point_name' ?
+                                                <tr key={val_idx}>
+                                                    <th>Нэр:</th>
+                                                    <td>{value}</td>
+                                                </tr>: field == 'aimag' ?
+                                                <tr key={val_idx}>
+                                                    <th>Аймаг:</th>
+                                                    <td>{value}</td>
+                                                </tr>: field == 'sum' ?
+                                                <tr key={val_idx}>
+                                                    <th>Сум:</th>
+                                                    <td>{value}</td>
+                                                </tr>: null
+                                            )}
+                                            <tr key="price">
+                                                <th>Үнэ</th>
+                                                <td>{feature_price}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-12 mb-4">
+                                <div className="row">
+                                    <div className="col-8 col-sm-6 d-flex justify-content-center">
+                                    <button
+                                        type="button"
+                                        className="btn btn-lg gp-btn-primary"
+                                        onClick={this.props.handlePointToCart}
+                                        disabled = {is_button}
                                     >
-                                        Ачааллаж байна...
-                                        <a class="spinner-border text-light" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </a>
+                                        <i className="fa fa-shopping-cart"></i>
+                                        &nbsp; Сагсанд нэмэх
                                     </button>
-                                    : null
-                                }
+                                    </div>
+                                    <div className="col-4 col-sm-6 d-flex justify-content-center">
+                                    {payload ?
+                                        <button type="button"
+                                            className="btn btn-lg btn-secondary"
+                                            data-dismiss="modal"
+                                        >
+                                            Ачааллаж байна...
+                                            <a class="spinner-border text-light" role="status">
+                                                <span class="sr-only">Loading...</span>
+                                            </a>
+                                        </button>
+                                        : null
+                                    }
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="row">
-                        <button type="button"
-                            className="btn btn-primary invisible"
-                            onClick={this.props.handleClose}
-                        >
-                            Буцах
-                        </button>
-                    </div>
                 </div>
+                <div className='modal-backdrop fade show'></div>
             </div>
         )
     }
