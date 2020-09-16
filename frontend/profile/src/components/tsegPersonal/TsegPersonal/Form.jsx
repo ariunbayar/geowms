@@ -182,8 +182,8 @@ export default class Forms extends Component {
                 checkError:error,
             })
         }
-        if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
-            alert("Уртраг эсвэл Өргөрөгийн мэдээллийг оруулна уу !!!")
+        if(this.state.LA == '' || this.state.LB == '' || this.state.LC == '' || this.state.BA == '' || this.state.BB == '' || this.state.BC == '' ){
+            alert("Солбицлын мэдээлэл дутуу байна !!!")
             this.setState({
                 checkError:error
             })
@@ -209,8 +209,12 @@ export default class Forms extends Component {
             [e.target.name]:e.target.value,
         })
     }
-
     handleOnchange(e){
+        if(e.target.name){
+            this.setState({
+                checkError:[]
+            })
+        }
         this.setState({
             [e.target.name]:parseFloat(e.target.value),
         })
@@ -415,7 +419,7 @@ export default class Forms extends Component {
                     }
                     const m =d[1]
                     const y = d[0]
-                    var dateStr = y+ "-" + m + "-" + dated; 
+                    var dateStr = y+ "-" + m + "-" + dated;
 
                     this.setState({
                         values : {

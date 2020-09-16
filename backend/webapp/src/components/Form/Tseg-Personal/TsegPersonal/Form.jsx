@@ -181,12 +181,13 @@ export  class Forms extends Component {
                 checkError:error,
             })
         }
-        if(this.state.BA == '' || this.state.BB == '' || this.state.BC == '' || this.state.LA == '' || this.state.LB == '' || this.state.LC == ''){
-            alert("Уртраг эсвэл Өргөрөгийн мэдээллийг оруулна уу !!!")
+        if(this.state.LA == '' || this.state.LB == '' || this.state.LC == '' || this.state.BA == '' || this.state.BB == '' || this.state.BC == '' ){
+            alert("Солбицлын мэдээлэл дутуу байна !!!")
             this.setState({
                 checkError:error
             })
         }
+
 
     }
 
@@ -199,17 +200,17 @@ export  class Forms extends Component {
             }
 
         }
-        if(e.target.name == 'BA' || e.target.name == 'BB' || e.target.name == 'BC' || e.target.name == 'LA' || e.target.name == 'LB' ||e.target.name == 'BB'){
-            this.setState({
-                checkError:[]
-            })
-        }
         this.setState({
             [e.target.name]:e.target.value,
         })
     }
 
     handleOnchange(e){
+        if(e.target.name){
+            this.setState({
+                checkError:[]
+            })
+        }
         this.setState({
             [e.target.name]:parseFloat(e.target.value),
         })
@@ -415,7 +416,6 @@ export  class Forms extends Component {
                     const m =d[1]
                     const y = d[0]
                     var dateStr = y+ "-" + m + "-" + dated;
-
                     this.setState({
                         values : {
                             ...this.state.values,
@@ -603,17 +603,6 @@ export  class Forms extends Component {
                                 <tr>
                                     <th>Зэрэг</th>
                                     {values.suljeenii_torol == '2' ?
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">Идэвхтэй</option>
-                                                <option value="2">Идэвхгүй</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td> : values.suljeenii_torol == '3' ?
                                         <td>
                                         <Fragment>
                                             <Field name="center_typ" as="select" className="form-control"
