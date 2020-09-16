@@ -26,38 +26,52 @@ export class Cart extends Component{
             is_button: false,
             is_purchase: false,
             alert_msg: '',
+            max_size: 4,
+            first_number: 0,
         }
 
         this.removeList = this.removeList.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
+        this.moreItems = this.moreItems.bind(this)
+        this.undoItems = this.undoItems.bind(this)
     }
 
     componentDidMount(){
-        console.log("did mount",this.props.content)
         const {coordinate, torf, content} = this.props
         if(torf == true){
             if(content.length !== 0){
                 var arr = [this.props.content[0][1][2]]
+                if(arr[0][1]){
+                    name = arr[0][1]
+                }
+                else
+                {
+                    name = 'Нэр байхгүй байна'
+                }
                 var arr1 = [this.props.content[0][1][0]]
-                var json = [{ 'name': arr[0][1] ,'id': arr1[0][1] }]
+                var json = [{ 'name': name, 'id': arr1[0][1] }]
                 this.setState({ data: json, is_button: false, })
             }
         }
     }
 
     componentDidUpdate(pP, pS){
-        console.log("did update")
         if(pP.coordinate !== this.props.coordinate){
             if(this.props.torf == true){
                 if(this.props.content.length !== 0){
                     var arr = [this.props.content[0][1][2]]
+                    if(arr[0][1]){
+                        name = arr[0][1]
+                    }
+                    else
+                    {
+                        name = 'Нэр байхгүй байна'
+                    }
                     var arr1 = [this.props.content[0][1][0]]
-                    var json = [{ 'name': arr[0][1] ,'id': arr1[0][1] }]
-                    const isBelowThreshold = (currentValue) => currentValue = json.name;
+                    var json = [{ 'name': name ,'id': arr1[0][1] }]
                     const found = this.state.data.filter(element => {
-                         return element.id == json[0].id
+                        return element.id == json[0].id
                     }).length > 0
-                    console.log('found', found)
                     if(!found){
                         this.setState({
                             data: this.state.data.concat(json),
@@ -82,7 +96,6 @@ export class Cart extends Component{
 
     removeList(coordinate){
         const {data} = this.state
-        console.log("ustgah", coordinate)
         if(data.length == 1){
             this.setState({
                 data: [],
@@ -91,7 +104,6 @@ export class Cart extends Component{
         if(data.length > 1){
             const isBelowThreshold = (coordinateFromArray) => coordinateFromArray = coordinate;
             if(data.every(isBelowThreshold)){
-                console.log("tentsuu data: ", coordinate)
                 var array = data.filter((item) =>{
                     return item.id !== coordinate
                 })
@@ -104,7 +116,6 @@ export class Cart extends Component{
 
     checkDataForPurchase(){
         this.setState({ is_purchase: true })
-        console.log("hudaldaj awah", this.state.data)
         if(this.state.data.length > 0){
             service.purchaseFromCart(this.state.data, this.props.code)
                 .then(({success, msg, payment}) => {
@@ -129,17 +140,39 @@ export class Cart extends Component{
         }
     }
 
+    moreItems(){
+        const { max_size, first_number } = this.state
+        var first = first_number
+        first += max_size
+        var max = max_size
+        max += max_size
+        this.setState({ first_number: first, max_size: max, undoItem: true })
+    }
+
+    undoItems(){
+        const { max_size, first_number } = this.state
+        var first = first_number
+        var max = max_size
+        var need = max / 2
+        first = first - need
+        max = max - need
+        this.setState({ max_size: max, first_number: first })
+        if(first == 0){
+            this.setState({ undoItem: false })
+        }
+    }
+
     render(){
-        const {coordinate, torf, data, is_button, alert_msg, success } = this.state
+        const {coordinate, torf, data, is_button, alert_msg, success, max_size, first_number, undoItem } = this.state
         const {x, y} = this.props
-        console.log("in render",this.state.data)
         if(data.length > 0){
             this.div = []
-            data.map((data, key) => {
+            data.slice(first_number, max_size).map((data, key) => {
+                var idx = key + 1 + first_number
                 this.div.push(
                     <div className="rounded bg-light card-baraa row shadow-sm bg-white"  key={key}>
-                        <div className="col-md-10 name">{data.name} </div>
-                        <div className="col-md-1 icon"> <i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.id)}></i></div>
+                        <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.id)}></i></div>
+                        <div className="col-md-10 name"><b>{idx}. Цэгийн нэр:</b>{data.name}</div>
                     </div>
                 )
             })
@@ -164,7 +197,7 @@ export class Cart extends Component{
                 <div className="cart-button">
                     <div className="card-count">
                         <span classname="cart-count-span text-success">
-                            {this.state.data.length}
+                            {data.length}
                         </span>
                     </div>
                     <div className="card-icon">
@@ -172,8 +205,22 @@ export class Cart extends Component{
                     </div>
                 </div>
                 <div className="cart-list">
+                    {
+                        undoItem
+                        ?
+                        <button type="button" className="btn btn-primary" onClick={() => this.undoItems()}>undo</button>
+                        :
+                        null
+                    }
                     {this.div}
-
+                    {
+                        data.length > max_size
+                        ?
+                        <button type="button" className="btn btn-primary" onClick={() => this.moreItems()}>more</button>
+                        :
+                        null
+                    }
+                    <br/>
                     {this.state.is_purchase ?
                         <button className="btn gp-btn-primary" disabled>
                             <div className="spinner-border" role="status">
@@ -227,7 +274,6 @@ export class ShopCart extends Control {
     }
 
     showModal(coordinate, torf, x, y, content, code) {
-        console.log("from Cart", content)
         this.renderComponent({coordinate, torf, x, y, content, code})
         if(torf){
             // this.setClass()
@@ -237,6 +283,5 @@ export class ShopCart extends Control {
     setClass(){
         this.root.className = 'h1'
         this.root.innerText = "Захиалгууд"
-        console.log(this.root)
     }
 }

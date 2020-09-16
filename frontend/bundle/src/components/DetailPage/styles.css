@@ -297,8 +297,8 @@ element.style {
 }
 
 .card-baraa {
-    height: 57px;
-    width: 276px;
+    height: auto;
+    width: auto;
     background-color: rgba(0,60,136,0.5);
     margin-top: 7px;
     padding: 9px 7px;

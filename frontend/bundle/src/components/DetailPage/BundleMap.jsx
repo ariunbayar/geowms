@@ -341,7 +341,7 @@ export default class BundleMap extends Component {
 
                             if(!this.state.is_draw_open){
                                 if(geodb_table == 'mpoint_view'){
-                                    if(feature_info.length){
+                                    if(feature_info.length > 0){
                                         this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
                                         this.setState({pay_modal_check: true})
                                         this.state.vector_layer.setSource(null)

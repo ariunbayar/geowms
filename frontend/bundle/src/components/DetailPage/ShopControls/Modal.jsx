@@ -57,7 +57,7 @@ class ModalComponent extends Component{
             <div>
                 <div className="show d-block modal modal-dialog modal-dialog-scrollable ">
                     <div className="modal-content">
-                            <button type="button" className="close border border-danger" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
+                            <button type="button" className="close border" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <div className="modal-body">
