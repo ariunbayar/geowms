@@ -38,7 +38,7 @@ export class QPay extends Component {
             if(this.props.qpay_open)
             {
                 this.payCheck(this.props.qpay_open)
-                this.setState({minutes:5, seconds:0})
+                this.setState({minutes:5, seconds:0, qPay_QRimage: ''})
                 this.timerRemaining()
                 this.HandleCreateQpay()
             }
@@ -137,7 +137,14 @@ export class QPay extends Component {
                 <h1 className="text-succes gp-text-primary"></h1>
                 <h1 className="text-succes gp-text-primary">QR Code уншуулна уу.</h1><br></br>
                 {error_message == '' ?
-                    <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  qPay_QRimage} />:
+                    (qPay_QRimage != [] ? 
+                        <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  qPay_QRimage} />:
+                        <div className="my-5">
+                            <div className="spinner-border gp-text-primary my-5" role="status">
+                                <i className="fas fa-cog fa-spin"></i>
+                            </div>
+                        </div>
+                    ):
                     <h6 className="text-success">{error_message}</h6>}
             </div>
         )

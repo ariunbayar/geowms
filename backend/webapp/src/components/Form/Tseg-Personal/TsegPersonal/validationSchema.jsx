@@ -5,6 +5,8 @@ export const validationSchema = object().shape({
 
     suljeenii_torol: string()
         .required('Хоосон байна!'),
+    ondor_torol: string()
+        .required('Хоосон байна!'),
     ondor: string()
         .required('Хоосон байна!'),
     center_typ: string()
