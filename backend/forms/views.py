@@ -723,6 +723,7 @@ def tsegPersonalUpdate(request, payload):
         'point_type': data.point_class if data.point_class else '',
         'center_typ': data.mclass if data.mclass else '',
         'aimag': data.aimag if data.aimag else '',
+        'ondor_torol': "1",
         'sum': data.sum if data.sum else '',
         'sheet1':data.sheet1 if data.sheet1 else '',
         'zone': int(data.sheet2) if sheet2 else '',

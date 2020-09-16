@@ -24,6 +24,7 @@ export default class Forms extends Component {
                 alban_baiguullga: '',
                 center_typ: '',
                 ondor: '',
+                ondor_torol: '',
                 pid: '',
             },
             tesgiin_ner: '',
@@ -343,6 +344,7 @@ export default class Forms extends Component {
         form_datas.append('toviin_dugaar', this.state.toviin_dugaar)
         form_datas.append('center_typ', this.state.values.center_typ)
         form_datas.append('ondor', parseFloat(this.state.values.ondor))
+        form_datas.append('ondor_torol', parseFloat(this.state.values.ondor_torol))
         form_datas.append('pid', this.state.values.pid)
         form_datas.append('suljeenii_torol', this.state.values.suljeenii_torol)
         form_datas.append('aimag_name', this.state.aimag_name)
@@ -421,6 +423,7 @@ export default class Forms extends Component {
                             pid: item.pid,
                             center_typ: item.center_typ,
                             ondor: item.ondor,
+                            ondor: item.ondor_torol,
                             suljeenii_torol: item.point_type,
                             sudalga_or_shine: item.sudalga_or_shine,
                             date: dateStr,
@@ -581,7 +584,7 @@ export default class Forms extends Component {
                                 </tr>
                                 <tr>
                                     <th>Зэрэг</th>
-                                    {values.suljeenii_torol == '2' ? 
+                                    {values.suljeenii_torol == '2' ?
                                         <td>
                                         <Fragment>
                                             <Field name="center_typ" as="select" className="form-control"
@@ -601,10 +604,6 @@ export default class Forms extends Component {
                                                 <option value="1">AA анги</option>
                                                 <option value="2">A анги</option>
                                                 <option value="3">B анги</option>
-                                                <option value="4">C анги</option>
-                                                <option value="5">I зэрэг</option>
-                                                <option value="6">II зэрэг</option>
-                                                <option value="7">III зэрэг</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
@@ -614,12 +613,10 @@ export default class Forms extends Component {
                                             <Field name="center_typ" as="select" className="form-control"
                                             className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">1 анги</option>
-                                                <option value="2">2 анги</option>
-                                                <option value="3">3 анги</option>
-                                                <option value="4">4 анги</option>
-                                                <option value="5">I зэрэг</option>
-                                                <option value="6">II зэрэг</option>
+                                                <option value="1">I анги</option>
+                                                <option value="2">II анги</option>
+                                                <option value="3">III анги</option>
+                                                <option value="4">IV анги</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
@@ -629,12 +626,10 @@ export default class Forms extends Component {
                                             <Field name="center_typ" as="select" className="form-control"
                                             className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">1 анги</option>
-                                                <option value="2">2 анги</option>
-                                                <option value="3">3 анги</option>
-                                                <option value="4">4 анги</option>
-                                                <option value="5">I зэрэг</option>
-                                                <option value="6">II зэрэг</option>
+                                                <option value="1">I анги</option>
+                                                <option value="2">II анги</option>
+                                                <option value="3">III анги</option>
+                                                <option value="4">IV анги</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
@@ -644,8 +639,8 @@ export default class Forms extends Component {
                                             <Field name="center_typ" as="select" className="form-control"
                                             className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">1 анги</option>
-                                                <option value="2">2 анги</option>
+                                                <option value="1">I анги</option>
+                                                <option value="2">II анги</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
@@ -655,10 +650,10 @@ export default class Forms extends Component {
                                             <Field name="center_typ" as="select" className="form-control"
                                             className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">1 анги</option>
-                                                <option value="2">2 анги</option>
-                                                <option value="3">3 анги</option>
-                                                <option value="4">4 анги</option>
+                                                <option value="1">I анги</option>
+                                                <option value="2">II анги</option>
+                                                <option value="3">III анги</option>
+                                                <option value="4">IV анги</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
@@ -668,14 +663,13 @@ export default class Forms extends Component {
                                             <Field name="center_typ" as="select" className="form-control"
                                             className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                 <option>...</option>
-                                                <option value="1">1 анги</option>
+                                                <option value="1">C анги</option>
                                             </Field>
                                             <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                         </Fragment>
                                     </td>
                                     }
                                 </tr>
-
                                 <tr>
                                     <th style={{width: "5%"}} scope="row">5</th>
                                     <th>Аймаг</th>
@@ -706,7 +700,7 @@ export default class Forms extends Component {
                                 <tr>
                                     <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
                                     <th rowSpan="4" scope="rowgroup">
-                                        Солбилцол WGS-84 /DMS/
+                                    WGS84 солбицлын тогтолтоонд, ITRF 2008 эринд 2008 эринд тодорхойлсон
                                         <button type='button' className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
                                             Шалгах
                                         </button>
@@ -783,8 +777,21 @@ export default class Forms extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colSpan="2" scope="rowgroup">Өндөр</th>
+                                    <th colSpan="2" scope="rowgroup">
+                                        Өндөр төрөл
+                                        <Fragment>
+                                            <Field name="ondor_torol" as="select" className="form-control"
+                                                className={'form-control ' + (errors.ondor_torol ? 'is-invalid' : '')}>
+                                                <option >...</option>
+                                                <option value="1">Эллипсойдын өндрийн утга</option>
+                                                <option value="2">Ортометрын өндрийн утга</option>
+                                                <option value="3">Балтын тэнгэсийн өндрийн утга</option>
+                                            </Field>
+                                            <ErrorMessage name="ondor_torol" component="div" className="text-dange"/>
+                                        </Fragment>
+                                    </th>
                                     <th colSpan="4" scope="rowgroup">
+                                        Өндөр тоо
                                         <Field
                                             className={'form-control ' + (errors.ondor ? 'is-invalid' : '')}
                                             name='ondor'
