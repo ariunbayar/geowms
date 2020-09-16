@@ -26,7 +26,7 @@ export class Cart extends Component{
             is_button: false,
             is_purchase: false,
             alert_msg: '',
-            max_size: 4,
+            max_size: 8,
             first_number: 0,
         }
 
@@ -143,9 +143,12 @@ export class Cart extends Component{
     moreItems(){
         const { max_size, first_number } = this.state
         var first = first_number
-        first += max_size
         var max = max_size
-        max += max_size
+        var need = max - first
+        console.log("max", max, 'first ', first)
+        first = first + need
+        max = max + need
+        console.log("max", max, 'first ', first)
         this.setState({ first_number: first, max_size: max, undoItem: true })
     }
 
@@ -153,11 +156,12 @@ export class Cart extends Component{
         const { max_size, first_number } = this.state
         var first = first_number
         var max = max_size
-        var need = max / 2
+        var need = max - first_number
         first = first - need
         max = max - need
+        console.log("undo", "max", max, 'first ', first)
         this.setState({ max_size: max, first_number: first })
-        if(first == 0){
+        if(first <= 0){
             this.setState({ undoItem: false })
         }
     }
@@ -172,7 +176,7 @@ export class Cart extends Component{
                 this.div.push(
                     <div className="rounded bg-light card-baraa row shadow-sm bg-white"  key={key}>
                         <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.id)}></i></div>
-                        <div className="col-md-10 name"><b>{idx}. Цэгийн нэр:</b>{data.name}</div>
+                        <div className="col-md-10 name"><b>{idx}. Цэгийн нэр: </b>{data.name}</div>
                     </div>
                 )
             })
@@ -208,7 +212,7 @@ export class Cart extends Component{
                     {
                         undoItem
                         ?
-                        <button type="button" className="btn btn-primary" onClick={() => this.undoItems()}>undo</button>
+                        <a type="button" className="btn-outline btn-block p-0 my-2 m-0 text-center" onClick={() => this.undoItems()}><i style={{fontSize:"30px"}} className="fa fa-angle-up gp-text-primary" aria-hidden="true"></i></a>
                         :
                         null
                     }
@@ -216,11 +220,10 @@ export class Cart extends Component{
                     {
                         data.length > max_size
                         ?
-                        <button type="button" className="btn btn-primary" onClick={() => this.moreItems()}>more</button>
+                        <a type="button" className="btn-outline btn-block p-0 my-2 m-0 text-center" onClick={() => this.moreItems()}><i style={{fontSize:"30px"}} className="fa fa-angle-down gp-text-primary" aria-hidden="true"></i></a>
                         :
                         null
                     }
-                    <br/>
                     {this.state.is_purchase ?
                         <button className="btn gp-btn-primary" disabled>
                             <div className="spinner-border" role="status">
