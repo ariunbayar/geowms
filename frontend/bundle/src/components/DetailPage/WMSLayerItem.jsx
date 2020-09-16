@@ -30,12 +30,14 @@ export default class WMSLayerItem extends Component {
         return (
             <li>
                 <label>
-                    <input
-                        type="checkbox"
+                    <div className="custom-control custom-switch">
+                        <input
+                        type="checkbox" className="custom-control-input" id={code}
                         onChange={(e) => this.toggle(e.target.checked)}
                         checked={is_visible}
                     />
-                    <a> {name}</a>
+                    <label className="custom-control-label" htmlFor={code}>{name}</label>
+                    </div>
                 </label>
                 {legendURL != "null" &&
                     <ul>
