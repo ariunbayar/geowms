@@ -30,6 +30,7 @@ import {SearchBar} from './searchControl/SearchBar'
 import {SearchBarButton} from './searchControl/SearchBarButton'
 import {DrawButton} from './controls/Draw'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
+import { AlertRoot } from "./ShopControls/alert"
 
 export default class BundleMap extends Component {
 
@@ -62,6 +63,7 @@ export default class BundleMap extends Component {
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
             searchbar: new SearchBar(),
+            alertBox: new AlertRoot(),
         }
 
         this.marker = this.initMarker()
@@ -249,6 +251,7 @@ export default class BundleMap extends Component {
                 this.controls.sidebar,
                 this.controls.searchbar,
                 this.controls.cart,
+                this.controls.alertBox,
             ]),
             layers: [
                 ...base_layers,
@@ -322,7 +325,6 @@ export default class BundleMap extends Component {
                             const source = new VectorSource({
                                 features: features
                             });
-
                             const feature_info = features.map((feature) => {
                                 const geometry_name = feature.getGeometryName()
                                 const values =
@@ -338,6 +340,9 @@ export default class BundleMap extends Component {
                                         this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
                                         this.setState({pay_modal_check: true})
                                         this.state.vector_layer.setSource(null)
+                                    }
+                                    else{
+                                        this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
                                     }
                                 }
                                 else{

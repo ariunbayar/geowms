@@ -306,3 +306,9 @@ element.style {
 .cart{
     z-index: 1;
 }
+
+.alert-custom-css{
+    width: auto;
+    position: absolute;
+    bottom: 5%;
+}
