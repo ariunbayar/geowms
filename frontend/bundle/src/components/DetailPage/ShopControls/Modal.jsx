@@ -117,8 +117,8 @@ class ModalComponent extends Component{
                                             data-dismiss="modal"
                                         >
                                             Ачааллаж байна...
-                                            <a class="spinner-border text-light" role="status">
-                                                <span class="sr-only">Loading...</span>
+                                            <a className="spinner-border text-light" role="status">
+                                                <span className="sr-only">Loading...</span>
                                             </a>
                                         </button>
                                         : null
