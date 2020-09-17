@@ -14,6 +14,8 @@ export class HureeForm extends Component {
             y: 0,
             handle_save_succes_huree: false,
             save_is_error: false,
+            perms : this.props.perms,
+            is_editable: this.props.is_editable
         }
 
         this.handleRemove = this.handleRemove.bind(this)
@@ -80,6 +82,7 @@ export class HureeForm extends Component {
     render() {
         const tuuhen_ov = this.props.dursgalt_id
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
+        const { perms, is_editable } = this.state
         return (
             <div>
                 {this.state.huree_data.length > 2 ?
@@ -91,8 +94,9 @@ export class HureeForm extends Component {
                         <tr>
                             <th rowSpan="2" scope="rowgroup" scope="row">№</th>
                             <td colSpan="2">Latitude Longitude</td>
-                            <td rowSpan="2">Засах</td>
-                            <td rowSpan="2">Устгах</td>
+                            {is_editable ? <td rowSpan="2">Засах</td> : null}
+                            {perms.perm_remove ? <td rowSpan="2">Устгах</td> : null}
+                            {!perms.perm_remove && perms.perm_create && <td rowSpan="2">Нэмэх</td>}
                         </tr>
                         <tr>
                             <th scope="row">X</th>
@@ -100,7 +104,10 @@ export class HureeForm extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                    {this.state.huree_data.map((data, idx) =>
+                    {
+                        perms.perm_view
+                        ?
+                        this.state.huree_data.map((data, idx) =>
                             <HureeFormTable
                                 key={idx}
                                 values={data}
@@ -108,41 +115,55 @@ export class HureeForm extends Component {
                                 tuuhen_ov={tuuhen_ov}
                                 tuuh_soyl_huree_id={tuuh_soyl_huree_id}
                                 handleRemove={() => this.handleRemove(data.id)}
+                                perms = {perms}
+                                is_editable = {is_editable}
                             ></HureeFormTable>
-                        )}
-
-                        <tr >
-                            <th scope="row"></th>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="x"
-                                    onChange={(e) => this.handleInput('x', e)}
-                                    value={this.state.x}
-                                />
-                            </td>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="y"
-                                    onChange={(e) => this.handleInput('y', e)}
-                                    value={this.state.y}
-                                />
-                            </td>
-                            <td colSpan="2" scope="rowgroup" scope="row">
-                                { this.state.handle_save_succes_huree ?
-                                        <a className="spinner-border gp-text-primary" role="status">
-                                            <span className="sr-only">Loading...</span>
-                                        </a>
+                        )
+                        :
+                        null
+                    }
+                        {perms.perm_create ?
+                            <tr >
+                                <th scope="row"></th>
+                                <td scope="row">
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        id="x"
+                                        onChange={(e) => this.handleInput('x', e)}
+                                        value={this.state.x}
+                                    />
+                                </td>
+                                <td scope="row">
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        id="y"
+                                        onChange={(e) => this.handleInput('y', e)}
+                                        value={this.state.y}
+                                    />
+                                </td>
+                                {
+                                    perms.perm_create
+                                    ?
+                                    <td colSpan="2" scope="rowgroup" scope="row">
+                                        { this.state.handle_save_succes_huree ?
+                                                <a className="spinner-border gp-text-primary" role="status">
+                                                    <span className="sr-only">Loading...</span>
+                                                </a>
+                                            :
+                                            <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
+                                        }
+                                        <br></br>
+                                        {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+                                    </td>
                                     :
-                                    <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
+                                    null
                                 }
-                                <br></br>
-                                {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
-                            </td>
-                        </tr>
+                            </tr>
+                            :
+                            null
+                        }
                     </tbody>
                 </table>
             </div>
