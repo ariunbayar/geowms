@@ -13,6 +13,7 @@ export class TuuhenOv extends Component {
     }
 
     render() {
+        console.log(this.props.perms)
         return (
             <Switch>
                 <Route exact path={"/gov/tuuhen-ov/add/"} component={Forms}/>
