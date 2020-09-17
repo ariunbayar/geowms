@@ -74,9 +74,6 @@ export class AddForm extends Component {
 
     render() {
         const { perms, is_editable } = this.state
-        if(!perms.perm_view){
-            this.props.id.history.push({pathname:'/gov/tuuhen-ov/', state: {error:"эрх алга"}})
-        }
         const dursgalt_id = this.state.id
         const huree_len = this.state.huree_len
         const huree_components = []

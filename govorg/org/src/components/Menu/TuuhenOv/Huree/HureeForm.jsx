@@ -96,6 +96,7 @@ export class HureeForm extends Component {
                             <td colSpan="2">Latitude Longitude</td>
                             {is_editable ? <td rowSpan="2">Засах</td> : null}
                             {perms.perm_remove ? <td rowSpan="2">Устгах</td> : null}
+                            {!perms.perm_remove && perms.perm_create && <td rowSpan="2">Нэмэх</td>}
                         </tr>
                         <tr>
                             <th scope="row">X</th>
@@ -121,44 +122,48 @@ export class HureeForm extends Component {
                         :
                         null
                     }
-                        <tr >
-                            <th scope="row"></th>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="x"
-                                    onChange={(e) => this.handleInput('x', e)}
-                                    value={this.state.x}
-                                />
-                            </td>
-                            <td scope="row">
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="y"
-                                    onChange={(e) => this.handleInput('y', e)}
-                                    value={this.state.y}
-                                />
-                            </td>
-                            {
-                                perms.perm_create
-                                ?
-                                <td colSpan="2" scope="rowgroup" scope="row">
-                                    { this.state.handle_save_succes_huree ?
-                                            <a className="spinner-border gp-text-primary" role="status">
-                                                <span className="sr-only">Loading...</span>
-                                            </a>
-                                        :
-                                        <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
-                                    }
-                                    <br></br>
-                                    {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+                        {perms.perm_create ?
+                            <tr >
+                                <th scope="row"></th>
+                                <td scope="row">
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        id="x"
+                                        onChange={(e) => this.handleInput('x', e)}
+                                        value={this.state.x}
+                                    />
                                 </td>
-                                :
-                                null
-                            }
-                        </tr>
+                                <td scope="row">
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        id="y"
+                                        onChange={(e) => this.handleInput('y', e)}
+                                        value={this.state.y}
+                                    />
+                                </td>
+                                {
+                                    perms.perm_create
+                                    ?
+                                    <td colSpan="2" scope="rowgroup" scope="row">
+                                        { this.state.handle_save_succes_huree ?
+                                                <a className="spinner-border gp-text-primary" role="status">
+                                                    <span className="sr-only">Loading...</span>
+                                                </a>
+                                            :
+                                            <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
+                                        }
+                                        <br></br>
+                                        {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+                                    </td>
+                                    :
+                                    null
+                                }
+                            </tr>
+                            :
+                            null
+                        }
                     </tbody>
                 </table>
             </div>
