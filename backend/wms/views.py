@@ -13,6 +13,8 @@ from main.decorators import ajax_required
 from django.contrib.postgres.search import SearchVector
 from .models import WMS
 from .forms import WMSForm
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 
 
 def _get_wms_display(request, wms):
@@ -143,6 +145,13 @@ def titleUpdate(request, payload):
     return JsonResponse(rsp)
 
 
+def save_image_from_url(model, url, layer_code):
+    r = requests.get(url)
+    img_temp = NamedTemporaryFile(delete=True)
+    img_temp.write(r.content)
+    img_temp.flush()
+    model.legend_url.save(layer_code + ".png", File(img_temp), save=True)
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -152,14 +161,14 @@ def layerAdd(request, payload):
     layer_name = payload.get('id')
     layer_code = payload.get('code')
     legend_url = payload.get('legendURL')
-
     wms = get_object_or_404(WMS, pk=wmsId)
     wms_layer = WMSLayer.objects.filter(code=layer_code, wms_id=wms.id)
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, legend_url=legend_url)
-
+        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name)
+        if wmslayerimage:
+            save_image_from_url(wmslayerimage,legend_url, layer_code)
         return JsonResponse({'success': True})
 
 
@@ -170,8 +179,9 @@ def layerRemove(request, payload):
 
     wmsId = payload.get('wmsId')
     layer_name = payload.get('id')
-
     wms_layer = get_object_or_404(WMSLayer, code=layer_name, wms=wmsId)
+    wms_layer.legend_url.delete(save=False)
+    BundleLayer.objects.filter(layer=wms_layer).delete()
     wms_layer.delete()
 
     return JsonResponse({'success': True})
@@ -214,12 +224,12 @@ def update(request, payload):
 
             form.save()
             wms = form.instance
-
             for layer_choice in layer_choices:
+
                 WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(
                         name=layer_choice.get('name'),
                         code=layer_choice.get('code'),
-                        legend_url=layer_choice.get('legendurl'))
+                        )
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
