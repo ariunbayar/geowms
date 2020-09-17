@@ -48,7 +48,7 @@ export class OrgAdd extends Component {
 
     handleGetAll(org_level,id){
         if(id){
-            service.OrgAll(org_level,id).then(({ orgs }) => {
+            service.orgAll(org_level,id).then(({ orgs }) => {
                 if (orgs) {
                     orgs.map(org=>this.setState({
                         org_name:org.name
