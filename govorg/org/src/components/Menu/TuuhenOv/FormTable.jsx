@@ -30,6 +30,7 @@ export default class FormTable extends Component {
     }
 
     render() {
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         const { id, dugaar, date, inspireid, too_shirheg, aimagname, sumname, burtgegch, created_at} = this.props.values
         const idx = this.props.idx
         return (
@@ -47,11 +48,14 @@ export default class FormTable extends Component {
                             <i className="fa fa-plus-circle" aria-hidden="true"></i>
                     </NavLink>
                 </th>
+                {perm_view && perm_create && perm_remove ?
                 <th>
                     <NavLink to={`/gov/tuuhen-ov/${id}/update/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
-                </th>
+                </th> : null
+                }
+                {perm_remove ?
                 <th>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
@@ -64,7 +68,8 @@ export default class FormTable extends Component {
                             title="Тохиргоог устгах"
                         />
                     }
-                </th>
+                </th> : null
+                }
             </tr>
         )
     }

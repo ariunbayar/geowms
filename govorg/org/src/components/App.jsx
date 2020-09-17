@@ -27,6 +27,7 @@ export class App extends Component {
     }
 
     render() {
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.state.tuuhen_ov
         return (
         <BrowserRouter>
                     <div className="container-fluid mt-0">
@@ -49,18 +50,24 @@ export class App extends Component {
                                         <i className='fa fa-university text-primary'></i>&nbsp;СИСТЕМ
                                         </NavLink>
                                     </li>
+                                    {perm_view || perm_remove ?
                                     <li className="nav-item m-1">
                                         <NavLink  to={'/gov/tuuhen-ov/'} activeClassName="active">
                                             <i className='fa fa-history  text-primary'></i>&nbsp;Түүхэн өв бүртгэл
                                         </NavLink>
-                                    </li>
+                                    </li> : null
+                                    }
                                 </ul>
                             </div>
                         </nav>
                         <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
                         <div className="col-md-10">
                                 <Switch>
-                                    <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/>
+                                    {perm_view || perm_remove ?
+                                    <Route path="/gov/tuuhen-ov/"
+                                        component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}
+                                        />: null
+                                    }
                                     <Route exact path="/gov/" component={Employee}/>
                                     <Route exact path="/gov/bundle/" component={Bundle}/>
                                 </Switch>
