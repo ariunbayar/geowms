@@ -166,7 +166,7 @@ def layerAdd(request, payload):
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name)
+        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
         if wmslayerimage:
             save_image_from_url(wmslayerimage,legend_url, layer_code)
         return JsonResponse({'success': True})
