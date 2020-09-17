@@ -9,14 +9,15 @@ class Bundle(models.Model):
 
     class Meta:
         ordering = ('sort_order',)
-    MODUL_TVVHEN_UV = 1
+    MODULE_TUUHEN_UV = 1
     MODULE_CHOICES = (
-        (MODUL_TVVHEN_UV, 'Түүх, соёлын өв'),
+        (MODULE_TUUHEN_UV, 'Түүх, соёлын өв'),
     )
     
     layers = models.ManyToManyField(WMSLayer, through='BundleLayer')
     name = models.CharField(max_length=200)
-    modul = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
+    price = models.PositiveIntegerField()
+    module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
 
     is_removeable = models.BooleanField()
     icon = models.ImageField(upload_to='дэд-сан/')
