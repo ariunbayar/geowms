@@ -56,7 +56,7 @@ export class FormList extends Component {
                 setTimeout(() => {
                     this.setState({ alert: false, msg: [] })
                 }, 3000);
-                this.handleListUpdated()
+                this.paginate(1, "")
             }else{
                 this.setState({ msg, alert: false })
                 setTimeout(() => {

@@ -42,6 +42,7 @@ export default class Modal extends Component {
         setTimeout(() => {
             this.setState({status: 'closed'})
             if (callback) {
+                this.props.modalClose()
                 callback()
             } else {
                 console.log(callback)
