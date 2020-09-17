@@ -10,14 +10,16 @@ export class TuuhenOv extends Component {
 
     constructor(props) {
         super(props)
+        this.state = {
+            perms: this.props.perms
+        }
     }
 
     render() {
-        console.log(this.props.perms)
         return (
             <Switch>
                 <Route exact path={"/gov/tuuhen-ov/add/"} component={Forms}/>
-                <Route exact path={"/gov/tuuhen-ov/:id/add/"} component={AddForm}/>
+                <Route exact path={"/gov/tuuhen-ov/:id/add/"} component={ (id) => <AddForm id={id} perms={this.state.perms}/>}/>
                 <Route exact path={"/gov/tuuhen-ov/:id/update/"} component={Forms}/>
                 <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/"} component={DursgaltGazar}/>
                 <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/update/:idx/"} component={DursgaltGazar}/>

@@ -24,6 +24,17 @@ export class FormList extends Component {
         this.handleSearch = this.handleSearch.bind(this)
     }
 
+    componentDidMount(){
+        if(this.props.location.state)
+        {
+            this.setState({ msg: this.props.location.state.error })
+            this.props.history.push({state: null})
+            setTimeout(() => {
+                this.setState({ msg: [] })
+            }, 2000);
+        }
+    }
+
     paginate (page, query) {
         const perpage = this.state.perPage
         this.setState({ currentPage: page })

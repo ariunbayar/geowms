@@ -15,7 +15,8 @@ export default class AyulFormTable extends Component {
             disable: false,
             save_is_load: false,
             save_is_error: false,
-
+            perms: this.props.perms,
+            is_editable: this.props.is_editable,
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -91,6 +92,7 @@ export default class AyulFormTable extends Component {
     render() {
         // const values = this.props.values
         const idx = this.props.idx
+        const { perms, is_editable } = this.state
         return (
             <tr key={idx}>
                 <th scope="row">{idx+1}</th>
@@ -114,38 +116,49 @@ export default class AyulFormTable extends Component {
                         value={this.state.y}
                     />
                 </td>
-                <td>
+                {
+                    is_editable
+                    ?
+                    <td>
                     {this.state.disable ?
-                    (this.state.save_is_load ?
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="sr-only">Loading...</span>
-                        </div>:
-                        <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Хадгалах">
-                            <i className="fa fa-floppy-o" aria-hidden="true"></i>
+                        (this.state.save_is_load ?
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="sr-only">Loading...</span>
+                            </div>:
+                            <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Хадгалах">
+                                <i className="fa fa-floppy-o" aria-hidden="true"></i>
+                            </a>
+                        ):
+                        <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Засах">
+                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                         </a>
-                    ):
-                    <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Засах">
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    </a>
 
-                    }
-                    <br></br>
-                    {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
-
-                </td>
-                <td>
-                    <a onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
-                    </a>
-                    {this.state.is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                        />
-                    }
-                </td>
+                        }
+                        <br></br>
+                        {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+                    </td>
+                    :
+                    null
+                }
+                {
+                    perms.perm_remove
+                    ?
+                    <td>
+                        <a onClick={this.handleModalDeleteOpen}>
+                            <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        </a>
+                        {this.state.is_modal_delete_open &&
+                            <Modal
+                                modalClose={this.handleModalDeleteClose}
+                                modalAction={this.props.handleRemove}
+                                text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
+                                title="Тохиргоог устгах"
+                            />
+                        }
+                    </td>
+                    :
+                    null
+                }
             </tr>
         )
     }
