@@ -121,7 +121,7 @@ def _get_bundle_display(bundle):
     return {
         'id': bundle.id,
         'name': bundle.name,
-        'price': bundle.price,
+        'price': 123,
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
