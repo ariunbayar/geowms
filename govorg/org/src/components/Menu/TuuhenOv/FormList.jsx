@@ -17,6 +17,7 @@ export class FormList extends Component {
             currentPage: 1,
             msg: [],
             alert: false,
+            perms: props.perms,
         }
 
         this.paginate = this.paginate.bind(this)
@@ -67,6 +68,7 @@ export class FormList extends Component {
 
 
     render() {
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.state.perms
         const{ tuuh_soyl_list, searchQuery, tuuh_soyl , alert, msg} = this.state
         const error_bn = Object.keys(msg).length > 0
         return (
@@ -77,11 +79,13 @@ export class FormList extends Component {
                         <div className={alert && error_bn?"text-success":"text-danger"}>{msg}</div>
                     </div>
                     <div className="col-md-12">
+                        {perm_create ?
                         <div className="text-right">
                             <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/add/`}>
                                 Нэмэх
                             </NavLink>
-                        </div>
+                        </div> : null
+                        }
                         <input
                             type="text"
                             className="form-control col-md-4  mb-1 float-left"
@@ -101,8 +105,8 @@ export class FormList extends Component {
                                     <th scope="col">Бүртгэгч</th>
                                     <th scope="col">Он,сар,өдөр</th>
                                     <th scope="col">Нэмэх</th>
-                                    <th scope="col">Засах</th>
-                                    <th scope="col">Устгах</th>
+                                    {perm_view && perm_create && perm_remove ? <th scope="col">Засах</th> : null }
+                                    {perm_remove ? <th scope="col">Устгах</th> : null }
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,6 +120,7 @@ export class FormList extends Component {
                                                 key={idx}
                                                 idx = {idx}
                                                 values={values}
+                                                perms={this.state.perms}
                                                 handleRemove={() => this.handleRemove(values.id)}
                                                 handleMove={this.handleMove}
                                             />

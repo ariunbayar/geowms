@@ -10,18 +10,24 @@ export class TuuhenOv extends Component {
 
     constructor(props) {
         super(props)
+        this.state={
+            perms: props.perms,
+        }
     }
 
+    componentDidMount(){
+        const { perms } = this.state
+    }
     render() {
-        console.log(this.props.perms)
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.state.perms
         return (
             <Switch>
-                <Route exact path={"/gov/tuuhen-ov/add/"} component={Forms}/>
-                <Route exact path={"/gov/tuuhen-ov/:id/add/"} component={AddForm}/>
-                <Route exact path={"/gov/tuuhen-ov/:id/update/"} component={Forms}/>
-                <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/"} component={DursgaltGazar}/>
-                <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/update/:idx/"} component={DursgaltGazar}/>
-                <Route exact path={"/gov/tuuhen-ov/"} component={FormList}/>
+                {perm_create ? <Route exact path={"/gov/tuuhen-ov/add/"} component={Forms}/> : null}
+                {perm_view || perm_create ? <Route exact path={"/gov/tuuhen-ov/:id/add/"} component={AddForm}/> : null}
+                {perm_view && perm_create && perm_remove ? <Route exact path={"/gov/tuuhen-ov/:id/update/"} component={Forms}/> : null}
+                {perm_view ? <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/"} component={DursgaltGazar}/> : null}
+                {perm_view && perm_create && perm_remove ? <Route exact path={"/gov/tuuhen-ov/dursgalt-gazar/:id/update/:idx/"} component={DursgaltGazar}/> : null}
+                {perm_view ? <Route exact path={"/gov/tuuhen-ov/"} component={()=><FormList perms={this.state.perms}/>}/> : null}
             </Switch>
         )
     }
