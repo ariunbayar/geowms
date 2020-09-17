@@ -98,7 +98,7 @@ export class FormTseg extends Component {
         else{
             this.error_msg = []
         }
-        if(e.target.value.length >= 1){
+        if(e.target.value.length >= 0){
             this.error_msg = []
             this.setState({ checkError: this.state.error })
             service.searchTseg(e.target.value).then(({items, names}) => {

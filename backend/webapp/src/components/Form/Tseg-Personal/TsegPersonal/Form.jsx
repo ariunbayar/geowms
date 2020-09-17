@@ -728,7 +728,7 @@ export  class Forms extends Component {
                                             placeholder="D"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BA}
+                                            value ={this.state.BA || ''}
                                         />
                                         <input
                                             className={'form-control row float-left m-2' }
@@ -738,7 +738,7 @@ export  class Forms extends Component {
                                             id="BB"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BB}
+                                            value ={this.state.BB || ''}
                                         />
                                         <input
                                             className={'form-control row float-left m-2' }
@@ -748,7 +748,7 @@ export  class Forms extends Component {
                                             id="BC"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BC}
+                                            value ={this.state.BC || ''}
                                         />
                                     </td>
                                     <td colSpan="2" scope="rowgroup" className="pl-5">
@@ -770,7 +770,7 @@ export  class Forms extends Component {
                                             id="LB"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LB}
+                                            value ={this.state.LB || ''}
                                         />
                                         <input
                                             className={'form-control row float-left m-2' }
@@ -780,7 +780,7 @@ export  class Forms extends Component {
                                             id="LC"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LC}
+                                            value ={this.state.LC || ''}
                                         />
                                     </td>
                                 </tr>
