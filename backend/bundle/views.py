@@ -116,12 +116,21 @@ def _get_form_check_options(bundleId):
     return roleOptions
 
 
+def _get_module_display(module):
+    return {
+        'id': module[0],
+        'name': module[1],
+    }
+
+
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
+    modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
     return {
         'id': bundle.id,
         'name': bundle.name,
-        'price': 123,
+        'price':modules,
+        'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
@@ -185,12 +194,47 @@ def create(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def update(request, payload):
-
+def ModuleCheck(request, payload):
+    module = payload.get('module')
     bundle = get_object_or_404(Bundle, pk=payload.get('id'))
+    if(bundle.module):
+        if(module):
+            module = int(payload.get('module'))
+            if(bundle.module == module):
+                return JsonResponse({'success': False})
+            else:
+                name = Bundle.objects.filter(module=module)
+                if(name):
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False})
 
+        else:
+            return JsonResponse({'success': False})
+    else:
+        if(module):
+            module = int(payload.get('module'))
+            name = Bundle.objects.filter(module=module)
+            if(name):
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False})
+        else:
+            return JsonResponse({'success': False})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def update(request, payload):
+    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
+    if(payload.get('module')):
+        module = int(payload.get('module'))
+        Bundle.objects.filter(id=payload.get('id')).update(module=module)
+    else:
+        Bundle.objects.filter(id=payload.get('id')).update(module=None)
+        
     icon_data = payload.get('icon')
-
     form = BundleForm(payload, instance=bundle)
     if form.is_valid():
         if icon_data:

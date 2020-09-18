@@ -38,6 +38,7 @@ urlpatterns = [
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
         path('create/', bundle_views.create, name='create'),
+        path('ModuleCheck/', bundle_views.ModuleCheck, name='ModuleCheck'),
         path('update/', bundle_views.update, name='update'),
         path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
