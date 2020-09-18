@@ -75,7 +75,7 @@ def all(request):
             })
     context = {
         'org': {
-            "org_name":org.name,
+            "org_name":org.name.upper(),
             "org_level":org.level,
             'perms':perms
         },
