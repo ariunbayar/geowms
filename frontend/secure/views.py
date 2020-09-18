@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
 from main.auth_api import GeoAuth
 from geoportal_app.models import User
+from backend.org.models import Employee
 
 from .form import RegisterForm, LoginForm
 
@@ -107,6 +108,13 @@ def login(request):
             user = auth.authenticate(request, username=username, password=password)
             if user is not None:
                 if user.is_active:
+                    org = Employee.objects.filter(user=user)
+                    if org:
+                        auth.login(request, user)
+                        return redirect(settings.LOGIN_REDIRECT_ORG_URL)
+                    else:
+                        auth.login(request, user)
+                        return redirect(settings.LOGIN_REDIRECT_URL)
                     auth.login(request, user)
                     return redirect(settings.LOGIN_REDIRECT_URL)
                 else:
