@@ -165,7 +165,7 @@ export default class Maps extends Component {
         this.handleSetCenter()
     }
 
-    handleMapClick(event) { 
+    handleMapClick(event) {
             this.marker.point.setCoordinates(event.coordinate)
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)

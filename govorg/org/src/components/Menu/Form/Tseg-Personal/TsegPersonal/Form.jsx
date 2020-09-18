@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react"
 import ImageUploader from 'react-images-upload'
 import {service} from '../../service'
+import {NavLink} from "react-router-dom"
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import Maps from '../../../map/Map'
@@ -94,7 +95,8 @@ export  class Forms extends Component {
     }
 
     componentDidMount(){
-        const id = this.props.match.params.id
+        const id = this.props.data.match.params.id
+        alert(id)
         if(id) {
             this.setState({id})
             this.tsegUpdate(id)
@@ -367,13 +369,13 @@ export  class Forms extends Component {
         form_datas.append('hotolson', this.state.values.hotolson)
         form_datas.append('alban_tushaal', this.state.values.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.values.alban_baiguullga)
-        const id = this.props.match.params.id
+        const id = this.props.data.match.params.id
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push('/back/froms/tseg-info/tsegpersonal/tseg-personal/')
+                    this.props.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
                 }, 1000)
             }
             else{
@@ -464,7 +466,7 @@ export  class Forms extends Component {
     }
 
     getItem(){
-        const id = this.props.match.params.id
+        const id = this.props.data.match.params.id
         if(id){
             service.updateTseg(id).then(({tseg_display})=> {
                 if(tseg_display){
@@ -516,9 +518,9 @@ export  class Forms extends Component {
                             />
                         </div>
                         <div className="col-md-12 mb-4 mt-4 pl-0">
-                            <a href="#" className="btn gp-outline-primary " onClick={this.props.history.goBack}>
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </a>
+                            <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                            </NavLink>
                         </div>
                         <div
                             style={{right:'0'}}
@@ -728,7 +730,7 @@ export  class Forms extends Component {
                                             placeholder="D"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BA}
+                                            value ={this.state.BA || ''}
                                         />
                                         <input
                                             className={'form-control row float-left m-2' }
@@ -738,7 +740,7 @@ export  class Forms extends Component {
                                             id="BB"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BB}
+                                            value ={this.state.BB || ''}
                                         />
                                         <input
                                             className={'form-control row float-left m-2' }
@@ -748,7 +750,7 @@ export  class Forms extends Component {
                                             id="BC"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BC}
+                                            value ={this.state.BC || ''}
                                         />
                                     </td>
                                     <td colSpan="2" scope="rowgroup" className="pl-5">
@@ -770,7 +772,7 @@ export  class Forms extends Component {
                                             id="LB"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LB}
+                                            value ={this.state.LB || ''}
                                         />
                                         <input
                                             className={'form-control row float-left m-2' }
@@ -780,7 +782,7 @@ export  class Forms extends Component {
                                             id="LC"
                                             type="number"
                                             onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LC}
+                                            value ={this.state.LC || ''}
                                         />
                                     </td>
                                 </tr>

@@ -9,6 +9,7 @@ from main.decorators import ajax_required
 from .models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
+from backend.govorg.models import GovOrg
 from django.contrib.postgres.search import SearchVector
 
 
@@ -31,7 +32,7 @@ def all(request, payload, level):
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
     })
-    
+
 
 def _get_org_role_display(org_role):
 
@@ -285,11 +286,12 @@ def org_remove(request, payload, level):
     org = get_object_or_404(Org, pk=org_id, level=level)
     org_users = Employee.objects.filter(org=org_id)
     for org_user in org_users:
-
         user = User.objects.filter(pk=org_user.user_id)
         org_user.delete()
         user.delete()
-
+    org_govorgs = GovOrg.objects.filter(org=org)
+    for org_govorg in org_govorgs:
+        org_govorg.delete()
     org.orgrole_set.all().delete()
     org.delete()
 
@@ -308,7 +310,7 @@ def orgList(request, payload, level):
     orgs_display = []
 
     orgs = Org.objects.filter(level=level).annotate(search=SearchVector(
-        'name')).filter(search__contains=query)
+        'name')).filter(search__contains=query).order_by('id')
     total_items = Paginator(orgs, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list

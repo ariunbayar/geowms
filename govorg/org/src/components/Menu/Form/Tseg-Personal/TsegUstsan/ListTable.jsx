@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from '../../.././Modal'
+import Modal from '../../../helpers/Modal'
 
 export default class ListTable extends Component {
 
@@ -39,6 +39,7 @@ export default class ListTable extends Component {
 
     render() {
         const idx = this.props.idx
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         const {id,email,name,alban_tushaal,utas,tseg_id} = this.props.values
         const {is_modal_success_open, is_modal_delete_open}=this.state
         return (
@@ -59,11 +60,11 @@ export default class ListTable extends Component {
                     {tseg_id}
                 </td>
                 <td>
-                <NavLink to={`/back/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
+                {perm_view && perm_create && perm_remove ? <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                </NavLink>
+                </NavLink> : null}
                 </td>
-                <td>
+                {perm_approve ? <td>
                 <button href="#" className="btn gp-btn-primary" aria-hidden="true" onClick={this.handleModalSuccessOpen}>
                     Баталгаажуулах
                 </button>
@@ -76,8 +77,8 @@ export default class ListTable extends Component {
                         actionName="Баталгаажуул"
                     />
                 }
-                </td>
-                <td>
+                </td> : null}
+                {perm_remove ? <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
                     </a>
@@ -89,7 +90,7 @@ export default class ListTable extends Component {
                             title="Тохиргоог устгах"
                         />
                     }
-                </td>
+                </td> : null}
             </tr>
         )
     }

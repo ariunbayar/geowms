@@ -96,8 +96,8 @@ export class OrgRole extends Component {
                             </table>
                             {this.state.handleSaveIsLoad ?
                                 <button className="btn gp-btn-primary">
-                                    <div class="spinner-border text-light" role="status">
-                                        <span class="sr-only">Loading...</span>
+                                    <div className="spinner-border text-light" role="status">
+                                        <span className="sr-only">Loading...</span>
                                     </div>
                                     <a className="text-light"> Шалгаж байна.</a>
                                 </button>:

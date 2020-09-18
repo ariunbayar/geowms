@@ -145,10 +145,8 @@ export class Cart extends Component{
         var first = first_number
         var max = max_size
         var need = max - first
-        console.log("max", max, 'first ', first)
         first = first + need
         max = max + need
-        console.log("max", max, 'first ', first)
         this.setState({ first_number: first, max_size: max, undoItem: true })
     }
 
@@ -159,7 +157,6 @@ export class Cart extends Component{
         var need = max - first_number
         first = first - need
         max = max - need
-        console.log("undo", "max", max, 'first ', first)
         this.setState({ max_size: max, first_number: first })
         if(first <= 0){
             this.setState({ undoItem: false })

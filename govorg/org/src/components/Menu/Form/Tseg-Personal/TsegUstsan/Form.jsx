@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
 import {service} from './service'
+import {NavLink} from "react-router-dom"
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaAdmin} from './validationSchema'
 export class FormTseg extends Component {
@@ -67,7 +68,7 @@ export class FormTseg extends Component {
 
     componentDidMount(){
         this._isMounted = true;
-        const id = this.props.match.params.id
+        const id = this.props.data.match.params.id
         if(id){
             this._isMounted && this.setState({id})
         }
@@ -98,7 +99,7 @@ export class FormTseg extends Component {
         else{
             this.error_msg = []
         }
-        if(e.target.value.length >= 1){
+        if(e.target.value.length >= 0){
             this.error_msg = []
             this.setState({ checkError: this.state.error })
             service.searchTseg(e.target.value).then(({items, names}) => {
@@ -205,7 +206,7 @@ export class FormTseg extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                 }, 1000)
-                this.props.history.push( `/back/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
+                this.props.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
             }
         })
     }
@@ -318,9 +319,9 @@ export class FormTseg extends Component {
                     return (
                     <Form>
                         <div className="col-md-12 mb-4 mt-4">
-                            <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </a>
+                            <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`} className='btn gp-outline-primary '>
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                            </NavLink>
                         </div>
                         <div className="row container  my-4">
                         <h4>Таны мэдээлэл</h4>
