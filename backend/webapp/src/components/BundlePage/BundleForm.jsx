@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
 import {NavLink} from "react-router-dom"
+import { service } from "./service"
 
 
 export default class BundleForm extends Component {
@@ -16,12 +17,16 @@ export default class BundleForm extends Component {
             layers: props.values.layers,
             icon: props.values.icon,
             icon_url: props.values.icon_url,
+            self_module:'',
+            module:props.values.self_module,
+            check_module:false,
         }
 
         this.handleChange = this.handleChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.onDrop = this.onDrop.bind(this)
+        this.handleSelectChange = this.handleSelectChange.bind(this)
 
     }
 
@@ -31,9 +36,10 @@ export default class BundleForm extends Component {
     componentDidUpdate(prevProps) {
 
         if (this.props.values.id !== prevProps.values.id) {
-            const {id, name, price, layers} = this.props.values
-            this.setState({id, name, price, layers})
+            const {id, name, price, layers, self_module} = this.props.values
+            this.setState({id, name, price, layers, self_module, module:self_module})
         }
+        
 
     }
 
@@ -42,7 +48,10 @@ export default class BundleForm extends Component {
     }
 
     handleSave() {
-        this.props.handleSave(this.state)
+        const {id, name, layers,icon, icon_url, module}=this.state
+            const values ={'id':id, 'name':name, "layers":layers, 'icon':icon, 'icon_url':icon_url, 'module':module} 
+            this.props.handleSave(values)
+    
     }
 
     handleLayerToggle(e) {
@@ -51,9 +60,35 @@ export default class BundleForm extends Component {
         if (e.target.checked) {
             layers.push(value)
         } else {
-            layers = layers.filter((id) => id != value)
+            layers = layers.filter((id) => id != value) 
         }
         this.setState({layers})
+    }
+
+
+    handleSelectChange(event){
+        const value = {'module':event.target.value, 'id':this.state.id}
+        const module = event.target.value
+        service.ModuleCheck(value).then(({success}) => {
+            if (success){
+                this.setState({
+                    module:'',
+                    check_module:true,
+                })
+                setTimeout(() => {
+                    this.setState({
+                        check_module:false
+                    })
+                }, 1000);
+            }
+            else{
+                this.setState({
+                    module:module,
+                    self_module:module,
+                })
+            }
+        })
+
     }
 
     onDrop([icon]) {
@@ -85,15 +120,24 @@ export default class BundleForm extends Component {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="id_price"> Үнэ: </label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="id_price"
-                        placeholder="сангийн нэр"
-                        onChange={(e) => this.handleChange('price', e)}
-                        value={this.state.price}
-                    />
+                    <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
+
+                    {this.state.price ?
+                        <select className='form-control ' name="module" onChange={e =>this.handleSelectChange(e)} 
+                        value={this.state.self_module ? `${this.state.self_module}` : ''}
+                        >
+                            <option value=''></option>
+                            {this.state.price.map(a=> 
+                                <option key={a.id} 
+                                value={a.id}
+                                >
+                                {a.name}
+                                </option>)}
+                    </select>:
+                        <select className='form-control ' name="module">
+                        <option value=''></option>
+                    </select>
+                    }
                 </div>
 
                 {this.props.formOptions.map(({name, layers,is_active}, idx) =>

@@ -7,7 +7,8 @@ export const service = {
     roleCreate,
     roleRemove,
     defaultCheckUpdate,
-    detail
+    detail,
+    ModuleCheck
 }
 
 const prefix = '/back'
@@ -143,4 +144,13 @@ function defaultCheckUpdate(values) {
     }
 
     return fetch(`${prefix}/bundle/defaultCheckUpdate/`, opts).then(handleResponse)
+}
+
+function ModuleCheck(values){
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`${prefix}/bundle/ModuleCheck/`, opts).then(handleResponse)
 }
