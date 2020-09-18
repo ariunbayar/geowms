@@ -90,7 +90,6 @@ export default class AyulFormTable extends Component {
     }
 
     render() {
-        // const values = this.props.values
         const idx = this.props.idx
         const { perms, is_editable } = this.state
         return (

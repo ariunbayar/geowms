@@ -49,7 +49,6 @@ export class Purchase extends Component {
     handlePayment (){
         const purchase_id = this.props.match.params.id
         const {purchase_all} = this.state
-        console.log(purchase_all)
         service.payment(purchase_all).then(({ success }) => {
             if (success) {
                 this.props.history.push(`/profile/all/api/details/${purchase_id}/`)

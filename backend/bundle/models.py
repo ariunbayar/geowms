@@ -10,10 +10,12 @@ class Bundle(models.Model):
     class Meta:
         ordering = ('sort_order',)
     MODULE_TUUHEN_UV = 1
+    MODULE_TSEG_BURTGEL = 2
     MODULE_CHOICES = (
         (MODULE_TUUHEN_UV, 'Түүх, соёлын өв'),
+        (MODULE_TSEG_BURTGEL, 'Геодезийн тулгуур сүлжээ'),
     )
-    
+
     layers = models.ManyToManyField(WMSLayer, through='BundleLayer')
     name = models.CharField(max_length=200)
     price = models.PositiveIntegerField()
