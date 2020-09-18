@@ -108,7 +108,13 @@ export class DevPage extends Component {
                     <li>cryptography 3.0: <LinkExternal href="https://pypi.org/project/cryptography/"/></li>
                 </ul>
             </div>
-
+            <div>
+                <strong>pyproj 2.5.0: </strong>
+                    <LinkExternal href="https://pypi.org/project/pyproj/2.5.0/"/>
+                    <ul>
+                        <li>Координат хөрвүүлэх сан </li>
+                    </ul>
+            </div>
             <h1>Координатын формат</h1>
             <div>
                 <ul>
