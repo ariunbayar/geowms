@@ -31,7 +31,7 @@ export class Жагсаалт extends Component {
             return service
                 .paginatedList(page, perpage, query)
                 .then(page => {
-                    this.setState({user_list: page.items })
+                    this.setState({user_list: page.items , user_length:page.items.length})
                     return page
                 })
     }

@@ -49,7 +49,7 @@ export class WmsList extends Component {
             return service
                 .paginatedList(page, perpage, query)
                 .then(page => {
-                    this.setState({ wms_list: page.items})
+                    this.setState({ wms_list: page.items, wms_length: page.items.length })
                     return page
                 })
     }
