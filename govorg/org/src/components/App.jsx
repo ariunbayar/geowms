@@ -5,6 +5,7 @@ import Employee from './Menu/Employee/EmployeeForm'
 import Bundle from './Menu/Bundle/Bundle'
 import { TuuhenOv } from './Menu/TuuhenOv'
 import { Forms } from './Menu/Form'
+import { ZipCode } from './Menu/Zipcode'
 
 export class App extends Component {
 
@@ -74,6 +75,11 @@ export class App extends Component {
                             :
                             null
                             }
+                            <li className="nav-item m-1">
+                                <NavLink  to={'/gov/zip-code/'} activeClassName="active">
+                                    <i className='fa fa-history  text-primary'></i> Зипкод
+                                </NavLink>
+                            </li>
                         </ul>
                     </div>
                 </nav>
@@ -86,6 +92,7 @@ export class App extends Component {
                             {tuuhen_ov.perm_view ?
                                 <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
                             }
+                            <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/" component={Employee}/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
                         </Switch>
