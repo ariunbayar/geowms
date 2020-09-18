@@ -591,7 +591,6 @@ export class DursgaltGazar extends Component {
                 isValid,
                 dirty,
             }) => {
-            console.log(values)
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>

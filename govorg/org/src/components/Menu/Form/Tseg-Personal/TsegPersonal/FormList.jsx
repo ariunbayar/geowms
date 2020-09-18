@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
 import {service} from '../../service'
-import { Pagination } from "../../../../../../../src/components/Pagination/index"
+import {Pagination} from '../../../../../../../../src/components/Pagination/index'
 
 export class FormList extends Component {
 
@@ -75,6 +75,7 @@ export class FormList extends Component {
     }
 
     render() {
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         const { error, error_msg } = this.state
         const error_bn = Object.keys(error_msg).length > 0
         return (
@@ -93,9 +94,9 @@ export class FormList extends Component {
                             </div>
                         }
                         <div className="text-right mb-">
-                            <NavLink className="btn gp-btn-primary my-8 mb-0" to={"/back/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
+                            {perm_create ? <NavLink className="btn gp-btn-primary my-8 mb-0" to={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
-                            </NavLink>
+                            </NavLink> : null}
                         </div>
                         <div className="form-row text-right">
                         <div className="form-group col-md-4">
@@ -119,9 +120,9 @@ export class FormList extends Component {
                                     <th scope="col">Анги/Зэрэг</th>
                                     <th scope="col">Аймаг</th>
                                     <th scope="col">Сум</th>
-                                    <th scope="col">Засах</th>
-                                    <th scope="col">Устгах</th>
-                                    <th scope="col">Баталгаажуулах</th>
+                                    { perm_remove && perm_create && perm_view ? <th scope="col">Засах</th> : null}
+                                    { perm_remove ? <th scope="col">Устгах</th> : null}
+                                    { perm_approve ? <th scope="col">Баталгаажуулах</th> : null}
                                 </tr>
                             </thead>
                             <tbody>
@@ -130,6 +131,7 @@ export class FormList extends Component {
                                         key={idx}
                                         idx = {idx}
                                         values={values}
+                                        perms={this.props.perms}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleMove={this.handleMove}
                                         handleSuccess = {() => this.handleSuccess(values.point_type, values.id, values.point_class ,values.t_type)}

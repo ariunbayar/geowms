@@ -16,7 +16,7 @@ export const validationSchema = object().shape({
         .required('Хоосон байна!'),
     date: string()
         .required('Хоосон байна!'),
-    hotolson: string() 
+    hotolson: string()
         .max(100, '100-с илүүгүй урттай оруулна уу!')
         .required('Хоосон байна!'),
     alban_tushaal: string()

@@ -27,7 +27,6 @@ function updateTseg(id){
 }
 
 function findSum(X, niitB) {
-    console.log(X, niitB)
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({"x":niitB, "y":X})

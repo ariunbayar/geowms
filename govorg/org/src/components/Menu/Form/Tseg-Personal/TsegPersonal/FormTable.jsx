@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../../../Modal"
+import Modal from "../../../helpers/Modal"
 
 export default class FormTable extends Component {
 
@@ -67,7 +67,7 @@ export default class FormTable extends Component {
     }
 
     render() {
-
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ,aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
         const idx = this.props.idx
         return (
@@ -79,11 +79,16 @@ export default class FormTable extends Component {
                 <th>{ point_type > 4 && point_type ? <a>{point_type} зэрэг</a> : point_type < 4 && point_type ? <a>{point_type} анги</a> :''} </th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
+                {perm_remove && perm_view && perm_create ?
                 <th>
-                    <NavLink to={`/back/froms/tseg-info/tsegpersonal/tseg-personal/${id}/засах/`}>
+                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </th>
+                :
+                null
+                }
+                {perm_remove ?
                 <th>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o" aria-hidden="true"></i>
@@ -97,6 +102,9 @@ export default class FormTable extends Component {
                         />
                     }
                 </th>
+                :
+                null}
+                {perm_approve ?
                 <th>
                     {t_type[3] != point_class ?
                         <a className="btn" onClick={this.handleModalSuccessOpen}
@@ -126,6 +134,9 @@ export default class FormTable extends Component {
                         />
                     }
                 </th>
+                :
+                null
+                }
             </tr>
         )
     }

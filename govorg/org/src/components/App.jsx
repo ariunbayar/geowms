@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import Employee from './Menu/Employee/EmployeeForm'
 import Bundle from './Menu/Bundle/Bundle'
 import { TuuhenOv } from './Menu/TuuhenOv'
+import { Forms } from './Menu/Form'
 
 export class App extends Component {
 
@@ -13,7 +14,8 @@ export class App extends Component {
             perms: props.org.perms,
             org_level: props.org.org_level,
             name: props.org.name,
-            tuuhen_ov: {}
+            tuuhen_ov: {},
+            tseg_burtgel: {}
         }
     }
 
@@ -23,11 +25,15 @@ export class App extends Component {
             if(perm.module_id == 1){
                 this.setState({tuuhen_ov: perm})
             }
+            else if(perm.module_id == 2){
+                this.setState({tseg_burtgel: perm})
+            }
         })
+
     }
 
     render() {
-        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.state.tuuhen_ov
+        const { tuuhen_ov, tseg_burtgel } = this.state
         return (
         <BrowserRouter>
             <div className="container-fluid mt-0">
@@ -50,10 +56,19 @@ export class App extends Component {
                                 <i className='fa fa-university text-primary'></i>&nbsp;СИСТЕМ
                                 </NavLink>
                             </li>
-                            {perm_view ?
+                            {tuuhen_ov.perm_view ?
                             <li className="nav-item m-1">
                                 <NavLink  to={'/gov/tuuhen-ov/'} activeClassName="active">
                                     <i className='fa fa-history  text-primary'></i>&nbsp;Түүхэн өв бүртгэл
+                                </NavLink>
+                            </li>
+                            :
+                            null
+                            }
+                            {tseg_burtgel.perm_view ?
+                            <li className="nav-item m-1">
+                                <NavLink  to={'/gov/froms/'} activeClassName="active">
+                                    <i className='fa fa-history  text-primary'></i>&nbsp;Хүсэлт
                                 </NavLink>
                             </li>
                             :
@@ -65,12 +80,11 @@ export class App extends Component {
                 <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
                 <div className="col-md-10">
                         <Switch>
-                            {perm_view ?
-                            <Route path="/gov/tuuhen-ov/"
-                                component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}
-                                />
-                                :
-                                null
+                            {tseg_burtgel.perm_view ?
+                                <Route path={"/gov/froms/"} component={()=><Forms perms={this.state.tseg_burtgel}/>}/> : null
+                            }
+                            {tuuhen_ov.perm_view ?
+                                <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
                             }
                             <Route exact path="/gov/" component={Employee}/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>

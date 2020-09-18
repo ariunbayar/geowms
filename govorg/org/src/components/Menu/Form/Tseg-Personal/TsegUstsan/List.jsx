@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
 import {service} from './service'
-import {Pagination} from '../../../../../../../src/components/Pagination/index'
+import {Pagination} from '../../../../../../../../src/components/Pagination/index'
 
 export class List extends Component {
 
@@ -67,11 +67,12 @@ export class List extends Component {
     }
 
     render() {
+        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         return (
             <div className="container my-4">
                 <div className="row">
                     <div className="col-md-12">
-                          <NavLink className="btn gp-btn-primary float-right" to={"/back/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
+                          <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
                         <input
@@ -90,9 +91,9 @@ export class List extends Component {
                                     <th scope="col">Байгууллага</th>
                                     <th scope="col">Албан тушаал</th>
                                     <th scope="col">Цэгийн дугаар</th>
-                                    <th>Засах</th>
-                                    <th>Баталгаажуулах</th>
-                                    <th>Устгах</th>
+                                    {perm_create && perm_view && perm_remove ? <th>Засах</th> :null}
+                                    {perm_approve ? <th>Баталгаажуулах</th> :null}
+                                    {perm_remove ? <th>Устгах</th> :null}
                                 </tr>
                                </thead>
                              <tbody>
@@ -105,6 +106,7 @@ export class List extends Component {
                                     <ListTable
                                         key={idx}
                                         idx={idx}
+                                        perms={this.props.perms}
                                         values={tseg}
                                         handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
                                         handleRemove={() => this.handleRemove(tseg.id)}
