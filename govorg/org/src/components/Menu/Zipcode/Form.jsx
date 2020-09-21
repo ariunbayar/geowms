@@ -30,7 +30,7 @@ export class Forms extends Component {
     handleInputAimag(e){
         if(e.target.value){
             this.setState({aimag_id: e.target.value})
-            this.setState({sumid: 0})
+            this.setState({sum_id: 0, baga_id: 0})
             const aimag_id = e.target.value
             const aiamg_data = this.state.aimag[aimag_id]
             var zip_code = aiamg_data[0]
@@ -93,6 +93,7 @@ export class Forms extends Component {
     }
 
     render() {
+        console.log(this.state.sum_id)
         return (
             <div className="my-4 mt-4">
                 <h3 className="text-center">Зипкод</h3>
@@ -102,9 +103,10 @@ export class Forms extends Component {
                             <th style={{width:"30%"}}>Аймаг, Нийслэл</th>
                             <td style={{widtd:"60%"}}>
                                 <select name="aimag_name" id="aimag_name" className='form-control' value={this.state.aimag_id} onChange={this.handleInputAimag}>
+                                    <option value='0'>--- Аймаг/Нийслэл сонгоно уу ---</option>
                                     {this.state.aimag.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data[1]}</option>
-                                )}
+                                        <option key={idx} value={idx + 1}>{data[1]}</option>
+                                    )}
                                 </select>
                             </td>
                         </tr>
@@ -112,8 +114,9 @@ export class Forms extends Component {
                             <th>Сум/дүүрэг</th>
                             <td>
                                 <select name="sum_name" id="sum_name" className='form-control' value={this.state.sum_id} onChange={this.handleInputSum}>
+                                    <option value="0">--- Сум/дүүрэг сонгоно уу ---</option>
                                     {this.state.sum.map((data, idx) =>
-                                        <option key={idx} value={idx}>{data[1]}</option>
+                                        <option key={idx} value={idx + 1}>{data[1]}</option>
                                     )}
                                 </select>
                             </td>
@@ -122,9 +125,10 @@ export class Forms extends Component {
                             <th>Баг/хороо</th>
                             <td>
                                 <select name="bag_horoo" id="bag_horoo" className='form-control' value={this.state.baga_id} onChange={this.handleInputBaga}>
-                                {this.state.baga.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data[1]}</option>
-                                )}
+                                    <option value="0">--- Баг/Хороо сонгоно уу ---</option>
+                                    {this.state.baga.map((data, idx) =>
+                                        <option key={idx} value={idx + 1}>{data[1]}</option>
+                                    )}
                                 </select>
                             </td>
                         </tr>
@@ -143,7 +147,12 @@ export class Forms extends Component {
                         </tr>
                         <tr>
                             <td colSpan="2" >
-                                <Maps></Maps>
+                                <Maps
+                                    aimag_id = {this.state.aimag_id}
+                                    sum_id = {this.state.sum_id}
+                                    bag_id = {this.state.baga_id}
+                                >
+                                </Maps>
                             </td>
                         </tr>
                     </tbody>
