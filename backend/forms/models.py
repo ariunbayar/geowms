@@ -169,7 +169,7 @@ class Mpoint1(models.Model):
     point_class = models.BigIntegerField()
     mclass = models.BigIntegerField()
     point_class_name = models.CharField(max_length=100)
-    point_type = models.CharField(max_length=100)
+    ondor_type = models.CharField(max_length=100)
     center_typ = models.CharField(max_length=10)
     aimag = models.CharField(max_length=50)
     sum = models.CharField(max_length=50)
