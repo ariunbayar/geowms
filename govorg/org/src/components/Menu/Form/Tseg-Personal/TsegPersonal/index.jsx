@@ -15,7 +15,7 @@ export class TsegPersonal extends Component {
         return (
             <Switch>
                 {perm_view ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/"} component={()=><FormList perms={this.props.perms}/>}/> : null}
-                {perm_create ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"} component={()=><Forms perms={this.props.perms}/>}/> : null}
+                {perm_create ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data} perms={this.props.perms}/>}/> : null}
                 {perm_view && perm_create && perm_remove ? <Route  exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/:id/засах/"} component={(data)=><Forms data={data} perms={this.props.perms}/>}/> : null}
             </Switch>
         )

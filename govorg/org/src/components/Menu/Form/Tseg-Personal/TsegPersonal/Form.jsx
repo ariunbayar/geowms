@@ -96,7 +96,6 @@ export  class Forms extends Component {
 
     componentDidMount(){
         const id = this.props.data.match.params.id
-        alert(id)
         if(id) {
             this.setState({id})
             this.tsegUpdate(id)
@@ -425,7 +424,7 @@ export  class Forms extends Component {
                             center_typ: item.center_typ,
                             ondor: item.ondor,
                             ondor_torol: item.ondor_torol,
-                            suljeenii_torol: item.point_type,
+                            suljeenii_torol: item.suljeenii_torol,
                             sudalga_or_shine: item.sudalga_or_shine,
                             date: dateStr,
                             hotolson: item.hotolson,
@@ -483,6 +482,8 @@ export  class Forms extends Component {
     }
 
     render() {
+        console.log(this.state.values.ondor_torol)
+        console.log("ararara")
        if(this.state.latlongy == ''){
         this.getItem()
        }
@@ -793,9 +794,9 @@ export  class Forms extends Component {
                                             <Field name="ondor_torol" as="select" className="form-control"
                                                 className={'form-control ' + (errors.ondor_torol ? 'is-invalid' : '')}>
                                                 <option >...</option>
-                                                <option value="1">Эллипсойдын өндрийн утга</option>
-                                                <option value="2">Ортометрын өндрийн утга</option>
-                                                <option value="3">Балтын тэнгэсийн өндрийн утга</option>
+                                                <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
+                                                <option value="Ортометрын өндрийн утга">Ортометрын өндрийн утга</option>
+                                                <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option>
                                             </Field>
                                             <ErrorMessage name="ondor_torol" component="div" className="text-dange"/>
                                         </Fragment>
