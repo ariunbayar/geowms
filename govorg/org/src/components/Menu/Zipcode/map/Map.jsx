@@ -34,7 +34,8 @@ export default class Maps extends Component {
             source_draw: null,
             info:[],
             xy: [],
-            map_wms_list: []
+            map_wms_list: [],
+            wms_list: []
         }
 
         this.controls = {
@@ -66,25 +67,24 @@ export default class Maps extends Component {
     }
 
     componentDidMount() {
-        this.loadMapData()
+        console.log(this.props.wms_list)
     }
 
-    loadMapData() {
+    componentDidUpdate(prevProps){
+        if(prevProps.wms_list !== this.props.wms_list)
+        {
+            this.loadMapData(this.props.wms_list)
+        }
+    }
+
+    loadMapData(wms_list) {
             service.loadBaseLayers().then(({base_layer_list}) => {
-            this.handleMapDataLoaded(base_layer_list)
+            this.handleMapDataLoaded(base_layer_list, wms_list)
         })
     }
 
-    handleMapDataLoaded(base_layer_list) {
-        const wms_list = [{
-            'name': 'Засаг захиргааны хил',
-            'url': '/api/service/WMS/9/3/',
-            'layers':[
-            {name: "Аймаг нийслэлийн хил", code: "Аймаг_нийслэлийн_хил"},
-            {name: "Сум дүүргийн хил", code: "Сум_дүүргийн_хил"},
-            {name: "Баг хорооны хил", code: "Баг_хорооны_хил"},
-        ]
-        }]
+    handleMapDataLoaded(base_layer_list, wms_list) {
+
         const map_wms_list = wms_list.map(({name, url, layers}) => {
 
             return {
@@ -237,7 +237,6 @@ export default class Maps extends Component {
     }
 
     showFeaturesAt(coordinate) {
-        console.log(coordinate)
         this.state.map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) =>
                 layer.tile.setVisible(false)
@@ -262,7 +261,6 @@ export default class Maps extends Component {
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
-                            console.log(text)
                             const parser = new WMSGetFeatureInfo()
                             const features = parser.readFeatures(text)
                             const source = new VectorSource({
@@ -279,8 +277,6 @@ export default class Maps extends Component {
 
     }
 
-    componentDidUpdate(pP){
-    }
 
     render() {
         return (

@@ -5,7 +5,8 @@ const prefix = '/back/tuuhen_ov'
 export const service = {
     getAimags,
     getSum,
-    getBaga
+    getBaga,
+    getWmsLayer
 }
 function getAimags() {
     const requestOptions = {
@@ -28,4 +29,11 @@ function getBaga(code) {
         body: JSON.stringify({code})
     }
     return fetch('/gov/zip-code/bag-horoo/', requestOptions).then(handleResponse)
+}
+
+function getWmsLayer() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch('/gov/zip-code/wms-layer/', requestOptions).then(handleResponse)
 }

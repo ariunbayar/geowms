@@ -19,6 +19,7 @@ export class Forms extends Component {
             aimag_id: 0,
             sum_id: 0,
             baga_id: 0,
+            wms_list: []
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInputAimag = this.handleInputAimag.bind(this)
@@ -80,6 +81,11 @@ export class Forms extends Component {
         console.log(this.state)
     }
     componentDidMount(){
+        service.getWmsLayer().then(({wms_list, success}) => {
+            if(success){
+                    this.setState({wms_list})
+            }
+        })
         service.getAimags().then(({info, success}) => {
             if(success){
                 this.setState({aimag: info, code:info[0][0]})
@@ -143,7 +149,7 @@ export class Forms extends Component {
                         </tr>
                         <tr>
                             <td colSpan="2" >
-                                <Maps></Maps>
+                                <Maps wms_list={this.state.wms_list}></Maps>
                             </td>
                         </tr>
                     </tbody>

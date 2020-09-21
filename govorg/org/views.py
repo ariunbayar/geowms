@@ -2,6 +2,7 @@ from django.shortcuts import render
 from backend.org.models import Org, OrgRole, Employee
 from geoportal_app.models import User
 from backend.bundle.models import Bundle
+from backend.wmslayer.models import WMSLayer
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
@@ -207,7 +208,7 @@ def sum(request, payload):
 
 @require_POST
 @ajax_required
-def baga_horoo(request, payload):
+def bagaHoroo(request, payload):
     try:
         code = payload.get('code')
         find_cursor = connections['postgis_db'].cursor()
@@ -231,3 +232,27 @@ def baga_horoo(request, payload):
             'info': "Алдаа гарсан",
         }
         return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def wmsLayer(request):
+    layers = []
+    zip_layers = WMSLayer.objects.filter(geodb_table='zip_code')
+    for zip_layer in zip_layers:
+        layers.append({
+            'name':zip_layer.name,
+            'code':zip_layer.code
+        })
+        wms_id = zip_layer.wms_id
+    wms_list = [{
+        'name': 'Зипкод',
+        'url': '/back/wms/WMS/' + str(wms_id) + '/',
+        'layers':layers
+    }]
+    print(wms_list)
+    rsp = {
+        'wms_list': wms_list,
+        'success': True,
+    }
+    return JsonResponse(rsp)
