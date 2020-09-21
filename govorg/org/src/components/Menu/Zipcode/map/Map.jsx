@@ -67,14 +67,8 @@ export default class Maps extends Component {
     }
 
     componentDidMount() {
-        console.log(this.props.wms_list)
-    }
-
-    componentDidUpdate(prevProps){
-        if(prevProps.wms_list !== this.props.wms_list)
-        {
-            this.loadMapData(this.props.wms_list)
-        }
+        const {aimag_id, bag_id, sum_id} = this.props
+        console.log('aimag', aimag_id, 'baag', bag_id, 'sum' , sum_id)
     }
 
     loadMapData(wms_list) {
@@ -84,7 +78,6 @@ export default class Maps extends Component {
     }
 
     handleMapDataLoaded(base_layer_list, wms_list) {
-
         const map_wms_list = wms_list.map(({name, url, layers}) => {
 
             return {
@@ -206,7 +199,7 @@ export default class Maps extends Component {
         }, 2000);
 
         setTimeout(() => {
-        this.handleSetCenter(7)
+            this.handleSetCenter(7)
         }, 3000);
     }
 
@@ -220,7 +213,7 @@ export default class Maps extends Component {
 
     }
 
-    handleSetCenter(zoom,) {
+    handleSetCenter(zoom) {
         var coord = [104.323, 43.2231]
         const view = this.map.getView()
         const map_projection = view.getProjection()
@@ -228,12 +221,6 @@ export default class Maps extends Component {
         this.marker.point.setCoordinates(map_coord)
         view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
         this.showFeaturesAt(map_coord)
-
-        this.state.map_wms_list.map((wms, idx) =>
-        wms.layers.map((layer, idx) =>
-            layer.tile.setVisible(false)
-        )
-        )
     }
 
     showFeaturesAt(coordinate) {
@@ -242,6 +229,7 @@ export default class Maps extends Component {
                 layer.tile.setVisible(false)
             )
         )
+        const {aimag_id, bag_id, sum_id} = this.props
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -267,6 +255,25 @@ export default class Maps extends Component {
                                 features: features
                             });
                             this.state.vector_layer.setSource(source)
+                            console.log(features[0])
+                            if(features[0]){
+                                if(features[0].id_.includes('Сум_дүүргийн_хил')){
+                                    console.log("sum shdee")
+                                    console.log(this.state.map_wms_list)
+                                    this.state.map_wms_list.map((wms, idx) =>
+                                    wms.layers.map((layer, idx) =>{
+                                        console.log(layer.tile)
+                                        layer.tile.setVisible(false)
+                                    })
+                                )
+                                }
+                                if(features[0].id_.includes('Аймаг_нийслэлийн_хил')){
+                                    console.log("aimag shdee")
+                                }
+                                if(features[0].id_.includes('Баг_хорооны_хил')){
+                                    console.log("bag bnshde")
+                                }
+                            }
                         })
                 } else {
                     /* TODO */
@@ -277,6 +284,63 @@ export default class Maps extends Component {
 
     }
 
+    componentDidUpdate(pP){
+        if(prevProps.wms_list !== this.props.wms_list)
+        {
+            this.loadMapData(this.props.wms_list)
+        }
+
+        const {aimag_id, bag_id, sum_id} = this.props
+        if(pP.aimag_id !== aimag_id){
+            console.log('aimag', aimag_id)
+            if(aimag_id !== 0){
+                this.state.map_wms_list.map((wms, idx) =>
+                    wms.layers.map((layer, idx) =>{
+                        console.log(layer.tile)
+                        if(layer.tile.values_.source.params_.LAYERS == "Сум_дүүргийн_хил"){
+                            layer.tile.setVisible(true)
+                            this.handleSetCenter(7)
+                        }
+                        if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
+                            layer.tile.setVisible(true)
+                            this.handleSetCenter(7)
+                        }
+                }))
+            }
+        }
+        if(pP.sum_id !== sum_id){
+            if(sum_id !== 0){
+                this.state.map_wms_list.map((wms, idx) =>
+                    wms.layers.map((layer, idx) =>{
+                        console.log(layer.tile)
+                        if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
+                            layer.tile.setVisible(true)
+                            this.handleSetCenter(7)
+                        }
+                        if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
+                            layer.tile.setVisible(true)
+                            this.handleSetCenter(7)
+                        }
+                }))
+            }
+        }
+        if(pP.bag_id !== bag_id){
+            if(bag_id !== 0){
+                this.state.map_wms_list.map((wms, idx) =>
+                    wms.layers.map((layer, idx) =>{
+                        console.log(layer.tile)
+                        if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
+                            layer.tile.setVisible(true)
+                            this.handleSetCenter(7)
+                        }
+                        if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
+                            layer.tile.setVisible(true)
+                            this.handleSetCenter(7)
+                        }
+                }))
+            }
+        }
+    }
 
     render() {
         return (
