@@ -482,8 +482,6 @@ export  class Forms extends Component {
     }
 
     render() {
-        console.log(this.state.values.ondor_torol)
-        console.log("ararara")
        if(this.state.latlongy == ''){
         this.getItem()
        }
