@@ -2,6 +2,7 @@ from django.shortcuts import render
 from backend.org.models import Org, OrgRole, Employee
 from geoportal_app.models import User
 from backend.bundle.models import Bundle
+from backend.wmslayer.models import WMSLayer
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
@@ -148,86 +149,3 @@ def bundle(request):
     }
 
     return render(request, 'org/index.html', context)
-
-
-@require_POST
-@ajax_required
-def aimag(request):
-    try:
-        find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT  code, name, area_m2 FROM public."AU_AimagUnit" ORDER BY name ASC ''')
-        data = find_cursor.fetchall()
-        if(data):
-            rsp = {
-                'success': True,
-                'info': data
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
-            }
-            return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
-
-
-
-@require_POST
-@ajax_required
-def sum(request, payload):
-    try:
-        code = payload.get('code')
-        find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT code, name FROM public."AU_SumUnit" where au1_code = %s ORDER BY name  ASC ''', [code])
-        data = find_cursor.fetchall()
-        if(data):
-            rsp = {
-                'success': True,
-                'info': data
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
-            }
-            return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
-
-@require_POST
-@ajax_required
-def baga_horoo(request, payload):
-    try:
-        code = payload.get('code')
-        find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT code, name FROM public."AU_BagUnit" where au2_code = %s ORDER BY name ASC ''', [code])
-        data = find_cursor.fetchall()
-        if(data):
-            rsp = {
-                'success': True,
-                'info': data
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
-            }
-            return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)

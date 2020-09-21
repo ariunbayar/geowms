@@ -8,12 +8,6 @@ urlpatterns = [
         path('bundle/', org_views.bundle, name='bundle'),
     ], 'back_org'))),
 
-    path('zip-code/', include(([
-        path('aimag/', org_views.aimag, name='aimag'),
-        path('sum/', org_views.sum, name='sum'),
-        path('bag-horoo/', org_views.baga_horoo, name='bag-horoo'),
-    ], 'zip_code'))),
-
     path('', include(([
         path('', org_views.all, name='all'),
     ], 'org'))),

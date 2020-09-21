@@ -34,7 +34,9 @@ export default class Maps extends Component {
             source_draw: null,
             info:[],
             xy: [],
-            map_wms_list: []
+            map_wms_list: [],
+            wms_list: [],
+            feature_req: 0
         }
 
         this.controls = {
@@ -67,26 +69,15 @@ export default class Maps extends Component {
 
     componentDidMount() {
         const {aimag_id, bag_id, sum_id} = this.props
-        console.log('aimag', aimag_id, 'baag', bag_id, 'sum' , sum_id)
-        this.loadMapData()
     }
 
-    loadMapData() {
+    loadMapData(wms_list) {
             service.loadBaseLayers().then(({base_layer_list}) => {
-            this.handleMapDataLoaded(base_layer_list)
+            this.handleMapDataLoaded(base_layer_list, wms_list)
         })
     }
 
-    handleMapDataLoaded(base_layer_list) {
-        const wms_list = [{
-            'name': 'Засаг захиргааны хил',
-            'url': '/api/service/WMS/2/14/',
-            'layers':[
-            {name: "Аймаг нийслэлийн хил", code: "Аймаг_нийслэлийн_хил"},
-            {name: "Сум дүүргийн хил", code: "Сум_дүүргийн_хил"},
-            {name: "Баг хорооны хил", code: "Баг_хорооны_хил"},
-        ]
-        }]
+    handleMapDataLoaded(base_layer_list, wms_list) {
         const map_wms_list = wms_list.map(({name, url, layers}) => {
 
             return {
@@ -203,13 +194,6 @@ export default class Maps extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
-        setTimeout(() => {
-            this.handleSetCenter(7)
-        }, 2000);
-
-        setTimeout(() => {
-            this.handleSetCenter(7)
-        }, 3000);
     }
 
     handleMapClick(event) {
@@ -218,43 +202,27 @@ export default class Maps extends Component {
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
-            this.showFeaturesAt(event.coordinate)
-
     }
 
     handleSetCenter(zoom) {
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        console.log("ZZOZOOZOZOMZMZ")
-        var coord = [104.323, 43.2231]
+        var coord = [this.props.latx, this.props.laty]
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.marker.point.setCoordinates(map_coord)
-        view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
-        this.showFeaturesAt(map_coord)
-
-        this.state.map_wms_list.map((wms, idx) =>
-        wms.layers.map((layer, idx) =>
-            layer.tile.setVisible(false)
-        )
-        )
+        this.showFeaturesAt(map_coord,zoom)
     }
 
-    showFeaturesAt(coordinate) {
-        console.log(coordinate)
+    showFeaturesAt(coordinate, zoom) {
+        this.setState({feature_req: this.state.feature_req++})
         const {aimag_id, bag_id, sum_id} = this.props
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
         this.state.map_wms_list.forEach(({layers}) => {
             layers.forEach(({tile}) => {
+                if (tile.getVisible() != true) {
+                    return
+                }
                 const wms_source = tile.getSource()
                 const url = wms_source.getFeatureInfoUrl(
                     coordinate,
@@ -264,99 +232,107 @@ export default class Maps extends Component {
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
                     }
                 )
-
-                if (url) {
-                    fetch(url)
-                        .then((response) => response.text())
-                        .then((text) => {
-                            console.log(text)
-                            const parser = new WMSGetFeatureInfo()
-                            const features = parser.readFeatures(text)
-                            const source = new VectorSource({
-                                features: features
-                            });
-                            this.state.vector_layer.setSource(source)
-                            console.log(features[0])
-                            if(features[0]){
-                                if(features[0].id_.includes('Сум_дүүргийн_хил')){
-                                    console.log("sum shdee")
-                                    console.log(this.state.map_wms_list)
-                                    this.state.map_wms_list.map((wms, idx) =>
-                                    wms.layers.map((layer, idx) =>{
-                                        console.log(layer.tile)
-                                        layer.tile.setVisible(false)
-                                    })
-                                )
+                view.animate({zoom: zoom}, {center: view.setCenter(coordinate)});
+                setTimeout(() => {
+                    if (url) {
+                        fetch(url)
+                            .then((response) => response.text())
+                            .then((text) => {
+                                const parser = new WMSGetFeatureInfo()
+                                const features = parser.readFeatures(text)
+                                const source = new VectorSource({
+                                    features: features
+                                });
+                                const feature_info = features.map((feature) => {
+                                    const geometry_name = feature.getGeometryName()
+                                    const values =
+                                        feature.getKeys()
+                                        .filter((key) => key != geometry_name)
+                                        .map((key) => [key, feature.get(key)])
+                                    return [feature.getId(), values]
+                                })
+                                this.state.vector_layer.setSource(source)
+                                if(this.state.feature_req <= 5){
+                                    if (feature_info.length == 0){
+                                        this.showFeaturesAt(coordinate, zoom)
+                                    }
                                 }
-                                if(features[0].id_.includes('Аймаг_нийслэлийн_хил')){
-                                    console.log("aimag shdee")
-                                }
-                                if(features[0].id_.includes('Баг_хорооны_хил')){
-                                    console.log("bag bnshde")
-                                }
-                            }
-                        })
-                } else {
-                    /* TODO */
-                    console.log('no feature url', wms_source);
-                }
+                            })
+                    } else {
+                        /* TODO */
+                        console.log('no feature url', wms_source);
+                    }
+                }, 1500);
             })
         })
 
     }
 
     componentDidUpdate(pP){
-        const {aimag_id, bag_id, sum_id} = this.props
+        if(pP.wms_list !== this.props.wms_list)
+        {
+            this.loadMapData(this.props.wms_list)
+        }
+
+        const {aimag_id, bag_id, sum_id, zip_id} = this.props
         if(pP.aimag_id !== aimag_id){
-            console.log('aimag', aimag_id)
-            if(aimag_id !== 0){
-                setTimeout(() => {
-                    this.handleSetCenter(7)
-                }, 3000);
+            if(aimag_id !==-1 && sum_id == -1 && bag_id == -1 && zip_id == -1){
                 this.state.map_wms_list.map((wms, idx) =>
                     wms.layers.map((layer, idx) =>{
-                        console.log(layer.tile)
+                        if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
+                            layer.tile.setVisible(true)
+                        }
+                        else{
+                            layer.tile.setVisible(false)
+                        }
+                }))
+                this.handleSetCenter(7.6)
+            }
+        }
+
+        if(pP.sum_id !== sum_id){
+            if(sum_id !==-1 && bag_id == -1 && aimag_id !== -1 && zip_id == -1){
+                this.state.map_wms_list.map((wms, idx) =>
+                    wms.layers.map((layer, idx) =>{
                         if(layer.tile.values_.source.params_.LAYERS == "Сум_дүүргийн_хил"){
                             layer.tile.setVisible(true)
                         }
-                        if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
-                            layer.tile.setVisible(true)
+                        else{
+                            layer.tile.setVisible(false)
                         }
-                }))
-            }
-        }
-        if(pP.sum_id !== sum_id){
-            if(sum_id !== 0){
-                setTimeout(() => {
-                    this.handleSetCenter(9)
-                }, 3000);
-                this.state.map_wms_list.map((wms, idx) =>
-                    wms.layers.map((layer, idx) =>{
-                        console.log(layer.tile)
-                        if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
-                            layer.tile.setVisible(true)
-                        }
-                        if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
-                            layer.tile.setVisible(true)
-                        }
-                }))
+                    })
+                )
+                this.handleSetCenter(10)
             }
         }
         if(pP.bag_id !== bag_id){
-            if(bag_id !== 0){
-                setTimeout(() => {
-                    this.handleSetCenter(11)
-                }, 3000);
+            if(bag_id !==-1 && sum_id !==-1 && aimag_id !==-1 && zip_id == -1){
                 this.state.map_wms_list.map((wms, idx) =>
                     wms.layers.map((layer, idx) =>{
-                        console.log(layer.tile)
                         if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
                             layer.tile.setVisible(true)
                         }
-                        if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
-                            layer.tile.setVisible(true)
+                        else{
+                            layer.tile.setVisible(false)
                         }
                 }))
+                this.handleSetCenter(13)
+
+            }
+        }
+        if(pP.zip_id !== zip_id){
+            if(bag_id !==-1 && sum_id !==-1 && aimag_id !==-1 && zip_id !== -1){
+                this.state.map_wms_list.map((wms, idx) =>
+                    wms.layers.map((layer, idx) =>{
+                        if(layer.tile.values_.source.params_.LAYERS == "Зип_код"){
+                            layer.tile.setVisible(true)
+                        }
+                        else{
+                            layer.tile.setVisible(false)
+                        }
+                }))
+                this.handleSetCenter(13.43)
+
             }
         }
     }

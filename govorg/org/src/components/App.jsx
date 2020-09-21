@@ -60,7 +60,7 @@ export class App extends Component {
                             {tuuhen_ov.perm_view ?
                             <li className="nav-item m-1">
                                 <NavLink  to={'/gov/tuuhen-ov/'} activeClassName="active">
-                                    <i className='fa fa-history  text-primary'></i>&nbsp;Түүхэн өв бүртгэл
+                                    <i className='fa fa-history text-primary'></i>&nbsp;Түүхэн өв бүртгэл
                                 </NavLink>
                             </li>
                             :
@@ -69,7 +69,7 @@ export class App extends Component {
                             {tseg_burtgel.perm_view ?
                             <li className="nav-item m-1">
                                 <NavLink  to={'/gov/froms/'} activeClassName="active">
-                                    <i className='fa fa-history  text-primary'></i>&nbsp;Хүсэлт
+                                    <i className='fa fa-file-archive-o text-primary'></i>&nbsp;Хүсэлт
                                 </NavLink>
                             </li>
                             :
@@ -77,7 +77,7 @@ export class App extends Component {
                             }
                             <li className="nav-item m-1">
                                 <NavLink  to={'/gov/zip-code/'} activeClassName="active">
-                                    <i className='fa fa-history  text-primary'></i> Зипкод
+                                    <i className='fa fa-address-card text-primary'></i> Зипкод
                                 </NavLink>
                             </li>
                         </ul>

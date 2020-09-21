@@ -11,6 +11,7 @@ from backend.org import views as org_views
 from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
+from backend.zipcode import views as zipcode_views
 
 
 app_name = 'backend'
@@ -154,6 +155,15 @@ urlpatterns = [
         path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
 
     ], 'tuuhen_ov'))),
+
+    path('zip-code/', include(([
+        path('aimag/', zipcode_views.aimag, name='aimag'),
+        path('sum/', zipcode_views.sum, name='sum'),
+        path('bag-horoo/', zipcode_views.bagaHoroo, name='bag-horoo'),
+        path('zip/', zipcode_views.zip, name='zip'),
+        path('zip-update/', zipcode_views.zipUpdate, name='zip-update'),
+        path('wms-layer/', zipcode_views.wmsLayer, name='wms-layer'),
+    ], 'zip_code'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 ]
