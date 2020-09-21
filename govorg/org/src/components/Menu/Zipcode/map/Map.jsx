@@ -45,6 +45,7 @@ export default class Maps extends Component {
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
+        this.handleSetCenter = this.handleSetCenter.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
     }
 
@@ -200,6 +201,13 @@ export default class Maps extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        setTimeout(() => {
+            this.handleSetCenter(7)
+        }, 2000);
+
+        setTimeout(() => {
+        this.handleSetCenter(7)
+        }, 3000);
     }
 
     handleMapClick(event) {
@@ -212,12 +220,29 @@ export default class Maps extends Component {
 
     }
 
+    handleSetCenter(zoom,) {
+        var coord = [104.323, 43.2231]
+        const view = this.map.getView()
+        const map_projection = view.getProjection()
+        const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+        this.marker.point.setCoordinates(map_coord)
+        view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
+        this.showFeaturesAt(map_coord)
+
+        this.state.map_wms_list.map((wms, idx) =>
+        wms.layers.map((layer, idx) =>
+            layer.tile.setVisible(false)
+        )
+        )
+    }
+
     showFeaturesAt(coordinate) {
-        // this.state.map_wms_list.map((wms, idx) =>
-        //     wms.layers.map((layer, idx) =>
-        //         layer.tile.setVisible(false)
-        //     )
-        // )
+        console.log(coordinate)
+        this.state.map_wms_list.map((wms, idx) =>
+            wms.layers.map((layer, idx) =>
+                layer.tile.setVisible(false)
+            )
+        )
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -237,6 +262,7 @@ export default class Maps extends Component {
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
+                            console.log(text)
                             const parser = new WMSGetFeatureInfo()
                             const features = parser.readFeatures(text)
                             const source = new VectorSource({
