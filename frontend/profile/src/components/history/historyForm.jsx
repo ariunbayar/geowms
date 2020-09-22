@@ -25,7 +25,7 @@ export default class HistoryForm extends Component {
             return service
                 .paginatedList(page, perpage)
                 .then(page => {
-                    this.setState({payment: page.items })
+                    this.setState({payment: page.items , payment_length:page.items.length})
                     return page
                 })
     }
@@ -35,16 +35,19 @@ export default class HistoryForm extends Component {
         <div className="container">
             <div className="row">
                 { payment_length ===0 ?
-                            <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
-                            payment.map((p, idx) =>
-                                <HistoryTable
-                                    key={idx}
-                                    values={p}
-                                >
-                                </HistoryTable>
-                        )}
+                    <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
+                        payment.map((p, idx) =>
+                            <HistoryTable
+                                key={idx}
+                                values={p}
+                            >
+                            </HistoryTable>
+                        )
+                }
             </div>
-            <Pagination paginate = { this.paginate }/>
+            {payment_length !=0 &&
+                    <Pagination paginate = { this.paginate }/>
+            }
         </div>
         )
     }

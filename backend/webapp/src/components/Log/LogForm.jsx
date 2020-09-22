@@ -38,18 +38,17 @@ export class LogForm extends Component {
                         <table className="table example" id="example">
                             <thead>
                                 <tr>
+                                    <th scope="col">№</th>
+                                    <th scope="col">Хэрэглэгч</th>
+                                    <th scope="col">Амжилттай/Амжилтгүй</th>
                                     <th scope="col">Нийт дүн</th>
                                     <th scope="col">Тодорхойлолт</th>
-                                    <th scope="col"> Огноо</th>
-                                    <th scope="col">Амжилттай</th>
-                                    <th scope="col">Амжилтгүй</th>
-                                    <th scope="col">Хэрэглэгч</th>
+                                    <th scope="col">Код</th>
+                                    <th scope="col">Мэдэгдэл</th>
+                                    <th scope="col">Дата ID</th>
                                     <th scope="col">Банкны дугаар</th>
-                                    <th scope="col">Дата id</th>
-                                    <th scope="col">Алдаатай код</th>
-                                    <th scope="col">Алдаатай зурвас</th>
-                                    <th scope="col">Амжилтгүй болсон</th>
                                     <th scope="col">Гео дугаар</th>
+                                    <th scope="col">Огноо</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -58,6 +57,7 @@ export class LogForm extends Component {
                                 payment_all.map((pay, idx) =>
                                     <LogFormTable
                                         key = {idx}
+                                        idx = {idx}
                                         values={pay}>
                                     </LogFormTable>
                                 )}
