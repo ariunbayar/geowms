@@ -18,16 +18,26 @@
 </style>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary mb-0 sticky-top flex-md-nowrap p-0 shadow ">
-    <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">{{org.org_name}}</a>
-    <div class="container">
-        <div class="ml-auto mt-2 mt-lg-0"> 
-            <a href="/logout/" class="btn gp-btn-primary "><i class="fas fa-sign-out-alt" aria-hidden="true" > &nbsp;ГАРАХ</i></a>
+  <nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary mb-0 sticky-top flex-md-nowrap  shadow ">
+    <div class="container pl-3 ml-3">
+        <div class="mr-auto mt-lg-0 float-left" > 
+            <a href="{% url "bundle:all" %}">
+                <img class="logo-top col-md-8"  src="{% static "assets/image/logo/logo.png" %}" alt="">
+            </a>
+        </div>
+
+    </div>
+    <div class="container pr-4 mr-4">
+        <div class="ml-auto mt-lg-0 float-right mr-4 pr-4"> 
+            </a> <a href="/logout/" class="btn gp-btn-primary mr-4 pr-4"><i class="fas fa-sign-out-alt" aria-hidden="true"> &nbsp;ГАРАХ</i></a>
         </div>
     </div>
 </nav>
-  {% block content %}
-  {% endblock %}
+<div>
+    {% block content %}
+    {% endblock %}
+</div>
+
 
 </div>
     {% block script %}

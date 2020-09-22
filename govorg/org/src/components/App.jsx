@@ -39,9 +39,11 @@ export class App extends Component {
         <BrowserRouter>
             <div className="container-fluid mt-0">
                 <div className="row d-flex flex-wrap">
-                <nav id="sidebarMenu" className="col-lg-2 d-md-block bg-light sidebar collapse shadow pt-5 mt-0 pl-3 h-100 position-fixed" >
+                <nav id="sidebarMenu" className="col-lg-2 d-md-block bg-light sidebar collapse shadow pt-5 mt-0 pl-5 h-100 position-fixed" >
+                    <h5 className="text-primary mb-4">{this.props.org.org_name}</h5>
                     <div className="sidebar-sticky ">
-                        <ul className="nav flex-column ">
+                       
+                        <ul className="nav flex-column ml-3">
                             <li className="nav-item m-1 pb-1">
                                 <NavLink  exact to={'/gov/bundle/'} activeClassName="active">
                                 <i className="fa fa-database text-primary"></i>&nbsp;ДЭД САН
