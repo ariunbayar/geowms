@@ -338,7 +338,6 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-
                             if(!this.state.is_draw_open){
                                 if(geodb_table == 'mpoint_view'){
                                     if(feature_info.length > 0){
