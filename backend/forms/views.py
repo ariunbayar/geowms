@@ -76,13 +76,11 @@ def createPdf(pk):
     pdf.cell(43, 8, data.point_id, 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
-    # tseg ner ehni mor
     pdf.cell(10, 8, '3.', 1, 0, 'C')
     pdf.cell(51, 8, 'Трапцийн дугаар', 1, 0, 'C')
     if data.sheet1:
         trapets = data.sheet1 + '-' + str(int(data.sheet2)) + '-' + str(int(data.sheet3))
     pdf.cell(33, 8, trapets, 1, 0, 'C')
-
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(41, 8, 'Сүлжээний төрөл', 1, 0, 'C')
     pdf.cell(43, 8, tseg.suljeenii_torol, 1, 0, 'C')
@@ -92,9 +90,6 @@ def createPdf(pk):
     pdf.cell(10, 8, '5.', 1, 0, 'C')
     pdf.cell(84, 8, 'Байршил (Аймаг, сум, дүүрэг, хороо)', 1, 0, 'C')
     pdf.cell(94, 8, data. aimag + ' ' + data.sum, 1, 1, 'C')
-
-    # 4
-
     pdf.ln(0)
     pdf.cell(10, 8, '6.', 1, 0, 'C')
     pdf.cell(33, 8, 'Цэгийн солбилцол', 1, 0, 'C')
@@ -102,13 +97,10 @@ def createPdf(pk):
     pdf.cell(33, 8, 'L= ' + Lchar, 1, 0, 'C')
     pdf.cell(33, 8, 'X= ' + utmx, 1, 0, 'C')
     pdf.cell(34, 8, 'Y= ' + utmy, 1, 0, 'C')
-
     # mor 5
     pdf.ln(0)
     pdf.cell(10, 8, '', 1, 1, 'C')
     pdf.cell(188, 8, '7. Цэгийн фото зураг', 1, 1, 'C')
-
-
     # mor 6
     pdf.cell(94, 8, 'Холоос', 1, 0, 'C')
     pdf.cell(94, 8, 'Ойроос', 1, 0, 'C')
@@ -927,7 +919,7 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='GPS-ийн сүлжээний цэг'
+                        point_class_name='Триангуляцийн сүлжээний цэг'
             )
             update_cursor = connections['postgis_db'].cursor()
             update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [geom, pk])
