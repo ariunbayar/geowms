@@ -12,7 +12,7 @@ from django.db import connections
 def aimag(request):
     try:
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT  code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), area_m2 FROM public."AU_AimagUnit" ORDER BY name ASC ''')
+        find_cursor.execute(''' SELECT  code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM public."AU_AimagUnit" ORDER BY name ASC ''')
         data = find_cursor.fetchall()
         if(data):
             rsp = {
@@ -41,7 +41,7 @@ def sum(request, payload):
     try:
         code = payload.get('code')
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM public."AU_SumUnit" where au1_code = %s ORDER BY name  ASC ''', [code])
+        find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code FROM public."AU_SumUnit" where au1_code = %s ORDER BY name  ASC ''', [code])
         data = find_cursor.fetchall()
         if(data):
             rsp = {
@@ -68,7 +68,7 @@ def bagaHoroo(request, payload):
     try:
         code = payload.get('code')
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM public."AU_BagUnit" where au2_code = %s ORDER BY name ASC ''', [code])
+        find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code, au2_code FROM public."AU_BagUnit" where au2_code = %s ORDER BY name ASC ''', [code])
         data = find_cursor.fetchall()
         if(data):
             rsp = {
@@ -106,7 +106,6 @@ def wmsLayer(request):
         'url': '/back/wms/WMS/' + str(wms_id) + '/',
         'layers':layers
     }]
-    print(wms_list)
     rsp = {
         'wms_list': wms_list,
         'success': True,
@@ -124,7 +123,6 @@ def zipUpdate(request, payload):
     zip_id =  payload.get('zip_id')
     zip_code_before =  payload.get('zip_code_before')
     find_cursor = connections['postgis_db'].cursor()
-
     if not aimag_id != -1 and sum_id == -1 and baga_id == -1:
         rsp = {
             'success': False,
@@ -134,10 +132,19 @@ def zipUpdate(request, payload):
 
     if aimag_id != -1 and sum_id == -1 and baga_id == -1 and zip_id == -1:
         find_cursor.execute(''' UPDATE  public."AU_AimagUnit" SET code = %s where code = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE  public."AU_BagUnit" SET au1_code = %s where au1_code = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE  public."AU_SumUnit" SET au1_code = %s where au1_code = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE public.zipcode SET au1_code = %s where au1_code = %s''', [zip_code, zip_code_before])
+
     if sum_id != -1 and aimag_id != -1 and baga_id == -1 and zip_id == -1:
         find_cursor.execute(''' UPDATE  public."AU_SumUnit" SET code = %s where code = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE  public."AU_BagUnit" SET au2_code = %s where au2_code = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE public.zipcode SET au2_code = %s where au2_code = %s''', [zip_code, zip_code_before])
+
     if baga_id != -1 and sum_id != -1 and aimag_id != -1 and zip_id == -1:
         find_cursor.execute(''' UPDATE  public."AU_BagUnit" SET code = %s where code = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE public.zipcode SET code = %s where code = %s''', [zip_code, zip_code_before])
+
     if baga_id != -1 and sum_id != -1 and aimag_id != -1 and zip_id != -1:
         find_cursor.execute(''' UPDATE public.zipcode SET zipcode = %s where zipcode = %s''', [zip_code, zip_code_before])
     rsp = {
@@ -154,6 +161,56 @@ def zip(request, payload):
         code = payload.get('code')
         find_cursor = connections['postgis_db'].cursor()
         find_cursor.execute(''' SELECT zipcode, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM public.zipcode where code = %s ORDER BY name ASC ''', [code])
+        data = find_cursor.fetchall()
+        if(data):
+            rsp = {
+                'success': True,
+                'info': data
+            }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
+            }
+            return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def search(request, payload):
+    try:
+        query = payload.get('query')
+        search_table = payload.get('search_table')
+        data = None
+        find_cursor = connections['postgis_db'].cursor()
+        if search_table == 'AU_AimagUnit':
+            if query:
+                find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM "AU_AimagUnit" where code LIKE %s ORDER BY name ASC limit 10 ''', [query + '%'])
+            else:
+                find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM "AU_AimagUnit" WHERE code IS NULL ORDER BY name ASC limit 10 ''', [query + '%'])
+        if search_table == 'AU_SumUnit':
+            if query:
+                find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code FROM "AU_SumUnit" where code LIKE %s ORDER BY name ASC limit 10 ''', [query + '%'])
+            else:
+                find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code FROM "AU_SumUnit" WHERE code IS NULL ORDER BY name ASC limit 10 ''', [query + '%'])
+        if search_table == 'AU_BagUnit':
+            if query:
+                find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code, au2_code FROM "AU_BagUnit" where code LIKE %s ORDER BY name ASC limit 10 ''', [query + '%'])
+            else:
+                find_cursor.execute(''' SELECT code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code, au2_code FROM "AU_BagUnit" WHERE code IS NULL ORDER BY name ASC limit 10 ''', [query + '%'])
+        if search_table == 'zipcode':
+            if query:
+                find_cursor.execute(''' SELECT zipcode, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code, au2_code, code FROM public.zipcode where CAST(zipcode AS TEXT) LIKE %s ORDER BY name ASC limit 10 ''', [query + '%'])
+            else:
+                find_cursor.execute(''' SELECT zipcode, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))), au1_code, au2_code, code FROM public.zipcode WHERE zipcode IS NULL ORDER BY name ASC limit 10 ''', [query + '%'])
+
         data = find_cursor.fetchall()
         if(data):
             rsp = {

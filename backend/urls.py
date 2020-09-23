@@ -163,6 +163,7 @@ urlpatterns = [
         path('zip/', zipcode_views.zip, name='zip'),
         path('zip-update/', zipcode_views.zipUpdate, name='zip-update'),
         path('wms-layer/', zipcode_views.wmsLayer, name='wms-layer'),
+        path('search/', zipcode_views.search, name='search'),
     ], 'zip_code'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
