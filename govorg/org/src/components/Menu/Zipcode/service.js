@@ -8,8 +8,18 @@ export const service = {
     getBaga,
     getWmsLayer,
     zipUpdate,
-    getZip
+    getZip,
+    zipSearch
 }
+
+function zipSearch(query, search_table) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query, search_table})
+    }
+    return fetch('/back/zip-code/search/', requestOptions).then(handleResponse)
+}
+
 function getAimags() {
     const requestOptions = {
         ...getPostOptions(),
@@ -26,6 +36,7 @@ function getSum(code) {
 }
 
 function getBaga(code) {
+    console.log(code)
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({code})

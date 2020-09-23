@@ -36,7 +36,8 @@ export default class Maps extends Component {
             xy: [],
             map_wms_list: [],
             wms_list: [],
-            feature_req: 0
+            feature_req: 0,
+            zoom: 0,
         }
 
         this.controls = {
@@ -100,6 +101,15 @@ export default class Maps extends Component {
                 }),
             }
         })
+        map_wms_list.map((wms, idx) =>
+            wms.layers.map((layer, idx) =>{
+                if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
+                    layer.tile.setVisible(true)
+                }
+                else{
+                    layer.tile.setVisible(false)
+                }
+        }))
         this.setState({map_wms_list})
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
@@ -142,7 +152,6 @@ export default class Maps extends Component {
                     base_layer_controls: []
                 }
             )
-
         const vector_layer = new VectorLayer({
             source: new VectorSource(),
             style: new Style({
@@ -201,20 +210,23 @@ export default class Maps extends Component {
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
+            this.setState({feature_req: 0})
             this.setState({coordinate_clicked})
+            this.showFeaturesAt(event.coordinate, this.state.zoom, true, 1000)
     }
 
-    handleSetCenter(zoom) {
-        var coord = [this.props.latx, this.props.laty]
+    handleSetCenter(zoom, latx, laty) {
+        var coord = [latx, laty]
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.showFeaturesAt(map_coord,zoom)
+        this.marker.point.setCoordinates(map_coord)
+        if(!this.props.root_check) this.showFeaturesAt(map_coord, zoom, false, 1000)
     }
 
-    showFeaturesAt(coordinate, zoom) {
-        this.setState({feature_req: this.state.feature_req++})
-        const {aimag_id, bag_id, sum_id} = this.props
+    showFeaturesAt(coordinate, zoom, mouse, time) {
+        this.setState({feature_req: 0})
+        this.setState({feature_req: this.state.feature_req + 1})
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -232,7 +244,7 @@ export default class Maps extends Component {
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
                     }
                 )
-                view.animate({zoom: zoom}, {center: view.setCenter(coordinate)});
+                if(!mouse) view.animate({zoom: zoom}, {center: view.setCenter(coordinate)});
                 setTimeout(() => {
                     if (url) {
                         fetch(url)
@@ -252,9 +264,15 @@ export default class Maps extends Component {
                                     return [feature.getId(), values]
                                 })
                                 this.state.vector_layer.setSource(source)
-                                if(this.state.feature_req <= 5){
+                                if(this.state.feature_req < 3){
                                     if (feature_info.length == 0){
-                                        this.showFeaturesAt(coordinate, zoom)
+                                        this.showFeaturesAt(coordinate, zoom, mouse, time)
+                                    }
+                                    else{
+                                        var array = this.state.coordinate_clicked.split(',').map(function(n) {
+                                            return Number(n);
+                                        });
+                                        if(mouse) this.props.handlefeatureDataRead(feature_info, array)
                                     }
                                 }
                             })
@@ -262,7 +280,7 @@ export default class Maps extends Component {
                         /* TODO */
                         console.log('no feature url', wms_source);
                     }
-                }, 1500);
+                }, time);
             })
         })
 
@@ -286,7 +304,8 @@ export default class Maps extends Component {
                             layer.tile.setVisible(false)
                         }
                 }))
-                this.handleSetCenter(7.6)
+                this.setState({zoom:7.6})
+                this.handleSetCenter(7.6, this.props.latx, this.props.laty)
             }
         }
 
@@ -302,7 +321,8 @@ export default class Maps extends Component {
                         }
                     })
                 )
-                this.handleSetCenter(10)
+                this.setState({zoom:10})
+                this.handleSetCenter(10, this.props.latx, this.props.laty)
             }
         }
         if(pP.bag_id !== bag_id){
@@ -316,7 +336,8 @@ export default class Maps extends Component {
                             layer.tile.setVisible(false)
                         }
                 }))
-                this.handleSetCenter(13)
+                this.setState({zoom:13})
+                this.handleSetCenter(13, this.props.latx, this.props.laty)
 
             }
         }
@@ -331,7 +352,8 @@ export default class Maps extends Component {
                             layer.tile.setVisible(false)
                         }
                 }))
-                this.handleSetCenter(13.43)
+                this.setState({zoom:13.43})
+                this.handleSetCenter(13.43, this.props.latx, this.props.laty)
 
             }
         }
