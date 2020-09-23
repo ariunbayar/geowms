@@ -65,20 +65,24 @@ def check(request, payload):
                         card_number = ' '
                     if not purhcase.is_success:
                         Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=datetime.now(),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.", qpay_rsp=data)
-                    return JsonResponse({'success': True, 'error_message':'Төлөгдсөн төлбөрийн дугаар'})
+                    rsp = {
+                        'success': True,
+                        'msg':'Төлөгдсөн төлбөрийн дугаар'
+                    }
                 else:
-                    return JsonResponse({'success': False, 'error_message':' '})
+                    rsp = {
+                        'success': False,
+                        'msg': 'Мэдээлэл олдсонгүй'
+                    }
             else:
                 rsp = {
                     'success': False,
                 }
-                return JsonResponse(rsp)
         except Exception:
             rsp = {
                 'success': False,
                 'msg': "Хүсэлт амжилтгүй болсон"
             }
-            return JsonResponse(rsp)
         except ConnectionError:
             rsp = {
                 'success': False,
@@ -89,5 +93,5 @@ def check(request, payload):
             'success': False,
             'msg': 'Мэдээлэл олдсонгүй'
         }
-        return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
