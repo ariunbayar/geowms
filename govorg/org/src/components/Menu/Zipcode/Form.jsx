@@ -71,14 +71,13 @@ export class Forms extends Component {
                 {values.map(([field, value], val_idx) =>
                     field == 'au1_code' ? this.handleInputAimag(value, false, false) :
                     field == 'au2_code' ? this.setState({root2:value}) :
-                    field == 'code' ? this.setState({root3:value}) :
-                    field == 'zipcode' ? this.setState({root4:value}) : null
+                    field == 'zip_code' ? this.setState({root4:value}) : null
                 )}
             )}
         }
     }
 
-    handleEdit(root, name, x, y, root1, root2, root3){
+    handleEdit(root, name, x, y, root1, root2){
         this.setState({root1: '', root2: '', root3: '', root4: -1, latx: '', laty: ''})
         this.setState({latx:x, laty:y, zip_code:root, zip_code_before:root})
 
@@ -92,7 +91,7 @@ export class Forms extends Component {
         }
         if(this.state.search_table == 'zipcode'){
             this.handleInputAimag(root1, true, true)
-            this.setState({root2:root2, root3:root3, root4: root})
+            this.setState({root3:root2, root4: root})
         }
     }
 
@@ -128,36 +127,38 @@ export class Forms extends Component {
         if(check) this.setState({root_check: false})
         if(check && !check_search) this.setState({search_table: 'AU_AimagUnit'})
 
-        if(code){
-            const aimag = this.state.aimag
-            var idx = -1
-            for(var i = 0; i < aimag.length; i++){
-                if(aimag[i][0] == code){
-                    idx = i
+        const aimag = this.state.aimag
+        var idx = -1
+        if(check) code=code - ' '
+        code=code+' '
+        for(var i = 0; i < aimag.length; i++){
+            if(aimag[i][0] == code){
+                idx = i
+            }
+
+        }
+        this.setState({disabled: true})
+        this.setState({aimag_id: code, sum:[], zip:[], sum_id: -1, zip_id:-1})
+        if(check){this.setState({aimag_id: code})}
+        const aiamg_data = aimag[idx]
+        var zip_code = aiamg_data[0].replace(/\s/g, '')
+        var latx = aiamg_data[2]
+        var laty = aiamg_data[3]
+        this.setState({latx, laty, zip_code, zip_code_before:zip_code})
+        service.getSum(zip_code).then(({info, success}) => {
+            if(success){
+                this.setState({sum: info})
+                if(this.state.root2 != ''){
+
+                    this.handleInputSum(this.state.root2, false, false)
                 }
             }
-            this.setState({disabled: true})
-            this.setState({aimag_id: code, sum:[], baga:[], zip:[], sum_id: -1, baga_id: -1, zip_id:-1})
-            const aiamg_data = aimag[idx]
-            var zip_code = aiamg_data[0]
-            var latx = aiamg_data[2]
-            var laty = aiamg_data[3]
-            this.setState({latx, laty, zip_code, zip_code_before:zip_code})
-            service.getSum(zip_code).then(({info, success}) => {
-                if(success){
-                    this.setState({sum: info})
-                    if(this.state.root2 != ''){
-
-                        this.handleInputSum(this.state.root2, false, false)
-                    }
-                }
-                else{
-                    this.setState({error_msg: info})
-                }setTimeout(() => {
-                    this.setState({error_msg: ''})
-                }, 2222);
-            })
-        }
+            else{
+                this.setState({error_msg: info})
+            }setTimeout(() => {
+                this.setState({error_msg: ''})
+            }, 2222);
+        })
     }
 
     handleInputSum(code, check, check_search){
@@ -173,7 +174,7 @@ export class Forms extends Component {
                 }
             }
             if(sum.length >= idx && sum.length >= -1){
-                this.setState({sum_id: code, baga:[], zip:[], baga_id: -1, zip_id:-1})
+                this.setState({sum_id: code, zip:[], zip_id:-1})
                 const sum_data = sum[idx]
                 var zip_code = sum_data[0]
                 var latx = sum_data[2]
@@ -314,28 +315,16 @@ export class Forms extends Component {
                                 </td>
                             </tr>
                             <tr>
-                                <th>Шийдвэр</th>
-                                <td>
-                                    <input
-                                    name="shiidver"
-                                    type="text"
-                                    id="shiidver"
-                                    className='form-control'
-                                    value={this.state.shiidver}
-                                    onChange={(e)=> this.setState({shiidver:e.target.value})}></input>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td colSpan="2" >
                                     <Maps
                                         wms_list={this.state.wms_list}
                                         aimag_id = {this.state.aimag_id}
                                         sum_id = {this.state.sum_id}
-                                        bag_id = {this.state.baga_id}
                                         zip_id = {this.state.zip_id}
                                         latx = {latx}
                                         laty = {laty}
                                         root_check = {this.state.root_check}
+                                        search_table = { this.state.search_table}
                                         handlefeatureDataRead={this.handlefeatureDataRead}
                                     >
                                     </Maps>
@@ -381,8 +370,7 @@ export class Forms extends Component {
                     <select name="search_table" id="search_table" className='form-control col-md-5  mb-1 float-left' value={this.state.search_table} onChange={(e) => this.handleInpuZereg(e.target.value)}>
                         <option value='AU_AimagUnit'>Аймаг нийслэлийн хил</option>
                         <option value='AU_SumUnit'>Сум дүүргийн хил</option>
-                        <option value='AU_BagUnit'>Баг хорооны хил</option>
-                        <option value='zipcode'>Зип код</option>
+                        <option value='zipcode'>Баг хорооны хил</option>
                     </select>
                     <table className="table">
                             <thead>

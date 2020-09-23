@@ -68,10 +68,6 @@ export default class Maps extends Component {
         return {feature: feature, point: point}
     }
 
-    componentDidMount() {
-        const {aimag_id, bag_id, sum_id} = this.props
-    }
-
     loadMapData(wms_list) {
             service.loadBaseLayers().then(({base_layer_list}) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
@@ -266,7 +262,7 @@ export default class Maps extends Component {
                                 this.state.vector_layer.setSource(source)
                                 if(this.state.feature_req < 3){
                                     if (feature_info.length == 0){
-                                        this.showFeaturesAt(coordinate, zoom, mouse, time)
+                                        this.showFeaturesAt(coordinate, zoom, mouse, time)  
                                     }
                                     else{
                                         var array = this.state.coordinate_clicked.split(',').map(function(n) {
@@ -292,9 +288,10 @@ export default class Maps extends Component {
             this.loadMapData(this.props.wms_list)
         }
 
-        const {aimag_id, bag_id, sum_id, zip_id} = this.props
+        const {aimag_id, sum_id, zip_id} = this.props
         if(pP.aimag_id !== aimag_id){
-            if(aimag_id !==-1 && sum_id == -1 && bag_id == -1 && zip_id == -1){
+            console.log("ASdasda")
+            if(aimag_id !==-1 && sum_id == -1 && zip_id == -1){
                 this.state.map_wms_list.map((wms, idx) =>
                     wms.layers.map((layer, idx) =>{
                         if(layer.tile.values_.source.params_.LAYERS == "Аймаг_нийслэлийн_хил"){
@@ -310,7 +307,7 @@ export default class Maps extends Component {
         }
 
         if(pP.sum_id !== sum_id){
-            if(sum_id !==-1 && bag_id == -1 && aimag_id !== -1 && zip_id == -1){
+            if(sum_id !==-1 && aimag_id !== -1 && zip_id == -1){
                 this.state.map_wms_list.map((wms, idx) =>
                     wms.layers.map((layer, idx) =>{
                         if(layer.tile.values_.source.params_.LAYERS == "Сум_дүүргийн_хил"){
@@ -325,24 +322,8 @@ export default class Maps extends Component {
                 this.handleSetCenter(10, this.props.latx, this.props.laty)
             }
         }
-        if(pP.bag_id !== bag_id){
-            if(bag_id !==-1 && sum_id !==-1 && aimag_id !==-1 && zip_id == -1){
-                this.state.map_wms_list.map((wms, idx) =>
-                    wms.layers.map((layer, idx) =>{
-                        if(layer.tile.values_.source.params_.LAYERS == "Баг_хорооны_хил"){
-                            layer.tile.setVisible(true)
-                        }
-                        else{
-                            layer.tile.setVisible(false)
-                        }
-                }))
-                this.setState({zoom:13})
-                this.handleSetCenter(13, this.props.latx, this.props.laty)
-
-            }
-        }
         if(pP.zip_id !== zip_id){
-            if(bag_id !==-1 && sum_id !==-1 && aimag_id !==-1 && zip_id !== -1){
+            if(sum_id !==-1 && aimag_id !==-1 && zip_id !== -1){
                 this.state.map_wms_list.map((wms, idx) =>
                     wms.layers.map((layer, idx) =>{
                         if(layer.tile.values_.source.params_.LAYERS == "Зип_код"){
