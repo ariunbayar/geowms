@@ -22,7 +22,6 @@ export class QPay extends Component {
 
     componentDidMount(){
         if(this.state.qpay_open){
-            this.payCheck(this.props.qpay_open)
             this.timerRemaining()
             this.HandleCreateQpay()
         }
@@ -37,13 +36,11 @@ export class QPay extends Component {
         {
             if(this.props.qpay_open)
             {
-                this.payCheck(this.props.qpay_open)
                 this.setState({minutes:5, seconds:0, qPay_QRimage: ''})
                 this.timerRemaining()
                 this.HandleCreateQpay()
             }
             else{
-                this.payCheck(this.props.qpay_open)
                 clearInterval(this.myInterval)
             }
         }
@@ -63,6 +60,7 @@ export class QPay extends Component {
                     this.setState({error_message})
                 }
                 this.setState({qPay_QRimage})
+                this.payCheck(this.props.qpay_open)
             }
         })
 
