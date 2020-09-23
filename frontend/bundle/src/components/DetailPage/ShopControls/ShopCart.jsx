@@ -9,8 +9,8 @@ import { CompilationStatus } from "webpack-build-notifier/dist/types"
 import OverlayPositioning from "ol/OverlayPositioning"
 import { set } from "ol/transform"
 import { withRouter } from 'react-router-dom';
-import { Route, Link, BrowserRouter as Router, Switch } from "react-router-dom";
 import { identityTransform } from "ol/proj"
+
 export class Cart extends Component{
 
     constructor(props) {
@@ -259,9 +259,6 @@ export class ShopCart extends Control {
 
         this.renderComponent = this.renderComponent.bind(this)
         this.showModal = this.showModal.bind(this)
-        this.setClass = this.setClass
-        this.render = this.render.bind(this)
-
     }
 
     renderComponent(props) {
@@ -275,13 +272,5 @@ export class ShopCart extends Control {
 
     showModal(coordinate, torf, x, y, content, code) {
         this.renderComponent({coordinate, torf, x, y, content, code})
-        if(torf){
-            // this.setClass()
-        }
-    }
-
-    setClass(){
-        this.root.className = 'h1'
-        this.root.innerText = "Захиалгууд"
     }
 }
