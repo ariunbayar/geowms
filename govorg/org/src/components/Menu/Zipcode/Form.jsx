@@ -9,7 +9,7 @@ export class Forms extends Component {
         super(props)
         this.state = {
             form_data:[],
-            search_query:'0',
+            search_query:'2',
             search_table:'AU_AimagUnit',
             zip_code:'',
             shiidver: '',
@@ -39,7 +39,6 @@ export class Forms extends Component {
         this.getAimag = this.getAimag.bind(this)
         this.handleInputAimag = this.handleInputAimag.bind(this)
         this.handleInputSum = this.handleInputSum.bind(this)
-        this.handleInputBaga = this.handleInputBaga.bind(this)
         this.handleInputZip = this.handleInputZip.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.handleEdit = this.handleEdit.bind(this)
@@ -67,15 +66,6 @@ export class Forms extends Component {
                 )}
             )}
         }
-        if(this.state.search_table == 'AU_BagUnit'){
-            {data.map(([name, values], idx) =>
-                {values.map(([field, value], val_idx) =>
-                    field == 'au1_code' ? this.handleInputAimag(value, false, false) :
-                    field == 'au2_code' ? this.setState({root2:value}) :
-                    field == 'code' ? this.setState({root3:value}) : null
-                )}
-            )}
-        }
         if(this.state.search_table == 'zipcode'){
             {data.map(([name, values], idx) =>
                 {values.map(([field, value], val_idx) =>
@@ -99,10 +89,6 @@ export class Forms extends Component {
         {
             this.handleInputAimag(root1, true, true)
             this.setState({root2:root})
-        }
-        if(this.state.search_table == 'AU_BagUnit'){
-            this.handleInputAimag(root1, true, true)
-            this.setState({root2:root2, root3:root})
         }
         if(this.state.search_table == 'zipcode'){
             this.handleInputAimag(root1, true, true)
@@ -194,41 +180,6 @@ export class Forms extends Component {
                 var laty = sum_data[3]
                 this.setState({latx, laty})
                 this.setState({zip_code, zip_code_before:zip_code})
-                service.getBaga(zip_code).then(({info, success}) => {
-                    if(success){
-                        this.setState({baga: info})
-                        if(this.state.root3 != '') this.handleInputBaga(this.state.root3, false, false)
-
-                    }
-                    else{
-                        this.setState({error_msg: info})
-                    }setTimeout(() => {
-                        this.setState({error_msg: ''})
-                    }, 2222);
-                })
-            }
-        }
-    }
-
-    handleInputBaga(code, check, check_search){
-        if(check) this.setState({root_check: false})
-        if(check && !check_search) this.setState({search_table: 'AU_BagUnit'})
-        this.setState({disabled: true})
-        if(code){
-            const baga = this.state.baga
-            var idx = -1
-            for(var i = 0; i < baga.length; i++){
-                if(baga[i][0] == code){
-                    idx = i
-                }
-            }
-            if(baga.length >= idx && baga.length >= -1){
-                this.setState({baga_id: code, zip_id:-1, zip:[]})
-                const baga_data = baga[idx]
-                var zip_code = baga_data[0]
-                var latx = baga_data[2]
-                var laty = baga_data[3]
-                this.setState({latx, laty, zip_code, zip_code_before:zip_code})
                 service.getZip(zip_code).then(({info, success}) => {
                     if(success){
                         this.setState({zip: info})
@@ -341,17 +292,6 @@ export class Forms extends Component {
                             </tr>
                             <tr>
                                 <th>Баг/хороо</th>
-                                <td>
-                                    <select disabled={this.state.disabled} name="baga_id" id="baga_id" className='form-control' value={this.state.baga_id} onChange={(e) => this.handleInputBaga(e.target.value, true, false)}>
-                                        <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
-                                        {this.state.baga.map((data, idx) =>
-                                            <option key={idx} value={data[0]}>{data[1]}</option>
-                                        )}
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Зипкод</th>
                                 <td>
                                     <select disabled={this.state.disabled} name="zip_id" id="zip_id" className='form-control' value={this.state.zip_id} onChange={(e) => this.handleInputZip(e.target.value, true, false)}>
                                         <option value="-1">--- Зипкод сонгоно уу ---</option>
