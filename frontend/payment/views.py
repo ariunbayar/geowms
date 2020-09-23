@@ -341,13 +341,16 @@ def purchaseFromCart(request, payload):
 def download_pdf(request, pk):
     mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=pk).first()
     if mpoint:
-        point = get_object_or_404(PaymentPoint, point_id=mpoint.id)
-        payment = get_object_or_404(Payment, user=request.user, id=point.payment_id, is_success=True)
-        # generate the file
-        file_name = pk + '.pdf'
-        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
-        response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
-        return response
+        point = PaymentPoint.objects.filter(point_id=mpoint.id).first()
+        if point:
+            payment = get_object_or_404(Payment, user=request.user, id=point.payment_id, is_success=True)
+            # generate the file
+            file_name = pk + '.pdf'
+            src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+            response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
+            return response
+        else:
+            raise Http404
     else:
         raise Http404
 

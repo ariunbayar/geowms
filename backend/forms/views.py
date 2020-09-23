@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 import math
-import pyproj
+from pyproj import Transformer
 import uuid
 from django.db.models import Q
 import re
@@ -38,12 +38,10 @@ def createPdf(pk):
         BC = "%.6f" % BC
         Bchar = str(BA) + '°' + str(BB) + "'" + str(float(BC))  + '"'
         Lchar = str(LA) + '°' + str(LB) + "'" + str(float(LC))  + '"'
-        zoneout = int(L)/6+31
-        instr = ("+proj=longlat +datum=WGS84 +no_defs")
-        outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-        inproj = pyproj.Proj(instr)
-        outproj = pyproj.Proj(outstr)
-        val1 = pyproj.transform(inproj, outproj, L,B)
+        transformer = Transformer.from_crs(4326, 26917)
+        transformer = Transformer.from_crs("EPSG:4326", 'EPSG:3857')
+        transformer
+        val1 = transformer.transform(L, B)
         utmx = val1[0]
         utmx = str("%.6f" % utmx)
         utmy = val1[1]
@@ -93,10 +91,10 @@ def createPdf(pk):
     pdf.ln(0)
     pdf.cell(10, 8, '6.', 1, 0, 'C')
     pdf.cell(33, 8, 'Цэгийн солбилцол', 1, 0, 'C')
-    pdf.cell(45, 8, 'B= ' + Bchar, 1, 0, 'C')
+    pdf.cell(33, 8, 'B= ' + Bchar, 1, 0, 'C')
     pdf.cell(33, 8, 'L= ' + Lchar, 1, 0, 'C')
-    pdf.cell(33, 8, 'X= ' + utmx, 1, 0, 'C')
-    pdf.cell(34, 8, 'Y= ' + utmy, 1, 0, 'C')
+    pdf.cell(40, 8, 'X= ' + utmx, 1, 0, 'C')
+    pdf.cell(39, 8, 'Y= ' + utmy, 1, 0, 'C')
     # mor 5
     pdf.ln(0)
     pdf.cell(10, 8, '', 1, 1, 'C')
