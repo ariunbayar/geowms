@@ -14,13 +14,14 @@ class SearchBarComponent extends Component {
         super(props)
 
         this.state = {
-            coordinate: '',
-            zoom: 5000,
-            zoom1: 6000,
-            zoom2: 10000,
-            zoom3: 10000,
-            aimagid: 0,
-            sumid: 0,
+            coordinatex: '',
+            coordinatey: '',
+            zoom: 10,
+            zoom1: 10,
+            zoom2: 13,
+            zoom3: 10,
+            aimagid: -1,
+            sumid: -1,
             BA:'',
             BB:'',
             BC:'',
@@ -34,35 +35,27 @@ class SearchBarComponent extends Component {
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
-        this.handleSubmitCoordinateAimag = this.handleSubmitCoordinateAimag.bind(this)
+        this.handleSubmitClear = this.handleSubmitClear.bind(this)
         this.handleSubmitCoordinateName = this.handleSubmitCoordinateName.bind(this)
         this.handleSubmitCoordinateGradus = this.handleSubmitCoordinateGradus.bind(this)
         this.handleInput = this.handleInput.bind(this)
+        this.handleInputSum = this.handleInputSum.bind(this)
     }
 
     handleSubmitCoordinate(event) {
         event.preventDefault()
-        const coord = helpers.parseCoordinateString(this.state.coordinate)
-        this.props.handleSetCenter(coord, this.state.zoom/1000)
+        // const coord = helpers.parseCoordinateString(this.state.coordinate)
+        var array = [this.state.coordinatey, this.state.coordinatex]
+        this.props.handleSetCenter(array, this.state.zoom)
     }
 
-    handleSubmitCoordinateAimag(event) {
+    handleSubmitClear(event) {
         event.preventDefault()
-        if(this.state.sumid == 0)
-        {
-            const aimag_id = this.state.aimagid
-            const aiamg_data = this.state.aimag[aimag_id]
-            var array = [aiamg_data[0], aiamg_data[1]]
-            this.props.handleSetCenter(array, 7.555)
-        }
-        else
-        {
-            const sum_id = this.state.sumid
-            const sum_data = this.state.sum[sum_id]
-            var array = [sum_data[0], sum_data[1]]
-            this.props.handleSetCenter(array, 10.555)
-        }
+        this.setState({sumid: -1, aimagid: -1})
+        var array = [103.525827, 46.723984]
+        this.props.handleSetCenter(array, 5.041301562246971)
     }
+
     componentDidMount(){
         service.getAimags().then(({info, success}) => {
             if(success){
@@ -82,6 +75,7 @@ class SearchBarComponent extends Component {
                 this.setState({error_msg: info})
             }setTimeout(() => {
                 this.setState({error_msg: ''})
+
             }, 2222);
         })
     }
@@ -89,7 +83,7 @@ class SearchBarComponent extends Component {
         event.preventDefault()
         service.searchPoint(this.state.point_id).then(({info, success}) => {
             if(success){
-                this.props.handleSetCenter(info, this.state.zoom2/1000)
+                this.props.handleSetCenter(info, this.state.zoom2)
             }
             else{
                 this.setState({error_msg: info})
@@ -110,7 +104,7 @@ class SearchBarComponent extends Component {
             var Bbut=(BC/3600)+(BB/60)+BA-BBB
             var niitB=Bbut+BBB
             var array = [X, niitB]
-            this.props.handleSetCenter(array, this.state.zoom1/1000)
+            this.props.handleSetCenter(array, this.state.zoom1)
 
         }
     }
@@ -118,10 +112,16 @@ class SearchBarComponent extends Component {
     handleInput(e){
         if(e.target.value){
             this.setState({aimagid: e.target.value})
-            this.setState({sumid: 0})
+            this.setState({sumid: -1})
             const aimag_id = e.target.value
             const aiamg_data = this.state.aimag[aimag_id]
             var aimag_name = aiamg_data[2]
+
+
+            var array = [aiamg_data[0], aiamg_data[1]]
+            this.props.handleSetCenter(array, 7.555)
+
+
             service.getSum(aimag_name).then(({info, success}) => {
                 if(success){
                     this.setState({sum: info})
@@ -134,12 +134,24 @@ class SearchBarComponent extends Component {
             })
         }
     }
+    handleInputSum(e){
+        if(e.target.value){
+            this.setState({sumid: e.target.value})
+            const sum_id = e.target.value
+            const sum_data = this.state.sum[sum_id]
+
+
+            var array = [sum_data[0], sum_data[1]]
+            this.props.handleSetCenter(array, 10.555)
+
+        }
+    }
 
     render() {
         const {error_msg} = this.state
         return (
             <div>
-                {/* <div className="form-group  rounded shadow-sm p-3 mb-5 bg-white rounded">
+                {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <label className="font-weight-bold" htmlFor="formGroupInput">Нэрэлбэрээр хайх</label>
                     <div className="input-group mb-3">
 
@@ -150,20 +162,25 @@ class SearchBarComponent extends Component {
                     </div>
                 </div> */}
 
-                <form onSubmit={this.handleSubmitCoordinateAimag} className=" rounded shadow-sm p-3 mb-5 bg-white rounded">
+                <form onSubmit={this.handleSubmitClear} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Аймгаар хайх</label>
                         <div className="input-group mb-3">
                             <select name="center_typ" as="select"
-                                onChange={this.handleInput }
+                                onChange={this.handleInput}
+                                value={this.state.aimagid}
                                 className='form-control'>
+                                <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
                                 {this.state.aimag.map((data, idx) =>
                                     <option key={idx} value={idx}>{data[2]}</option>
                                 )}
                             </select>
                             <select name="center_typ" as="select"
-                                onChange={(e) => this.setState({sumid: parseInt(e.target.value)}) }
-                                className='form-control'>
+                                onChange={this.handleInputSum}
+                                className='form-control'
+                                value={this.state.sumid}
+                                >
+                                <option value="-1">--- Сум/дүүрэг сонгоно уу ---</option>
                                 {this.state.sum.map((data, idx) =>
                                     <option key={idx} value={idx}>{data[2]}</option>
                                 )}
@@ -171,13 +188,13 @@ class SearchBarComponent extends Component {
                         </div>
                         <div className="input-group mb-3">
                             <div>
-                                <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
+                                <button className="btn gp-btn-primary" type="submit"><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
                             </div>
                         </div>
                     </div>
                 </form>
 
-                <form onSubmit={this.handleSubmitCoordinateName} className=" rounded shadow-sm p-3 mb-5 bg-white rounded">
+                <form onSubmit={this.handleSubmitCoordinateName} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Цэгийн дугаараар хайх</label>
                         <br></br>
@@ -189,13 +206,14 @@ class SearchBarComponent extends Component {
                                 value={this.state.point_id}
                             />
                         </div>
+                        {/* <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <div className="input-group mb-3">
                             <input type="number" className="form-control"
                                 name="zoom2"
                                 onChange={(e) => this.setState({zoom2: e.target.value}) }
                                 value={this.state.zoom2}
                             />
-                        </div>
+                        </div> */}
                         <div className="input-group mb-3">
                             <div>
                                 <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
@@ -205,23 +223,29 @@ class SearchBarComponent extends Component {
                 </form>
 
 
-                <form onSubmit={this.handleSubmitCoordinate} className=" rounded shadow-sm p-3 mb-5 bg-white rounded">
+                <form onSubmit={this.handleSubmitCoordinate} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
                         <div className="input-group mb-3">
-                            <input type="text" className="form-control" placeholder="өргөрөг, уртраг"
+                            <input type="text" className="form-control" placeholder="Өргөрөг"
                                 name="coordinate"
-                                onChange={(e) => this.setState({coordinate: e.target.value}) }
+                                onChange={(e) => this.setState({coordinatex: e.target.value}) }
+                                value={this.state.coordinate}
+                            />
+                            <input type="text" className="form-control" placeholder="Уртраг"
+                                name="coordinate"
+                                onChange={(e) => this.setState({coordinatey: e.target.value}) }
                                 value={this.state.coordinate}
                             />
                         </div>
+                        {/* <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <div className="input-group mb-3">
                             <input type="number" className="form-control" placeholder="өргөрөг, уртраг"
                                 name="zoom"
                                 onChange={(e) => this.setState({zoom: e.target.value}) }
                                 value={this.state.zoom}
                             />
-                        </div>
+                        </div> */}
                         <div className="input-group mb-3">
                             <div>
                                 <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
@@ -229,10 +253,11 @@ class SearchBarComponent extends Component {
                         </div>
                     </div>
                 </form>
-                <form onSubmit={this.handleSubmitCoordinateGradus} className=" rounded shadow-sm p-3 mb-5 bg-white rounded">
+                <form onSubmit={this.handleSubmitCoordinateGradus} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
-                        <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
+                        <label className="font-weight-bold" htmlFor="formGroupInput">Өргөрөг</label>
                         <div className="input-group mb-3">
+                            <label className="font-weight-bold" htmlFor="formGroupInput"></label>
                             <input type="text" className="form-control" placeholder="Градус X"
                                 name="BA"
                                 onChange={(e) => this.setState({BA: parseFloat(e.target.value)}) }
@@ -249,6 +274,7 @@ class SearchBarComponent extends Component {
                                 value={this.state.BC}
                             />
                         </div>
+                        <label className="font-weight-bold" htmlFor="formGroupInput">Уртраг</label>
                         <div className="input-group mb-3">
                             <input type="number" className="form-control" placeholder="Градус Y"
                                 name="LA"
@@ -266,13 +292,14 @@ class SearchBarComponent extends Component {
                                 value={this.state.LC}
                             />
                         </div>
+                        {/* <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <div className="input-group mb-3">
                             <input type="number" className="form-control" placeholder="өргөрөг, уртраг"
                                 name="zoom1"
                                 onChange={(e) => this.setState({zoom1: e.target.value}) }
                                 value={this.state.zoom1}
                             />
-                        </div>
+                        </div> */}
                         <div className="input-group mb-3">
                             <div>
                                 <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>

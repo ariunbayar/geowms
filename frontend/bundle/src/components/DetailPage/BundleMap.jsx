@@ -350,7 +350,7 @@ export default class BundleMap extends Component {
                                     }
                                 }
                                 else{
-                                    if(!this.state.pay_modal_check) {
+                                    if(!this.state.pay_modal_check && geodb_table != 'privite') {
                                         this.state.vector_layer.setSource(source)
                                         this.controls.modal.showModal(feature_info, true)
                                     }
