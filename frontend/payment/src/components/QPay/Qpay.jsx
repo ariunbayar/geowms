@@ -78,13 +78,7 @@ export class QPay extends Component {
                     this.props.history(`/profile/all/api/details/${purchase_id}/`)
                 }
                 else{
-                    if(msg){ //Amjiltgv boloh uyd
-                        this.setState({msg})
-                        setTimeout(() => {
-                            this.props.handleClose()
-                        }, 2000);
-                        this.setState({ msg: '' })
-                    }
+
                     setTimeout(() => {
                         this.payCheck(this.props.qpay_open)
                     }, 5000)

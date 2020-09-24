@@ -14,6 +14,7 @@ from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 import math
 from pyproj import Transformer
+import pyproj
 import uuid
 from django.db.models import Q
 import re
