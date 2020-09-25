@@ -130,7 +130,7 @@ def zipUpdate(request, payload):
         return JsonResponse(rsp)
 
     if aimag_id != -1 and sum_id == -1 and zip_id == -1:
-        find_cursor.execute(''' UPDATE  public."AU_AimagUnit" SET zipcode = %s where zipcode = %s''', [zip_code, zip_code_before])
+        find_cursor.execute(''' UPDATE  public."AU_AimagUnit" SET code = %s where code = %s''', [zip_code, zip_code_before])
         find_cursor.execute(''' UPDATE  public."AU_SumUnit" SET au1_code = %s where au1_code = %s''', [zip_code, zip_code_before])
         find_cursor.execute(''' UPDATE public.zipcode2 SET au1_code = %s where au1_code = %s''', [zip_code, zip_code_before])
 

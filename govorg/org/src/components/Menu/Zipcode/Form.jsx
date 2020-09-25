@@ -53,7 +53,7 @@ export class Forms extends Component {
         if(this.state.search_table == 'AU_AimagUnit'){
             {data.map(([name, values], idx) =>
                 {values.map(([field, value], val_idx) =>
-                    field == 'code' ? this.handleInputAimag(value, false, false) : null
+                    field == 'code' ? this.handleInputAimag(value, false, true) : null
                 )}
             )}
         }
@@ -61,7 +61,7 @@ export class Forms extends Component {
         {
             {data.map(([name, values], idx) =>
                 {values.map(([field, value], val_idx) =>
-                    field == 'au1_code' ? this.handleInputAimag(value, false, false) :
+                    field == 'au1_code' ? this.handleInputAimag(value, false, true) :
                     field == 'code' ? this.setState({root2:value}) : null
                 )}
             )}
@@ -69,16 +69,16 @@ export class Forms extends Component {
         if(this.state.search_table == 'zipcode'){
             {data.map(([name, values], idx) =>
                 {values.map(([field, value], val_idx) =>
-                    field == 'au1_code' ? this.handleInputAimag(value, false, false) :
+                    field == 'au1_code' ? this.handleInputAimag(value, false, true) :
                     field == 'au2_code' ? this.setState({root2:value}) :
-                    field == 'zip_code' ? this.setState({root4:value}) : null
+                    field == 'code' ? this.setState({root4:value}) : null
                 )}
             )}
         }
     }
 
     handleEdit(root, name, x, y, root1, root2){
-        this.setState({root1: '', root2: '', root3: '', root4: -1, latx: '', laty: ''})
+        this.setState({root1: '', root2: '', root3: '', root4: -1, latx: '', laty: '', root_check: true})
         this.setState({latx:x, laty:y, zip_code:root, zip_code_before:root})
 
         if(this.state.search_table == 'AU_AimagUnit'){
@@ -91,7 +91,7 @@ export class Forms extends Component {
         }
         if(this.state.search_table == 'zipcode'){
             this.handleInputAimag(root1, true, true)
-            this.setState({root3:root2, root4: root})
+            this.setState({root2:root2, root4: root})
         }
     }
 
@@ -124,33 +124,31 @@ export class Forms extends Component {
     }
 
     handleInputAimag(code, check, check_search){
+        this.setState({aimag_id: code, sum:[], zip:[], sum_id: -1, zip_id:-1, disabled: true})
         if(check) this.setState({root_check: false})
-        if(check && !check_search) this.setState({search_table: 'AU_AimagUnit'})
+        if(check && !check_search) this.setState({search_table: 'AU_AimagUnit', root1: '', root2: '', root3: '', root4: -1})
 
         const aimag = this.state.aimag
         var idx = -1
-        if(check) code=code - ' '
-        code=code+' '
         for(var i = 0; i < aimag.length; i++){
             if(aimag[i][0] == code){
                 idx = i
             }
 
         }
-        this.setState({disabled: true})
-        this.setState({aimag_id: code, sum:[], zip:[], sum_id: -1, zip_id:-1})
         if(check){this.setState({aimag_id: code})}
         const aiamg_data = aimag[idx]
-        var zip_code = aiamg_data[0].replace(/\s/g, '')
+        var zip_code = aiamg_data[0]
         var latx = aiamg_data[2]
         var laty = aiamg_data[3]
-        this.setState({latx, laty, zip_code, zip_code_before:zip_code})
+        if(!check_search) this.setState({latx, laty})
+        this.setState({zip_code, zip_code_before:zip_code})
         service.getSum(zip_code).then(({info, success}) => {
             if(success){
                 this.setState({sum: info})
                 if(this.state.root2 != ''){
 
-                    this.handleInputSum(this.state.root2, false, false)
+                    this.handleInputSum(this.state.root2, check, check_search)
                 }
             }
             else{
@@ -162,8 +160,9 @@ export class Forms extends Component {
     }
 
     handleInputSum(code, check, check_search){
+        this.setState({sum_id: code, zip:[], zip_id:-1})
         if(check) this.setState({root_check: false})
-        if(check && !check_search) this.setState({search_table: 'AU_SumUnit'})
+        if(check && !check_search) this.setState({search_table: 'AU_SumUnit', root1: '', root2: '', root3: '', root4: -1})
         this.setState({disabled: true})
         if(code){
             const sum = this.state.sum
@@ -174,17 +173,16 @@ export class Forms extends Component {
                 }
             }
             if(sum.length >= idx && sum.length >= -1){
-                this.setState({sum_id: code, zip:[], zip_id:-1})
                 const sum_data = sum[idx]
                 var zip_code = sum_data[0]
                 var latx = sum_data[2]
                 var laty = sum_data[3]
-                this.setState({latx, laty})
+                if(!check_search) this.setState({latx, laty})
                 this.setState({zip_code, zip_code_before:zip_code})
                 service.getZip(zip_code).then(({info, success}) => {
                     if(success){
                         this.setState({zip: info})
-                        if(this.state.root4 != -1) this.handleInputZip(this.state.root4, false, false)
+                        if(this.state.root4 != -1) this.handleInputZip(this.state.root4, check, check_search)
                     }
                     else{
                         this.setState({error_msg: info})
@@ -198,7 +196,7 @@ export class Forms extends Component {
 
     handleInputZip(code, check, check_search){
         if(check) this.setState({root_check: false})
-        if(check && !check_search) this.setState({search_table: 'zipcode'})
+        if(check && !check_search) this.setState({search_table: 'zipcode', root1: '', root2: '', root3: '', root4: -1})
         this.setState({disabled: true})
         const zip = this.state.zip
         var idx = -1
@@ -224,6 +222,8 @@ export class Forms extends Component {
             if(success){
                 setTimeout(() => {
                    this.setState({success_msg:true ,handle_save:false, latx:'', laty:'', latx:'', sum:[], baga:[], aimag_id: -1, sum_id: -1, baga_id: -1,zip_id: -1, zip_code:''})
+                   this.getAimag()
+                   this.handleSearch(this.state.search_query,this.state.search_table)
                 }, 1000);
                 setTimeout(() => {
                     this.setState({success_msg:false})

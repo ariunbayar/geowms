@@ -262,7 +262,7 @@ export default class Maps extends Component {
                                 this.state.vector_layer.setSource(source)
                                 if(this.state.feature_req < 3){
                                     if (feature_info.length == 0){
-                                        this.showFeaturesAt(coordinate, zoom, mouse, time)  
+                                        this.showFeaturesAt(coordinate, zoom, mouse, time)
                                     }
                                     else{
                                         var array = this.state.coordinate_clicked.split(',').map(function(n) {
@@ -290,7 +290,6 @@ export default class Maps extends Component {
 
         const {aimag_id, sum_id, zip_id} = this.props
         if(pP.aimag_id !== aimag_id){
-            console.log("ASdasda")
             if(aimag_id !==-1 && sum_id == -1 && zip_id == -1){
                 this.state.map_wms_list.map((wms, idx) =>
                     wms.layers.map((layer, idx) =>{
