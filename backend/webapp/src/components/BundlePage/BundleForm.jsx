@@ -33,7 +33,6 @@ export default class BundleForm extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        console.log("object", prevProps);
         if (this.props.values.id !== prevProps.values.id) {
             const {id, name, price, layers, icon_url, self_module} = this.props.values
             this.setState({id, name, price, layers, icon_url, self_module, module:self_module})
