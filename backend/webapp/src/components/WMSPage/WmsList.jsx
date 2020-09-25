@@ -180,6 +180,7 @@ export class WmsList extends Component {
                                     <WMS
                                         key={values.id}
                                         values={values}
+                                        modalClose={() =>this.modalClose()}
                                         idx={(this.state.currentPage*20)-20+index+1}
                                         handleRemove={() => this.handleRemove(values.id)}
                                         handleEdit={() => this.handleEdit(values)}
