@@ -9,7 +9,6 @@ export default class BundleForm extends Component {
     constructor(props) {
 
         super(props)
-
         this.state = {
             id: props.values.id,
             name: props.values.name,
@@ -34,12 +33,12 @@ export default class BundleForm extends Component {
     }
 
     componentDidUpdate(prevProps) {
-
+        console.log("object", prevProps);
         if (this.props.values.id !== prevProps.values.id) {
-            const {id, name, price, layers, self_module} = this.props.values
-            this.setState({id, name, price, layers, self_module, module:self_module})
+            const {id, name, price, layers, icon_url, self_module} = this.props.values
+            this.setState({id, name, price, layers, icon_url, self_module, module:self_module})
         }
-        
+
 
     }
 
@@ -49,9 +48,9 @@ export default class BundleForm extends Component {
 
     handleSave() {
         const {id, name, layers,icon, icon_url, module}=this.state
-            const values ={'id':id, 'name':name, "layers":layers, 'icon':icon, 'icon_url':icon_url, 'module':module} 
+            const values ={'id':id, 'name':name, "layers":layers, 'icon':icon, 'icon_url':icon_url, 'module':module}
             this.props.handleSave(values)
-    
+
     }
 
     handleLayerToggle(e) {
@@ -60,7 +59,7 @@ export default class BundleForm extends Component {
         if (e.target.checked) {
             layers.push(value)
         } else {
-            layers = layers.filter((id) => id != value) 
+            layers = layers.filter((id) => id != value)
         }
         this.setState({layers})
     }
@@ -123,12 +122,12 @@ export default class BundleForm extends Component {
                     <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
 
                     {this.state.price ?
-                        <select className='form-control ' name="module" onChange={e =>this.handleSelectChange(e)} 
+                        <select className='form-control ' name="module" onChange={e =>this.handleSelectChange(e)}
                         value={this.state.self_module ? `${this.state.self_module}` : ''}
                         >
                             <option value=''></option>
-                            {this.state.price.map(a=> 
-                                <option key={a.id} 
+                            {this.state.price.map(a=>
+                                <option key={a.id}
                                 value={a.id}
                                 >
                                 {a.name}
@@ -217,4 +216,3 @@ export default class BundleForm extends Component {
         )
     }
 }
-
