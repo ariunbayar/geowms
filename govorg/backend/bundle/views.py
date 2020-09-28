@@ -69,4 +69,4 @@ def bundle(request):
         'org': {"org_name": org.name},
     }
 
-    return render(request, 'govorg/index.html', context)
+    return render(request, 'org/index.html', context)

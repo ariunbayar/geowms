@@ -63,7 +63,6 @@ INSTALLED_APPS = [
 
     # GovOrg apps
 
-    'govorg.apps.GovOrgConfig',
     'govorg.backend.org.apps.OrgConfig',
     'govorg.backend.bundle.apps.BundleConfig',
     'govorg.backend.employee.apps.EmployeeConfig',

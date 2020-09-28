@@ -27,4 +27,4 @@ def frontend(request):
             'perms':perms
         },
     }
-    return render(request, 'govorg/index.html', context)
+    return render(request, 'org/index.html', context)
