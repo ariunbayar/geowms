@@ -5,13 +5,18 @@ import {service} from './service'
 import {HureeForm} from './Huree/HureeForm'
 import {AyulForm} from './Ayul/AyulForm'
 import Maps from '../Components/map/Map'
+import { Pagination } from "../Components/pagination/pagination"
 
 export class AddForm extends Component {
 
     constructor(props) {
 
+
         super(props)
         this.state = {
+            perPage:10,
+            currentPage: 1,
+            searchQuery: '',
             form_data: [],
             ayul_data: [],
             handle_save_succes_ayul: false,
@@ -20,9 +25,11 @@ export class AddForm extends Component {
             y: '',
             perms: this.props.perms,
             id: this.props.id.match.params.id,
+            load: 0,
         }
 
-        this.handleListUpdated = this.handleListUpdated.bind(this)
+        this.paginate = this.paginate.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.hureeTooShirheg = this.hureeTooShirheg.bind(this)
@@ -42,15 +49,33 @@ export class AddForm extends Component {
         if(perms.perm_create && perms.perm_remove && perms.perm_view){
             this.setState({ is_editable: perms.perm_create})
         }
-        this.handleListUpdated()
         this.hureeTooShirheg()
+        this.paginate(1, "")
     }
 
-    handleListUpdated() {
-        const {id} = this.state
-        service.dursgaltGazarAll(id).then(({form_data}) => {
-            this.setState({form_data})
-        })
+    paginate (page, query) {
+        const perPage = this.state.perPage
+        const id = this.state.id
+        this.setState({ currentPage: page })
+            return service
+                .dursgaltGazarAll(page, perPage, query, id)
+                .then(page => {
+                    this.setState({ form_data: page.items, form_data_length: page.items.length })
+                    return page
+                })
+    }
+
+    handleSearch(field, e) {
+        if(e.target.value.length >= 1)
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
     }
 
     hureeTooShirheg() {
@@ -68,12 +93,12 @@ export class AddForm extends Component {
 
     handleRemove(id) {
         service.dursgaltGazarRemove(id).then(({success}) => {
-            if (success) this.handleListUpdated()
+            if (success) this.paginate()
         })
     }
 
     render() {
-        const { perms, is_editable } = this.state
+        const { perms, is_editable, currentPage } = this.state
         const dursgalt_id = this.state.id
         const huree_len = this.state.huree_len
         const huree_components = []
@@ -97,7 +122,8 @@ export class AddForm extends Component {
                         null
                     }
                     <div className="col-md-12">
-                        <div className="text-right">
+                    {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
+                        <div className="text-right my-3">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.id.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
@@ -110,8 +136,15 @@ export class AddForm extends Component {
                                 :
                                 null
                             }
+                            <input
+                                type="text"
+                                className="form-control col-md-4  mb-1 float-left"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
                         </div>
-                        {perms.perm_view ? <h4>СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
                         <table className="table">
                             <thead>
                                 {
@@ -139,7 +172,8 @@ export class AddForm extends Component {
                                     this.state.form_data.map((values, idx) =>
                                         <DursgaltGazarTable
                                             key={idx}
-                                            idx = {idx}
+                                            idx={(currentPage*1)-1+idx+1}
+                                            // idx = {idx}
                                             dursgalt_id = {dursgalt_id}
                                             values={values}
                                             handleRemove={() => this.handleRemove(values.id)}
@@ -153,6 +187,11 @@ export class AddForm extends Component {
                                 }
                             </tfoot>
                         </table>
+                        <Pagination
+                            paginate = {this.paginate}
+                            searchQuery = {this.state.searchQuery}
+                            load = { this.state.load }
+                        />
                         {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
                         {huree_components}
                         {

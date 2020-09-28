@@ -1,7 +1,7 @@
 activate
 *.swp
 __pycache__
-
+.vscode/
 
 backend/**/*.dev.html
 frontend/**/*.dev.html
