@@ -38,7 +38,7 @@ export default class DursgaltGazarTable extends Component {
         const idx = this.props.idx
         return (
             <tr>
-                <th>{idx + 1}</th>
+                <th>{idx}</th>
                 <th>{dursgal}</th>
                 <th>{stone}</th>
                 <th>{x}</th>

@@ -481,9 +481,18 @@ def dursgaltGazarCreate(request, payload):
 @require_POST
 @ajax_required
 def dursgaltGazarAll(request, payload):
+    page = payload.get('page')
+    query = payload.get('query')
+    per_page = payload.get('perpage')
+    tuuh_soyol = payload.get('id')
     form_data = []
-    tuug_soyol = payload.get('id')
-    for data in TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuug_soyol):
+
+    data = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuuh_soyol).annotate(search=SearchVector('dursgal')).filter(search__contains=query).order_by('id')
+
+    total_items = Paginator(data, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for data in page_items:
         form_data.append({
             'id': data.id,
             'dursgal': data.dursgal,
@@ -491,12 +500,17 @@ def dursgaltGazarAll(request, payload):
             'x': data.x,
             'y': data.y,
             'stone': data.stone,
-            'dursgal': data.dursgal,
             'protection': data.protection,
-            'point_check': findPoint(data.x, data.y, tuug_soyol),
+            'point_check': findPoint(data.x, data.y, tuuh_soyol),
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
-    return JsonResponse({'form_data': form_data})
+    total_page = total_items.num_pages
+    rsp = {
+    'items': form_data,
+    'page': page,
+    'total_page': total_page
+    }
+    return JsonResponse(rsp)
 
 
 def findPoint(x,y, tuug_soyol):
