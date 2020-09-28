@@ -126,7 +126,7 @@ module.exports = {
         }),
         hhwp({
             chunks: ['govorg/frontend'],
-            filename: path.resolve(__dirname, 'govorg/templates/govorg/index.dev.html'),
+            filename: path.resolve(__dirname, 'govorg/backend/org/templates/org/index.dev.html'),
         }),
         new WebpackBuildNotifierPlugin({
             title: "Geoportal DEV",
