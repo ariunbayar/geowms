@@ -180,7 +180,7 @@ export default class BundleForm extends Component {
                 <div className="form-group">
                     <label htmlFor="id_icon"> Icon: </label>
                     {!this.state.icon &&
-                        <img src={this.state.icon_url} className="uploadPicture"/>
+                        <img src={this.state.icon_url} style={{width:"100px"}} className="uploadPicture ml-3"/>
                     }
                     <ImageUploader
                         withPreview={true}

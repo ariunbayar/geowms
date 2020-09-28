@@ -14,7 +14,7 @@ export class AddForm extends Component {
 
         super(props)
         this.state = {
-            perPage:5,
+            perPage:10,
             currentPage: 1,
             searchQuery: '',
             form_data: [],
@@ -122,7 +122,8 @@ export class AddForm extends Component {
                         null
                     }
                     <div className="col-md-12">
-                        <div className="text-right">
+                    {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
+                        <div className="text-right my-3">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.id.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
@@ -144,7 +145,6 @@ export class AddForm extends Component {
                                 value={this.state.searchQuery}
                             />
                         </div>
-                        {perms.perm_view ? <h4>СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
                         <table className="table">
                             <thead>
                                 {
@@ -187,13 +187,11 @@ export class AddForm extends Component {
                                 }
                             </tfoot>
                         </table>
-                        {this.state.form_data.length > this.state.perPage?
                         <Pagination
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
                             load = { this.state.load }
-                        />: null
-                        }
+                        />
                         {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
                         {huree_components}
                         {
