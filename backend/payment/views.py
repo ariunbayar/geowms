@@ -9,16 +9,23 @@ from geoportal_app.models import User
 from .models import Payment, PaymentPoint
 from backend.forms.models import Mpoint_view
 
+from django.contrib.postgres.search import SearchVector
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def paymentList(request, payload):
 
+    query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
     payment_all = []
 
-    payments = Payment.objects.all()
+    payments = Payment.objects.all().annotate(search=SearchVector(
+        'user__first_name',
+        'geo_unique_number'
+        )
+    ).filter(search__icontains=query)
     total_items = Paginator(payments, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
