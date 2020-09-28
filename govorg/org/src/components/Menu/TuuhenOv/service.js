@@ -98,10 +98,11 @@ function dursgaltGazarUpdate(form_datas_values, form_datas) {
     return fetch(`${prefix}/dursgalt-gazar/update/`, opts).then(handleResponse)
 }
 
-function dursgaltGazarAll(id) {
+function dursgaltGazarAll(page, perpage, query, id) {
+
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id}),
+        body: JSON.stringify({page, perpage, query, id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/all/`, opts).then(handleResponse)
 }
@@ -191,8 +192,3 @@ function ayulAll(id) {
     }
     return fetch(`${prefix}/dursgalt-gazar/ayul-all/`, opts).then(handleResponse)
 }
-
-
-
-
-
