@@ -160,13 +160,6 @@ def updateMore(request, pk):
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
     form_options = _get_bundle_options()
     form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
-    form_options_role = _get_role_options()
 
     rsp = {
         'bundle_list': bundle_list,
