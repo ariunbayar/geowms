@@ -4,7 +4,7 @@ from backend.bundle.models import Bundle
 from django.shortcuts import get_object_or_404
 
 
-def all(request):
+def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
     perms = []
     for module in Bundle.MODULE_CHOICES:
@@ -27,4 +27,4 @@ def all(request):
             'perms':perms
         },
     }
-    return render(request, 'org/index.html', context)
+    return render(request, 'govorg/index.html', context)

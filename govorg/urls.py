@@ -12,8 +12,8 @@ urlpatterns = [
     ], 'back_org'))),
 
     path('', include(([
-        path('', org_views.all, name='all'),
+        path('', org_views.frontend, name='frontend'),
     ], 'org'))),
 
-    re_path('^.*', org_views.all, name='org'),
+    re_path('^.*', org_views.frontend, name='org'),
 ]
