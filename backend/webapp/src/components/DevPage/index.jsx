@@ -119,7 +119,7 @@ export class DevPage extends Component {
             <div>
                  <ul>
                      <li>Татах линк:
-                         <LinkExternal href="/static/assets/user_login.zip"/>
+                         <LinkExternal href="/static/assets/qgis_plugin.zip"/>
                      </li>
                 </ul>
             </div>
