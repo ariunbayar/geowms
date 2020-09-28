@@ -5,10 +5,10 @@ export const service ={
 
 const prefix = '/back/payment'
 
-function payList(page, perpage) {
+function payList(page, perpage, query) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({page, perpage}),
+        body: JSON.stringify({page, perpage, query}),
     }
     return fetch(`${prefix}/payment-list/`, opts).then(handleResponse)
 }

@@ -17,15 +17,28 @@ export class LogForm extends Component {
         this.paginate = this.paginate.bind(this)
     }
 
-    paginate (page) {
+    paginate (page, query) {
         const perpage = this.state.payPerPage
         this.setState({ currentPage: page })
             return service
-                .payList(page, perpage)
+                .payList(page, perpage, query)
                 .then(page => {
-                    this.setState({ payment_all: page.items, pay_legth: page.items.length })
+                    this.setState({ payment_all: page.items, pay_legth: page.items.length})
                     return page
                 })
+    }
+
+    handleSearch(field, e) {
+        if(e.target.value.length >= 1)
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
+        else
+        {
+            this.setState({ [field]: e.target.value })
+            this.paginate(this.state.currentPage, e.target.value)
+        }
     }
 
     render() {
@@ -34,7 +47,19 @@ export class LogForm extends Component {
             <div className="main-content">
                 <div className="container page-container my-4">
                     <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer shadow-lg p-3 mb-5 bg-white rounded">
-                    <h5 className="mb-3">Гүйлгээний хуулга</h5>
+                    <div className="row justify-content-between">
+                        <h5 className="mb-3">Гүйлгээний хуулга</h5>
+                        <div className="col-md-4  mb-1">
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+                        </div>
+                    </div>
                         <table className="table example" id="example">
                             <thead>
                                 <tr>
@@ -53,7 +78,7 @@ export class LogForm extends Component {
                             </thead>
                             <tbody>
                                 {pay_legth === 0 ?
-                                <tr><center>Мэдээлэл байхгүй байна</center></tr>:
+                                <tr><td>Мэдээлэл байхгүй байна</td></tr>:
                                 payment_all.map((pay, idx) =>
                                     <LogFormTable
                                         key = {idx}
