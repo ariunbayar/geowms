@@ -48,7 +48,7 @@ export class LogForm extends Component {
                 <div className="container page-container my-4">
                     <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer shadow-lg p-3 mb-5 bg-white rounded">
                     <div className="row justify-content-between">
-                        <h5 className="mb-3">Гүйлгээний хуулга</h5>
+                        <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>
                         <div className="col-md-4  mb-1">
                             <input
                                 type="text"
