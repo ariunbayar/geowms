@@ -187,11 +187,13 @@ export class AddForm extends Component {
                                 }
                             </tfoot>
                         </table>
+                        {this.state.form_data.length > this.state.perPage?
                         <Pagination
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
                             load = { this.state.load }
-                        />
+                        />: null
+                        }
                         {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
                         {huree_components}
                         {

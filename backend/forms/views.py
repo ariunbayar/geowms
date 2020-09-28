@@ -504,11 +504,11 @@ def dursgaltGazarAll(request, payload):
             'point_check': findPoint(data.x, data.y, tuuh_soyol),
             'created_at': data.created_at.strftime('%Y-%m-%d'),
         })
-        total_page = total_items.num_pages
-        rsp = {
-        'items': form_data,
-        'page': page,
-        'total_page': total_page
+    total_page = total_items.num_pages
+    rsp = {
+    'items': form_data,
+    'page': page,
+    'total_page': total_page
     }
     return JsonResponse(rsp)
 
