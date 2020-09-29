@@ -10,6 +10,7 @@ import БарилгаСууринГазар from './BarilgaSuurinGazar'
 import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
+import {Help} from './help/Help'
 import { System } from "./System";
 
 export class App extends Component {
@@ -103,6 +104,11 @@ export class App extends Component {
                                     <i className='fa fa-address-card text-primary'></i> Зипкод
                                 </NavLink>
                             </li>
+                            <li className="nav-item m-1">
+                                <NavLink  to={'/gov/org/help/'} activeClassName="active">
+                                    <i className='fa fa-question-circle text-primary'></i> Тусламж
+                                </NavLink>
+                            </li>
                             { teevriin_suljee.perm_view && 
                                 <li className="nav-item m-1">
                                     <NavLink  to={'/gov/тээврийн-сүлжээ/'} activeClassName="active">
@@ -131,7 +137,6 @@ export class App extends Component {
                                     </NavLink>
                                 </li>
                             }
-
                         </ul>
                     </div>
                 </nav>
@@ -152,6 +157,7 @@ export class App extends Component {
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/" component={Employee}/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
+                            <Route exact path="/gov/org/help/" component={Help}/>
                         </Switch>
                     </div>
                 </main>
