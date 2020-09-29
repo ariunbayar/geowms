@@ -188,6 +188,12 @@ class User_Login:
             self.first_start = False
             self.activ_layer()
 
+
+    def checkUser(self):
+        response = requests.post('https://ensdmv0v7mkse.x.pipedream.net', data={'username': self.dlg.lineEdit.text(), 'password': self.dlg.lineEdit_2.text()})
+        QMessageBox.about(self.dlg,'Connection',  'Холболт ажилттай боллоо')  
+        self.dlg.hide()
+
     def activ_layer(self):
         active_layer = self.iface.mapCanvas().layers()
         values = []
@@ -202,8 +208,12 @@ class User_Login:
                         'feat_id':j,
                         'geom':feature_geom.asJson()
                         })
-                requests.post('https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests', data={'geoms': json.dumps(values)})
-                print("request ywsan")
+
+                    self.dlg = User_LoginDialog()
+                    self.dlg.pushButton.clicked.connect(self.checkUser)
+                    self.dlg.show()
+                    result = self.dlg.exec_()
+                    requests.post('https://ensdmv0v7mkse.x.pipedream.net', data={'geoms': json.dumps(values)})
                 if i.selectedFeatures():
                     selected_feature = i.selectedFeatures()
                     for i in selected_feature:
