@@ -10,6 +10,7 @@ import БарилгаСууринГазар from './BarilgaSuurinGazar'
 import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
+import { System } from "./System";
 
 export class App extends Component {
 
@@ -144,6 +145,7 @@ export class App extends Component {
                                 <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
                             }
                             <Route path="/gov/тээврийн-сүлжээ/" component={ТээврийнСүлжээ}/>
+                            <Route path="/gov/system/" component={System} />
                             <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
                             <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
                             <Route path="/gov/барилга-суурин-газар/" component={БарилгаСууринГазар}/>
