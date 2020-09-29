@@ -63,7 +63,10 @@ INSTALLED_APPS = [
 
     # GovOrg apps
 
-    'govorg.org.apps.OrgConfig',
+    'govorg.backend.org.apps.OrgConfig',
+    'govorg.backend.bundle.apps.BundleConfig',
+    'govorg.backend.employee.apps.EmployeeConfig',
+    'govorg.backend.system.apps.SystemConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
@@ -147,7 +150,7 @@ FILES_ROOT = os.path.join(BASE_DIR, 'geoportal_app', 'files', 'payment')
 
 LOGIN_URL = 'secure:login'
 LOGIN_REDIRECT_URL = 'bundle:all'
-LOGIN_REDIRECT_ORG_URL = 'org:all'
+LOGIN_REDIRECT_ORG_URL = 'org:frontend'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
 

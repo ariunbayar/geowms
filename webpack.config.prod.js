@@ -16,23 +16,23 @@ const hhwp = ({ chunks, filename }) => new HtmlWebpackPlugin({
 module.exports = {
     mode: "development",
     entry: {
-        'backend/webapp': 
+        'backend/webapp':
             hp('backend/webapp/src/index.js'),
 
-        'frontend/bundle': 
+        'frontend/bundle':
             hp('frontend/bundle/src/index.js'),
 
-        'frontend/mobile': 
+        'frontend/mobile':
             hp('frontend/mobile/src/index.js'),
 
-        'frontend/payment': 
+        'frontend/payment':
             hp('frontend/payment/src/index.js'),
 
-        'frontend/profile': 
+        'frontend/profile':
             hp('frontend/profile/src/index.js'),
 
-        'govorg/org': 
-            hp('govorg/org/src/index.js'),
+        'govorg/frontend':
+            hp('govorg/frontend/index.js'),
     },
     output: {
         // options related to how webpack emits results
@@ -124,8 +124,8 @@ module.exports = {
             filename: path.resolve(__dirname, 'frontend/profile/templates/profile/index.prod.html'),
         }),
         hhwp({
-            chunks: ['govorg/org'],
-            filename: path.resolve(__dirname, 'govorg/org/templates/org/index.prod.html'),
+            chunks: ['govorg/frontend'],
+            filename: path.resolve(__dirname, 'govorg/backend/org/templates/org/index.prod.html'),
         }),
     ],
 }
