@@ -8,6 +8,7 @@ from govorg.backend.system import views as system_views
 urlpatterns = [
     path('api/', include(([
         path('employee/', employee_views.employees, name='employees'),
+        path('system/', system_views.systemList, name='system'),
         path('bundle/', bundle_views.bundle, name='bundle'),
     ], 'back_org'))),
 
