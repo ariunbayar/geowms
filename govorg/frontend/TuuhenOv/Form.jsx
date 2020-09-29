@@ -210,7 +210,7 @@ export class Forms extends Component {
 
                                 <tr>
                                     <th scope="row">Хамрах хүруу тоо ширхэг</th>
-                                    {tuuh_id ? 
+                                    {tuuh_id ?
                                     <td>
                                             <a className="btn gp-outline-primary" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</a>
                                             <ul>
@@ -265,7 +265,7 @@ export class Forms extends Component {
                     </Form>
                     )
                 }}
-            </Formik>  
+            </Formik>
         )
 
     }

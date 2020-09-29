@@ -18,7 +18,7 @@ export default class Bundle extends Component {
     }
     componentDidMount(){
         this.handlegetAll()
-    }   
+    }
 
     handlegetAll(){
         service.roles().then(({org_roles}) => {

@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 
 export class EmployeeTable extends Component {
-    render() {            
+    render() {
         const idx = this.props.idx
         const {id, last_name, username,first_name, email, register, gender, position, created_at} = this.props.values
         return (

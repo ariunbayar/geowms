@@ -1785,7 +1785,7 @@ export class DursgaltGazar extends Component {
                                             id="id_dgh_sergeen_zasvarlah_eseh_temdeglel"
                                             type="textarea"
                                         />
-                                        <ErrorMessage name="dgh_sergeen_zasvarlah_eseh_temdeglel" component="div" className="invalid-feedback"/>                          
+                                        <ErrorMessage name="dgh_sergeen_zasvarlah_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -1833,7 +1833,7 @@ export class DursgaltGazar extends Component {
                                             id="id_dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel"
                                             type="textarea"
                                         />
-                                    <ErrorMessage name="dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel" component="div" className="invalid-feedback"/>                              
+                                    <ErrorMessage name="dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                 </tr>
                                 <tr>
@@ -1878,7 +1878,7 @@ export class DursgaltGazar extends Component {
                                             id="id_dgh_hashaa_baigaa_eseh_temdeglel"
                                             type="textarea"
                                         />
-                                        <ErrorMessage name="dgh_hashaa_baigaa_eseh_temdeglel" component="div" className="invalid-feedback"/>                      
+                                        <ErrorMessage name="dgh_hashaa_baigaa_eseh_temdeglel" component="div" className="invalid-feedback"/>
                                 </td>
                                 </tr>
                                 <tr>
@@ -2029,7 +2029,7 @@ export class DursgaltGazar extends Component {
                 </Form>
                 )
             }}
-        </Formik> 
+        </Formik>
         )
 
     }
