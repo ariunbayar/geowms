@@ -188,43 +188,6 @@ class User_Login:
             self.first_start = False
             self.activ_layer()
 
-
-    def checkUser(self):
-        try:
-            connection = psycopg2.connect(user="postgres",
-                                            password="Aguero16",
-                                            host="127.0.0.1",
-                                            port="5432",
-                                            database="geo4")
-            cursor = connection.cursor()
-            d_id = 'geo'
-            email = 'geo@gmail.com'
-            cursor.execute(''' SELECT * FROM geoportal_app_user WHERE email= %s and password= %s ''', [self.dlg.lineEdit.text(),self.dlg.lineEdit_2.text()])
-            mobile_records = cursor.fetchall() 
-            user_values=[]
-            if mobile_records:
-                for i in mobile_records:
-                    user_values.append({
-                        'id':i[0],
-                        'username':i[4],
-                        'email':i[7],
-                        'firstName':i[5],
-                        'lastName':i[6],
-                        'is_sso':i[13],
-                        'is_superuser':i[3]
-
-                    })
-                QMessageBox.about(self.dlg,'Connection',  'Холболт амжилттай боллоо')  
-                requests.post('https://ensdmv0v7mkse.x.pipedream.net', data={'user_info': json.dumps(user_values)})
-                self.dlg.hide()
- 
-            else:
-                QMessageBox.about(self.dlg,'Connection',  'Холболт ажилтгүй боллоо')  
-        except (Exception, psycopg2.Error) as error :
-            QMessageBox.about(self.dlg, 'Connection', 'Өгөгдлийн сантай холбогдоход алдаа гарлаа')  
-            print ("Error while fetching data from PostgreSQL", error)
-        
-
     def activ_layer(self):
         active_layer = self.iface.mapCanvas().layers()
         values = []
@@ -232,7 +195,6 @@ class User_Login:
         if active_layer:
             for i in active_layer:
                 changed_geom = i.editBuffer()
-                print("changed_geom", changed_geom)
                 if changed_geom:
                     ch=changed_geom.changedGeometries()
                     for j, feature_geom in ch.items():
@@ -240,19 +202,12 @@ class User_Login:
                         'feat_id':j,
                         'geom':feature_geom.asJson()
                         })
-
-                    self.dlg = User_LoginDialog()
-                    self.dlg.pushButton.clicked.connect(self.checkUser)
-                    self.dlg.show()
-                    result = self.dlg.exec_()
-                requests.post('https://ensdmv0v7mkse.x.pipedream.net', data={'geoms': json.dumps(values)})
+                requests.post('https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests', data={'geoms': json.dumps(values)})
+                print("request ywsan")
                 if i.selectedFeatures():
                     selected_feature = i.selectedFeatures()
-                    print(selected_feature)
                     for i in selected_feature:
                         selected_feautures.append({
                         'active_feature_id':i.id(),
                         'active_feature_attributes':i.attributes()}
-                        )
-        print("done success")               
-                            
+                        )                            

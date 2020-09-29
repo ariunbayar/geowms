@@ -29,7 +29,7 @@
     <string notr="true">color: rgb(238, 238, 236);</string>
    </property>
    <property name="text">
-    <string>Имэйл</string>
+    <string>Нэвтрэх нэр</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -72,6 +72,9 @@
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(238, 238, 236);</string>
+   </property>
+   <property name="echoMode">
+    <enum>QLineEdit::Password</enum>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton">
