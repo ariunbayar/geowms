@@ -403,7 +403,7 @@ export class FormTseg extends Component {
                                                 id="tsegiin_dugaar"
                                                 autoComplete="off"
                                                 list="tsegList"
-                                                className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (tseg_dugaar_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
                                                 onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
                                                 value = {this.state.tsegiin_dugaar}
                                             />

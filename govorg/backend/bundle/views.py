@@ -62,11 +62,3 @@ def bundle(request):
         )
 
     return JsonResponse({'org_roles': org_roles_display})
-
-    org = Org.objects.filter(employee__user=request.user).first()
-
-    context = {
-        'org': {"org_name": org.name},
-    }
-
-    return render(request, 'org/index.html', context)

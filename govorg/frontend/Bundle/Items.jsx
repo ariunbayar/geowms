@@ -13,7 +13,7 @@ export class Item extends Component {
     }
 
     handlePermChange(e) {
-            
+
     }
 
     render() {
