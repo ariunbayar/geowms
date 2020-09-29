@@ -115,6 +115,14 @@ export class DevPage extends Component {
                         <li>Координат хөрвүүлэх сан </li>
                     </ul>
             </div>
+            <strong>'Qgis'-ийн 'Active feature'-ийн өөрчлөлтийг авах 'plugin' </strong>
+            <div>
+                 <ul>
+                     <li>Татах линк:
+                         <LinkExternal href="/static/assets/qgis_plugin.zip"/>
+                     </li>
+                </ul>
+            </div>
             <h1>Координатын формат</h1>
             <div>
                 <ul>
@@ -161,7 +169,6 @@ export class DevPage extends Component {
                      </li>
                 </ul>
             </div>
-
             <h1>Өнгөний код</h1>
             <div className="col-md-3 colordiv">
               <ul>
