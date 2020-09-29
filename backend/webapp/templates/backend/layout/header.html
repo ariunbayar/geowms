@@ -1,30 +1,67 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary py-0">
-    <div class="container">
-        <div class="ml-auto mt-2 mt-lg-0">
-                {% if user.is_authenticated %}
-                    {% if user.is_superuser %}
-                    <span class="btn gp-btn-primary">
-                        Нэвтэрсэн хэрэглэгч: {{user.username}}
-                    </span>
-                    {% else %}
-                    <span class="btn gp-btn-primary">
-                        Нэвтэрсэн хэрэглэгч: {{user.last_name|first}}.{{user.first_name}}
-                       </span>
-                    {% endif %}
-                    <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
+<header class="topbar-nav">
+    <nav class="navbar navbar-expand fixed-top bg-white">
+      <ul class="navbar-nav mr-auto align-items-center">
+        <li class="nav-item">
+          <a class="nav-link toggle-menu" href="javascript:void();">
+          <i class="icon-menu menu-icon"></i>
+        </a>
+        </li>
+        <li class="nav-item">
+          <form class="search-bar">
+            <input type="text" class="form-control" placeholder="Хайх"></input>
+            <a href="javascript:void();"><i class="icon-magnifier"></i></a>
+          </form>
+        </li>
+      </ul>
+      <ul class="navbar-nav align-items-center right-nav-link">
+        <li class="nav-item">
+          <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown" href="#">
+            <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
+          </a>
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li class="dropdown-item user-details">
+                        <a href="javaScript:void();">
+                        <div class="media">
+                            <div class="avatar"><img class="align-self-start mr-3" src="{% static "assets/image/user.png" %}" alt="user avatar"></img></div>
+                            <div class="media-body">
+                                <h6 class="mt-2 user-title">{{user.username}}</h6>
+                                <p class="user-subtitle">{{user.email}}</p>
+                            </div>
+                        </div>
+                        </a>
+                        </li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item"><a href="{% url "profile:history" %}" class="text-dark"><i class="icon-wallet mr-2"></i>ПРОФАЙЛ</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i>ГАРАХ</a></li>
+                </ul>
                 {% else %}
-                    <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li class="dropdown-item user-details">
+                        <a href="javaScript:void();">
+                        <div class="media">
+                            <div class="avatar"><img class="align-self-start mr-3" src="https://via.placeholder.com/110X110" alt="user avatar"></img></div>
+                            <div class="media-body">
+                                <h6 class="mt-2 user-title">{{user.last_name}}</h6>
+                                <p class="user-subtitle">{{user.first_name}}</p>
+                            </div>
+                        </div>
+                        </a>
+                    </li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item"><a href="{% url "profile:history" %}" class="text-dark"><i class="icon-wallet mr-2"></i> Account</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i> ГАРАХ</a></li>
+                </ul>
                 {% endif %}
-        </div>
-    </div>
-</nav>
-<div class="container py-3">
-    <div class="row h-100">
-        <div class="col-md-4">
-            <a href="/">
-                <img class="logo-top" src="{% static "assets/image/logo/logo.png" %}" alt="">
-            </a>
-        </div>
-    </div>
-</div>
+            {% else %}
+                <li class="dropdown-item"><a href="{% url "secure:login" %}"><i class="icon-power mr-2"></i>УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a></li>
+            {% endif %}
+        </li>
+      </ul>
+    </nav>
+    </header>
+    <div class="clearfix"></div>

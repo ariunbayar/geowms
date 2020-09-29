@@ -13,20 +13,40 @@
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/jquery.dataTables.min.css" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/buttons.dataTables.min.css" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/morris.css" %}">
+    <!--Full Calendar Css-->
+    <link rel="stylesheet" href="{% static "assets/admin/plugins/fullcalendar/css/fullcalendar.min.css" %}">
+    <!-- simplebar CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/plugins/simplebar/css/simplebar.css" %}">
+    <!-- Bootstrap core CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/animate.css" %}">
+    <!-- Icons CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/icons.css" %}">
+    <!-- Sidebar CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/sidebar-menu.css" %}">
+    <!-- Custom Style-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/app-style.css" %}">
+
 </head>
 
 <body>
 
     {% include "./header.html" %}
-
     {% block content %}{% endblock %}
-
-    {% include "./footer.html" %}
-
-
     {% block script %}
     {% endblock %}
 
+<script src="{% static "assets/admin/js/jquery.min.js" %}"></script>
+<script src="{% static "assets/admin/js/popper.min.js" %}"></script>
+
+<script src="{% static "assets/admin/plugins/simplebar/js/simplebar.js" %}"></script>
+<script src="{% static "assets/admin/js/waves.js" %}"></script>
+
+<script src="{% static "assets/admin/js/sidebar-menu.js" %}"></script>
+<script src="{% static "assets/admin/js/app-script.js" %}"></script>
+
+<script src="{% static "assets/admin/js/bootstrap.min.js" %}"></script>
+
 </body>
+
 
 </html>
