@@ -35,25 +35,7 @@ export class Org extends Component {
         const { user_count } = this.state;
         const org_level = this.props.match.params.level
         return (
-            <div className="container my-4 shadow-lg mb-5 bg-white rounded">
-                <div className="row">
-                    <div className="col-md-12 px-0">
-                        <ul className="list-group list-group-horizontal col-md-12 text-center pr-0">
-                            <NavLink to="/back/байгууллага/түвшин/1/" className="list-group-item col-md-3" activeClassName="text-white gp-bg-primary">
-                                1-р түвшин
-                            </NavLink>
-                            <NavLink to="/back/байгууллага/түвшин/2/" className="list-group-item col-md-3" activeClassName="text-white gp-bg-primary">
-                                2-р түвшин
-                            </NavLink>
-                            <NavLink to="/back/байгууллага/түвшин/3/" className="list-group-item col-md-3" activeClassName="text-white gp-bg-primary">
-                                3-р түвшин
-                            </NavLink>
-                            <NavLink to="/back/байгууллага/түвшин/4/" className="list-group-item col-md-3" activeClassName="text-white gp-bg-primary">
-                                4-р түвшин
-                            </NavLink>
-                        </ul>
-                    </div>
-                </div>
+            <div className="my-4 shadow-lg mb-5 bg-white rounded">
                 <div className="row">
                     <div className="col-md-12">
                         <Switch>

@@ -50,65 +50,61 @@ export class CrudEvenLog extends Component {
     render() {
         const { crud_event_display, currentPage, crud_length, crudPerPage } = this.state
         return (
-            <div className="main-content">
-                <div className="container page-container my-4">
-                    <div className="row rounded">
-                        <div className="col-md-6">
-                            <h5 className="mb-3">Хандалтын тоогоор</h5>
-                            <Charts></Charts>
-                        </div>
-                        <div className="col-md-6">
-                            <h5 className="mb-3">Үйлдлийн төрлөөр</h5>
-                            <RadarChart></RadarChart>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-12">
-                            <hr />
-                        </div>
-                    </div>
-                    <h5 className="mb-3">Хийгдсэн үйлдлийн мэдээлэл</h5>
-                    <div className="form-row text-right">
-                        <div className="form-group col-md-8">
-                            <label htmlFor="searchQuery">Хайх:</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="searchQuery"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
-                        </div>
-                    </div>
-                    <div className="row rounded">
-                        <div className="col-md-12">
-                            <table className="table example" id="example">
-                                <thead>
-                                    <tr>
+            <div className="row">
+                <div className="col-md-12">
+                    <div className="card">
+                        <div className="card-body">
+                        <div className="form-row text-right">
+                        <div className="row">
+                            <div className="col-md-6">
+                                <h5 className="mb-3">Хандалтын тоогоор</h5>
+                                <Charts></Charts>
+                            </div>
+                            <div className="col-md-6">
+                                <h5 className="mb-3">Үйлдлийн төрлөөр</h5>
+                                <RadarChart></RadarChart>
+                            </div>
+                            </div>
+                                <div className="form-group col-md-8">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="searchQuery"
+                                        placeholder="Хайх"
+                                        onChange={(e) => this.handleSearch('searchQuery', e)}
+                                        value={this.state.searchQuery}
+                                    />
+                                </div>
+                            </div>
+                            <h5 className="card-title">Basic Table</h5>
+                            <div className="table-responsive">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
                                         <th scope="col">№</th>
                                         <th scope="col">Үйлдэл</th>
-                                        <th scope="col">Хийгдсэн хүснэгт</th >
-                                        <th scope="col">Хэрэглэгчийн нэр</th >
-                                        <th scope="col">Огноо</th >
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { crud_length === 0 ?
-                                    <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
-                                    crud_event_display.map((logout, idx) =>
-                                        <CrudEvenLogTable
-                                            key = {idx}
-                                            idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
-                                            values={logout}>
-                                        </CrudEvenLogTable>
-                                    )}
-                                </tbody>
-                            </table>
-                            <Pagination
-                                paginate = {this.paginate}
-                                searchQuery = {this.state.searchQuery}
-                            />
+                                        <th scope="col">Хийгдсэн хүснэгт</th>
+                                        <th scope="col">Хэрэглэгчийн нэр</th>
+                                        <th scope="col">Огноо</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        { crud_length === 0 ?
+                                            <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
+                                            crud_event_display.map((logout, idx) =>
+                                                <CrudEvenLogTable
+                                                    key = {idx}
+                                                    idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
+                                                    values={logout}>
+                                                </CrudEvenLogTable>
+                                        )}
+                                    </tbody>
+                                </table>
+                                <Pagination
+                                    paginate = {this.paginate}
+                                    searchQuery = {this.state.searchQuery}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
