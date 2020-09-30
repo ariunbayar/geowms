@@ -85,7 +85,7 @@ export class AyulForm extends Component {
         const tuuhen_ov = this.props.dursgalt_id
         const { perms, is_editable } = this.state
         return (
-            <div>
+            <div className="ml-3">
                 <h4>Дурсгалт газрын аюулын хамрах хүрээний солбилцол.</h4>
                 {this.state.ayul_data.length > 2 ?
                     <h6 className="text-success">Аюулын хүрээ</h6>:

@@ -120,7 +120,7 @@ export class Forms extends Component {
 
         for(var i=1; i<=huree_len; i++)
         {
-            huree_components.push(<HureeEdit huree_id={i} hureeRemove={this.hureeRemove} ></HureeEdit>)
+            huree_components.push(<a><HureeEdit huree_id={i} hureeRemove={this.hureeRemove} ></HureeEdit><br></br></a>)
         }
         return (
             <Formik
@@ -146,7 +146,7 @@ export class Forms extends Component {
                      <Maps handleXY={this.handleXY} coordinatCheck={false} />
                         <div className='card'>
                             <div className='card-body row'>
-                                <div className='col-md-7 my-4'>
+                                <div className='col-md-9 my-4'>
                                     <div className="col-md-12 mb-4 my-4">
                                         <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                             <i className="fa fa-angle-double-left"></i> Буцах
@@ -194,7 +194,7 @@ export class Forms extends Component {
                                                         type="text"
                                                     />
                                                 </td>
-                                                <th rowSpan="2" scope="rowgroup">Тухайн дурсгал оршиж буй аймаг, сумын нэрийг бичнэ.</th>
+                                                <th rowSpan="2" scope="rowgroup">Тухайн дурсгал оршиж буй аймаг,<br></br> сумын нэрийг бичнэ.</th>
                                             </tr>
                                             <tr>
                                                 <th scope="row">Сум, Дүүрэг</th>
@@ -214,10 +214,10 @@ export class Forms extends Component {
                                                 <th scope="row">Хамрах хүруу тоо ширхэг</th>
                                                 {tuuh_id ?
                                                 <td>
-                                                        <a className="btn gp-outline-primary" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</a>
-                                                        <ul>
-                                                            {huree_components}
-                                                        </ul>
+                                                        <button type="button" class="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1"  onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
+                                                        <br></br>
+                                                        <hr className="my-2"></hr>
+                                                        {huree_components}
                                                 </td>:
                                                 <td>
                                                         <Field
@@ -246,7 +246,7 @@ export class Forms extends Component {
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <div className="span3">
+                                    <div className="span3 my-3">
                                         {has_error
                                             ?
                                                 <p> </p>

@@ -7,8 +7,13 @@
     height: 70%;
     right: 5px;
     position: fixed;
+    z-index: 100;
 }
-
+.map-open-button{
+    right: 0px;
+    top:63px;
+    position: fixed;
+}
 .суурь-давхаргууд{
     right: 1px;
     z-index: -100;

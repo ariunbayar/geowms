@@ -50,7 +50,7 @@ export default class App extends Component {
               <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
               <li>
                 <NavLink href="javaScript:void();"  activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>Хандалт</span> <i className="fa fa-angle-left pull-right"></i>
+                  <i className="icon-map"></i> <span>ХАНДАЛТ</span> <i className="fa fa-angle-left pull-right"></i>
                 </NavLink>
                 <ul className="sidebar-submenu">
                   <li><NavLink  activeClassName="active" to={"/back/access/login/"}><i className="fa fa-circle-o"></i>Оролт гаралт</NavLink></li>
@@ -60,7 +60,7 @@ export default class App extends Component {
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/log/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>Calendar</span>
+                  <i className="icon-map"></i> <span>БАНК ЛОГ</span>
                 </NavLink>
               </li>
               <li>
