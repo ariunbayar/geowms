@@ -11,9 +11,7 @@ export default class FormTable extends Component {
             x: '',
             y: ''
         }
-
     }
-
 
     render() {
         const {idx, values} = this.props

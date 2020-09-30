@@ -129,7 +129,7 @@ export default class AyulFormTable extends Component {
                             </a>
                         ):
                         <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Засах">
-                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                         </a>
 
                         }
@@ -144,7 +144,7 @@ export default class AyulFormTable extends Component {
                     ?
                     <td>
                         <a onClick={this.handleModalDeleteOpen}>
-                            <i className="fa fa-trash-o" aria-hidden="true"></i>
+                            <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                         </a>
                         {this.state.is_modal_delete_open &&
                             <Modal

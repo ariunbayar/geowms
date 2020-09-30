@@ -55,7 +55,7 @@ export default class DursgaltGazarTable extends Component {
                     ?
                     <th>
                         <NavLink to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/update/${id}/`}>
-                                <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                         </NavLink>
                     </th>
                     :
@@ -66,7 +66,7 @@ export default class DursgaltGazarTable extends Component {
                     ?
                     <th>
                         <a href="#" onClick={this.handleModalDeleteOpen}>
-                            <i className="fa fa-trash-o" aria-hidden="true"></i>
+                            <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                         </a>
                         {this.state.is_modal_delete_open &&
                             <Modal

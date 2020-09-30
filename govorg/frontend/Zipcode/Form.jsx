@@ -35,6 +35,7 @@ export class Forms extends Component {
             root3: '',
             root4: -1,
         }
+
         this.handleSubmit = this.handleSubmit.bind(this)
         this.getAimag = this.getAimag.bind(this)
         this.handleInputAimag = this.handleInputAimag.bind(this)
@@ -265,9 +266,9 @@ export class Forms extends Component {
     render() {
         const {latx, laty} = this.state
         return (
-            <div className="card">
-                <div className="row my-4 card-body">
-                    <div className="my-4 mt-4 col-md-6">
+            <div className="card container">
+                <div className="row card-body">
+                    <div className="mt-4 col-md">
                         <table className="table table-bordered">
                             <tbody>
                             <tr>
@@ -359,7 +360,7 @@ export class Forms extends Component {
                         null
                         }
                     </div>
-                    <div className="my-4 mt-4 col-md-6">
+                    <div className="my-4 mt-4 col-md">
                     <input
                         type="text"
                         className="form-control col-md-7  mb-1 float-left"
@@ -373,26 +374,28 @@ export class Forms extends Component {
                         <option value='AU_SumUnit'>Сум дүүргийн хил</option>
                         <option value='zipcode'>Баг хорооны хил</option>
                     </select>
-                    <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">№</th>
-                                    <th scope="col">Нэр</th>
-                                    <th scope="col">Код</th>
-                                    <th scope="col">Засах</th>
-                                </tr>
-                            </thead>
-                            <tfoot>
-                                {this.state.form_data.map((values, idx) =>
-                                    <FormTable
-                                        handleEdit={this.handleEdit}
-                                        key={idx}
-                                        values={values}
-                                        idx = {idx}
-                                    />
-                                )}
-                            </tfoot>
-                        </table>
+                        <div className="table-responsive">
+                            <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">№</th>
+                                            <th scope="col">Нэр</th>
+                                            <th scope="col">Код</th>
+                                            <th scope="col">Засах</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        {this.state.form_data.map((values, idx) =>
+                                            <FormTable
+                                                handleEdit={this.handleEdit}
+                                                key={idx}
+                                                values={values}
+                                                idx = {idx}
+                                            />
+                                        )}
+                                    </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

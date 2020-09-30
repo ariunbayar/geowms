@@ -594,7 +594,7 @@ export class DursgaltGazar extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className='container my-4 card'>
+                    <div className='col-md-8 my-4 card'>
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}
@@ -604,13 +604,13 @@ export class DursgaltGazar extends Component {
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
                         </div>
-                        <div className="row container  my-4">
+                        <div className="row container">
                             <h4>2015 ОНЫ ТҮҮХ, СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛИЙН МАЯГТ №1</h4>
                         </div>
 
                         <table className="table table-bordered">
                             <tr>
-                                <th scope="row" style={{width: "20%"}} className="align-middle">
+                                <td scope="row" style={{width: "20%"}} className="align-middle">
                                     Төрөл зүйл
                                     <div
                                         type="button"
@@ -628,7 +628,7 @@ export class DursgaltGazar extends Component {
                                         </div>
                                     </i>
                                     </div>
-                                </th>
+                                </td>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <div className="form-group">
                                         <select className="form-control" id="torol_zuil_torol_zuil" value={this.state.torol_zuil_torol_zuil} onChange={(e) => this.handleInput('torol_zuil_torol_zuil', e)}>
@@ -641,19 +641,19 @@ export class DursgaltGazar extends Component {
                                             <option value="7" >7. Үйлдвэрлэлийн ул мөр хадгалсан дурсгалт газар</option>
                                         </select>
                                         {this.state.torol_zuil_torol_zuil_level1.length > 0 && (
-                                        <select className="form-control" id="torol_zuil_torol_zuil_tree" value={this.state.torol_zuil_torol_zuil_tree} onChange={(e) => this.handleInput('torol_zuil_torol_zuil_tree', e)}>
+                                        <select className="form-control my-3" id="torol_zuil_torol_zuil_tree" value={this.state.torol_zuil_torol_zuil_tree} onChange={(e) => this.handleInput('torol_zuil_torol_zuil_tree', e)}>
                                             {this.state.torol_zuil_torol_zuil_level1}
                                         </select>)}
 
                                         {this.state.torol_zuil_torol_zuil_level2.length > 0 && (
-                                        <select className="form-control" id="torol_zuil_torol_zuil_tree2" value={this.state.torol_zuil_torol_zuil_tree2} onChange={(e) => this.handleInput('torol_zuil_torol_zuil_tree2', e)}>
+                                        <select className="form-control my-3" id="torol_zuil_torol_zuil_tree2" value={this.state.torol_zuil_torol_zuil_tree2} onChange={(e) => this.handleInput('torol_zuil_torol_zuil_tree2', e)}>
                                             {this.state.torol_zuil_torol_zuil_level2}
                                         </select>)}
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row" className="align-middle">
+                                <td scope="row" className="align-middle">
                                     Чулуулгын төрөл
                                     <div
                                         type="button"
@@ -671,7 +671,7 @@ export class DursgaltGazar extends Component {
                                         </div>
                                     </i>
                                     </div>
-                                </th>
+                                </td>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <Fragment>
                                         <Field name="torol_zuiltorol_zuil_name" as="select" className="form-control"
@@ -693,7 +693,7 @@ export class DursgaltGazar extends Component {
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row">
+                                <td scope="row">
                                     Дурсгалт газрын нэр.
                                     <div
                                         type="button"
@@ -711,7 +711,7 @@ export class DursgaltGazar extends Component {
                                         </div>
                                     </i>
                                     </div>
-                                </th>
+                                </td>
                                 <td colSpan="7" scope="rowgroup"  scope="row">
                                     <Field
                                         className={'form-control ' + (errors.torol_zuil_dursgalt_gazriin_ner ? 'is-invalid' : '')}
@@ -723,7 +723,7 @@ export class DursgaltGazar extends Component {
                                 </td>
                             </tr>
                             <tr>
-                                <th rowSpan="20" scope="rowgroup" scope="row">
+                                <td rowSpan="20" scope="rowgroup" scope="row">
                                     Солбилцол
                                     <div
                                         type="button"
@@ -741,8 +741,8 @@ export class DursgaltGazar extends Component {
                                         </div>
                                     </i>
                                     </div>
-                                </th>
-                                <th rowSpan="2" colSpan="2" scope="rowgroup" scope="row">№</th>
+                                </td>
+                                <td rowSpan="2" colSpan="2" scope="rowgroup" scope="row">№</td>
                                 <td colSpan="5">Latitude Longitude</td>
                             </tr>
                             <tr>
@@ -788,7 +788,7 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th scope="row" style={{width: "20%"}} className="align-middle">
+                                    <td scope="row" style={{width: "20%"}} className="align-middle">
                                         Тодорхойлолт
                                         <div
                                             type="button"
@@ -806,7 +806,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td colSpan="5" scope="row">
                                         <Field
                                             className={'form-control ' + (errors.torol_zuil_todorhoilolt ? 'is-invalid' : '')}
@@ -824,7 +824,7 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "10%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "10%"}} className="align-middle">
                                         Хэмжээ
                                         <div
                                             type="button"
@@ -842,7 +842,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>Талбай</td>
                                     <td>Урт</td>
                                     <td>Өргөн</td>
@@ -907,7 +907,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" className="align-middle">
+                                    <td scope="row" className="align-middle">
                                         Бусад хэмжээ
                                         <div
                                             type="button"
@@ -925,7 +925,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td colSpan="6" scope="rowgroup">
                                         <Field
                                             className={'form-control ' + (errors.hemjee_busad_hemjee ? 'is-invalid' : '')}
@@ -937,7 +937,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th className="align-middle">
+                                    <td className="align-middle">
                                         Тоо ширхэг
                                         <div
                                             type="button"
@@ -955,7 +955,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td colSpan="6">
                                         <Field
                                             className={'form-control ' + (errors.hemjee_too_shirheg ? 'is-invalid' : '')}
@@ -967,7 +967,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th className="align-middle">
+                                    <td className="align-middle">
                                         Тэмдэглэл
                                         <div
                                             type="button"
@@ -985,7 +985,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td colSpan="6">
                                         <Field
                                             className={'form-control ' + (errors.hemjee_temdeglel ? 'is-invalid' : '')}
@@ -1003,7 +1003,7 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Дурсгалт газрын гэрээгээр хариуцуулж байгаа иргэн (малчин) байгаа эсэх.
                                         <div
                                             type="button"
@@ -1022,7 +1022,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dg_ezen_dursgalt_gazar_ezen" as="select" className="form-control"
@@ -1053,7 +1053,7 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Хамгаалалтын ангилал.
                                         <div
                                             type="button"
@@ -1071,7 +1071,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_angilal" as="select" className="form-control"
@@ -1087,7 +1087,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="4" scope="rowgroup" scope="row" className="align-middle">
+                                    <td rowSpan="4" scope="rowgroup" scope="row" className="align-middle">
                                         Хамгаалалтын бүс тогтоох шаардлагатай эсэх.
                                         <div
                                             type="button"
@@ -1105,7 +1105,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_bus_togtooh_shaardlaga" as="select" className="form-control"
@@ -1127,7 +1127,7 @@ export class DursgaltGazar extends Component {
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Тусгай хамгаалалтад авах шаардлагатай эсэх.
                                         <div
                                             type="button"
@@ -1146,7 +1146,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_tusgai_hamgaalalt" as="select" className="form-control"
@@ -1172,7 +1172,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Яаралтай авран хамгаалах шаардлагатай эсэх.
                                         <div
                                             type="button"
@@ -1191,7 +1191,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_yaaraltai_hamgaalalt" as="select" className="form-control"
@@ -1217,7 +1217,7 @@ export class DursgaltGazar extends Component {
                                 </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Өмчлөл, эзэмших ашиглалтын байдлыг өөрчлөх саналтай эсэх.
                                         <div
                                             type="button"
@@ -1236,7 +1236,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt" as="select" className="form-control"
@@ -1262,8 +1262,8 @@ export class DursgaltGazar extends Component {
                                 </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>
-                                        Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ. Хэрэв хууль бусаар ухаж тоносон бол "Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>
+                                        Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага<br></br> судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ.<br></br> Хэрэв хууль бусаар ухаж тоносон бол <br></br>"Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
                                         <div
                                             type="button"
                                             onMouseOver={(e) => this.handleBoxOver('showBox15', e)}
@@ -1281,7 +1281,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_maltan_sudaltan_hamgaalalt" as="select" className="form-control"
@@ -1308,7 +1308,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
 
                                 <tr>
-                                    <th rowSpan="13" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="13" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Гэмтлийн тухай мэдээлэл.
                                         <div
                                             type="button"
@@ -1327,7 +1327,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <div className="col-md-12">
                                             <input
@@ -1509,7 +1509,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
 
                                 <tr>
-                                    <th rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="12" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Байгалийн хүчин зүйл.
                                         <div
                                             type="button"
@@ -1528,7 +1528,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <div className="col-md-12">
                                             <input
@@ -1697,7 +1697,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
 
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Сэргээн засварласан эсэх.
                                         <div
                                             type="button"
@@ -1716,7 +1716,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_sergeen_zasvarlasan_eseh_hamgaalalt" as="select" className="form-control"
@@ -1742,7 +1742,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Сэргээн засварлах эсэх.
                                         <div
                                             type="button"
@@ -1761,7 +1761,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_sergeen_zasvarlah_eseh_nenshaardlaga" as="select" className="form-control"
@@ -1789,7 +1789,7 @@ export class DursgaltGazar extends Component {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Хамгаалалтын зэрэг өөрчлөх санал.
                                         <div
                                             type="button"
@@ -1808,7 +1808,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_hamgaalaltiin_zereg_oorchloh_sanal" as="select" className="form-control"
@@ -1837,7 +1837,7 @@ export class DursgaltGazar extends Component {
                                 </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Хашаа хайстай эсэх.
                                         <div
                                             type="button"
@@ -1856,7 +1856,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_hashaa_baigaa_eseh_hashaa" as="select" className="form-control"
@@ -1882,7 +1882,7 @@ export class DursgaltGazar extends Component {
                                 </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Саравчтай эсэх.
                                         <div
                                             type="button"
@@ -1901,7 +1901,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_saravchtai_eseh_saravch" as="select" className="form-control"
@@ -1927,7 +1927,7 @@ export class DursgaltGazar extends Component {
                                 </td>
                                 </tr>
                                 <tr>
-                                    <th rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
+                                    <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}} className="align-middle">
                                         Хаяг тайлбартай эсэх.
                                         <div
                                             type="button"
@@ -1946,7 +1946,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Fragment>
                                             <Field name="dgh_hayg_tailbar_eseh_hayg" as="select" className="form-control"
@@ -1976,7 +1976,7 @@ export class DursgaltGazar extends Component {
 
 
                                 <tr>
-                                    <th rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>
+                                    <td rowSpan="1" scope="rowgroup" scope="row" style={{width: "30%"}}>
                                         Бусад тэмдэглэл.
                                         <div
                                             type="button"
@@ -1994,7 +1994,7 @@ export class DursgaltGazar extends Component {
                                             </div>
                                         </i>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <Field
                                             className={'form-control ' + (errors.last_busad_temdeglel ? 'is-invalid' : '')}
@@ -2008,7 +2008,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
                             </thead>
                         </table>
-                        <div className="span3">
+                        <div className="span3 my-3">
                             {has_error
                                 ?
                                     <p> </p>

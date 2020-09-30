@@ -33,6 +33,7 @@ export default class Maps extends Component {
             source_draw: null,
             info:[],
             xy: [],
+            map_open:true,
         }
 
         this.controls = {
@@ -210,14 +211,20 @@ export default class Maps extends Component {
 
     render() {
         return (
-            <div>
+            <div className="">
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
-                            <div id="map" className="mt-2"></div>
+                            <div id={this.state.map_open ? "map" : "map-disable"} className="mt-2"></div>
                         </div>
                     </div>
                 </div>
+                <button
+                    className="btn btn-info btn-sm waves-effect waves-light m-1 map-open-button"
+                    onClick={() => this.setState(prevState => ({map_open: !prevState.map_open}))}
+                >
+                {this.state.map_open ? "Газрын зураг хаах" : "Газрын зураг нээх"}
+                </button>
             </div>
         )
     }

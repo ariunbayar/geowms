@@ -61,9 +61,9 @@ export class App extends Component {
         <BrowserRouter>
             <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
             <div className="brand-logo">
-                <a href="index.html">
-                <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
-                <h5 className="logo-text">ГЕОПОРТАЛ</h5>
+                <a href="/">
+                    <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
+                    <h5 className="logo-text">ГЕОПОРТАЛ</h5>
                 </a>
             </div>
             <ul className="sidebar-menu do-nicescrol">

@@ -84,10 +84,10 @@ export class HureeForm extends Component {
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         const { perms, is_editable } = this.state
         return (
-            <div>
+            <div className="ml-3">
                 {this.state.huree_data.length > 2 ?
-                    <h6 className="text-success">Хүрээ  {tuuh_soyl_huree_id}.</h6>:
-                    <h6 className="text-danger">Хүрээ  {tuuh_soyl_huree_id}.</h6>
+                    <h6 className="text-success my-3">Хүрээ  {tuuh_soyl_huree_id}.</h6>:
+                    <h6 className="text-danger my-3">Хүрээ  {tuuh_soyl_huree_id}.</h6>
                 }
                 <table className="table table-bordered">
                     <thead>

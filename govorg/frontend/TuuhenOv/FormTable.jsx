@@ -45,20 +45,20 @@ export default class FormTable extends Component {
                 <th>{created_at}</th>
                 <th>
                     <NavLink to={`/gov/tuuhen-ov/${id}/add/`}>
-                            <i className="fa fa-plus-circle" aria-hidden="true"></i>
+                            <i className="fa fa-plus-circle gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </th>
                 {perm_view && perm_create && perm_remove ?
                 <th>
                     <NavLink to={`/gov/tuuhen-ov/${id}/update/`}>
-                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </th> : null
                 }
                 {perm_remove ?
                 <th>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     {this.state.is_modal_delete_open &&
                         <Modal
