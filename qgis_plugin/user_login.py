@@ -32,7 +32,11 @@ import os.path
 from qgis.core import QgsProject
 import psycopg2
 from PyQt5.QtWidgets import QMessageBox
+<<<<<<< HEAD
+from qgis.core import QgsProject, QgsFeature, QgsFeatureRequest, QgsExpression
+=======
 from qgis.core import QgsProject
+>>>>>>> 7570b2ec1e7fbd080a1a5ee8d171bafa851a5bfc
 
 class User_Login:
     """QGIS Plugin Implementation."""
@@ -190,34 +194,44 @@ class User_Login:
 
 
     def checkUser(self):
-        response = requests.post('https://ensdmv0v7mkse.x.pipedream.net', data={'username': self.dlg.lineEdit.text(), 'password': self.dlg.lineEdit_2.text()})
+        user_info = []
+        user_info.append({
+            'username': self.dlg.lineEdit.text(),
+            'password': self.dlg.lineEdit_2.text()
+        })
         QMessageBox.about(self.dlg,'Connection',  'Холболт ажилттай боллоо')  
         self.dlg.hide()
+        return user_info
 
     def activ_layer(self):
         active_layer = self.iface.mapCanvas().layers()
-        values = []
-        selected_feautures = []
+        features = QgsFeatureRequest()
+        user_info = []
         if active_layer:
             for i in active_layer:
                 changed_geom = i.editBuffer()
+                fieldnames = [field.name() for field in i.fields()]
+                n_of_attributes = (len([field.name() for field in i.fields()]))
                 if changed_geom:
                     ch=changed_geom.changedGeometries()
                     for j, feature_geom in ch.items():
-                        values.append({
-                        'feat_id':j,
-                        'geom':feature_geom.asJson()
-                        })
+                        values = []
+                        expr = QgsExpression('"id"=\'%s\'' % j)
+                        for feature in i.getFeatures(QgsFeatureRequest(expr)):
+                            attributes = []
+                            for j in range(n_of_attributes):
+                                attributes.append({
+                                fieldnames[j]:feature[str(fieldnames[j])],
+                                })
+                            values = [
+                            {"geom":feature_geom.asJson()},
+                            {"att":attributes}
+                            ]
+                        requests.post('http://127.0.0.1:8000/api/service/qgis-submit/', data={'values': json.dumps(values)})
+
 
                     self.dlg = User_LoginDialog()
-                    self.dlg.pushButton.clicked.connect(self.checkUser)
+                    user_info = self.dlg.pushButton.clicked.connect(self.checkUser)
                     self.dlg.show()
                     result = self.dlg.exec_()
-                    requests.post('https://ensdmv0v7mkse.x.pipedream.net', data={'geoms': json.dumps(values)})
-                if i.selectedFeatures():
-                    selected_feature = i.selectedFeatures()
-                    for i in selected_feature:
-                        selected_feautures.append({
-                        'active_feature_id':i.id(),
-                        'active_feature_attributes':i.attributes()}
-                        )                            
+             
