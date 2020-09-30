@@ -72,66 +72,70 @@ export class FormList extends Component {
         const{ tuuh_soyl_list, searchQuery, tuuh_soyl , alert, msg} = this.state
         const error_bn = Object.keys(msg).length > 0
         return (
-            <div  className="container my-4">
-                <div className="row">
-                    <div className={`text-left position-absolute` +
-                        (error_bn ? ' d-show': ' d-none') + (alert && error_bn? ' alert alert-success': ' alert alert-danger')} role="alert">
-                        <div className={alert && error_bn?"text-success":"text-danger"}>{msg}</div>
-                    </div>
-                    <div className="col-md-12">
-                        {perm_create ?
-                        <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/add/`}>
-                                Нэмэх
-                            </NavLink>
-                        </div> : null
-                        }
-                        <input
-                            type="text"
-                            className="form-control col-md-4  mb-1 float-left"
-                            id="searchQuery"
-                            placeholder="Хайх"
-                            onChange={(e) => this.handleSearch('searchQuery', e)}
-                            value={searchQuery}
-                        />
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col"> № </th>
-                                    <th scope="col">Бүртгэлийн дугаар</th>
-                                    <th scope="col">Аймаг, Нийслэл</th>
-                                    <th scope="col">Сум, Дүүрэг</th>
-                                    <th scope="col">Тоо ширхэг</th>
-                                    <th scope="col">Бүртгэгч</th>
-                                    <th scope="col">Он,сар,өдөр</th>
-                                    <th scope="col">Нэмэх</th>
-                                    {perm_view && perm_create && perm_remove ? <th scope="col">Засах</th> : null }
-                                    {perm_remove ? <th scope="col">Устгах</th> : null }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    tuuh_soyl_list == 0
-                                    ?
-                                        "Бүртгэл байхгүй байна"
-                                    :
-                                        (tuuh_soyl.map((values, idx) =>
-                                            <FormTable
-                                                key={idx}
-                                                idx = {idx}
-                                                values={values}
-                                                perms={this.state.perms}
-                                                handleRemove={() => this.handleRemove(values.id)}
-                                                handleMove={this.handleMove}
-                                            />
-                                        ))
+            <div className="col-md-12">
+                <div className="card">
+                    <div className="card-body">
+                        <div className="row">
+                            <div className={`text-left position-absolute` +
+                                (error_bn ? ' d-show': ' d-none') + (alert && error_bn? ' alert alert-success': ' alert alert-danger')} role="alert">
+                                <div className={alert && error_bn?"text-success":"text-danger"}>{msg}</div>
+                            </div>
+                            <div className="col-md-12">
+                                {perm_create ?
+                                <div className="text-right">
+                                    <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/add/`}>
+                                        Нэмэх
+                                    </NavLink>
+                                </div> : null
                                 }
-                            </tbody>
-                        </table>
-                        <Pagination
-                            paginate = {this.paginate}
-                            searchQuery = {searchQuery}
-                        />
+                                <input
+                                    type="text"
+                                    className="form-control col-md-4  mb-1 float-left"
+                                    id="searchQuery"
+                                    placeholder="Хайх"
+                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                    value={searchQuery}
+                                />
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"> № </th>
+                                            <th scope="col">Бүртгэлийн дугаар</th>
+                                            <th scope="col">Аймаг, Нийслэл</th>
+                                            <th scope="col">Сум, Дүүрэг</th>
+                                            <th scope="col">Тоо ширхэг</th>
+                                            <th scope="col">Бүртгэгч</th>
+                                            <th scope="col">Он,сар,өдөр</th>
+                                            <th scope="col">Нэмэх</th>
+                                            {perm_view && perm_create && perm_remove ? <th scope="col">Засах</th> : null }
+                                            {perm_remove ? <th scope="col">Устгах</th> : null }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            tuuh_soyl_list == 0
+                                            ?
+                                                "Бүртгэл байхгүй байна"
+                                            :
+                                                (tuuh_soyl.map((values, idx) =>
+                                                    <FormTable
+                                                        key={idx}
+                                                        idx = {idx}
+                                                        values={values}
+                                                        perms={this.state.perms}
+                                                        handleRemove={() => this.handleRemove(values.id)}
+                                                        handleMove={this.handleMove}
+                                                    />
+                                                ))
+                                        }
+                                    </tbody>
+                                </table>
+                                <Pagination
+                                    paginate = {this.paginate}
+                                    searchQuery = {searchQuery}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

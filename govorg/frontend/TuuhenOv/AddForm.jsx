@@ -109,7 +109,7 @@ export class AddForm extends Component {
             }
         }
         return (
-            <div  className="container my-4">
+            <div  className="container my-4 card">
                 <div className="row">
                     {
                         perms.perm_create || perms.perm_remove
@@ -121,7 +121,7 @@ export class AddForm extends Component {
                         :
                         null
                     }
-                    <div className="col-md-12">
+                    <div className="col-md-12 card-body">
                     {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
                         <div className="text-right my-3">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.id.history.goBack}>
