@@ -85,29 +85,19 @@ export class Pagination extends Component {
 
     render() {
         const {page, total_page} = this.state
-        return (
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="float-left">
-                        <strong>Хуудас {page}-{total_page}</strong>
-                    </div>
-                    <div className="float-right">
-                        <button
-                            type=" button"
-                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={this.prevPage}
-                        >
-                            &laquo;өмнөх
-                        </button> {}
+        const pages = []
+        for (let i = page; i <= total_page; i++) {
+            pages.push(<li className="page-item" key={i}><a className="page-link">{i}</a></li>)
 
-                        <button
-                            type="button"
-                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={this.nextPage}
-                        >
-                            дараах &raquo;
-                        </button>
-                    </div>
+        }
+        return (
+            <div className="row float-sm-right">
+                <div className="row-sm-12">
+                    <ul className="pagination pagination-outline-primary pagination-sm">
+                        <li className={"page-item" + (this.state.is_loading ? " disabled" : "")}><a className="page-link" onClick={this.prevPage}>Previous</a></li>
+                        {pages}
+                        <li className={"page-item" + (this.state.is_loading ? " disabled" : "")}><a className="page-link" onClick={this.nextPage}>Next</a></li>
+                    </ul>
                 </div>
             </div>
         )

@@ -54,6 +54,7 @@ export class WmsList extends Component {
                 })
     }
 
+
     handleSearch(field, e) {
         if(e.target.value.length >= 1)
         {
@@ -146,54 +147,67 @@ export class WmsList extends Component {
     render() {
         const {wms_list, wms_length }=this.state
         return (
-            <div className={this.state.is_form_open ? "container my-4" : "container my-4 shadow-lg p-3 mb-5 bg-white rounded" } >
                 <div className="row">
-                    <div className="col-md-12">
-                        <div className="text-right">
-                            <NavLink className="btn gp-btn-primary" to={`/back/wms/үүсгэх/`}>
-                                Нэмэх
-                            </NavLink>
-                            <input
-                                type="text"
-                                className="form-control col-md-4  mb-1 float-left"
-                                id="searchQuery"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
-                        </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col"> # </th>
-                                    <th scope="col"> Нэр </th>
-                                    <th scope="col"> Огноо</th>
-                                    <th scope="col"> Идэвхтэй эсэх</th>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {wms_length===0 ?
-                                <tr><td>WMS бүртгэлгүй байна</td></tr>:
-                                wms_list.map((values, index) =>
-                                    <WMS
-                                        key={values.id}
-                                        values={values}
-                                        modalClose={() =>this.modalClose()}
-                                        idx={(this.state.currentPage*20)-20+index+1}
-                                        handleRemove={() => this.handleRemove(values.id)}
-                                        handleEdit={() => this.handleEdit(values)}
+                    <div className="col-lg-12">
+                        <div className="card">
+                            <div className="card-body">
+                                    <div className="row">
+                                        <div className="col-sm-12 col-md-6 p-0">
+                                            <div className="float-sm-left">
+                                                <input
+                                                    type="text"
+                                                    className="form-control m-1"
+                                                    id="searchQuery small-input"
+                                                    placeholder="Хайх"
+                                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                                    value={this.state.searchQuery}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="col-sm-12 col-md-6 p-0">
+                                            <div className="float-sm-right">
+                                                <NavLink className="btn btn-sm btn-outline-primary waves-effect waves-light m-1" to={`/back/wms/үүсгэх/`}>
+                                                    Нэмэх
+                                                </NavLink>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="row">
+                                        <table className="table align-items-center table-flush">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col"> # </th>
+                                                    <th scope="col"> Нэр </th>
+                                                    <th scope="col"> Огноо</th>
+                                                    <th scope="col"> Идэвхтэй эсэх</th>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {wms_length===0 ?
+                                                <tr><td>WMS бүртгэлгүй байна</td></tr>:
+                                                wms_list.map((values, index) =>
+                                                    <WMS
+                                                        key={values.id}
+                                                        values={values}
+                                                        modalClose={() =>this.modalClose()}
+                                                        idx={(this.state.currentPage*20)-20+index+1}
+                                                        handleRemove={() => this.handleRemove(values.id)}
+                                                        handleEdit={() => this.handleEdit(values)}
+                                                    />
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <Pagination paginate={this.paginate}
+                                        searchQuery = { this.state.searchQuery }
                                     />
-                                )}
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <Pagination paginate={this.paginate}
-                    searchQuery = { this.state.searchQuery }
-                />
-            </div>
         )
     }
 }
