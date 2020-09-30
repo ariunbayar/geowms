@@ -16,9 +16,9 @@ class SearchBarComponent extends Component {
         this.state = {
             coordinatex: '',
             coordinatey: '',
-            zoom: 10,
-            zoom1: 10,
-            zoom2: 13,
+            bairlal_one_zoom: 7.3376399772248575,
+            bairlal_two_zoom: 7.3376399772248575,
+            tseg_dugaar_zoom: 7.3376399772248575,
             zoom3: 10,
             aimagid: -1,
             sumid: -1,
@@ -46,7 +46,7 @@ class SearchBarComponent extends Component {
         event.preventDefault()
         // const coord = helpers.parseCoordinateString(this.state.coordinate)
         var array = [this.state.coordinatey, this.state.coordinatex]
-        this.props.handleSetCenter(array, this.state.zoom)
+        this.props.handleSetCenter(array, this.state.bairlal_one_zoom)
     }
 
     handleSubmitClear(event) {
@@ -83,7 +83,7 @@ class SearchBarComponent extends Component {
         event.preventDefault()
         service.searchPoint(this.state.point_id).then(({info, success}) => {
             if(success){
-                this.props.handleSetCenter(info, this.state.zoom2)
+                this.props.handleSetCenter(info, parseInt(this.state.tseg_dugaar_zoom))
             }
             else{
                 this.setState({error_msg: info})
@@ -104,7 +104,7 @@ class SearchBarComponent extends Component {
             var Bbut=(BC/3600)+(BB/60)+BA-BBB
             var niitB=Bbut+BBB
             var array = [X, niitB]
-            this.props.handleSetCenter(array, this.state.zoom1)
+            this.props.handleSetCenter(array, this.state.bairlal_two_zoom)
 
         }
     }
@@ -206,17 +206,23 @@ class SearchBarComponent extends Component {
                                 value={this.state.point_id}
                             />
                         </div>
-                        {/* <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
-                        <div className="input-group mb-3">
-                            <input type="number" className="form-control"
-                                name="zoom2"
-                                onChange={(e) => this.setState({zoom2: e.target.value}) }
-                                value={this.state.zoom2}
-                            />
-                        </div> */}
+                        <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
+                        <select name="tseg_dugaar_zoom" as="select"
+                                onChange={(e) => this.setState({tseg_dugaar_zoom: e.target.value}) }
+                                value={this.state.tseg_dugaar_zoom}
+                                className='form-control'>
+                                <option value='2.9903484967519145'>5000000</option>
+                                <option value='4.3576399772248543'>1000000</option>
+                                <option value='7.3376399772248575'>100000</option>
+                                <option value='8.738265134288114'>50000</option>
+                                <option value='9.721598467621447'>25000</option>
+                                <option value='10.781598467621446'>10000</option>
+                                <option value='12.194931800954776'>5000</option>
+                                <option value='14.383305008368451'>1000</option>
+                        </select>
                         <div className="input-group mb-3">
                             <div>
-                                <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
+                                <button className="btn gp-btn-primary my-3" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
                             </div>
                         </div>
                     </div>
@@ -238,17 +244,23 @@ class SearchBarComponent extends Component {
                                 value={this.state.coordinate}
                             />
                         </div>
-                        {/* <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
-                        <div className="input-group mb-3">
-                            <input type="number" className="form-control" placeholder="өргөрөг, уртраг"
-                                name="zoom"
-                                onChange={(e) => this.setState({zoom: e.target.value}) }
-                                value={this.state.zoom}
-                            />
-                        </div> */}
+                        <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
+                        <select name="bairlal_one_zoom" as="select"
+                                onChange={(e) => this.setState({bairlal_one_zoom: e.target.value}) }
+                                value={this.state.bairlal_one_zoom}
+                                className='form-control'>
+                                <option value='2.9903484967519145'>5000000</option>
+                                <option value='4.3576399772248543'>1000000</option>
+                                <option value='7.3376399772248575'>100000</option>
+                                <option value='8.738265134288114'>50000</option>
+                                <option value='9.721598467621447'>25000</option>
+                                <option value='10.781598467621446'>10000</option>
+                                <option value='12.194931800954776'>5000</option>
+                                <option value='14.383305008368451'>1000</option>
+                        </select>
                         <div className="input-group mb-3">
                             <div>
-                                <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
+                                <button className="btn gp-btn-primary my-3" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
                             </div>
                         </div>
                     </div>
@@ -292,17 +304,23 @@ class SearchBarComponent extends Component {
                                 value={this.state.LC}
                             />
                         </div>
-                        {/* <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
-                        <div className="input-group mb-3">
-                            <input type="number" className="form-control" placeholder="өргөрөг, уртраг"
-                                name="zoom1"
-                                onChange={(e) => this.setState({zoom1: e.target.value}) }
-                                value={this.state.zoom1}
-                            />
-                        </div> */}
+                        <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
+                        <select name="bairlal_two_zoom" as="select"
+                                onChange={(e) => this.setState({bairlal_two_zoom: e.target.value}) }
+                                value={this.state.bairlal_two_zoom}
+                                className='form-control'>
+                                <option value='2.9903484967519145'>5000000</option>
+                                <option value='4.3576399772248543'>1000000</option>
+                                <option value='7.3376399772248575'>100000</option>
+                                <option value='8.738265134288114'>50000</option>
+                                <option value='9.721598467621447'>25000</option>
+                                <option value='10.781598467621446'>10000</option>
+                                <option value='12.194931800954776'>5000</option>
+                                <option value='14.383305008368451'>1000</option>
+                        </select>
                         <div className="input-group mb-3">
                             <div>
-                                <button className="btn gp-btn-primary" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
+                                <button className="btn gp-btn-primary my-3" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
                             </div>
                         </div>
                     </div>
