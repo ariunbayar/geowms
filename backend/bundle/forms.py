@@ -9,7 +9,6 @@ class BundleForm(forms.ModelForm):
 
         fields = [
                 'name',
-                'module',
                 'layers',
             ]
 
@@ -17,12 +16,10 @@ class BundleForm(forms.ModelForm):
 
         labels = {
                 'name': 'Багцийн нэр',
-                'module': 'Компонент',
                 'layers': 'Давхаргууд',
             }
 
         error_messages = {
                 'name': {'required': 'Оруулна уу!'},
-                'module': {'required': 'Оруулна уу!'},
                 'layers': {'required': 'Оруулна уу!'},
             }

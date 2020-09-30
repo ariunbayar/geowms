@@ -233,7 +233,7 @@ def update(request, payload):
         Bundle.objects.filter(id=payload.get('id')).update(module=module)
     else:
         Bundle.objects.filter(id=payload.get('id')).update(module=None)
-        
+
     icon_data = payload.get('icon')
     form = BundleForm(payload, instance=bundle)
     if form.is_valid():
