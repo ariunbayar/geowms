@@ -289,6 +289,7 @@ def _get_service_url(request, wms):
 
 
 @require_GET
+@user_passes_test(lambda u: u.is_superuser)
 def proxy(request, wms_id):
 
     BASE_HEADERS = {
