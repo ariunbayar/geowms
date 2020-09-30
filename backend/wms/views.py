@@ -6,15 +6,18 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
+from django.contrib.postgres.search import SearchVector
 
+from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from main.decorators import ajax_required
-from django.contrib.postgres.search import SearchVector
+
 from .models import WMS
 from .forms import WMSForm
-from django.core.files import File
-from django.core.files.temp import NamedTemporaryFile
+
 
 
 def _get_wms_display(request, wms):
@@ -279,6 +282,12 @@ def paginatedList(request, payload):
     return JsonResponse(rsp)
 
 
+def _get_service_url(request, wms):
+    url = reverse('backend:wms:proxy', args=[wms.pk])
+    absolute_url = request.build_absolute_uri(url)
+    return absolute_url
+
+
 @require_GET
 def proxy(request, wms_id):
 
@@ -290,7 +299,13 @@ def proxy(request, wms_id):
     headers = {**BASE_HEADERS}
     rsp = requests.get(wms.url, queryargs, headers=headers)
     content = rsp.content
+
+    if request.GET.get('REQUEST') == 'GetCapabilities':
+        service_url = _get_service_url(request, wms)
+        content = replace_src_url(content, wms.url, service_url)
+
     content_type = rsp.headers.get('content-type')
+
     return HttpResponse(content, content_type=content_type)
 
 
