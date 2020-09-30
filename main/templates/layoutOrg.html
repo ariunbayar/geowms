@@ -13,36 +13,109 @@
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.theme.default.min.css" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/animate.min.css" %}">
     <link href="{% static "assets/bootstrap/css/font-awesome.min.css" %}" rel="stylesheet">
+    <!--Full Calendar Css-->
+    <link rel="stylesheet" href="{% static "assets/admin/plugins/fullcalendar/css/fullcalendar.min.css" %}">
+    <!-- simplebar CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/plugins/simplebar/css/simplebar.css" %}">
+    <!-- Bootstrap core CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/animate.css" %}">
+    <!-- Icons CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/icons.css" %}">
+    <!-- Sidebar CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/sidebar-menu.css" %}">
+    <!-- Custom Style-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/app-style.css" %}">
 </head>
 <style>
 </style>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark gp-bg-primary mb-0 sticky-top flex-md-nowrap  shadow ">
-    <div class="container pl-3 ml-3">
-        <div class="mr-auto mt-lg-0 float-left" > 
-            <a href="{% url "bundle:all" %}">
-                <img class="logo-top col-md-8"  src="{% static "assets/image/logo/logo.png" %}" alt="">
-            </a>
-        </div>
+    <div id="wrapper">
+        <header class="topbar-nav">
+            <nav class="navbar navbar-expand fixed-top bg-white">
+                <ul class="navbar-nav mr-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link toggle-menu" href="javascript:void();">
+                    <i class="icon-menu menu-icon"></i>
+                </a>
+                </li>
+                <li class="nav-item">
+                    <form class="search-bar">
+                    <input type="text" class="form-control" placeholder="Хайх"></input>
+                    <a href="javascript:void();"><i class="icon-magnifier"></i></a>
+                    </form>
+                </li>
+                </ul>
+                <ul class="navbar-nav align-items-center right-nav-link">
+                <li class="nav-item">
+                    <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown" href="#">
+                    <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
+                    </a>
+                    {% if user.is_authenticated %}
+                        {% if user.is_superuser %}
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li class="dropdown-item user-details">
+                                <a href="javaScript:void();">
+                                <div class="media">
+                                    <div class="avatar"><img class="align-self-start mr-3" src="{% static "assets/image/user.png" %}" alt="user avatar"></img></div>
+                                    <div class="media-body">
+                                        <h6 class="mt-2 user-title">{{user.username}}</h6>
+                                        <p class="user-subtitle">{{user.email}}</p>
+                                    </div>
+                                </div>
+                                </a>
+                                </li>
+                            <li class="dropdown-divider"></li>
+                            <li class="dropdown-item"><a href="{% url "profile:history" %}" class="text-dark"><i class="icon-wallet mr-2"></i>ПРОФАЙЛ</a></li>
+                            <li class="dropdown-divider"></li>
+                            <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i>ГАРАХ</a></li>
+                        </ul>
+                        {% else %}
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li class="dropdown-item user-details">
+                                <a href="javaScript:void();">
+                                <div class="media">
+                                    <div class="avatar"><img class="align-self-start mr-3" src="https://via.placeholder.com/110X110" alt="user avatar"></img></div>
+                                    <div class="media-body">
+                                        <h6 class="mt-2 user-title">{{user.last_name}}</h6>
+                                        <p class="user-subtitle">{{user.first_name}}</p>
+                                    </div>
+                                </div>
+                                </a>
+                            </li>
+                            <li class="dropdown-divider"></li>
+                            <li class="dropdown-item"><a href="{% url "profile:history" %}" class="text-dark"><i class="icon-wallet mr-2"></i> Account</a></li>
+                            <li class="dropdown-divider"></li>
+                            <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i> ГАРАХ</a></li>
+                        </ul>
+                        {% endif %}
+                    {% else %}
+                        <li class="dropdown-item"><a href="{% url "secure:login" %}"><i class="icon-power mr-2"></i>УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a></li>
+                    {% endif %}
+                </li>
+                </ul>
+            </nav>
+        </header>
 
+    <div>
+        {% block content %}
+        {% endblock %}
     </div>
-    <div class="container pr-4 mr-4">
-        <div class="ml-auto mt-lg-0 float-right mr-4 pr-4"> 
-            </a> <a href="/logout/" class="btn gp-btn-primary mr-4 pr-4"><i class="fas fa-sign-out-alt" aria-hidden="true"> &nbsp;ГАРАХ</i></a>
-        </div>
-    </div>
-</nav>
-<div>
-    {% block content %}
-    {% endblock %}
 </div>
-
 
 </div>
     {% block script %}
     {% endblock %}
-
+    <script src="{% static "assets/admin/js/jquery.min.js" %}"></script>
+    <script src="{% static "assets/admin/js/popper.min.js" %}"></script>
+    <script src="{% static "assets/admin/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "assets/admin/plugins/simplebar/js/simplebar.js" %}"></script>
+    <script src="{% static "assets/admin/js/waves.js" %}"></script>
+    <script src="{% static "assets/admin/js/sidebar-menu.js" %}"></script>
+    <script src="{% static "assets/admin/js/app-script.js" %}"></script>
+    <script src="{% static "assets/admin/plugins/vectormap/jquery-jvectormap-2.0.2.min.js" %}"></script>
+    <script src="{% static "assets/admin/plugins/vectormap/jquery-jvectormap-world-mill-en.js" %}"></script>
+    <script src="{% static "assets/admin/js/index.js" %}"></script>
 </body>
 
 </html>

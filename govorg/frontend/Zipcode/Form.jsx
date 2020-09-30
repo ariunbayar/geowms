@@ -265,10 +265,11 @@ export class Forms extends Component {
     render() {
         const {latx, laty} = this.state
         return (
-            <div className="row my-4">
-                <div className="my-4 mt-4 col-md-6">
-                    <table className="table table-bordered">
-                        <tbody>
+            <div className="card">
+                <div className="row my-4 card-body">
+                    <div className="my-4 mt-4 col-md-6">
+                        <table className="table table-bordered">
+                            <tbody>
                             <tr>
                                 <th style={{width:"30%"}}>Аймаг, Нийслэл</th>
                                 <td style={{widtd:"60%"}}>
@@ -331,34 +332,34 @@ export class Forms extends Component {
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
-                    {this.state.handle_save ?
-                        <button className="btn gp-btn-primary">
-                            <div className="spinner-border text-light" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div>
-                            <a className="text-light"> Шалгаж байна.</a>
-                        </button>:
-                        <button className="btn gp-btn-primary" onClick={this.handleSubmit} >
-                            Хадгалах
-                        </button>
-                    }
-                    {this.state.success_msg ?
-                    <div className="alert alert-success col-md-4 my-4" role="alert">
-                        Амжилттай хадгалагдлаа
+                        </table>
+                        {this.state.handle_save ?
+                            <button className="btn gp-btn-primary">
+                                <div className="spinner-border text-light" role="status">
+                                    <span className="sr-only">Loading...</span>
+                                </div>
+                                <a className="text-light"> Шалгаж байна.</a>
+                            </button>:
+                            <button className="btn gp-btn-primary" onClick={this.handleSubmit} >
+                                Хадгалах
+                            </button>
+                        }
+                        {this.state.success_msg ?
+                        <div className="alert alert-success col-md-4 my-4" role="alert">
+                            Амжилттай хадгалагдлаа
+                        </div>
+                        :
+                        null
+                        }
+                        {this.state.danger_msg ?
+                        <div className="alert alert-danger col-md-4 my-4" role="alert">
+                            Алдаа гарлаа.
+                        </div>
+                        :
+                        null
+                        }
                     </div>
-                    :
-                    null
-                    }
-                    {this.state.danger_msg ?
-                    <div className="alert alert-danger col-md-4 my-4" role="alert">
-                        Алдаа гарлаа.
-                    </div>
-                    :
-                    null
-                    }
-                </div>
-                <div className="my-4 mt-4 col-md-6">
+                    <div className="my-4 mt-4 col-md-6">
                     <input
                         type="text"
                         className="form-control col-md-7  mb-1 float-left"
@@ -392,6 +393,7 @@ export class Forms extends Component {
                                 )}
                             </tfoot>
                         </table>
+                    </div>
                 </div>
             </div>
         )

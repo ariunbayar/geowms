@@ -594,7 +594,7 @@ export class DursgaltGazar extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className='container my-4'>
+                    <div className='container my-4 card'>
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}
@@ -807,7 +807,7 @@ export class DursgaltGazar extends Component {
                                         </i>
                                         </div>
                                     </th>
-                                    <td colSpan="5" scope="row" style={{width: "80%"}}>
+                                    <td colSpan="5" scope="row">
                                         <Field
                                             className={'form-control ' + (errors.torol_zuil_todorhoilolt ? 'is-invalid' : '')}
                                             component="textarea"

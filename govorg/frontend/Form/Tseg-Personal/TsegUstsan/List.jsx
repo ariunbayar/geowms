@@ -69,10 +69,10 @@ export class List extends Component {
     render() {
         const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         return (
-            <div className="container my-4">
-                <div className="row">
-                    <div className="col-md-12">
-                          <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
+            <div  className="card my-4">
+                <div  className="card-body">
+                    <div className="col-md-12 my-3">
+                        <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
                         <input
@@ -83,7 +83,7 @@ export class List extends Component {
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
-                        <table className="table table-fluid">
+                        <table className="table table-fluid my-3">
                             <thead>
                                 <tr>
                                     <th scope="col"> № </th>

@@ -59,89 +59,106 @@ export class App extends Component {
         const { tuuhen_ov, tseg_burtgel, teevriin_suljee, barilga_suurin_gazar, bair_zuin_zurag, ded_butets } = this.state
         return (
         <BrowserRouter>
-            <div className="container-fluid mt-0">
-                <div className="row d-flex flex-wrap">
-                <nav id="sidebarMenu" className="col-lg-2 d-md-block bg-light sidebar collapse shadow pt-5 mt-0 pl-5 h-100 position-fixed" >
-                    <h5 className="text-primary mb-4">{this.props.org.org_name}</h5>
-                    <div className="sidebar-sticky ">
+            <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
+            <div className="brand-logo">
+                <a href="index.html">
+                <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
+                <h5 className="logo-text">ГЕОПОРТАЛ</h5>
+                </a>
+            </div>
+            <ul className="sidebar-menu do-nicescrol">
+                <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/bundle/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ДЭД САН</span>
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ХЭРЭГЛЭГЧ</span>
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/system/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>СИСТЕМ</span>
+                    </NavLink>
+                </li>
+                {tuuhen_ov.perm_view ?
+                <li >
+                    <NavLink  activeClassName="active" to={"/gov/tuuhen-ov/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ТҮҮХЭН ӨВ БҮРТГЭЛ</span>
+                    </NavLink>
+                </li>
+                :
+                null
+                }
+                {tseg_burtgel.perm_view ?
+                <li>
+                <a href="javaScript:void();" className="waves-effect">
+                    <i className="icon-map"></i> <span>ХҮСЭЛТ</span>
+                    <i className="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul className="sidebar-submenu">
+                    <li>
+                        <a href="javaScript:void();"><i className="fa fa-circle-o"></i>Цэгийн мэдээлэл<i className="fa fa-angle-left pull-right"></i></a>
+                            <ul className="sidebar-submenu">
+                                <li>
+                                    <NavLink activeClassName="active" to={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/"}><i className="fa fa-circle-o"></i>Шинэ цэг</NavLink>
+                                </li>
+                                <li>
+                                    <NavLink activeClassName="active" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/"}><i className="fa fa-circle-o"></i>Цэг устгах</NavLink>
+                                </li>
+                            </ul>
+                    </li>
+                </ul>
+                </li>
+                :
+                null
+                }
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/zip-code/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ЗИПКОД</span>
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/org/help/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ТУСЛАМЖ</span>
+                    </NavLink>
+                </li>
+                {teevriin_suljee.perm_view &&
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/тээврийн-сүлжээ/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ТЭЭВРИЙН СҮЛЖЭЭ</span>
+                    </NavLink>
+                </li>
+                }
+                { ded_butets.perm_view &&
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/дэд-бүтэц/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>ДЭД БҮТЭЦ</span>
+                    </NavLink>
+                </li>
+                }
+                { bair_zuin_zurag.perm_view &&
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/байр-зүйн-зураг/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>БАЙР ЗҮЙН ЗУРАГ</span>
+                    </NavLink>
+                </li>
+                }
+                { barilga_suurin_gazar.perm_view &&
+                <li>
+                    <NavLink  activeClassName="active" to={"/gov/барилга-суурин-газар/"} className="waves-effect">
+                        <i className="icon-map"></i> <span>БАРИЛГА СУУРИН ГАЗАР</span>
+                    </NavLink>
+                </li>
+                }
+            </ul>
+            </div>
 
-                        <ul className="nav flex-column ml-3">
-                            <li className="nav-item m-1 pb-1">
-                                <NavLink  exact to={'/gov/bundle/'} activeClassName="active">
-                                <i className="fa fa-database text-primary"></i>&nbsp;ДЭД САН
-                                </NavLink>
-                            </li>
-                            <li className="nav-item m-1 pb-1">
-                                <NavLink  to={'/gov/'} activeClassName="active">
-                                <i className="fa fa-users text-primary" ></i>&nbsp;ХЭРЭГЛЭГЧ
-                                </NavLink>
-                            </li>
-                            <li className="nav-item m-1">
-                                <NavLink  to={'/gov/system/'} activeClassName="active">
-                                <i className='fa fa-university text-primary'></i>&nbsp;СИСТЕМ
-                                </NavLink>
-                            </li>
-                            {tuuhen_ov.perm_view ?
-                            <li className="nav-item m-1">
-                                <NavLink  to={'/gov/tuuhen-ov/'} activeClassName="active">
-                                    <i className='fa fa-history text-primary'></i>&nbsp;Түүхэн өв бүртгэл
-                                </NavLink>
-                            </li>
-                            :
-                            null
-                            }
-                            {tseg_burtgel.perm_view ?
-                            <li className="nav-item m-1">
-                                <NavLink  to={'/gov/froms/'} activeClassName="active">
-                                    <i className='fa fa-file-archive-o text-primary'></i>&nbsp;Хүсэлт
-                                </NavLink>
-                            </li>
-                            :
-                            null
-                            }
-                            <li className="nav-item m-1">
-                                <NavLink  to={'/gov/zip-code/'} activeClassName="active">
-                                    <i className='fa fa-address-card text-primary'></i> Зипкод
-                                </NavLink>
-                            </li>
-                            <li className="nav-item m-1">
-                                <NavLink  to={'/gov/org/help/'} activeClassName="active">
-                                    <i className='fa fa-question-circle text-primary'></i> Тусламж
-                                </NavLink>
-                            </li>
-                            { teevriin_suljee.perm_view && 
-                                <li className="nav-item m-1">
-                                    <NavLink  to={'/gov/тээврийн-сүлжээ/'} activeClassName="active">
-                                        <i className='fa fa-address-card text-primary'></i> Тээврийн Сүлжээ
-                                    </NavLink>
-                                </li>
-                            }
-                            { ded_butets.perm_view &&
-                                <li className="nav-item m-1">
-                                    <NavLink  to={'/gov/дэд-бүтэц/'} activeClassName="active">
-                                        <i className='fa fa-address-card text-primary'></i> Дэд Бүтэц
-                                    </NavLink>
-                                </li>
-                            }
-                            { bair_zuin_zurag.perm_view &&
-                                <li className="nav-item m-1">
-                                    <NavLink  to={'/gov/байр-зүйн-зураг/'} activeClassName="active">
-                                        <i className='fa fa-address-card text-primary'></i> Байр Зүйн Зураг
-                                    </NavLink>
-                                </li>
-                            }
-                            { barilga_suurin_gazar.perm_view &&
-                                <li className="nav-item m-1">
-                                    <NavLink  to={'/gov/барилга-суурин-газар/'} activeClassName="active">
-                                        <i className='fa fa-address-card text-primary'></i> Барилга Суурин Газар
-                                    </NavLink>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </nav>
-                <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-                <div className="col-md-10">
+            <div className="clearfix">
+                <div className="content-wrapper">
+                    <div className="container-fluid">
                         <Switch>
                             {tseg_burtgel.perm_view ?
                                 <Route path={"/gov/froms/"} component={()=><Forms perms={this.state.tseg_burtgel}/>}/> : null
@@ -160,9 +177,7 @@ export class App extends Component {
                             <Route exact path="/gov/org/help/" component={Help}/>
                         </Switch>
                     </div>
-                </main>
                 </div>
-
             </div>
         </BrowserRouter>
         )

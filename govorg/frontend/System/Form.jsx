@@ -57,9 +57,9 @@ export class Form extends Component {
     render() {
         const {currentPage, systemPerPage, systems, govorg_length}=this.state
         return (
-            <div className="container">
-                <div className="row">
-                    <div className="col-md-12 pl-5 m-5">
+            <div className="col-md-12">
+                <div className="card">
+                    <div className="card-body">
                         <input
                             type="text"
                             className="form-control flaot-left col-md-4  mb-1"
@@ -68,8 +68,8 @@ export class Form extends Component {
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
-                        <table className="table table-bordered">
-                           <thead>
+                        <table className="table">
+                            <thead>
                                 <tr>
                                     <th scope="col">№</th>
                                     <th scope="col">Нэр</th>
