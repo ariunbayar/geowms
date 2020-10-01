@@ -1,6 +1,6 @@
 import requests
 import json
-from geojson import Point, Feature, FeatureCollection, dump,MultiPoint
+
 from django.http import HttpResponse, Http404
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
@@ -11,7 +11,6 @@ from api.utils import filter_layers, replace_src_url
 from backend.govorg.models import GovOrg
 from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
-from django.db import connections
 
 
 def _get_service_url(request, token, wms):
@@ -80,8 +79,6 @@ def qgis_submit(request):
     except Exception:
         return JsonResponse({'success': False})
 
-
-
 def _get_changeset_display(ob):
     geom= eval(ob[1])
     geometry = eval(geom['geom'])
@@ -100,16 +97,14 @@ def _get_feature_coll(ob, changeset_list):
     return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
+    cursor = connections['default'].cursor()
+    cursor.execute(''' select * from changeset''')
+    changesets = cursor.fetchall()
+    feature = []
+    geoJson = []
+    changeset_list = [_get_changeset_display(ob) for ob in changesets]
+    features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
 
-
-cursor = connections['default'].cursor()
-cursor.execute(''' select * from changeset''')
-changesets = cursor.fetchall()
-feature = []
-geoJson = []
-changeset_list = [_get_changeset_display(ob) for ob in changesets]
-features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
-
-feature_collection = FeatureCollection(features)
-with open('myfile.geojson', 'w') as f:
-   dump(feature_collection, f)
+    feature_collection = FeatureCollection(features)
+    with open('myfile.geojson', 'w') as f:
+       dump(feature_collection, f)

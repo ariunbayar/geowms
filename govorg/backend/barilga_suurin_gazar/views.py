@@ -6,6 +6,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from backend.changeset.models import ChangeSet
 from django.db import connections
+from main.decorators import ajax_required
 
 
 def _get_changeset_display(ob):
@@ -44,5 +45,3 @@ def changeset_all(request):
         'GeoJson': feature_collection,
     }
     return JsonResponse(rsp)
-
-
