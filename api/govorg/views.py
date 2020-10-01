@@ -1,6 +1,6 @@
 import requests
 import json
-
+from geojson import Point, Feature, FeatureCollection, dump,MultiPoint
 from django.http import HttpResponse, Http404
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
@@ -79,3 +79,4 @@ def qgis_submit(request):
 
     except Exception:
         return JsonResponse({'success': False})
+

@@ -18,13 +18,13 @@ def _get_changeset_display(ob):
     }
 
 def _get_feature_coll(ob, changeset_list):
-    print("changeset_list[ob]['coordinate']", type(changeset_list[ob]['coordinate']))
     return {
         'type': 'Feature',
         'geometry':{
             "type":changeset_list[ob]['geom_type'],
             "coordinates":changeset_list[ob]['coordinate'],
         }
+        "properties": {'changeset_id', changeset_list[ob]['changeset_id'],}
     }
 
 
