@@ -79,4 +79,3 @@ def qgis_submit(request):
 
     except Exception:
         return JsonResponse({'success': False})
-
