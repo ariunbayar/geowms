@@ -23,6 +23,7 @@ export default class TeevriinSuljee extends Component {
     componentDidMount() {
 
         service.geom().then(({GeoJson}) => {
+            console.log(GeoJson)
             if(GeoJson){
                 this.setState({
                     GeoJson

@@ -6,5 +6,5 @@ export const service = {
 
 function geom() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`/gov/api/bundle/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/bair_zuin_zurag/`, requestOptions).then(handleResponse)
 }
