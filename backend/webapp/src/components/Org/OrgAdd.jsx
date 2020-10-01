@@ -67,9 +67,9 @@ export class OrgAdd extends Component {
         const org_level=this.props.match.params.level
         return (
             <div className="main-content">
-                <div className="container page-container my-4">
+                <div className="page-container my-4">
                     <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-3">
                             <div className="text-left">
                                 <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
                                     <p className="btn gp-outline-primary">

@@ -54,27 +54,23 @@ export class OrgMenu extends Component {
         return (
                 <div className="row">
                     <div class="col-lg-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <ul class="nav nav-tabs nav-tabs-dark nav-justified">
-                                    <li class="nav-item">
-                                            <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active nav-link"  data-toggle="tab"><i class="icon-home"></i> <span class="hidden-xs">Эрх</span></NavLink>
-                                    </li>
-                                    <li class="nav-item">
-                                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active nav-link"  data-toggle="tab"><i class="icon-user"></i> <span class="hidden-xs">Албан хаагчид</span><small className="badge float-right badge-info">{this.state.employee_count}</small></NavLink>
-                                    </li>
-                                    <li class="nav-item">
-                                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active nav-link"  data-toggle="tab"><i class="icon-envelope-open"></i> <span class="hidden-xs">Систем</span><small className="badge float-right badge-info">{this.state.sistem_count}</small></NavLink>
-                                    </li>
-                                </ul>
-                                <div class="tab-content">
-                                <Switch>
-                                    <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
-                                    <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
-                                    <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
-                                </Switch>
-                                </div>
-                            </div>
+                        <ul class="nav nav-tabs nav-tabs-dark nav-justified">
+                            <li class="nav-item">
+                                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active nav-link"  data-toggle="tab"><i class="icon-home"></i> <span class="hidden-xs">Эрх</span></NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active nav-link"  data-toggle="tab"><i class="icon-user"></i> <span class="hidden-xs">Албан хаагчид</span><small className="badge float-right badge-info">{this.state.employee_count}</small></NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} activeClassName="active nav-link"  data-toggle="tab"><i class="icon-envelope-open"></i> <span class="hidden-xs">Систем</span><small className="badge float-right badge-info">{this.state.sistem_count}</small></NavLink>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                        <Switch>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
+                        </Switch>
                         </div>
                     </div>
                 </div>
