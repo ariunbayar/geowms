@@ -2,48 +2,47 @@ from django.shortcuts import render
 
 from django.views.decorators.http import require_GET
 from backend.changeset.models import ChangeSet
-from django.views.decorators.csrf import csrf_exempt
+from main.decorators import ajax_required
 
 
-def _get_bundle_options():
-
-    form_options = []
-
-    for wms in WMS.objects.all():
-        layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
-        wms_display = {
-            'name': wms.name,
-            'is_active': wms.is_active,
-            'layers': layers,
-        }
-        form_options.append(wms_display)
-
-    return form_options
-
-
-
-def _get_changeset_display(geom):
-    print("bundle", geom)
-    print("attributes",geom.features )
+def _get_changeset_display(ob):
+    geom= eval(ob[1])
+    geometry = eval(geom['geom'])
+    coordinates = geometry['coordinates']
+    geom_type = geometry['type']
     return {
-        'geom':geom.geom,
-        'attributes':geom.features
+        'coordinate':coordinates,
+        'geom_type':geom_type,
+        'changeset_id':ob[0],
+        'changeset_attributes':ob[2]
     }
 
+def _get_feature_coll(ob, changeset_list):
+    print("changeset_list[ob]['coordinate']", type(changeset_list[ob]['coordinate']))
+    return {
+        'type': 'Feature',
+        'geometry':{
+            "type":changeset_list[ob]['geom_type'],
+            "coordinates":changeset_list[ob]['coordinate'],
+        }
+    }
+
+
 @require_GET
-@csrf_exempt
+@ajax_required
 def changeset_all(request):
+
     cursor = connections['default'].cursor()
-    cursor.execute(''' select * from changeset_changeset ''')
-    geom = cursor.fetchone()
+    cursor.execute(''' select * from changeset_changeset''')
+    changesets = cursor.fetchall()
+    feature = []
+    geoJson = []
+    changeset_list = [_get_changeset_display(ob) for ob in changesets]
+    feature = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
 
-    print(geom)
+    geoJson =[{
+        "type": "FeatureCollection",
+        "features":feature,
+    }]
 
 
-    return JsonResponse({'success': True})
-
-cursor = connections['default'].cursor()
-cursor.execute(''' select * from changeset_changeset ''')
-geom = cursor.fetchone()
-
-print(geom)

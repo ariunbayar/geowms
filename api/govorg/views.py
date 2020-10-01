@@ -79,9 +79,3 @@ def qgis_submit(request):
 
     except Exception:
         return JsonResponse({'success': False})
-
-cursor = connections['default'].cursor()
-cursor.execute(''' select * from changeset_changeset ''')
-geom = cursor.fetchone()
-
-print(geom)
