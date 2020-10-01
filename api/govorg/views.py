@@ -1,6 +1,6 @@
 import requests
 import json
-
+from geojson import Point, Feature, FeatureCollection, dump,MultiPoint
 from django.http import HttpResponse, Http404
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
@@ -11,6 +11,7 @@ from api.utils import filter_layers, replace_src_url
 from backend.govorg.models import GovOrg
 from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
+from django.db import connections
 
 
 def _get_service_url(request, token, wms):
@@ -78,3 +79,4 @@ def qgis_submit(request):
 
     except Exception:
         return JsonResponse({'success': False})
+
