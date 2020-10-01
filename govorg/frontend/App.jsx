@@ -70,23 +70,23 @@ export class App extends Component {
                 <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/bundle/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ДЭД САН</span>
+                        <i className="fa fa-database gp-text-primary"></i> <span>ДЭД САН</span>
                     </NavLink>
                 </li>
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ХЭРЭГЛЭГЧ</span>
+                        <i className="icon-user gp-text-primary"></i> <span>ХЭРЭГЛЭГЧ</span>
                     </NavLink>
                 </li>
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/system/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>СИСТЕМ</span>
+                        <i className="fa fa-assistive-listening-systems gp-text-primary"></i> <span>СИСТЕМ</span>
                     </NavLink>
                 </li>
                 {tuuhen_ov.perm_view ?
                 <li >
                     <NavLink  activeClassName="active" to={"/gov/tuuhen-ov/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ТҮҮХЭН ӨВ БҮРТГЭЛ</span>
+                        <i className="fa fa-history gp-text-primary"></i> <span>ТҮҮХЭН ӨВ БҮРТГЭЛ</span>
                     </NavLink>
                 </li>
                 :
@@ -95,7 +95,7 @@ export class App extends Component {
                 {tseg_burtgel.perm_view ?
                 <li>
                 <a href="javaScript:void();" className="waves-effect">
-                    <i className="icon-map"></i> <span>ХҮСЭЛТ</span>
+                    <i className="zmdi zmdi-photo-size-select-small gp-text-primary"></i> <span>ХҮСЭЛТ</span>
                     <i className="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul className="sidebar-submenu">
@@ -117,25 +117,25 @@ export class App extends Component {
                 }
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/zip-code/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ЗИПКОД</span>
+                        <i className="zmdi zmdi-group-work gp-text-primary"></i> <span>ЗИПКОД</span>
                     </NavLink>
                 </li>
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/org/help/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ТУСЛАМЖ</span>
+                        <i className="zmdi zmdi-pin-help gp-text-primary"></i> <span>ТУСЛАМЖ</span>
                     </NavLink>
                 </li>
                 {teevriin_suljee.perm_view &&
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/тээврийн-сүлжээ/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ТЭЭВРИЙН СҮЛЖЭЭ</span>
+                        <i className="icon-map gp-text-primary"></i> <span>ТЭЭВРИЙН СҮЛЖЭЭ</span>
                     </NavLink>
                 </li>
                 }
                 { ded_butets.perm_view &&
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/дэд-бүтэц/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>ДЭД БҮТЭЦ</span>
+                        <i className="icon-map gp-text-primary"></i> <span>ДЭД БҮТЭЦ</span>
                     </NavLink>
                 </li>
                 }

@@ -80,7 +80,7 @@ export class OrgForm extends Component {
         const {orgs,currentPage,org_length} = this.state
         return (
             <div className="main-content">
-                <div className="container page-container my-4">
+                <div className="page-container my-4">
                     <div className="text-right">
                         <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
                             Нэмэх

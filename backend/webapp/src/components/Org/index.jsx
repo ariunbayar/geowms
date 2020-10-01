@@ -35,8 +35,8 @@ export class Org extends Component {
         const { user_count } = this.state;
         const org_level = this.props.match.params.level
         return (
-            <div className="my-4 shadow-lg mb-5 bg-white rounded">
-                <div className="row">
+            <div className="card">
+                <div className="card-body row">
                     <div className="col-md-12">
                         <Switch>
                             <Route exact path="/back/байгууллага/түвшин/:level/" component={OrgForm}/>

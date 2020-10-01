@@ -94,7 +94,7 @@ export class GovorgForm extends Component {
         const {name, token} = this.state.govorg
         return (
 
-            <div className="container my-4">
+            <div className="my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>

@@ -56,114 +56,116 @@ class ModalComponent extends Component{
         const { payload, is_button } = this.state
         return (
             <div>
-                <div className="show d-block modal modal-dialog modal-dialog-scrollable ">
-                    <div className="modal-content">
-                            <button type="button" className="close border" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        <div className="modal-body">
-                            {!is_complete &&
-                                <div className="d-flex align-items-center">
-                                    <strong>Түр хүлээнэ үү...</strong>
-                                    <div className="spinner-border ml-auto" role="status" aria-hidden="true"></div>
-                                </div>
-                            }
-                            {is_complete && content.map(([layer_name, values], idx) =>
-                                <div key={idx}>
-                                    <h6 className="text-center">Цэгийн мэдээлэл</h6>
-                                    <table className="table">
-                                        <tbody>
-                                            {values.map(([field, value], val_idx) =>
-                                                field == 'point_id' ?
-                                                <tr key={val_idx}>
-                                                    <th>Цэгийн дугаар:</th>
-                                                    <td>{value}</td>
-                                                </tr>: field == 'point_name' ?
-                                                <tr key={val_idx}>
-                                                    <th>Цэгийн Нэр:</th>
-                                                    <td>{value}</td>
-                                                </tr>: field == 'id' ?
-                                                <tr key={val_idx}>
-                                                    <th>Цэгийн дахин давтагдашгүй дугаар:</th>
-                                                    <td>{value}</td>
-                                                </tr>: field == 'point_class_name' ?
-                                                <tr key={val_idx}>
-                                                    <th>Сүлжээний төрөл:</th>
-                                                    <td>{value}</td>
-                                                </tr>: null
-                                            )}
-                                            {values.map(([field, value], val_idx) =>
-                                                field == 'aimag' ?
-                                                <tr key={val_idx}>
-                                                    <th>Аймаг:</th>
-                                                    <td>{value}</td>
-                                                </tr>: field == 'sum' ?
-                                                <tr key={val_idx}>
-                                                    <th>Сум:</th>
-                                                    <td>{value}</td>
-                                                </tr>: field == 'mclass' ?
-                                                <tr key={val_idx}>
-                                                    <th>Сүлжээний зэрэг:</th>
-                                                    <td>{value}</td>
-                                                </tr>: null
-                                            )}
-                                            <tr>
-                                                <th>Трапецийн дугаар(1:100000)</th>
-                                                <td>
-                                                    {values.map(([field, value], val_idx) =>
-                                                        field == 'sheet1' ?
-                                                            <a key={val_idx}>
-                                                                {value}-
-                                                            </a>
-                                                        : field == 'sheet2' ?
-                                                        <a key={val_idx}>
-                                                            {parseInt(value)}-
-                                                        </a>:field == 'sheet3' ?
-                                                            <a key={val_idx}>
-                                                                {parseInt(value)}
-                                                        </a>: null
-                                                    )}
-                                                </td>
-                                            </tr>
-                                            <tr key="price">
-                                                <th>Үнэ</th>
-                                                <td>{feature_price}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-12 mb-4">
-                                <div className="row">
-                                    <div className="col-8 col-sm-6 d-flex justify-content-center">
-                                        <button
-                                            type="button"
-                                            className="btn btn-lg gp-btn-primary"
-                                            onClick={this.props.handlePointToCart}
-                                            disabled = {is_button}
-                                        >
-                                            <i className="fa fa-shopping-cart"></i>
-                                            &nbsp; Сагсанд нэмэх
-                                        </button>
+                <div className="show d-block modal">
+                    <div className="modal-dialog modal-dialog-scrollable">
+                        <div className="modal-content animated swing">
+                                <button type="button" className="close border" data-dismiss="modal" aria-label="Close" onClick={this.props.handleClose}>
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            <div className="modal-body">
+                                {!is_complete &&
+                                    <div className="d-flex align-items-center">
+                                        <strong>Түр хүлээнэ үү...</strong>
+                                        <div className="spinner-border ml-auto" role="status" aria-hidden="true"></div>
                                     </div>
-                                    <div className="col-sm-6 float-right">
-                                        <a href="/profile/tseg-personal/tseg-info/tseg-personal/" className="btn btn-lg gp-btn-primary ml-3"><i className="fa fa-location-arrow mr-2"></i>Цэг нэмэх</a>
+                                }
+                                {is_complete && content.map(([layer_name, values], idx) =>
+                                    <div key={idx}>
+                                        <h6 className="text-center">Цэгийн мэдээлэл</h6>
+                                        <table className="table">
+                                            <tbody>
+                                                {values.map(([field, value], val_idx) =>
+                                                    field == 'point_id' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Цэгийн дугаар:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: field == 'point_name' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Цэгийн Нэр:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: field == 'id' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Цэгийн дахин давтагдашгүй дугаар:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: field == 'point_class_name' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Сүлжээний төрөл:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: null
+                                                )}
+                                                {values.map(([field, value], val_idx) =>
+                                                    field == 'aimag' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Аймаг:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: field == 'sum' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Сум:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: field == 'mclass' ?
+                                                    <tr key={val_idx}>
+                                                        <th>Сүлжээний зэрэг:</th>
+                                                        <td>{value}</td>
+                                                    </tr>: null
+                                                )}
+                                                <tr>
+                                                    <th>Трапецийн дугаар(1:100000)</th>
+                                                    <td>
+                                                        {values.map(([field, value], val_idx) =>
+                                                            field == 'sheet1' ?
+                                                                <a key={val_idx}>
+                                                                    {value}-
+                                                                </a>
+                                                            : field == 'sheet2' ?
+                                                            <a key={val_idx}>
+                                                                {parseInt(value)}-
+                                                            </a>:field == 'sheet3' ?
+                                                                <a key={val_idx}>
+                                                                    {parseInt(value)}
+                                                            </a>: null
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                                <tr key="price">
+                                                    <th>Үнэ</th>
+                                                    <td>{feature_price}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div className="col-4 col-sm-6 d-flex justify-content-center">
-                                    {payload ?
-                                        <button type="button"
-                                            className="btn btn-lg btn-secondary"
-                                            data-dismiss="modal"
-                                        >
-                                            Ачааллаж байна...
-                                            <a className="spinner-border text-light" role="status">
-                                                <span className="sr-only">Loading...</span>
-                                            </a>
-                                        </button>
-                                        : null
-                                    }
+                                )}
+                            </div>
+                            <div className="row">
+                                <div className="col-sm-12 mb-4">
+                                    <div className="row">
+                                        <div className="col-8 col-sm-6 d-flex justify-content-center">
+                                            <button
+                                                type="button"
+                                                className="btn btn-lg gp-btn-primary"
+                                                onClick={this.props.handlePointToCart}
+                                                disabled = {is_button}
+                                            >
+                                                <i className="fa fa-shopping-cart"></i>
+                                                &nbsp; Сагсанд нэмэх
+                                            </button>
+                                        </div>
+                                        <div className="col-sm-6 float-right">
+                                            <a href="/profile/tseg-personal/tseg-info/tseg-personal/" className="btn btn-lg gp-btn-primary ml-3"><i className="fa fa-location-arrow mr-2"></i>Цэг нэмэх</a>
+                                        </div>
+                                        <div className="col-4 col-sm-6 d-flex justify-content-center">
+                                        {payload ?
+                                            <button type="button"
+                                                className="btn btn-lg btn-secondary"
+                                                data-dismiss="modal"
+                                            >
+                                                Ачааллаж байна...
+                                                <a className="spinner-border text-light" role="status">
+                                                    <span className="sr-only">Loading...</span>
+                                                </a>
+                                            </button>
+                                            : null
+                                        }
+                                        </div>
                                     </div>
                                 </div>
                             </div>
