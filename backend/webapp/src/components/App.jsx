@@ -97,13 +97,13 @@ export default class App extends Component {
                 </li>
                 <li>
                   <NavLink  activeClassName="active" to={"/back/user/"} className="waves-effect">
-                    <i className="icon-map"></i> <span>ХЭРЭГЛЭГЧ</span>
+                    <i class="zmdi zmdi-account"></i> <span>ХЭРЭГЛЭГЧ</span>
                     <small className="badge float-right badge-info">{this.state.user_count}</small>
                   </NavLink>
                 </li>
                 <li>
                   <NavLink  activeClassName="active" to={"/back/тохиргоо/"} className="waves-effect">
-                    <i className="icon-map"></i> <span>ТОХИРГОО</span>
+                    <i class="zmdi zmdi-settings"></i> <span>ТОХИРГОО</span>
                   </NavLink>
                 </li>
               </ul>

@@ -44,7 +44,7 @@ export default class Config extends Component {
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o" aria-hidden="true" style={{color:"red"}}></i>
                     </a>
                     {is_modal_delete_open &&
                         <Modal

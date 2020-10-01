@@ -17,6 +17,7 @@ export class Pagination extends Component {
         this.loadPage = this.loadPage.bind(this)
         this.nextPage = this.nextPage.bind(this)
         this.prevPage = this.prevPage.bind(this)
+        this.addPage = this.addPage.bind(this)
     }
 
     componentDidMount() {
@@ -83,6 +84,11 @@ export class Pagination extends Component {
         }
     }
 
+    addPage() {
+        console.log("asd")
+        console.log(this.state.page)
+    }
+
     render() {
         const {page, total_page} = this.state
         return (
@@ -98,6 +104,24 @@ export class Pagination extends Component {
                             onClick={this.prevPage}
                         >
                             &laquo;өмнөх
+                        </button> {}
+                        <button
+                            type=" button"
+                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                            onClick={this.addPage}
+                        >1
+                        </button> {}
+                        <button
+                            type=" button"
+                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                            onClick={this.addPage}
+                        >2
+                        </button> {}
+                        <button
+                            type=" button"
+                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                            onClick={this.addPage}
+                        >3
                         </button> {}
 
                         <button

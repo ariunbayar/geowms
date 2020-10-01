@@ -49,41 +49,42 @@ export class ConfigList extends Component {
         const {config_list, disk} = this.state
 
         return (
-            <div className="container my-4 shadow-lg p-3 mb-5 bg-white rounded">
-                <div className="row">
-                    <div className="col-md-12">
-                        <div className="text-right mb-4">
-                            <NavLink className="btn gp-btn-primary" to={"/back/тохиргоо/үүсгэх/"}>
-                                Нэмэх
-                            </NavLink>
+            <div className="row">
+                <div className="col-md-12">
+                    <div className="card">
+                        <div class="card-body">
+                            <div className="text-right mb-4">
+                                    <NavLink className="btn gp-btn-primary" to={"/back/тохиргоо/үүсгэх/"}>
+                                        Нэмэх
+                                    </NavLink>
+                            </div>
+                            <div className="table-responsive">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Нэр</th>
+                                            <th scope="col">Утга</th>
+                                            <th scope="col">Зассан</th>
+                                            <th scope="col"></th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {config_list.map((config, idx) =>
+                                            <Config key={config.id} values={config}
+                                            handleUpdated={() => this.handleRemoved(config.id)}
+                                            handleRemove={()=>this.handleRemove(config.id)}
+                                            />
+                                        )}
+                                    </tbody>
+                                </table>
+                                <div className="col-md-12">
+                                    <h4 className="my-4">Дискийн хэмжээ</h4>
+                                    <DiskSize disk={disk}/>
+                                </div>
+                            </div>
                         </div>
-
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Нэр</th>
-                                    <th scope="col">Утга</th>
-                                    <th scope="col">Зассан</th>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {config_list.map((config, idx) =>
-                                    <Config key={config.id} values={config}
-                                    handleUpdated={() => this.handleRemoved(config.id)}
-                                    handleRemove={()=>this.handleRemove(config.id)}
-                                    />
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <h3>Дискийн хэмжээ</h3>
-                        <DiskSize disk={disk}/>
                     </div>
                 </div>
             </div>
