@@ -35,50 +35,52 @@ class ModalComponent extends Component{
 
         return (
             <div>
-                <div className="show d-block modal modal-dialog modal-dialog-scrollable">
-                    <div className="modal-content">
-                        <div className="modal-header" onClick={this.props.handleClose}>
-                            <h5 className="modal-title">Дэлгэрэнгүй мэдээлэл</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            {!is_complete &&
-                                <div className="d-flex align-items-center">
-                                    <strong>Түр хүлээнэ үү...</strong>
-                                    <div className="spinner-border ml-auto" role="status" aria-hidden="true"></div>
-                                </div>
-                            }
-                            {is_complete && content.map(([layer_name, values], idx) =>
-                                <div key={idx}>
-                                    <h6>{layer_name}</h6>
-                                    <table className="table">
-                                        <tbody>
-                                            {values.map(([field, value], val_idx) =>
-                                                <tr key={val_idx}>
-                                                    <th>{field}</th>
-                                                    <td>{value}</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
-                            {payload ?
-                            <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                                Ачааллаж байна...
-                                <a className="spinner-border text-light" role="status">
-                                    <span className="sr-only">Loading...</span>
-                                </a>
-                            </button>
-                            : null
-                            // <button type="button" onClick={() => this.handlePayment()} className="btn btn-secondary" data-dismiss="modal">Худалдаж авах</button>
-                            }
+                <div className="show d-block modal modal-dialog">
+                    <div className="modal-dialog-scrollable modal-dialog-centered">
+                        <div className="modal-content animated swing">
+                            <div className="modal-header" onClick={this.props.handleClose}>
+                                <h5 className="modal-title">Дэлгэрэнгүй мэдээлэл</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {!is_complete &&
+                                    <div className="d-flex align-items-center">
+                                        <strong>Түр хүлээнэ үү...</strong>
+                                        <div className="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+                                    </div>
+                                }
+                                {is_complete && content.map(([layer_name, values], idx) =>
+                                    <div key={idx}>
+                                        <h6>{layer_name}</h6>
+                                        <table className="table">
+                                            <tbody>
+                                                {values.map(([field, value], val_idx) =>
+                                                    <tr key={val_idx}>
+                                                        <th>{field}</th>
+                                                        <td>{value}</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" onClick={this.props.handleClose} className="btn btn-secondary" data-dismiss="modal">Буцах</button>
+                                {payload ?
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">
+                                    Ачааллаж байна...
+                                    <a className="spinner-border text-light" role="status">
+                                        <span className="sr-only">Loading...</span>
+                                    </a>
+                                </button>
+                                : null
+                                // <button type="button" onClick={() => this.handlePayment()} className="btn btn-secondary" data-dismiss="modal">Худалдаж авах</button>
+                                }
 
+                            </div>
                         </div>
                     </div>
                 </div>
