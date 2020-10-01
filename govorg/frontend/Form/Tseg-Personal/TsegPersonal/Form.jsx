@@ -508,592 +508,591 @@ export  class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row container  m-l">
-                        <div className="float-left">
-                            <Maps
-                                handleXY={this.handleXY}
-                                coordinatCheck={false}
-                                xy={this.x}
-                            />
-                        </div>
-                        <div className="col-md-12 mb-4 mt-4 pl-0">
-                            <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
-                                    <i className="fa fa-angle-double-left"></i> Буцах
-                            </NavLink>
-                        </div>
-                        <div
-                            style={{right:'0'}}
-                            className={`float-lg-right mr-5 ml-5 mt-4 position-absolute alert alert-danger` +
-                                (error_msg == '' ? ` d-none`: ` d-block`)} role="alert">
-                            {error_msg ? error_msg: null}
-                        </div>
-                        <h4>Цэгийн хувийн хэрэг</h4>
-                        <table className="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">1</th>
-                                    <th style={{width: "15%"}}>Цэгийн нэр</th>
-                                    <td  scope="rowgroup">
-                                        {this.state.name_error ? <a className="text-danger">Цэгийн нэр давхцаж байна !!!</a> : this.state.tesgiin_ner == '' ? '' : ''}
-                                        <div className="input-group">
-                                            <input
-                                                name="tesgiin_ner"
-                                                type="text"
-                                                id="tesgiin_ner"
-                                                list="tsegList"
-                                                autoComplete="off"
-                                                className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
-                                                onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
-                                                value = {this.state.tesgiin_ner}
-                                            />
-                                        </div>
-                                    </td>
-                                    <th style={{width: "5%"}} scope="row">2</th>
-                                    <th>Төвийн дугаар</th>
-                                    <td  scope="rowgroup">
-                                        {this.state.id_error ? <a className="text-danger">Төвийн дугаар давхцаж байна !!! </a> : this.state.toviin_dugaar == '' ? '' : ''}
-                                        <div className="input-group">
-                                            <input
-                                                name="toviin_dugaar"
-                                                type="text"
-                                                id="toviin_dugaar"
-                                                list="tsegList"
-                                                autoComplete="off"
-                                                className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
-                                                onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
-                                                value = {this.state.toviin_dugaar}
-                                            />
-                                            <div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th rowSpan="2" style={{width: "5%"}} scope="row">3</th>
-                                    <th rowSpan="2">Трапецийн дугаар(1:100000)</th>
-                                    <td rowSpan="2">
-                                        <input
-                                            className={'form-control ' + (errors.trapetsiin_dugaar ? 'is-invalid' : '')}
-                                            name='trapetsiin_dugaar'
-                                            id="id_trapetsiin_dugaar"
-                                            disabled={true}
-                                            type="text"
-                                            value={this.state.trapetsiin_dugaar }
-                                            value={(this.state.trapetsiin_dugaar == ''? '' : `${this.state.trapetsiin_dugaar}` + '- ' + `${this.state.zone}` + ' -' + `${this.state.cc}`)}
+                    <div className="row">
+                        <div className="col-md-8 my-2 card">
+                            <div className="card-body">
+                                <div className="row ml-3">
+                                    <div className="float-left">
+                                        <Maps
+                                            handleXY={this.handleXY}
+                                            coordinatCheck={false}
+                                            xy={this.x}
                                         />
-                                    </td>
-                                    <th style={{width: "5%"}} scope="row" rowSpan="2">4</th>
-                                    <th>Сүлжээний төрөл</th>
-                                    <td>
-                                        <Fragment>
-                                            <Field name="suljeenii_torol" as="select" className="form-control"
-                                            className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="3">GPS-ийн сүлжээ</option>
-                                                <option value="6">Гравиметрийн сүлжээ</option>
-                                                <option value="7">Өндрийн сүлжээ</option>
-                                                <option value="4">Триангуляцийн сүлжээ</option>
-                                                <option value="5">Полигометрийн сүлжээ</option>
-                                                <option value="8">Зураглалын сүлжээ</option>
-                                                <option value="2">GNSS-ийн байнгын ажиллагаатай станц</option>
-                                            </Field>
-                                            <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Зэрэг</th>
-                                    {values.suljeenii_torol == '2' ?
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">AA анги</option>
-                                                <option value="2">A анги</option>
-                                                <option value="3">B анги</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td> : values.suljeenii_torol == '4' ?
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">I анги</option>
-                                                <option value="2">II анги</option>
-                                                <option value="3">III анги</option>
-                                                <option value="4">IV анги</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td> : values.suljeenii_torol == '5' ?
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">I анги</option>
-                                                <option value="2">II анги</option>
-                                                <option value="3">III анги</option>
-                                                <option value="4">IV анги</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td> : values.suljeenii_torol == '6' ?
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">I анги</option>
-                                                <option value="2">II анги</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td> : values.suljeenii_torol == '7' ?
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">I анги</option>
-                                                <option value="2">II анги</option>
-                                                <option value="3">III анги</option>
-                                                <option value="4">IV анги</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td>  :
-                                        <td>
-                                        <Fragment>
-                                            <Field name="center_typ" as="select" className="form-control"
-                                            className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option value="1">C анги</option>
-                                            </Field>
-                                            <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td>
-                                    }
-                                </tr>
-
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">5</th>
-                                    <th>Аймаг</th>
-                                    <td colSpan="1" scope="rowgroup">
-                                    <input
-                                            className={'form-control '}
-                                            name='aimag_name'
-                                            id="aimag_name"
-                                            disabled={true}
-                                            type="text"
-                                            value={this.state.aimag_name}
-                                        />
-
-                                    </td>
-                                    <th>Сум</th>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <input
-                                            className={'form-control '}
-                                            name='sum_name'
-                                            id="sum_name"
-                                            type="text"
-                                            disabled={true}
-                                            value={this.state.sum_name || ''}
-                                        />
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <th rowSpan="4" scope="rowgroup" style={{width: "5%"}} scope="row">6</th>
-                                    <th rowSpan="4" scope="rowgroup">
-                                        WGS84 солбицлын тогтолтоонд, ITRF 2008 эринд 2008 эринд тодорхойлсон
-                                        <button type='button' className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
-                                            Шалгах
-                                        </button>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг(B)</th>
-                                    <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг(L)</th>
-                                </tr>
-                                <tr>
-                                    <td colSpan="2" className="pl-3">
-                                        <input
-                                            className={'form-control row float-left m-2' }
-                                            style={{width:"90%"}}
-                                            name='BA'
-                                            id="BA"
-                                            placeholder="D"
-                                            type="number"
-                                            onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BA || ''}
-                                        />
-                                        <input
-                                            className={'form-control row float-left m-2' }
-                                            style={{width:"90%"}}
-                                            placeholder="M"
-                                            name='BB'
-                                            id="BB"
-                                            type="number"
-                                            onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BB || ''}
-                                        />
-                                        <input
-                                            className={'form-control row float-left m-2' }
-                                            style={{width:"90%"}}
-                                            placeholder="S"
-                                            name='BC'
-                                            id="BC"
-                                            type="number"
-                                            onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.BC || ''}
-                                        />
-                                    </td>
-                                    <td colSpan="2" scope="rowgroup" className="pl-5">
-                                        <input
-                                            className={'form-control row float-left m-2' }
-                                            style={{width:"90%"}}
-                                            placeholder="D"
-                                            name="LA"
-                                            id="LA"
-                                            type="number"
-                                            onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LA}
-                                        />
-                                        <input
-                                            className={'form-control row float-left m-2' }
-                                            style={{width:"90%"}}
-                                            placeholder="M"
-                                            name='LB'
-                                            id="LB"
-                                            type="number"
-                                            onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LB || ''}
-                                        />
-                                        <input
-                                            className={'form-control row float-left m-2' }
-                                            style={{width:"90%"}}
-                                            placeholder="S"
-                                            name='LC'
-                                            id="LC"
-                                            type="number"
-                                            onChange = {(e)=>this.handleOnchange(e)}
-                                            value ={this.state.LC || ''}
-                                        />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="2" scope="rowgroup">
-                                        Өндөр төрөл
-                                        <Fragment>
-                                            <Field name="ondor_torol" as="select" className="form-control"
-                                                className={'form-control ' + (errors.ondor_torol ? 'is-invalid' : '')}>
-                                                <option >...</option>
-                                                <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
-                                                <option value="Ортометрын өндрийн утга">Ортометрын өндрийн утга</option>
-                                                <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option>
-                                            </Field>
-                                            <ErrorMessage name="ondor_torol" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </th>
-                                    <th colSpan="4" scope="rowgroup">
-                                        Өндөр тоо
-                                        <Field
-                                            className={'form-control ' + (errors.ondor ? 'is-invalid' : '')}
-                                            name='ondor'
-                                            id="id_ondor"
-                                            type="number"
-                                        />
-                                        <ErrorMessage name="ondor" component="div" className="text-dange"/>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>
-                                        7. Цэгийн фото зураг
-                                        <div
-                                            type="button"
-                                            onMouseOver={(e) => this.handleBoxOver(e)}
-                                            onMouseLeave={(e) => this.handleBoxLeave(e)}
-                                            style={{backgroundColor:"white"}}
-                                            className="float-right"
-                                        >
-                                        <i className="fa fa-exclamation-circle float-right">
-                                            <div className={`alert alert-dark rounded position-absolute d-none`+
-                                                        `${this.state.showBox ? " d-block" : ""}`}
-                                                        role="alert"
-                                            >
-                                                <h6 className="alert-heading">Санамж!</h6>
-                                                <p>".jpeg" болон ".png" байх ёстой</p>
-                                            </div>
-                                        </i>
-                                        </div>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
-                                        ойроос
-                                    </th>
-                                    <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
-                                        холоос
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
-                                    <div className="form-group">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'tseg_oiroos_img_url')}
-                                            imgExtension={['.jpeg', '.png']}
-                                            maxFileSize={2250000}
-                                            singleImage={true}
-                                            label=''
-                                        />
-                                        {
-                                        this.state.tseg_oiroos_img_url_zurag ?
-                                        <center><img src={this.state.tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
-                                        <center><label>Зураг байхгүй байна.</label></center>
-                                        }
                                     </div>
+                                    <div className="col-md-12 mb-4 mt-4 pl-0">
+                                        <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
+                                                <i className="fa fa-angle-double-left"></i> Буцах
+                                        </NavLink>
+                                    </div>
+                                    <div
+                                        className={`float-lg-right mr-5 ml-5 mt-4 position-absolute alert alert-danger` +
+                                            (error_msg == '' ? ` d-none`: ` d-block`)} role="alert">
+                                        {error_msg ? error_msg: null}
+                                    </div>
+                                    <h4>Цэгийн хувийн хэрэг</h4>
+                                    <table className="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">1</th>
+                                                <th>Цэгийн нэр</th>
+                                                <td  scope="rowgroup">
+                                                    {this.state.name_error ? <a className="text-danger">Цэгийн нэр давхцаж байна !!!</a> : this.state.tesgiin_ner == '' ? '' : ''}
+                                                    <div className="input-group">
+                                                        <input
+                                                            name="tesgiin_ner"
+                                                            type="text"
+                                                            id="tesgiin_ner"
+                                                            list="tsegList"
+                                                            autoComplete="off"
+                                                            className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
+                                                            onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
+                                                            value = {this.state.tesgiin_ner}
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <th scope="row">2</th>
+                                                <th>Төвийн дугаар</th>
+                                                <td  scope="rowgroup">
+                                                    {this.state.id_error ? <a className="text-danger">Төвийн дугаар давхцаж байна !!! </a> : this.state.toviin_dugaar == '' ? '' : ''}
+                                                    <div className="input-group">
+                                                        <input
+                                                            name="toviin_dugaar"
+                                                            type="text"
+                                                            id="toviin_dugaar"
+                                                            list="tsegList"
+                                                            autoComplete="off"
+                                                            className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
+                                                            onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
+                                                            value = {this.state.toviin_dugaar}
+                                                        />
+                                                        <div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th rowSpan="2" scope="row">3</th>
+                                                <th rowSpan="2">Трапецийн дугаар<br></br> (1:100000)</th>
+                                                <td rowSpan="2">
+                                                    <input
+                                                        className={'form-control ' + (errors.trapetsiin_dugaar ? 'is-invalid' : '')}
+                                                        name='trapetsiin_dugaar'
+                                                        id="id_trapetsiin_dugaar"
+                                                        disabled={true}
+                                                        type="text"
+                                                        value={this.state.trapetsiin_dugaar }
+                                                        value={(this.state.trapetsiin_dugaar == ''? '' : `${this.state.trapetsiin_dugaar}` + '- ' + `${this.state.zone}` + ' -' + `${this.state.cc}`)}
+                                                    />
+                                                </td>
+                                                <th scope="row" rowSpan="2">4</th>
+                                                <th>Сүлжээний төрөл</th>
+                                                <td>
+                                                    <Fragment>
+                                                        <Field name="suljeenii_torol" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="3">GPS-ийн сүлжээ</option>
+                                                            <option value="6">Гравиметрийн сүлжээ</option>
+                                                            <option value="7">Өндрийн сүлжээ</option>
+                                                            <option value="4">Триангуляцийн сүлжээ</option>
+                                                            <option value="5">Полигометрийн сүлжээ</option>
+                                                            <option value="8">Зураглалын сүлжээ</option>
+                                                            <option value="2">GNSS-ийн байнгын ажиллагаатай станц</option>
+                                                        </Field>
+                                                        <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Зэрэг</th>
+                                                {values.suljeenii_torol == '2' ?
+                                                    <td>
+                                                    <Fragment>
+                                                        <Field name="center_typ" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="1">AA анги</option>
+                                                            <option value="2">A анги</option>
+                                                            <option value="3">B анги</option>
+                                                        </Field>
+                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td> : values.suljeenii_torol == '4' ?
+                                                    <td>
+                                                    <Fragment>
+                                                        <Field name="center_typ" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="1">I анги</option>
+                                                            <option value="2">II анги</option>
+                                                            <option value="3">III анги</option>
+                                                            <option value="4">IV анги</option>
+                                                        </Field>
+                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td> : values.suljeenii_torol == '5' ?
+                                                    <td>
+                                                    <Fragment>
+                                                        <Field name="center_typ" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="1">I анги</option>
+                                                            <option value="2">II анги</option>
+                                                            <option value="3">III анги</option>
+                                                            <option value="4">IV анги</option>
+                                                        </Field>
+                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td> : values.suljeenii_torol == '6' ?
+                                                    <td>
+                                                    <Fragment>
+                                                        <Field name="center_typ" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="1">I анги</option>
+                                                            <option value="2">II анги</option>
+                                                        </Field>
+                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td> : values.suljeenii_torol == '7' ?
+                                                    <td>
+                                                    <Fragment>
+                                                        <Field name="center_typ" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="1">I анги</option>
+                                                            <option value="2">II анги</option>
+                                                            <option value="3">III анги</option>
+                                                            <option value="4">IV анги</option>
+                                                        </Field>
+                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td>  :
+                                                    <td>
+                                                    <Fragment>
+                                                        <Field name="center_typ" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option value="1">C анги</option>
+                                                        </Field>
+                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td>
+                                                }
+                                            </tr>
 
-                                    </td>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'tseg_holoos_img_url')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={2250000}
-                                            singleImage={true}
-                                            label=''
-                                        />
-                                        {
-                                        this.state.tseg_holoos_img_url_zurag ?
-                                        <center><img src={this.state.tseg_holoos_img_url_zurag } width="150px" height="100px"/></center>:
-                                        <center><label>Зураг байхгүй байна.</label></center>
+                                            <tr>
+                                                <th scope="row">5</th>
+                                                <th>Аймаг</th>
+                                                <td colSpan="1" scope="rowgroup">
+                                                <input
+                                                        className={'form-control '}
+                                                        name='aimag_name'
+                                                        id="aimag_name"
+                                                        disabled={true}
+                                                        type="text"
+                                                        value={this.state.aimag_name}
+                                                    />
+
+                                                </td>
+                                                <th>Сум</th>
+                                                <td colSpan="2" scope="rowgroup">
+                                                    <input
+                                                        className={'form-control '}
+                                                        name='sum_name'
+                                                        id="sum_name"
+                                                        type="text"
+                                                        disabled={true}
+                                                        value={this.state.sum_name || ''}
+                                                    />
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th rowSpan="4" scope="rowgroup" scope="row">6</th>
+                                                <th rowSpan="4" scope="rowgroup" className="text-justify">
+                                                    WGS84 солбицлын<br></br> тогтолтоонд, <br></br> ITRF 2008 эринд <br></br>тодорхойлсон<br></br>
+                                                    <button type='button' className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
+                                                        Шалгах
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="2" style={{textAlign:'center'}}>Өргөрөг(B)</th>
+                                                <th colSpan="2" scope="rowgroup" style={{textAlign:'center'}}>Уртраг(L)</th>
+                                            </tr>
+                                            <tr>
+                                                <td colSpan="2" className="pl-3">
+                                                    <input
+                                                        className={'form-control row float-left m-2' }
+                                                        name='BA'
+                                                        id="BA"
+                                                        placeholder="D"
+                                                        type="number"
+                                                        onChange = {(e)=>this.handleOnchange(e)}
+                                                        value ={this.state.BA || ''}
+                                                    />
+                                                    <input
+                                                        className={'form-control row float-left m-2' }
+                                                        placeholder="M"
+                                                        name='BB'
+                                                        id="BB"
+                                                        type="number"
+                                                        onChange = {(e)=>this.handleOnchange(e)}
+                                                        value ={this.state.BB || ''}
+                                                    />
+                                                    <input
+                                                        className={'form-control row float-left m-2' }
+                                                        placeholder="S"
+                                                        name='BC'
+                                                        id="BC"
+                                                        type="number"
+                                                        onChange = {(e)=>this.handleOnchange(e)}
+                                                        value ={this.state.BC || ''}
+                                                    />
+                                                </td>
+                                                <td colSpan="2" scope="rowgroup" className="pl-5">
+                                                    <input
+                                                        className={'form-control row float-left m-2' }
+                                                        placeholder="D"
+                                                        name="LA"
+                                                        id="LA"
+                                                        type="number"
+                                                        onChange = {(e)=>this.handleOnchange(e)}
+                                                        value ={this.state.LA}
+                                                    />
+                                                    <input
+                                                        className={'form-control row float-left m-2' }
+                                                        placeholder="M"
+                                                        name='LB'
+                                                        id="LB"
+                                                        type="number"
+                                                        onChange = {(e)=>this.handleOnchange(e)}
+                                                        value ={this.state.LB || ''}
+                                                    />
+                                                    <input
+                                                        className={'form-control row float-left m-2' }
+                                                        placeholder="S"
+                                                        name='LC'
+                                                        id="LC"
+                                                        type="number"
+                                                        onChange = {(e)=>this.handleOnchange(e)}
+                                                        value ={this.state.LC || ''}
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="2" scope="rowgroup">
+                                                    Өндөр төрөл
+                                                    <Fragment>
+                                                        <Field name="ondor_torol" as="select" className="form-control"
+                                                            className={'form-control ' + (errors.ondor_torol ? 'is-invalid' : '')}>
+                                                            <option >...</option>
+                                                            <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
+                                                            <option value="Ортометрын өндрийн утга">Ортометрын өндрийн утга</option>
+                                                            <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option>
+                                                        </Field>
+                                                        <ErrorMessage name="ondor_torol" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </th>
+                                                <th colSpan="4" scope="rowgroup">
+                                                    Өндөр тоо
+                                                    <Field
+                                                        className={'form-control ' + (errors.ondor ? 'is-invalid' : '')}
+                                                        name='ondor'
+                                                        id="id_ondor"
+                                                        type="number"
+                                                    />
+                                                    <ErrorMessage name="ondor" component="div" className="text-dange"/>
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>
+                                                    7. Цэгийн фото зураг
+                                                    <div
+                                                        type="button"
+                                                        onMouseOver={(e) => this.handleBoxOver(e)}
+                                                        onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                                        style={{backgroundColor:"white"}}
+                                                        className="float-right"
+                                                    >
+                                                    <i className="fa fa-exclamation-circle float-right">
+                                                        <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                                    `${this.state.showBox ? " d-block" : ""}`}
+                                                                    role="alert"
+                                                        >
+                                                            <h6 className="alert-heading">Санамж!</h6>
+                                                            <p>".jpeg" болон ".png" байх ёстой</p>
+                                                        </div>
+                                                    </i>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
+                                                    ойроос
+                                                </th>
+                                                <th style={{textAlign: "center"}} colSpan="3" scope="rowgroup">
+                                                    холоос
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <td colSpan="3" scope="rowgroup">
+                                                <div className="form-group">
+                                                    <ImageUploader
+                                                        withPreview={true}
+                                                        withIcon={false}
+                                                        buttonText='Зураг оруулах'
+                                                        onChange={(e) =>this.onDrop(e, 'tseg_oiroos_img_url')}
+                                                        imgExtension={['.jpeg', '.png']}
+                                                        maxFileSize={2250000}
+                                                        singleImage={true}
+                                                        label=''
+                                                    />
+                                                    {
+                                                    this.state.tseg_oiroos_img_url_zurag ?
+                                                    <center><img src={this.state.tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
+                                                    <center><label>Зураг байхгүй байна.</label></center>
+                                                    }
+                                                </div>
+
+                                                </td>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    <ImageUploader
+                                                        withPreview={true}
+                                                        withIcon={false}
+                                                        buttonText='Зураг оруулах'
+                                                        onChange={(e) =>this.onDrop(e, 'tseg_holoos_img_url')}
+                                                        imgExtension={['.jpg', '.png']}
+                                                        maxFileSize={2250000}
+                                                        singleImage={true}
+                                                        label=''
+                                                    />
+                                                    {
+                                                    this.state.tseg_holoos_img_url_zurag ?
+                                                    <center><img src={this.state.tseg_holoos_img_url_zurag } width="150px" height="100px"/></center>:
+                                                    <center><label>Зураг байхгүй байна.</label></center>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">8. Байршлын тухай: </th>
+                                                <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
+                                                    {this.state.barishil_tuhai.length < 50 ? <a className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </a> : ''}
+                                                    <input
+                                                        className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')}
+                                                        name='barishil_tuhai'
+                                                        id="id_barishil_tuhai"
+                                                        type="textarea"
+                                                        onChange = {(e) => this.handleInput(e)}
+                                                        value={this.state.barishil_tuhai}
+                                                    />
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="3" scope="rowgroup">
+                                                    9. Байршлын тойм зураг
+                                                </th>
+                                                <th colSpan="3" scope="rowgroup">
+                                                    10. Төв цэгийн хэлбэр
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    <ImageUploader
+                                                        withPreview={true}
+                                                        withIcon={false}
+                                                        buttonText='Зураг оруулах'
+                                                        onChange={(e) =>this.onDrop(e, 'bairshil_tseg_oiroos_img_url')}
+                                                        imgExtension={['.jpg', '.png']}
+                                                        maxFileSize={2250000}
+                                                        singleImage={true}
+                                                        label=''
+                                                    />
+                                                    {
+                                                    this.state.bairshil_tseg_oiroos_img_url_zurag ?
+                                                    <center><img src={this.state.bairshil_tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
+                                                    <center><label>Зураг байхгүй байна.</label></center>
+                                                    }
+                                                </td>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    <ImageUploader
+                                                        withPreview={true}
+                                                        withIcon={false}
+                                                        buttonText='Зураг оруулах'
+                                                        onChange={(e) =>this.onDrop(e, 'bairshil_tseg_holoos_img_url')}
+                                                        imgExtension={['.jpg', '.png']}
+                                                        maxFileSize={2250000}
+                                                        singleImage={true}
+                                                        label=''
+                                                    />
+                                                    {
+                                                    this.state.bairshil_tseg_holoos_img_url_zurag ?
+                                                    <center><img src={this.state.bairshil_tseg_holoos_img_url_zurag} width="150px" height="100px"/></center>:
+                                                    <center><label>Зураг байхгүй байна.</label></center>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">11.</th>
+                                                <td colSpan="5" scope="rowgroup">
+                                                    <Fragment>
+                                                        <Field name="sudalga_or_shine" as="select" className="form-control"
+                                                        className={'form-control ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
+                                                            <option>...</option>
+                                                            <option>Сэргээсэн</option>
+                                                            <option>Шинээр суулгасан</option>
+                                                        </Field>
+                                                        <ErrorMessage name="sudalga_or_shine" component="div" className="text-dange"/>
+                                                    </Fragment>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">12.</th>
+                                                <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
+                                                <td colSpan="4" scope="rowgroup">
+                                                {this.state.hors_error ? <a className="text-danger">Бүртгэлгүй хөрсний мэдээлэл байна</a> : ''}
+                                                    <div className="input-group">
+                                                        <input
+                                                            name="hors_shinj_baidal"
+                                                            type="text"
+                                                            id="hors_shinj_baidal"
+                                                            list="tsegList"
+                                                            autoComplete="off"
+                                                            className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')}
+                                                            onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
+                                                            value = {this.state.hors_shinj_baidal}
+                                                        />
+                                                        <div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">13.</th>
+                                                <th colSpan="2" scope="rowgroup">Цэг тэмдэгт судалгасан огноо:</th>
+                                                <td colSpan="3" scope="input-group date">
+                                                    <Field
+                                                        className={'form-control ' + (errors.date ? 'is-invalid' : '')}
+                                                        name='date'
+                                                        id="id_date"
+                                                        type="date"
+                                                    />
+                                                    <ErrorMessage name="date" component="div" className="text-dange"/>
+                                                </td>
+                                            </tr>
+                                            {values.suljeenii_torol == '3' ?
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">14.</th>
+                                                <th colSpan="2" scope="rowgroup">Файл 1:</th>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    {this.state.file_path11 === '' ? null : <a href={`/media/${this.state.file_path11}`}>{this.state.file_path11}</a>}
+                                                    <input
+                                                        type="file"
+                                                        className={'form-control ' + (this.state.file_path1_error > 0 ? 'is-invalid' : '')}
+                                                        disabled={values.suljeenii_torol == '3' ? false : true}
+                                                        onChange={(e) => this.onChangeHandler(e, 'file_path1')}
+                                                    />
+                                                    {this.state.file_path1_error > 0 ?
+                                                    <ul className="text-danger">
+                                                        <li>XXXXDDDS.YYo</li>
+                                                        <li>XXXX – Хэмжсэн цэгийн нэр</li>
+                                                        <li>DDD-Жилийн өдөр (GPS-ийн өдөр, 001-365)</li>
+                                                        <li>S-хэмжсэн хугацааны урт (0-9, а-Z)</li>
+                                                        <li>YY-хэмжилт хийсэн оны сүүлийн 2 орон (2018 үед 18 )Жишээ нь: gunt2170.18o</li>
+                                                    </ul>
+                                                    : null}
+                                                </td>
+                                            </tr>: null}
+                                            {values.suljeenii_torol == '3' ?
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">15.</th>
+                                                <th colSpan="2" scope="rowgroup">Файл 2:</th>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    {this.state.file_path22 === '' ? null : <a href={`/media/${this.state.file_path22}`}>{this.state.file_path22}</a>}
+                                                    <input
+                                                        type="file"
+                                                        className="form-control"
+                                                        className={'form-control ' + (this.state.file_path2_error > 0 ? 'is-invalid' : '')}
+                                                        disabled={values.suljeenii_torol == '3' ? false : true}
+                                                        onChange={(e) => this.onChangeHandler(e, 'file_path2')}
+                                                    />
+                                                    {this.state.file_path2_error > 0 ?
+                                                    <ul className="text-danger">
+                                                        <li>XXXXDDDS.YYo</li>
+                                                        <li>XXXX – Хэмжсэн цэгийн нэр</li>
+                                                        <li>DDD-Жилийн өдөр (GPS-ийн өдөр, 001-365)</li>
+                                                        <li>S-хэмжсэн хугацааны урт (0-9, а-Z)</li>
+                                                        <li>YY-хэмжилт хийсэн оны сүүлийн 2 орон (2018 үед 18 )Жишээ нь: gunt2170.18o</li>
+                                                    </ul>
+                                                    : null}
+
+                                                </td>
+                                            </tr>
+                                            : null}
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">16.</th>
+                                                <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    <Field
+                                                        className={'form-control ' + (errors.alban_baiguullga ? 'is-invalid' : '')}
+                                                        name='alban_baiguullga'
+                                                        id="id_alban_baiguullga"
+                                                        type="text"
+                                                    />
+                                                    <ErrorMessage name="alban_baiguullga" component="div" className="text-danger"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">17.</th>
+                                                <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    <Field
+                                                        className={'form-control ' + (errors.alban_tushaal ? 'is-invalid' : '')}
+                                                        name='alban_tushaal'
+                                                        id="id_alban_tushaal"
+                                                        type="text"
+                                                    />
+                                                    <ErrorMessage name="alban_tushaal" component="div" className="=text-danger"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th colSpan="1" scope="rowgroup">18.</th>
+                                                <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
+                                                <td colSpan="3" scope="rowgroup">
+                                                    <Field
+                                                        className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
+                                                        name='hotolson'
+                                                        id="id_hotolson"
+                                                        type="text"
+                                                    />
+                                                    <ErrorMessage name="hotolson" component="div" className="text-danger"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div className="span3 my-3">
+                                        {has_error
+                                            ?
+                                                <p> </p>
+                                            : status == 'saved' && !dirty &&
+                                                <p>
+                                                    Амжилттай нэмэгдлээ
+                                                </p>
                                         }
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">8. Байршлын тухай: </th>
-                                    <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
-                                         {this.state.barishil_tuhai.length < 50 ? <a className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </a> : ''}
-                                        <input
-                                            className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')}
-                                            name='barishil_tuhai'
-                                            id="id_barishil_tuhai"
-                                            type="textarea"
-                                            onChange = {(e) => this.handleInput(e)}
-                                            value={this.state.barishil_tuhai}
-                                        />
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>
-                                        9. Байршлын тойм зураг
-                                    </th>
-                                    <th colSpan="3" scope="rowgroup" style={{width: "50%"}}>
-                                        10. Төв цэгийн хэлбэр
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td colSpan="3" scope="rowgroup" style={{height: "200px"}}>
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'bairshil_tseg_oiroos_img_url')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={2250000}
-                                            singleImage={true}
-                                            label=''
-                                        />
-                                        {
-                                        this.state.bairshil_tseg_oiroos_img_url_zurag ?
-                                        <center><img src={this.state.bairshil_tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
-                                        <center><label>Зураг байхгүй байна.</label></center>
-                                        }
-                                    </td>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'bairshil_tseg_holoos_img_url')}
-                                            imgExtension={['.jpg', '.png']}
-                                            maxFileSize={2250000}
-                                            singleImage={true}
-                                            label=''
-                                        />
-                                        {
-                                        this.state.bairshil_tseg_holoos_img_url_zurag ?
-                                        <center><img src={this.state.bairshil_tseg_holoos_img_url_zurag} width="150px" height="100px"/></center>:
-                                        <center><label>Зураг байхгүй байна.</label></center>
-                                        }
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">11.</th>
-                                    <td colSpan="5" scope="rowgroup">
-                                        <Fragment>
-                                            <Field name="sudalga_or_shine" as="select" className="form-control"
-                                            className={'form-control ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
-                                                <option>...</option>
-                                                <option>Сэргээсэн</option>
-                                                <option>Шинээр суулгасан</option>
-                                            </Field>
-                                            <ErrorMessage name="sudalga_or_shine" component="div" className="text-dange"/>
-                                        </Fragment>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">12.</th>
-                                    <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
-                                    <td colSpan="4" scope="rowgroup">
-                                    {this.state.hors_error ? <a className="text-danger">Бүртгэлгүй хөрсний мэдээлэл байна</a> : ''}
-                                        <div className="input-group">
-                                            <input
-                                                name="hors_shinj_baidal"
-                                                type="text"
-                                                id="hors_shinj_baidal"
-                                                list="tsegList"
-                                                autoComplete="off"
-                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')}
-                                                onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
-                                                value = {this.state.hors_shinj_baidal}
-                                            />
-                                            <div>
-                                            </div>
+                                        <div>
+                                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
+                                                {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                                {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                                {!isSubmitting && 'Нэмэх' }
+                                            </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">13.</th>
-                                    <th colSpan="2" scope="rowgroup">Цэг тэмдэгт судалгасан огноо:</th>
-                                    <td colSpan="3" scope="input-group date">
-                                        <Field
-                                            className={'form-control ' + (errors.date ? 'is-invalid' : '')}
-                                            name='date'
-                                            id="id_date"
-                                            type="date"
-                                        />
-                                        <ErrorMessage name="date" component="div" className="text-dange"/>
-                                    </td>
-                                </tr>
-                                {values.suljeenii_torol == '3' ?
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">14.</th>
-                                    <th colSpan="2" scope="rowgroup">Файл 1:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        {this.state.file_path11 === '' ? null : <a href={`/media/${this.state.file_path11}`}>{this.state.file_path11}</a>}
-                                        <input
-                                            type="file"
-                                            className={'form-control ' + (this.state.file_path1_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '3' ? false : true}
-                                            onChange={(e) => this.onChangeHandler(e, 'file_path1')}
-                                        />
-                                        {this.state.file_path1_error > 0 ?
-                                        <ul className="text-danger">
-                                            <li>XXXXDDDS.YYo</li>
-                                            <li>XXXX – Хэмжсэн цэгийн нэр</li>
-                                            <li>DDD-Жилийн өдөр (GPS-ийн өдөр, 001-365)</li>
-                                            <li>S-хэмжсэн хугацааны урт (0-9, а-Z)</li>
-                                            <li>YY-хэмжилт хийсэн оны сүүлийн 2 орон (2018 үед 18 )Жишээ нь: gunt2170.18o</li>
-                                        </ul>
-                                        : null}
-                                    </td>
-                                </tr>: null}
-                                {values.suljeenii_torol == '3' ?
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">15.</th>
-                                    <th colSpan="2" scope="rowgroup">Файл 2:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        {this.state.file_path22 === '' ? null : <a href={`/media/${this.state.file_path22}`}>{this.state.file_path22}</a>}
-                                        <input
-                                            type="file"
-                                            className="form-control"
-                                            className={'form-control ' + (this.state.file_path2_error > 0 ? 'is-invalid' : '')}
-                                            disabled={values.suljeenii_torol == '3' ? false : true}
-                                            onChange={(e) => this.onChangeHandler(e, 'file_path2')}
-                                        />
-                                        {this.state.file_path2_error > 0 ?
-                                        <ul className="text-danger">
-                                            <li>XXXXDDDS.YYo</li>
-                                            <li>XXXX – Хэмжсэн цэгийн нэр</li>
-                                            <li>DDD-Жилийн өдөр (GPS-ийн өдөр, 001-365)</li>
-                                            <li>S-хэмжсэн хугацааны урт (0-9, а-Z)</li>
-                                            <li>YY-хэмжилт хийсэн оны сүүлийн 2 орон (2018 үед 18 )Жишээ нь: gunt2170.18o</li>
-                                        </ul>
-                                        : null}
-
-                                    </td>
-                                </tr>
-                                : null}
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">16.</th>
-                                    <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.alban_baiguullga ? 'is-invalid' : '')}
-                                            name='alban_baiguullga'
-                                            id="id_alban_baiguullga"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="alban_baiguullga" component="div" className="text-danger"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">17.</th>
-                                    <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.alban_tushaal ? 'is-invalid' : '')}
-                                            name='alban_tushaal'
-                                            id="id_alban_tushaal"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="alban_tushaal" component="div" className="=text-danger"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colSpan="1" scope="rowgroup">18.</th>
-                                    <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
-                                    <td colSpan="3" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' + (errors.hotolson ? 'is-invalid' : '')}
-                                            name='hotolson'
-                                            id="id_hotolson"
-                                            type="text"
-                                        />
-                                        <ErrorMessage name="hotolson" component="div" className="text-danger"/>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div className="span3">
-                            {has_error
-                                ?
-                                    <p> </p>
-                                : status == 'saved' && !dirty &&
-                                    <p>
-                                        Амжилттай нэмэгдлээ
-                                    </p>
-                            }
-                            <div>
-                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
-                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                    {!isSubmitting && 'Нэмэх' }
-                                </button>
+                                        <datalist id="tsegList">
+                                            {this.datalist}
+                                        </datalist>
+                                    </div>
+                                </div>
                             </div>
-                            <datalist id="tsegList">
-                                {this.datalist}
-                            </datalist>
                         </div>
                     </div>
                  </Form>

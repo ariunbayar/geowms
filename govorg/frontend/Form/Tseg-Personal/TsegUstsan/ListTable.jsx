@@ -61,7 +61,7 @@ export default class ListTable extends Component {
                 </td>
                 <td>
                 {perm_view && perm_create && perm_remove ? <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                 </NavLink> : null}
                 </td>
                 {perm_approve ? <td>
@@ -80,7 +80,7 @@ export default class ListTable extends Component {
                 </td> : null}
                 {perm_remove ? <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     {is_modal_delete_open &&
                         <Modal

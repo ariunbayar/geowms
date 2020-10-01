@@ -82,7 +82,7 @@ export default class FormTable extends Component {
                 {perm_remove && perm_view && perm_create ?
                 <th>
                     <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/${id}/засах/`}>
-                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </th>
                 :
@@ -91,7 +91,7 @@ export default class FormTable extends Component {
                 {perm_remove ?
                 <th>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     {this.state.is_modal_delete_open &&
                         <Modal

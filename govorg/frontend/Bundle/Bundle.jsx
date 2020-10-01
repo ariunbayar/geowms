@@ -41,29 +41,27 @@ export default class Bundle extends Component {
 
     render() {
         return (
-            <div className="container my-5 ml-5">
-                <div className="row">
-                    <div className="col-md-12 pl-5 ">
-                        <div className="mb-3">
-                            <table className="table table-bordered">
-                                <thead>
-                                    <tr>
-                                    <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
-                                    <th scope="col">харах</th>
-                                    <th scope="col">нэмэх</th>
-                                    <th scope="col">хасах</th>
-                                    <th scope="col">цуцлах</th>
-                                    <th scope="col">хянах</th>
-                                    <th scope="col">батлах</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.state.org_roles.map((org_role, idx) =>
-                                        <Item key={idx} org_role={org_role} />
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+            <div className='card'>
+                <div className="card-body">
+                    <div className="table-responsive">
+                        <table className="table table-bordered">
+                            <thead>
+                                <tr>
+                                <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
+                                <th scope="col">харах</th>
+                                <th scope="col">нэмэх</th>
+                                <th scope="col">хасах</th>
+                                <th scope="col">цуцлах</th>
+                                <th scope="col">хянах</th>
+                                <th scope="col">батлах</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.org_roles.map((org_role, idx) =>
+                                    <Item key={idx} org_role={org_role} />
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

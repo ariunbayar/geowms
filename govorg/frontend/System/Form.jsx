@@ -57,19 +57,19 @@ export class Form extends Component {
     render() {
         const {currentPage, systemPerPage, systems, govorg_length}=this.state
         return (
-            <div className="container">
-                <div className="row">
-                    <div className="col-md-12 pl-5 m-5">
-                        <input
-                            type="text"
-                            className="form-control flaot-left col-md-4  mb-1"
-                            id="searchQuery"
-                            placeholder="Хайх"
-                            onChange={(e) => this.handleSearch('searchQuery', e)}
-                            value={this.state.searchQuery}
-                        />
-                        <table className="table table-bordered">
-                           <thead>
+            <div className="card">
+                <div className="card-body">
+                    <input
+                        type="text"
+                        className="form-control flaot-left col-md-4"
+                        id="searchQuery"
+                        placeholder="Хайх"
+                        onChange={(e) => this.handleSearch('searchQuery', e)}
+                        value={this.state.searchQuery}
+                    />
+                    <div className="table-responsive my-3">
+                        <table className="table">
+                            <thead>
                                 <tr>
                                     <th scope="col">№</th>
                                     <th scope="col">Нэр</th>
@@ -89,10 +89,10 @@ export class Form extends Component {
                                 )}
                             </tbody>
                         </table>
-                        <Pagination paginate={this.paginate}
-                            searchQuery = { this.state.searchQuery }
-                        />
                     </div>
+                    <Pagination paginate={this.paginate}
+                        searchQuery = { this.state.searchQuery }
+                    />
                 </div>
             </div>
         );

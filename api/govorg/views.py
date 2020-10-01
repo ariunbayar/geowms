@@ -1,14 +1,16 @@
 import requests
+import json
 
 from django.http import HttpResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
-from django.views.decorators.http import require_GET
-
-from backend.govorg.models import GovOrg
-from backend.wms.models import WMS
-from backend.wms.models import WMSLog
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 from api.utils import filter_layers, replace_src_url
+from backend.govorg.models import GovOrg
+from backend.wms.models import WMS, WMSLog
+from backend.changeset.models import ChangeSet
 
 
 def _get_service_url(request, token, wms):
@@ -56,3 +58,23 @@ def proxy(request, token, pk):
     )
 
     return HttpResponse(content, content_type=content_type)
+
+
+@require_POST
+@csrf_exempt
+def qgis_submit(request):
+
+    values = request.POST.get('values')
+
+    try:
+        values_list = json.loads(values)
+
+        changeset = ChangeSet()
+        changeset.geom = values_list[0]
+        changeset.features = values_list[1]
+        changeset.save()
+
+        return JsonResponse({'success': True})
+
+    except Exception:
+        return JsonResponse({'success': False})

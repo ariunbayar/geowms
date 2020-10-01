@@ -39,35 +39,37 @@ export class Detail extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="container my-4">
-                <div className="row">
-                    <div className="col-md-12 mb-4">
-                        <NavLink className="btn gp-outline-primary" exact to={`/gov/system/`}>
-                            <i className="fa fa-angle-double-left"></i> Буцах
-                        </NavLink>
-                    </div>
-                </div>
-                <div className="row">
-
-                    <div className="col-md-12 mb-4">
-                        <h4>{name}</h4>
-                        <p><strong>Token</strong>: {token} </p>
-                    </div>
-
-                    {this.state.govorg_wms_list.map((wms) =>
-                        <div className="col-md-12 mb-4" key={wms.id}>
-                            <h4> {wms.name} </h4>
-                            <input type="text" className="form-control" disabled value={wms.public_url}/>
-                            <ul>
-                                {wms.layer_list.map((layer, idx) =>
-                                    <li key={idx}>
-                                        {layer.title} ({layer.code})
-                                    </li>
-                                )}
-                            </ul>
+            <div className="card">
+                <div className="card-body">
+                    <div className="row">
+                        <div className="col-md-12 mb-4">
+                            <NavLink className="btn gp-outline-primary" exact to={`/gov/system/`}>
+                                <i className="fa fa-angle-double-left"></i> Буцах
+                            </NavLink>
                         </div>
-                    )}
+                    </div>
+                    <div className="row">
 
+                        <div className="col-md-12 mb-4">
+                            <h4>{name}</h4>
+                            <p><strong>Token</strong>: {token} </p>
+                        </div>
+
+                        {this.state.govorg_wms_list.map((wms) =>
+                            <div className="col-md-12 mb-4" key={wms.id}>
+                                <h4> {wms.name} </h4>
+                                <input type="text" className="form-control" disabled value={wms.public_url}/>
+                                <ul>
+                                    {wms.layer_list.map((layer, idx) =>
+                                        <li key={idx}>
+                                            {layer.title} ({layer.code})
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+                        )}
+
+                    </div>
                 </div>
             </div>
         )

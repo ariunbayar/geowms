@@ -35,6 +35,7 @@ export class Forms extends Component {
             root3: '',
             root4: -1,
         }
+
         this.handleSubmit = this.handleSubmit.bind(this)
         this.getAimag = this.getAimag.bind(this)
         this.handleInputAimag = this.handleInputAimag.bind(this)
@@ -265,10 +266,11 @@ export class Forms extends Component {
     render() {
         const {latx, laty} = this.state
         return (
-            <div className="row my-4">
-                <div className="my-4 mt-4 col-md-6">
-                    <table className="table table-bordered">
-                        <tbody>
+            <div className="card container">
+                <div className="row card-body">
+                    <div className="mt-4 col-md">
+                        <table className="table table-bordered">
+                            <tbody>
                             <tr>
                                 <th style={{width:"30%"}}>Аймаг, Нийслэл</th>
                                 <td style={{widtd:"60%"}}>
@@ -331,34 +333,34 @@ export class Forms extends Component {
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
-                    {this.state.handle_save ?
-                        <button className="btn gp-btn-primary">
-                            <div className="spinner-border text-light" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div>
-                            <a className="text-light"> Шалгаж байна.</a>
-                        </button>:
-                        <button className="btn gp-btn-primary" onClick={this.handleSubmit} >
-                            Хадгалах
-                        </button>
-                    }
-                    {this.state.success_msg ?
-                    <div className="alert alert-success col-md-4 my-4" role="alert">
-                        Амжилттай хадгалагдлаа
+                        </table>
+                        {this.state.handle_save ?
+                            <button className="btn gp-btn-primary">
+                                <div className="spinner-border text-light" role="status">
+                                    <span className="sr-only">Loading...</span>
+                                </div>
+                                <a className="text-light"> Шалгаж байна.</a>
+                            </button>:
+                            <button className="btn gp-btn-primary" onClick={this.handleSubmit} >
+                                Хадгалах
+                            </button>
+                        }
+                        {this.state.success_msg ?
+                        <div className="alert alert-success col-md-4 my-4" role="alert">
+                            Амжилттай хадгалагдлаа
+                        </div>
+                        :
+                        null
+                        }
+                        {this.state.danger_msg ?
+                        <div className="alert alert-danger col-md-4 my-4" role="alert">
+                            Алдаа гарлаа.
+                        </div>
+                        :
+                        null
+                        }
                     </div>
-                    :
-                    null
-                    }
-                    {this.state.danger_msg ?
-                    <div className="alert alert-danger col-md-4 my-4" role="alert">
-                        Алдаа гарлаа.
-                    </div>
-                    :
-                    null
-                    }
-                </div>
-                <div className="my-4 mt-4 col-md-6">
+                    <div className="my-4 mt-4 col-md">
                     <input
                         type="text"
                         className="form-control col-md-7  mb-1 float-left"
@@ -372,26 +374,29 @@ export class Forms extends Component {
                         <option value='AU_SumUnit'>Сум дүүргийн хил</option>
                         <option value='zipcode'>Баг хорооны хил</option>
                     </select>
-                    <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">№</th>
-                                    <th scope="col">Нэр</th>
-                                    <th scope="col">Код</th>
-                                    <th scope="col">Засах</th>
-                                </tr>
-                            </thead>
-                            <tfoot>
-                                {this.state.form_data.map((values, idx) =>
-                                    <FormTable
-                                        handleEdit={this.handleEdit}
-                                        key={idx}
-                                        values={values}
-                                        idx = {idx}
-                                    />
-                                )}
-                            </tfoot>
-                        </table>
+                        <div className="table-responsive">
+                            <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">№</th>
+                                            <th scope="col">Нэр</th>
+                                            <th scope="col">Код</th>
+                                            <th scope="col">Засах</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        {this.state.form_data.map((values, idx) =>
+                                            <FormTable
+                                                handleEdit={this.handleEdit}
+                                                key={idx}
+                                                values={values}
+                                                idx = {idx}
+                                            />
+                                        )}
+                                    </tfoot>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         )

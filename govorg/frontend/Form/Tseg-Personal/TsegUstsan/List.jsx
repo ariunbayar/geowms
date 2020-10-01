@@ -69,52 +69,54 @@ export class List extends Component {
     render() {
         const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         return (
-            <div className="container my-4">
-                <div className="row">
+            <div  className="card my-4">
+                <div  className="card-body">
                     <div className="col-md-12">
-                          <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
+                        <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
                         <input
                             type="text"
-                            className="form-control col-md-4  mb-1 float-left"
+                            className="form-control col-md-4 float-left"
                             id="searchQuery"
                             placeholder="Хайх"
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
-                        <table className="table table-fluid">
-                            <thead>
-                                <tr>
-                                    <th scope="col"> № </th>
-                                    <th scope="col"> Email </th>
-                                    <th scope="col">Байгууллага</th>
-                                    <th scope="col">Албан тушаал</th>
-                                    <th scope="col">Цэгийн дугаар</th>
-                                    {perm_create && perm_view && perm_remove ? <th>Засах</th> :null}
-                                    {perm_approve ? <th>Баталгаажуулах</th> :null}
-                                    {perm_remove ? <th>Устгах</th> :null}
-                                </tr>
-                               </thead>
-                             <tbody>
-                            {
-                                this.state.list_length == 0
-                                ?
-                                    <tr><td>"Бүртгэл байхгүй байна"</td></tr>
-                                :
-                                (this.state.list.map((tseg, idx) =>
-                                    <ListTable
-                                        key={idx}
-                                        idx={idx}
-                                        perms={this.props.perms}
-                                        values={tseg}
-                                        handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
-                                        handleRemove={() => this.handleRemove(tseg.id)}
-                                    />
-                                ))
-                            }
-                            </tbody>
-                        </table>
+                        <div className="table-responsive">
+                            <table className="table table-fluid my-4">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"> № </th>
+                                        <th scope="col"> Email </th>
+                                        <th scope="col">Байгууллага</th>
+                                        <th scope="col">Албан тушаал</th>
+                                        <th scope="col">Цэгийн дугаар</th>
+                                        {perm_create && perm_view && perm_remove ? <th>Засах</th> :null}
+                                        {perm_approve ? <th>Баталгаажуулах</th> :null}
+                                        {perm_remove ? <th>Устгах</th> :null}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {
+                                    this.state.list_length == 0
+                                    ?
+                                        <tr><td>"Бүртгэл байхгүй байна"</td></tr>
+                                    :
+                                    (this.state.list.map((tseg, idx) =>
+                                        <ListTable
+                                            key={idx}
+                                            idx={idx}
+                                            perms={this.props.perms}
+                                            values={tseg}
+                                            handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
+                                            handleRemove={() => this.handleRemove(tseg.id)}
+                                        />
+                                    ))
+                                }
+                                </tbody>
+                            </table>
+                        </div>
                         <Pagination
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
