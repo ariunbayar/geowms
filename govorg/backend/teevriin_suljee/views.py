@@ -1,8 +1,11 @@
-from django.shortcuts import render
+import requests
+import json
+from geojson import Point, Feature, FeatureCollection, dump,MultiPoint
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
 
-from django.views.decorators.http import require_GET
 from backend.changeset.models import ChangeSet
-from main.decorators import ajax_required
+from django.db import connections
 
 
 def _get_changeset_display(ob):
@@ -18,14 +21,9 @@ def _get_changeset_display(ob):
     }
 
 def _get_feature_coll(ob, changeset_list):
-    return {
-        'type': 'Feature',
-        'geometry':{
-            "type":changeset_list[ob]['geom_type'],
-            "coordinates":changeset_list[ob]['coordinate'],
-        }
-        "properties": {'changeset_id', changeset_list[ob]['changeset_id'],}
-    }
+    
+    point = MultiPoint((changeset_list[ob]['coordinate']))
+    return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
 @require_GET
@@ -38,11 +36,13 @@ def changeset_all(request):
     feature = []
     geoJson = []
     changeset_list = [_get_changeset_display(ob) for ob in changesets]
-    feature = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
+    features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
 
-    geoJson =[{
-        "type": "FeatureCollection",
-        "features":feature,
-    }]
+    feature_collection = FeatureCollection(features)
+
+    rsp = {
+        'GeoJson': feature_collection,
+    }
+    return JsonResponse(rsp)
 
 
