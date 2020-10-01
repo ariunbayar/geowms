@@ -72,7 +72,7 @@ export class Жагсаалт extends Component {
         const org_id = this.props.match.params.id
         const {currentPage, govorgPerPage, govorg_list, govorg_length}=this.state
         return (
-            <div  className="container my-4">
+            <div  className="my-4">
                 <div className="row">
 
                     <div className="col-md-12">
@@ -92,34 +92,35 @@ export class Жагсаалт extends Component {
                                         value={this.state.searchQuery}
                                    />
                                 </div>
-
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col"> # </th>
-                                            <th scope="col"> Системүүдийн нэр</th>
-                                            <th scope="col"> Токен </th>
-                                            <th scope="col"> Үүсгэсэн огноо </th>
-                                            <th scope="col"> </th>
-                                            <th scope="col"> </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        { govorg_length === 0 ?
-                                             <tr><td>Систем бүртгэлгүй байна </td></tr>:
-                                             govorg_list.map((values,index) =>
-                                                <Govorg
-                                                    org_level={org_level}
-                                                    org_id={org_id}
-                                                    key={values.id}
-                                                    idx={(currentPage*govorgPerPage)-govorgPerPage+index+1}
-                                                    values={values}
-                                                    handleRemove={() => this.handleRemove(values.id)}
-                                                    handleEdit={() => this.handleEdit(values)}
-                                                />
-                                        )}
-                                    </tbody>
-                                </table>
+                                <div className="table-responsive">
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col"> # </th>
+                                                <th scope="col"> Системүүдийн нэр</th>
+                                                <th scope="col"> Токен </th>
+                                                <th scope="col"> Үүсгэсэн огноо </th>
+                                                <th scope="col"> </th>
+                                                <th scope="col"> </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            { govorg_length === 0 ?
+                                                <tr><td>Систем бүртгэлгүй байна </td></tr>:
+                                                govorg_list.map((values,index) =>
+                                                    <Govorg
+                                                        org_level={org_level}
+                                                        org_id={org_id}
+                                                        key={values.id}
+                                                        idx={(currentPage*govorgPerPage)-govorgPerPage+index+1}
+                                                        values={values}
+                                                        handleRemove={() => this.handleRemove(values.id)}
+                                                        handleEdit={() => this.handleEdit(values)}
+                                                    />
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                                 <Pagination
                                     paginate = {this.paginate}
                                     searchQuery = {this.state.searchQuery}

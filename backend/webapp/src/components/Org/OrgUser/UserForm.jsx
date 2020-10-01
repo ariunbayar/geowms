@@ -73,7 +73,7 @@ export class UserForm extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="container my-4">
+            <div className="my-4">
                 <div className="row">
 
                     <div className="col-md-12">
@@ -90,36 +90,38 @@ export class UserForm extends Component {
                                 value={this.state.searchQuery}
                             />
                         </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col"> №</th>
-                                    <th scope="col"> Нэр</th>
-                                    <th scope="col"> Цахим шуудан </th>
-                                    <th scope="col"> ДАН систем </th>
-                                    <th scope="col"> Албан тушаал</th>
-                                    <th scope="col"> Үүссэн </th>
-                                    <th scope="col"> Зассан </th>
-                                    <th scope="col"> </th>
-                                    <th scope="col"> </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                { employees_length === 0 ?
-                                <tr><td>Ажилтан бүртгэлгүй байна</td></tr>:
-                                employees.map((employe, idx) =>
-                                    <UserFormTable
-                                        org_level={org_level}
-                                        org_id={org_id}
-                                        key = {idx}
-                                        idx = {(currentPage*employeesPerPage)-employeesPerPage+idx+1}
-                                        values={employe}
-                                        handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
-                                    >
-                                    </UserFormTable>
-                                )}
-                            </tbody>
-                        </table>
+                        <div className="table-responsive">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"> №</th>
+                                        <th scope="col"> Нэр</th>
+                                        <th scope="col"> Цахим шуудан </th>
+                                        <th scope="col"> ДАН систем </th>
+                                        <th scope="col"> Албан тушаал</th>
+                                        <th scope="col"> Үүссэн </th>
+                                        <th scope="col"> Зассан </th>
+                                        <th scope="col"> </th>
+                                        <th scope="col"> </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { employees_length === 0 ?
+                                    <tr><td>Ажилтан бүртгэлгүй байна</td></tr>:
+                                    employees.map((employe, idx) =>
+                                        <UserFormTable
+                                            org_level={org_level}
+                                            org_id={org_id}
+                                            key = {idx}
+                                            idx = {(currentPage*employeesPerPage)-employeesPerPage+idx+1}
+                                            values={employe}
+                                            handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
+                                        >
+                                        </UserFormTable>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <Pagination

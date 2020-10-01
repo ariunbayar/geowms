@@ -202,7 +202,7 @@ export class UserAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="container my-4">
+            <div className="col-6 my-4">
                 <div className="row">
                     <div className="col-md-12">
                         <div className="row">

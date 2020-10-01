@@ -75,7 +75,7 @@ export default class App extends Component {
               </li>
               <li>
                 <NavLink href="javaScript:void();" activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
+                  <i className="fa fa-users"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
                 </NavLink>
                 <ul className="sidebar-submenu">
                   <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/1/"}><i className="fa fa-circle-o"></i> 1-р түвшин</NavLink></li>
