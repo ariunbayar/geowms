@@ -103,7 +103,7 @@ def _get_feature_coll(ob, changeset_list):
 
 
 cursor = connections['default'].cursor()
-cursor.execute(''' select * from changeset_changeset''')
+cursor.execute(''' select * from changeset''')
 changesets = cursor.fetchall()
 feature = []
 geoJson = []

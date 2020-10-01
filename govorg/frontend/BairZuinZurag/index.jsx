@@ -5,6 +5,7 @@ import Map from 'ol/Map';
 import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile';
 import View from 'ol/View';
+import { service } from "./service"
 import "../styles.css"
 
 export default class BairZuinZurag extends Component {
@@ -12,12 +13,25 @@ export default class BairZuinZurag extends Component {
     constructor(props) {
 
         super(props)
+
+        this.state = {
+            GeoJson: []
+        }
         this.loadMapData = this.loadMapData.bind(this)
     }
 
     componentDidMount() {
-            this.loadMapData()
-        }
+
+        service.geom().then(({GeoJson}) => {
+            if(GeoJson){
+                this.setState({
+                    GeoJson
+                })
+            }
+        })
+
+        this.loadMapData()
+    }
 
     loadMapData(){
 
