@@ -79,7 +79,7 @@ export class FormList extends Component {
         const { error, error_msg } = this.state
         const error_bn = Object.keys(error_msg).length > 0
         return (
-            <div  className="card my-4">
+            <div  className="card">
                 <div  className="card-body">
                     <div className="row">
                         <div className="col-md-12 ">

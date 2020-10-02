@@ -95,7 +95,7 @@ export class App extends Component {
                 {tseg_burtgel.perm_view ?
                 <li>
                 <a href="javaScript:void();" className="waves-effect">
-                    <i className="zmdi zmdi-photo-size-select-small gp-text-primary"></i> <span>ХҮСЭЛТ</span>
+                    <i className="zmdi zmdi-photo-size-select-small gp-text-primary"></i>  <span> ХҮСЭЛТ</span>
                     <i className="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul className="sidebar-submenu">
@@ -158,25 +158,23 @@ export class App extends Component {
 
             <div className="clearfix">
                 <div className="content-wrapper">
-                    <div className="container-fluid">
-                        <Switch>
-                            {tseg_burtgel.perm_view ?
-                                <Route path={"/gov/froms/"} component={()=><Forms perms={this.state.tseg_burtgel}/>}/> : null
-                            }
-                            {tuuhen_ov.perm_view ?
-                                <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
-                            }
-                            <Route path="/gov/тээврийн-сүлжээ/" component={ТээврийнСүлжээ}/>
-                            <Route path="/gov/system/" component={System} />
-                            <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
-                            <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
-                            <Route path="/gov/барилга-суурин-газар/" component={БарилгаСууринГазар}/>
-                            <Route path="/gov/zip-code/" component={ZipCode}/>
-                            <Route exact path="/gov/" component={Employee}/>
-                            <Route exact path="/gov/bundle/" component={Bundle}/>
-                            <Route exact path="/gov/org/help/" component={Help}/>
-                        </Switch>
-                    </div>
+                    <Switch>
+                        {tseg_burtgel.perm_view ?
+                            <Route path={"/gov/froms/"} component={()=><Forms perms={this.state.tseg_burtgel}/>}/> : null
+                        }
+                        {tuuhen_ov.perm_view ?
+                            <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
+                        }
+                        <Route path="/gov/тээврийн-сүлжээ/" component={ТээврийнСүлжээ}/>
+                        <Route path="/gov/system/" component={System} />
+                        <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
+                        <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
+                        <Route path="/gov/барилга-суурин-газар/" component={БарилгаСууринГазар}/>
+                        <Route path="/gov/zip-code/" component={ZipCode}/>
+                        <Route exact path="/gov/" component={Employee}/>
+                        <Route exact path="/gov/bundle/" component={Bundle}/>
+                        <Route exact path="/gov/org/help/" component={Help}/>
+                    </Switch>
                 </div>
             </div>
         </BrowserRouter>

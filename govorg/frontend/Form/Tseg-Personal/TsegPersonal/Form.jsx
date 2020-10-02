@@ -508,9 +508,9 @@ export  class Forms extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className="row">
-                        <div className="col-md-8 my-2 card">
-                            <div className="card-body">
+                    <div className="card">
+                        <div className="card-body">
+                            <div className="col-md-8 ">
                                 <div className="row ml-3">
                                     <div className="float-left">
                                         <Maps

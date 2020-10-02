@@ -69,7 +69,7 @@ export class List extends Component {
     render() {
         const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         return (
-            <div  className="card my-4">
+            <div  className="card">
                 <div  className="card-body">
                     <div className="col-md-12">
                         <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
