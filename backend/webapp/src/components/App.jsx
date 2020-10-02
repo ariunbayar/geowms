@@ -86,7 +86,7 @@ export default class App extends Component {
               </li>
               <li >
                 <NavLink  activeClassName="active" to={"/back/суурь-давхарга/"} className="waves-effect">
-                  <i className="fa fa-angle-left pull-right"></i> <span>СУУРЬ ДАВХРАГА</span>
+                  <i className="icon-layers"></i> <span>СУУРЬ ДАВХРАГА</span>
                 </NavLink>
               </li>
               <li>
@@ -96,13 +96,13 @@ export default class App extends Component {
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/user/"} className="waves-effect">
-                  <i className="zmdi zmdi-account"></i> <span>ХЭРЭГЛЭГЧ</span>
+                  <i className="fa fa-user"></i> <span>ХЭРЭГЛЭГЧ</span>
                   <small className="badge float-right badge-info">{this.state.user_count}</small>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/тохиргоо/"} className="waves-effect">
-                  <i className="zmdi zmdi-settings"></i> <span>ТОХИРГОО</span>
+                  <i className="fa fa-cogs"></i> <span>ТОХИРГОО</span>
                 </NavLink>
               </li>
             </ul>
