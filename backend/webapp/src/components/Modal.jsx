@@ -37,7 +37,7 @@ export default class Modal extends Component {
         }, 0)
     }
 
-    handleClose(callback) {
+    handleClose(callback) { 
         this.setState({status: 'closing'})
         setTimeout(() => {
             this.setState({status: 'closed'})
@@ -71,25 +71,50 @@ export default class Modal extends Component {
         return (
             <Fragment>
                 <div className={className}>
-                    <div className="modal-dialog modal-dialog-centered" data-toggle="modal" data-target="#smallsizemodal">
-                        <div className="modal-content animated jackInTheBox">
-                            <div className="modal-header d-flex justify-content-center" >
-                                <h5 className="modal-title">{this.props.title}</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content animated jackInTheBox" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
+                            <div className="col-md-12 offset-md-12 float-right my-1">
+                                <button type="button" className="close mt-2 mr-2" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
                                 </button>
                             </div>
-                            <div className="modal-body">
+                            <div className="d-flex justify-content-center">
+                            {this.props.model_type_icon ?
+                            <svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 512 512" class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw fa-2x">
+                            <path fill="green" d="M256 40c118.621 0 216 96.075 216 216 0 119.291-96.61 216-216 216-119.244 0-216-96.562-216-216 0-119.203 96.602-216 
+                            216-216m0-32C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm-11.49 120h22.979c6.823 
+                            0 12.274 5.682 11.99 12.5l-7 168c-.268 6.428-5.556 11.5-11.99 11.5h-8.979c-6.433 0-11.722-5.073-11.99-11.5l-7-168c-.283-6.818 5.167-12.5 11.99-12.5zM256 
+                            340c-15.464 0-28 12.536-28 28s12.536 28 28 28 28-12.536 28-28-12.536-28-28-28z" class=""></path>
+                            </svg>
+                            :
+                            <svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 512 512" class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw fa-2x">
+                            <path fill="red" d="M256 40c118.621 0 216 96.075 216 216 0 119.291-96.61 216-216 216-119.244 0-216-96.562-216-216 0-119.203 96.602-216 
+                            216-216m0-32C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm-11.49 120h22.979c6.823 
+                            0 12.274 5.682 11.99 12.5l-7 168c-.268 6.428-5.556 11.5-11.99 11.5h-8.979c-6.433 0-11.722-5.073-11.99-11.5l-7-168c-.283-6.818 5.167-12.5 11.99-12.5zM256 
+                            340c-15.464 0-28 12.536-28 28s12.536 28 28 28 28-12.536 28-28-12.536-28-28-28z" class=""></path>
+                            </svg>
+                            }
+                            </div>
+                            <div className="d-flex justify-content-center my-3">
+                                <h5 >{this.props.title}</h5>
+                                </div>
+                            <div className="modal-body text-wrap ml-2 mr-2 text-justify my-(-1)">
                                 {this.props.text}
                             </div>
-                            <div className="modal-footer">
-                                <button type="button" onClick={() => this.handleClose()} className="btn gp-outline-primary">Буцах</button>
+                            <div className="modal-footer" style={{border: 'none'}}>
+                                <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
+                                    <i class="fa fa-times"></i>
+                                    {this.props.actionName ? this.props.actionName : "  БУЦАХ"}
+                                </button>
                                 <button
                                     type="button"
                                     onClick={this.handleProceed}
-                                    className="btn gp-btn-primary text-white"
+                                    class="btn btn-outline-primary waves-effect waves-light"
                                 >
-                                    {this.props.actionName ? this.props.actionName : "Устгах"}
+                                    <i class="fa fa-check-square-o"></i>
+                                    {this.props.actionName ? this.props.actionName : "  УСТГАХ"}
                                 </button>
                             </div>
                         </div>
