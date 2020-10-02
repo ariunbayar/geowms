@@ -67,13 +67,26 @@ def qgis_submit(request):
 
     try:
         values_list = json.loads(values)
-
+    
         changeset = ChangeSet()
         changeset.geom = values_list[0]
         changeset.features = values_list[1]
         changeset.save()
-
+        
         return JsonResponse({'success': True})
 
     except Exception:
         return JsonResponse({'success': False})
+
+
+def _get_changeset_display(ob):
+    geom= eval(ob[1])
+    geometry = eval(geom['geom'])
+    coordinates = geometry['coordinates']
+    geom_type = geometry['type']
+    return {
+        'coordinate':coordinates,
+        'geom_type':geom_type,
+        'changeset_id':ob[0],
+        'changeset_attributes':ob[2]
+    }
