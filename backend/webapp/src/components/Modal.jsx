@@ -71,9 +71,9 @@ export default class Modal extends Component {
         return (
             <Fragment>
                 <div className={className}>
-                    <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+                    <div className="modal-dialog modal-dialog-centered" data-toggle="modal" data-target="#smallsizemodal">
                         <div className="modal-content animated jackInTheBox">
-                            <div className="modal-header" >
+                            <div className="modal-header d-flex justify-content-center" >
                                 <h5 className="modal-title">{this.props.title}</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
