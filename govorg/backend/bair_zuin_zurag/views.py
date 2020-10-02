@@ -1,6 +1,6 @@
 import requests
 import json
-from geojson import Point, Feature, FeatureCollection, dump,MultiPoint
+from geojson import Point, Feature, FeatureCollection, dump,MultiPolygon
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
@@ -23,7 +23,7 @@ def _get_changeset_display(ob):
 
 def _get_feature_coll(ob, changeset_list):
     
-    point = MultiPoint((changeset_list[ob]['coordinate']))
+    point = MultiPolygon((changeset_list[ob]['coordinate']))
     return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
