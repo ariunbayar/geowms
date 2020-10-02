@@ -3,15 +3,14 @@ import React, { Component } from "react"
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import OSM from 'ol/source/OSM';
+import GeoJSON from 'ol/format/GeoJSON';
 import TileLayer from 'ol/layer/Tile';
+import {transform as transformCoordinate} from 'ol/proj'
 import View from 'ol/View';
 import { service } from "./service"
 import "../styles.css"
 
-import Circle from 'ol/geom/Circle';
-import Feature from 'ol/Feature';
-import GeoJSON from 'ol/format/GeoJSON';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
+import {Fill, Stroke, Style} from 'ol/style';
 import {Vector as VectorSource} from 'ol/source';
 import {Vector as VectorLayer} from 'ol/layer';
 
@@ -23,7 +22,9 @@ export default class BarilgaSuurinGazar extends Component {
         super(props)
 
         this.state = {
-            GeoJson: []
+            GeoJson: [],
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857',
         }
         this.loadMapData = this.loadMapData.bind(this)
     }
@@ -35,23 +36,23 @@ export default class BarilgaSuurinGazar extends Component {
                 this.setState({
                     GeoJson
                 })
+                this.loadMapData(GeoJson)
             }
         })
 
-        this.loadMapData()
     }
 
-    loadMapData(){
-
-        const image = new CircleStyle({
-              radius: 5,
-              fill: null,
-              stroke: new Stroke({color: 'red', width: 1}),
-            });
+    loadMapData(GeoJson){
 
         const styles = {
-              'Point': new Style({
-                image: image,
+              'MultiPolygon': new Style({
+                stroke: new Stroke({
+                  color: 'yellow',
+                  width: 1,
+                }),
+                fill: new Fill({
+                  color: 'rgba(255, 255, 0, 0.1)',
+                }),
               }),
             };
 
@@ -59,45 +60,35 @@ export default class BarilgaSuurinGazar extends Component {
           return styles[feature.getGeometry().getType()];
         };
 
-        const geojsonObject = {
-          'type': 'FeatureCollection',
-          'features': [
-            {
-              'type': 'Feature',
-              'geometry': {
-                'type': 'Point',
-                'coordinates': [0, 0],
-              },
-            },
-            ],
-        };
+        const geojsonObject =  GeoJson
 
         const vectorSource = new VectorSource({
-          features: new GeoJSON().readFeatures(geojsonObject),
+          features: new GeoJSON().readFeatures(geojsonObject, {
+            dataProjection: this.state.dataProjection,
+            featureProjection: this.state.featureProjection,
+          }),
         });
-
-        vectorSource.addFeature(new Feature(new Circle([5e6, 7e6], 1e6)));
 
         const vectorLayer = new VectorLayer({
               source: vectorSource,
               style: styleFunction,
             });
 
-        var map = new Map({
+        const map = new Map({
             layers: [
                 new TileLayer({
                   source: new OSM(),
                 }),
-                vectorLayer ],
+                vectorLayer
+            ],
                 target: 'map',
             view: new View({
+                projection: this.state.projection,
                 center: [11461613.630815497, 5878656.0228370065],
                 zoom: 5.041301562246971,
             }),
         });
     }
-
-
 
     render() {
         return (
