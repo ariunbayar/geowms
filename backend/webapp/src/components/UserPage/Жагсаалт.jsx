@@ -50,7 +50,7 @@ export class Жагсаалт extends Component {
     }
 
     render() {
-        const { user_list, user_length } = this.state
+        const { user_list, user_length, usersPerPage} = this.state
         return (
             <div className="row">
                 <div className="col-md-12">
@@ -87,7 +87,7 @@ export class Жагсаалт extends Component {
                                                         <User
                                                             key={values.id}
                                                             values={values}
-                                                            idx={(this.state.currentPage*20)-20+index+1}
+                                                            idx={(this.state.currentPage*usersPerPage)-usersPerPage+index+1}
                                                         />
                                                     )
                                                 }

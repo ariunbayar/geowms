@@ -1,3 +1,4 @@
+import { get } from "ol/proj"
 import React, { Component } from "react"
 
 
@@ -17,6 +18,7 @@ export class Pagination extends Component {
         this.loadPage = this.loadPage.bind(this)
         this.nextPage = this.nextPage.bind(this)
         this.prevPage = this.prevPage.bind(this)
+        this.addPage = this.addPage.bind(this)
     }
 
     componentDidMount() {
@@ -29,6 +31,17 @@ export class Pagination extends Component {
             const query = this.props.searchQuery
             this.setState({ searchQuery: query })
             this.loadPage(1, query)
+        }
+        if(prevProps.load !== this.props.load)
+        {
+            const query = this.props.searchQuery
+            this.loadPage(1, query)
+        }
+        if(this.props.org_level){
+            if(prevProps.org_level !== this.props.org_level){
+                const query = this.props.searchQuery
+                this.loadPage(1, query)
+            }
         }
     }
 
@@ -47,9 +60,10 @@ export class Pagination extends Component {
 
         page = Math.max(page, 1)
         page = Math.min(page, this.state.total_page)
-
         this.setState({is_loading: true})
-        this.props.paginate(page, query)
+        if(this.props.org_level){
+            const level = this.props.org_level
+            this.props.paginate(page, query, level)
             .then(({ page, total_page}) => {
                 this.setState({
                     page,
@@ -57,7 +71,24 @@ export class Pagination extends Component {
                     is_loading: false,
                 })
             })
+        }
+        else
+        {
+            this.props.paginate(page, query)
+            .then(({ page, total_page }) => {
+                this.setState({
+                    page,
+                    total_page,
+                    is_loading: false,
+                })
+            })
+        }
+    }
 
+    addPage(id) {
+        const page = id.target.value
+        this.setState({ page })
+        this.loadPage(page, '')
     }
 
     render() {
@@ -71,19 +102,56 @@ export class Pagination extends Component {
                     <div className="float-right">
                         <button
                             type=" button"
+                            value="1"
                             className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={this.prevPage}
+                            onClick={(e) => this.addPage(e)}
                         >
-                            &laquo;өмнөх
+                            &lt;&lt;
                         </button> {}
-
+                        { page > 1 &&
+                            <button
+                                type=" button"
+                                className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                                onClick={this.prevPage}
+                            >
+                                &lt;
+                            </button>
+                        }
+                        &nbsp;
+                        { page > 1 &&
+                            <button
+                                type=" button"
+                                className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                                onClick={this.prevPage}
+                            >
+                                &lt;
+                            </button>
+                        }
+                        &nbsp;
                         <button
-                            type="button"
+                            type=" button"
+                            value={page}
                             className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={this.nextPage}
+                        >{page}
+                        </button> {}
+                        { page < total_page &&
+                            <button
+                                type="button"
+                                className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                                onClick={this.nextPage}
+                            >
+                                &gt;
+                            </button>
+                        }
+                        &nbsp;
+                        <button
+                            type=" button"
+                            value={total_page}
+                            className={"btn gp-outline-primary" + (this.state.is_loading ? " disabled" : "")}
+                            onClick={(e) => this.addPage(e)}
                         >
-                            дараах &raquo;
-                        </button>
+                            &gt;&gt;
+                        </button> {}
                     </div>
                 </div>
             </div>
