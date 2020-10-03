@@ -12,7 +12,6 @@ from backend.govorg.models import GovOrg
 from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
 
-
 def _get_service_url(request, token, wms):
     url = reverse('api:service:proxy', args=[token, wms.pk])
     absolute_url = request.build_absolute_uri(url)
@@ -68,12 +67,11 @@ def qgis_submit(request):
 
     try:
         values_list = json.loads(values)
-
+    
         changeset = ChangeSet()
         changeset.geom = values_list[0]
         changeset.features = values_list[1]
         changeset.save()
-
         return JsonResponse({'success': True})
 
     except Exception:

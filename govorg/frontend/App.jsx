@@ -139,13 +139,11 @@ export class App extends Component {
                     </NavLink>
                 </li>
                 }
-                { bair_zuin_zurag.perm_view &&
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/байр-зүйн-зураг/"} className="waves-effect">
                         <i className="icon-map"></i> <span>БАЙР ЗҮЙН ЗУРАГ</span>
                     </NavLink>
                 </li>
-                }
                 { barilga_suurin_gazar.perm_view &&
                 <li>
                     <NavLink  activeClassName="active" to={"/gov/барилга-суурин-газар/"} className="waves-effect">

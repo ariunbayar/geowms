@@ -68,6 +68,10 @@ INSTALLED_APPS = [
     'govorg.backend.bundle.apps.BundleConfig',
     'govorg.backend.employee.apps.EmployeeConfig',
     'govorg.backend.system.apps.SystemConfig',
+    'govorg.backend.bair_zuin_zurag.apps.BairZuinZuragConfig',
+    'govorg.backend.barilga_suurin_gazar.apps.BarilgaSuurinGazarConfig',
+    'govorg.backend.ded_butets.apps.DedButetsConfig',
+    'govorg.backend.teevriin_suljee.apps.TeevriinSuljeeConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
