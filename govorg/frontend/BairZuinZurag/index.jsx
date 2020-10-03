@@ -7,7 +7,7 @@ import TileLayer from 'ol/layer/Tile';
 import View from 'ol/View';
 import GeoJSON from 'ol/format/GeoJSON';
 import { service } from "./service"
-import "../styles.css"
+import "./styles.css"
 
 import {Fill, Stroke, Style} from 'ol/style';
 import {Vector as VectorSource} from 'ol/source';
