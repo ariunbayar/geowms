@@ -71,6 +71,7 @@ def qgis_submit(request):
         changeset = ChangeSet()
         changeset.geom = values_list[0]
         changeset.features = values_list[1]
+        changeset.projection = values_list[2]        
         changeset.save()
         return JsonResponse({'success': True})
 
