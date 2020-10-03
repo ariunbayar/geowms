@@ -169,6 +169,7 @@ urlpatterns = [
 
     path('gis/', include(([
         path('table_list/', backend.gis.views.table_list),
+        path('field_list/<str:schema>/<str:table>/', backend.gis.views.field_list),
     ], 'gis'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
