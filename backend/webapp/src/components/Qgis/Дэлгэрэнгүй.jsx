@@ -36,43 +36,50 @@ export class Дэлгэрэнгүй extends Component {
 
         const {items} = this.state
         return (
-           <div className="row">
-                <div className="col-md-12">
-                    <div className="card">
-                        <div className="card-body">
-                            <div className="my-4">
-                                <div className="p-3">
-                                    <div className="table-responsive">
-                                        <table className="table">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">№</th>
-                                                    <th scope="col">field name</th>
-                                                    <th scope="col">field type</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {items === 0 ?
-                                                    <tr><td>Хоосон байна </td></tr>:
-                                                    items.map((values,index) =>
-                                                        <tr key={index}>
-                                                            <td>{index + 1}</td>
-                                                            <td>
-                                                                {values.name}
-                                                            </td>
-                                                            <td>{values.type}</td>
-                                                        </tr>
-                                                    )
-                                                }
-                                            </tbody>
-                                        </table>
+                <div className="card">
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-12 mb-4">
+                                <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                                </a>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-12">
+                                <div className="my-4">
+                                    <div className="p-3">
+                                        <div className="table-responsive">
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">№</th>
+                                                        <th scope="col">field name</th>
+                                                        <th scope="col">field type</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {items === 0 ?
+                                                        <tr><td>Хоосон байна </td></tr>:
+                                                        items.map((values,index) =>
+                                                            <tr key={index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>
+                                                                    {values.name}
+                                                                </td>
+                                                                <td>{values.type}</td>
+                                                            </tr>
+                                                        )
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
         )
     }
 }
