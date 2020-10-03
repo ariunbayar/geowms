@@ -1,35 +1,19 @@
+from collections import namedtuple
+
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-
+from django.db import connections
 
 from main.decorators import ajax_required
 
 
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def schema_list(request):
-    sql = "SELECT schema_name FROM information_schema.schemata"
-    sql = "SELECT nspname FROM pg_catalog.pg_namespace"
-
-    rsp = {
-        'items': [
-            'pg_toast',
-            'pg_temp_1',
-            'pg_toast_temp_1',
-            'pg_catalog',
-            'public',
-            'information_schema',
-            'topology',
-            'qgis',
-            'TopographicMap',
-            'HentiiDedBut',
-            'Bayankhongor',
-        ],
-    }
-
-    return JsonResponse(rsp)
+def _named_tuple_fetchall(cursor):
+    """ Return all rows from a cursor as a namedtuple """
+    desc = cursor.description
+    nt_result = namedtuple('Result', [col[0] for col in desc])
+    for row in cursor.fetchall():
+        yield nt_result(*row)
 
 
 @require_GET
@@ -48,17 +32,18 @@ def table_list(request):
             schemaname != 'information_schema'
     """
 
-    # TODO
+    with connections['postgis_db'].cursor() as cursor:
+        cursor.execute(sql)
+        tables_display = [
+            {
+                'schemaname': table.schemaname,
+                'tablename': table.tablename,
+            }
+            for table in _named_tuple_fetchall(cursor)
+        ]
 
     rsp = {
-        'items': [
-             ['public', 'spatial_ref_sys'],
-             ['public', 'SPA'],
-             ['public', 'AdmUnitAimag'],
-             ['public', 'AdministrativeUnit'],
-             ['public', 'power_station'],
-             ['TopographicMap', 'Parcel'],
-        ],
+        'items': tables_display,
     }
 
     return JsonResponse(rsp)

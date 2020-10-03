@@ -168,7 +168,6 @@ urlpatterns = [
     ], 'zip_code'))),
 
     path('gis/', include(([
-        path('schema_list/', backend.gis.views.schema_list),
         path('table_list/', backend.gis.views.table_list),
     ], 'gis'))),
 
