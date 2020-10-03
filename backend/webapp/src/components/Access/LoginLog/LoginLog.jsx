@@ -77,40 +77,36 @@ export class LoginLog extends Component {
             </div>
             <div className="row">
                 <div className="col-lg-12">
-                    <div className="card">
-                        <div className="card-body">
-                            <div className="table-responsive">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">№</th>
-                                            <th scope="col">Хэрэглэгчийн нэр</th>
-                                            <th scope="col">Хэрэглэгчийн үйлдэл</th>
-                                            <th scope="col">Хэрэглэгчийн дугаар</th>
-                                            <th scope="col">IP Хаяг</th>
-                                            <th scope="col">Нэвтэрсэн огноо</th >
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        { login_length === 0 ?
-                                        <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:
-                                        login_log_all.map((login, idx) =>
+                    <div className="table-responsive">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">№</th>
+                                    <th scope="col">Хэрэглэгчийн нэр</th>
+                                    <th scope="col">Хэрэглэгчийн үйлдэл</th>
+                                    <th scope="col">Хэрэглэгчийн дугаар</th>
+                                    <th scope="col">IP Хаяг</th>
+                                    <th scope="col">Нэвтэрсэн огноо</th >
+                                </tr>
+                            </thead>
+                            <tbody>
+                                { login_length === 0 ?
+                                <tr><td>Нэвтрэлтийн хандалд байхгүй байна </td></tr>:
+                                login_log_all.map((login, idx) =>
 
-                                            <LoginLogTable
-                                                key = {idx}
-                                                idx = {(currentPage*loginPerPage)-loginPerPage+idx+1}
-                                                values={login}>
-                                            </LoginLogTable>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <Pagination
-                                paginate = {this.paginate}
-                                searchQuery = {this.state.searchQuery}
-                            />
-                        </div>
+                                    <LoginLogTable
+                                        key = {idx}
+                                        idx = {(currentPage*loginPerPage)-loginPerPage+idx+1}
+                                        values={login}>
+                                    </LoginLogTable>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
+                    <Pagination
+                        paginate = {this.paginate}
+                        searchQuery = {this.state.searchQuery}
+                    />
                 </div>
             </div>
 

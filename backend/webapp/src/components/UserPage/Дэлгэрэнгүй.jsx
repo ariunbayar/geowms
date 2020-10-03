@@ -106,10 +106,10 @@ export class Дэлгэрэнгүй extends Component {
             <div className="card">
                 <div className="card-body">
                     <div className="row">
-                        <div className="col-md-12 mb-4">
-                            <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </a>
+                        <div className="col-md-4 mb-4">
+                            <button href="#" className="btn btn-outline-primary btn-block waves-effect waves-light m-1" onClick={this.props.history.goBack}>
+                                Буцах
+                            </button>
                         </div>
                     </div>
                     <div className="row">

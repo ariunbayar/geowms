@@ -67,8 +67,7 @@ export class CrudEvenLog extends Component {
                             <hr />
                         </div>
                     </div>
-                    <h5 className="cmb-3 text-center text-uppercase">Лог</h5>
-                    <div className="table-responsive">
+                    <h5 className="text-center text-uppercase">Лог</h5>
                     <div className="row">
                         <div className="col-sm-6">
                                 <input
@@ -82,36 +81,39 @@ export class CrudEvenLog extends Component {
                         </div>
                     </div>
                     <div className="row">
-                        <table className="table">
-                                <thead>
-                                    <tr>
-                                    <th scope="col">№</th>
-                                    <th scope="col">Үйлдэл</th>
-                                    <th scope="col">Хийгдсэн хүснэгт</th>
-                                    <th scope="col">Хэрэглэгчийн нэр</th>
-                                    <th scope="col">Огноо</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { crud_length === 0 ?
-                                        <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
-                                        crud_event_display.map((logout, idx) =>
-                                            <CrudEvenLogTable
-                                                key = {idx}
-                                                idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
-                                                values={logout}>
-                                            </CrudEvenLogTable>
-                                    )}
-                                </tbody>
-                            </table>
+                        <div className="col-lg-12">
+                           <div className="table-responsive">
+                            <table className="table">
+                                    <thead>
+                                        <tr>
+                                        <th scope="col">№</th>
+                                        <th scope="col">Үйлдэл</th>
+                                        <th scope="col">Хийгдсэн хүснэгт</th>
+                                        <th scope="col">Хэрэглэгчийн нэр</th>
+                                        <th scope="col">Огноо</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        { crud_length === 0 ?
+                                            <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
+                                            crud_event_display.map((logout, idx) =>
+                                                <CrudEvenLogTable
+                                                    key = {idx}
+                                                    idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
+                                                    values={logout}>
+                                                </CrudEvenLogTable>
+                                        )}
+                                    </tbody>
+                                </table>
+                           </div>
                             <Pagination
                                 paginate = {this.paginate}
                                 searchQuery = {this.state.searchQuery}
                             />
                         </div>
                     </div>
-                </div>
             </div>
+        </div>
         )
 
     }

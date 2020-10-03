@@ -50,11 +50,6 @@ export default class App extends Component {
                 <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
                   <i className="icon-map"></i> <span>ХАНДАЛТ</span>
                 </NavLink>
-                {/* <ul className="sidebar-submenu">
-                  <li><NavLink  activeClassName="active" to={"/back/access/login/"}><i className="fa fa-circle-o"></i>Оролт гаралт</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/access/logout/"}><i className="fa fa-circle-o"></i>Үйлдэл</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/access/page/"}><i className="fa fa-circle-o"></i>Хуудас хандалт</NavLink></li>
-                </ul> */}
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/log/"} className="waves-effect">
