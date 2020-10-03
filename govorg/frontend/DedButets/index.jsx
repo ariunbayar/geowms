@@ -81,7 +81,6 @@ export default class DedButets extends Component {
             ],
                 target: 'map',
             view: new View({
-                projection: this.state.projection,
                 center: [11461613.630815497, 5878656.0228370065],
                 zoom: 5.041301562246971,
             }),
