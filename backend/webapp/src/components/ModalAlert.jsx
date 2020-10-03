@@ -46,7 +46,7 @@ export default class ModalAlert extends Component {
             } else {
                 this.props.modalClose()
             }
-        }, 150)
+        }, 200)
     }
 
     handleProceed() {
