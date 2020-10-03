@@ -1,6 +1,6 @@
 export const service = {
     getAll,
-    paginatedList
+    getDetail
 }
 
 function handleResponse(response) {
@@ -59,12 +59,9 @@ function getAll() {
     return fetch(`/back/gis/table_list/`, requestOptions).then(handleResponse)
 }
 
-
-function paginatedList(page, per_page, query) {
+function getDetail(schemaname, tablename) {
     const requestOptions = {
-        ..._getPostOptions(),
-        body: JSON.stringify({ page, per_page, query }),
+        ..._getGetOptions()
     }
-
-    return fetch(`${prefix}/paginatedList/`, requestOptions).then(handleResponse)
+    return fetch(`/back/gis/field_list/${schemaname}/${tablename}/`, requestOptions).then(handleResponse)
 }

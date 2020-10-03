@@ -1,9 +1,8 @@
 import React, { Component } from "react"
 import {service} from './service'
 import { toSize } from "ol/size"
-import {NavLink} from "react-router-dom"
 
-export class Жагсаалт extends Component {
+export class Дэлгэрэнгүй extends Component {
 
 
     constructor(props) {
@@ -12,13 +11,17 @@ export class Жагсаалт extends Component {
 
         this.state = {
             items: '',
+
         }
 
         this.handleData = this.handleData.bind(this)
     }
 
     componentDidMount(){
-        service.getAll().then(({items}) => {
+
+        const schemaname = this.props.match.params.schemaname
+        const tablename= this.props.match.params.tablename
+        service.getDetail(schemaname, tablename).then(({items}) => {
             this.handleData(items)
         })
     }
@@ -44,8 +47,8 @@ export class Жагсаалт extends Component {
                                             <thead>
                                                 <tr>
                                                     <th scope="col">№</th>
-                                                    <th scope="col">schemaname</th>
-                                                    <th scope="col">tablename</th>
+                                                    <th scope="col">field name</th>
+                                                    <th scope="col">field type</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -55,11 +58,9 @@ export class Жагсаалт extends Component {
                                                         <tr key={index}>
                                                             <td>{index + 1}</td>
                                                             <td>
-                                                                <NavLink to={`/back/qgis/detail/${values.schemaname}/${values.tablename}/`} className="waves-effect">
-                                                                    {values.schemaname}
-                                                                </NavLink>
+                                                                {values.name}
                                                             </td>
-                                                            <td>{values.tablename}</td>
+                                                            <td>{values.type}</td>
                                                         </tr>
                                                     )
                                                 }
