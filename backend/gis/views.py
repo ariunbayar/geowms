@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from django.contrib.auth.decorators import user_passes_test
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_GET
 from django.db import connections
 
@@ -44,6 +44,44 @@ def table_list(request):
 
     rsp = {
         'items': tables_display,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def field_list(request, schema, table):
+
+    if schema.startswith('pg_') or table.startswith('pg_'):
+        raise Http404
+
+    sql = """
+        SELECT
+            attname,
+            atttypid::regtype AS atttypid
+        FROM
+            pg_catalog.pg_attribute
+        WHERE
+            attrelid = %s::regclass
+            AND NOT attisdropped
+        ORDER BY
+            attnum ASC
+    """
+
+    with connections['postgis_db'].cursor() as cursor:
+        cursor.execute(sql, ['"%s"."%s"' % (schema, table)])
+        fields_display = [
+            {
+                'name': field.attname,
+                'type': field.atttypid,
+            }
+            for field in _named_tuple_fetchall(cursor)
+        ]
+
+    rsp = {
+        'items': fields_display,
     }
 
     return JsonResponse(rsp)
