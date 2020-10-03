@@ -1,6 +1,6 @@
 import requests
 import json
-from geojson import Point, Feature, FeatureCollection, dump,MultiPolygon
+from geojson import Feature, FeatureCollection
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
@@ -22,9 +22,37 @@ def _get_changeset_display(ob):
     }
 
 def _get_feature_coll(ob, changeset_list):
-    
-    point = MultiPolygon((changeset_list[ob]['coordinate']))
-    return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
+    geom_type = changeset_list[ob]['geom_type'] 
+    if geom_type == 'Point':
+        from geojson import Point
+        point = Point((changeset_list[ob]['coordinate']))
+        return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
+    elif geom_type == 'LineString':
+        from geojson import LineString
+        point = LineString((changeset_list[ob]['coordinate']))
+        return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
+
+    elif geom_type == 'Polygon':
+        from geojson import Polygon
+        point = Polygon((changeset_list[ob]['coordinate']))
+        return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
+
+    elif geom_type == 'MultiPoint':
+        from geojson import MultiPoint
+        point = MultiPoint((changeset_list[ob]['coordinate']))
+        return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
+
+
+    elif geom_type == 'MultiLineString':
+        from geojson import MultiLineString
+        point = MultiLineString((changeset_list[ob]['coordinate']))
+        return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
+
+
+    else:
+        from geojson import MultiPolygon
+        point = MultiPolygon((changeset_list[ob]['coordinate']))
+        return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
 @require_GET

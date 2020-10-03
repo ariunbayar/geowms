@@ -220,13 +220,13 @@ class User_Login:
 
                 for j, feature_geom in ch.items():
                     values = []
-                    expr = QgsExpression('"id"=\'%s\'' % j)
+                    expr = QgsExpression('\'%s\=\%s\'' %(fieldnames[0] , j))
 
                     for feature in layer.getFeatures(QgsFeatureRequest(expr)):
                         attributes = []
                         for j in range(len(layer.fields())):
                             attributes.append({
-                                fieldnames[j]: feature[str(fieldnames[j])],
+                                str(fieldnames[j]):str(feature[str(fieldnames[j])]),
                             })
                         values = [
                             {"geom": feature_geom.asJson()},
