@@ -109,7 +109,7 @@ export class AddForm extends Component {
             }
         }
         return (
-            <div  className="my-4 card">
+            <div  className="card">
                 <div className="row">
                     {
                         perms.perm_create || perms.perm_remove
