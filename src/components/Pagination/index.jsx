@@ -91,15 +91,55 @@ export class Pagination extends Component {
 
         }
         return (
-            <div className="row float-sm-right">
-                <div className="row-sm-12">
-                    <ul className="pagination pagination-outline-primary pagination-sm">
-                        <li className={"page-item" + (this.state.is_loading ? " disabled" : "")}><a className="page-link" onClick={this.prevPage}>Previous</a></li>
-                        {pages}
-                        <li className={"page-item" + (this.state.is_loading ? " disabled" : "")}><a className="page-link" onClick={this.nextPage}>Next</a></li>
-                    </ul>
+            <div className="row">
+            <div className="col-md-12">
+                <div className="float-left">
+                    <strong className="gp-text-primary">Хуудас {page}-{total_page}</strong>
+                </div>
+                <div className="float-right btn-group group-round">
+                    <button
+                        type=" button"
+                        value="1"
+                        className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                        onClick={(e) => this.addPage(e)}
+                    >
+                        &lt;&lt;
+                    </button> {}
+                    { page > 1 &&
+                        <button
+                            type=" button"
+                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                            onClick={this.prevPage}
+                        >
+                            &lt;
+                        </button>
+                    }
+                    <button
+                        type=" button"
+                        value={page}
+                        className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                    >{page}
+                    </button> {}
+                    { page < total_page &&
+                        <button
+                            type="button"
+                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                            onClick={this.nextPage}
+                        >
+                            &gt;
+                        </button>
+                    }
+                    <button
+                        type=" button"
+                        value={total_page}
+                        className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                        onClick={(e) => this.addPage(e)}
+                    >
+                        &gt;&gt;
+                    </button> {}
                 </div>
             </div>
+        </div>
         )
     }
 }

@@ -34,11 +34,9 @@ export default class BundleAdminRights extends Component {
 
     render() {
         return (
-            <div className="shadow-lg p-3 mb-5 bg-white rounded">
+            <>
                 {this.props.formOptions.map(({id, name, layers, is_active}, idx) =>
                     <div key={idx}>
-                        <div className="col-md-1"></div>
-                        <div className="col-md-11">
                          {is_active ?
                             <div key={idx} className="row">
                                 <a>
@@ -54,54 +52,52 @@ export default class BundleAdminRights extends Component {
                                 </a>
                             </div>
                             }
-                        </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col"> Давхаргын нэр </th>
-                                    <th scope="col"> Харагдах чек </th>
-                                    {this.props.formOptionsRole.map(({id}, idx) =>
-                                        (id == 1 ?
-                                        <th key={idx} scope="col">Нээлтэй өгөгдөл</th>:
-                                        <th key={idx} scope="col">Эрх {id}</th>
-                                        )
-                                    )}
-                                </tr>
-                            </thead>
-                                <tbody>
-                                    {layers.map((layer) =>
-                                        (this.state.layers.indexOf(layer.id) > -1) &&
-
-                                            this.props.values.roles.map((roleChecks) =>
-
-                                                (roleChecks.layer_id == layer.id &&
-                                                    <BundleFormTable
-                                                        key={layer.id}
-                                                        values = {layer}
-                                                        wmsId = {this.state.id}
-                                                        role={this.props.formOptionsRole}
-                                                        roleChecks = {roleChecks}
-                                                    />
-                                                )
-
+                        <div className="table-responsive">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"> Давхаргын нэр </th>
+                                        <th scope="col"> Харагдах чек </th>
+                                        {this.props.formOptionsRole.map(({id}, idx) =>
+                                            (id == 1 ?
+                                            <th key={idx} scope="col">Нээлтэй өгөгдөл</th>:
+                                            <th key={idx} scope="col">Эрх {id}</th>
                                             )
-                                    )}
-                                </tbody>
-                        </table>
+                                        )}
+                                    </tr>
+                                </thead>
+                                    <tbody>
+                                        {layers.map((layer) =>
+                                            (this.state.layers.indexOf(layer.id) > -1) &&
+
+                                                this.props.values.roles.map((roleChecks) =>
+
+                                                    (roleChecks.layer_id == layer.id &&
+                                                        <BundleFormTable
+                                                            key={layer.id}
+                                                            values = {layer}
+                                                            wmsId = {this.state.id}
+                                                            role={this.props.formOptionsRole}
+                                                            roleChecks = {roleChecks}
+                                                        />
+                                                    )
+
+                                                )
+                                        )}
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 
                 <div className="form-group">
                     <div className="form-group">
-                        <NavLink to={`/back/дэд-сан/`}>
-                            <button className="btn btn-block gp-outline-primary"  >
+                        <NavLink className="btn btn-outline-primary btn-block waves-effect waves-light m-1" to={`/back/дэд-сан/`}>
                                 Буцах
-                            </button>
                         </NavLink>
                     </div>
                 </div>
-            </div>
+            </>
         )
     }
 }
-

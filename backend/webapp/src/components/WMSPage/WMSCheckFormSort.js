@@ -37,27 +37,30 @@ export default class WMSCheckFormSort extends Component {
     render() {
         const {wmslayers, wmsId} = this.state
         return (
-            <div >
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Код</th>
-                            <th scope="col">Нэршил</th>
-                            <th scope="col">ГеоСервер</th>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
+            <div className="card">
+                <div className="card-body">
+                    <div className="table-responsive">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Код</th>
+                                    <th scope="col">Нэршил</th>
+                                    <th scope="col">ГеоСервер</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
 
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {wmslayers.map((layer) =>
-                            <WMSCheckFormTable  key={layer.id} layer={layer} wmsId={wmsId} handleMove={this.handleMove}></WMSCheckFormTable>
-                        )}
-                    </tbody>
-                </table>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {wmslayers.map((layer) =>
+                                    <WMSCheckFormTable  key={layer.id} layer={layer} wmsId={wmsId} handleMove={this.handleMove}></WMSCheckFormTable>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         )
     }
 }
-

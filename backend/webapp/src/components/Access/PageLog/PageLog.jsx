@@ -13,7 +13,7 @@ export class PageLog extends Component {
             page_logs: [],
             log_length:null,
             currentPage:1,
-            logPerPage:100,
+            logPerPage:20,
             searchQuery: '',
             searchIsLoad: false,
         }
@@ -48,70 +48,67 @@ export class PageLog extends Component {
     render() {
         const { page_logs, log_length, currentPage, logPerPage } = this.state
         return (
-            <div className="main-content">
-                <div className="container page-container my-4">
-                    <div className="row rounded">
-                        <div className="col-md-6">
-                            <h5 className="mb-3">Хандалтын тоогоор</h5>
-                            <Charts></Charts>
-                        </div>
-                        <div className="col-md-6">
-                            <h5 className="mb-3">Хандалтын төхөөрөмжийн тоогоор</h5>
-                            <PieChart></PieChart>
-                        </div>
+            <>
+                <div className="row">
+                    <div className="col-md-6">
+                        <h5 className="text-uppercase text-center">
+                            Хандалтын тоогоор
+                        </h5>
+                        <Charts></Charts>
                     </div>
-                    <div className="row">
-                        <div className="col-md-12">
-                            <hr />
-                        </div>
+                    <div className="col-md-6">
+                        <h5 className="text-uppercase text-center">Хандалтын төхөөрөмжийн тоогоор</h5>
+                        <PieChart></PieChart>
                     </div>
-                    <h5 className="mb-3">Нэвтэрч орсон мэдээлэл</h5>
-                    <div className="form-row text-right">
-                        <div className="form-group col-md-8">
-                            <label htmlFor="searchQuery">Хайх:</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="searchQuery"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
-                        </div>
-                    </div>
-                    <div className="row rounded">
-                        <div className="col-md-12">
-                            <table className="table example" id="example">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">№</th>
-                                        <th scope="col">Хаяг</th>
-                                        <th scope="col">Method</th>
-                                        <th scope="col">IP Хаяг</th >
-                                        <th scope="col">Хэрэглэгчийн дугаар</th >
-                                        <th scope="col">Огноо</th >
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {log_length === 0 ?
-                                    <tr><td>Хандалт байхгүй байна </td></tr>:
-                                    page_logs.map((page, idx) =>
-                                        <PageLogTable 
-                                            key = {idx} 
-                                            idx = {(currentPage*logPerPage)-logPerPage+idx+1} 
-                                            values={page}>
-                                        </PageLogTable>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <Pagination
-                        paginate = {this.paginate}
-                        searchQuery = {this.state.searchQuery}
-                    />
                 </div>
-            </div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <hr />
+                    </div>
+                </div>
+                <h5 className="mb-3 text-center text-uppercase">Нэвтэрч орсон мэдээлэл</h5>
+                <div className="form-row text-right">
+                    <div className="form-group col-md-6">
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="searchQuery"
+                            placeholder="Хайх"
+                            onChange={(e) => this.handleSearch('searchQuery', e)}
+                            value={this.state.searchQuery}
+                        />
+                    </div>
+                </div>
+                <div className="table-responsive">
+                    <table className="table example" id="example">
+                        <thead>
+                            <tr>
+                                <th scope="col">№</th>
+                                <th scope="col">Хаяг</th>
+                                <th scope="col">Method</th>
+                                <th scope="col">IP Хаяг</th >
+                                <th scope="col">Хэрэглэгчийн дугаар</th >
+                                <th scope="col">Огноо</th >
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {log_length === 0 ?
+                            <tr><td>Хандалт байхгүй байна </td></tr>:
+                            page_logs.map((page, idx) =>
+                                <PageLogTable
+                                    key = {idx}
+                                    idx = {(currentPage*logPerPage)-logPerPage+idx+1}
+                                    values={page}>
+                                </PageLogTable>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                <Pagination
+                    paginate = {this.paginate}
+                    searchQuery = {this.state.searchQuery}
+                />
+            </>
         )
 
     }

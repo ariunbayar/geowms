@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 
 import {CrudEvenLog} from './CrudEvenLog/CrudEvenLog'
+import Dashboard from "./Dashboard"
 import {LoginLog} from './LoginLog/LoginLog'
 import {PageLog} from './PageLog/PageLog'
 
@@ -11,7 +12,7 @@ export class Access extends Component {
     constructor(props) {
         super(props)
 
-        this.default_url = '/back/access/login/'
+        // this.default_url = '/back/access/login/'
 
     }
 
@@ -30,11 +31,39 @@ export class Access extends Component {
     render() {
 
         return (
-            <Switch>
-                <Route path={"/back/access/login/"} component={LoginLog} />
-                <Route path={"/back/access/logout/"} component={CrudEvenLog} />
-                <Route path={"/back/access/page/"} component={PageLog} />
-            </Switch>
+            <div className="card">
+              <div className="card-body">
+                <ul className="nav nav-tabs nav-tabs-dark nav-justified">
+                  <li className="nav-item">
+                    <NavLink to={"/back/access/login/"} activeClassName="nav-link active"  data-toggle="tab">
+                    <i className="icon-home"></i>
+                    <span className="hidden-xs">ОРОЛТ ГАРАЛТ</span>
+                    </NavLink>
+                  </li>
+                  <li className="nav-item">
+                    <NavLink to={"/back/access/logout/"} activeClassName="nav-link active"  data-toggle="tab">
+                        <i className="icon-user"></i>
+                        <span className="hidden-xs">ҮЙЛДЭЛ</span>
+                    </NavLink>
+                  </li>
+          <li className="nav-item">
+                    <NavLink to={"/back/access/page/"} activeClassName="nav-link active"  data-toggle="tab">
+                        <i className="icon-envelope-open"></i>
+                        <span className="hidden-xs">ХУУДАС ХАНДАЛТ</span>
+                    </NavLink>
+                  </li>
+                </ul>
+
+                <div className="tab-content">
+                    <Switch>
+                        <Route path={"/back/access/dashboard/"} component={Dashboard} />
+                        <Route path={"/back/access/login/"} component={LoginLog} />
+                        <Route path={"/back/access/logout/"} component={CrudEvenLog} />
+                        <Route path={"/back/access/page/"} component={PageLog} />
+                    </Switch>
+                </div>
+              </div>
+           </div>
         )
 
     }
