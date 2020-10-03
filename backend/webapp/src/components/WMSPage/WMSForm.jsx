@@ -175,7 +175,7 @@ export class WMSForm extends Component {
                         <div className="card-body">
                             <div className="form-group">
                                 <NavLink to={`/back/wms/`}>
-                                    <button className="btn btn-outline-primary btn-block waves-effect waves-light m-1"  >
+                                    <button className="btn gp-btn-primary btn-block waves-effect waves-light m-1"  >
                                         Буцах
                                         </button>
                                 </NavLink>
@@ -212,7 +212,7 @@ export class WMSForm extends Component {
                                 onChange={this.ActiveChange}/>
                             </div>
                             <div className="form-group">
-                                <button className="btn btn-primary btn-block waves-effect waves-light m-1" onClick={this.handleSave} >
+                                <button className="btn gp-btn-primary btn-block waves-effect waves-light m-1" onClick={this.handleSave} >
                                     Хадгал
                                     </button>
                             </div>

@@ -167,7 +167,7 @@ export class WmsList extends Component {
 
                                         <div className="col-sm-12 col-md-6 p-0">
                                             <div className="float-sm-right">
-                                                <NavLink className="btn btn-sm btn-outline-primary waves-effect waves-light m-1" to={`/back/wms/үүсгэх/`}>
+                                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/back/wms/үүсгэх/`}>
                                                     Нэмэх
                                                 </NavLink>
                                             </div>

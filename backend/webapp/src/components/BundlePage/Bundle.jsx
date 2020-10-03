@@ -69,13 +69,13 @@ export default class Bundle extends Component {
 
                 <td>
                     <NavLink to={`/back/дэд-сан/${id}/засах/`}>
-                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </td>
 
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
 
                     {is_modal_delete_open &&
@@ -89,12 +89,12 @@ export default class Bundle extends Component {
                 </td>
                 <td>
                     <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
-                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
+                        <i className="fa fa-chevron-up gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
                 <td>
                     <a href="#" onClick={event => this.props.handleMove(event, id, 'down')}>
-                        <i className="fa fa-chevron-down" aria-hidden="true"></i>
+                        <i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
             </tr>

@@ -105,6 +105,13 @@ export default class BundleForm extends Component {
         return (
             <>
                 <div className="form-group">
+                    <div className="form-group">
+                        <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light m-1"  to={`/back/дэд-сан/`}>
+                                Буцах
+                        </NavLink>
+                    </div>
+                </div>
+                <div className="form-group">
                     <label htmlFor="id_name"> Сангийн нэр: </label>
                     <input
                         type="text"
@@ -194,13 +201,13 @@ export default class BundleForm extends Component {
                 </div>
 
                 <div className="form-group">
-                    <button className="btn btn-primary btn-block waves-effect waves-light m-1" onClick={this.handleSave} >
+                    <button className="btn gp-btn-primary btn-block waves-effect waves-light m-1" onClick={this.handleSave} >
                         Хадгал
                     </button>
                 </div>
 
                 <div className="form-group">
-                    <NavLink className="btn btn-outline-primary btn-block waves-effect waves-light m-1" to={`/back/дэд-сан/`}>
+                    <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light m-1" to={`/back/дэд-сан/`}>
                             Буцах
                     </NavLink>
                 </div>

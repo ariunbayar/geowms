@@ -89,14 +89,6 @@ export default class BundleAdminRights extends Component {
                         </div>
                     </div>
                 )}
-
-                <div className="form-group">
-                    <div className="form-group">
-                        <NavLink className="btn btn-outline-primary btn-block waves-effect waves-light m-1" to={`/back/дэд-сан/`}>
-                                Буцах
-                        </NavLink>
-                    </div>
-                </div>
             </>
         )
     }

@@ -32,23 +32,20 @@ export class Access extends Component {
         return (
             <div className="card">
               <div className="card-body">
-                <ul className="nav nav-tabs nav-tabs-dark nav-justified">
+                <ul className="nav nav-tabs nav-tabs-primary nav-justified">
                   <li className="nav-item">
                     <NavLink to={"/back/access/login/"} activeClassName="nav-link active"  data-toggle="tab">
-                    <i className="icon-home"></i>
-                    <span className="hidden-xs">ОРОЛТ ГАРАЛТ</span>
+                    <span className="hidden-xs gp-text-primary">ОРОЛТ ГАРАЛТ</span>
                     </NavLink>
                   </li>
-                  <li className="nav-item">
+                  <li className="nav-item gp-text-primary">
                     <NavLink to={"/back/access/logout/"} activeClassName="nav-link active"  data-toggle="tab">
-                        <i className="icon-user"></i>
-                        <span className="hidden-xs">ҮЙЛДЭЛ</span>
+                        <span className="hidden-xs gp-text-primary">ҮЙЛДЭЛ</span>
                     </NavLink>
                   </li>
-          <li className="nav-item">
+                  <li className="nav-item gp-text-primary">
                     <NavLink to={"/back/access/page/"} activeClassName="nav-link active"  data-toggle="tab">
-                        <i className="icon-envelope-open"></i>
-                        <span className="hidden-xs">ХУУДАС ХАНДАЛТ</span>
+                        <span className="hidden-xs gp-text-primary">ХУУДАС ХАНДАЛТ</span>
                     </NavLink>
                   </li>
                 </ul>

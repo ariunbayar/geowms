@@ -48,22 +48,22 @@ export default class App extends Component {
               <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
               <li>
                 <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ХАНДАЛТ</span>
+                  <i className="fa fa-history"></i> <span>ХАНДАЛТ</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/log/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>БАНК ЛОГ</span>
+                  <i className="fa fa-bank"></i> <span>БАНК ЛОГ</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/дэд-сан/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ДЭД САН</span>
+                  <i className="fa fa-database"></i> <span>ДЭД САН</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/wms/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>WMS</span>
+                  <i className="zmdi zmdi-image-alt"></i> <span>WMS</span>
                 </NavLink>
               </li>
               <li>
