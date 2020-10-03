@@ -56,7 +56,7 @@ export class Charts extends Component {
         }
 
         return (
-            <Line data={dataLine} options={{ responsive: true }} />
+            <Line  width={100} height={30} data={dataLine} options={{ responsive: true }} />
         )
     }
 

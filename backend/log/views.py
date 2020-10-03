@@ -40,13 +40,12 @@ def login_list(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
     login_log_all_display = []
-
     logins = LoginEvent.objects.annotate(search=SearchVector(
-        'login_type', 
-        'user_id', 
-        'remote_ip', 
+        'login_type',
+        'user_id',
+        'remote_ip',
         'datetime'
-    ) + SearchVector('username'),).filter(search__contains=query)
+    ) + SearchVector('username'),).filter(search__icontains=query)
 
     total_items = Paginator(logins, per_page)
     items_page = total_items.page(page)
@@ -178,13 +177,12 @@ def crudList(request, payload):
     per_page = payload.get('perpage')
     crud_event_display = []
     cruds = CRUDEvent.objects.annotate(search=SearchVector(
-        'event_type', 
+        'event_type',
         'object_id',
-        'content_type_id', 
+        'content_type_id',
         'user_id',
         'changed_fields'
-    ) + SearchVector('object_repr')).filter(search__contains=query)
-
+    ) + SearchVector('object_repr')).filter(search__icontains=query)
     total_items = Paginator(cruds, per_page)
     items_page = total_items.page(page)
 

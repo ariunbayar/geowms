@@ -51,34 +51,39 @@ export class CrudEvenLog extends Component {
         const { crud_event_display, currentPage, crud_length, crudPerPage } = this.state
         return (
             <div className="row">
-                <div className="col-md-12">
-                    <div className="card">
-                        <div className="card-body">
-                        <div className="form-row text-right">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <h5 className="mb-3">Хандалтын тоогоор</h5>
-                                <Charts></Charts>
-                            </div>
-                            <div className="col-md-6">
-                                <h5 className="mb-3">Үйлдлийн төрлөөр</h5>
-                                <RadarChart></RadarChart>
-                            </div>
-                            </div>
-                                <div className="form-group col-md-8">
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="searchQuery"
-                                        placeholder="Хайх"
-                                        onChange={(e) => this.handleSearch('searchQuery', e)}
-                                        value={this.state.searchQuery}
-                                    />
-                                </div>
-                            </div>
-                            <h5 className="card-title">Basic Table</h5>
-                            <div className="table-responsive">
-                                <table className="table">
+                <div className="col-lg-12">
+                    <div className="row">
+                        <div className="col-lg-6">
+                            <h5 className="text-uppercase text-center">Хандалтын тоогоор</h5>
+                            <Charts></Charts>
+                        </div>
+                        <div className="col-lg-6">
+                            <h5 className="text-uppercase text-center">Үйлдлийн төрлөөр</h5>
+                            <RadarChart></RadarChart>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-md-12 ">
+                            <hr />
+                        </div>
+                    </div>
+                    <h5 className="text-center text-uppercase">Лог</h5>
+                    <div className="row">
+                        <div className="col-sm-6">
+                                <input
+                                    type="text"
+                                    className="form-control m-1"
+                                    id="searchQuery small-input"
+                                    placeholder="Хайх"
+                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                    value={this.state.searchQuery}
+                                />
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-lg-12">
+                           <div className="table-responsive">
+                            <table className="table">
                                     <thead>
                                         <tr>
                                         <th scope="col">№</th>
@@ -100,15 +105,15 @@ export class CrudEvenLog extends Component {
                                         )}
                                     </tbody>
                                 </table>
-                                <Pagination
-                                    paginate = {this.paginate}
-                                    searchQuery = {this.state.searchQuery}
-                                />
-                            </div>
+                           </div>
+                            <Pagination
+                                paginate = {this.paginate}
+                                searchQuery = {this.state.searchQuery}
+                            />
                         </div>
                     </div>
-                </div>
             </div>
+        </div>
         )
 
     }

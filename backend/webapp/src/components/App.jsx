@@ -41,42 +41,36 @@ export default class App extends Component {
         <BrowserRouter>
           <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
             <div className="brand-logo">
-                <a href="index.html">
                 <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
                 <h5 className="logo-text">ГЕОПОРТАЛ</h5>
-              </a>
             </div>
             <ul className="sidebar-menu do-nicescrol">
               <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
               <li>
-                <NavLink href="javaScript:void();"  activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ХАНДАЛТ</span> <i className="fa fa-angle-left pull-right"></i>
+                <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
+                  <i className="fa fa-history"></i> <span>ХАНДАЛТ</span>
                 </NavLink>
-                <ul className="sidebar-submenu">
-                  <li><NavLink  activeClassName="active" to={"/back/access/login/"}><i className="fa fa-circle-o"></i>Оролт гаралт</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/access/logout/"}><i className="fa fa-circle-o"></i>Үйлдэл</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/access/page/"}><i className="fa fa-circle-o"></i>Хуудас хандалт</NavLink></li>
-                </ul>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/log/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>БАНК ЛОГ</span>
+                  <i className="fa fa-bank"></i> <span>БАНК ЛОГ</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/дэд-сан/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ДЭД САН</span>
+                  <i className="fa fa-database"></i> <span>ДЭД САН</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/wms/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>WMS</span>
+                  <i className="zmdi zmdi-image-alt"></i> <span>WMS</span>
                 </NavLink>
               </li>
               <li>
-                <NavLink href="javaScript:void();" activeClassName="active" to={"/back/access/login/"} className="waves-effect">
+                <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
                   <i className="fa fa-users"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
                 </NavLink>
+
                 <ul className="sidebar-submenu">
                   <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/1/"}><i className="fa fa-circle-o"></i> 1-р түвшин</NavLink></li>
                   <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/2/"}><i className="fa fa-circle-o"></i> 2-р түвшин</NavLink></li>
