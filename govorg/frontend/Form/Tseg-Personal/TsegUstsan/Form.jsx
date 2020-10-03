@@ -318,7 +318,7 @@ export class FormTseg extends Component {
                     const error_bn = Object.keys(checkError).length > 0
                     return (
                     <Form>
-                        <div className="container my-3 p-3 card">
+                        <div className="container p-3 card">
                             <div className="card-body">
                                 <div className="row ml-3">
                                     <div className="col-md-12 mb-4 mt-4">
