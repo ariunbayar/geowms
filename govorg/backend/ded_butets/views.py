@@ -10,15 +10,15 @@ from main.decorators import ajax_required
 
 
 def _get_changeset_display(ob):
-    geom= eval(ob[1])
+    geom= eval(ob.geom)
     geometry = eval(geom['geom'])
     coordinates = geometry['coordinates']
     geom_type = geometry['type']
     return {
         'coordinate':coordinates,
         'geom_type':geom_type,
-        'changeset_id':ob[0],
-        'changeset_attributes':ob[2]
+        'changeset_id':ob.id,
+        'changeset_attributes':ob.features
     }
 
 def _get_feature_coll(ob, changeset_list):
@@ -31,14 +31,10 @@ def _get_feature_coll(ob, changeset_list):
 @ajax_required
 def changeset_all(request):
 
-    cursor = connections['default'].cursor()
-    cursor.execute(''' select * from changeset''')
-    changesets = cursor.fetchall()
     feature = []
     geoJson = []
-    changeset_list = [_get_changeset_display(ob) for ob in changesets]
+    changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
     features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
-
     feature_collection = FeatureCollection(features)
 
     rsp = {
