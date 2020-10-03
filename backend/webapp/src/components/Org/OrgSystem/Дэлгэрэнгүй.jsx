@@ -41,7 +41,7 @@ export class Дэлгэрэнгүй extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-            <div className="container my-4">
+            <div className="my-4">
                 <div className="row">
                     <div className="col-md-12 mb-4">
                         <NavLink className="btn gp-outline-primary" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`}>

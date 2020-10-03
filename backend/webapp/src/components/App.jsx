@@ -73,8 +73,9 @@ export default class App extends Component {
               </li>
               <li>
                 <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
+                  <i className="fa fa-users"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
                 </NavLink>
+
                 <ul className="sidebar-submenu">
                   <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/1/"}><i className="fa fa-circle-o"></i> 1-р түвшин</NavLink></li>
                   <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/2/"}><i className="fa fa-circle-o"></i> 2-р түвшин</NavLink></li>
@@ -84,23 +85,23 @@ export default class App extends Component {
               </li>
               <li >
                 <NavLink  activeClassName="active" to={"/back/суурь-давхарга/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>СУУРЬ ДАВХРАГА</span>
+                  <i className="icon-layers"></i> <span>СУУРЬ ДАВХРАГА</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/dev/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ХӨГЖҮҮЛЭЛТ</span>
+                  <i className="fa fa-connectdevelop"></i> <span>ХӨГЖҮҮЛЭЛТ</span>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/user/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ХЭРЭГЛЭГЧ</span>
+                  <i className="fa fa-user"></i> <span>ХЭРЭГЛЭГЧ</span>
                   <small className="badge float-right badge-info">{this.state.user_count}</small>
                 </NavLink>
               </li>
               <li>
                 <NavLink  activeClassName="active" to={"/back/тохиргоо/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ТОХИРГОО</span>
+                  <i className="fa fa-cogs"></i> <span>ТОХИРГОО</span>
                 </NavLink>
               </li>
             </ul>

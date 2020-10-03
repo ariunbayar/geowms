@@ -71,37 +71,39 @@ export class OrgRole extends Component {
         const org_level = this.props.match.params.level
 
         return (
-            <div className="container my-4">
+            <div className="my-4">
                 <div className="row">
                     <div className="col-md-12 pt-2 pr-0">
                         <div className="text"></div>
                         <div className="mb-3 mt-3">
-                            <table className="table table-bordered">
-                                <thead>
-                                    <tr>
-                                    <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
-                                    <th scope="col">харах</th>
-                                    <th scope="col">нэмэх</th>
-                                    <th scope="col">хасах</th>
-                                    <th scope="col">цуцлах</th>
-                                    <th scope="col">хянах</th>
-                                    <th scope="col">батлах</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.state.org_roles.map((org_role, idx) =>
-                                        <Item key={idx} org_role={org_role} handleChange={org_role => this.handleChange(idx, org_role)}/>
-                                    )}
-                                </tbody>
-                            </table>
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                        <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
+                                        <th scope="col">харах</th>
+                                        <th scope="col">нэмэх</th>
+                                        <th scope="col">хасах</th>
+                                        <th scope="col">цуцлах</th>
+                                        <th scope="col">хянах</th>
+                                        <th scope="col">батлах</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.org_roles.map((org_role, idx) =>
+                                            <Item key={idx} org_role={org_role} handleChange={org_role => this.handleChange(idx, org_role)}/>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                             {this.state.handleSaveIsLoad ?
-                                <button className="btn gp-btn-primary">
+                                <button className="btn gp-btn-primary my-3">
                                     <div className="spinner-border text-light" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div>
                                     <a className="text-light"> Шалгаж байна.</a>
                                 </button>:
-                                <button className="btn gp-btn-primary" onClick={this.handleSave} >
+                                <button className="btn gp-btn-primary my-3" onClick={this.handleSave} >
                                     Хадгалах
                                 </button>
                             }

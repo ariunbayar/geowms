@@ -32,21 +32,16 @@ export class WMSForm extends Component {
 
     }
 
-
     componentDidMount() {
         const id = this.props.match.params.id
         if (id) {
             this.loadData()
         }
-
-
     }
 
     componentDidUpdate(prevState) {
 
-
     }
-
 
     handleSave() {
         const id = this.props.match.params.id
@@ -83,6 +78,7 @@ export class WMSForm extends Component {
         }
 
     }
+
     ActiveChange(e){
         const is_active=this.state.is_active
         this.setState({
@@ -101,6 +97,7 @@ export class WMSForm extends Component {
         }
 
     }
+
     loadData() {
         const id = this.props.match.params.id
         service.detail(id).then(({ wms_list }) => {
@@ -116,8 +113,6 @@ export class WMSForm extends Component {
 
             }
         })
-
-
     }
 
     handleWmsLayerRefresh() {

@@ -41,6 +41,7 @@
         "react-dom": "^16.13.1",
         "react-flip-move": "^3.0.4",
         "react-images-upload": "^1.2.8",
+        "react-js-pagination": "^3.0.3",
         "react-router-dom": "^5.1.2",
         "yup": "^0.28.5"
     }

@@ -1,3 +1,4 @@
+import { get } from "ol/proj"
 import React, { Component } from "react"
 
 
@@ -17,6 +18,7 @@ export class Pagination extends Component {
         this.loadPage = this.loadPage.bind(this)
         this.nextPage = this.nextPage.bind(this)
         this.prevPage = this.prevPage.bind(this)
+        this.addPage = this.addPage.bind(this)
     }
 
     componentDidMount() {
@@ -73,7 +75,7 @@ export class Pagination extends Component {
         else
         {
             this.props.paginate(page, query)
-            .then(({ page, total_page}) => {
+            .then(({ page, total_page }) => {
                 this.setState({
                     page,
                     total_page,
@@ -81,6 +83,12 @@ export class Pagination extends Component {
                 })
             })
         }
+    }
+
+    addPage(id) {
+        const page = id.target.value
+        this.setState({ page })
+        this.loadPage(page, '')
     }
 
     render() {
@@ -92,54 +100,56 @@ export class Pagination extends Component {
         }
         return (
             <div className="row">
-            <div className="col-md-12">
-                <div className="float-left">
-                    <strong className="gp-text-primary">Хуудас {page}-{total_page}</strong>
-                </div>
-                <div className="float-right btn-group group-round">
-                    <button
-                        type=" button"
-                        value="1"
-                        className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                        onClick={(e) => this.addPage(e)}
-                    >
-                        &lt;&lt;
-                    </button> {}
-                    { page > 1 &&
-                        <button
-                            type=" button"
-                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={this.prevPage}
-                        >
-                            &lt;
-                        </button>
-                    }
-                    <button
-                        type=" button"
-                        value={page}
-                        className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                    >{page}
-                    </button> {}
-                    { page < total_page &&
-                        <button
-                            type="button"
-                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={this.nextPage}
-                        >
-                            &gt;
-                        </button>
-                    }
-                    <button
-                        type=" button"
-                        value={total_page}
-                        className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                        onClick={(e) => this.addPage(e)}
-                    >
-                        &gt;&gt;
-                    </button> {}
+                <div className="col-md-12">
+                    <div className="col-md-12">
+                        <div className="float-left">
+                            <strong className="gp-text-primary">Хуудас {page}-{total_page}</strong>
+                        </div>
+                        <div className="float-right btn-group group-round">
+                            <button
+                                type=" button"
+                                value="1"
+                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                onClick={(e) => this.addPage(e)}
+                            >
+                                &lt;&lt;
+                            </button> {}
+                            { page > 1 &&
+                                <button
+                                    type=" button"
+                                    className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                    onClick={this.prevPage}
+                                >
+                                    &lt;
+                                </button>
+                            }
+                            <button
+                                type=" button"
+                                value={page}
+                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                            >{page}
+                            </button> {}
+                            { page < total_page &&
+                                <button
+                                    type="button"
+                                    className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                    onClick={this.nextPage}
+                                >
+                                    &gt;
+                                </button>
+                            }
+                            <button
+                                type=" button"
+                                value={total_page}
+                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                onClick={(e) => this.addPage(e)}
+                            >
+                                &gt;&gt;
+                            </button> {}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
         )
     }
 }
