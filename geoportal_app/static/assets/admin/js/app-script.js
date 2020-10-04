@@ -1,8 +1,8 @@
 
 $(function() {
     "use strict";
-     
-	 
+
+
 //sidebar menu js
 $.sidebarMenu($('.sidebar-menu'));
 
@@ -11,9 +11,9 @@ $.sidebarMenu($('.sidebar-menu'));
 $(".toggle-menu").on("click", function(e) {
         e.preventDefault();
         $("#wrapper").toggleClass("toggled");
-    });	   
-	
-	   
+    });
+
+
 // === sidebar menu activation js
 
 $(function() {
@@ -23,24 +23,24 @@ $(function() {
             if (!o.is("li")) break;
             o = o.parent().addClass("in").parent().addClass("active");
         }
-    }), 	   
-	   
+    }),
+
 /* Back To Top */
 
-$(document).ready(function(){ 
-    $(window).on("scroll", function(){ 
-        if ($(this).scrollTop() > 300) { 
-            $('.back-to-top').fadeIn(); 
-        } else { 
-            $('.back-to-top').fadeOut(); 
-        } 
-    }); 
-    $('.back-to-top').on("click", function(){ 
-        $("html, body").animate({ scrollTop: 0 }, 600); 
-        return false; 
-    }); 
-});	   
-	   
+$(document).ready(function(){
+    $(window).on("scroll", function(){
+        if ($(this).scrollTop() > 300) {
+            $('.back-to-top').fadeIn();
+        } else {
+            $('.back-to-top').fadeOut();
+        }
+    });
+    $('.back-to-top').on("click", function(){
+        $("html, body").animate({ scrollTop: 0 }, 600);
+        return false;
+    });
+});
+
 $(function () {
   $('[data-toggle="popover"]').popover()
 })

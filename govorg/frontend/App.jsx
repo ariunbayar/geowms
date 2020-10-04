@@ -12,6 +12,7 @@ import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
 import {Help} from './help/Help'
 import { System } from "./System";
+import MenuItem from "../../src/components/MenuItem"
 
 export class App extends Component {
 
@@ -68,46 +69,26 @@ export class App extends Component {
             </div>
             <ul className="sidebar-menu do-nicescrol">
                 <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/bundle/"} className="waves-effect">
-                        <i className="fa fa-database gp-text-primary"></i> <span>ДЭД САН</span>
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/"} className="waves-effect">
-                        <i className="icon-user gp-text-primary"></i> <span>ХЭРЭГЛЭГЧ</span>
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/system/"} className="waves-effect">
-                        <i className="fa fa-assistive-listening-systems gp-text-primary"></i> <span>СИСТЕМ</span>
-                    </NavLink>
-                </li>
+                <MenuItem icon="fa fa-database gp-text-primary" url="/gov/bundle/">ДЭД САН</MenuItem>
+                <MenuItem icon="icon-user gp-text-primary" url="/gov/">ХЭРЭГЛЭГЧ</MenuItem>
+                <MenuItem icon="fa fa-assistive-listening-systems gp-text-primary" url="/gov/system/">СИСТЕМ</MenuItem>
                 {tuuhen_ov.perm_view ?
-                <li >
-                    <NavLink  activeClassName="active" to={"/gov/tuuhen-ov/"} className="waves-effect">
-                        <i className="fa fa-history gp-text-primary"></i> <span>ТҮҮХЭН ӨВ БҮРТГЭЛ</span>
-                    </NavLink>
-                </li>
-                :
-                null
+                    <MenuItem icon="fa fa-history gp-text-primary" url="/gov/tuuhen-ov/">ТҮҮХЭН ӨВ БҮРТГЭЛ</MenuItem>
+                    :
+                    null
                 }
                 {tseg_burtgel.perm_view ?
                 <li>
-                <a href="javaScript:void();" className="waves-effect">
+                <a className="waves-effect">
                     <i className="zmdi zmdi-photo-size-select-small gp-text-primary"></i>  <span> ХҮСЭЛТ</span>
                     <i className="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul className="sidebar-submenu">
                     <li>
-                        <a href="javaScript:void();"><i className="fa fa-circle-o"></i>Цэгийн мэдээлэл<i className="fa fa-angle-left pull-right"></i></a>
+                        <a className="waves-effect"><i className="fa fa-circle-o"></i>ЦЭГИЙН МЭДЭЭЛЭЛ<i className="fa fa-angle-left pull-right"></i></a>
                             <ul className="sidebar-submenu">
-                                <li>
-                                    <NavLink activeClassName="active" to={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/"}><i className="fa fa-circle-o"></i>Шинэ цэг</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink activeClassName="active" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/"}><i className="fa fa-circle-o"></i>Цэг устгах</NavLink>
-                                </li>
+                                <MenuItem icon="fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/">ШИНЭ ЦЭГ</MenuItem>
+                                <MenuItem icon="fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/">ЦЭГ УСТГАХ</MenuItem>
                             </ul>
                     </li>
                 </ul>
@@ -115,43 +96,21 @@ export class App extends Component {
                 :
                 null
                 }
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/zip-code/"} className="waves-effect">
-                        <i className="zmdi zmdi-group-work gp-text-primary"></i> <span>ЗИПКОД</span>
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/org/help/"} className="waves-effect">
-                        <i className="zmdi zmdi-pin-help gp-text-primary"></i> <span>ТУСЛАМЖ</span>
-                    </NavLink>
-                </li>
+                <MenuItem icon="zmdi zmdi-group-work gp-text-primary" url="/gov/zip-code/">ЗИПКОД</MenuItem>
+                <MenuItem icon="zmdi zmdi-pin-help gp-text-primary" url="/gov/org/help/">ТУСЛАМЖ</MenuItem>
                 {teevriin_suljee.perm_view &&
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/тээврийн-сүлжээ/"} className="waves-effect">
-                        <i className="icon-map gp-text-primary"></i> <span>ТЭЭВРИЙН СҮЛЖЭЭ</span>
-                    </NavLink>
-                </li>
+                    <MenuItem icon="icon-map gp-text-primary" url="/gov/тээврийн-сүлжээ/">ТЭЭВРИЙН СҮЛЖЭЭ</MenuItem>
                 }
                 { ded_butets.perm_view &&
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/дэд-бүтэц/"} className="waves-effect">
-                        <i className="icon-map gp-text-primary"></i> <span>ДЭД БҮТЭЦ</span>
-                    </NavLink>
-                </li>
+                    <MenuItem icon="icon-map gp-text-primary" url="/gov/дэд-бүтэц/">ДЭД БҮТЭЦ</MenuItem>
                 }
                 { bair_zuin_zurag.perm_view &&
                 <li>
-                    <NavLink  activeClassName="active" to={"/gov/байр-зүйн-зураг/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>БАЙР ЗҮЙН ЗУРАГ</span>
-                    </NavLink>
+                    <MenuItem icon="icon-map" url="/gov/байр-зүйн-зураг/">БАЙР ЗҮЙН ЗУРАГ</MenuItem>
                 </li>
                 }
                 { barilga_suurin_gazar.perm_view &&
-                <li>
-                    <NavLink  activeClassName="active" to={"/gov/барилга-суурин-газар/"} className="waves-effect">
-                        <i className="icon-map"></i> <span>БАРИЛГА СУУРИН ГАЗАР</span>
-                    </NavLink>
-                </li>
+                    <MenuItem icon="icon-map" url="/gov/барилга-суурин-газар/">БАРИЛГА СУУРИН ГАЗАР</MenuItem>
                 }
             </ul>
             </div>

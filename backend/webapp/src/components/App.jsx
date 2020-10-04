@@ -12,6 +12,7 @@ import {ConfigPage} from "./ConfigPage";
 import {Log} from "./Log"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
+import MenuItem from "../../../../src/components/MenuItem"
 
 export default class App extends Component {
 
@@ -41,15 +42,13 @@ export default class App extends Component {
         <BrowserRouter>
           <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
             <div className="brand-logo">
-                <a href="index.html">
                 <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
                 <h5 className="logo-text">ГЕОПОРТАЛ</h5>
-              </a>
             </div>
             <ul className="sidebar-menu do-nicescrol">
               <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
               <li>
-                <NavLink href="javaScript:void();"  activeClassName="active" to={"/back/access/login/"} className="waves-effect">
+                <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
                   <i className="icon-map"></i> <span>ХАНДАЛТ</span> <i className="fa fa-angle-left pull-right"></i>
                 </NavLink>
                 <ul className="sidebar-submenu">
@@ -58,53 +57,26 @@ export default class App extends Component {
                   <li><NavLink  activeClassName="active" to={"/back/access/page/"}><i className="fa fa-circle-o"></i>Хуудас хандалт</NavLink></li>
                 </ul>
               </li>
+                <MenuItem url={"/back/log/"}>БАНК ЛОГ</MenuItem>
+                <MenuItem url={"/back/дэд-сан/"}>ДЭД САН</MenuItem>
+                <MenuItem url={"/back/wms/"}>WMS</MenuItem>
               <li>
-                <NavLink  activeClassName="active" to={"/back/log/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>БАНК ЛОГ</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/дэд-сан/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>ДЭД САН</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/wms/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>WMS</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink href="javaScript:void();" activeClassName="active" to={"/back/access/login/"} className="waves-effect">
+                <a className="waves-effect">
                   <i className="fa fa-users"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
-                </NavLink>
+                </a>
+                {/* <a activeClassName="active" to={"/back/access/login/"} className="waves-effect">
+                </a> */}
                 <ul className="sidebar-submenu">
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/1/"}><i className="fa fa-circle-o"></i> 1-р түвшин</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/2/"}><i className="fa fa-circle-o"></i> 2-р түвшин</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/3/"}><i className="fa fa-circle-o"></i> 3-р түвшин</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/4/"}><i className="fa fa-circle-o"></i> 4-р түвшин</NavLink></li>
+                  <MenuItem url={"/back/байгууллага/түвшин/1/"}>1-р түвшин</MenuItem>
+                  <MenuItem url={"/back/байгууллага/түвшин/2/"}>2-р түвшин</MenuItem>
+                  <MenuItem url={"/back/байгууллага/түвшин/3/"}>3-р түвшин</MenuItem>
+                  <MenuItem url={"/back/байгууллага/түвшин/4/"}>4-р түвшин</MenuItem>
                 </ul>
               </li>
-              <li >
-                <NavLink  activeClassName="active" to={"/back/суурь-давхарга/"} className="waves-effect">
-                  <i className="icon-layers"></i> <span>СУУРЬ ДАВХРАГА</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/dev/"} className="waves-effect">
-                  <i className="fa fa-connectdevelop"></i> <span>ХӨГЖҮҮЛЭЛТ</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/user/"} className="waves-effect">
-                  <i className="fa fa-user"></i> <span>ХЭРЭГЛЭГЧ</span>
-                  <small className="badge float-right badge-info">{this.state.user_count}</small>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/тохиргоо/"} className="waves-effect">
-                  <i className="fa fa-cogs"></i> <span>ТОХИРГОО</span>
-                </NavLink>
-              </li>
+                <MenuItem icon="icon-layers" url={"/back/суурь-давхарга/"}>СУУРЬ ДАВХРАГА</MenuItem>
+                <MenuItem url={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</MenuItem>
+                <MenuItem url={"/back/user/"}>ХЭРЭГЛЭГЧ</MenuItem>
+                <MenuItem icon="fa fa-cogs" url={"/back/тохиргоо/"}>ТОХИРГОО</MenuItem>
             </ul>
           </div>
         <div className="content-wrapper">
