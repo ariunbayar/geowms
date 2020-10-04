@@ -12,6 +12,7 @@ from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
 from backend.zipcode import views as zipcode_views
+import backend.gis.views
 
 
 app_name = 'backend'
@@ -165,6 +166,11 @@ urlpatterns = [
         path('wms-layer/', zipcode_views.wmsLayer, name='wms-layer'),
         path('search/', zipcode_views.search, name='search'),
     ], 'zip_code'))),
+
+    path('gis/', include(([
+        path('table_list/', backend.gis.views.table_list),
+        path('field_list/<str:schema>/<str:table>/', backend.gis.views.field_list),
+    ], 'gis'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 ]
