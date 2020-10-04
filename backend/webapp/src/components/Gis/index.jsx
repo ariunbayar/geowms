@@ -5,7 +5,7 @@ import {Жагсаалт} from './Жагсаалт'
 import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
 
 
-export class Qgis extends Component {
+export class Gis extends Component {
 
     constructor(props) {
         super(props)
@@ -14,8 +14,8 @@ export class Qgis extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path={"/back/qgis/"} component={Жагсаалт}/>
-                <Route exact path={"/back/qgis/detail/:schemaname/:tablename/"} component={Дэлгэрэнгүй}/>
+                <Route exact path={"/back/gis/"} component={Жагсаалт}/>
+                <Route exact path={"/back/gis/detail/:schemaname/:tablename/"} component={Дэлгэрэнгүй}/>
             </Switch>
         )
 

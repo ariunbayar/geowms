@@ -85,6 +85,7 @@ export class Дэлгэрэнгүй extends Component {
                                 <div className="my-4">
                                     <div className="p-3">
                                         <div className="table-responsive">
+                                            <p>Дурын 10 өгөгдөл:</p>
                                              <table className="table">
                                                 <thead>
                                                     <tr>

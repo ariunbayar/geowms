@@ -28,25 +28,46 @@ def _dict_fetchall(cursor):
 @user_passes_test(lambda u: u.is_superuser)
 def table_list(request):
 
+
     sql = """
         SELECT
-           schemaname,
-           tablename
+            c.oid as "oid",
+            n.nspname as "schema",
+            c.relname as "name",
+            c.reltuples as "rows",
+            CASE c.relkind
+                WHEN 'r' THEN 'table'
+                WHEN 'v' THEN 'view'
+                WHEN 'm' THEN 'materialized view'
+                WHEN 'i' THEN 'index'
+                WHEN 'S' THEN 'sequence'
+                WHEN 's' THEN 'special'
+                WHEN 'f' THEN 'foreign table'
+                WHEN 'p' THEN 'partitioned table'
+                WHEN 'I' THEN 'partitioned index'
+            END as "kind",
+            pg_catalog.pg_table_size(c.oid) as "size"
         FROM
-            pg_catalog.pg_tables
-        WHERE
-            schemaname != 'pg_catalog' AND
-            schemaname != 'information_schema'
-        ORDER BY
-            schemaname, tablename
+            pg_catalog.pg_class c
+        LEFT JOIN
+            pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind IN ('r', 'p', '', 'v', 'm')
+              AND n.nspname <> 'pg_catalog'
+              AND n.nspname <> 'information_schema'
+          AND pg_catalog.pg_table_is_visible(c.oid)
+        ORDER BY 2, 3;
     """
 
     with connections['postgis_db'].cursor() as cursor:
         cursor.execute(sql)
         tables_display = [
             {
-                'schemaname': table.schemaname,
-                'tablename': table.tablename,
+                'oid': table.oid,
+                'schemaname': table.schema,
+                'tablename': table.name,
+                'kind': table.kind,
+                'size': table.size,
+                'rows': table.rows,
             }
             for table in _named_tuple_fetchall(cursor)
         ]
@@ -81,18 +102,8 @@ def field_list(request, schema, table):
 
     # public.mpoint1
 
-    sql = """
-        ********* QUERY **********
-        SELECT c.oid,
-          n.nspname,
-          c.relname
-        FROM pg_catalog.pg_class c
-             LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relname OPERATOR(pg_catalog.~) '^(mpoint1)$' COLLATE pg_catalog.default
-          AND n.nspname OPERATOR(pg_catalog.~) '^(public)$' COLLATE pg_catalog.default
-        ORDER BY 2, 3;
-        **************************
 
+    sql = """
         ********* QUERY **********
         SELECT c.relchecks, c.relkind, c.relhasindex, c.relhasrules, c.relhastriggers, c.relrowsecurity, c.relforcerowsecurity, false AS relhasoids, c.relispartition, '', c.reltablespace, CASE WHEN c.reloftype = 0 THEN '' ELSE c.reloftype::pg_catalog.regtype::pg_catalog.text END, c.relpersistence, c.relreplident, am.amname
         FROM pg_catalog.pg_class c

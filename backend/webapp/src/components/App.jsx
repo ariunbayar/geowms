@@ -10,7 +10,7 @@ import { СуурьДавхаргаХуудас } from "./СуурьДавхар
 import {service} from "./service";
 import {ConfigPage} from "./ConfigPage";
 import {Log} from "./Log"
-import {Qgis} from "./Qgis"
+import {Gis} from "./Gis"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
 
@@ -102,8 +102,8 @@ export default class App extends Component {
                 </NavLink>
               </li>
               <li>
-                <NavLink  activeClassName="active" to={"/back/qgis/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>QGIS</span>
+                <NavLink  activeClassName="active" to={"/back/gis/"} className="waves-effect">
+                  <i className="icon-map"></i> <span>GIS</span>
                 </NavLink>
               </li>
               <li>
@@ -126,7 +126,7 @@ export default class App extends Component {
             />
             <Route exact path={"/back/dev/"} component={DevPage} />
             <Route path={"/back/user/"} component={UserPage} />
-            <Route path={"/back/qgis/"} component={Qgis} />
+            <Route path={"/back/gis/"} component={Gis} />
             <Route path={"/back/тохиргоо/"} component={ConfigPage} />
             <Route path={"/back/дэд-сан/"} component={BundlePage} />
           </Switch>
