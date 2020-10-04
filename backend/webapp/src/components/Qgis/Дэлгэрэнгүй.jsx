@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import {service} from './service'
+import Data from './Data'
 import { toSize } from "ol/size"
 
 export class Дэлгэрэнгүй extends Component {
@@ -11,6 +12,7 @@ export class Дэлгэрэнгүй extends Component {
 
         this.state = {
             items: '',
+            data: ''
 
         }
 
@@ -21,20 +23,20 @@ export class Дэлгэрэнгүй extends Component {
 
         const schemaname = this.props.match.params.schemaname
         const tablename= this.props.match.params.tablename
-        service.getDetail(schemaname, tablename).then(({items}) => {
-            this.handleData(items)
+        service.getDetail(schemaname, tablename).then(({items, data}) => {
+            this.handleData(items, data)
         })
     }
 
-    handleData(items){
-        this.setState({items})
+    handleData(items, data){
+        this.setState({items, data})
     }
 
     render() {
         if (!this.state.items)
             return ''
 
-        const {items} = this.state
+        const {items, data} = this.state
         return (
                 <div className="card">
                     <div className="card-body">
@@ -69,6 +71,41 @@ export class Дэлгэрэнгүй extends Component {
                                                                 </td>
                                                                 <td>{values.type}</td>
                                                             </tr>
+                                                        )
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-12">
+                                <div className="my-4">
+                                    <div className="p-3">
+                                        <div className="table-responsive">
+                                             <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        {data === 0 ?
+                                                            <tr><td>Хоосон байна </td></tr>:
+                                                            Object.keys(data[0]).map((key) => {
+                                                                return(
+                                                                    <th key={key} scope="col">{key} </th>
+                                                                )
+                                                            })
+                                                        }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {data === 0 ?
+                                                        <tr><td>Хоосон байна </td></tr>:
+                                                        data.map((values,index) =>
+                                                            <Data
+                                                                key={index}
+                                                                values={values}
+                                                            />
                                                         )
                                                     }
                                                 </tbody>
