@@ -18,6 +18,7 @@ urlpatterns = [
         path('barilga_suurin_gazar/', bair_zuin_zurag_views.changeset_all, name='barilga_suurin_gazar'),
         path('ded_butets/', bair_zuin_zurag_views.changeset_all, name='ded_butets'),
         path('teevriin_suljee/', bair_zuin_zurag_views.changeset_all, name='teevriin_suljee'),
+        path('testGet/', teevriin_suljee_views.testGet, name='testGet'),
     ], 'back_org'))),
 
     path('', include(([

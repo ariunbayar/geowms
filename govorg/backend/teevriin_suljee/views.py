@@ -11,12 +11,12 @@ from main.decorators import ajax_required
 
 
 def _get_changeset_display(ob):
-    
+
     geom= eval(ob.geom)
     geometry = eval(geom['geom'])
     coordinates = geometry['coordinates']
     geom_type = geometry['type']
-    
+
     return {
         'coordinate':coordinates,
         'geom_type':geom_type,
@@ -26,7 +26,7 @@ def _get_changeset_display(ob):
     }
 
 def _get_feature_coll(ob, changeset_list):
-    geom_type = changeset_list[ob]['geom_type'] 
+    geom_type = changeset_list[ob]['geom_type']
     if geom_type == 'Point':
         from geojson import Point
         point = Point((changeset_list[ob]['coordinate']))
@@ -66,6 +66,26 @@ def changeset_all(request):
     feature = []
     geoJson = []
     changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
+    features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
+    feature_collection = FeatureCollection(features)
+    rsp = {
+        'GeoJson': feature_collection,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def testGet(request):
+    print("geogeogoegoeg")
+    print("geogeogoegoeg")
+    print("geogeogoegoeg")
+    print("geogeogoegoeg")
+    print("geogeogoegoeg")
+    feature = []
+    geoJson = []
+    changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
+    print(changeset_list)
     features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
     feature_collection = FeatureCollection(features)
     rsp = {

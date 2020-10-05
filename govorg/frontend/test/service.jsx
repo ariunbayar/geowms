@@ -1,10 +1,10 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../Components/helpers/service'
 
 export const service = {
-    geom
+    getGeom
 }
 
-function geom() {
+function getGeom() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`/gov/api/teevriin_suljee/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/testGet/`, requestOptions).then(handleResponse)
 }
