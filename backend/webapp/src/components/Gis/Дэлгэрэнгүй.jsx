@@ -24,8 +24,6 @@ export class Дэлгэрэнгүй extends Component {
         const schemaname = this.props.match.params.schemaname
         const tablename= this.props.match.params.tablename
         service.getDetail(schemaname, tablename).then(({items, data}) => {
-            console.log(items)
-            console.log(data)
             this.handleData(items, data)
         })
     }
