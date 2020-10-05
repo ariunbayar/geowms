@@ -44,57 +44,59 @@ export class LogForm extends Component {
     render() {
         const {payment_all, pay_legth} = this.state
         return (
-            <div className="main-content">
-                <div className="container page-container my-4">
-                    <div id="example_wrapper" className="dataTables_wrapper dt-bootstrap4 no-footer shadow-lg p-3 mb-5 bg-white rounded">
-                    <div className="row justify-content-between">
-                        <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>
-                        <div className="col-md-4  mb-1">
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="searchQuery"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
+            <>
+                <div className="card">
+                    <div className="card-body">
+                        <div className="row justify-content-between">
+                            <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>
+                            <div className="col-md-4  mb-1">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="searchQuery"
+                                    placeholder="Хайх"
+                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                    value={this.state.searchQuery}
+                                />
+                            </div>
                         </div>
-                    </div>
-                        <table className="table example" id="example">
-                            <thead>
-                                <tr>
-                                    <th scope="col">№</th>
-                                    <th scope="col">Хэрэглэгч</th>
-                                    <th scope="col">Амжилттай/Амжилтгүй</th>
-                                    <th scope="col">Нийт дүн</th>
-                                    <th scope="col">Тодорхойлолт</th>
-                                    <th scope="col">Код</th>
-                                    <th scope="col">Мэдэгдэл</th>
-                                    <th scope="col">Дата ID</th>
-                                    <th scope="col">Банкны дугаар</th>
-                                    <th scope="col">Гео дугаар</th>
-                                    <th scope="col">Огноо</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {pay_legth === 0 ?
-                                <tr><td>Мэдээлэл байхгүй байна</td></tr>:
-                                payment_all.map((pay, idx) =>
-                                    <LogFormTable
-                                        key = {idx}
-                                        idx = {idx}
-                                        values={pay}>
-                                    </LogFormTable>
-                                )}
-                            </tbody>
-                        </table>
+                        <div className="table-responsive">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">№</th>
+                                        <th scope="col">Хэрэглэгч</th>
+                                        <th scope="col">Амжилттай/Амжилтгүй</th>
+                                        <th scope="col">Нийт дүн</th>
+                                        <th scope="col">Тодорхойлолт</th>
+                                        <th scope="col">Код</th>
+                                        <th scope="col">Мэдэгдэл</th>
+                                        <th scope="col">Дата ID</th>
+                                        <th scope="col">Банкны дугаар</th>
+                                        <th scope="col">Гео дугаар</th>
+                                        <th scope="col">Огноо</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pay_legth === 0 ?
+                                    <tr><td>Мэдээлэл байхгүй байна</td></tr>:
+                                    payment_all.map((pay, idx) =>
+                                        <LogFormTable
+                                            key = {idx}
+                                            idx = {idx}
+                                            values={pay}>
+                                        </LogFormTable>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                         <Pagination
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
                         />
                     </div>
                 </div>
-            </div>
+            </>
         )
     }
 }

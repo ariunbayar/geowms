@@ -69,48 +69,46 @@ export class App extends Component {
             </div>
             <ul className="sidebar-menu do-nicescrol">
                 <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
-                <MenuItem icon="fa fa-database gp-text-primary" url="/gov/bundle/">ДЭД САН</MenuItem>
-                <MenuItem icon="icon-user gp-text-primary" url="/gov/">ХЭРЭГЛЭГЧ</MenuItem>
-                <MenuItem icon="fa fa-assistive-listening-systems gp-text-primary" url="/gov/system/">СИСТЕМ</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-database" url="/gov/bundle/">ДЭД САН</MenuItem>
+                <MenuItem icon="gp-text-primary icon-user" url="/gov/">ХЭРЭГЛЭГЧ</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/">СИСТЕМ</MenuItem>
                 {tuuhen_ov.perm_view ?
-                    <MenuItem icon="fa fa-history gp-text-primary" url="/gov/tuuhen-ov/">ТҮҮХЭН ӨВ БҮРТГЭЛ</MenuItem>
+                    <MenuItem icon="gp-text-primary fa fa-history" url="/gov/tuuhen-ov/">ТҮҮХЭН ӨВ БҮРТГЭЛ</MenuItem>
                     :
                     null
                 }
                 {tseg_burtgel.perm_view ?
                 <li>
-                <a className="waves-effect">
-                    <i className="zmdi zmdi-photo-size-select-small gp-text-primary"></i>  <span> ХҮСЭЛТ</span>
-                    <i className="fa fa-angle-left pull-right"></i>
-                </a>
-                <ul className="sidebar-submenu">
-                    <li>
-                        <a className="waves-effect"><i className="fa fa-circle-o"></i>ЦЭГИЙН МЭДЭЭЛЭЛ<i className="fa fa-angle-left pull-right"></i></a>
-                            <ul className="sidebar-submenu">
-                                <MenuItem icon="fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/">ШИНЭ ЦЭГ</MenuItem>
-                                <MenuItem icon="fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/">ЦЭГ УСТГАХ</MenuItem>
-                            </ul>
-                    </li>
-                </ul>
+                    <a className="waves-effect">
+                        <i className="gp-text-primary zmdi zmdi-photo-size-select-small"></i>  <span> ХҮСЭЛТ</span>
+                        <i className="fa fa-angle-left pull-right"></i>
+                    </a>
+                    <ul className="sidebar-submenu">
+                        <li>
+                            <a className="waves-effect"><i className="gp-text-primary fa fa-circle-o"></i>ЦЭГИЙН МЭДЭЭЛЭЛ<i className="fa fa-angle-left pull-right"></i></a>
+                                <ul className="sidebar-submenu">
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/">ШИНЭ ЦЭГ</MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/">ЦЭГ УСТГАХ</MenuItem>
+                                </ul>
+                        </li>
+                    </ul>
                 </li>
                 :
                 null
                 }
-                <MenuItem icon="zmdi zmdi-group-work gp-text-primary" url="/gov/zip-code/">ЗИПКОД</MenuItem>
-                <MenuItem icon="zmdi zmdi-pin-help gp-text-primary" url="/gov/org/help/">ТУСЛАМЖ</MenuItem>
+                <MenuItem icon="gp-text-primary zmdi zmdi-group-work" url="/gov/zip-code/">ЗИПКОД</MenuItem>
+                <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/">ТУСЛАМЖ</MenuItem>
                 {teevriin_suljee.perm_view &&
-                    <MenuItem icon="icon-map gp-text-primary" url="/gov/тээврийн-сүлжээ/">ТЭЭВРИЙН СҮЛЖЭЭ</MenuItem>
+                    <MenuItem icon="gp-text-primary icon-map" url="/gov/тээврийн-сүлжээ/">ТЭЭВРИЙН СҮЛЖЭЭ</MenuItem>
                 }
                 { ded_butets.perm_view &&
-                    <MenuItem icon="icon-map gp-text-primary" url="/gov/дэд-бүтэц/">ДЭД БҮТЭЦ</MenuItem>
+                    <MenuItem icon="gp-text-primary icon-map" url="/gov/дэд-бүтэц/">ДЭД БҮТЭЦ</MenuItem>
                 }
                 { bair_zuin_zurag.perm_view &&
-                <li>
-                    <MenuItem icon="icon-map" url="/gov/байр-зүйн-зураг/">БАЙР ЗҮЙН ЗУРАГ</MenuItem>
-                </li>
+                    <MenuItem icon="gp-text-primary icon-map" url="/gov/байр-зүйн-зураг/">БАЙР ЗҮЙН ЗУРАГ</MenuItem>
                 }
                 { barilga_suurin_gazar.perm_view &&
-                    <MenuItem icon="icon-map" url="/gov/барилга-суурин-газар/">БАРИЛГА СУУРИН ГАЗАР</MenuItem>
+                    <MenuItem icon="gp-text-primary icon-map" url="/gov/барилга-суурин-газар/">БАРИЛГА СУУРИН ГАЗАР</MenuItem>
                 }
             </ul>
             </div>

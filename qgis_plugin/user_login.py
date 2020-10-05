@@ -203,7 +203,6 @@ class User_Login:
     def activ_layer(self):
 
         active_layers = self.iface.mapCanvas().layers()
-        features = QgsFeatureRequest()
 
         if not active_layers:
             return
@@ -213,6 +212,7 @@ class User_Login:
             changed_geom = layer.editBuffer()
             fieldnames = [field.name() for field in layer.fields()]
             n_of_attributes = len(layer.fields())
+            projection = layer.crs().authid()
 
             if changed_geom:
 
@@ -220,17 +220,18 @@ class User_Login:
 
                 for j, feature_geom in ch.items():
                     values = []
-                    expr = QgsExpression('"id"=\'%s\'' % j)
+                    expr = QgsExpression('\'%s\=\%s\'' %(fieldnames[0] , j))
 
                     for feature in layer.getFeatures(QgsFeatureRequest(expr)):
                         attributes = []
                         for j in range(len(layer.fields())):
                             attributes.append({
-                                fieldnames[j]: feature[str(fieldnames[j])],
+                                str(fieldnames[j]):str(feature[str(fieldnames[j])]),
                             })
                         values = [
                             {"geom": feature_geom.asJson()},
-                            {"att": attributes}
+                            {"att": attributes},
+                            {'projection':projection}
                         ]
                     data = {'values': json.dumps(values)}
                     requests.post('http://127.0.0.1:8000/api/service/qgis-submit/', data=data)

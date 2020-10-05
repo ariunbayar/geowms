@@ -93,53 +93,60 @@ export class Pagination extends Component {
 
     render() {
         const {page, total_page} = this.state
+        const pages = []
+        for (let i = page; i <= total_page; i++) {
+            pages.push(<li className="page-item" key={i}><a className="page-link">{i}</a></li>)
+
+        }
         return (
             <div className="row">
                 <div className="col-md-12">
-                    <div className="float-left">
-                        <strong className="gp-text-primary">Хуудас {page}-{total_page}</strong>
-                    </div>
-                    <div className="float-right btn-group group-round">
-                        <button
-                            type=" button"
-                            value="1"
-                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={(e) => this.addPage(e)}
-                        >
-                            &lt;&lt;
-                        </button> {}
-                        { page > 1 &&
+                    <div className="col-md-12">
+                        <div className="float-left">
+                            <strong className="gp-text-primary">Хуудас {page}-{total_page}</strong>
+                        </div>
+                        <div className="float-right btn-group group-round">
                             <button
                                 type=" button"
+                                value="1"
                                 className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                                onClick={this.prevPage}
+                                onClick={(e) => this.addPage(e)}
                             >
-                                &lt;
-                            </button>
-                        }
-                        <button
-                            type=" button"
-                            value={page}
-                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                        >{page}
-                        </button> {}
-                        { page < total_page &&
+                                &lt;&lt;
+                            </button> {}
+                            { page > 1 &&
+                                <button
+                                    type=" button"
+                                    className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                    onClick={this.prevPage}
+                                >
+                                    &lt;
+                                </button>
+                            }
                             <button
-                                type="button"
+                                type=" button"
+                                value={page}
                                 className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                                onClick={this.nextPage}
+                            >{page}
+                            </button> {}
+                            { page < total_page &&
+                                <button
+                                    type="button"
+                                    className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                    onClick={this.nextPage}
+                                >
+                                    &gt;
+                                </button>
+                            }
+                            <button
+                                type=" button"
+                                value={total_page}
+                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                onClick={(e) => this.addPage(e)}
                             >
-                                &gt;
-                            </button>
-                        }
-                        <button
-                            type=" button"
-                            value={total_page}
-                            className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
-                            onClick={(e) => this.addPage(e)}
-                        >
-                            &gt;&gt;
-                        </button> {}
+                                &gt;&gt;
+                            </button> {}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -14,3 +14,4 @@ pycryptodome==3.6.1
 django-easy-audit==1.2.3
 pyproj==2.5.0
 fpdf==1.7.2
+geojson==2.5.0

@@ -74,9 +74,9 @@ export default class WMSCheckFormTable extends Component {
                         {
                             toggleButton
                             ?
-                            <i className="fa fa-window-close-o" aria-hidden="true"></i>
+                            <i className="fa fa-window-close-o text-success" aria-hidden="true"></i>
                             :
-                            <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                         }
                     </a>
                         {
@@ -96,21 +96,21 @@ export default class WMSCheckFormTable extends Component {
                 <td >
                     {titleDisabled ?
                     <a className="btn" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
-                        <i className="fa fa-floppy-o" aria-hidden="true"></i>
+                        <i className="fa fa-floppy-o text-success" aria-hidden="true"></i>
                     </a>:
                     <a className="btn" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </a>
                     }
                 </td>
                 <td >
                     <a className="btn" onClick={event => this.props.handleMove(layer.id, 'up', wmsId)}>
-                        <i className="fa fa-chevron-up" aria-hidden="true"></i>
+                        <i className="fa fa-chevron-up gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
                 <td>
                     <a className="btn" onClick={event => this.props.handleMove(layer.id, 'down', wmsId)}>
-                        <i className="fa fa-chevron-down" aria-hidden="true"></i>
+                        <i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
             </tr>

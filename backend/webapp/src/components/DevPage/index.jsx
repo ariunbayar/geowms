@@ -124,6 +124,13 @@ export class DevPage extends Component {
                                     </li>
                             </ul>
                         </div>
+                        <div>
+                            <strong>GeoJSON==2.5.0: </strong>
+                            <LinkExternal href="https://pypi.org/project/geojson/"/>
+                            <ul>
+                                <li>Бүх 'GeoJSON' форматтай өгөгдөлд зориулсан сан</li>
+                            </ul>
+                        </div>
                         <h3>Координатын формат</h3>
                         <div>
                             <ul>

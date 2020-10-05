@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'frontend.page.apps.PageConfig',
     'frontend.profile.apps.ProfileConfig',
     'frontend.qpay.apps.QpayConfig',
+
     # Backend apps
 
     'backend.webapp.apps.WebappConfig',
@@ -57,6 +58,8 @@ INSTALLED_APPS = [
     'backend.forms.apps.FormsConfig',
     'backend.zipcode.apps.ZipcodeConfig',
     'backend.changeset.apps.ChangesetConfig',
+    'backend.gis.apps.GisConfig',
+
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
@@ -68,6 +71,10 @@ INSTALLED_APPS = [
     'govorg.backend.bundle.apps.BundleConfig',
     'govorg.backend.employee.apps.EmployeeConfig',
     'govorg.backend.system.apps.SystemConfig',
+    'govorg.backend.bair_zuin_zurag.apps.BairZuinZuragConfig',
+    'govorg.backend.barilga_suurin_gazar.apps.BarilgaSuurinGazarConfig',
+    'govorg.backend.ded_butets.apps.DedButetsConfig',
+    'govorg.backend.teevriin_suljee.apps.TeevriinSuljeeConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
