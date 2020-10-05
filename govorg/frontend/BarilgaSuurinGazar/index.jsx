@@ -8,7 +8,7 @@ import TileLayer from 'ol/layer/Tile';
 import {transform as transformCoordinate} from 'ol/proj'
 import View from 'ol/View';
 import { service } from "./service"
-import "../styles.css"
+import "./styles.css"
 
 import {Fill, Stroke, Style} from 'ol/style';
 import {Vector as VectorSource} from 'ol/source';

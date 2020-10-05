@@ -9,16 +9,20 @@ from django.db import connections
 from main.decorators import ajax_required
 
 
+
 def _get_changeset_display(ob):
+    
     geom= eval(ob.geom)
     geometry = eval(geom['geom'])
     coordinates = geometry['coordinates']
     geom_type = geometry['type']
+    
     return {
         'coordinate':coordinates,
         'geom_type':geom_type,
         'changeset_id':ob.id,
-        'changeset_attributes':ob.features
+        'changeset_attributes':ob.features,
+        'projection': ob.projection
     }
 
 def _get_feature_coll(ob, changeset_list):
@@ -64,7 +68,6 @@ def changeset_all(request):
     changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
     features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
     feature_collection = FeatureCollection(features)
-
     rsp = {
         'GeoJson': feature_collection,
     }

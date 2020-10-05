@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'frontend.page.apps.PageConfig',
     'frontend.profile.apps.ProfileConfig',
     'frontend.qpay.apps.QpayConfig',
+
     # Backend apps
 
     'backend.webapp.apps.WebappConfig',
@@ -57,6 +58,8 @@ INSTALLED_APPS = [
     'backend.forms.apps.FormsConfig',
     'backend.zipcode.apps.ZipcodeConfig',
     'backend.changeset.apps.ChangesetConfig',
+    'backend.gis.apps.GisConfig',
+
     # API apps
 
     'api.govorg.apps.GovOrgConfig',
