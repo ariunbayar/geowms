@@ -13,6 +13,7 @@ import {Log} from "./Log"
 import {Gis} from "./Gis"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
+import MenuItem from "../../../../src/components/MenuItem"
 
 export default class App extends Component {
 
@@ -47,64 +48,28 @@ export default class App extends Component {
             </div>
             <ul className="sidebar-menu do-nicescrol">
               <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
+                <MenuItem icon="gp-text-primary fa fa-history" url={"/back/access/login/"}>ХАНДАЛТ</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-bank" url={"/back/log/"}>БАНК ЛОГ</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-database" url={"/back/дэд-сан/"}>ДЭД САН</MenuItem>
+                <MenuItem icon="gp-text-primary zmdi zmdi-image-alt" url={"/back/wms/"}>WMS</MenuItem>
               <li>
-                <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="fa fa-history"></i> <span>ХАНДАЛТ</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/log/"} className="waves-effect">
-                  <i className="fa fa-bank"></i> <span>БАНК ЛОГ</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/дэд-сан/"} className="waves-effect">
-                  <i className="fa fa-database"></i> <span>ДЭД САН</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/wms/"} className="waves-effect">
-                  <i className="zmdi zmdi-image-alt"></i> <span>WMS</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink activeClassName="active" to={"/back/access/login/"} className="waves-effect">
-                  <i className="fa fa-users"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
-                </NavLink>
-
+                <a className="waves-effect">
+                  <i className="gp-text-primary fa fa-users"></i> <span>БАЙГУУЛЛАГА</span> <i className="fa fa-angle-left pull-right"></i>
+                </a>
+                {/* <a activeClassName="active" to={"/back/access/login/"} className="waves-effect">
+                </a> */}
                 <ul className="sidebar-submenu">
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/1/"}><i className="fa fa-circle-o"></i> 1-р түвшин</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/2/"}><i className="fa fa-circle-o"></i> 2-р түвшин</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/3/"}><i className="fa fa-circle-o"></i> 3-р түвшин</NavLink></li>
-                  <li><NavLink  activeClassName="active" to={"/back/байгууллага/түвшин/4/"}><i className="fa fa-circle-o"></i> 4-р түвшин</NavLink></li>
+                  <MenuItem icon="fa fa-circle-o gp-text-primary" url={"/back/байгууллага/түвшин/1/"}>1-р түвшин</MenuItem>
+                  <MenuItem icon="fa fa-circle-o gp-text-primary" url={"/back/байгууллага/түвшин/2/"}>2-р түвшин</MenuItem>
+                  <MenuItem icon="fa fa-circle-o gp-text-primary" url={"/back/байгууллага/түвшин/3/"}>3-р түвшин</MenuItem>
+                  <MenuItem icon="fa fa-circle-o gp-text-primary" url={"/back/байгууллага/түвшин/4/"}>4-р түвшин</MenuItem>
                 </ul>
               </li>
-              <li >
-                <NavLink  activeClassName="active" to={"/back/суурь-давхарга/"} className="waves-effect">
-                  <i className="icon-layers"></i> <span>СУУРЬ ДАВХРАГА</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/dev/"} className="waves-effect">
-                  <i className="fa fa-connectdevelop"></i> <span>ХӨГЖҮҮЛЭЛТ</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/user/"} className="waves-effect">
-                  <i className="fa fa-user"></i> <span>ХЭРЭГЛЭГЧ</span>
-                  <small className="badge float-right badge-info">{this.state.user_count}</small>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/gis/"} className="waves-effect">
-                  <i className="icon-map"></i> <span>GIS</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink  activeClassName="active" to={"/back/тохиргоо/"} className="waves-effect">
-                  <i className="fa fa-cogs"></i> <span>ТОХИРГОО</span>
-                </NavLink>
-              </li>
+                <MenuItem icon="gp-text-primary icon-layers" url={"/back/суурь-давхарга/"}>СУУРЬ ДАВХРАГА</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-connectdevelop" url={"/back/dev/"}>ХӨГЖҮҮЛЭЛТ</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-user" url={"/back/user/"}>ХЭРЭГЛЭГЧ</MenuItem>
+                <MenuItem icon="gp-text-primary icon-map" url={"/back/gis/"}>GIS</MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-cogs" url={"/back/тохиргоо/"}>ТОХИРГОО</MenuItem>
             </ul>
           </div>
         <div className="content-wrapper">

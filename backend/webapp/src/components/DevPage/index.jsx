@@ -22,7 +22,7 @@ export class DevPage extends Component {
         <div className="row">
             <div className="col-md-12">
                 <div className="card">
-                    <div class="card-body">
+                    <div className="card-body">
                         <h3>Libraries</h3>
 
                         <p>
