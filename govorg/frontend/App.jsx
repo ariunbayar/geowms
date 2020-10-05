@@ -11,6 +11,7 @@ import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
 import {Help} from './help/Help'
+import Test from './test'
 import { System } from "./System";
 import MenuItem from "../../src/components/MenuItem"
 
@@ -130,7 +131,7 @@ export class App extends Component {
                         <Route path="/gov/zip-code/" component={ZipCode}/>
                         <Route exact path="/gov/" component={Employee}/>
                         <Route exact path="/gov/bundle/" component={Bundle}/>
-                        <Route exact path="/gov/org/help/" component={Help}/>
+                        <Route exact path="/gov/org/help/" component={Test}/>
                     </Switch>
                 </div>
             </div>
