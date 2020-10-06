@@ -86,36 +86,44 @@ def table_list(request):
     rsp = {
         'items': [
             {
+                'oid': 88363,
                 'schema': 'public',
-                'name': 'AU_SumUnit',
+                'table': 'AU_SumUnit',
             },
             {
+                'oid': 83299,
                 'schema': 'public',
-                'name': 'AU_StateUnit',
+                'table': 'AU_StateUnit',
             },
             {
+                'oid': 83311,
                 'schema': 'public',
-                'name': 'AU_AimagUnit',
+                'table': 'AU_AimagUnit',
             },
             {
+                'oid': 59907,
                 'schema': 'public',
-                'name': 'AddressPoint',
+                'table': 'AddressPoint',
             },
             {
+                'oid': 24149,
                 'schema': 'public',
-                'name': 'AdmUnitSum',
+                'table': 'AdmUnitSum',
             },
             {
+                'oid': 24630,
                 'schema': 'public',
-                'name': 'AdmUnitUls',
+                'table': 'AdmUnitUls',
             },
             {
+                'oid': 35684,
                 'schema': 'public',
-                'name': 'Sand',
+                'table': 'Sand',
             },
             {
+                'oid': 85312,
                 'schema': 'public',
-                'name': 'Shuudan_uilchilgeenii_salbaruud',
+                'table': 'Shuudan_uilchilgeenii_salbaruud',
             },
         ]
     }
