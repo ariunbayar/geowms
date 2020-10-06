@@ -15,9 +15,11 @@ export class ConfigList extends Component {
         this.state = {
             config_list: [],
             disk: {},
+            modal_alert_check: false,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
     componentDidMount() {
@@ -40,8 +42,23 @@ export class ConfigList extends Component {
 
     handleRemove(id){
         service.remove(id).then(({success}) => {
-            success && this.handleListUpdated()
+            if(success){
+                this.setState({modal_alert_check: true})
+                this.modalCloseTime()
+            }
         })
+    }
+
+    modalCloseTime(){
+        setTimeout(() => {
+            this.handleListUpdated()
+            this.setState({modal_alert_check: false})
+        }, 2000)
+    }
+
+    modalClose(){
+        this.handleListUpdated()
+        this.setState({modal_alert_check: false})
     }
 
     render() {
@@ -73,8 +90,11 @@ export class ConfigList extends Component {
                                     <tbody>
                                         {config_list.map((config, idx) =>
                                             <Config key={config.id} values={config}
-                                            handleUpdated={() => this.handleRemoved(config.id)}
                                             handleRemove={()=>this.handleRemove(config.id)}
+                                            handleUpdated={() => this.handleRemoved(config.id)}
+                                            modal_alert_check = {this.state.modal_alert_check}
+                                            modalCloseTime = {() => this.modalCloseTime()}
+                                            modalClose = {() => this.modalClose}
                                             />
                                         )}
                                     </tbody>

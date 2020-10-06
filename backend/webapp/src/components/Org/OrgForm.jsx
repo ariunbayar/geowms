@@ -23,9 +23,12 @@ export class OrgForm extends Component {
             query_min: false,
             search_load: false,
             load: 0,
+            modal_alert_check: false,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+
     }
 
     componentDidUpdate(prevProp){
@@ -72,8 +75,20 @@ export class OrgForm extends Component {
                 a++
                 this.setState({ load: a })
                 this.paginate(1, searchQuery, level, org_id)
+                this.setState({ modal_alert_check: true })
+                this.modalCloseTime()
             }
         })
+    }
+
+    modalCloseTime(){
+        setTimeout(() => {
+            this.setState({modal_alert_check: false})
+        }, 2000)
+    }
+
+    modalClose() {
+        this.setState({modal_alert_check: false})
     }
 
     render() {
@@ -115,7 +130,11 @@ export class OrgForm extends Component {
                                                 idx={(currentPage*20)-20+idx+1}
                                                 org_level={this.state.level}
                                                 org={org}
-                                                handleUserDelete={() => this.handleUserDelete(org.id)}>
+                                                handleUserDelete={() => this.handleUserDelete(org.id)}
+                                                modal_alert_check = {this.state.modal_alert_check}
+                                                modalCloseTime = {() => this.modalCloseTime()}
+                                                modalClose = {() => this.modalClose()}
+                                            >
                                             </OrgFormTable>
                                     )}
                                 </tbody>

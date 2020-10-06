@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
 import {service} from './service'
+import ModalAlert from "../ModalAlert"
 
 
 export class ConfigForm extends Component {
@@ -17,10 +18,13 @@ export class ConfigForm extends Component {
             form_is_loading: false,
             name_isnull: false,
             value_isnull: false,
+            modal_alert_check: false,
         }
 
         this.handleChange = this.handleChange.bind(this);
         this.handleForm = this.handleForm.bind(this);
+        this.modalClose = this.modalClose.bind(this);
+        this.modalCloseTime = this.modalCloseTime.bind(this);
     }
 
     componentDidMount() {
@@ -67,14 +71,28 @@ export class ConfigForm extends Component {
 
             if (id) {
                 service.update(id, values).then(({success}) => {
-                    success && this.props.history.push('/back/тохиргоо/')
+                    success && this.setState({modal_alert_check: true})
                 })
             } else {
                 service.create(values).then(({success}) => {
-                    success && this.props.history.push('/back/тохиргоо/')
+                    success && this.setState({modal_alert_check: true})
                 })
             }
         }
+    }
+
+    modalClose(){
+        setTimeout(() => {
+            this.props.history.push('/back/тохиргоо/')
+            this.setState({modal_alert_check: false})
+        }, 0)
+    }
+
+    modalCloseTime(){
+        setTimeout(() => {
+            this.props.history.push('/back/тохиргоо/')
+            this.setState({modal_alert_check: false})
+        }, 2000)
     }
 
     render() {
@@ -121,12 +139,25 @@ export class ConfigForm extends Component {
                         </div>
 
                         {form_is_loading ?
-                            <button className="btn gp-btn-primary" onClick={this.handleForm}>
-                                <div className="spinner-border" role="status">
-                                    <span className="sr-only"></span>
-                                </div>
-                                {} Түр хүлээнэ үү...
-                            </button> :
+                            <>
+                                {this.state.modal_alert_check ?
+                                    <ModalAlert
+                                        modalClose={this.modalClose}
+                                        modalCloseTime={this.modalCloseTime()}
+                                        title="Амжилттай хадгаллаа"
+                                        model_type_icon = "success"
+                                    />
+                                    :
+                                    <button className="btn gp-btn-primary" onClick={this.handleForm}>
+                                        <div className="spinner-border" role="status">
+                                            <span className="sr-only"></span>
+                                        </div>
+                                        {} Түр хүлээнэ үү...
+                                    </button>
+
+                                }
+                            </>
+                            :
                             <button className="btn gp-btn-primary" onClick={this.handleForm}>
                                 Хадгалах
                             </button>

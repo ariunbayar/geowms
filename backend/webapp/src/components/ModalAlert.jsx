@@ -10,7 +10,6 @@ export default class ModalAlert extends Component {
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
-        this.handleProceed = this.handleProceed.bind(this)
     }
 
     componentDidMount() {
@@ -37,20 +36,9 @@ export default class ModalAlert extends Component {
         }, 0)
     }
 
-    handleClose(callback) {
+    handleClose() {
         this.setState({status: 'closing'})
-        setTimeout(() => {
-            this.setState({status: 'closed'})
-            if (callback) {
-                callback()
-            } else {
-                this.props.modalClose()
-            }
-        }, 200)
-    }
-
-    handleProceed() {
-        this.handleClose(this.props.modalAction)
+        this.props.modalClose(true)
     }
 
     render () {
@@ -72,7 +60,7 @@ export default class ModalAlert extends Component {
             <Fragment>
                 <div className={className} onClick={() => this.handleClose()}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content animated jackInTheBox" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
+                        <div className="modal-content" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
                             <div className="d-flex justify-content-center">
                                 {this.props.model_type_icon == "danger"?
                                 <i class="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
