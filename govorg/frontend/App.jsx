@@ -132,9 +132,13 @@ export class App extends Component {
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
-                                    { barilga_suurin_gazar_table_list.map(({ oid, schema, table }) =>
-                                        <MenuItem icon="fa fa-table" url={`/gov/барилга-суурин-газар/${oid}/`}
-                                                    text={schema + '.' + table}></MenuItem>
+                                    { barilga_suurin_gazar_table_list.map(({ oid, schema, table }, idx) =>
+                                        <MenuItem
+                                            key={ idx }
+                                            icon="fa fa-table"
+                                            url={`/gov/барилга-суурин-газар/${oid}/`}
+                                            text={schema + '.' + table}
+                                        ></MenuItem>
                                     )}
                                 </ul>
                             </li>
@@ -155,7 +159,7 @@ export class App extends Component {
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
                             <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
-                            <Route path="/gov/барилга-суурин-газар/" component={БарилгаСууринГазар}/>
+                            <Route path="/gov/барилга-суурин-газар/" component={ БарилгаСууринГазар }/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/" component={Employee}/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
