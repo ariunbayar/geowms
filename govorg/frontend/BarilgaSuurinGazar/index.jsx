@@ -75,6 +75,7 @@ export default class BarilgaSuurinGazar extends Component {
 
         const oid_old = prevProps.match.params.oid
         const oid = this.props.match.params.oid
+        console.log(this.props)
 
         if (oid_old != oid) {
 
