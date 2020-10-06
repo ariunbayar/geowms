@@ -20,6 +20,7 @@ urlpatterns = [
         path('barilga_suurin_gazar/', include(([
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
             path('table_list/', govorg.backend.barilga_suurin_gazar.views.table_list),
+            path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
         ], 'barilga_suurin_gazar'))),
         path('ded_butets/', bair_zuin_zurag_views.changeset_all, name='ded_butets'),
         path('teevriin_suljee/', bair_zuin_zurag_views.changeset_all, name='teevriin_suljee'),

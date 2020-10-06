@@ -159,7 +159,7 @@ export class App extends Component {
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
                             <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
-                            <Route path="/gov/барилга-суурин-газар/" component={ БарилгаСууринГазар }/>
+                            <Route path="/gov/барилга-суурин-газар/:oid/" component={ БарилгаСууринГазар }/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/" component={Employee}/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
