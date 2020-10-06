@@ -167,3 +167,113 @@ def rows(request, oid):
         }
     }
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def add(request, payload):
+    oid = payload.get('oid')
+    data = payload.get('data')
+    tabne_data = gis_table_by_oid(oid)
+    table_fields = '('
+    table_rows = []
+    check = False
+    # query insert and value beltgeh
+
+    for index, row in enumerate(data):
+        if not row == "id":
+            table_fields = table_fields + row
+            table_rows.append(data[row])
+            check = True
+        if index < len(data) -1 and check:
+            table_fields = table_fields + ', '
+    table_fields = table_fields + ')'
+    # ['1', '2'] convert to ('1', '2')
+    table_rows = tuple(table_rows)
+    # ['1', '2'] convert to ('1', '2')  end
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+                sql = """ INSERT INTO {tabne_data} {table_fields} VALUES {table_rows} """.format(
+                    tabne_data=tabne_data,
+                    table_fields=table_fields,
+                    table_rows=table_rows,
+                )
+                cursor.execute(sql)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def save(request, payload, pk):
+    oid = payload.get('oid')
+    data = payload.get('data')
+    pk = pk
+    tabne_data = gis_table_by_oid(oid)
+    table_fields_zow = ''
+    data_fields = []
+    data_rows = []
+    check = False
+    # query set beltgeh
+    for index, row in enumerate(data):
+        if not row == 'id':
+            data_fields.append(row)
+            data_rows.append(data[row])
+            table_fields_zow = table_fields_zow + str(row) + '=' + "'" + str(data[row]) + "'"
+            check = True
+        if index < len(data) -1 and check:
+            table_fields_zow = table_fields_zow + ', '
+    # query set beltgeh end
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+            sql = """ UPDATE {tabne_data} SET {table_fields_zow} WHERE id = {pk} """.format(
+                tabne_data=tabne_data,
+                table_fields_zow=table_fields_zow,
+                pk=pk,
+            )
+            cursor.execute(sql)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def delete(request, payload, pk):
+    oid = payload.get('oid')
+    tabne_data = gis_table_by_oid(oid)
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+                sql = """ DELETE FROM {tabne_data} where id = {pk} """.format(
+                    tabne_data=tabne_data,
+                    pk=pk,
+                )
+                cursor.execute(sql)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
