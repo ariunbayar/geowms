@@ -112,18 +112,18 @@ export default class BarilgaSuurinGazar extends Component {
         const typeSelect = document.getElementById('type')
 
         const value = typeSelect.value
-        
+
         if (value !== 'None') {
 
             const draw = new Draw({
-              source: source,        
-              type: typeSelect.value,        
+              source: source,
+              type: typeSelect.value,
             })
 
             map.addInteraction(draw)
 
             this.draw = draw
-        
+
         }
     }
 

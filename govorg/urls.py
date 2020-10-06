@@ -9,16 +9,23 @@ from govorg.backend.barilga_suurin_gazar import views as barilga_suurin_gazar_vi
 from govorg.backend.ded_butets import views as ded_butets_veiws
 from govorg.backend.teevriin_suljee import views as teevriin_suljee_views
 
+import govorg.backend.barilga_suurin_gazar.views
+
 urlpatterns = [
     path('api/', include(([
         path('employee/', employee_views.employees, name='employees'),
         path('system/', system_views.systemList, name='system'),
         path('bundle/', bundle_views.bundle, name='bundle'),
         path('bair_zuin_zurag/', bair_zuin_zurag_views.changeset_all, name='bair_zuin_zurag'),
-        path('barilga_suurin_gazar/', bair_zuin_zurag_views.changeset_all, name='barilga_suurin_gazar'),
+        path('barilga_suurin_gazar/', include(([
+            path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
+            path('table_list/', govorg.backend.barilga_suurin_gazar.views.table_list),
+        ], 'barilga_suurin_gazar'))),
         path('ded_butets/', bair_zuin_zurag_views.changeset_all, name='ded_butets'),
         path('teevriin_suljee/', bair_zuin_zurag_views.changeset_all, name='teevriin_suljee'),
+        path('testGet/', teevriin_suljee_views.testGet, name='testGet'),
     ], 'back_org'))),
+
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),
