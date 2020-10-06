@@ -2,9 +2,11 @@ import requests
 import json
 from geojson import Feature, FeatureCollection
 
+from django.conf import settings
 from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
 
 from backend.changeset.models import ChangeSet
@@ -81,6 +83,7 @@ def changeset_all(request):
 
 @require_GET
 @ajax_required
+@cache_page(settings.DEBUG and 300 or 0)
 def table_list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -120,11 +123,66 @@ def table_list(request):
 
 
 
+@require_GET
+@ajax_required
+@cache_page(settings.DEBUG and 300 or 0)
+def rows(request, oid):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    columns_to_select = [
+        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        for f in fields
+    ]
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            {columns}
+        FROM
+            {table}
+        LIMIT {limit}
+    """.format(
+        columns=', '.join(columns_to_select),
+        table=table,
+        limit=10,
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+
+    rsp = {
+        'data': {
+            'fields': [
+                {
+                    'name': f.attname,
+                    'type': f.atttypid,
+                }
+                for f in fields
+            ],
+            'rows': rows,
+        }
+    }
+    return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
 def add(request, payload):
+
     oid = payload.get('oid')
     data = payload.get('data')
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
     fields = gis_fields_by_oid(oid)
 
     tabne_data = gis_table_by_oid(oid)
@@ -186,9 +244,14 @@ def add(request, payload):
 @require_POST
 @ajax_required
 def save(request, payload, pk):
+
     oid = payload.get('oid')
     data = payload.get('data')
-    pk = pk
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
     tabne_data = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
     table_fields_zow = ''
@@ -246,9 +309,17 @@ def save(request, payload, pk):
 @require_POST
 @ajax_required
 def delete(request, payload, pk):
+
     oid = payload.get('oid')
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
     tabne_data = gis_table_by_oid(oid)
+
     try:
+
         with connections['postgis_db'].cursor() as cursor:
                 sql = """ DELETE FROM {tabne_data} where id = {pk} """.format(
                     tabne_data=tabne_data,
@@ -259,10 +330,11 @@ def delete(request, payload, pk):
             'success': True,
             'info': "Амжилттай",
         }
-        return JsonResponse(rsp)
+
     except Exception:
         rsp = {
             'success': False,
             'info': "Алдаа гарсан",
         }
-        return JsonResponse(rsp)
+
+    return JsonResponse(rsp)

@@ -39,3 +39,13 @@ function save(values) {
 
     return fetch(`/gov/api/barilga_suurin_gazar/add/`, opts).then(handleResponse)
 }
+
+function detail(values, id) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`/gov/api/barilga_suurin_gazar/${id}/detail/`, opts).then(handleResponse)
+}

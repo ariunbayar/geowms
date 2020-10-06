@@ -214,7 +214,7 @@ export class App extends Component {
                                         <MenuItem
                                             key={ idx }
                                             icon="fa fa-table"
-                                            url={`/gov/барилга-суурин-газар/${oid}/`} exact
+                                            url={`/gov/барилга-суурин-газар/${oid}/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>
                                     )}

@@ -25,7 +25,6 @@ export default class Маягт extends Component {
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        console.log(values)
         this.setState({ values })
         setStatus('checking')
         setSubmitting(true)
@@ -75,7 +74,6 @@ export default class Маягт extends Component {
                         isSubmitting,
                         setFieldValue,
                         handleBlur,
-                        handleChange,
                         values,
                         isValid,
                         dirty,
@@ -86,7 +84,7 @@ export default class Маягт extends Component {
                                 { fields.map((field, idx) =>
                                     <div className="form-group" key={ idx }>
                                         <label className="">{ field }</label>
-                                        <input name={ field } onchange={handleChange} className="form-control" placeholder={ field } />
+                                        <input name={ field } className="form-control" placeholder={ field } />
                                     </div>
                                 )}
 

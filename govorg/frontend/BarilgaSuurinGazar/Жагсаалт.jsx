@@ -38,7 +38,7 @@ export default class Жагсаалт extends Component {
 
     handleUpdateData(){
         service
-            .rows(this.state.id)
+            .rows(this.state.oid)
             .then(({ data }) => {
                 this.setState({
                     data,
@@ -83,34 +83,26 @@ export default class Жагсаалт extends Component {
         const { rows, fields } = this.state.data
 
         return (
-            <div className="table-responsive">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            { fields.map((field, idx) =>
-                                <th key={ idx }>
-                                    { field }
-                                </th>
-                            )}
-                                <th></th>
-                                <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <table className="table-responsive table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        { fields.map((field, idx) =>
+                            <th key={ idx }>
+                                { field.name }
+                            </th>
+                        )}
+                    </tr>
+                </thead>
+                <tbody>
 
-                        { rows.map((row, idx) =>
+                    { rows.map((row, idx) =>
 
-                            <tr key={ idx }>
+                        <tr key={ idx }>
 
-                                { fields.map((field, idx) =>
-
-                                    <td key={ idx }>
-                                        { row[field] }
-                                    </td>
-
-                                )}
                                 <td>
-                                    <NavLink to={`/gov/барилга-суурин-газар/:oid/маягт/row.id/засах/`}>
+                                    <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/${row.id}/засах/`}>
                                             <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                                     </NavLink>
                                 </td>
@@ -129,12 +121,25 @@ export default class Жагсаалт extends Component {
                                     }
                                 </td>
 
-                            </tr>
+                                { fields.map((field, idx) =>
+                                    <td key={ idx }>
+                                        { field.type == 'geometry'
+                                        
+                                            ?
+                                                row[field.name].substr(0, 80)
+                                            :
+                                                row[field.name]
+                                        }
+                                    </td>
+                                )}
 
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            )}
+
+                        </tr>
+
+                    )}
+                </tbody>
+            </table>
         )
     }
 }
