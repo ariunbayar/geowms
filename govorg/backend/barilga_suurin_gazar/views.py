@@ -4,11 +4,12 @@ from geojson import Feature, FeatureCollection
 
 from django.db import connections
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.decorators.http import require_GET, require_POST
 
 from backend.changeset.models import ChangeSet
 from backend.org.models import Org
+from backend.bundle.models import Bundle
 from main.decorators import ajax_required
 from main.utils import gis_table_by_oid, gis_fields_by_oid, dict_fetchall
 
@@ -82,50 +83,36 @@ def changeset_all(request):
 def table_list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+
+    oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
+    rows = []
+
+    if len(oids):
+
+        with connections['postgis_db'].cursor() as cursor:
+
+            oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
+
+            sql = """
+                SELECT
+                    c.oid as "oid",
+                    n.nspname as "schema",
+                    c.relname as "table"
+                FROM
+                    pg_catalog.pg_class c
+                LEFT JOIN
+                    pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                WHERE
+                    c.oid IN ({oids})
+            """.format(
+                oids=('%s, ' * len(oids))[:-2],
+            )
+            cursor.execute(sql, oids)
+            rows = list(dict_fetchall(cursor))
 
     rsp = {
-        'items': [
-            {
-                'oid': 88363,
-                'schema': 'public',
-                'table': 'AU_SumUnit',
-            },
-            {
-                'oid': 83299,
-                'schema': 'public',
-                'table': 'AU_StateUnit',
-            },
-            {
-                'oid': 83311,
-                'schema': 'public',
-                'table': 'AU_AimagUnit',
-            },
-            {
-                'oid': 59907,
-                'schema': 'public',
-                'table': 'AddressPoint',
-            },
-            {
-                'oid': 24149,
-                'schema': 'public',
-                'table': 'AdmUnitSum',
-            },
-            {
-                'oid': 24630,
-                'schema': 'public',
-                'table': 'AdmUnitUls',
-            },
-            {
-                'oid': 35684,
-                'schema': 'public',
-                'table': 'Sand',
-            },
-            {
-                'oid': 85312,
-                'schema': 'public',
-                'table': 'Shuudan_uilchilgeenii_salbaruud',
-            },
-        ]
+        'items': rows
     }
 
     return JsonResponse(rsp)
