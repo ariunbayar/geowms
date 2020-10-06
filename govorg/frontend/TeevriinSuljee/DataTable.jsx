@@ -2,6 +2,19 @@ import React, { Component } from "react"
 
 
 export default class DataTable extends Component {
+    constructor(props){
+        super(props)
+        this.state = {
+            send: this.props.send
+        }
+    }
+
+    componentDidUpdate(){
+        console.log(this.props.send)
+        const send = this.props.send
+        if(send){
+        }
+    }
 
     render() {
         const { rows, fields } = this.props.data

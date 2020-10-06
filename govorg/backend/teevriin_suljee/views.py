@@ -94,6 +94,25 @@ def testGet(request):
     return JsonResponse(rsp)
 
 
+@require_POST
+@ajax_required
+def saveJson(request, payload, oid):
+    print("Hahaha")
+    data = payload.get('data')
+    print(data)
+    print(data)
+    print(data)
+    print(data)
+    print(oid)
+    print(oid)
+    print(oid)
+    print(oid)
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
+
+
 @require_GET
 @ajax_required
 def table_list(request):

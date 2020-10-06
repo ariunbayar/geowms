@@ -12,10 +12,8 @@ import {SidebarButton} from './controls/SidebarButton'
 import {Modal} from './controls/Modal'
 import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
-import DataTable from './DataTable';
-import { Feature } from 'ol';
 
-export default class TeevriinSuljee extends Component{
+export default class ГазрынЗураг extends Component{
 
     constructor(props){
       super(props)
@@ -31,9 +29,6 @@ export default class TeevriinSuljee extends Component{
             fields: [],
             rows: [],
         },
-        featureID: null,
-        send: false,
-        changedFeature: '',
         Mongolia: [11461613.630815497, 5878656.0228370065],
       }
 
@@ -45,13 +40,18 @@ export default class TeevriinSuljee extends Component{
       this.loadData = this.loadData.bind(this)
       this.onChange = this.onChange.bind(this)
       this.loadRows = this.loadRows.bind(this)
-      this.clearMap = this.clearMap.bind(this)
-      this.deleteLinked = this.deleteLinked.bind(this)
-      this.remove = this.remove.bind(this)
-      this.removeWithKey = this.removeWithKey.bind(this)
-      this.addModifyInteraction = this.addModifyInteraction.bind(this)
-      this.saveData = this.saveData.bind(this)
-      this.sendData = this.sendData.bind(this)
+      this.toggleSidebar = this.toggleSidebar.bind(this)
+      this.handleMapClick = this.handleMapClick.bind(this)
+    }
+
+    toggleSidebar() {
+      this.setState(prevState => ({
+          is_sidebar_open: !prevState.is_sidebar_open,
+      }))
+    }
+
+    handleMapClick(event){
+        this.controls.modal.showModal(null, true)
     }
 
     componentDidMount(){
@@ -129,7 +129,6 @@ export default class TeevriinSuljee extends Component{
             })
           });
           const vectorLayer = new VectorLayer({
-              name: 'vector_layer',
               source: vs,
               style: styleFunction,
           });
@@ -138,8 +137,6 @@ export default class TeevriinSuljee extends Component{
               source: vectorLayer.getSource(),
           });
           map.addInteraction(snap2);
-
-          this.vectorLayer = vectorLayer
         })
         // var v2 = new View({
         //     center: this.state.Mongolia,
@@ -190,18 +187,20 @@ export default class TeevriinSuljee extends Component{
     //   map.on('click', this.handleMapClick)
       this.map = map
 
-      const ExampleModify = {
+      var ExampleModify = {
         init: function () {
           this.select = new Select();
+          this.select.getFeatures().on('add', function (event) {
+            var properties = event.element.getProperties();
+            // selectedFeatureID = properties.id;
+            console.log(properties)
+          })
           map.addInteraction(this.select);
-          this.select.on("select", event => featureSelected(event));
-
           this.modify = new Modify({
             features: this.select.getFeatures(),
           });
-          this.modify.on("modifyend", event => modifiedFea(event));
-          this.modify.on("modifystart", event => startModFea(event));
           map.addInteraction(this.modify);
+
           this.setEvents();
         },
         setEvents: function () {
@@ -280,32 +279,7 @@ export default class TeevriinSuljee extends Component{
         source: vector.getSource(),
       });
       map.addInteraction(snap);
-      this.vector = vector
-      const featureSelected = (event) => {
-        console.log("selected data")
-        if(event.selected[0]){
-          console.log(event.selected[0].getProperties())
-          this.setState({ send: true })
-        }else{
-          this.setState({ send: false })
-        }
-      }
-      const modifiedFea = (event) => {
-        console.log("modified end")
-        const features = event.features.getArray();
-        console.log(features)
-        console.log("feature changed id is",features[0]);
-        const format = new GeoJSON(),
-        data = format.writeFeatureObject(features[0]);
-        const changedFeature = JSON.stringify(data, null, 4)
-        console.log("changed Data");
-        this.setState({ changedFeature })
-        this.sendData(changedFeature)
-        console.log(changedFeature);
-      }
-      const startModFea = (event) => {
-        console.log("started modify")
-      }
+
     }
 
     loadRows() {
@@ -330,7 +304,6 @@ export default class TeevriinSuljee extends Component{
     onChange(e){
       const ExampleDraw = this.state.ExampleDraw
       const ExampleModify = this.state.ExampleModify
-      const parser = new GeoJSON();
       var type = e.target.getAttribute('name');
         var value = e.target.value;
         if (type == 'draw-type') {
@@ -344,160 +317,67 @@ export default class TeevriinSuljee extends Component{
             ExampleModify.setActive(false);
           }
         }
-      // ExampleDraw.Point.on('drawstart', function(e){
-      //   if(value === 'Point'){
-      //     this.clearMap()
-      //   }
-      // })
-      // ExampleDraw.LineString.on('drawstart', function(e){
-      //   if(value === 'LineString'){
-      //     this.clearMap()
-      //   }
-      // })
-      // ExampleDraw.Polygon.on('drawstart', function(e){
-      //   if(value === 'Polygon'){
-      //     this.clearMap()
-      //   }
-      // })
-      // ExampleDraw.Circle.on('drawstart', function(e){
-      //   if(value === 'Circle'){
-      //     this.clearMap()
-      //   }
-      // })
-      var featureID = this.state.featureID
-      const vectorLayer = this.vectorLayer
+      ExampleDraw.Point.on('drawstart', function(e){
+        if(selected === 'Point'){
+          clearMap()
+        }
+      })
+      ExampleDraw.LineString.on('drawstart', function(e){
+        if(selected === 'LineString'){
+          clearMap()
+        }
+      })
+      ExampleDraw.Polygon.on('drawstart', function(e){
+        if(selected === 'Polygon'){
+          clearMap()
+        }
+      })
+      ExampleDraw.Circle.on('drawstart', function(e){
+        if(selected === 'Circle'){
+          clearMap()
+        }
+      })
       ExampleDraw.Point.on('drawend', function(e){
+        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        console.log(JSON.stringify(area, null, 4));
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
       })
       ExampleDraw.LineString.on('drawend', function(e){
+        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        console.log(JSON.stringify(area, null, 4));
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
       })
       ExampleDraw.Polygon.on('drawend', function(e){
+        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        console.log(JSON.stringify(area, null, 4));
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
-        const format = new GeoJSON(),
-        data = format.writeFeatures(vectorLayer.getSource().getFeatures());
-        console.log(JSON.stringify(data, null, 4));
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
       })
       ExampleDraw.Circle.on('drawend', function(e){
+        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        console.log(JSON.stringify(area, null, 4));
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
       })
-      this.setState({ featureID: featureID })
-    }
 
-    clearMap() {
-      const vector = this.vector
-      vector.getSource().clear();
-    }
-
-    deleteLinked(){
-      this.removeSelectedFeature()
-    }
-
-    removeSelectedFeature() {
-      this.remove()
-    }
-
-    removeWithKey(e){
-      if (e.keyCode == 48){
-        this.remove()
-      }
-    }
-
-    remove(){
-      console.log("remove")
-      // const vector = this.vector
-      // const featureID = this.state.featureID
-      // const vectorLayer = this.vectorLayer
-      // var feaForRemove = vector.getSource().getFeatures();
-      // console.log(feaForRemove)
-      // if (feaForRemove != null && feaForRemove.length > 0) {
-      //   feaForRemove.map((x) => {
-      //     console.log(x)
-      //     var properties = feaForRemove[x].getProperties();
-      //     var id = properties.id;
-      //     if (id == featureID) {
-      //       vectorLayer.getSource().removeFeature(feaForRemove[x]);
-      //         break;
-      //     }
-      //   })
-      // }
-    }
-
-    sendData(data){
-      const oid = this.state.oid
-      service.sendFea({data}, oid).then(({success}) => {
-        console.log(success, "hadgalsan data")
-        console.log(success, "hadgalsan data")
-        console.log(success, "hadgalsan data")
-        console.log(success, "hadgalsan data")
-      })
-    }
-
-    addModifyInteraction() {
-      console.log("ADADDADADA")
-      const map = this.map
-      const vectorLayer = this.vectorLayer
-      const select_interaction = new Select({
-        layers: function(vectorLayer) {
-          return vectorLayer.get('name') === 'vector_layer';
-        }
-      });
-      const modify = new ol.interaction.Modify({
-        features: select_interaction.getFeatures()
-      });
-      map.getInteractions().extend([select_interaction, modify]);
-      const selected_features = select_interaction.getFeatures();
-
-      selected_features.on('add', function(event){
-        console.log("add")
-        const feature = event.element;
-        const vectorLayer = this.vectorLayer
-        feature.on('modifyend', function(event){
-          console.log("chancajncjasnklfnsdlk")
-        })
-        feature.on('change', function(event){
-          console.log(event.target.getGeometry().getCoordinates())
-        })
-        var format = new GeoJSON(),
-        data = format.writeFeatures(feature.getSource().getFeatures());
-        console.log(JSON.stringify(data, null, 4));
-      })
-    }
-
-    saveData() {
-      console.log("sAVESARATATATA orj bna")
-      const vectorLayer = this.vectorLayer
-      var format = new GeoJSON(),
-      data = format.writeFeatures(vectorLayer.getSource().getFeatures());
-      console.log(JSON.stringify(data, null, 4));
     }
 
     render(){
@@ -526,13 +406,9 @@ export default class TeevriinSuljee extends Component{
                   </select>
                 </div>
               </form>
-              <button className="btn btn-danger" onClick={() => this.deleteLinked()} onKeyDown={(e) => this.removeWithKey(e)}>Арилгах</button>
               <div className="row">
-                <div className="col-xs-12 col-sm-6 col-md-8 m-0 p-0 border border-danger">
+                <div className="col-md-12 px-0">
                     <div id="map" className="map"></div>
-                </div>
-                <div className="col-xs-6 col-md-4 border border-danger">
-                    <DataTable  data={ this.state.data } send={this.state.send}/>
                 </div>
               </div>
               {/* {this.state.is_sidebar_open ?

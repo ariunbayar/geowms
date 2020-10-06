@@ -1,7 +1,9 @@
 import React, { Component } from "react"
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { service } from "./service"
-export default class DataTable extends Component {
+import { NavLink } from "react-router-dom"
+
+export default class Жагсаалт extends Component {
 
     constructor(props) {
         super(props)
@@ -26,7 +28,6 @@ export default class DataTable extends Component {
         service
             .rows(this.state.id)
             .then(({ data }) => {
-                console.log(data)
                 this.setState({ data })
         })
 
@@ -61,6 +62,7 @@ export default class DataTable extends Component {
                             </th>
                         )}
                             <th></th>
+                            <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,6 +78,11 @@ export default class DataTable extends Component {
                                 </td>
 
                             )}
+                            <td>
+                                <NavLink to={`#`}>
+                                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                                </NavLink>
+                            </td>
                             <td>
                                 <a href="#" onClick={this.handleModalDeleteOpen}>
                                     <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
