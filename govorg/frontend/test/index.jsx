@@ -7,7 +7,7 @@ import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import {Draw, Modify, Select, Snap} from 'ol/interaction';
 import {OSM, Vector as VectorSource} from 'ol/source';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-// import { service } from './service';
+
 import GeoJSON from 'ol/format/GeoJSON';
 
 export default class LoadDel extends Component{
