@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import Modal from "../Modal"
+import ModalAlert from "../ModalAlert"
 
 export class OrgFormTable extends Component {
 
@@ -11,6 +12,7 @@ export class OrgFormTable extends Component {
         }
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     handleModalDeleteOpen() {
@@ -20,6 +22,12 @@ export class OrgFormTable extends Component {
     handleModalDeleteClose() {
         this.setState({is_modal_delete_open: false})
     }
+
+    modalClose(){
+        this.setState({is_modal_delete_open: false})
+        this.props.modalClose()
+    }
+
     render() {
         const org = this.props.org
         const idx = this.props.idx
@@ -45,14 +53,25 @@ export class OrgFormTable extends Component {
                         <i className="fa fa-trash-o" aria-hidden="true" style={{color: "red"}}></i>
                     </a>
                     {is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleUserDelete}
-                            text={(
-                                <p>Та <b>"{org.name}"</b> нэртэй байгууллагыг устгахдаа итгэлтэй байна уу?</p>
-                            )}
-                            title="Байгууллага устгах"
-                        />
+                        <>
+                            <Modal
+                                modalClose={this.handleModalDeleteClose}
+                                modalAction={this.props.handleUserDelete}
+                                text={(
+                                    <p>Та <b>"{org.name}"</b> нэртэй байгууллагыг устгахдаа итгэлтэй байна уу?</p>
+                                )}
+                                title="Байгууллага устгах"
+                                model_type_icon = "success"
+                            />
+                            {
+                                this.props.modal_alert_check &&
+                                <ModalAlert
+                                    title="Амжилттай устгалаа"
+                                    model_type_icon = "success"
+                                    modalClose = {this.modalClose}
+                                />
+                            }
+                        </>
                     }
                 </td>
             </tr>
