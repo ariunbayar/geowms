@@ -16,14 +16,23 @@ urlpatterns = [
         path('employee/', employee_views.employees, name='employees'),
         path('system/', system_views.systemList, name='system'),
         path('bundle/', bundle_views.bundle, name='bundle'),
-        path('bair_zuin_zurag/', bair_zuin_zurag_views.changeset_all, name='bair_zuin_zurag'),
+        path('bair_zuin_zurag/', include(([
+            path('', govorg.backend.bair_zuin_zurag.views.changeset_all),
+            path('table_list/', govorg.backend.bair_zuin_zurag.views.table_list),
+        ], 'bair_zuin_zurag'))),
         path('barilga_suurin_gazar/', include(([
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
             path('table_list/', govorg.backend.barilga_suurin_gazar.views.table_list),
             path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
         ], 'barilga_suurin_gazar'))),
-        path('ded_butets/', bair_zuin_zurag_views.changeset_all, name='ded_butets'),
-        path('teevriin_suljee/', bair_zuin_zurag_views.changeset_all, name='teevriin_suljee'),
+        path('ded_butets/', include(([
+            path('', govorg.backend.ded_butets.views.changeset_all),
+            path('table_list/', govorg.backend.ded_butets.views.table_list),
+        ], 'ded_butets'))),
+        path('teevriin_suljee/', include(([
+            path('', govorg.backend.teevriin_suljee.views.changeset_all),
+            path('table_list/', govorg.backend.teevriin_suljee.views.table_list),
+        ], 'teevriin_suljee'))),
         path('testGet/', teevriin_suljee_views.testGet, name='testGet'),
     ], 'back_org'))),
 

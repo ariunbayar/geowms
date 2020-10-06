@@ -3,10 +3,13 @@ import json
 from geojson import Feature, FeatureCollection
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import get_object_or_404
 
 from backend.changeset.models import ChangeSet
 from django.db import connections
 from main.decorators import ajax_required
+from django.db import connections
+from backend.org.models import Org
 
 
 
@@ -62,7 +65,6 @@ def _get_feature_coll(ob, changeset_list):
 @require_GET
 @ajax_required
 def changeset_all(request):
-
     feature = []
     geoJson = []
     changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
@@ -77,18 +79,68 @@ def changeset_all(request):
 @require_GET
 @ajax_required
 def testGet(request):
-    print("geogeogoegoeg")
-    print("geogeogoegoeg")
-    print("geogeogoegoeg")
-    print("geogeogoegoeg")
-    print("geogeogoegoeg")
-    feature = []
-    geoJson = []
-    changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
-    print(changeset_list)
-    features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
-    feature_collection = FeatureCollection(features)
+    # find_cursor = connections['postgis_db'].cursor()
+    find_cursor2 = connections['postgis_db'].cursor()
+    # find_cursor.execute(''' SELECT  code, name, ST_X(ST_TRANSFORM(ST_CENTROID(geom),4326)), ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4326))) FROM public.test_polygon ORDER BY name ASC ''')
+    find_cursor2.execute(''' SELECT id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom FROM public.test_polygon limit 1 ''')
+    geojson = find_cursor2.fetchall()
+    if(geojson):
+        rsp = {
+            'success': True,
+            'info': geojson
+        }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def table_list(request):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+
     rsp = {
-        'GeoJson': feature_collection,
+        'items': [
+            {
+                'oid': 88363,
+                'schema': 'public',
+                'table': 'AU_SumUnit',
+            },
+            {
+                'oid': 83299,
+                'schema': 'public',
+                'table': 'AU_StateUnit',
+            },
+            {
+                'oid': 83311,
+                'schema': 'public',
+                'table': 'AU_AimagUnit',
+            },
+            {
+                'oid': 59907,
+                'schema': 'public',
+                'table': 'AddressPoint',
+            },
+            {
+                'oid': 24149,
+                'schema': 'public',
+                'table': 'AdmUnitSum',
+            },
+            {
+                'oid': 24630,
+                'schema': 'public',
+                'table': 'AdmUnitUls',
+            },
+            {
+                'oid': 35684,
+                'schema': 'public',
+                'table': 'Sand',
+            },
+            {
+                'oid': 85312,
+                'schema': 'public',
+                'table': 'Shuudan_uilchilgeenii_salbaruud',
+            },
+        ]
     }
+
     return JsonResponse(rsp)
