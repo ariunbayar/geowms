@@ -59,10 +59,11 @@ function getWmsLayer() {
     return fetch('/back/zip-code/wms-layer/', requestOptions).then(handleResponse)
 }
 
-function zipUpdate(aimag_id, sum_id, baga_id, zip_id, zip_code, zip_code_before) {
+function zipUpdate(oid, data) {
+    var pk = 2
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({aimag_id, sum_id, baga_id, zip_id, zip_code, zip_code_before})
+        body: JSON.stringify({oid, data})
     }
-    return fetch('/back/zip-code/zip-update/', requestOptions).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pk}/save/`, requestOptions).then(handleResponse)
 }
