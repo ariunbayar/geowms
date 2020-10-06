@@ -60,6 +60,8 @@ export default class BarilgaSuurinGazar extends Component {
 
     }
 
+    
+
     loadRows() {
 
         service
@@ -197,7 +199,7 @@ export default class BarilgaSuurinGazar extends Component {
                         </select>
                     </div>
 
-                    <DataTable data={ this.state.data }/>
+                    <DataTable data={ this.state.data } handleSaveSuccess={this.loadRows}/>
 
                 </div>
             </div>
