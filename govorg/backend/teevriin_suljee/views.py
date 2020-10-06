@@ -3,11 +3,12 @@ import json
 from geojson import Feature, FeatureCollection
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import get_object_or_404
 
 from backend.changeset.models import ChangeSet
 from django.db import connections
 from main.decorators import ajax_required
-
+from backend.org.models import Org
 
 
 def _get_changeset_display(ob):
@@ -91,4 +92,58 @@ def testGet(request):
     rsp = {
         'GeoJson': feature_collection,
     }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def table_list(request):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+
+    rsp = {
+        'items': [
+            {
+                'oid': 88363,
+                'schema': 'public',
+                'table': 'AU_SumUnit',
+            },
+            {
+                'oid': 83299,
+                'schema': 'public',
+                'table': 'AU_StateUnit',
+            },
+            {
+                'oid': 83311,
+                'schema': 'public',
+                'table': 'AU_AimagUnit',
+            },
+            {
+                'oid': 59907,
+                'schema': 'public',
+                'table': 'AddressPoint',
+            },
+            {
+                'oid': 24149,
+                'schema': 'public',
+                'table': 'AdmUnitSum',
+            },
+            {
+                'oid': 24630,
+                'schema': 'public',
+                'table': 'AdmUnitUls',
+            },
+            {
+                'oid': 35684,
+                'schema': 'public',
+                'table': 'Sand',
+            },
+            {
+                'oid': 85312,
+                'schema': 'public',
+                'table': 'Shuudan_uilchilgeenii_salbaruud',
+            },
+        ]
+    }
+
     return JsonResponse(rsp)

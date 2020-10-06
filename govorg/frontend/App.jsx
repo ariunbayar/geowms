@@ -29,6 +29,9 @@ export class App extends Component {
             bair_zuin_zurag: {},
             barilga_suurin_gazar: {},
             barilga_suurin_gazar_table_list: [],
+            bair_zuin_zurag_table_list: [],
+            ded_butets_table_list: [],
+            teevriin_suljee_table_list: [],
             teevriin_suljee: {},
             tseg_burtgel: {}
         }
@@ -67,6 +70,30 @@ export class App extends Component {
                 })
             })
 
+        service
+            .tableListTeevriinSuljee()
+            .then(({ items }) => {
+                this.setState({
+                    teevriin_suljee_table_list: items,
+                })
+            })
+
+        service
+            .tableListBairZuinZurag()
+            .then(({ items }) => {
+                this.setState({
+                    bair_zuin_zurag_table_list: items,
+                })
+            })
+
+        service
+            .tableListDedButets()
+            .then(({ items }) => {
+                this.setState({
+                    ded_butets_table_list: items,
+                })
+            })
+
     }
 
     render() {
@@ -74,10 +101,13 @@ export class App extends Component {
             tuuhen_ov,
             tseg_burtgel,
             teevriin_suljee,
+            teevriin_suljee_table_list,
             barilga_suurin_gazar,
-            barilga_suurin_gazar_table_list,
+            ded_butets_table_list,
             bair_zuin_zurag,
+            bair_zuin_zurag_table_list,
             ded_butets,
+            barilga_suurin_gazar_table_list,
         } = this.state
 
         return (
@@ -117,13 +147,46 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary zmdi zmdi-group-work" url="/gov/zip-code/" text="ЗИПКОД"></MenuItem>
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="ТУСЛАМЖ"></MenuItem>
                         {teevriin_suljee.perm_view &&
-                            <MenuItem icon="gp-text-primary icon-map" url="/gov/тээврийн-сүлжээ/" text="ТЭЭВРИЙН СҮЛЖЭЭ"></MenuItem>
+                            <li>
+                                <a className="waves-effect">
+                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="fa fa-angle-left pull-right"></i>
+                                </a>
+                                <ul className="sidebar-submenu">
+                                    { teevriin_suljee_table_list.map(({ oid, schema, table }, index) =>
+                                        <MenuItem key={index} icon="fa fa-table" url={`/gov/тээврийн-сүлжээ/${oid}/`}
+                                                    text={schema + '.' + table}></MenuItem>
+                                    )}
+                                </ul>
+                            </li>
                         }
                         { ded_butets.perm_view &&
-                            <MenuItem icon="gp-text-primary icon-map" url="/gov/дэд-бүтэц/" text="ДЭД БҮТЭЦ"></MenuItem>
+                            <li>
+                                <a className="waves-effect">
+                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="fa fa-angle-left pull-right"></i>
+                                </a>
+                                <ul className="sidebar-submenu">
+                                    { ded_butets_table_list.map(({ oid, schema, table }, index) =>
+                                        <MenuItem key={index} icon="fa fa-table" url={`/gov/дэд-бүтэц/${oid}/`}
+                                                    text={schema + '.' + table}></MenuItem>
+                                    )}
+                                </ul>
+                            </li>
                         }
                         { bair_zuin_zurag.perm_view &&
-                            <MenuItem icon="gp-text-primary icon-map" url="/gov/байр-зүйн-зураг/" text="БАЙР ЗҮЙН ЗУРАГ"></MenuItem>
+                            <li>
+                                <a className="waves-effect">
+                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="fa fa-angle-left pull-right"></i>
+                                </a>
+                                <ul className="sidebar-submenu">
+                                    { bair_zuin_zurag_table_list.map(({ oid, schema, table }, index) =>
+                                        <MenuItem key={index} icon="fa fa-table" url={`/gov/байр-зүйн-зураг/${oid}/`}
+                                                    text={schema + '.' + table}></MenuItem>
+                                    )}
+                                </ul>
+                            </li>
                         }
                         { barilga_suurin_gazar.perm_view &&
                             <li>
@@ -132,8 +195,8 @@ export class App extends Component {
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
-                                    { barilga_suurin_gazar_table_list.map(({ oid, schema, table }) =>
-                                        <MenuItem icon="fa fa-table" url={`/gov/барилга-суурин-газар/${oid}/`}
+                                    { barilga_suurin_gazar_table_list.map(({ oid, schema, table }, index) =>
+                                        <MenuItem key={index} icon="fa fa-table" url={`/gov/барилга-суурин-газар/${oid}/`}
                                                     text={schema + '.' + table}></MenuItem>
                                     )}
                                 </ul>
