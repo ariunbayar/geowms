@@ -140,7 +140,7 @@ def rows(request, oid):
     fields = gis_fields_by_oid(oid)
 
     columns_to_select = [
-        'SUBSTR(ST_AsText("%s"), 0, 26) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
         for f in fields
     ]
 
