@@ -2,7 +2,8 @@ import React, { Component } from "react"
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { service } from "./service"
 import { NavLink } from "react-router-dom"
-export default class DataTable extends Component {
+
+export default class Жагсаалт extends Component {
 
     constructor(props) {
         super(props)

@@ -13,7 +13,7 @@ import {Modal} from './controls/Modal'
 import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
 
-export default class TeevriinSuljee extends Component{
+export default class ГазрынЗураг extends Component{
 
     constructor(props){
       super(props)
