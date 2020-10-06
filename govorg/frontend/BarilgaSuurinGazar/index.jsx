@@ -75,7 +75,6 @@ export default class BarilgaSuurinGazar extends Component {
 
         const oid_old = prevProps.match.params.oid
         const oid = this.props.match.params.oid
-        console.log(this.props)
 
         if (oid_old != oid) {
 
@@ -181,7 +180,6 @@ export default class BarilgaSuurinGazar extends Component {
     }
 
     render() {
-        console.log(this.state.oid)
         return (
             <div className="row">
                 <div className="col-md-12 px-0">
