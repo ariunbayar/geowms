@@ -71,7 +71,7 @@ export class BunleGisForms extends Component {
     }
 
     handleSave(values) {
-
+        console.log(values.oid_list.length, values.oid_list)
         if (values.id) {
 
             service.updateGis(values).then(({success, item}) => {

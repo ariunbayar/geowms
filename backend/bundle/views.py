@@ -259,22 +259,17 @@ def update(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateGis(request, payload):
-    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
-    if(payload.get('module')):
-        module = int(payload.get('module'))
-        Bundle.objects.filter(id=payload.get('id')).update(module=module)
-    else:
-        Bundle.objects.filter(id=payload.get('id')).update(module=None)
-
     oid_list = payload.get('oid_list')
     bundle_id = payload.get('id')
-    for gis_bundle_id in BundleGIS.objects.filter(bundle_id=bundle_id):
-        check = False
+    diff_oid = None
+    for gis_bundle in BundleGIS.objects.filter(bundle_id=bundle_id):
+
         for oid in oid_list:
-            if gis_bundle_id.oid == oid:
-                check = True
-        if not check:
-            i.delete()
+            if gis_bundle.oid != oid:
+                diff_oid = gis_bundle.oid
+        if diff_oid:
+            saves = BundleGIS.objects.filter(bundle_id = bundle_id, oid=diff_oid)
+            saves.delete()
 
     for oid in oid_list:
         bundle_gis = BundleGIS.objects.filter(oid=oid)

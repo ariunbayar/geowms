@@ -11,25 +11,13 @@ export default class GisForm extends Component {
         this.state = {
             id: props.values.id,
             name: props.values.name,
-            price: props.values.price,
-            layers: props.values.layers,
-            icon: props.values.icon,
-            icon_url: props.values.icon_url,
-            self_module:'',
-            module:props.values.self_module,
-            check_module:false,
-            tablename: props.gis_list.tablename,
             gis_list:[],
             oid_list:[],
 
         }
 
-        this.handleChange = this.handleChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
-        this.onDrop = this.onDrop.bind(this)
-        this.handleSelectChange = this.handleSelectChange.bind(this)
-
     }
 
     componentDidMount(){
@@ -40,9 +28,9 @@ export default class GisForm extends Component {
     }
 
     handleSave() {
-        const {id, name,module,oid_list}=this.state
-            const values ={'id':id, 'name':name,'module':module, 'oid_list':oid_list}
-            this.props.handleSave(values)
+        const {id,oid_list}=this.state
+        const values ={'id':id, 'oid_list':oid_list}
+        this.props.handleSave(values)
     }
 
     handleLayerToggle(e) {
@@ -52,55 +40,19 @@ export default class GisForm extends Component {
             oid_list.push(value)
         } else {
             oid_list = oid_list.filter((oid) => oid != value)
-        }
+        }       
         this.setState({oid_list})
     }
 
-    handleSelectChange(event){
-        const value = {'module':event.target.value, 'id':this.state.id}
-        const module = event.target.value
-        service.ModuleCheck(value).then(({success}) => {
-            if (success){
-                this.setState({
-                    module:'',
-                    check_module:true,
-                })
-                setTimeout(() => {
-                    this.setState({
-                        check_module:false
-                    })
-                }, 1000);
-            }
-            else{
-                this.setState({
-                    module:module,
-                    self_module:module,
-                })
-            }
-        })
-
-    }
 
     componentDidUpdate(prevProps) {
         if (this.props.gis_list !== prevProps.gis_list) {
-            const {id, name, price, layers, icon_url, self_module, oid_list} = this.props.values
+            const {id, name, oid_list} = this.props.values
             const gis_list = this.props.gis_list
-            this.setState({id, name, price, layers, icon_url, self_module, module:self_module, gis_list:gis_list, oid_list})
+            this.setState({id, name, gis_list:gis_list, oid_list})
         }
     }
 
-
-    onDrop([icon]) {
-        if(icon){
-            let reader = new FileReader();
-            reader.onload = (upload) => {
-                this.setState({
-                    icon: btoa(upload.target.result)
-                })
-            }
-            reader.readAsBinaryString(icon)
-        }
-    }
 
     render() {
         return (    
@@ -122,28 +74,6 @@ export default class GisForm extends Component {
                         onChange={(e) => this.handleChange('name', e)}
                         value={this.state.name}
                     />
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
-
-                    {this.state.price ?
-                        <select className='form-control ' name="module" onChange={e =>this.handleSelectChange(e)}
-                        value={this.state.self_module ? `${this.state.self_module}` : ''}
-                        >
-                            <option value=''></option>
-                            {this.state.price.map(a=>
-                                <option key={a.id}
-                                value={a.id}
-                                >
-                                {a.name}
-                                </option>)}
-                    </select>:
-                        <select className='form-control ' name="module">
-                        <option value=''></option>
-                    </select>
-                    }
-
                 </div>
                 <div>
 
