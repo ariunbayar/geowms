@@ -149,7 +149,7 @@ export class App extends Component {
                         {teevriin_suljee.perm_view &&
                             <li>
                                 <a className="waves-effect">
-                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="gp-text-primary icon-map"></i>  <span>Тээврийн сүлжээ</span>
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
@@ -167,7 +167,7 @@ export class App extends Component {
                         { ded_butets.perm_view &&
                             <li>
                                 <a className="waves-effect">
-                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="gp-text-primary icon-map"></i> <span>Дэд бүтэц</span>
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
@@ -185,7 +185,7 @@ export class App extends Component {
                         { bair_zuin_zurag.perm_view &&
                             <li>
                                 <a className="waves-effect">
-                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="gp-text-primary icon-map"></i>  <span>Байр зүйн зураг</span>
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
@@ -203,7 +203,7 @@ export class App extends Component {
                         { barilga_suurin_gazar.perm_view &&
                             <li>
                                 <a className="waves-effect">
-                                    <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                    <i className="gp-text-primary icon-map"></i>  <span> Барилга суурин газар</span>
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
