@@ -1,6 +1,7 @@
 import requests
 import json
 from geojson import Feature, FeatureCollection
+from collections import namedtuple
 
 from django.db import connections
 from django.http import JsonResponse
@@ -10,7 +11,6 @@ from django.views.decorators.http import require_GET, require_POST
 from backend.changeset.models import ChangeSet
 from backend.org.models import Org
 from main.decorators import ajax_required
-
 
 
 def _get_changeset_display(ob):
@@ -131,192 +131,202 @@ def table_list(request):
     return JsonResponse(rsp)
 
 
+def table_name_schema(oid):
+
+    sql = """
+		SELECT
+            c.oid as "oid",
+            n.nspname as "schema",
+            c.relname as "name"
+        FROM
+            pg_catalog.pg_class c
+        LEFT JOIN
+            pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind IN ('r', 'p', '', 'v', 'm')
+              AND n.nspname <> 'pg_catalog'
+              AND n.nspname <> 'information_schema'
+          AND pg_catalog.pg_table_is_visible(c.oid)
+		  AND c.oid = %s;
+    """
+    cursor = connections['postgis_db'].cursor()
+
+    cursor.execute(sql, [oid])
+    table = cursor.fetchone()
+    tables_display = {
+            'oid': table[0],
+            'schemaname': table[1],
+            'tablename': table[2],
+        }
+
+    return tables_display
+
+
+def _named_tuple_fetchall(cursor):
+    """ Return all rows from a cursor as a namedtuple """
+    desc = cursor.description
+    nt_result = namedtuple('Result', [col[0] for col in desc])
+    for row in cursor.fetchall():
+        yield nt_result(*row)
+
+
+def _dict_fetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    for row in cursor.fetchall():
+        yield dict(zip(columns, row))
+
+
 @require_GET
 @ajax_required
 def rows(request, oid):
-
+    tabne_data = table_name_schema(oid)
+    schema = tabne_data['schemaname']
+    table = tabne_data['tablename']
     org = get_object_or_404(Org, employee__user=request.user)
 
-    fields = [
-        "id",
-        "geom",
-        "objectid_1",
-        "fid_1",
-        "objectid_2",
-        "\u0442url",
-        "objectid_3",
-        "\u0442url_1",
-        "butenner",
-        "sum",
-        "bag",
-        "gudamj",
-        "hayag",
-        "objectid",
+    if schema.startswith('pg_') or table.startswith('pg_'):
+        raise Http404
+
+    if '\'' in schema + table or '"' in schema + table:
+        raise Http404
+
+    """
+    postgis_db=# select ST_GeometryType(geom) from public.mpoint7 limit 1;
+    -[ RECORD 1 ]---+---------
+    st_geometrytype | ST_Point
+
+    postgis_db=# select pg_typeof(geom) from public.mpoint7 limit 1;
+    -[ RECORD 1 ]-------
+    pg_typeof | geometry
+    """
+
+    # public.mpoint1
+
+
+    sql = """
+        ********* QUERY **********
+        SELECT c.relchecks, c.relkind, c.relhasindex, c.relhasrules, c.relhastriggers, c.relrowsecurity, c.relforcerowsecurity, false AS relhasoids, c.relispartition, '', c.reltablespace, CASE WHEN c.reloftype = 0 THEN '' ELSE c.reloftype::pg_catalog.regtype::pg_catalog.text END, c.relpersistence, c.relreplident, am.amname
+        FROM pg_catalog.pg_class c
+         LEFT JOIN pg_catalog.pg_class tc ON (c.reltoastrelid = tc.oid)
+        LEFT JOIN pg_catalog.pg_am am ON (c.relam = am.oid)
+        WHERE c.oid = '82516';
+        **************************
+
+        ********* QUERY **********
+        SELECT a.attname,
+          pg_catalog.format_type(a.atttypid, a.atttypmod),
+          (SELECT substring(pg_catalog.pg_get_expr(d.adbin, d.adrelid, true) for 128)
+           FROM pg_catalog.pg_attrdef d
+           WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum AND a.atthasdef),
+          a.attnotnull,
+          (SELECT c.collname FROM pg_catalog.pg_collation c, pg_catalog.pg_type t
+           WHERE c.oid = a.attcollation AND t.oid = a.atttypid AND a.attcollation <> t.typcollation) AS attcollation,
+          a.attidentity,
+          a.attgenerated
+        FROM pg_catalog.pg_attribute a
+        WHERE a.attrelid = '82516' AND a.attnum > 0 AND NOT a.attisdropped
+        ORDER BY a.attnum;
+        **************************
+
+        ********* QUERY **********
+        SELECT pol.polname, pol.polpermissive,
+          CASE WHEN pol.polroles = '{0}' THEN NULL ELSE pg_catalog.array_to_string(array(select rolname from pg_catalog.pg_roles where oid = any (pol.polroles) order by 1),',') END,
+          pg_catalog.pg_get_expr(pol.polqual, pol.polrelid),
+          pg_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid),
+          CASE pol.polcmd
+            WHEN 'r' THEN 'SELECT'
+            WHEN 'a' THEN 'INSERT'
+            WHEN 'w' THEN 'UPDATE'
+            WHEN 'd' THEN 'DELETE'
+            END AS cmd
+        FROM pg_catalog.pg_policy pol
+        WHERE pol.polrelid = '82516' ORDER BY 1;
+        **************************
+
+        ********* QUERY **********
+        SELECT oid, stxrelid::pg_catalog.regclass, stxnamespace::pg_catalog.regnamespace AS nsp, stxname,
+          (SELECT pg_catalog.string_agg(pg_catalog.quote_ident(attname),', ')
+           FROM pg_catalog.unnest(stxkeys) s(attnum)
+           JOIN pg_catalog.pg_attribute a ON (stxrelid = a.attrelid AND
+                a.attnum = s.attnum AND NOT attisdropped)) AS columns,
+          'd' = any(stxkind) AS ndist_enabled,
+          'f' = any(stxkind) AS deps_enabled,
+          'm' = any(stxkind) AS mcv_enabled
+        FROM pg_catalog.pg_statistic_ext stat WHERE stxrelid = '82516'
+        ORDER BY 1;
+        **************************
+
+        ********* QUERY **********
+        SELECT pubname
+        FROM pg_catalog.pg_publication p
+        JOIN pg_catalog.pg_publication_rel pr ON p.oid = pr.prpubid
+        WHERE pr.prrelid = '82516'
+        UNION ALL
+        SELECT pubname
+        FROM pg_catalog.pg_publication p
+        WHERE p.puballtables AND pg_catalog.pg_relation_is_publishable('82516')
+        ORDER BY 1;
+        **************************
+
+        ********* QUERY **********
+        SELECT c.oid::pg_catalog.regclass FROM pg_catalog.pg_class c, pg_catalog.pg_inherits i WHERE c.oid=i.inhparent AND i.inhrelid = '82516' AND c.relkind != 'p' ORDER BY inhseqno;
+        **************************
+
+        ********* QUERY **********
+        SELECT c.oid::pg_catalog.regclass,       pg_catalog.pg_get_expr(c.relpartbound, c.oid),       c.relkind FROM pg_catalog.pg_class c, pg_catalog.pg_inherits i WHERE c.oid=i.inhrelid AND i.inhparent = '82516' ORDER BY pg_catalog.pg_get_expr(c.relpartbound, c.oid) = 'DEFAULT',          c.oid::pg_catalog.regclass::pg_catalog.text;
+        **************************
+    """
+
+    with connections['postgis_db'].cursor() as cursor:
+
+        sql = """
+            SELECT
+                attname,
+                atttypid::regtype AS atttypid
+            FROM
+                pg_catalog.pg_attribute
+            WHERE
+                attrelid = %s::regclass
+                AND NOT attisdropped
+                AND attnum > 0
+            ORDER BY
+                attnum ASC
+        """
+
+        cursor.execute(sql, ['"%s"."%s"' % (schema, table)])
+        fields = list(_named_tuple_fetchall(cursor))
+
+    columns_to_select = [
+        'SUBSTR(ST_AsText("%s"), 0, 26) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        for f in fields
     ]
 
-    rows = [
+    with connections['postgis_db'].cursor() as cursor:
+        sql = """
+            SELECT
+                {columns}
+            FROM
+                "{schema}"."{table}"
+            LIMIT {limit}
+        """.format(
+            columns=', '.join(columns_to_select),
+            schema=schema,
+            table=table,
+            limit=10,
+        )
+        cursor.execute(sql)
+        rows = list(_dict_fetchall(cursor))
+
+    fields_display = [
         {
-            "id": 1,
-            "geom": "POINT ZM (97.708101366243",
-            "objectid_1": 1,
-            "fid_1": 0.0,
-            "objectid_2": 1.0,
-            "\u0442url": 101.0,
-            "objectid_3": 1.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-4-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 406.0,
-            "objectid": 1
-        },
-        {
-            "id": 2,
-            "geom": "POINT ZM (97.706275394361",
-            "objectid_1": 2,
-            "fid_1": 1.0,
-            "objectid_2": 2.0,
-            "\u0442url": 101.0,
-            "objectid_3": 2.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-4-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 404.0,
-            "objectid": 2
-        },
-        {
-            "id": 3,
-            "geom": "POINT ZM (97.706064042387",
-            "objectid_1": 3,
-            "fid_1": 2.0,
-            "objectid_2": 3.0,
-            "\u0442url": 101.0,
-            "objectid_3": 3.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-4-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 401.0,
-            "objectid": 3
-        },
-        {
-            "id": 4,
-            "geom": "POINT ZM (97.706677901300",
-            "objectid_1": 4,
-            "fid_1": 3.0,
-            "objectid_2": 4.0,
-            "\u0442url": 101.0,
-            "objectid_3": 4.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 300.0,
-            "objectid": 4
-        },
-        {
-            "id": 5,
-            "geom": "POINT ZM (97.707272094176",
-            "objectid_1": 5,
-            "fid_1": 4.0,
-            "objectid_2": 5.0,
-            "\u0442url": 101.0,
-            "objectid_3": 5.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 302.0,
-            "objectid": 5
-        },
-        {
-            "id": 6,
-            "geom": "POINT ZM (97.706067371888",
-            "objectid_1": 6,
-            "fid_1": 5.0,
-            "objectid_2": 6.0,
-            "\u0442url": 101.0,
-            "objectid_3": 6.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 307.0,
-            "objectid": 6
-        },
-        {
-            "id": 7,
-            "geom": "POINT ZM (97.704538908007",
-            "objectid_1": 7,
-            "fid_1": 6.0,
-            "objectid_2": 7.0,
-            "\u0442url": 101.0,
-            "objectid_3": 7.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 301.0,
-            "objectid": 7
-        },
-        {
-            "id": 8,
-            "geom": "POINT ZM (97.705203142314",
-            "objectid_1": 8,
-            "fid_1": 7.0,
-            "objectid_2": 8.0,
-            "\u0442url": 101.0,
-            "objectid_3": 8.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 303.0,
-            "objectid": 8
-        },
-        {
-            "id": 9,
-            "geom": "POINT ZM (97.707729485980",
-            "objectid_1": 9,
-            "fid_1": 8.0,
-            "objectid_2": 9.0,
-            "\u0442url": 101.0,
-            "objectid_3": 9.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 311.0,
-            "objectid": 9
-        },
-        {
-            "id": 10,
-            "geom": "POINT ZM (97.709291238422",
-            "objectid_1": 10,
-            "fid_1": 9.0,
-            "objectid_2": 10.0,
-            "\u0442url": 101.0,
-            "objectid_3": 10.0,
-            "\u0442url_1": 101.0,
-            "butenner": "\u0413\u043e\u0432\u044c-\u0410\u043b\u0442\u0430\u0439 \u0430\u0439\u043c\u0430\u0433",
-            "sum": "\u042d\u0440\u0434\u044d\u043d\u044d \u0441\u0443\u043c",
-            "bag": "\u04e8\u043b\u0437\u0438\u0439\u0442 4-\u0440 \u0431\u0430\u0433",
-            "gudamj": "\u041c\u0430\u043d\u0434\u0430\u043b-3-\u0440 \u0433\u0443\u0434\u0430\u043c\u0436",
-            "hayag": 315.0,
-            "objectid": 10
+            'name': field.attname,
+            'type': field.atttypid,
         }
+        for field in fields
     ]
-
+    fields = []
+    for i in fields_display:
+        fields.append(i['name'])
     rsp = {
         'data': {
             'fields': fields,
