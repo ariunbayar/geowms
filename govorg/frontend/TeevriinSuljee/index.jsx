@@ -13,6 +13,7 @@ import {Modal} from './controls/Modal'
 import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
 import DataTable from './DataTable';
+import { Feature } from 'ol';
 
 export default class TeevriinSuljee extends Component{
 
@@ -32,6 +33,7 @@ export default class TeevriinSuljee extends Component{
         },
         featureID: null,
         send: false,
+        changedFeature: '',
         Mongolia: [11461613.630815497, 5878656.0228370065],
       }
 
@@ -43,22 +45,13 @@ export default class TeevriinSuljee extends Component{
       this.loadData = this.loadData.bind(this)
       this.onChange = this.onChange.bind(this)
       this.loadRows = this.loadRows.bind(this)
-      this.toggleSidebar = this.toggleSidebar.bind(this)
-      this.handleMapClick = this.handleMapClick.bind(this)
       this.clearMap = this.clearMap.bind(this)
       this.deleteLinked = this.deleteLinked.bind(this)
       this.remove = this.remove.bind(this)
       this.removeWithKey = this.removeWithKey.bind(this)
-    }
-
-    toggleSidebar() {
-      this.setState(prevState => ({
-          is_sidebar_open: !prevState.is_sidebar_open,
-      }))
-    }
-
-    handleMapClick(event){
-        this.controls.modal.showModal(null, true)
+      this.addModifyInteraction = this.addModifyInteraction.bind(this)
+      this.saveData = this.saveData.bind(this)
+      this.sendData = this.sendData.bind(this)
     }
 
     componentDidMount(){
@@ -136,6 +129,7 @@ export default class TeevriinSuljee extends Component{
             })
           });
           const vectorLayer = new VectorLayer({
+              name: 'vector_layer',
               source: vs,
               style: styleFunction,
           });
@@ -200,9 +194,13 @@ export default class TeevriinSuljee extends Component{
         init: function () {
           this.select = new Select();
           map.addInteraction(this.select);
+          this.select.on("select", event => featureSelected(event));
+
           this.modify = new Modify({
             features: this.select.getFeatures(),
           });
+          this.modify.on("modifyend", event => modifiedFea(event));
+          this.modify.on("modifystart", event => startModFea(event));
           map.addInteraction(this.modify);
           this.setEvents();
         },
@@ -282,18 +280,31 @@ export default class TeevriinSuljee extends Component{
         source: vector.getSource(),
       });
       map.addInteraction(snap);
-      var select = new Select({});
-      select.on("select", event => featureSelected(event));
-      map.addInteraction(select);
       this.vector = vector
       const featureSelected = (event) => {
-        const {send} = this.state
+        console.log("selected data")
         if(event.selected[0]){
           console.log(event.selected[0].getProperties())
-          this.setState({ send: !send })
+          this.setState({ send: true })
         }else{
-          this.setState({ send: !send })
+          this.setState({ send: false })
         }
+      }
+      const modifiedFea = (event) => {
+        console.log("modified end")
+        const features = event.features.getArray();
+        console.log(features)
+        console.log("feature changed id is",features[0]);
+        const format = new GeoJSON(),
+        data = format.writeFeatureObject(features[0]);
+        const changedFeature = JSON.stringify(data, null, 4)
+        console.log("changed Data");
+        this.setState({ changedFeature })
+        this.sendData(changedFeature)
+        console.log(changedFeature);
+      }
+      const startModFea = (event) => {
+        console.log("started modify")
       }
     }
 
@@ -354,6 +365,7 @@ export default class TeevriinSuljee extends Component{
       //   }
       // })
       var featureID = this.state.featureID
+      const vectorLayer = this.vectorLayer
       ExampleDraw.Point.on('drawend', function(e){
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
         console.log(JSON.stringify(area, null, 4));
@@ -383,6 +395,9 @@ export default class TeevriinSuljee extends Component{
         })
         const properties = e.feature.getProperties();
         featureID = properties.id;
+        const format = new GeoJSON(),
+        data = format.writeFeatures(vectorLayer.getSource().getFeatures());
+        console.log(JSON.stringify(data, null, 4));
       })
       ExampleDraw.Circle.on('drawend', function(e){
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
@@ -394,7 +409,7 @@ export default class TeevriinSuljee extends Component{
         const properties = e.feature.getProperties();
         featureID = properties.id;
       })
-
+      this.setState({ featureID: featureID })
     }
 
     clearMap() {
@@ -419,15 +434,16 @@ export default class TeevriinSuljee extends Component{
     remove(){
       console.log("remove")
       // const vector = this.vector
+      // const featureID = this.state.featureID
       // const vectorLayer = this.vectorLayer
-      // var feaForRemove = vectorLayer.getSource().getFeatures();
+      // var feaForRemove = vector.getSource().getFeatures();
       // console.log(feaForRemove)
       // if (feaForRemove != null && feaForRemove.length > 0) {
-      //   feaForRemove.forEach(x => {
+      //   feaForRemove.map((x) => {
       //     console.log(x)
       //     var properties = feaForRemove[x].getProperties();
       //     var id = properties.id;
-      //     if (id == selectedFeatureID) {
+      //     if (id == featureID) {
       //       vectorLayer.getSource().removeFeature(feaForRemove[x]);
       //         break;
       //     }
@@ -435,8 +451,53 @@ export default class TeevriinSuljee extends Component{
       // }
     }
 
-    sendData(){
-      this.setState({ send: true })
+    sendData(data){
+      const oid = this.state.oid
+      service.sendFea({data}, oid).then(({success}) => {
+        console.log(success, "hadgalsan data")
+        console.log(success, "hadgalsan data")
+        console.log(success, "hadgalsan data")
+        console.log(success, "hadgalsan data")
+      })
+    }
+
+    addModifyInteraction() {
+      console.log("ADADDADADA")
+      const map = this.map
+      const vectorLayer = this.vectorLayer
+      const select_interaction = new Select({
+        layers: function(vectorLayer) {
+          return vectorLayer.get('name') === 'vector_layer';
+        }
+      });
+      const modify = new ol.interaction.Modify({
+        features: select_interaction.getFeatures()
+      });
+      map.getInteractions().extend([select_interaction, modify]);
+      const selected_features = select_interaction.getFeatures();
+
+      selected_features.on('add', function(event){
+        console.log("add")
+        const feature = event.element;
+        const vectorLayer = this.vectorLayer
+        feature.on('modifyend', function(event){
+          console.log("chancajncjasnklfnsdlk")
+        })
+        feature.on('change', function(event){
+          console.log(event.target.getGeometry().getCoordinates())
+        })
+        var format = new GeoJSON(),
+        data = format.writeFeatures(feature.getSource().getFeatures());
+        console.log(JSON.stringify(data, null, 4));
+      })
+    }
+
+    saveData() {
+      console.log("sAVESARATATATA orj bna")
+      const vectorLayer = this.vectorLayer
+      var format = new GeoJSON(),
+      data = format.writeFeatures(vectorLayer.getSource().getFeatures());
+      console.log(JSON.stringify(data, null, 4));
     }
 
     render(){

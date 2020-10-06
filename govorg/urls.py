@@ -36,6 +36,7 @@ urlpatterns = [
             path('', govorg.backend.teevriin_suljee.views.changeset_all),
             path('table_list/', govorg.backend.teevriin_suljee.views.table_list),
             path('<int:oid>/rows/', govorg.backend.teevriin_suljee.views.rows),
+            path('<int:oid>/save/', govorg.backend.teevriin_suljee.views.saveJson),
         ], 'teevriin_suljee'))),
         path('testGet/', teevriin_suljee_views.testGet, name='testGet'),
     ], 'back_org'))),

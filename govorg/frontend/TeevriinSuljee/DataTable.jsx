@@ -7,19 +7,13 @@ export default class DataTable extends Component {
         this.state = {
             send: this.props.send
         }
-        this.getData = this.getData.bind(this)
     }
 
     componentDidUpdate(){
         console.log(this.props.send)
         const send = this.props.send
         if(send){
-            this.getData()
         }
-    }
-
-    getData(){
-        
     }
 
     render() {
