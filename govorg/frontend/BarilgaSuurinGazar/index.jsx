@@ -19,12 +19,12 @@ export default class Index extends Component {
                         </NavLink>
                     </li>
                     <li className="nav-item">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} activeClassName="nav-link active"  data-toggle="tab">
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} activeClassName="nav-link"  data-toggle="tab">
                             <span className="hidden-xs gp-text-primary">ЖАГСААЛТ</span>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} activeClassName="nav-link active"  data-toggle="tab">
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} activeClassName="nav-link"  data-toggle="tab">
                             <span className="hidden-xs gp-text-primary">МАЯГТ</span>
                         </NavLink>
                     </li>

@@ -20,17 +20,26 @@ export default class Жагсаалт extends Component {
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
+        this.handleUpdateData = this.handleUpdateData.bind(this)
+        this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
 
     }
 
     componentDidMount() {
+        this.handleUpdateData()
 
+    }
+
+    handleUpdateData(){
         service
             .rows(this.state.id)
             .then(({ data }) => {
                 this.setState({ data })
         })
+    }
 
+    handleSaveSuccess(){
+        this.handleUpdateData()
     }
 
     handleModalDeleteOpen(event) {
@@ -43,8 +52,12 @@ export default class Жагсаалт extends Component {
     }
 
     handleRemove(id) {
-        service.remove(id).then(({success}) => {
-            if (success) this.props.handleSaveSuccess
+        const value = { 'oid': this.state.id }
+        service.remove(value, id).then(({success}) => {
+            if (success) {
+                this.handleSaveSuccess()
+                this.setState({is_modal_delete_open: false})
+            }
         })
     }
 
@@ -53,56 +66,58 @@ export default class Жагсаалт extends Component {
         const { rows, fields } = this.state.data
 
         return (
-            <table className="table table-bordered table-sm">
-                <thead>
-                    <tr>
-                        { fields.map((field, idx) =>
-                            <th key={ idx }>
-                                { field }
-                            </th>
-                        )}
-                            <th></th>
-                            <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    { rows.map((row, idx) =>
-
-                        <tr key={ idx }>
-
+            <div className="border border-danger">
+                <table className="table table-bordered table-sm">
+                    <thead>
+                        <tr>
                             { fields.map((field, idx) =>
+                                <th key={ idx }>
+                                    { field }
+                                </th>
+                            )}
+                                <th></th>
+                                <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                                <td key={ idx }>
-                                    { row[field] }
+                        { rows.map((row, idx) =>
+
+                            <tr key={ idx }>
+
+                                { fields.map((field, idx) =>
+
+                                    <td key={ idx }>
+                                        { row[field] }
+                                    </td>
+
+                                )}
+                                <td>
+                                    <NavLink to={`#`}>
+                                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                                    </NavLink>
+                                </td>
+                                <td>
+                                    <a href="#" onClick={this.handleModalDeleteOpen}>
+                                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                                    </a>
+
+                                    {is_modal_delete_open &&
+                                        <Modal
+                                            modalClose={this.handleModalDeleteClose}
+                                            modalAction={() => this.handleRemove(row.id)}
+                                            text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
+                                            title="Тохиргоог устгах"
+                                        />
+                                    }
                                 </td>
 
-                            )}
-                            <td>
-                                <NavLink to={`#`}>
-                                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                                </NavLink>
-                            </td>
-                            <td>
-                                <a href="#" onClick={this.handleModalDeleteOpen}>
-                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                </a>
+                            </tr>
 
-                                {is_modal_delete_open &&
-                                    <Modal
-                                        modalClose={this.handleModalDeleteClose}
-                                        modalAction={() => this.handleRemove(row.id)}
-                                        text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
-                                        title="Тохиргоог устгах"
-                                    />
-                                }
-                            </td>
-
-                        </tr>
-
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         )
     }
 }

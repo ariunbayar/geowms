@@ -10,7 +10,7 @@ export default class Маягт extends Component {
         super(props)
 
         this.state = {
-            id: this.props.match.params.oid,
+            oid: this.props.match.params.oid,
             is_modal_delete_open: false,
             data: {
                 fields: [],
@@ -18,16 +18,32 @@ export default class Маягт extends Component {
             },
         }
 
+        this.onSubmit = this.onSubmit.bind(this)
+
+    }
+
+    onSubmit(values, { setStatus, setSubmitting }) {
+        this.setState({ values })
+        setStatus('checking')
+        setSubmitting(true)
+        setTimeout(() => {
+            service
+            .save(values)
+            .then(({success}) => {
+                if (success) {
+                    setStatus('saved')
+                    setSubmitting(false)
+                }
+            })
+        }, 800)
     }
 
     componentDidMount() {
-
         service
-            .rows(this.state.id)
+            .rows(this.state.oid)
             .then(({ data }) => {
                 this.setState({ data })
         })
-
     }
 
     render() {
@@ -37,8 +53,8 @@ export default class Маягт extends Component {
                 <Formik
                         enableReinitialize
                         initialValues={this.state.values}
-                        validationSchema={validationSchema}
                         onSubmit={this.onSubmit}
+                        validate={(values, props) => {} }
                     >
                     {({
                         errors,
