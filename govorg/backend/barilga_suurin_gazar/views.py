@@ -161,13 +161,20 @@ def rows(request, oid):
 def add(request, payload):
     oid = payload.get('oid')
     data = payload.get('data')
+    fields = gis_fields_by_oid(oid)
+
     tabne_data = gis_table_by_oid(oid)
     table_fields = '('
     table_rows = []
+    table_fields_real = []
+    table_fields_json = []
     check = False
     # query insert and value beltgeh
+    for f in fields:
+        table_fields_real.append(f.attname)
 
     for index, row in enumerate(data):
+        table_fields_json.append(row)
         if not row == "id":
             table_fields = table_fields + row
             table_rows.append(data[row])
@@ -175,22 +182,35 @@ def add(request, payload):
         if index < len(data) -1 and check:
             table_fields = table_fields + ', '
     table_fields = table_fields + ')'
+    count = 0
+    for real in table_fields_real:
+        for jsons in table_fields_json:
+            if real == jsons:
+                count = count + 1
+    if not len(table_fields_real) == count:
+        rsp = {
+            'success': False,
+            'info': "Хүснэгтийн нэр буруу байна.",
+        }
+        return JsonResponse(rsp)
+
     # ['1', '2'] convert to ('1', '2')
-    table_rows = tuple(table_rows)
+    # table_rows = tuple(table_rows)
     # ['1', '2'] convert to ('1', '2')  end
     try:
         with connections['postgis_db'].cursor() as cursor:
-                sql = """ INSERT INTO {tabne_data} {table_fields} VALUES {table_rows} """.format(
+                sql = """ INSERT INTO {tabne_data} {table_fields} VALUES ({values}) """.format(
                     tabne_data=tabne_data,
                     table_fields=table_fields,
-                    table_rows=table_rows,
+                    values=('%s, ' * len(table_rows))[:-2]
                 )
-                cursor.execute(sql)
+                cursor.execute(sql, table_rows)
         rsp = {
             'success': True,
             'info': "Амжилттай",
         }
         return JsonResponse(rsp)
+
     except Exception:
         rsp = {
             'success': False,
@@ -206,20 +226,38 @@ def save(request, payload, pk):
     data = payload.get('data')
     pk = pk
     tabne_data = gis_table_by_oid(oid)
+    fields = gis_fields_by_oid(oid)
     table_fields_zow = ''
+    data_fields_json = []
+    table_fields_real = []
     data_fields = []
     data_rows = []
     check = False
+    for f in fields:
+        table_fields_real.append(f.attname)
     # query set beltgeh
     for index, row in enumerate(data):
+        data_fields_json.append(row)
         if not row == 'id':
             data_fields.append(row)
             data_rows.append(data[row])
-            table_fields_zow = table_fields_zow + str(row) + '=' + "'" + str(data[row]) + "'"
+            table_fields_zow = table_fields_zow + str(row) + '=' + '%s'
             check = True
         if index < len(data) -1 and check:
             table_fields_zow = table_fields_zow + ', '
     # query set beltgeh end
+
+    count = 0
+    for real in table_fields_real:
+        for jsons in data_fields_json:
+            if real == jsons:
+                count = count + 1
+    if not len(table_fields_real) == count:
+        rsp = {
+            'success': False,
+            'info': "Хүснэгтийн нэр буруу байна.",
+        }
+        return JsonResponse(rsp)
     try:
         with connections['postgis_db'].cursor() as cursor:
             sql = """ UPDATE {tabne_data} SET {table_fields_zow} WHERE id = {pk} """.format(
@@ -227,7 +265,7 @@ def save(request, payload, pk):
                 table_fields_zow=table_fields_zow,
                 pk=pk,
             )
-            cursor.execute(sql)
+            cursor.execute(sql, data_rows)
         rsp = {
             'success': True,
             'info': "Амжилттай",
