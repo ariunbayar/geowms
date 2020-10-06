@@ -1,85 +1,37 @@
 import React, { Component } from "react"
+import {Switch, Route, Link, NavLink} from "react-router-dom"
 import Modal from "../../../src/components/Modal/DeleteModal"
+import Жагсаалт from "./Жагсаалт"
+import Маягт from "./Маягт"
 
 export default class DataTable extends Component {
 
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            is_modal_delete_open: false,
-        }
-
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
-
-    }
-
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
-
-    handleRemove(id) {
-        service.remove(id).then(({success}) => {
-            if (success) this.props.handleSaveSuccess
-        })
-    }
-
     render() {
-        const {is_modal_delete_open}=this.state
-        const { rows, fields } = this.props.data
-
+        const oid = this.props.oid
         return (
-            <table className="table table-bordered table-sm">
-                <thead>
-                    <tr>
-                        { fields.map((field, idx) =>
-                            <th key={ idx }>
-                                { field }
-                            </th>
-                        )}
-                            <th></th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div className="card">
+              <div className="card-body">
+                <ul className="nav nav-tabs nav-tabs-primary nav-justified">
+                    <li className="nav-item">
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} activeClassName="nav-link active"  data-toggle="tab">
+                            <span className="hidden-xs gp-text-primary">ЖАГСААЛТ</span>
+                        </NavLink>
+                    </li>
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} activeClassName="nav-link active"  data-toggle="tab">
+                            <span className="hidden-xs gp-text-primary">МАЯГТ</span>
+                        </NavLink>
+                    </li>
+                </ul>
 
-                    { rows.map((row, idx) =>
-
-                        <tr key={ idx }>
-
-                            { fields.map((field, idx) =>
-
-                                <td key={ idx }>
-                                    { row[field] }
-                                </td>
-
-                            )}
-                            <td>
-                                <a href="#" onClick={this.handleModalDeleteOpen}>
-                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                </a>
-
-                                {is_modal_delete_open &&
-                                    <Modal
-                                        modalClose={this.handleModalDeleteClose}
-                                        modalAction={() => this.handleRemove(row.id)}
-                                        text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
-                                        title="Тохиргоог устгах"
-                                    />
-                                }
-                            </td>
-
-                        </tr>
-
-                    )}
-                </tbody>
-            </table>
+                <div className="tab-content">
+                    <Switch>
+                        <Route path={`/gov/барилга-суурин-газар/:oid/жагсаалт/`} component={Жагсаалт} />
+                        <Route path={`/gov/барилга-суурин-газар/:oid/маягт/`} component={Маягт} />
+                    </Switch>
+                </div>
+              </div>
+           </div>
         )
     }
 }

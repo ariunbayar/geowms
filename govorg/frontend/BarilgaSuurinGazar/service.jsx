@@ -19,7 +19,8 @@ function rows(oid) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/rows/`, requestOptions).then(handleResponse)
 }
 
-function remove(id) {
+
+function remove(oid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/barilga_suurin_gazar/${id}/remove/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/remove/`, requestOptions).then(handleResponse)
 }

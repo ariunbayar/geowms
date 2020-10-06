@@ -60,14 +60,11 @@ export default class BarilgaSuurinGazar extends Component {
 
     }
 
-    
-
     loadRows() {
 
         service
             .rows(this.state.oid)
             .then(({ data }) => {
-
                 this.setState({ data })
 
             })
@@ -183,6 +180,7 @@ export default class BarilgaSuurinGazar extends Component {
     }
 
     render() {
+        console.log(this.state.oid)
         return (
             <div className="row">
                 <div className="col-md-12 px-0">
@@ -199,7 +197,7 @@ export default class BarilgaSuurinGazar extends Component {
                         </select>
                     </div>
 
-                    <DataTable data={ this.state.data } handleSaveSuccess={this.loadRows}/>
+                    <DataTable oid={this.state.oid}/>
 
                 </div>
             </div>
