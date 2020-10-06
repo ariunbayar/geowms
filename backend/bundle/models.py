@@ -46,3 +46,10 @@ class BundleLayer(models.Model):
     bundle = models.ForeignKey(Bundle, on_delete=models.PROTECT)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, default=5)
     defaultCheck = models.PositiveIntegerField(default=0)
+
+
+class BundleGIS(models.Model):
+
+    bundle = models.ForeignKey(Bundle, on_delete=models.PROTECT)
+    oid = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

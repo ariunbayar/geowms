@@ -28,7 +28,6 @@ def _dict_fetchall(cursor):
 @user_passes_test(lambda u: u.is_superuser)
 def table_list(request):
 
-
     sql = """
         SELECT
             c.oid as "oid",
