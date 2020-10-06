@@ -5,28 +5,42 @@ import { NavLink, withRouter } from 'react-router-dom'
 class MenuItem extends Component {
 
     getNavLinkClass(path){
-        return this.props.location.pathname === path ? 'active' : '';
+
+        let is_match;
+
+        if ('exact' in this.props) {
+            is_match = this.props.location.pathname === path
+        } else {
+            is_match = this.props.location.pathname.substr(0, path.length) === path
+        }
+
+        return is_match ? 'active' : '';
     }
 
     render() {
+
         return (
             <li className={ this.getNavLinkClass(this.props.url) }>
-                { this.props.children ?
-                    <NavLink  activeClassName="active" to={this.props.url} className="waves-effect">
-                      <i className={!this.props.icon? "icon-map": this.props.icon}></i> <span>{this.props.children}</span>
-                    </NavLink>
-                    :
-                    <NavLink  activeClassName="active" to={ this.props.url } className="waves-effect">
-                        { this.props.icon &&
-                            <Fragment>
-                                <i className={ this.props.icon }></i> {}
-                            </Fragment>
-                        }
-                        <span>{ this.props.text }</span>
-                    </NavLink>
-                }
+
+                <NavLink activeClassName="active" to={ this.props.url } className="waves-effect">
+
+                    { this.props.icon &&
+                        <Fragment>
+                            <i className={ this.props.icon }></i> {}
+                        </Fragment>
+                    }
+                    <span>{ this.props.text }</span>
+
+                    { this.props.children &&
+                        <i className="fa fa-angle-left pull-right"></i>
+                    }
+
+                </NavLink>
+
+                { this.props.children }
             </li>
         )
+
     }
 }
 
