@@ -11,8 +11,9 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
 
+
 from .forms import BundleForm
-from .models import Bundle, BundleLayer
+from .models import Bundle, BundleLayer, BundleGIS
 
 
 def _get_bundle_options():
@@ -27,6 +28,20 @@ def _get_bundle_options():
             'layers': layers,
         }
         form_options.append(wms_display)
+
+    return form_options
+
+def _get_bundle_gis_options(bundle_id):
+
+    form_options = []
+
+    for oids in BundleGIS.objects.filter(bundle_id=bundle_id):
+
+        bundle_display = {
+            'oid': oids.oid,
+        }
+
+        form_options.append(bundle_display)
 
     return form_options
 
@@ -126,10 +141,12 @@ def _get_module_display(module):
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
+    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]    
     return {
         'id': bundle.id,
         'name': bundle.name,
         'price':modules,
+        'oid_list':oid_list,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
@@ -159,12 +176,14 @@ def all(request):
 def updateMore(request, pk):
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
     form_options = _get_bundle_options()
+    gis_options = _get_bundle_gis_options(pk)
     form_options_role = _get_role_options()
 
     rsp = {
         'bundle_list': bundle_list,
         'form_options': form_options,
         'form_options_role': form_options_role,
+        'gis_options':gis_options
     }
     return JsonResponse(rsp)
 
@@ -236,6 +255,8 @@ def update(request, payload):
 
     icon_data = payload.get('icon')
     form = BundleForm(payload, instance=bundle)
+
+
     if form.is_valid():
         if icon_data:
             form.instance.icon.delete(save=False)
@@ -245,6 +266,34 @@ def update(request, payload):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def updateGis(request, payload):
+    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
+    if(payload.get('module')):
+        module = int(payload.get('module'))
+        Bundle.objects.filter(id=payload.get('id')).update(module=module)
+    else:
+        Bundle.objects.filter(id=payload.get('id')).update(module=None)
+
+    oid_list = payload.get('oid_list')
+    bundle_id = payload.get('id')
+    for gis_bundle_id in BundleGIS.objects.filter(bundle_id=bundle_id):
+        check = False
+        for oid in oid_list:
+            if gis_bundle_id.oid == oid:
+                check = True
+        if not check:
+            i.delete()
+
+    for oid in oid_list:
+        bundle_gis = BundleGIS.objects.filter(oid=oid)
+        if not bundle_gis:
+            BundleGIS.objects.create(oid=oid, bundle_id = bundle_id)
+    return JsonResponse({'success': True})
 
 
 @require_POST
