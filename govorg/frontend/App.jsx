@@ -155,7 +155,7 @@ export class App extends Component {
                                 <ul className="sidebar-submenu">
                                     { teevriin_suljee_table_list.map(({ oid, schema, table }, index) =>
                                         <MenuItem
-                                            key={ idx }
+                                            key={ index }
                                             icon="fa fa-table"
                                             url={`/gov/тээврийн-сүлжээ/${oid}/`}
                                             text={schema + '.' + table}
@@ -173,7 +173,7 @@ export class App extends Component {
                                 <ul className="sidebar-submenu">
                                     { ded_butets_table_list.map(({ oid, schema, table }, index) =>
                                         <MenuItem
-                                            key={ idx }
+                                            key={ index }
                                             icon="fa fa-table"
                                             url={`/gov/дэд-бүтэц/${oid}/`}
                                             text={schema + '.' + table}
@@ -191,7 +191,7 @@ export class App extends Component {
                                 <ul className="sidebar-submenu">
                                     { bair_zuin_zurag_table_list.map(({ oid, schema, table }, index) =>
                                         <MenuItem
-                                            key={ idx }
+                                            key={ index }
                                             icon="fa fa-table"
                                             url={`/gov/байр-зүйн-зураг/${oid}/`}
                                             text={schema + '.' + table}

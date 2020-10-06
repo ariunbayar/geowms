@@ -52,6 +52,7 @@ export default class TeevriinSuljee extends Component{
       this.loadMap()
       service.getGeom('haha').then(({success, info})=>{
             if (success) {
+                console.log(info)
                 this.setState({ info })
                 // loadData(info)
             }

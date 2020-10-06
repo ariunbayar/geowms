@@ -89,6 +89,7 @@ def testGet(request):
             'success': True,
             'info': geojson
         }
+    return JsonResponse(rsp)
 
 
 @require_GET
