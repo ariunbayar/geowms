@@ -10,6 +10,7 @@ export default class Маягт extends Component {
         super(props)
 
         this.state = {
+            values: {},
             is_loading: true,
             oid: this.props.match.params.oid,
             is_modal_delete_open: false,
@@ -65,7 +66,7 @@ export default class Маягт extends Component {
                         enableReinitialize
                         initialValues={this.state.values}
                         onSubmit={this.onSubmit}
-                        validate={(values, props) => {} }
+                        validate={(values) => {} }
                     >
                     {({
                         errors,
@@ -84,7 +85,7 @@ export default class Маягт extends Component {
                                 { fields.map((field, idx) =>
                                     <div className="form-group" key={ idx }>
                                         <label className="">{ field }</label>
-                                        <input className="form-control" placeholder={ field } />
+                                        <input name={ field } className="form-control" placeholder={ field } />
                                     </div>
                                 )}
 

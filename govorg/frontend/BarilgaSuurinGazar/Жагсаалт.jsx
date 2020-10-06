@@ -82,64 +82,62 @@ export default class Жагсаалт extends Component {
         const { rows, fields } = this.state.data
 
         return (
-            <div className="border border-danger" style={{overflowX: 'auto'}}>
-                <table className="table table-bordered table-sm">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th></th>
+            <table className="table-responsive table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        { fields.map((field, idx) =>
+                            <th key={ idx }>
+                                { field.name }
+                            </th>
+                        )}
+                    </tr>
+                </thead>
+                <tbody>
+
+                    { rows.map((row, idx) =>
+
+                        <tr key={ idx }>
+
+                            <td>
+                                <NavLink to={`#`}>
+                                    <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                                </NavLink>
+                            </td>
+                            <td>
+                                <a href="#" onClick={this.handleModalDeleteOpen}>
+                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                                </a>
+
+                                {is_modal_delete_open &&
+                                    <Modal
+                                        modalClose={this.handleModalDeleteClose}
+                                        modalAction={() => this.handleRemove(row.id)}
+                                        text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
+                                        title="Тохиргоог устгах"
+                                    />
+                                }
+                            </td>
+
                             { fields.map((field, idx) =>
-                                <th key={ idx }>
-                                    { field.name }
-                                </th>
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody>
 
-                        { rows.map((row, idx) =>
-
-                            <tr key={ idx }>
-
-                                <td>
-                                    <NavLink to={`#`}>
-                                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                                    </NavLink>
-                                </td>
-                                <td>
-                                    <a href="#" onClick={this.handleModalDeleteOpen}>
-                                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                    </a>
-
-                                    {is_modal_delete_open &&
-                                        <Modal
-                                            modalClose={this.handleModalDeleteClose}
-                                            modalAction={() => this.handleRemove(row.id)}
-                                            text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
-                                            title="Тохиргоог устгах"
-                                        />
+                                <td key={ idx }>
+                                    { field.type == 'geometry'
+                                        ?
+                                            row[field.name].substr(0, 80)
+                                        :
+                                            row[field.name]
                                     }
                                 </td>
 
-                                { fields.map((field, idx) =>
+                            )}
 
-                                    <td key={ idx }>
-                                        { field.type == 'geometry'
-                                            ?
-                                                row[field.name].substr(0, 40)
-                                            :
-                                                row[field.name]
-                                        }
-                                    </td>
+                        </tr>
 
-                                )}
-
-                            </tr>
-
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                    )}
+                </tbody>
+            </table>
         )
     }
 }

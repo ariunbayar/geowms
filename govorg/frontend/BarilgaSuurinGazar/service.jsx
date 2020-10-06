@@ -4,7 +4,8 @@ import {handleResponse, getGetOptions, getPostOptions} from '../Components/helpe
 export const service = {
     geom,
     rows,
-    remove
+    remove, 
+    save,
 }
 
 
