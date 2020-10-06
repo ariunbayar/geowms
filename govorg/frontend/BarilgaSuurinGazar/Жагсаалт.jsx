@@ -82,17 +82,17 @@ export default class Жагсаалт extends Component {
         const { rows, fields } = this.state.data
 
         return (
-            <div className="border border-danger">
+            <div className="border border-danger" style={{overflowX: 'auto'}}>
                 <table className="table table-bordered table-sm">
                     <thead>
                         <tr>
+                            <th></th>
+                            <th></th>
                             { fields.map((field, idx) =>
                                 <th key={ idx }>
-                                    { field }
+                                    { field.name }
                                 </th>
                             )}
-                                <th></th>
-                                <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,16 +101,9 @@ export default class Жагсаалт extends Component {
 
                             <tr key={ idx }>
 
-                                { fields.map((field, idx) =>
-
-                                    <td key={ idx }>
-                                        { row[field] }
-                                    </td>
-
-                                )}
                                 <td>
                                     <NavLink to={`#`}>
-                                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                                     </NavLink>
                                 </td>
                                 <td>
@@ -127,6 +120,19 @@ export default class Жагсаалт extends Component {
                                         />
                                     }
                                 </td>
+
+                                { fields.map((field, idx) =>
+
+                                    <td key={ idx }>
+                                        { field.type == 'geometry'
+                                            ?
+                                                row[field.name].substr(0, 40)
+                                            :
+                                                row[field.name]
+                                        }
+                                    </td>
+
+                                )}
 
                             </tr>
 
