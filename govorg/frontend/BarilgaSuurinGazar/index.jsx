@@ -1,8 +1,5 @@
 import React, { Component } from "react"
 
-import "./styles.css"
-import { service } from "./service"
-
 import 'ol/ol.css'
 import Map from 'ol/Map'
 import TileLayer from 'ol/layer/Tile'
@@ -16,6 +13,11 @@ import {Vector as VectorSource} from 'ol/source'
 import {Vector as VectorLayer} from 'ol/layer'
 
 import Draw from 'ol/interaction/Draw';
+
+import "./styles.css"
+import { service } from "./service"
+
+
 
 export default class BarilgaSuurinGazar extends Component {
 
@@ -103,40 +105,41 @@ export default class BarilgaSuurinGazar extends Component {
 
         this.map = map
         this.source = shpSource
-        this.addInteraction()
     }
 
-    addInteraction() {
-        const map = this.map
-        const source = this.source
-        const typeSelect = document.getElementById('type')
+    addInteraction(typeSelect) {
 
-        const value = typeSelect.value
+        console.log(typeSelect);
+        console.log(this.draw);
 
-        if (value !== 'None') {
-
-            const draw = new Draw({
-              source: source,
-              type: typeSelect.value,
-            })
-
-            map.addInteraction(draw)
-
-            this.draw = draw
-
+        if (this.draw) {
+            this.map.removeInteraction(this.draw)
         }
+
+        const allowed_types = [
+            'Point',
+            'LineString',
+            'Polygon',
+            'Circle',
+        ]
+
+        if (allowed_types.includes[typeSelect])
+            return
+
+
+        const draw = new Draw({
+            source: this.source,
+            type: typeSelect,
+        })
+
+        this.map.addInteraction(draw)
+
+        this.draw = draw
     }
 
     handleOnChange(e) {
-        const map = this.map
-        const draw = this.draw
-
-        const value = e.target.value
-        
-        if (value !== 'None') {
-            map.removeInteraction(draw);
-            this.addInteraction();        
-        }
+        const typeSelect = e.target.value
+        this.addInteraction(typeSelect)
     }
 
     render() {
@@ -144,7 +147,7 @@ export default class BarilgaSuurinGazar extends Component {
             <div className="row">
                 <div className="col-md-12 px-0">
                     <div id="map" className="map"></div>
-                    <form class="form-inline">
+                    <div className="form-inline">
                         <label>Geometry type &nbsp;</label>
                         <select id="type" onChange={event => this.handleOnChange(event)}>
                             <option value="Point">Point</option>
@@ -153,7 +156,7 @@ export default class BarilgaSuurinGazar extends Component {
                             <option value="Circle">Circle</option>
                             <option value="None">None</option>
                         </select>
-                    </form>
+                    </div>
                 </div>
             </div>
         )
