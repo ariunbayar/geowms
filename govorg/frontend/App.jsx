@@ -230,7 +230,7 @@ export class App extends Component {
                             {tuuhen_ov.perm_view ?
                                 <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
                             }
-                            <Route path="/gov/тээврийн-сүлжээ/" component={ТээврийнСүлжээ}/>
+                            <Route path="/gov/тээврийн-сүлжээ/:oid/" component={ТээврийнСүлжээ}/>
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
                             <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
