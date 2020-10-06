@@ -84,8 +84,8 @@ export default class Маягт extends Component {
                             <Form>
                                 { fields.map((field, idx) =>
                                     <div className="form-group" key={ idx }>
-                                        <label className="">{ field }</label>
-                                        <input name={ field } className="form-control" placeholder={ field } />
+                                        <label className="">{ field.name }</label>
+                                        <input name={ field.name } className="form-control" placeholder={ field.name } />
                                     </div>
                                 )}
 
