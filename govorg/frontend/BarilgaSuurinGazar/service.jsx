@@ -4,7 +4,7 @@ import {handleResponse, getGetOptions, getPostOptions} from '../Components/helpe
 export const service = {
     geom,
     rows,
-    remove, 
+    remove,
     save,
 }
 
@@ -20,14 +20,14 @@ function rows(oid) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/rows/`, requestOptions).then(handleResponse)
 }
 
-function remove(value, id) {
+function remove(oid, id) {
 
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(oid),
+        body: '{}',
     }
 
-    return fetch(`/gov/api/barilga_suurin_gazar/${id}/remove/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/remove/`, opts).then(handleResponse)
 }
 
 function save(values) {

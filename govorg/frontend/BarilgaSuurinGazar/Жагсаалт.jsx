@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 
-import Modal from "../../../src/components/Modal/DeleteModal"
 import { service } from "./service"
-import { NavLink } from "react-router-dom"
+import ЖагсаалтItem from "./ЖагсаалтItem"
+
 
 export default class Жагсаалт extends Component {
 
@@ -14,7 +14,7 @@ export default class Жагсаалт extends Component {
 
             is_loading: true,
 
-            id: this.props.match.params.oid,
+            oid: this.props.match.params.oid,
             is_modal_delete_open: false,
             data: {
                 fields: [],
@@ -23,51 +23,23 @@ export default class Жагсаалт extends Component {
 
         }
 
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
-        this.handleUpdateData = this.handleUpdateData.bind(this)
-        this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
+        this.loadData = this.loadData.bind(this)
 
     }
 
     componentDidMount() {
-        this.handleUpdateData()
-
+        this.loadData()
     }
 
-    handleUpdateData(){
+    loadData() {
         service
-            .rows(this.state.id)
+            .rows(this.state.oid)
             .then(({ data }) => {
                 this.setState({
                     data,
                     is_loading: false,
                 })
             })
-    }
-
-    handleSaveSuccess(){
-        this.handleUpdateData()
-    }
-
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
-
-    handleRemove(id) {
-        const value = { 'oid': this.state.id }
-        service.remove(value, id).then(({success}) => {
-            if (success) {
-                this.handleSaveSuccess()
-                this.setState({is_modal_delete_open: false})
-            }
-        })
     }
 
     render() {
@@ -78,8 +50,7 @@ export default class Жагсаалт extends Component {
             )
         }
 
-        const { is_modal_delete_open } = this.state
-        const { rows, fields } = this.state.data
+        const { fields, rows } = this.state.data
 
         return (
             <table className="table-responsive table-bordered table-sm">
@@ -95,46 +66,14 @@ export default class Жагсаалт extends Component {
                     </tr>
                 </thead>
                 <tbody>
-
                     { rows.map((row, idx) =>
-
-                        <tr key={ idx }>
-
-                            <td>
-                                <NavLink to={`#`}>
-                                    <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                                </NavLink>
-                            </td>
-                            <td>
-                                <a href="#" onClick={this.handleModalDeleteOpen}>
-                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                </a>
-
-                                {is_modal_delete_open &&
-                                    <Modal
-                                        modalClose={this.handleModalDeleteClose}
-                                        modalAction={() => this.handleRemove(row.id)}
-                                        text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
-                                        title="Тохиргоог устгах"
-                                    />
-                                }
-                            </td>
-
-                            { fields.map((field, idx) =>
-
-                                <td key={ idx }>
-                                    { field.type == 'geometry'
-                                        ?
-                                            row[field.name].substr(0, 80)
-                                        :
-                                            row[field.name]
-                                    }
-                                </td>
-
-                            )}
-
-                        </tr>
-
+                        <ЖагсаалтItem
+                            key={ idx }
+                            oid={ this.state.oid }
+                            item={ row }
+                            fields={ fields }
+                            handleUpdate={ this.loadData }
+                        />
                     )}
                 </tbody>
             </table>

@@ -306,24 +306,26 @@ def save(request, payload, pk):
 
 @require_POST
 @ajax_required
-def delete(request, payload, pk):
-
-    oid = payload.get('oid')
+def delete(request, payload, oid, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
-    tabne_data = gis_table_by_oid(oid)
+    table = gis_table_by_oid(oid)
 
     try:
 
         with connections['postgis_db'].cursor() as cursor:
-                sql = """ DELETE FROM {tabne_data} where id = {pk} """.format(
-                    tabne_data=tabne_data,
-                    pk=pk,
-                )
-                cursor.execute(sql)
+
+            sql = """
+                DELETE FROM
+                    {table}
+                WHERE id = %s
+            """.format(table=table)
+
+            cursor.execute(sql, [pk])
+
         rsp = {
             'success': True,
             'info': "Амжилттай",
