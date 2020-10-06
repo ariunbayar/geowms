@@ -38,6 +38,7 @@ export default class Index extends Component {
                     <Switch>
                         <Route path={`/gov/барилга-суурин-газар/:oid/жагсаалт/`} component={Жагсаалт} />
                         <Route path={`/gov/барилга-суурин-газар/:oid/маягт/`} component={Маягт} />
+                        <Route path={`/gov/барилга-суурин-газар/:oid/маягт/:id/засах/`} component={Маягт} />
                         <Route path={`/gov/барилга-суурин-газар/:oid/`} component={Map} />
                     </Switch>
                 </div>

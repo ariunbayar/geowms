@@ -14,7 +14,7 @@ export default class Жагсаалт extends Component {
 
             is_loading: true,
 
-            id: this.props.match.params.oid,
+            oid: this.props.match.params.oid,
             is_modal_delete_open: false,
             data: {
                 fields: [],
@@ -79,6 +79,7 @@ export default class Жагсаалт extends Component {
         }
 
         const { is_modal_delete_open } = this.state
+        const { oid } = this.state
         const { rows, fields } = this.state.data
 
         return (
@@ -109,7 +110,7 @@ export default class Жагсаалт extends Component {
 
                                 )}
                                 <td>
-                                    <NavLink to={``}>
+                                    <NavLink to={`/gov/барилга-суурин-газар/:oid/маягт/row.id/засах/`}>
                                             <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                                     </NavLink>
                                 </td>
