@@ -155,7 +155,7 @@ export class App extends Component {
                                 <ul className="sidebar-submenu">
                                     { teevriin_suljee_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
-                                            key={ idx }
+                                            key={ index }
                                             icon="fa fa-table"
                                             url={`/gov/тээврийн-сүлжээ/${oid}/`}
                                             text={schema + '.' + table}
@@ -173,7 +173,7 @@ export class App extends Component {
                                 <ul className="sidebar-submenu">
                                     { ded_butets_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
-                                            key={ idx }
+                                            key={ index }
                                             icon="fa fa-table"
                                             url={`/gov/дэд-бүтэц/${oid}/`}
                                             text={schema + '.' + table}
@@ -191,7 +191,7 @@ export class App extends Component {
                                 <ul className="sidebar-submenu">
                                     { bair_zuin_zurag_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
-                                            key={ idx }
+                                            key={ index }
                                             icon="fa fa-table"
                                             url={`/gov/байр-зүйн-зураг/${oid}/`}
                                             text={schema + '.' + table}
@@ -234,7 +234,7 @@ export class App extends Component {
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
                             <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
-                            <Route path="/gov/барилга-суурин-газар/" component={ БарилгаСууринГазар }/>
+                            <Route path="/gov/барилга-суурин-газар/:oid/" component={ БарилгаСууринГазар }/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/" component={Employee}/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>

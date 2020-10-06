@@ -16,7 +16,7 @@ import Draw from 'ol/interaction/Draw';
 
 import "./styles.css"
 import { service } from "./service"
-
+import DataTable from "./DataTable"
 
 
 export default class BarilgaSuurinGazar extends Component {
@@ -26,13 +26,23 @@ export default class BarilgaSuurinGazar extends Component {
         super(props)
 
         this.state = {
+
+            oid: this.props.match.params.oid,
+            data: {
+                fields: [],
+                rows: [],
+            },
+
             GeoJson: [],
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
+
         }
+
         this.loadMapData = this.loadMapData.bind(this)
         this.addInteraction = this.addInteraction.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
+        this.loadRows = this.loadRows.bind(this)
     }
 
     componentDidMount() {
@@ -46,6 +56,34 @@ export default class BarilgaSuurinGazar extends Component {
             }
         })
 
+        this.loadRows();
+
+    }
+
+    loadRows() {
+
+        service
+            .rows(this.state.oid)
+            .then(({ data }) => {
+
+                this.setState({ data })
+
+            })
+
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+
+        const oid_old = prevProps.match.params.oid
+        const oid = this.props.match.params.oid
+
+        if (oid_old != oid) {
+
+            this.setState({ oid }, () => {
+                this.loadRows()
+            })
+
+        }
     }
 
     loadMapData(GeoJson){
@@ -146,6 +184,7 @@ export default class BarilgaSuurinGazar extends Component {
         return (
             <div className="row">
                 <div className="col-md-12 px-0">
+
                     <div id="map" className="map"></div>
                     <div className="form-inline">
                         <label>Geometry type &nbsp;</label>
@@ -157,6 +196,9 @@ export default class BarilgaSuurinGazar extends Component {
                             <option value="None">None</option>
                         </select>
                     </div>
+
+                    <DataTable data={ this.state.data }/>
+
                 </div>
             </div>
         )
