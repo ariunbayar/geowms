@@ -16,42 +16,37 @@ export default class BundleAdminRights extends Component {
             icon: props.values.icon,
             icon_url: props.values.icon_url,
         }
-
-
-    }
-
-    componentDidMount() {
     }
 
     componentDidUpdate(prevProps) {
-
         if (this.props.values.id !== prevProps.values.id) {
             const {id, name, price, layers} = this.props.values
             this.setState({id, name, price, layers})
         }
-
     }
 
     render() {
         return (
             <>
-                {this.props.formOptions.map(({id, name, layers, is_active}, idx) =>
+                {this.props.formOptions.map(({id, name, layers, is_active, layer_visible}, idx) =>
                     <div key={idx}>
-                         {is_active ?
-                            <div key={idx} className="row">
-                                <a>
-                                    <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
-                                    <span> {name}</span>
-                                </a>
-                            </div> :
-
-                            <div key={idx} className="row" >
-                                <a>
-                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
-                                    <del> {name}</del>
-                                </a>
-                            </div>
-                            }
+                        {layer_visible &&
+                            (is_active ?
+                                <div key={idx} className="row">
+                                    <a>
+                                        <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
+                                        <span> {name}</span>
+                                    </a>
+                                </div> :
+                                <div key={idx} className="row" >
+                                    <a>
+                                        <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
+                                        <del> {name}</del>
+                                    </a>
+                                </div>
+                            )
+                        }
+                        {layer_visible ?
                         <div className="table-responsive">
                             <table className="table">
                                 <thead>
@@ -69,9 +64,7 @@ export default class BundleAdminRights extends Component {
                                     <tbody>
                                         {layers.map((layer) =>
                                             (this.state.layers.indexOf(layer.id) > -1) &&
-
                                                 this.props.values.roles.map((roleChecks) =>
-
                                                     (roleChecks.layer_id == layer.id &&
                                                         <BundleFormTable
                                                             key={layer.id}
@@ -81,12 +74,13 @@ export default class BundleAdminRights extends Component {
                                                             roleChecks = {roleChecks}
                                                         />
                                                     )
-
                                                 )
-                                        )}
+                                            )
+                                        }
                                     </tbody>
                             </table>
                         </div>
+                        :null}
                     </div>
                 )}
             </>
