@@ -24,6 +24,7 @@ export default class Test extends Component {
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.addInteraction = this.addInteraction.bind(this)
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
 
     componentDidMount() {
