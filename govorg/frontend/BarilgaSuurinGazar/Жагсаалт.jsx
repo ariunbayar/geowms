@@ -11,12 +11,16 @@ export default class Жагсаалт extends Component {
         super(props)
 
         this.state = {
+
+            is_loading: true,
+
             id: this.props.match.params.oid,
             is_modal_delete_open: false,
             data: {
                 fields: [],
                 rows: [],
             },
+
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -30,8 +34,11 @@ export default class Жагсаалт extends Component {
         service
             .rows(this.state.id)
             .then(({ data }) => {
-                this.setState({ data })
-        })
+                this.setState({
+                    data,
+                    is_loading: false,
+                })
+            })
 
     }
 
@@ -51,7 +58,14 @@ export default class Жагсаалт extends Component {
     }
 
     render() {
-        const {is_modal_delete_open}=this.state
+
+        if (this.state.is_loading) {
+            return (
+                <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
+            )
+        }
+
+        const { is_modal_delete_open } = this.state
         const { rows, fields } = this.state.data
 
         return (

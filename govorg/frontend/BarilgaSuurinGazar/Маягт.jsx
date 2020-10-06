@@ -10,6 +10,7 @@ export default class Маягт extends Component {
         super(props)
 
         this.state = {
+            is_loading: true,
             id: this.props.match.params.oid,
             is_modal_delete_open: false,
             data: {
@@ -25,12 +26,22 @@ export default class Маягт extends Component {
         service
             .rows(this.state.id)
             .then(({ data }) => {
-                this.setState({ data })
+                this.setState({
+                    is_loading: false,
+                    data,
+                })
         })
 
     }
 
     render() {
+
+        if (this.state.is_loading) {
+            return (
+                <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
+            )
+        }
+
         const { fields } = this.state.data
         return (
             <div>

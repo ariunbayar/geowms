@@ -12,20 +12,24 @@ export default class Index extends Component {
         return (
             <div className="card">
               <div className="card-body">
-                <ul className="nav nav-tabs nav-tabs-primary nav-justified">
+
+                <ul className="nav nav-tabs nav-tabs-primary">
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/`} activeClassName="nav-link active"  data-toggle="tab">
-                            <span className="hidden-xs gp-text-primary">MAP</span>
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/`} exact className="nav-link" activeClassName="active">
+                            <i className="fa fa-map"></i> {}
+                            <span className="hidden-xs">Газрын зургаар</span>
                         </NavLink>
                     </li>
                     <li className="nav-item">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} activeClassName="nav-link active"  data-toggle="tab">
-                            <span className="hidden-xs gp-text-primary">ЖАГСААЛТ</span>
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} className="nav-link" activeClassName="active">
+                            <i className="fa fa-table"></i> {}
+                            <span className="hidden-xs">Хүснэгтээр</span>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} activeClassName="nav-link active"  data-toggle="tab">
-                            <span className="hidden-xs gp-text-primary">МАЯГТ</span>
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} className="nav-link" activeClassName="active">
+                            <i className="fa fa-edit"></i> {}
+                            <span className="hidden-xs">Өөрчлөлт</span>
                         </NavLink>
                     </li>
                 </ul>
