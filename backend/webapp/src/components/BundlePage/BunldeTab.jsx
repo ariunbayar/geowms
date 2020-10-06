@@ -101,16 +101,12 @@ export class BundleTab extends Component {
             return (
                 <BrowserRouter >
                     <div>
-                    <ul className="sidebar-menu">
-                        <li>
-                            <NavLink activeClassName="active" to={`/back/дэд-сан/${id}/засах/wms/`} >
-                            <span>WMS</span>
-                            </NavLink>
+                    <ul className="nav nav-tabs">
+                        <li className=" nav-item nav-link">
+                            <NavLink activeClassName="active" to={`/back/дэд-сан/${id}/засах/wms/`}>WMS</NavLink>
                         </li>
-                        <li>
-                            <NavLink activeClassName="active" to={`/back/дэд-сан/${id}/засах/postgis_db/`}>
-                            <span>postgis_db</span>
-                            </NavLink>
+                        <li className=" nav-item nav-link">
+                            <NavLink activeClassName="active" to={`/back/дэд-сан/${id}/засах/postgis_db/`}>postgis_db</NavLink>
                         </li>
                     </ul>
                     </div>

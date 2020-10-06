@@ -24,6 +24,9 @@ urlpatterns = [
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
             path('table_list/', govorg.backend.barilga_suurin_gazar.views.table_list),
             path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
+            path('add/', govorg.backend.barilga_suurin_gazar.views.add),
+            path('<int:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
+            path('<int:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
         ], 'barilga_suurin_gazar'))),
         path('ded_butets/', include(([
             path('', govorg.backend.ded_butets.views.changeset_all),
@@ -33,6 +36,7 @@ urlpatterns = [
             path('', govorg.backend.teevriin_suljee.views.changeset_all),
             path('table_list/', govorg.backend.teevriin_suljee.views.table_list),
             path('<int:oid>/rows/', govorg.backend.teevriin_suljee.views.rows),
+            path('<int:oid>/save/', govorg.backend.teevriin_suljee.views.saveJson),
         ], 'teevriin_suljee'))),
         path('testGet/', teevriin_suljee_views.testGet, name='testGet'),
     ], 'back_org'))),

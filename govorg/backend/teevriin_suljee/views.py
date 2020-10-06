@@ -1,15 +1,17 @@
 import requests
 import json
 from geojson import Feature, FeatureCollection
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
+from django.db import connections
 
+from backend.bundle.models import Bundle
 from backend.changeset.models import ChangeSet
-from django.db import connections
-from main.decorators import ajax_required
-from django.db import connections
 from backend.org.models import Org
+from main.decorators import ajax_required
+from main.utils import dict_fetchall
 
 
 
@@ -92,55 +94,58 @@ def testGet(request):
     return JsonResponse(rsp)
 
 
+@require_POST
+@ajax_required
+def saveJson(request, payload, oid):
+    print("Hahaha")
+    data = payload.get('data')
+    print(data)
+    print(data)
+    print(data)
+    print(data)
+    print(oid)
+    print(oid)
+    print(oid)
+    print(oid)
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
+
+
 @require_GET
 @ajax_required
 def table_list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_TEEVRIIN_SULJEE)[0]
+
+    oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
+    rows = []
+
+    if len(oids):
+
+        with connections['postgis_db'].cursor() as cursor:
+
+            sql = """
+                SELECT
+                    c.oid as "oid",
+                    n.nspname as "schema",
+                    c.relname as "table"
+                FROM
+                    pg_catalog.pg_class c
+                LEFT JOIN
+                    pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                WHERE
+                    c.oid IN ({oids})
+            """.format(
+                oids=('%s, ' * len(oids))[:-2],
+            )
+            cursor.execute(sql, oids)
+            rows = list(dict_fetchall(cursor))
 
     rsp = {
-        'items': [
-            {
-                'oid': 88363,
-                'schema': 'public',
-                'table': 'AU_SumUnit',
-            },
-            {
-                'oid': 83299,
-                'schema': 'public',
-                'table': 'AU_StateUnit',
-            },
-            {
-                'oid': 83311,
-                'schema': 'public',
-                'table': 'AU_AimagUnit',
-            },
-            {
-                'oid': 59907,
-                'schema': 'public',
-                'table': 'AddressPoint',
-            },
-            {
-                'oid': 24149,
-                'schema': 'public',
-                'table': 'AdmUnitSum',
-            },
-            {
-                'oid': 24630,
-                'schema': 'public',
-                'table': 'AdmUnitUls',
-            },
-            {
-                'oid': 35684,
-                'schema': 'public',
-                'table': 'Sand',
-            },
-            {
-                'oid': 85312,
-                'schema': 'public',
-                'table': 'Shuudan_uilchilgeenii_salbaruud',
-            },
-        ]
+        'items': rows
     }
 
     return JsonResponse(rsp)

@@ -4,11 +4,12 @@ from geojson import Feature, FeatureCollection
 
 from django.db import connections
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.decorators.http import require_GET, require_POST
 
 from backend.changeset.models import ChangeSet
 from backend.org.models import Org
+from backend.bundle.models import Bundle
 from main.decorators import ajax_required
 from main.utils import gis_table_by_oid, gis_fields_by_oid, dict_fetchall
 
@@ -82,50 +83,36 @@ def changeset_all(request):
 def table_list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+
+    oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
+    rows = []
+
+    if len(oids):
+
+        with connections['postgis_db'].cursor() as cursor:
+
+            oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
+
+            sql = """
+                SELECT
+                    c.oid as "oid",
+                    n.nspname as "schema",
+                    c.relname as "table"
+                FROM
+                    pg_catalog.pg_class c
+                LEFT JOIN
+                    pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                WHERE
+                    c.oid IN ({oids})
+            """.format(
+                oids=('%s, ' * len(oids))[:-2],
+            )
+            cursor.execute(sql, oids)
+            rows = list(dict_fetchall(cursor))
 
     rsp = {
-        'items': [
-            {
-                'oid': 88363,
-                'schema': 'public',
-                'table': 'AU_SumUnit',
-            },
-            {
-                'oid': 83299,
-                'schema': 'public',
-                'table': 'AU_StateUnit',
-            },
-            {
-                'oid': 83311,
-                'schema': 'public',
-                'table': 'AU_AimagUnit',
-            },
-            {
-                'oid': 59907,
-                'schema': 'public',
-                'table': 'AddressPoint',
-            },
-            {
-                'oid': 24149,
-                'schema': 'public',
-                'table': 'AdmUnitSum',
-            },
-            {
-                'oid': 24630,
-                'schema': 'public',
-                'table': 'AdmUnitUls',
-            },
-            {
-                'oid': 35684,
-                'schema': 'public',
-                'table': 'Sand',
-            },
-            {
-                'oid': 85312,
-                'schema': 'public',
-                'table': 'Shuudan_uilchilgeenii_salbaruud',
-            },
-        ]
+        'items': rows
     }
 
     return JsonResponse(rsp)
@@ -140,7 +127,7 @@ def rows(request, oid):
     fields = gis_fields_by_oid(oid)
 
     columns_to_select = [
-        'SUBSTR(ST_AsText("%s"), 0, 26) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
         for f in fields
     ]
 
@@ -167,3 +154,113 @@ def rows(request, oid):
         }
     }
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def add(request, payload):
+    oid = payload.get('oid')
+    data = payload.get('data')
+    tabne_data = gis_table_by_oid(oid)
+    table_fields = '('
+    table_rows = []
+    check = False
+    # query insert and value beltgeh
+
+    for index, row in enumerate(data):
+        if not row == "id":
+            table_fields = table_fields + row
+            table_rows.append(data[row])
+            check = True
+        if index < len(data) -1 and check:
+            table_fields = table_fields + ', '
+    table_fields = table_fields + ')'
+    # ['1', '2'] convert to ('1', '2')
+    table_rows = tuple(table_rows)
+    # ['1', '2'] convert to ('1', '2')  end
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+                sql = """ INSERT INTO {tabne_data} {table_fields} VALUES {table_rows} """.format(
+                    tabne_data=tabne_data,
+                    table_fields=table_fields,
+                    table_rows=table_rows,
+                )
+                cursor.execute(sql)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def save(request, payload, pk):
+    oid = payload.get('oid')
+    data = payload.get('data')
+    pk = pk
+    tabne_data = gis_table_by_oid(oid)
+    table_fields_zow = ''
+    data_fields = []
+    data_rows = []
+    check = False
+    # query set beltgeh
+    for index, row in enumerate(data):
+        if not row == 'id':
+            data_fields.append(row)
+            data_rows.append(data[row])
+            table_fields_zow = table_fields_zow + str(row) + '=' + "'" + str(data[row]) + "'"
+            check = True
+        if index < len(data) -1 and check:
+            table_fields_zow = table_fields_zow + ', '
+    # query set beltgeh end
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+            sql = """ UPDATE {tabne_data} SET {table_fields_zow} WHERE id = {pk} """.format(
+                tabne_data=tabne_data,
+                table_fields_zow=table_fields_zow,
+                pk=pk,
+            )
+            cursor.execute(sql)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def delete(request, payload, pk):
+    oid = payload.get('oid')
+    tabne_data = gis_table_by_oid(oid)
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+                sql = """ DELETE FROM {tabne_data} where id = {pk} """.format(
+                    tabne_data=tabne_data,
+                    pk=pk,
+                )
+                cursor.execute(sql)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
