@@ -87,8 +87,6 @@ export default class GisForm extends Component {
             const gis_list = this.props.gis_list
             this.setState({id, name, price, layers, icon_url, self_module, module:self_module, gis_list:gis_list, oid_list})
         }
-
-
     }
 
 
