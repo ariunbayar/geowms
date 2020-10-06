@@ -65,7 +65,6 @@ export default class BarilgaSuurinGazar extends Component {
         service
             .rows(this.state.oid)
             .then(({ data }) => {
-
                 this.setState({ data })
 
             })
@@ -197,7 +196,7 @@ export default class BarilgaSuurinGazar extends Component {
                         </select>
                     </div>
 
-                    <DataTable data={ this.state.data }/>
+                    <DataTable oid={this.state.oid}/>
 
                 </div>
             </div>

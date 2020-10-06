@@ -12,6 +12,7 @@ import {SidebarButton} from './controls/SidebarButton'
 import {Modal} from './controls/Modal'
 import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
+import DataTable from './DataTable';
 
 export default class TeevriinSuljee extends Component{
 
@@ -24,8 +25,11 @@ export default class TeevriinSuljee extends Component{
         tables: [{"table_name": "test_point"}, {"table_name": "test_polygon"}],
         select_table:'',
         is_sidebar_open: false,
-        info: [],
-        id:'',
+        oid: this.props.match.params.oid,
+        data: {
+            fields: [],
+            rows: [],
+        },
         Mongolia: [11461613.630815497, 5878656.0228370065],
       }
 
@@ -36,6 +40,7 @@ export default class TeevriinSuljee extends Component{
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
       this.onChange = this.onChange.bind(this)
+      this.loadRows = this.loadRows.bind(this)
       this.toggleSidebar = this.toggleSidebar.bind(this)
       this.handleMapClick = this.handleMapClick.bind(this)
     }
@@ -52,57 +57,94 @@ export default class TeevriinSuljee extends Component{
 
     componentDidMount(){
       this.loadMap()
-      service.getGeom('haha').then(({success, info})=>{
-            if (success) {
-                // this.loadData(info)
-            }
-        })
+      this.loadRows()
     }
 
     loadData(){
-        // console.log(info)
-        // info.map((value) => {
-        //     geom = value
-        // })
-        const geom = {"type":"MultiPolygon","coordinates":[[[[107.260879,47.77587802],[107.26073371,47.77567475],[107.26119903,47.77530457],[107.26063096,47.77483557],[107.25995576,47.77382535],[107.2598343,47.7737316],[107.25883712,47.7731151],[107.25856845,47.77327556],[107.25874692,47.77341471],[107.25911591,47.77381566],[107.25920155,47.77443947],[107.25977703,47.77554745],[107.26001767,47.77588702],[107.26008549,47.77590351],[107.26045863,47.77594883],[107.26085648,47.77588831],[107.260879,47.77587802]]]]}
+        const data = this.state.data
         const map = this.map
         const styles = {
-            'MultiPolygon': new Style({
-              stroke: new Stroke({
-                color: 'blue',
-                width: 5,
-              }),
-              fill: new Fill({
-                color: 'rgba(255, 255, 0, 0.1)',
-              }),
+          'MultiPolygon': new Style({
+            stroke: new Stroke({
+              color: 'blue',
+              width: 3,
             }),
-          };
-        const styleFunction = function (feature) {
-        return styles[feature.getGeometry().getType()];
+            fill: new Fill({
+              color: 'rgba(255, 255, 0, 0.1)',
+            }),
+          }),
+          'Polygon': new Style({
+            stroke: new Stroke({
+              color: 'orange',
+              width: 4,
+            }),
+            fill: new Fill({
+              color: 'rgba(255, 255, 0, 0.1)',
+            }),
+          }),
+          'Point': new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 10,
+            }),
+            fill: new Fill({
+              color: 'rgba(255, 255, 0, 0.1)',
+            }),
+          }),
+          'LineString': new Style({
+            stroke: new Stroke({
+              color: 'green',
+              width: 8,
+            }),
+            fill: new Fill({
+              color: 'rgba(255, 255, 0, 0.1)',
+            }),
+          }),
+          'MultiPoint': new Style({
+            stroke: new Stroke({
+              color: 'green',
+              width: 8,
+            }),
+            fill: new Fill({
+              color: 'rgba(255, 255, 0, 0.1)',
+            }),
+          }),
         };
-
-        var vs = new VectorSource({
-        features: new GeoJSON().readFeatures(geom, {
-            dataProjection: this.state.dataProjection,
-            featureProjection: this.state.featureProjection,
+        data.rows.map((value) => {
+          console.log(value.geom)
+          const styleFunction = function (feature) {
+            return styles[feature.getGeometry().getType()];
+          };
+          const geoObject = value.geom
+          var vs = new VectorSource({
+          features: new GeoJSON().readFeatures(geoObject, {
+              dataProjection: this.state.dataProjection,
+              featureProjection: this.state.featureProjection,
+              name: 'GEOJSON'
+          })
+          });
+          vs.getFeatures().forEach(function(f) {
+            console.log(f.getProperties())
+            f.setProperties({
+              id: value.id
+            })
+          });
+          const vectorLayer = new VectorLayer({
+              source: vs,
+              style: styleFunction,
+          });
+          map.addLayer(vectorLayer)
+          var snap2 = new Snap({
+              source: vectorLayer.getSource(),
+          });
+          map.addInteraction(snap2);
         })
-        });
-
-        const vectorLayer = new VectorLayer({
-            source: vs,
-            style: styleFunction,
-        });
-        map.addLayer(vectorLayer)
         // var v2 = new View({
         //     center: this.state.Mongolia,
         //     zoom: 15,
         // });
 
         // map.setView(v2)
-        var snap2 = new Snap({
-            source: vectorLayer.getSource(),
-        });
-        map.addInteraction(snap2);
     }
 
     loadMap(){
@@ -149,6 +191,11 @@ export default class TeevriinSuljee extends Component{
       var ExampleModify = {
         init: function () {
           this.select = new Select();
+          this.select.getFeatures().on('add', function (event) {
+            var properties = event.element.getProperties();
+            // selectedFeatureID = properties.id;
+            console.log(properties)
+          })
           map.addInteraction(this.select);
           this.modify = new Modify({
             features: this.select.getFeatures(),
@@ -184,8 +231,14 @@ export default class TeevriinSuljee extends Component{
           this.Polygon.setActive(false);
           map.addInteraction(this.Circle);
           this.Circle.setActive(false);
+          map.addInteraction(this.MultiPoint);
+          this.MultiPoint.setActive(false);
         },
         Point: new Draw({
+          source: vector.getSource(),
+          type: 'Point',
+        }),
+        MultiPoint: new Draw({
           source: vector.getSource(),
           type: 'Point',
         }),
@@ -206,7 +259,6 @@ export default class TeevriinSuljee extends Component{
         },
         setActive: function (active) {
           var type = optionsForm.elements['draw-type'].value;
-          console.log(type)
           if (active) {
             this.activeType && this[this.activeType].setActive(false);
             this[type].setActive(true);
@@ -229,7 +281,25 @@ export default class TeevriinSuljee extends Component{
       });
       map.addInteraction(snap);
 
-      this.loadData()
+    }
+
+    loadRows() {
+        service
+            .rows(this.state.oid)
+            .then(({ data }) => {
+                this.setState({ data })
+                this.loadData()
+            })
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        const oid_old = prevProps.match.params.oid
+        const oid = this.props.match.params.oid
+        if (oid_old != oid) {
+            this.setState({ oid }, () => {
+                this.loadRows()
+            })
+        }
     }
 
     onChange(e){
@@ -248,6 +318,67 @@ export default class TeevriinSuljee extends Component{
             ExampleModify.setActive(false);
           }
         }
+      ExampleDraw.Point.on('drawstart', function(e){
+        if(selected === 'Point'){
+          clearMap()
+        }
+      })
+      ExampleDraw.LineString.on('drawstart', function(e){
+        if(selected === 'LineString'){
+          clearMap()
+        }
+      })
+      ExampleDraw.Polygon.on('drawstart', function(e){
+        if(selected === 'Polygon'){
+          clearMap()
+        }
+      })
+      ExampleDraw.Circle.on('drawstart', function(e){
+        if(selected === 'Circle'){
+          clearMap()
+        }
+      })
+      ExampleDraw.Point.on('drawend', function(e){
+        $('#data').val('')
+        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
+      })
+      ExampleDraw.LineString.on('drawend', function(e){
+        $('#data').val('')
+        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
+      })
+      ExampleDraw.Polygon.on('drawend', function(e){
+        $('#data').val('')
+        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
+      })
+      ExampleDraw.Circle.on('drawend', function(e){
+        $('#data').val('')
+        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
+        $('#data').val(JSON.stringify(area, null, 4));
+        //   e.feature.setProperties({
+        //       'id': featureID
+        //   })
+        // var properties = e.feature.getProperties();
+        // selectedFeatureID = properties.id;
+      })
+
     }
 
     render(){
@@ -276,8 +407,15 @@ export default class TeevriinSuljee extends Component{
                   </select>
                 </div>
               </form>
-              <div id="map" className="map"></div>
-              {this.state.is_sidebar_open ?
+              <div className="row">
+                <div className="col-xs-12 col-sm-6 col-md-8 m-0 p-0 border border-danger">
+                    <div id="map" className="map"></div>
+                </div>
+                <div className="col-xs-6 col-md-4 border border-danger">
+                    <DataTable  data={ this.state.data }/>
+                </div>
+              </div>
+              {/* {this.state.is_sidebar_open ?
                     <div className="map-menu col-md-2 card">
                         <div className="card-body">
                             <select className="form-control" id="select_table" value={this.state.select_table} onChange={(e) => this.setState({select_table: e.target.value})}>
@@ -290,7 +428,7 @@ export default class TeevriinSuljee extends Component{
                     </div>
                     :
                     null
-                }
+                } */}
             </div>
         )
     }
