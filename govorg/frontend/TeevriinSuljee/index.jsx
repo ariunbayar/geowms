@@ -30,6 +30,8 @@ export default class TeevriinSuljee extends Component{
             fields: [],
             rows: [],
         },
+        featureID: null,
+        send: false,
         Mongolia: [11461613.630815497, 5878656.0228370065],
       }
 
@@ -43,6 +45,10 @@ export default class TeevriinSuljee extends Component{
       this.loadRows = this.loadRows.bind(this)
       this.toggleSidebar = this.toggleSidebar.bind(this)
       this.handleMapClick = this.handleMapClick.bind(this)
+      this.clearMap = this.clearMap.bind(this)
+      this.deleteLinked = this.deleteLinked.bind(this)
+      this.remove = this.remove.bind(this)
+      this.removeWithKey = this.removeWithKey.bind(this)
     }
 
     toggleSidebar() {
@@ -138,6 +144,8 @@ export default class TeevriinSuljee extends Component{
               source: vectorLayer.getSource(),
           });
           map.addInteraction(snap2);
+
+          this.vectorLayer = vectorLayer
         })
         // var v2 = new View({
         //     center: this.state.Mongolia,
@@ -188,20 +196,14 @@ export default class TeevriinSuljee extends Component{
     //   map.on('click', this.handleMapClick)
       this.map = map
 
-      var ExampleModify = {
+      const ExampleModify = {
         init: function () {
           this.select = new Select();
-          this.select.getFeatures().on('add', function (event) {
-            var properties = event.element.getProperties();
-            // selectedFeatureID = properties.id;
-            console.log(properties)
-          })
           map.addInteraction(this.select);
           this.modify = new Modify({
             features: this.select.getFeatures(),
           });
           map.addInteraction(this.modify);
-
           this.setEvents();
         },
         setEvents: function () {
@@ -280,7 +282,19 @@ export default class TeevriinSuljee extends Component{
         source: vector.getSource(),
       });
       map.addInteraction(snap);
-
+      var select = new Select({});
+      select.on("select", event => featureSelected(event));
+      map.addInteraction(select);
+      this.vector = vector
+      const featureSelected = (event) => {
+        const {send} = this.state
+        if(event.selected[0]){
+          console.log(event.selected[0].getProperties())
+          this.setState({ send: !send })
+        }else{
+          this.setState({ send: !send })
+        }
+      }
     }
 
     loadRows() {
@@ -305,6 +319,7 @@ export default class TeevriinSuljee extends Component{
     onChange(e){
       const ExampleDraw = this.state.ExampleDraw
       const ExampleModify = this.state.ExampleModify
+      const parser = new GeoJSON();
       var type = e.target.getAttribute('name');
         var value = e.target.value;
         if (type == 'draw-type') {
@@ -318,67 +333,110 @@ export default class TeevriinSuljee extends Component{
             ExampleModify.setActive(false);
           }
         }
-      ExampleDraw.Point.on('drawstart', function(e){
-        if(selected === 'Point'){
-          clearMap()
-        }
-      })
-      ExampleDraw.LineString.on('drawstart', function(e){
-        if(selected === 'LineString'){
-          clearMap()
-        }
-      })
-      ExampleDraw.Polygon.on('drawstart', function(e){
-        if(selected === 'Polygon'){
-          clearMap()
-        }
-      })
-      ExampleDraw.Circle.on('drawstart', function(e){
-        if(selected === 'Circle'){
-          clearMap()
-        }
-      })
+      // ExampleDraw.Point.on('drawstart', function(e){
+      //   if(value === 'Point'){
+      //     this.clearMap()
+      //   }
+      // })
+      // ExampleDraw.LineString.on('drawstart', function(e){
+      //   if(value === 'LineString'){
+      //     this.clearMap()
+      //   }
+      // })
+      // ExampleDraw.Polygon.on('drawstart', function(e){
+      //   if(value === 'Polygon'){
+      //     this.clearMap()
+      //   }
+      // })
+      // ExampleDraw.Circle.on('drawstart', function(e){
+      //   if(value === 'Circle'){
+      //     this.clearMap()
+      //   }
+      // })
+      var featureID = this.state.featureID
       ExampleDraw.Point.on('drawend', function(e){
-        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        $('#data').val(JSON.stringify(area, null, 4));
-        //   e.feature.setProperties({
-        //       'id': featureID
-        //   })
-        // var properties = e.feature.getProperties();
-        // selectedFeatureID = properties.id;
+        console.log(JSON.stringify(area, null, 4));
+        featureID += 1
+        e.feature.setProperties({
+            'id': featureID
+        })
+        const properties = e.feature.getProperties();
+        featureID = properties.id;
       })
       ExampleDraw.LineString.on('drawend', function(e){
-        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        $('#data').val(JSON.stringify(area, null, 4));
-        //   e.feature.setProperties({
-        //       'id': featureID
-        //   })
-        // var properties = e.feature.getProperties();
-        // selectedFeatureID = properties.id;
+        console.log(JSON.stringify(area, null, 4));
+        featureID += 1
+        e.feature.setProperties({
+            'id': featureID
+        })
+        const properties = e.feature.getProperties();
+        featureID = properties.id;
       })
       ExampleDraw.Polygon.on('drawend', function(e){
-        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        $('#data').val(JSON.stringify(area, null, 4));
-        //   e.feature.setProperties({
-        //       'id': featureID
-        //   })
-        // var properties = e.feature.getProperties();
-        // selectedFeatureID = properties.id;
+        console.log(JSON.stringify(area, null, 4));
+        featureID += 1
+        e.feature.setProperties({
+            'id': featureID
+        })
+        const properties = e.feature.getProperties();
+        featureID = properties.id;
       })
       ExampleDraw.Circle.on('drawend', function(e){
-        $('#data').val('')
         let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        $('#data').val(JSON.stringify(area, null, 4));
-        //   e.feature.setProperties({
-        //       'id': featureID
-        //   })
-        // var properties = e.feature.getProperties();
-        // selectedFeatureID = properties.id;
+        console.log(JSON.stringify(area, null, 4));
+        featureID += 1
+        e.feature.setProperties({
+            'id': featureID
+        })
+        const properties = e.feature.getProperties();
+        featureID = properties.id;
       })
 
+    }
+
+    clearMap() {
+      const vector = this.vector
+      vector.getSource().clear();
+    }
+
+    deleteLinked(){
+      this.removeSelectedFeature()
+    }
+
+    removeSelectedFeature() {
+      this.remove()
+    }
+
+    removeWithKey(e){
+      if (e.keyCode == 48){
+        this.remove()
+      }
+    }
+
+    remove(){
+      console.log("remove")
+      // const vector = this.vector
+      // const vectorLayer = this.vectorLayer
+      // var feaForRemove = vectorLayer.getSource().getFeatures();
+      // console.log(feaForRemove)
+      // if (feaForRemove != null && feaForRemove.length > 0) {
+      //   feaForRemove.forEach(x => {
+      //     console.log(x)
+      //     var properties = feaForRemove[x].getProperties();
+      //     var id = properties.id;
+      //     if (id == selectedFeatureID) {
+      //       vectorLayer.getSource().removeFeature(feaForRemove[x]);
+      //         break;
+      //     }
+      //   })
+      // }
+    }
+
+    sendData(){
+      this.setState({ send: true })
     }
 
     render(){
@@ -407,12 +465,13 @@ export default class TeevriinSuljee extends Component{
                   </select>
                 </div>
               </form>
+              <button className="btn btn-danger" onClick={() => this.deleteLinked()} onKeyDown={(e) => this.removeWithKey(e)}>Арилгах</button>
               <div className="row">
                 <div className="col-xs-12 col-sm-6 col-md-8 m-0 p-0 border border-danger">
                     <div id="map" className="map"></div>
                 </div>
                 <div className="col-xs-6 col-md-4 border border-danger">
-                    <DataTable  data={ this.state.data }/>
+                    <DataTable  data={ this.state.data } send={this.state.send}/>
                 </div>
               </div>
               {/* {this.state.is_sidebar_open ?
