@@ -11,15 +11,20 @@ class MenuItem extends Component {
     render() {
         return (
             <li className={ this.getNavLinkClass(this.props.url) }>
-                <NavLink  activeClassName="active" to={ this.props.url } className="waves-effect">
-                    { this.props.icon &&
-                        <Fragment>
-                            <i className={ this.props.icon }></i> {}
-                        </Fragment>
-                    }
-                    <span>{ this.props.text }</span>
-                </NavLink>
-                { this.props.children }
+                { this.props.children ?
+                    <NavLink  activeClassName="active" to={this.props.url} className="waves-effect">
+                      <i className={!this.props.icon? "icon-map": this.props.icon}></i> <span>{this.props.children}</span>
+                    </NavLink>
+                    :
+                    <NavLink  activeClassName="active" to={ this.props.url } className="waves-effect">
+                        { this.props.icon &&
+                            <Fragment>
+                                <i className={ this.props.icon }></i> {}
+                            </Fragment>
+                        }
+                        <span>{ this.props.text }</span>
+                    </NavLink>
+                }
             </li>
         )
     }
