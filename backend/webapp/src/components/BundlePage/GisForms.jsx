@@ -2,7 +2,6 @@
 import React, { Component } from "react"
 import {service} from './service'
 import GisForm from './BundleGisForm'
-import BundleGisAdminRights from './BundleGisAdminRights'
 
 export class BunleGisForms extends Component {
 
@@ -64,7 +63,6 @@ export class BunleGisForms extends Component {
              })   
             }
         })
-
     }
 
     handleSaveSuccess() {
@@ -72,21 +70,14 @@ export class BunleGisForms extends Component {
     }
 
     handleSave(values) {
-
         if (values.id) {
-
-            service.updateGis(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
+            service.updateGis(values).then(({success}) => {
+                if (success) {
+                    this.props.history.push(`/back/дэд-сан/`)
+                }
             })
 
-        } else {
-
-            service.create_gis(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
-            })
-
-        }
-
+        } 
     }
 
     handleRemove(id) {
@@ -106,18 +97,6 @@ export class BunleGisForms extends Component {
                                     <GisForm
                                         handleSave={this.handleSave}
                                         gis_list = {this.state.gis_list}
-                                        values={this.state.form_values}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-lg-8">
-                            <div className="card">
-                                <div className="card-body">
-                                    <BundleGisAdminRights
-                                        handleSave={this.handleSave}
-                                        gis_options={this.state.gis_options}
-                                        formOptionsRole={this.state.form_options_role}
                                         values={this.state.form_values}
                                     />
                                 </div>

@@ -31,20 +31,6 @@ def _get_bundle_options():
 
     return form_options
 
-def _get_bundle_gis_options(bundle_id):
-
-    form_options = []
-
-    for oids in BundleGIS.objects.filter(bundle_id=bundle_id):
-
-        bundle_display = {
-            'oid': oids.oid,
-        }
-
-        form_options.append(bundle_display)
-
-    return form_options
-
 
 @require_POST
 @ajax_required
@@ -111,6 +97,7 @@ def _get_role_options():
     return form_options
 
 
+
 def _get_form_check_options(bundleId):
 
     bundleLayer = BundleLayer.objects.filter(bundle_id=bundleId).order_by('layer_id')
@@ -129,6 +116,7 @@ def _get_form_check_options(bundleId):
         }
         roleOptions.append(role_display)
     return roleOptions
+
 
 
 def _get_module_display(module):
@@ -176,14 +164,13 @@ def all(request):
 def updateMore(request, pk):
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
     form_options = _get_bundle_options()
-    gis_options = _get_bundle_gis_options(pk)
     form_options_role = _get_role_options()
 
     rsp = {
         'bundle_list': bundle_list,
         'form_options': form_options,
         'form_options_role': form_options_role,
-        'gis_options':gis_options
+
     }
     return JsonResponse(rsp)
 
@@ -272,22 +259,17 @@ def update(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateGis(request, payload):
-    bundle = get_object_or_404(Bundle, pk=payload.get('id'))
-    if(payload.get('module')):
-        module = int(payload.get('module'))
-        Bundle.objects.filter(id=payload.get('id')).update(module=module)
-    else:
-        Bundle.objects.filter(id=payload.get('id')).update(module=None)
-
     oid_list = payload.get('oid_list')
     bundle_id = payload.get('id')
-    for gis_bundle_id in BundleGIS.objects.filter(bundle_id=bundle_id):
-        check = False
+    diff_oid = None
+    for gis_bundle in BundleGIS.objects.filter(bundle_id=bundle_id):
+
         for oid in oid_list:
-            if gis_bundle_id.oid == oid:
-                check = True
-        if not check:
-            i.delete()
+            if gis_bundle.oid != oid:
+                diff_oid = gis_bundle.oid
+        if diff_oid:
+            saves = BundleGIS.objects.filter(bundle_id = bundle_id, oid=diff_oid)
+            saves.delete()
 
     for oid in oid_list:
         bundle_gis = BundleGIS.objects.filter(oid=oid)
