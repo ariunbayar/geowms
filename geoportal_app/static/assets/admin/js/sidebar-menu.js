@@ -8,6 +8,7 @@ $.sidebarMenu = function(menu) {
 	$(menu).on('click', 'li a', function(e) {
 		var $this = $(this);
 		var checkElement = $this.next();
+
 		if (checkElement.is(subMenuSelector) && checkElement.is(':visible')) {
 			checkElement.slideUp(animationSpeed, function() {
 				checkElement.removeClass('menu-open');
@@ -30,6 +31,14 @@ $.sidebarMenu = function(menu) {
 				checkElement.addClass('menu-open');
 				parent.find('li.active').removeClass('active');
 				parent_li.addClass('active');
+			});
+		}
+		// test
+		else if ((!checkElement.is(subMenuSelector)) && (!checkElement.is(':visible'))){
+			var parent = $this.parents('ul').first();
+			var ul = parent.find('ul:visible').slideUp(function() {
+				//Remove the menu-open class from the parent
+				ul.parent("li").removeClass("active");
 			});
 		}
 		//if this isn't a link, prevent the page from being redirected

@@ -52,7 +52,7 @@ export class ConfigList extends Component {
             <div className="row">
                 <div className="col-md-12">
                     <div className="card">
-                        <div class="card-body">
+                        <div className="card-body">
                             <div className="text-right mb-4">
                                     <NavLink className="btn gp-btn-primary" to={"/back/тохиргоо/үүсгэх/"}>
                                         Нэмэх

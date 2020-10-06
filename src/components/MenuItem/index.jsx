@@ -1,19 +1,20 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { Component } from 'react'
+import { NavLink, withRouter } from 'react-router-dom'
 
-const MenuItem = (props) => {
-  return (
-    <li>
-      <NavLink
-      exact={true}
-      className="waves-effect"
-      activeClassName="active"
-      to={props.url}
-    >
-      {props.children}
-    </NavLink>
-    </li>
-  );
-};
+class MenuItem extends Component {
+    getNavLinkClass(path){
+        return this.props.location.pathname === path ? 'active' : '';
+    }
 
-export default MenuItem;
+    render() {
+        return (
+            <li className={this.getNavLinkClass(this.props.url)}>
+                <NavLink  activeClassName="active" to={this.props.url} className="waves-effect">
+                  <i className={!this.props.icon? "icon-map": this.props.icon}></i> <span>{this.props.children}</span>
+                </NavLink>
+            </li>
+        )
+    }
+}
+
+export default withRouter(MenuItem)

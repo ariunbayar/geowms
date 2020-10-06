@@ -37,6 +37,8 @@ export class Дэлгэрэнгүй extends Component {
             return ''
 
         const {items, data} = this.state
+        const data_length = data.length
+        const items_length = items.length
         return (
                 <div className="card">
                     <div className="card-body">
@@ -61,7 +63,7 @@ export class Дэлгэрэнгүй extends Component {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {items === 0 ?
+                                                    {items_length == 0 ?
                                                         <tr><td>Хоосон байна </td></tr>:
                                                         items.map((values,index) =>
                                                             <tr key={index}>
@@ -89,8 +91,8 @@ export class Дэлгэрэнгүй extends Component {
                                              <table className="table">
                                                 <thead>
                                                     <tr>
-                                                        {data === 0 ?
-                                                            <tr><td>Хоосон байна </td></tr>:
+                                                        {data_length == 0 ?
+                                                            <tr><th>Хоосон байна </th></tr>:
                                                             Object.keys(data[0]).map((key) => {
                                                                 return(
                                                                     <th key={key} scope="col">{key} </th>

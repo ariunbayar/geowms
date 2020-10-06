@@ -66,8 +66,8 @@ export class Жагсаалт extends Component {
                                     value={this.state.searchQuery}
                                 />
                             </div>
-                            <div class="my-4">
-                                <div class="p-3">
+                            <div className="my-4">
+                                <div className="p-3">
                                     <div className="table-responsive">
                                         <table className="table">
                                             <thead>
@@ -96,7 +96,7 @@ export class Жагсаалт extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div class="pl-4">
+                            <div className="pl-4">
                                 <Pagination
                                     paginate = { this.paginate }
                                     searchQuery = { this.state.searchQuery }
