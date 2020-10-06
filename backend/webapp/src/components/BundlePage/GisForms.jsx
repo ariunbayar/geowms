@@ -63,7 +63,6 @@ export class BunleGisForms extends Component {
              })   
             }
         })
-
     }
 
     handleSaveSuccess() {
@@ -71,21 +70,14 @@ export class BunleGisForms extends Component {
     }
 
     handleSave(values) {
-        console.log(values.oid_list.length, values.oid_list)
         if (values.id) {
-
-            service.updateGis(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
+            service.updateGis(values).then(({success}) => {
+                if (success) {
+                    this.props.history.push(`/back/дэд-сан/`)
+                }
             })
 
-        } else {
-
-            service.create_gis(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
-            })
-
-        }
-
+        } 
     }
 
     handleRemove(id) {
