@@ -104,11 +104,15 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary icon-map" url="/gov/байр-зүйн-зураг/" text="БАЙР ЗҮЙН ЗУРАГ"></MenuItem>
                     }
                     { barilga_suurin_gazar.perm_view &&
-                        <MenuItem icon="gp-text-primary icon-map" url="/gov/барилга-суурин-газар/" text="БАРИЛГА СУУРИН ГАЗАР">
-                            <ul>
-                                <MenuItem icon="gp-text-primary icon-map" url="/gov/барилга-суурин-газар/:oid/" text="sldkjflskdjf"></MenuItem>
+                        <li>
+                            <a className="waves-effect">
+                                <i className="gp-text-primary icon-map"></i>  <span> БАРИЛГА СУУРИН ГАЗАР</span>
+                                <i className="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul className="sidebar-submenu">
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/барилга-суурин-газар/:oid/" text="sldkjflskdjf"></MenuItem>
                             </ul>
-                        </MenuItem>
+                        </li>
                     }
                 </ul>
             </div>
