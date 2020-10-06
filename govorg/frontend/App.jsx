@@ -153,7 +153,7 @@ export class App extends Component {
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
-                                    { teevriin_suljee_table_list.map(({ oid, schema, table }, index) =>
+                                    { teevriin_suljee_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
                                             icon="fa fa-table"
@@ -171,7 +171,7 @@ export class App extends Component {
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
-                                    { ded_butets_table_list.map(({ oid, schema, table }, index) =>
+                                    { ded_butets_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
                                             icon="fa fa-table"
@@ -189,7 +189,7 @@ export class App extends Component {
                                     <i className="fa fa-angle-left pull-right"></i>
                                 </a>
                                 <ul className="sidebar-submenu">
-                                    { bair_zuin_zurag_table_list.map(({ oid, schema, table }, index) =>
+                                    { bair_zuin_zurag_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
                                             icon="fa fa-table"

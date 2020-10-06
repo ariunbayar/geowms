@@ -9,6 +9,7 @@ class MenuItem extends Component {
     }
 
     render() {
+        console.log(this.props.children)
         return (
             <li className={ this.getNavLinkClass(this.props.url) }>
                 <NavLink  activeClassName="active" to={ this.props.url } className="waves-effect">
