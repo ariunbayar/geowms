@@ -82,8 +82,8 @@ export default class Жагсаалт extends Component {
         const { rows, fields } = this.state.data
 
         return (
-            <div className="border border-danger">
-                <table className="table table-bordered table-sm">
+            <div className="table-responsive">
+                <table className="table">
                     <thead>
                         <tr>
                             { fields.map((field, idx) =>
@@ -109,7 +109,7 @@ export default class Жагсаалт extends Component {
 
                                 )}
                                 <td>
-                                    <NavLink to={`#`}>
+                                    <NavLink to={``}>
                                             <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                                     </NavLink>
                                 </td>
