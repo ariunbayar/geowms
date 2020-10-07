@@ -8,11 +8,11 @@ import {Draw, Modify, Select, Snap} from 'ol/interaction';
 import {OSM, Vector as VectorSource} from 'ol/source';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-import {SidebarButton} from './controls/SidebarButton'
-import {Modal} from './controls/Modal'
 import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Feature } from 'ol';
+import {ModifyButton} from './controls/ModifyButton'
+import {ModifyBarButton} from './controls/ModifyBarButton'
 
 export default class TeevriinSuljee extends Component{
 
@@ -22,7 +22,6 @@ export default class TeevriinSuljee extends Component{
         GeoJson: [],
         dataProjection: 'EPSG:4326',
         featureProjection: 'EPSG:3857',
-        tables: [{"table_name": "test_point"}, {"table_name": "test_polygon"}],
         select_table:'',
         is_sidebar_open: false,
         oid: this.props.match.params.oid,
@@ -37,7 +36,7 @@ export default class TeevriinSuljee extends Component{
       }
 
       this.controls = {
-        modal: new Modal(),
+        cart: new ModifyButton(),
       }
 
       this.loadMap = this.loadMap.bind(this)
@@ -48,9 +47,9 @@ export default class TeevriinSuljee extends Component{
       this.deleteLinked = this.deleteLinked.bind(this)
       this.remove = this.remove.bind(this)
       this.removeWithKey = this.removeWithKey.bind(this)
-      this.addModifyInteraction = this.addModifyInteraction.bind(this)
       this.saveData = this.saveData.bind(this)
       this.sendData = this.sendData.bind(this)
+      this.ModifyButton = this.ModifyButton.bind(this)
     }
 
     componentDidMount(){
@@ -109,7 +108,6 @@ export default class TeevriinSuljee extends Component{
           }),
         };
         data.rows.map((value) => {
-          console.log(value.geom)
           const styleFunction = function (feature) {
             return styles[feature.getGeometry().getType()];
           };
@@ -178,8 +176,8 @@ export default class TeevriinSuljee extends Component{
         layers: [raster, vector],
         target: 'map',
         controls: defaultControls().extend([
-            new SidebarButton({toggleSidebar: this.toggleSidebar}),
-            this.controls.modal,
+          new ModifyBarButton({ModifyButton: this.ModifyButton}),
+          this.controls.cart,
         ]),
         view: new View({
           center: this.state.Mongolia,
@@ -461,43 +459,16 @@ export default class TeevriinSuljee extends Component{
       })
     }
 
-    addModifyInteraction() {
-      console.log("ADADDADADA")
-      const map = this.map
-      const vectorLayer = this.vectorLayer
-      const select_interaction = new Select({
-        layers: function(vectorLayer) {
-          return vectorLayer.get('name') === 'vector_layer';
-        }
-      });
-      const modify = new ol.interaction.Modify({
-        features: select_interaction.getFeatures()
-      });
-      map.getInteractions().extend([select_interaction, modify]);
-      const selected_features = select_interaction.getFeatures();
-
-      selected_features.on('add', function(event){
-        console.log("add")
-        const feature = event.element;
-        const vectorLayer = this.vectorLayer
-        feature.on('modifyend', function(event){
-          console.log("chancajncjasnklfnsdlk")
-        })
-        feature.on('change', function(event){
-          console.log(event.target.getGeometry().getCoordinates())
-        })
-        var format = new GeoJSON(),
-        data = format.writeFeatures(feature.getSource().getFeatures());
-        console.log(JSON.stringify(data, null, 4));
-      })
-    }
-
     saveData() {
       console.log("sAVESARATATATA orj bna")
       const vectorLayer = this.vectorLayer
       var format = new GeoJSON(),
       data = format.writeFeatures(vectorLayer.getSource().getFeatures());
       console.log(JSON.stringify(data, null, 4));
+    }
+
+    ModifyButton(){
+      console.log("test")
     }
 
     render(){
@@ -532,20 +503,6 @@ export default class TeevriinSuljee extends Component{
                       <div id="map"></div>
                   </div>
               </div>
-              {/* {this.state.is_sidebar_open ?
-                    <div className="map-menu col-md-2 card">
-                        <div className="card-body">
-                            <select className="form-control" id="select_table" value={this.state.select_table} onChange={(e) => this.setState({select_table: e.target.value})}>
-                                {this.state.tables.map((value, idx) =>
-                                    <option key={idx} value={value['table_name']}>{value['table_name']}</option>
-                                )}
-                            </select>
-                            {this.state.select_table}
-                        </div>
-                    </div>
-                    :
-                    null
-                } */}
             </div>
         )
     }
