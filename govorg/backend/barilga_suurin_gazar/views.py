@@ -187,7 +187,7 @@ def add(request, payload, oid):
     table = gis_table_by_oid(oid)
 
     fields_to_update = [
-        '"{}"'.format(field.attname)
+        field.attname
         for field in fields
         if field.attname not in ['id', 'geom']
     ]
@@ -208,7 +208,7 @@ def add(request, payload, oid):
                     ({values})
             """.format(
                 table=table,
-                fields=', '.join(fields_to_update),
+                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
                 values=('%s, ' * len(values))[:-2]
             )
             cursor.execute(sql, values)
@@ -218,7 +218,10 @@ def add(request, payload, oid):
             'info': "Амжилттай",
         }
 
-    except Exception:
+    except Exception as e:
+
+        if settings.DEBUG:
+            raise e
 
         rsp = {
             'success': False,
