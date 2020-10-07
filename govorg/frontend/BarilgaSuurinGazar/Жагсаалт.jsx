@@ -16,10 +16,7 @@ export default class Жагсаалт extends Component {
 
             oid: this.props.match.params.oid,
             is_modal_delete_open: false,
-            data: {
-                fields: [],
-                rows: [],
-            },
+            rows: [],
 
         }
 
@@ -34,9 +31,9 @@ export default class Жагсаалт extends Component {
     loadData() {
         service
             .rows(this.state.oid)
-            .then(({ data }) => {
+            .then(({ rows }) => {
                 this.setState({
-                    data,
+                    rows,
                     is_loading: false,
                 })
             })
@@ -50,9 +47,8 @@ export default class Жагсаалт extends Component {
             )
         }
 
-        const { is_modal_delete_open } = this.state
-        const { oid } = this.state
-        const { fields, rows } = this.state.data
+        const { is_modal_delete_open, oid, rows } = this.state
+        const { fields } = this.props
 
         return (
             <table className="table-responsive table-bordered table-sm">

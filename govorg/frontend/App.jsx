@@ -214,7 +214,7 @@ export class App extends Component {
                                         <MenuItem
                                             key={ idx }
                                             icon="fa fa-table"
-                                            url={`/gov/барилга-суурин-газар/${oid}/`}
+                                            url={`/gov/барилга-суурин-газар/${oid}/map/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>
                                     )}
@@ -237,7 +237,18 @@ export class App extends Component {
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
                             <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
-                            <Route path="/gov/барилга-суурин-газар/:oid/" component={ БарилгаСууринГазар }/>
+                            { barilga_suurin_gazar.perm_view &&
+                                <Route path="/gov/барилга-суурин-газар/:oid/" render={(routeProps) =>
+                                    <БарилгаСууринГазар
+                                        { ...routeProps }
+                                        fields={
+                                            barilga_suurin_gazar_table_list.reduce((acc, { oid, fields }) => {
+                                                return oid == routeProps.match.params.oid ? fields : acc
+                                            }, [])
+                                        }
+                                    />
+                                }/>
+                            }
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/employees/" component={ Employee }/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
