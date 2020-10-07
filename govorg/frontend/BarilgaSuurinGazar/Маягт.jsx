@@ -47,25 +47,27 @@ export default class Маягт extends Component {
                 .detail(this.state.oid, this.state.id)
                 .then(({ values }) => {
 
-                    /*
-                    const values = {}
-
-                    data.fields.forEach((field) => {
-                        if (field.type != 'geometry') {
-                            values[field.name] = ''
-                        }
-                    })
-                    */
-
                     this.setState({
                         is_loading: false,
                         values,
                 })
             })
+
         } else {
+
+            const values = {}
+
+            this.props.fields.forEach((field) => {
+                if (field.type != 'geometry') {
+                    values[field.name] = ''
+                }
+            })
+
             this.setState({
+                values,
                 is_loading: false,
             })
+
         }
     }
 
