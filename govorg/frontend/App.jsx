@@ -109,7 +109,6 @@ export class App extends Component {
             ded_butets,
             barilga_suurin_gazar_table_list,
         } = this.state
-
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -199,7 +198,8 @@ export class App extends Component {
                                             url={`/gov/байр-зүйн-зураг/${oid}/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>
-                                    )}
+                                    )
+                                    }
                                 </ul>
                             </MenuItem>
                         }
@@ -233,10 +233,44 @@ export class App extends Component {
                             {tuuhen_ov.perm_view ?
                                 <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
                             }
-                            <Route path="/gov/тээврийн-сүлжээ/:oid/" component={ТээврийнСүлжээ}/>
                             <Route path="/gov/system/" component={System} />
-                            <Route path="/gov/дэд-бүтэц/" component={ДэдБүтэц}/>
-                            <Route path="/gov/байр-зүйн-зураг/" component={БайрЗүйнЗураг}/>
+                            { teevriin_suljee.perm_view &&
+                                <Route path="/gov/тээврийн-сүлжээ/:oid/" render={(routeProps) =>
+                                    <ТээврийнСүлжээ
+                                        { ...routeProps }
+                                        fields={
+                                            teevriin_suljee_table_list.reduce((acc, { oid, fields }) => {
+                                                return oid == routeProps.match.params.oid ? fields : acc
+                                            }, [])
+                                        }
+                                    />
+                                }/>
+                            }
+                            { ded_butets.perm_view &&
+                                <Route path="/gov/дэд-бүтэц/:oid/" render={(routeProps) =>
+                                    <ДэдБүтэц
+                                        { ...routeProps }
+                                        fields={
+                                            ded_butets_table_list.reduce((acc, { oid, fields }) => {
+                                                return oid == routeProps.match.params.oid ? fields : acc
+                                            }, [])
+                                        }
+                                    />
+                                }/>
+                            }
+                            { bair_zuin_zurag.perm_view &&
+                                <Route path="/gov/байр-зүйн-зураг/:oid/" render={(routeProps) =>
+                                    <БайрЗүйнЗураг
+                                        { ...routeProps }
+                                        fields={
+                                            bair_zuin_zurag_table_list.reduce((acc, { oid, fields }) => {
+                                                return oid == routeProps.match.params.oid ? fields : acc
+                                            }, [])
+                                        }
+                                    />
+                                }/>
+                            }
+
                             { barilga_suurin_gazar.perm_view &&
                                 <Route path="/gov/барилга-суурин-газар/:oid/" render={(routeProps) =>
                                     <БарилгаСууринГазар

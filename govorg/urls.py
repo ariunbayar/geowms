@@ -21,6 +21,7 @@ urlpatterns = [
         path('bair_zuin_zurag/', include(([
             path('', govorg.backend.bair_zuin_zurag.views.changeset_all),
             path('table_list/', govorg.backend.bair_zuin_zurag.views.table_list),
+            path('<int:oid>/rows/', govorg.backend.bair_zuin_zurag.views.rows),
             path('add/', govorg.backend.bair_zuin_zurag.views.add),
             path('<str:pk>/save/', govorg.backend.bair_zuin_zurag.views.save),
             path('<str:pk>/remove/', govorg.backend.bair_zuin_zurag.views.delete),
@@ -40,6 +41,7 @@ urlpatterns = [
         path('ded_butets/', include(([
             path('', govorg.backend.ded_butets.views.changeset_all),
             path('table_list/', govorg.backend.ded_butets.views.table_list),
+            path('<int:oid>/rows/', govorg.backend.ded_butets.views.rows),
             path('add/', govorg.backend.ded_butets.views.add),
             path('<str:pk>/save/', govorg.backend.ded_butets.views.save),
             path('<str:pk>/remove/', govorg.backend.ded_butets.views.delete),
