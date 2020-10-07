@@ -112,7 +112,21 @@ def table_list(request):
                 oids=('%s, ' * len(oids))[:-2],
             )
             cursor.execute(sql, oids)
-            rows = list(dict_fetchall(cursor))
+            tables = list(dict_fetchall(cursor))
+
+        rows = [
+            {
+                **table,
+                'fields': [
+                    {
+                        'name': f.attname,
+                        'type': f.atttypid,
+                    }
+                    for f in gis_fields_by_oid(table['oid'])
+                ],
+            }
+            for table in tables
+        ]
 
     rsp = {
         'items': rows
@@ -156,26 +170,16 @@ def rows(request, oid):
     rows = list(rows)
 
     rsp = {
-        'data': {
-            'fields': [
-                {
-                    'name': f.attname,
-                    'type': f.atttypid,
-                }
-                for f in fields
-            ],
-            'rows': rows,
-        }
+        'rows': rows,
     }
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
-def add(request, payload):
+def add(request, payload, oid):
 
-    oid = payload.get('oid')
-    data = payload.get('data')
+    data = payload
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
@@ -241,9 +245,8 @@ def add(request, payload):
 
 @require_POST
 @ajax_required
-def save(request, payload, pk):
+def save(request, payload, oid, pk):
 
-    oid = payload.get('oid')
     data = payload.get('data')
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -379,13 +382,6 @@ def detail(request, oid, pk):
         raise Http404
 
     rsp = {
-        'fields': [
-            {
-                'name': f.attname,
-                'type': f.atttypid,
-            }
-            for f in fields
-        ],
         'values': rows[0],
     }
     return JsonResponse(rsp)

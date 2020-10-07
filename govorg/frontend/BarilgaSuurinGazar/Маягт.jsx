@@ -16,7 +16,6 @@ export default class Маягт extends Component {
             oid: this.props.match.params.oid,
             id: this.props.match.params.id,
 
-            fields: [],
             values: {},
 
         }
@@ -42,26 +41,32 @@ export default class Маягт extends Component {
 
     componentDidMount() {
 
-        service
-            .detail(this.state.oid, this.state.id)
-            .then(({ values, fields }) => {
+        if (this.state.id) {
 
-                /*
-                const values = {}
+            service
+                .detail(this.state.oid, this.state.id)
+                .then(({ values }) => {
 
-                data.fields.forEach((field) => {
-                    if (field.type != 'geometry') {
-                        values[field.name] = ''
-                    }
+                    /*
+                    const values = {}
+
+                    data.fields.forEach((field) => {
+                        if (field.type != 'geometry') {
+                            values[field.name] = ''
+                        }
+                    })
+                    */
+
+                    this.setState({
+                        is_loading: false,
+                        values,
                 })
-                */
-
-                this.setState({
-                    is_loading: false,
-                    fields,
-                    values,
             })
-        })
+        } else {
+            this.setState({
+                is_loading: false,
+            })
+        }
     }
 
     render() {
@@ -72,7 +77,8 @@ export default class Маягт extends Component {
             )
         }
 
-        const { fields, values } = this.state
+        const { values } = this.state
+        const { fields } = this.props
 
         return (
             <div>
