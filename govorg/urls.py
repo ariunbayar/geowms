@@ -26,7 +26,10 @@ urlpatterns = [
             path('<int:oid>/add/', govorg.backend.bair_zuin_zurag.views.add),
             path('<int:oid>/<str:pk>/remove/', govorg.backend.bair_zuin_zurag.views.delete),
             path('<int:oid>/<str:pk>/detail/', govorg.backend.bair_zuin_zurag.views.detail),
+            path('<int:oid>/<str:pk>/geom-update/', govorg.backend.bair_zuin_zurag.views.updateGeom),
+            path('<int:oid>/add-geom/', govorg.backend.bair_zuin_zurag.views.geomAdd),
         ], 'bair_zuin_zurag'))),
+
 
         path('barilga_suurin_gazar/', include(([
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
@@ -49,6 +52,8 @@ urlpatterns = [
             path('<int:oid>/<str:pk>/save/', govorg.backend.ded_butets.views.save),
             path('<int:oid>/<str:pk>/detail/', govorg.backend.ded_butets.views.detail),
             path('<int:oid>/<str:pk>/remove/', govorg.backend.ded_butets.views.delete),
+            path('<int:oid>/<str:pk>/geom-update/', govorg.backend.ded_butets.views.updateGeom),
+            path('<int:oid>/add-geom/', govorg.backend.ded_butets.views.geomAdd),
         ], 'ded_butets'))),
 
         path('teevriin_suljee/', include(([
@@ -59,6 +64,8 @@ urlpatterns = [
             path('<int:oid>/add/', govorg.backend.teevriin_suljee.views.add),
             path('<int:oid>/<str:pk>/detail/', govorg.backend.teevriin_suljee.views.detail),
             path('<int:oid>/<str:pk>/remove/', govorg.backend.teevriin_suljee.views.delete),
+            path('<int:oid>/<str:pk>/geom-update/', govorg.backend.teevriin_suljee.views.updateGeom),
+            path('<int:oid>/add-geom/', govorg.backend.teevriin_suljee.views.geomAdd),
         ], 'teevriin_suljee'))),
 
     ], 'back_org'))),
