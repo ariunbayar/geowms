@@ -339,3 +339,48 @@ def delete(request, payload, oid, pk):
         }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def detail(request, oid, pk):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    oid = payload.get('oid')
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    columns_to_select = [
+        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        for f in fields
+    ]
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """ SELECT {columns} FROM {table} where id = {pk} """.format(
+                    table=table,
+                    pk=pk,
+                    columns=', '.join(columns_to_select),
+                )
+
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+
+    rows = list(rows)
+
+    rsp = {
+        'data': {
+            'fields': [
+                {
+                    'name': f.attname,
+                    'type': f.atttypid,
+                }
+                for f in fields
+            ],
+            'rows': rows,
+        }
+    }
+    return JsonResponse(rsp)

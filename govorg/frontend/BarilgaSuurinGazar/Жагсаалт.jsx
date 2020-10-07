@@ -50,6 +50,8 @@ export default class Жагсаалт extends Component {
             )
         }
 
+        const { is_modal_delete_open } = this.state
+        const { oid } = this.state
         const { fields, rows } = this.state.data
 
         return (

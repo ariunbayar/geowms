@@ -45,14 +45,14 @@ export default class ЖагсаалтItem extends Component {
     render() {
 
         const { is_modal_delete_open } = this.state
-        const { item, fields } = this.props
+        const { item, fields, oid } = this.props
 
         return (
             <tr>
                 <td>
-                    <a href="#">
+                    <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/${item.id}/засах/`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                    </a>
+                    </NavLink>
                 </td>
                 <td>
                     <a href="#" onClick={ this.handleModalDeleteOpen }>

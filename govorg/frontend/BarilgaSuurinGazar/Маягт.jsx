@@ -59,6 +59,15 @@ export default class Маягт extends Component {
                 })
 
         })
+        const { oid, item } = this.props
+        service
+            .detail(oid, '6')
+            .then(({ data }) => {
+                this.setState({
+                    is_loading: false,
+                    data,
+                })
+        })
     }
 
     render() {
