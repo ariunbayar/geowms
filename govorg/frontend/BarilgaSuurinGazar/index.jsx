@@ -27,7 +27,7 @@ export default class Index extends Component {
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} className="nav-link" activeClassName="active">
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/шинэ/`} className="nav-link" activeClassName="active">
                             <i className="fa fa-edit"></i> {}
                             <span className="hidden-xs">Өөрчлөлт</span>
                         </NavLink>
