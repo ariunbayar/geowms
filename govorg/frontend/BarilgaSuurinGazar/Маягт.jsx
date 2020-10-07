@@ -11,10 +11,7 @@ export default class Маягт extends Component {
         super(props)
 
         this.state = {
-            values: {
-                'id': '',
-                'f_code': '',
-            },
+            values: {},
             is_loading: true,
             oid: this.props.match.params.oid,
             data: {
@@ -46,10 +43,21 @@ export default class Маягт extends Component {
         service
             .rows(this.state.oid)
             .then(({ data }) => {
+
+                const values = {}
+
+                data.fields.forEach((field) => {
+                    if (field.type != 'geometry') {
+                        values[field.name] = ''
+                    }
+                })
+
                 this.setState({
+                    values: '',
                     is_loading: false,
                     data,
                 })
+
         })
     }
 
@@ -83,19 +91,26 @@ export default class Маягт extends Component {
                         dirty,
                     }) => {
 
+                        console.log(this.state.values);
+
                         const has_error = Object.keys(errors).length > 0
 
                         return (
                             <Form>
-                                { fields.map((field, idx) =>
-                                    <div className="form-group row" key={ idx }>
-                                        <label className="col-sm-2 col-form-label">{ field.name }</label>
-                                        <div className="col-sm-10">
-                                            <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
-                                            <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
-                                        </div>
-                                    </div>
-                                )}
+                                { fields.map((field, idx) => {
+                                    if (field.type == 'geometry')
+                                        return
+                                    else
+                                        return (
+                                            <div className="form-group row" key={ idx }>
+                                                <label className="col-sm-2 col-form-label">{ field.name }</label>
+                                                <div className="col-sm-10">
+                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
+                                                    <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                                </div>
+                                            </div>
+                                        )
+                                })}
 
                                 <div>
                                     <button type="submit" className="btn" disabled={isSubmitting || has_error}>
