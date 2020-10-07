@@ -379,6 +379,9 @@ def updateGeom(request, payload, oid, pk):
     # pk = table row id
     # geojson = {"type":"Point","coordinates":[106.956508889,48.70858]} point polygon alinch bolno
     # oid = 89180 table id avna
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     geojson = payload.get('geojson')
     table = gis_table_by_oid(oid)
