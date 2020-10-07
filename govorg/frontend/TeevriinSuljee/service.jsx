@@ -6,6 +6,7 @@ export const service = {
     remove,
     save,
     detail,
+    update
 }
 
 function geom() {
@@ -43,4 +44,14 @@ function detail(oid, id) {
     const opts = getGetOptions()
 
     return fetch(`/gov/api/teevriin_suljee/${oid}/${id}/detail/`, opts).then(handleResponse)
+}
+
+
+function update(oid, data, pk) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(data),
+    }
+    return fetch(`/gov/api/teevriin_suljee/${oid}/${pk}/save/`, opts).then(handleResponse)
 }

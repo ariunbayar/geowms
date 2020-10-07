@@ -28,15 +28,26 @@ export default class Маягт extends Component {
         this.setState({ values })
         setStatus('checking')
         setSubmitting(true)
-
-        service
-            .save(this.state.oid, values)
-            .then(({ success }) => {
-                if (success) {
-                    setStatus('saved')
-                    setSubmitting(false)
-                }
-            })
+        if(this.state.id){
+            service
+                .update(this.state.oid, values, this.state.id)
+                .then(({ success }) => {
+                    if (success) {
+                        setStatus('saved')
+                        setSubmitting(false)
+                    }
+                })
+        }
+        else{
+            service
+                .save(this.state.oid, values)
+                .then(({ success }) => {
+                    if (success) {
+                        setStatus('saved')
+                        setSubmitting(false)
+                    }
+                })
+        }
     }
 
     componentDidMount() {

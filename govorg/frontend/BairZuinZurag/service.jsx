@@ -5,7 +5,8 @@ export const service = {
     rows,
     remove,
     save,
-    detail
+    detail,
+    update
 }
 
 function geom() {
@@ -42,4 +43,13 @@ function detail(oid, id) {
     const opts = getGetOptions()
 
     return fetch(`/gov/api/bair_zuin_zurag/${oid}/${id}/detail/`, opts).then(handleResponse)
+}
+
+function update(oid, data, pk) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(data),
+    }
+    return fetch(`/gov/api/bair_zuin_zurag/${oid}/${pk}/save/`, opts).then(handleResponse)
 }
