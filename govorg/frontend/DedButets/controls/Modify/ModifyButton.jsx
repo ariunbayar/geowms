@@ -1,7 +1,7 @@
 import React, {Component} from "react"
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
-import {service} from '../service'
+import {service} from '../../service'
 import { toStringHDMS } from "ol/coordinate"
 import Corner from "ol/extent/Corner"
 import { array } from "yup"

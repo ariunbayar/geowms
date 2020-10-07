@@ -23,7 +23,7 @@ import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
 import {RemoveButton} from './controls/Remove/RemoveButton'
 import { set } from 'ol/transform';
 
-export default class TeevriinSuljee extends Component{
+export default class BarilgaSuurinGazar extends Component{
 
     constructor(props){
       super(props)
