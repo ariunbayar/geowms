@@ -72,7 +72,7 @@ export default class ЖагсаалтItem extends Component {
                 { fields.map((field, idx) =>
 
                     <td key={ idx }>
-                        { field.type == 'geometry'
+                        { field.type == 'geometry' && typeof(item[field.name]) === 'string'
                             ?
                                 item[field.name].substr(0, 80)
                             :
