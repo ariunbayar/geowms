@@ -217,14 +217,25 @@ export class Forms extends Component {
     }
 
     handleSubmit(){
-        const oid = 89186
-        const data = {'id':2,  'name': 'lol', 'code': '200'}
-        
-        service.zipUpdate(oid, data).then(({success}) => {
+        this.setState({handle_save: true})
+        const {aimag_id, sum_id, baga_id, zip_id, zip_code, zip_code_before} = this.state
+        service.zipUpdate(aimag_id, sum_id, baga_id, zip_id,  zip_code, zip_code_before).then(({success}) => {
             if(success){
-                alert(success)
+                setTimeout(() => {
+                   this.setState({success_msg:true ,handle_save:false, latx:'', laty:'', latx:'', sum:[], baga:[], aimag_id: -1, sum_id: -1, baga_id: -1,zip_id: -1, zip_code:''})
+                   this.getAimag()
+                   this.handleSearch(this.state.search_query,this.state.search_table)
+                }, 1000);
+                setTimeout(() => {
+                    this.setState({success_msg:false})
+                }, 2500);
             }else{
-                alert(success)
+                setTimeout(() => {
+                    this.setState({handle_save:false, danger_msg:true})
+                }, 1000);
+                setTimeout(() => {
+                    this.setState({danger_msg:false})
+                }, 2500);
             }
         })
     }
