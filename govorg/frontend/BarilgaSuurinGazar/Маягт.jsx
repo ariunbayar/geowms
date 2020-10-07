@@ -49,6 +49,15 @@ export default class Маягт extends Component {
                     data,
                 })
         })
+        const { oid, item } = this.props
+        service
+            .detail(oid, '6')
+            .then(({ data }) => {
+                this.setState({
+                    is_loading: false,
+                    data,
+                })
+        })
     }
 
     render() {
@@ -83,8 +92,8 @@ export default class Маягт extends Component {
                             <Form>
                                 { fields.map((field, idx) =>
                                     <div className="form-group" key={ idx }>
-                                        <label className="">{ field }</label>
-                                        <input name={ field } className="form-control" placeholder={ field } />
+                                        <label className="">{ field.name }</label>
+                                        <input name={ field.name } className="form-control" placeholder={ field.name } />
                                     </div>
                                 )}
 

@@ -32,8 +32,9 @@ urlpatterns = [
             path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
             path('add/', govorg.backend.barilga_suurin_gazar.views.add),
             path('<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
-            path('<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
+            path('<str:oid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
             path('<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
+
         ], 'barilga_suurin_gazar'))),
 
         path('ded_butets/', include(([
