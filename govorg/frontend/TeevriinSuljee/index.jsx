@@ -14,6 +14,7 @@ import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
 import DataTable from './DataTable';
 import { Feature } from 'ol';
+import { set } from 'ol/transform';
 
 export default class TeevriinSuljee extends Component{
 
@@ -32,9 +33,11 @@ export default class TeevriinSuljee extends Component{
             rows: [],
         },
         featureID: null,
+        featureID_list: [],
         send: false,
         changedFeature: '',
         Mongolia: [11461613.630815497, 5878656.0228370065],
+        chkbox: true
       }
 
       this.controls = {
@@ -284,8 +287,12 @@ export default class TeevriinSuljee extends Component{
       const featureSelected = (event) => {
         console.log("selected data")
         if(event.selected[0]){
-          console.log(event.selected[0].getProperties())
-          this.setState({ send: true })
+          console.log("id", event.selected[0].getProperties()['id'])
+          const featureID_list = this.state.featureID_list
+          console.log("id2", featureID_list)
+          
+          featureID_list.push(event.selected[0].getProperties()['id'])
+          this.setState({ send: true, featureID_list})
         }else{
           this.setState({ send: false })
         }
@@ -432,23 +439,20 @@ export default class TeevriinSuljee extends Component{
     }
 
     remove(){
-      console.log("remove")
-      // const vector = this.vector
-      // const featureID = this.state.featureID
-      // const vectorLayer = this.vectorLayer
-      // var feaForRemove = vector.getSource().getFeatures();
-      // console.log(feaForRemove)
-      // if (feaForRemove != null && feaForRemove.length > 0) {
-      //   feaForRemove.map((x) => {
-      //     console.log(x)
-      //     var properties = feaForRemove[x].getProperties();
-      //     var id = properties.id;
-      //     if (id == featureID) {
-      //       vectorLayer.getSource().removeFeature(feaForRemove[x]);
-      //         break;
-      //     }
-      //   })
-      // }
+      const vector = this.vector
+      const featureID_list = this.state.featureID_list
+      const vectorLayer = this.vectorLayer
+      var features = vector.getSource().getFeatures();
+      console.log("feature_id",featureID_list )
+      if (features != null && features.length > 0) {
+        features.map((x) => {
+          var id = x.getProperties()['id']
+          featureID_list.map((data, idx) =>
+            id == data && vector.getSource().removeFeature(x)
+           )
+        })
+        this.setState({featureID_list: []})
+      }    
     }
 
     sendData(data){

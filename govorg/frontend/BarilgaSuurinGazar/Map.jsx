@@ -205,6 +205,7 @@ export default class ГазрынЗураг extends Component{
         },
         setEvents: function () {
           var selectedFeatures = this.select.getFeatures();
+          console.log("remove",selectedFeatures)
           this.select.on('change:active', function () {
             selectedFeatures.forEach(function (each) {
               selectedFeatures.remove(each);
