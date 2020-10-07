@@ -47,3 +47,11 @@ function detail(oid, id) {
 
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/detail/`, opts).then(handleResponse)
 }
+
+function sendFeature(data, oid) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(data),
+    }
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/save/`, opts).then(handleResponse)
+}
