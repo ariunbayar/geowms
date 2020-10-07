@@ -50,7 +50,7 @@ export default class ЖагсаалтItem extends Component {
         return (
             <tr>
                 <td>
-                    <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/${item.id}/засах/`}>
+                    <NavLink to={`/gov/дэд-бүтэц/${oid}/маягт/${item.id}/засах/`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </td>
@@ -72,7 +72,7 @@ export default class ЖагсаалтItem extends Component {
                 { fields.map((field, idx) =>
 
                     <td key={ idx }>
-                        { field.type == 'geometry' && typeof(item[field.name]) === 'string'
+                        { field.type == 'geometry'
                             ?
                                 item[field.name].substr(0, 80)
                             :

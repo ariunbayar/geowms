@@ -32,6 +32,7 @@ def _get_changeset_display(ob):
         'projection': ob.projection
     }
 
+
 def _get_feature_coll(ob, changeset_list):
     geom_type = changeset_list[ob]['geom_type']
     if geom_type == 'Point':
@@ -113,14 +114,27 @@ def table_list(request):
                 oids=('%s, ' * len(oids))[:-2],
             )
             cursor.execute(sql, oids)
-            rows = list(dict_fetchall(cursor))
+            tables = list(dict_fetchall(cursor))
+
+        rows = [
+            {
+                **table,
+                'fields': [
+                    {
+                        'name': f.attname,
+                        'type': f.atttypid,
+                    }
+                    for f in gis_fields_by_oid(table['oid'])
+                ],
+            }
+            for table in tables
+        ]
 
     rsp = {
         'items': rows
     }
 
     return JsonResponse(rsp)
-
 
 
 @require_GET
@@ -158,95 +172,69 @@ def rows(request, oid):
     rows = list(rows)
 
     rsp = {
-        'data': {
-            'fields': [
-                {
-                    'name': f.attname,
-                    'type': f.atttypid,
-                }
-                for f in fields
-            ],
-            'rows': rows,
-        }
+        'rows': rows,
     }
+    return JsonResponse(rsp)
+
+@require_POST
+@ajax_required
+def add(request, payload, oid):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    fields = gis_fields_by_oid(oid)
+    table = gis_table_by_oid(oid)
+
+    fields_to_update = [
+        field.attname
+        for field in fields
+        if field.attname not in ['id', 'geom']
+    ]
+
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
+
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+
+            sql = """
+                INSERT INTO
+                    {table}
+                    ({fields})
+                VALUES
+                    ({values})
+            """.format(
+                table=table,
+                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
+                values=('%s, ' * len(values))[:-2]
+            )
+            cursor.execute(sql, values)
+
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+
+    except Exception as e:
+
+        if settings.DEBUG:
+            raise e
+
+        rsp = {
+            'success': False,
+            'info': "Өгөгдлийн зөв оруулна уу!",
+        }
+
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
-def add(request, payload):
-
-    oid = payload.get('oid')
-    data = payload.get('data')
-
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
-
-    fields = gis_fields_by_oid(oid)
-
-    tabne_data = gis_table_by_oid(oid)
-    table_fields = '('
-    table_rows = []
-    table_fields_real = []
-    table_fields_json = []
-    check = False
-    # query insert and value beltgeh
-    for f in fields:
-        table_fields_real.append(f.attname)
-
-    for index, row in enumerate(data):
-        table_fields_json.append(row)
-        if not row == "id":
-            table_fields = table_fields + row
-            table_rows.append(data[row])
-            check = True
-        if index < len(data) -1 and check:
-            table_fields = table_fields + ', '
-    table_fields = table_fields + ')'
-    count = 0
-    for real in table_fields_real:
-        for jsons in table_fields_json:
-            if real == jsons:
-                count = count + 1
-    if not len(table_fields_real) == count:
-        rsp = {
-            'success': False,
-            'info': "Хүснэгтийн нэр буруу байна.",
-        }
-        return JsonResponse(rsp)
-
-    # ['1', '2'] convert to ('1', '2')
-    # table_rows = tuple(table_rows)
-    # ['1', '2'] convert to ('1', '2')  end
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-                sql = """ INSERT INTO {tabne_data} {table_fields} VALUES ({values}) """.format(
-                    tabne_data=tabne_data,
-                    table_fields=table_fields,
-                    values=('%s, ' * len(table_rows))[:-2]
-                )
-                cursor.execute(sql, table_rows)
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-        }
-        return JsonResponse(rsp)
-
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-def save(request, payload, pk):
-
-    oid = payload.get('oid')
-    data = payload.get('data')
+def save(request, payload, oid, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
@@ -254,45 +242,22 @@ def save(request, payload, pk):
 
     tabne_data = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
-    table_fields_zow = ''
-    data_fields_json = []
-    table_fields_real = []
-    data_fields = []
-    data_rows = []
-    check = False
-    for f in fields:
-        table_fields_real.append(f.attname)
     # query set beltgeh
-    for index, row in enumerate(data):
-        data_fields_json.append(row)
-        if not row == 'id':
-            data_fields.append(row)
-            data_rows.append(data[row])
-            table_fields_zow = table_fields_zow + str(row) + '=' + '%s'
-            check = True
-        if index < len(data) -1 and check:
-            table_fields_zow = table_fields_zow + ', '
-    # query set beltgeh end
+    fields_to_update = [
+        field.attname
+        for field in fields
+        if field.attname not in ['id', 'geom']
+    ]
 
-    count = 0
-    for real in table_fields_real:
-        for jsons in data_fields_json:
-            if real == jsons:
-                count = count + 1
-    if not len(table_fields_real) == count:
-        rsp = {
-            'success': False,
-            'info': "Хүснэгтийн нэр буруу байна.",
-        }
-        return JsonResponse(rsp)
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
+
     try:
         with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {tabne_data} SET {table_fields_zow} WHERE id = {pk} """.format(
-                tabne_data=tabne_data,
-                table_fields_zow=table_fields_zow,
-                pk=pk,
-            )
-            cursor.execute(sql, data_rows)
+            sql = """ UPDATE {tabne_data} SET {fields} = %s WHERE id = {pk} """.format(tabne_data=tabne_data, pk=pk, fields='= %s, '.join(['"{}"'.format(f) for f in fields_to_update]))
+            cursor.execute(sql, values)
         rsp = {
             'success': True,
             'info': "Амжилттай",
@@ -306,35 +271,76 @@ def save(request, payload, pk):
         return JsonResponse(rsp)
 
 
-@require_POST
-@ajax_required
-def delete(request, payload, pk):
 
-    oid = payload.get('oid')
+@require_GET
+@ajax_required
+def delete(request, oid, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
-    tabne_data = gis_table_by_oid(oid)
-
+    table = gis_table_by_oid(oid)
     try:
 
         with connections['postgis_db'].cursor() as cursor:
-                sql = """ DELETE FROM {tabne_data} where id = {pk} """.format(
-                    tabne_data=tabne_data,
-                    pk=pk,
-                )
-                cursor.execute(sql)
+
+            sql = """ DELETE FROM {table} WHERE id = {pk} """.format(table=table, pk=pk)
+            cursor.execute(sql)
+
         rsp = {
             'success': True,
             'info': "Амжилттай",
         }
 
     except Exception:
+
         rsp = {
             'success': False,
             'info': "Алдаа гарсан",
         }
 
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def detail(request, oid, pk):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    columns_to_select = [
+        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        for f in fields
+    ]
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            {columns}
+        FROM
+            {table}
+        WHERE
+            id = %s
+        LIMIT 1
+    """.format(
+        columns=', '.join(columns_to_select),
+        table=table,
+    )
+
+    cursor.execute(sql, [pk])
+    rows = list(dict_fetchall(cursor))
+
+    if len(rows) == 0:
+        raise Http404
+
+    rsp = {
+        'values': rows[0],
+    }
     return JsonResponse(rsp)

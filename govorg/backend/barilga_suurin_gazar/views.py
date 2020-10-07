@@ -31,6 +31,7 @@ def _get_changeset_display(ob):
         'projection': ob.projection
     }
 
+
 def _get_feature_coll(ob, changeset_list):
     geom_type = changeset_list[ob]['geom_type']
     if geom_type == 'Point':
@@ -187,7 +188,7 @@ def add(request, payload, oid):
     table = gis_table_by_oid(oid)
 
     fields_to_update = [
-        '"{}"'.format(field.attname)
+        field.attname
         for field in fields
         if field.attname not in ['id', 'geom']
     ]
@@ -208,7 +209,7 @@ def add(request, payload, oid):
                     ({values})
             """.format(
                 table=table,
-                fields=', '.join(fields_to_update),
+                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
                 values=('%s, ' * len(values))[:-2]
             )
             cursor.execute(sql, values)
@@ -218,7 +219,10 @@ def add(request, payload, oid):
             'info': "Амжилттай",
         }
 
-    except Exception:
+    except Exception as e:
+
+        if settings.DEBUG:
+            raise e
 
         rsp = {
             'success': False,
@@ -232,53 +236,28 @@ def add(request, payload, oid):
 @ajax_required
 def save(request, payload, oid, pk):
 
-    data = payload.get('data')
-
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     tabne_data = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
-    table_fields_zow = ''
-    data_fields_json = []
-    table_fields_real = []
-    data_fields = []
-    data_rows = []
-    check = False
-    for f in fields:
-        table_fields_real.append(f.attname)
     # query set beltgeh
-    for index, row in enumerate(data):
-        data_fields_json.append(row)
-        if not row == 'id':
-            data_fields.append(row)
-            data_rows.append(data[row])
-            table_fields_zow = table_fields_zow + str(row) + '=' + '%s'
-            check = True
-        if index < len(data) -1 and check:
-            table_fields_zow = table_fields_zow + ', '
-    # query set beltgeh end
+    fields_to_update = [
+        field.attname
+        for field in fields
+        if field.attname not in ['id', 'geom']
+    ]
 
-    count = 0
-    for real in table_fields_real:
-        for jsons in data_fields_json:
-            if real == jsons:
-                count = count + 1
-    if not len(table_fields_real) == count:
-        rsp = {
-            'success': False,
-            'info': "Хүснэгтийн нэр буруу байна.",
-        }
-        return JsonResponse(rsp)
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
+
     try:
         with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {tabne_data} SET {table_fields_zow} WHERE id = {pk} """.format(
-                tabne_data=tabne_data,
-                table_fields_zow=table_fields_zow,
-                pk=pk,
-            )
-            cursor.execute(sql, data_rows)
+            sql = """ UPDATE {tabne_data} SET {fields} = %s WHERE id = {pk} """.format(tabne_data=tabne_data, pk=pk, fields='= %s, '.join(['"{}"'.format(f) for f in fields_to_update]))
+            cursor.execute(sql, values)
         rsp = {
             'success': True,
             'info': "Амжилттай",
@@ -292,27 +271,21 @@ def save(request, payload, oid, pk):
         return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
-def delete(request, payload, oid, pk):
+def delete(request, oid, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     table = gis_table_by_oid(oid)
-
     try:
 
         with connections['postgis_db'].cursor() as cursor:
 
-            sql = """
-                DELETE FROM
-                    {table}
-                WHERE id = %s
-            """.format(table=table)
-
-            cursor.execute(sql, [pk])
+            sql = """ DELETE FROM {table} WHERE id = {pk} """.format(table=table, pk=pk)
+            cursor.execute(sql)
 
         rsp = {
             'success': True,
@@ -372,6 +345,27 @@ def detail(request, oid, pk):
     return JsonResponse(rsp)
 
 
+def geoJsonConvertGeom(json):
+    geojson = str(json)
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+
+                    sql = """ SELECT ST_GeomFromGeoJSON(%s); """
+                    cursor.execute(sql, [geojson])
+                    geom = cursor.fetchone()
+        return geom
+    except Exception:
+        return None
+
+
+def findGeomField(fields):
+    geom_field = None
+    for field in fields:
+        if field.atttypid == 'geometry':
+            geom_field = field.attname
+    return geom_field
+
+
 @require_POST
 @ajax_required
 def updateGeom(request, payload, oid, pk):
@@ -379,31 +373,22 @@ def updateGeom(request, payload, oid, pk):
     # pk = table row id
     # geojson = {"type":"Point","coordinates":[106.956508889,48.70858]} point polygon alinch bolno
     # oid = 89180 table id avna
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     geojson = payload.get('geojson')
     table = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
+    geom_field = findGeomField(fields)
 
-    geom_field = ''
-    for f in fields:
-        if f.atttypid == 'geometry':
-            geom_field = f.attname
-    geojson = str(geojson)
-
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-
-                    sql = """ SELECT ST_GeomFromGeoJSON(%s); """
-                    cursor.execute(sql, [geojson])
-                    geom = cursor.fetchone()
-
-    except Exception:
+    geom = geoJsonConvertGeom(geojson)
+    if not geom:
         rsp = {
             'success': False,
-            'info': "geom үүсэж чадсангүй",
+            'info': "Geojson алдаатай байна.",
         }
         return JsonResponse(rsp)
-
     try:
         with connections['postgis_db'].cursor() as cursor:
                     sql = """ UPDATE {table} SET {geom_field} = %s WHERE id = %s """.format(table=table, geom_field=geom_field)
@@ -421,3 +406,68 @@ def updateGeom(request, payload, oid, pk):
             'info': "Алдаа гарсан",
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def geomAdd(request, payload, oid):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    fields = gis_fields_by_oid(oid)
+    table = gis_table_by_oid(oid)
+    geom_field = findGeomField(fields)
+    fields_to_update = [
+        field.attname
+        for field in fields
+        if field.attname not in ['id', geom_field]
+    ]
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
+
+    geojson = payload.get(geom_field)
+    geom = geoJsonConvertGeom(geojson)
+    if geom:
+        values.append(geom)
+    else:
+        rsp = {
+            'success': False,
+            'info': "Geojson алдаатай байна.",
+        }
+        return JsonResponse(rsp)
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+
+            sql = """
+                INSERT INTO
+                    {table}
+                    ({fields}, "{geom}")
+                VALUES
+                    ({values})
+            """.format(
+                table=table,
+                geom=geom_field,
+                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
+                values=('%s, ' * len(values))[:-2]
+            )
+            cursor.execute(sql, values)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+
+    except Exception as e:
+
+        if settings.DEBUG:
+            raise e
+
+        rsp = {
+            'success': False,
+            'info': "Өгөгдлийн зөв оруулна уу!",
+        }
+
+    return JsonResponse(rsp)

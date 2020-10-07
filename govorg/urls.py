@@ -21,9 +21,11 @@ urlpatterns = [
         path('bair_zuin_zurag/', include(([
             path('', govorg.backend.bair_zuin_zurag.views.changeset_all),
             path('table_list/', govorg.backend.bair_zuin_zurag.views.table_list),
-            path('add/', govorg.backend.bair_zuin_zurag.views.add),
-            path('<str:pk>/save/', govorg.backend.bair_zuin_zurag.views.save),
-            path('<str:pk>/remove/', govorg.backend.bair_zuin_zurag.views.delete),
+            path('<int:oid>/rows/', govorg.backend.bair_zuin_zurag.views.rows),
+            path('<int:oid>/<str:pk>/save/', govorg.backend.bair_zuin_zurag.views.save),
+            path('<int:oid>/add/', govorg.backend.bair_zuin_zurag.views.add),
+            path('<int:oid>/<str:pk>/remove/', govorg.backend.bair_zuin_zurag.views.delete),
+            path('<int:oid>/<str:pk>/detail/', govorg.backend.bair_zuin_zurag.views.detail),
         ], 'bair_zuin_zurag'))),
 
         path('barilga_suurin_gazar/', include(([
@@ -35,28 +37,29 @@ urlpatterns = [
             path('<int:oid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
             path('<int:oid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
             path('<int:oid>/<str:pk>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
+            path('<int:oid>/add-geom/', govorg.backend.barilga_suurin_gazar.views.geomAdd),
 
         ], 'barilga_suurin_gazar'))),
 
         path('ded_butets/', include(([
             path('', govorg.backend.ded_butets.views.changeset_all),
             path('table_list/', govorg.backend.ded_butets.views.table_list),
-            path('add/', govorg.backend.ded_butets.views.add),
-            path('<str:pk>/save/', govorg.backend.ded_butets.views.save),
-            path('<str:pk>/remove/', govorg.backend.ded_butets.views.delete),
+            path('<int:oid>/rows/', govorg.backend.ded_butets.views.rows),
+            path('<int:oid>/add/', govorg.backend.ded_butets.views.add),
+            path('<int:oid>/<str:pk>/save/', govorg.backend.ded_butets.views.save),
+            path('<int:oid>/<str:pk>/detail/', govorg.backend.ded_butets.views.detail),
+            path('<int:oid>/<str:pk>/remove/', govorg.backend.ded_butets.views.delete),
         ], 'ded_butets'))),
 
         path('teevriin_suljee/', include(([
             path('', govorg.backend.teevriin_suljee.views.changeset_all),
             path('table_list/', govorg.backend.teevriin_suljee.views.table_list),
             path('<int:oid>/rows/', govorg.backend.teevriin_suljee.views.rows),
-            path('<int:oid>/save/', govorg.backend.teevriin_suljee.views.saveJson),
-            path('add/', govorg.backend.teevriin_suljee.views.add),
-            path('<str:pk>/save/', govorg.backend.teevriin_suljee.views.save),
-            path('<str:pk>/remove/', govorg.backend.teevriin_suljee.views.delete),
+            path('<int:oid>/<str:pk>/save/', govorg.backend.teevriin_suljee.views.save),
+            path('<int:oid>/add/', govorg.backend.teevriin_suljee.views.add),
+            path('<int:oid>/<str:pk>/detail/', govorg.backend.teevriin_suljee.views.detail),
+            path('<int:oid>/<str:pk>/remove/', govorg.backend.teevriin_suljee.views.delete),
         ], 'teevriin_suljee'))),
-
-        path('testGet/', teevriin_suljee_views.testGet, name='testGet'),
 
     ], 'back_org'))),
 
