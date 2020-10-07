@@ -34,6 +34,7 @@ urlpatterns = [
             path('<int:oid>/<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
             path('<int:oid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
             path('<int:oid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
+            path('<int:oid>/<str:pk>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
 
         ], 'barilga_suurin_gazar'))),
 

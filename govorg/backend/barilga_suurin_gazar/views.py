@@ -370,3 +370,54 @@ def detail(request, oid, pk):
         'values': rows[0],
     }
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def updateGeom(request, payload, oid, pk):
+
+    # pk = table row id
+    # geojson = {"type":"Point","coordinates":[106.956508889,48.70858]} point polygon alinch bolno
+    # oid = 89180 table id avna
+
+    geojson = payload.get('geojson')
+    table = gis_table_by_oid(oid)
+    fields = gis_fields_by_oid(oid)
+
+    geom_field = ''
+    for f in fields:
+        if f.atttypid == 'geometry':
+            geom_field = f.attname
+    geojson = str(geojson)
+
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+
+                    sql = """ SELECT ST_GeomFromGeoJSON(%s); """
+                    cursor.execute(sql, [geojson])
+                    geom = cursor.fetchone()
+
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "geom үүсэж чадсангүй",
+        }
+        return JsonResponse(rsp)
+
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+                    sql = """ UPDATE {table} SET {geom_field} = %s WHERE id = %s """.format(table=table, geom_field=geom_field)
+                    cursor.execute(sql, [geom, pk])
+
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': "Алдаа гарсан",
+        }
+        return JsonResponse(rsp)
