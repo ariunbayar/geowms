@@ -2,9 +2,10 @@ import {handleResponse, getPostOptions, getGetOptions} from '../Components/helpe
 
 export const service = {
     geom,
-    getGeom,
     rows,
-    sendFea,
+    remove,
+    save,
+    detail,
 }
 
 function geom() {
@@ -13,21 +14,33 @@ function geom() {
 }
 
 
-function getGeom() {
-    const requestOptions = {...getGetOptions()}
-    return fetch(`/gov/api/testGet/`, requestOptions).then(handleResponse)
-}
-
 function rows(oid) {
     const requestOptions = getGetOptions()
     return fetch(`/gov/api/teevriin_suljee/${oid}/rows/`, requestOptions).then(handleResponse)
 }
 
-function sendFea(data, oid) {
+function remove(oid, id) {
+
     const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify(data),
+        ...getGetOptions(),
     }
-    return fetch(`/gov/api/teevriin_suljee/${oid}/save/`, opts).then(handleResponse)
+
+    return fetch(`/gov/api/teevriin_suljee/${oid}/${id}/remove/`, opts).then(handleResponse)
 }
 
+function save(oid, values) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(values),
+    }
+
+    return fetch(`/gov/api/teevriin_suljee/${oid}/add/`, opts).then(handleResponse)
+}
+
+function detail(oid, id) {
+
+    const opts = getGetOptions()
+
+    return fetch(`/gov/api/teevriin_suljee/${oid}/${id}/detail/`, opts).then(handleResponse)
+}

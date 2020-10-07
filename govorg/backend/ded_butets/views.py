@@ -295,9 +295,9 @@ def save(request, payload, oid, pk):
         return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
-def delete(request, payload, oid, pk):
+def delete(request, oid, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]

@@ -24,8 +24,7 @@ function rows(oid) {
 function remove(oid, id) {
 
     const opts = {
-        ...getPostOptions(),
-        body: '{}',
+        ...getGetOptions(),
     }
 
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/remove/`, opts).then(handleResponse)

@@ -22,8 +22,7 @@ function rows(oid) {
 function remove(oid, id) {
 
     const opts = {
-        ...getPostOptions(),
-        body: '{}',
+        ...getGetOptions(),
     }
 
     return fetch(`/gov/api/ded_butets/${oid}/${id}/remove/`, opts).then(handleResponse)
@@ -46,10 +45,3 @@ function detail(oid, id) {
     return fetch(`/gov/api/ded_butets/${oid}/${id}/detail/`, opts).then(handleResponse)
 }
 
-function sendFeature(data, oid) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify(data),
-    }
-    return fetch(`/gov/api/ded_butets/${oid}/save/`, opts).then(handleResponse)
-}

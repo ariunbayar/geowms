@@ -31,9 +31,9 @@ export default class Жагсаалт extends Component {
     loadData() {
         service
             .rows(this.state.oid)
-            .then(({ data }) => {
+            .then(({ rows }) => {
                 this.setState({
-                    rows:data,
+                    rows,
                     is_loading: false,
                 })
             })

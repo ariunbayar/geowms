@@ -5,6 +5,7 @@ export const service = {
     rows,
     remove,
     save,
+    detail
 }
 
 function geom() {
@@ -19,13 +20,11 @@ function rows(oid) {
 }
 
 function remove(oid, id) {
-
     const opts = {
-        ...getPostOptions(),
-        body: '{}',
+        ...getGetOptions(),
     }
 
-    return fetch(`/gov/api/bair_zuin_zurag/${oid}/remove/`, opts).then(handleResponse)
+    return fetch(`/gov/api/bair_zuin_zurag/${oid}/${id}/remove/`, opts).then(handleResponse)
 }
 
 function save(oid, values) {
@@ -36,4 +35,11 @@ function save(oid, values) {
     }
 
     return fetch(`/gov/api/bair_zuin_zurag/${oid}/add/`, opts).then(handleResponse)
+}
+
+function detail(oid, id) {
+
+    const opts = getGetOptions()
+
+    return fetch(`/gov/api/bair_zuin_zurag/${oid}/${id}/detail/`, opts).then(handleResponse)
 }
