@@ -67,7 +67,7 @@ export default class TeevriinSuljee extends Component{
       this.clearMap = this.clearMap.bind(this)
       this.remove = this.remove.bind(this)
       this.saveData = this.saveData.bind(this)
-      this.sendData = this.sendData.bind(this)
+      this.updateGeom = this.updateGeom.bind(this)
       this.ModifyButton = this.ModifyButton.bind(this)
       this.LineButton = this.LineButton.bind(this)
       this.PointButton = this.PointButton.bind(this)
@@ -77,6 +77,7 @@ export default class TeevriinSuljee extends Component{
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
+      this.createGeom = this.createGeom.bind(this)
     }
 
     componentDidMount(){
@@ -277,10 +278,13 @@ export default class TeevriinSuljee extends Component{
     modifiedFea (event) {
       const features = event.features.getArray()
       const {format} = this.state
-      const data = format.writeFeatureObject(features[0])
-      const changedFeature = JSON.stringify(data, null, 4)
+      const data = format.writeFeatureObject(features[0],  {
+        dataProjection: this.state.dataProjection,
+        featureProjection: this.state.featureProjection,
+    })
+      const changedFeature = JSON.stringify(data)
       this.setState({ changedFeature })
-      this.sendData(changedFeature)
+      this.updateGeom(changedFeature)
     }
 
     loadRows() {
@@ -328,15 +332,18 @@ export default class TeevriinSuljee extends Component{
       var featureID = this.state.featureID
       const vectorLayer = this.vectorLayer
       const format = this.state.format
-      let area = format.writeFeatureObject(feature, {featureProjection: 'EPSG:3857'});
+      let area = format.writeFeatureObject(feature,  {
+        dataProjection: this.state.dataProjection,
+        featureProjection: this.state.featureProjection,
+    })
       featureID += 1
       feature.setProperties({
           'id': featureID
       })
       const properties = feature.getProperties();
       featureID = properties.id;
-      const drawed = JSON.stringify(area, null, 4)
-      this.sendData(drawed)
+      const drawed = JSON.stringify(area)
+      this.createGeom(drawed)
     }
 
     clearMap() {
@@ -364,11 +371,33 @@ export default class TeevriinSuljee extends Component{
       }
     }
 
-    sendData(data){
+    updateGeom(data){
       const id = this.state.selectedFeature_ID
       const oid = this.state.oid
-      service.sendFeature(data, oid, id).then(rsp => {
-        console.log(rsp)
+      const json = JSON.parse(data)
+      const datas = json.geometry
+      service.geomUpdate(datas, oid, id).then(({success, info}) => {
+        if(success) alert(info)
+        else alert(info)
+      })
+    }
+
+    createGeom(data){
+      const oid = this.state.oid
+      const json = JSON.parse(data)
+      const datas = json.geometry
+      const row_id = 30
+      service.geomAdd(datas, oid).then(({success, info, row_id}) => {
+        if(success){
+          alert(info)
+          if(row_id){
+            this.props.history.push(`/gov/барилга-суурин-газар/${oid}/маягт/${row_id}/засах/`)
+          }
+        }
+        else
+        {
+          alert(info)
+        }
       })
     }
 

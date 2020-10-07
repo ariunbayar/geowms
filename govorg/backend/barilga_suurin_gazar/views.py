@@ -358,6 +358,17 @@ def geoJsonConvertGeom(json):
         return None
 
 
+def tableLastfindID(table_name):
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+                    sql = """ select id from {table_name} order by id desc limit 1; """.format(table_name=table_name)
+                    cursor.execute(sql)
+                    row_id = cursor.fetchone()
+        return row_id
+    except Exception:
+        return None
+
+
 def findGeomField(fields):
     geom_field = None
     for field in fields:
@@ -408,6 +419,71 @@ def updateGeom(request, payload, oid, pk):
         return JsonResponse(rsp)
 
 
+# @require_POST
+# @ajax_required
+# def geomAdd(request, payload, oid):
+
+#     org = get_object_or_404(Org, employee__user=request.user)
+#     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+#     get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+#     fields = gis_fields_by_oid(oid)
+#     table = gis_table_by_oid(oid)
+#     geom_field = findGeomField(fields)
+#     fields_to_update = [
+#         field.attname
+#         for field in fields
+#         if field.attname not in ['id', geom_field]
+#     ]
+#     values = [
+#         payload.get(f, '')
+#         for f in fields_to_update
+#     ]
+
+#     geojson = payload.get(geom_field)
+#     geom = geoJsonConvertGeom(geojson)
+#     if geom:
+#         values.append(geom)
+#     else:
+#         rsp = {
+#             'success': False,
+#             'info': "Geojson алдаатай байна.",
+#         }
+#         return JsonResponse(rsp)
+#     try:
+#         with connections['postgis_db'].cursor() as cursor:
+
+#             sql = """
+#                 INSERT INTO
+#                     {table}
+#                     ({fields}, "{geom}")
+#                 VALUES
+#                     ({values})
+#             """.format(
+#                 table=table,
+#                 geom=geom_field,
+#                 fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
+#                 values=('%s, ' * len(values))[:-2]
+#             )
+#             cursor.execute(sql, values)
+#         rsp = {
+#             'success': True,
+#             'info': "Амжилттай",
+#         }
+
+#     except Exception as e:
+
+#         if settings.DEBUG:
+#             raise e
+
+#         rsp = {
+#             'success': False,
+#             'info': "Өгөгдлийн зөв оруулна уу!",
+#         }
+
+#     return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
 def geomAdd(request, payload, oid):
@@ -416,24 +492,13 @@ def geomAdd(request, payload, oid):
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
+    geojson = payload.get('geojson')
     fields = gis_fields_by_oid(oid)
     table = gis_table_by_oid(oid)
     geom_field = findGeomField(fields)
-    fields_to_update = [
-        field.attname
-        for field in fields
-        if field.attname not in ['id', geom_field]
-    ]
-    values = [
-        payload.get(f, '')
-        for f in fields_to_update
-    ]
-
-    geojson = payload.get(geom_field)
     geom = geoJsonConvertGeom(geojson)
-    if geom:
-        values.append(geom)
-    else:
+
+    if not geom:
         rsp = {
             'success': False,
             'info': "Geojson алдаатай байна.",
@@ -445,19 +510,19 @@ def geomAdd(request, payload, oid):
             sql = """
                 INSERT INTO
                     {table}
-                    ({fields}, "{geom}")
+                    ("{geom}")
                 VALUES
-                    ({values})
+                    (%s)
             """.format(
                 table=table,
                 geom=geom_field,
-                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
-                values=('%s, ' * len(values))[:-2]
             )
-            cursor.execute(sql, values)
+            cursor.execute(sql, geom)
+        row_id = tableLastfindID(table)[0]
         rsp = {
             'success': True,
             'info': "Амжилттай",
+            'row_id': row_id
         }
 
     except Exception as e:

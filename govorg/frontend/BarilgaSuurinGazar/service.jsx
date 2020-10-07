@@ -8,7 +8,9 @@ export const service = {
     save,
     detail,
     sendFeature,
-    update
+    update,
+    geomUpdate,
+    geomAdd,
 }
 
 
@@ -64,4 +66,22 @@ function sendFeature(data, oid, id) {
         body: JSON.stringify({data, id}),
     }
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/save/`, opts).then(handleResponse)
+}
+
+function geomUpdate(geojson, oid, pk) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({geojson}),
+    }
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${pk}/geom-update/`, opts).then(handleResponse)
+}
+
+function geomAdd(geojson, oid) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({geojson}),
+    }
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/add-geom/`, opts).then(handleResponse)
 }
