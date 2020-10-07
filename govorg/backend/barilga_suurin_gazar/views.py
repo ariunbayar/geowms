@@ -375,6 +375,27 @@ def detail(request, oid, pk):
     return JsonResponse(rsp)
 
 
+def geoJsonConvertGeom(json):
+    geojson = str(json)
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+
+                    sql = """ SELECT ST_GeomFromGeoJSON(%s); """
+                    cursor.execute(sql, [geojson])
+                    geom = cursor.fetchone()
+        return geom
+    except Exception:
+        return None
+
+
+def findGeomField(fields):
+    geom_field = None
+    for field in fields:
+        if field.atttypid == 'geometry':
+            geom_field = field.attname
+    return geom_field
+
+
 @require_POST
 @ajax_required
 def updateGeom(request, payload, oid, pk):
@@ -389,27 +410,15 @@ def updateGeom(request, payload, oid, pk):
     geojson = payload.get('geojson')
     table = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
+    geom_field = findGeomField(fields)
 
-    geom_field = ''
-    for f in fields:
-        if f.atttypid == 'geometry':
-            geom_field = f.attname
-    geojson = str(geojson)
-
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-
-                    sql = """ SELECT ST_GeomFromGeoJSON(%s); """
-                    cursor.execute(sql, [geojson])
-                    geom = cursor.fetchone()
-
-    except Exception:
+    geom = geoJsonConvertGeom(geojson)
+    if not geom:
         rsp = {
             'success': False,
-            'info': "geom үүсэж чадсангүй",
+            'info': "Geojson алдаатай байна.",
         }
         return JsonResponse(rsp)
-
     try:
         with connections['postgis_db'].cursor() as cursor:
                     sql = """ UPDATE {table} SET {geom_field} = %s WHERE id = %s """.format(table=table, geom_field=geom_field)
@@ -427,3 +436,68 @@ def updateGeom(request, payload, oid, pk):
             'info': "Алдаа гарсан",
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def geomAdd(request, payload, oid):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    fields = gis_fields_by_oid(oid)
+    table = gis_table_by_oid(oid)
+    geom_field = findGeomField(fields)
+    fields_to_update = [
+        field.attname
+        for field in fields
+        if field.attname not in ['id', geom_field]
+    ]
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
+
+    geojson = payload.get(geom_field)
+    geom = geoJsonConvertGeom(geojson)
+    if geom:
+        values.append(geom)
+    else:
+        rsp = {
+            'success': False,
+            'info': "Geojson алдаатай байна.",
+        }
+        return JsonResponse(rsp)
+    try:
+        with connections['postgis_db'].cursor() as cursor:
+
+            sql = """
+                INSERT INTO
+                    {table}
+                    ({fields}, "{geom}")
+                VALUES
+                    ({values})
+            """.format(
+                table=table,
+                geom=geom_field,
+                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
+                values=('%s, ' * len(values))[:-2]
+            )
+            cursor.execute(sql, values)
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+
+    except Exception as e:
+
+        if settings.DEBUG:
+            raise e
+
+        rsp = {
+            'success': False,
+            'info': "Өгөгдлийн зөв оруулна уу!",
+        }
+
+    return JsonResponse(rsp)
