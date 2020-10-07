@@ -100,8 +100,6 @@ export default class Маягт extends Component {
                         dirty,
                     }) => {
 
-                        console.log(this.state.values);
-
                         const has_error = Object.keys(errors).length > 0
 
                         return (

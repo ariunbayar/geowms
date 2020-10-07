@@ -30,10 +30,10 @@ urlpatterns = [
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
             path('table_list/', govorg.backend.barilga_suurin_gazar.views.table_list),
             path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
-            path('add/', govorg.backend.barilga_suurin_gazar.views.add),
-            path('<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
-            path('<str:oid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
-            path('<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
+            path('<int:oid>/add/', govorg.backend.barilga_suurin_gazar.views.add),
+            path('<int:oid>/<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
+            path('<int:oid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
+            path('<int:oid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
 
         ], 'barilga_suurin_gazar'))),
 

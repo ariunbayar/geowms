@@ -4,7 +4,7 @@ from geojson import Feature, FeatureCollection
 
 from django.conf import settings
 from django.db import connections
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
@@ -346,7 +346,6 @@ def delete(request, payload, oid, pk):
 def detail(request, oid, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
-    oid = payload.get('oid')
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
@@ -360,16 +359,26 @@ def detail(request, oid, pk):
     ]
 
     cursor = connections['postgis_db'].cursor()
-    sql = """ SELECT {columns} FROM {table} where id = {pk} """.format(
-                    table=table,
-                    pk=pk,
-                    columns=', '.join(columns_to_select),
-                )
+    sql = """
+        SELECT
+            {columns}
+        FROM
+            {table}
+        WHERE
+            id = %s
+        LIMIIT 1
+    """.format(
+        columns=', '.join(columns_to_select),
+        table=table,
+    )
 
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
+    cursor.execute(sql, [pk])
+    rows = list(dict_fetchall(cursor))
 
-    rows = list(rows)
+    if len(rows) == 0:
+        raise Http404
+
+    row = rows[0]
 
     rsp = {
         'data': {
@@ -380,7 +389,7 @@ def detail(request, oid, pk):
                 }
                 for f in fields
             ],
-            'rows': rows,
+            'row': row,
         }
     }
     return JsonResponse(rsp)
