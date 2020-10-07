@@ -77,7 +77,7 @@ export default class Маягт extends Component {
             )
         }
 
-        const { values } = this.state
+        const { values, id } = this.state
         const { fields } = this.props
 
         return (
@@ -107,6 +107,15 @@ export default class Маягт extends Component {
                                 { fields.map((field, idx) => {
                                     if (field.type == 'geometry')
                                         return
+                                    else if (field.name == 'id' && id)
+                                        return (
+                                            <div className="form-group row" key={ idx }>
+                                                <label className="col-sm-2 col-form-label">{ field.name }</label>
+                                                <div className="col-sm-10">
+                                                    <input name={ field.name } className="form-control" disabled type="text" value={ id }/>
+                                                </div>
+                                            </div>
+                                        )
                                     else
                                         return (
                                             <div className="form-group row" key={ idx }>
