@@ -11,15 +11,25 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import { service } from './service';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Feature } from 'ol';
-import {ModifyButton} from './controls/ModifyButton'
-import {ModifyBarButton} from './controls/ModifyBarButton'
+import {ModifyButton} from './controls/Modify/ModifyButton'
+import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
+import {LineBarButton} from './controls/Line/LineBarButton'
+import {LineButton} from './controls/Line/LineButton'
+import {PointBarButton} from './controls/Point/PointBarButton'
+import {PointButton} from './controls/Point/PointButton'
+import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
+import {PolygonButton} from './controls/Polygon/PolygonButton'
+import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
+import {RemoveButton} from './controls/Remove/RemoveButton'
 import { set } from 'ol/transform';
 
 export default class TeevriinSuljee extends Component{
 
     constructor(props){
       super(props)
+      this.type = 'Point'
       this.state = {
+          format: new GeoJSON(),
           GeoJson: [],
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
@@ -28,34 +38,45 @@ export default class TeevriinSuljee extends Component{
           is_sidebar_open: false,
           oid: this.props.match.params.oid,
 
-          data: {
-              fields: [],
-              rows: [],
-          },
+          rows: [],
 
           featureID: null,
           featureID_list: [],
+          selectedFeature_ID: null,
           send: false,
           changedFeature: '',
           Mongolia: [11461613.630815497, 5878656.0228370065],
-          chkbox: true
+          chkbox: true,
+          type: '',
       }
 
       this.controls = {
-        cart: new ModifyButton(),
+        modifyBtn: new ModifyButton(),
+        lineBtn: new LineButton(),
+        pointBtn: new PointButton(),
+        polygonBtn: new PolygonButton(),
+        removeBtn: new RemoveButton(),
       }
+
+      this.modifyE = this.ExampleModify()
+      this.drawE = this.ExampleDraw()
 
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
-      this.onChange = this.onChange.bind(this)
       this.loadRows = this.loadRows.bind(this)
       this.clearMap = this.clearMap.bind(this)
-      this.deleteLinked = this.deleteLinked.bind(this)
       this.remove = this.remove.bind(this)
-      this.removeWithKey = this.removeWithKey.bind(this)
       this.saveData = this.saveData.bind(this)
       this.sendData = this.sendData.bind(this)
       this.ModifyButton = this.ModifyButton.bind(this)
+      this.LineButton = this.LineButton.bind(this)
+      this.PointButton = this.PointButton.bind(this)
+      this.PolygonButton = this.PolygonButton.bind(this)
+      this.RemoveButton = this.RemoveButton.bind(this)
+      this.modifiedFea = this.modifiedFea.bind(this)
+      this.featureSelected = this.featureSelected.bind(this)
+      this.drawed = this.drawed.bind(this)
+      this.snap = this.snap.bind(this)
     }
 
     componentDidMount(){
@@ -65,7 +86,7 @@ export default class TeevriinSuljee extends Component{
 
     loadData(){
 
-        const data = this.state.data
+        const rows = this.state.rows
         const map = this.map
 
         const styles = {
@@ -115,13 +136,12 @@ export default class TeevriinSuljee extends Component{
             }),
           }),
         };
-
-        data.rows.map((value) => {
+        rows.map((value) => {
           const styleFunction = function (feature) {
             return styles[feature.getGeometry().getType()];
           };
           const geoObject = value.geom
-          var vs = new VectorSource({
+          const vs = new VectorSource({
           features: new GeoJSON().readFeatures(geoObject, {
               dataProjection: this.state.dataProjection,
               featureProjection: this.state.featureProjection,
@@ -139,25 +159,18 @@ export default class TeevriinSuljee extends Component{
               style: styleFunction,
           });
           map.addLayer(vectorLayer)
-          var snap2 = new Snap({
-              source: vectorLayer.getSource(),
-          });
-          map.addInteraction(snap2);
+          this.snap(vectorLayer)
 
           this.vectorLayer = vectorLayer
         })
     }
 
     loadMap(){
-
       const raster = new TileLayer({
         source: new OSM(),
       });
-      // const path = 'frontend/data/geojson/zip.geojson'
       const vector = new VectorLayer({
-        source: new VectorSource({
-          // features: new GeoJSON().readFeatures(path),
-        }),
+        source: new VectorSource(),
         style: new Style({
           fill: new Fill({
             color: 'rgba(255, 255, 255, 0.2)',
@@ -174,152 +187,107 @@ export default class TeevriinSuljee extends Component{
           }),
         }),
       });
-
+      this.vector = vector
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
         controls: defaultControls().extend([
           new ModifyBarButton({ModifyButton: this.ModifyButton}),
-          this.controls.cart,
+          new LineBarButton({LineButton: this.LineButton}),
+          new PointBarButton({PointButton: this.PointButton}),
+          new PolygonBarButton({PolygonButton: this.PolygonButton}),
+          new RemoveBarButton({RemoveButton: this.RemoveButton}),
+          this.controls.modifyBtn,
+          this.controls.lineBtn,
+          this.controls.pointBtn,
+          this.controls.polygonBtn,
         ]),
         view: new View({
           center: this.state.Mongolia,
           zoom: 5,
         }),
       });
-    //   map.on('click', this.handleMapClick)
       this.map = map
+      this.snap(vector)
+      this.setState({ type: 'Point' })
+      this.modifyE.funct()
+    }
 
-      const ExampleModify = {
-        init: function () {
-          this.select = new Select();
-          map.addInteraction(this.select);
-          this.select.on("select", event => featureSelected(event));
-
-          this.modify = new Modify({
-            features: this.select.getFeatures(),
+    ExampleModify(){
+      const init = () => {
+        const select = new Select();
+        this.map.addInteraction(select);
+        select.on("select", event => this.featureSelected(event));
+        const modify = new Modify({
+          features: select.getFeatures(),
+        })
+        modify.on("modifyend", event => this.modifiedFea(event));
+        this.map.addInteraction(modify);
+        this.select = select
+        this.modify = modify
+        this.modifyE.setEvents()
+      }
+      const setEvents = () => {
+        var selectedFeatures = this.select.getFeatures();
+        this.select.on('change:active', function () {
+          selectedFeatures.forEach(function (each) {
+            selectedFeatures.remove(each);
           });
+        });
+      }
+      const setActive = (active) => {
+        this.select.setActive(active);
+        this.modify.setActive(active);
+      }
+      return { funct: init, setEvents: setEvents, setActive: setActive }
+    }
 
-          this.modify.on("modifyend", event => modifiedFea(event));
-          this.modify.on("modifystart", event => startModFea(event));
-          map.addInteraction(this.modify);
-          this.setEvents();
-        },
-        setEvents: function () {
-          var selectedFeatures = this.select.getFeatures();
-          this.select.on('change:active', function () {
-            selectedFeatures.forEach(function (each) {
-              selectedFeatures.remove(each);
-            });
-          });
-        },
-        setActive: function (active) {
-          this.select.setActive(active);
-          this.modify.setActive(active);
-        },
-      };
-      this.setState({ ExampleModify })
-      ExampleModify.init();
-
-      var optionsForm = document.getElementById('options-form');
-      var ExampleDraw = {
-        init: function () {
-          map.addInteraction(this.Point);
-          this.Point.setActive(false);
-          map.addInteraction(this.LineString);
-          this.LineString.setActive(false);
-          map.addInteraction(this.Polygon);
-          this.Polygon.setActive(false);
-          map.addInteraction(this.Circle);
-          this.Circle.setActive(false);
-          map.addInteraction(this.MultiPoint);
-          this.MultiPoint.setActive(false);
-        },
-        Point: new Draw({
-          source: vector.getSource(),
-          type: 'Point',
-        }),
-        MultiPoint: new Draw({
-          source: vector.getSource(),
-          type: 'Point',
-        }),
-        LineString: new Draw({
-          source: vector.getSource(),
-          type: 'LineString',
-        }),
-        Polygon: new Draw({
-          source: vector.getSource(),
-          type: 'Polygon',
-        }),
-        Circle: new Draw({
-          source: vector.getSource(),
-          type: 'Circle',
-        }),
-        getActive: function () {
-          return this.activeType ? this[this.activeType].getActive() : false;
-        },
-        setActive: function (active) {
-          var type = optionsForm.elements['draw-type'].value;
-          if (active) {
-            this.activeType && this[this.activeType].setActive(false);
-            this[type].setActive(true);
-            this.activeType = type;
-          } else {
-            this.activeType && this[this.activeType].setActive(false);
-            this.activeType = null;
-          }
-        },
-      };
-      this.setState({ ExampleDraw })
-      ExampleDraw.init();
-      ExampleDraw.setActive(true);
-      ExampleModify.setActive(false);
-      // The snap interaction must be added after the Modify and Draw interactions
-      // in order for its map browser event handlers to be fired first. Its handlers
-      // are responsible of doing the snapping.
-      var snap = new Snap({
-        source: vector.getSource(),
-      });
-      map.addInteraction(snap);
-      this.vector = vector
-      const featureSelected = (event) => {
-        
-        if(event.selected[0]){
-          
-          const featureID_list = this.state.featureID_list
-          
-          
-          featureID_list.push(event.selected[0].getProperties()['id'])
-          this.setState({ send: true, featureID_list})
-        }else{
-          this.setState({ send: false })
+    ExampleDraw(){
+      const init = (elem) => {
+        this.map.addInteraction(elem);
+        elem.setActive(false);
+      }
+      const getActive = () => {
+        return this.draw ? this.draw.getActive() : false;
+      }
+      const setActive = (active) => {
+        if (active) {
+          this.draw.setActive(true);
+        } else {
+          this.draw.setActive(false);
         }
       }
+      return { init, init, getActive: getActive, setActive: setActive }
+    };
 
-      const modifiedFea = (event) => {
-        
-        const features = event.features.getArray()     
-        const format = new GeoJSON()
+    featureSelected(event){
+        if(event.selected[0])
+        {
+          const featureID_list = this.state.featureID_list
+          const selectedFeature_ID = event.selected[0].getProperties()['id']
+          featureID_list.push(selectedFeature_ID)
+          this.setState({ send: true, featureID_list, selectedFeature_ID })
+        }
+        else
+        {
+          this.setState({ send: false })
+        }
+    }
 
-        data = format.writeFeatureObject(features[0])
-
-        const changedFeature = JSON.stringify(data, null, 4)
-        
-        this.setState({ changedFeature })
-        this.sendData(changedFeature)
-        
-      }
-
-      const startModFea = (event) => {
-        
-      }
+    modifiedFea (event) {
+      const features = event.features.getArray()
+      const {format} = this.state
+      const data = format.writeFeatureObject(features[0])
+      const changedFeature = JSON.stringify(data, null, 4)
+      this.setState({ changedFeature })
+      this.sendData(changedFeature)
     }
 
     loadRows() {
         service
             .rows(this.state.oid)
-            .then(({ data }) => {
-                this.setState({ data })
+            .then(({ rows }) => {
+                this.setState({ rows })
                 this.loadData()
             })
     }
@@ -327,96 +295,48 @@ export default class TeevriinSuljee extends Component{
     componentDidUpdate(prevProps, prevState) {
         const oid_old = prevProps.match.params.oid
         const oid = this.props.match.params.oid
+        const type = this.state.type
+        if(prevState.type !== type){
+          this.map.removeInteraction(this.draw);
+          const draw = new Draw({
+            source: this.vector.getSource(),
+            type: type,
+          })
+          this.snap(this.vector)
+          this.draw = draw
+          draw.setActive(true);
+          this.modifyE.setActive(false);
+          this.drawE.init(draw)
+          draw.on('drawend', event => this.drawed(event))
+        }
         if (oid_old != oid) {
-            this.setState({ oid }, () => {
-                this.loadRows()
-            })
+          this.setState({ oid }, () => {
+              this.loadRows()
+          })
         }
     }
 
-    onChange(e){
-      const ExampleDraw = this.state.ExampleDraw
-      const ExampleModify = this.state.ExampleModify
-      const parser = new GeoJSON();
-      var type = e.target.getAttribute('name');
-        var value = e.target.value;
-        if (type == 'draw-type') {
-          ExampleDraw.getActive() && ExampleDraw.setActive(true);
-        } else if (type == 'interaction') {
-          if (value == 'modify') {
-            ExampleDraw.setActive(false);
-            ExampleModify.setActive(true);
-          } else if (value == 'draw') {
-            ExampleDraw.setActive(true);
-            ExampleModify.setActive(false);
-          }
-        }
-      // ExampleDraw.Point.on('drawstart', function(e){
-      //   if(value === 'Point'){
-      //     this.clearMap()
-      //   }
-      // })
-      // ExampleDraw.LineString.on('drawstart', function(e){
-      //   if(value === 'LineString'){
-      //     this.clearMap()
-      //   }
-      // })
-      // ExampleDraw.Polygon.on('drawstart', function(e){
-      //   if(value === 'Polygon'){
-      //     this.clearMap()
-      //   }
-      // })
-      // ExampleDraw.Circle.on('drawstart', function(e){
-      //   if(value === 'Circle'){
-      //     this.clearMap()
-      //   }
-      // })
+    snap(vector){
+      const snap = new Snap({
+        source: vector.getSource(),
+      });
+      this.map.addInteraction(snap);
+    }
+
+    drawed(event){
+      const feature = event.feature
       var featureID = this.state.featureID
       const vectorLayer = this.vectorLayer
-      ExampleDraw.Point.on('drawend', function(e){
-        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
+      const format = this.state.format
+      let area = format.writeFeatureObject(feature, {featureProjection: 'EPSG:3857'});
+      featureID += 1
+      feature.setProperties({
+          'id': featureID
       })
-      ExampleDraw.LineString.on('drawend', function(e){
-        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
-      })
-      ExampleDraw.Polygon.on('drawend', function(e){
-        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
-        const format = new GeoJSON(),
-        data = format.writeFeatures(vectorLayer.getSource().getFeatures());
-        
-      })
-      ExampleDraw.Circle.on('drawend', function(e){
-        let area = parser.writeFeatureObject(e.feature, {featureProjection: 'EPSG:3857'});
-        
-        featureID += 1
-        e.feature.setProperties({
-            'id': featureID
-        })
-        const properties = e.feature.getProperties();
-        featureID = properties.id;
-      })
-      this.setState({ featureID: featureID })
+      const properties = feature.getProperties();
+      featureID = properties.id;
+      const drawed = JSON.stringify(area, null, 4)
+      this.sendData(drawed)
     }
 
     clearMap() {
@@ -424,18 +344,8 @@ export default class TeevriinSuljee extends Component{
       vector.getSource().clear();
     }
 
-    deleteLinked(){
-      this.removeSelectedFeature()
-    }
-
-    removeSelectedFeature() {
+    RemoveButton() {
       this.remove()
-    }
-
-    removeWithKey(e){
-      if (e.keyCode == 48){
-        this.remove()
-      }
     }
 
     remove(){
@@ -455,53 +365,49 @@ export default class TeevriinSuljee extends Component{
     }
 
     sendData(data){
+      const id = this.state.selectedFeature_ID
       const oid = this.state.oid
-      service.sendFea({data}, oid).then(({success}) => {
+      service.sendFeature(data, oid, id).then(rsp => {
+        console.log(rsp)
       })
     }
 
     saveData() {
       const vectorLayer = this.vectorLayer
-      var format = new GeoJSON(),
+      const {format} = this.state
       data = format.writeFeatures(vectorLayer.getSource().getFeatures());
     }
 
     ModifyButton(){
+      this.drawE.setActive(false);
+      this.modifyE.setActive(true);
+    }
 
+    LineButton(){
+      this.setState({ type: 'LineString' })
+      this.drawE.getActive()
+      this.drawE.setActive(true);
+      this.modifyE.setActive(false);
+    }
+
+    PointButton(){
+      this.setState({ type: 'Point' })
+      this.drawE.getActive()
+      this.drawE.setActive(true);
+      this.modifyE.setActive(false);
+    }
+
+    PolygonButton(){
+      this.setState({ type: 'Polygon' })
+      this.drawE.getActive()
+      this.drawE.setActive(true);
+      this.modifyE.setActive(false);
     }
 
     render(){
         return (
-            <div>
-              <form id="options-form" autoComplete="off" onChange={(e) => this.onChange(e)}>
-                <div className="radio">
-                  <label>
-                    <input type="radio" name="interaction" value="draw" id="draw" defaultChecked={this.state.chkbox}/>
-                    Draw &nbsp;
-                  </label>
-                </div>
-                <div className="radio">
-                  <label>
-                    <input type="radio" name="interaction" value="modify"/>
-                    Modify &nbsp;
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>Draw type &nbsp;</label>
-                  <select name="draw-type" id="draw-type">
-                    <option value="Point">Point</option>
-                    <option value="LineString">LineString</option>
-                    <option value="Polygon">Polygon</option>
-                    <option value="Circle">Circle</option>
-                  </select>
-                </div>
-              </form>
-              <button className="btn btn-danger" onClick={() => this.deleteLinked()} onKeyDown={(e) => this.removeWithKey(e)}>Арилгах</button>
-              <div className="row">
-                <div className="col-md-12 px-0">
-                    <div id="map"></div>
-                </div>
-              </div>
+            <div className="col-md-12">
+                  <div id="map"></div>
             </div>
         )
     }

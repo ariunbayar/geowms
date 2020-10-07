@@ -7,6 +7,7 @@ export const service = {
     remove,
     save,
     detail,
+    sendFeature,
 }
 
 
@@ -48,10 +49,10 @@ function detail(oid, id) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/detail/`, opts).then(handleResponse)
 }
 
-function sendFeature(data, oid) {
+function sendFeature(data, oid, id) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(data),
+        body: JSON.stringify({data, id}),
     }
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/save/`, opts).then(handleResponse)
 }
