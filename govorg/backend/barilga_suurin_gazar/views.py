@@ -31,6 +31,7 @@ def _get_changeset_display(ob):
         'projection': ob.projection
     }
 
+
 def _get_feature_coll(ob, changeset_list):
     geom_type = changeset_list[ob]['geom_type']
     if geom_type == 'Point':
