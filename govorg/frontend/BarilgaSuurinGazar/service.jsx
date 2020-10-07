@@ -7,6 +7,7 @@ export const service = {
     remove,
     save,
     detail,
+    update
 }
 
 
@@ -38,6 +39,15 @@ function save(oid, values) {
     }
 
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/add/`, opts).then(handleResponse)
+}
+
+function update(oid, data, pk) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(data),
+    }
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${pk}/save/`, opts).then(handleResponse)
 }
 
 function detail(oid, id) {

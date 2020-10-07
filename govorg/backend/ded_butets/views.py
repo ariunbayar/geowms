@@ -235,7 +235,6 @@ def add(request, payload, oid):
 @require_POST
 @ajax_required
 def save(request, payload, oid, pk):
-    data = payload.get('data')
 
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_DED_BUTETS)[0]
@@ -243,45 +242,22 @@ def save(request, payload, oid, pk):
 
     tabne_data = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
-    table_fields_zow = ''
-    data_fields_json = []
-    table_fields_real = []
-    data_fields = []
-    data_rows = []
-    check = False
-    for f in fields:
-        table_fields_real.append(f.attname)
     # query set beltgeh
-    for index, row in enumerate(data):
-        data_fields_json.append(row)
-        if not row == 'id':
-            data_fields.append(row)
-            data_rows.append(data[row])
-            table_fields_zow = table_fields_zow + str(row) + '=' + '%s'
-            check = True
-        if index < len(data) -1 and check:
-            table_fields_zow = table_fields_zow + ', '
-    # query set beltgeh end
+    fields_to_update = [
+        field.attname
+        for field in fields
+        if field.attname not in ['id', 'geom']
+    ]
 
-    count = 0
-    for real in table_fields_real:
-        for jsons in data_fields_json:
-            if real == jsons:
-                count = count + 1
-    if not len(table_fields_real) == count:
-        rsp = {
-            'success': False,
-            'info': "Хүснэгтийн нэр буруу байна.",
-        }
-        return JsonResponse(rsp)
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
+
     try:
         with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {tabne_data} SET {table_fields_zow} WHERE id = {pk} """.format(
-                tabne_data=tabne_data,
-                table_fields_zow=table_fields_zow,
-                pk=pk,
-            )
-            cursor.execute(sql, data_rows)
+            sql = """ UPDATE {tabne_data} SET {fields} = %s WHERE id = {pk} """.format(tabne_data=tabne_data, pk=pk, fields='= %s, '.join(['"{}"'.format(f) for f in fields_to_update]))
+            cursor.execute(sql, values)
         rsp = {
             'success': True,
             'info': "Амжилттай",
@@ -295,6 +271,7 @@ def save(request, payload, oid, pk):
         return JsonResponse(rsp)
 
 
+
 @require_GET
 @ajax_required
 def delete(request, oid, pk):
@@ -304,18 +281,12 @@ def delete(request, oid, pk):
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     table = gis_table_by_oid(oid)
-
     try:
 
         with connections['postgis_db'].cursor() as cursor:
 
-            sql = """
-                DELETE FROM
-                    {table}
-                WHERE id = %s
-            """.format(table=table)
-
-            cursor.execute(sql, [pk])
+            sql = """ DELETE FROM {table} WHERE id = {pk} """.format(table=table, pk=pk)
+            cursor.execute(sql)
 
         rsp = {
             'success': True,
