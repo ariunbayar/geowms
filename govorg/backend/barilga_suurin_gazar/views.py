@@ -179,68 +179,53 @@ def rows(request, oid):
 @ajax_required
 def add(request, payload, oid):
 
-    data = payload
-
     org = get_object_or_404(Org, employee__user=request.user)
     bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
     get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     fields = gis_fields_by_oid(oid)
+    table = gis_table_by_oid(oid)
 
-    tabne_data = gis_table_by_oid(oid)
-    table_fields = '('
-    table_rows = []
-    table_fields_real = []
-    table_fields_json = []
-    check = False
-    # query insert and value beltgeh
-    for f in fields:
-        table_fields_real.append(f.attname)
+    fields_to_update = [
+        '"{}"'.format(field.attname)
+        for field in fields
+        if field.attname not in ['id', 'geom']
+    ]
 
-    for index, row in enumerate(data):
-        table_fields_json.append(row)
-        if not row == "id":
-            table_fields = table_fields + row
-            table_rows.append(data[row])
-            check = True
-        if index < len(data) -1 and check:
-            table_fields = table_fields + ', '
-    table_fields = table_fields + ')'
-    count = 0
-    for real in table_fields_real:
-        for jsons in table_fields_json:
-            if real == jsons:
-                count = count + 1
-    if not len(table_fields_real) == count:
-        rsp = {
-            'success': False,
-            'info': "Хүснэгтийн нэр буруу байна.",
-        }
-        return JsonResponse(rsp)
+    values = [
+        payload.get(f, '')
+        for f in fields_to_update
+    ]
 
-    # ['1', '2'] convert to ('1', '2')
-    # table_rows = tuple(table_rows)
-    # ['1', '2'] convert to ('1', '2')  end
     try:
         with connections['postgis_db'].cursor() as cursor:
-                sql = """ INSERT INTO {tabne_data} {table_fields} VALUES ({values}) """.format(
-                    tabne_data=tabne_data,
-                    table_fields=table_fields,
-                    values=('%s, ' * len(table_rows))[:-2]
-                )
-                cursor.execute(sql, table_rows)
+
+            sql = """
+                INSERT INTO
+                    {table}
+                    ({fields})
+                VALUES
+                    ({values})
+            """.format(
+                table=table,
+                fields=', '.join(fields_to_update),
+                values=('%s, ' * len(values))[:-2]
+            )
+            cursor.execute(sql, values)
+
         rsp = {
             'success': True,
             'info': "Амжилттай",
         }
-        return JsonResponse(rsp)
 
     except Exception:
+
         rsp = {
             'success': False,
-            'info': "Алдаа гарсан",
+            'info': "Өгөгдлийн зөв оруулна уу!",
         }
-        return JsonResponse(rsp)
+
+    return JsonResponse(rsp)
 
 
 @require_POST
