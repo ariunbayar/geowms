@@ -4,16 +4,19 @@ import Modal from "../../../src/components/Modal/DeleteModal"
 import { validationSchema } from './validationSchema'
 import { service } from "./service"
 
+
 export default class Маягт extends Component {
 
     constructor(props) {
         super(props)
 
         this.state = {
-            values: {},
+            values: {
+                'id': '',
+                'f_code': '',
+            },
             is_loading: true,
             oid: this.props.match.params.oid,
-            is_modal_delete_open: false,
             data: {
                 fields: [],
                 rows: [],
@@ -28,16 +31,15 @@ export default class Маягт extends Component {
         this.setState({ values })
         setStatus('checking')
         setSubmitting(true)
-        setTimeout(() => {
-            service
+
+        service
             .save(values)
-            .then(({success}) => {
+            .then(({ success }) => {
                 if (success) {
                     setStatus('saved')
                     setSubmitting(false)
                 }
             })
-        }, 800)
     }
 
     componentDidMount() {
@@ -69,13 +71,15 @@ export default class Маягт extends Component {
         }
 
         const { fields } = this.state.data
+
         return (
             <div>
                 <Formik
-                        enableReinitialize
-                        initialValues={this.state.values}
-                        onSubmit={this.onSubmit}
-                    >
+                    enableReinitialize
+                    initialValues={this.state.values}
+                    onSubmit={this.onSubmit}
+                    validationSchema={ validationSchema }
+                >
                     {({
                         errors,
                         status,
@@ -87,19 +91,24 @@ export default class Маягт extends Component {
                         isValid,
                         dirty,
                     }) => {
+
                         const has_error = Object.keys(errors).length > 0
+
                         return (
                             <Form>
                                 { fields.map((field, idx) =>
-                                    <div className="form-group" key={ idx }>
-                                        <label className="">{ field.name }</label>
-                                        <input name={ field.name } className="form-control" placeholder={ field.name } />
+                                    <div className="form-group row" key={ idx }>
+                                        <label className="col-sm-2 col-form-label">{ field.name }</label>
+                                        <div className="col-sm-10">
+                                            <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
+                                            <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                        </div>
                                     </div>
                                 )}
 
                                 <div>
                                     <button type="submit" className="btn" disabled={isSubmitting || has_error}>
-                                        {isSubmitting && <i className="fas fa-spinner fa-pulse"></i>}
+                                        {isSubmitting && <i className="fa fa-spinner fa-pulse"></i>}
                                         {isSubmitting && 'Шалгаж байна.'}
                                         {!isSubmitting && 'Хадгалах'}
                                     </button>
