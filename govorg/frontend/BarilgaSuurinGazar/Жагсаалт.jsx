@@ -1,105 +1,81 @@
 import React, { Component } from "react"
-import Modal from "../../../src/components/Modal/DeleteModal"
+
 import { service } from "./service"
-import { NavLink } from "react-router-dom"
+import ЖагсаалтItem from "./ЖагсаалтItem"
+
 
 export default class Жагсаалт extends Component {
 
     constructor(props) {
+
         super(props)
 
         this.state = {
-            id: this.props.match.params.oid,
+
+            is_loading: true,
+
+            oid: this.props.match.params.oid,
             is_modal_delete_open: false,
             data: {
                 fields: [],
                 rows: [],
             },
+
         }
 
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
+        this.loadData = this.loadData.bind(this)
 
     }
 
     componentDidMount() {
+        this.loadData()
+    }
 
+    loadData() {
         service
-            .rows(this.state.id)
+            .rows(this.state.oid)
             .then(({ data }) => {
-                this.setState({ data })
-        })
-
-    }
-
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
-
-    handleRemove(id) {
-        service.remove(id).then(({success}) => {
-            if (success) this.props.handleSaveSuccess
-        })
+                this.setState({
+                    data,
+                    is_loading: false,
+                })
+            })
     }
 
     render() {
-        const {is_modal_delete_open}=this.state
-        const { rows, fields } = this.state.data
+
+        if (this.state.is_loading) {
+            return (
+                <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
+            )
+        }
+
+        const { is_modal_delete_open } = this.state
+        const { oid } = this.state
+        const { fields, rows } = this.state.data
 
         return (
-            <table className="table table-bordered table-sm">
+            <table className="table-responsive table-bordered table-sm">
                 <thead>
                     <tr>
+                        <th></th>
+                        <th></th>
                         { fields.map((field, idx) =>
                             <th key={ idx }>
-                                { field }
+                                { field.name }
                             </th>
                         )}
-                            <th></th>
-                            <th></th>
                     </tr>
                 </thead>
                 <tbody>
-
                     { rows.map((row, idx) =>
-
-                        <tr key={ idx }>
-
-                            { fields.map((field, idx) =>
-
-                                <td key={ idx }>
-                                    { row[field] }
-                                </td>
-
-                            )}
-                            <td>
-                                <NavLink to={`#`}>
-                                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                                </NavLink>
-                            </td>
-                            <td>
-                                <a href="#" onClick={this.handleModalDeleteOpen}>
-                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                </a>
-
-                                {is_modal_delete_open &&
-                                    <Modal
-                                        modalClose={this.handleModalDeleteClose}
-                                        modalAction={() => this.handleRemove(row.id)}
-                                        text={`Та "${row.id}" id-тай мэдээллийг устгахдаа итгэлтэй байна уу?`}
-                                        title="Тохиргоог устгах"
-                                    />
-                                }
-                            </td>
-
-                        </tr>
-
+                        <ЖагсаалтItem
+                            key={ idx }
+                            oid={ this.state.oid }
+                            item={ row }
+                            fields={ fields }
+                            handleUpdate={ this.loadData }
+                        />
                     )}
                 </tbody>
             </table>

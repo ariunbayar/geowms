@@ -2,9 +2,11 @@ import requests
 import json
 from geojson import Feature, FeatureCollection
 
+from django.conf import settings
 from django.db import connections
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
 
 from backend.changeset.models import ChangeSet
@@ -80,6 +82,7 @@ def changeset_all(request):
 
 @require_GET
 @ajax_required
+@cache_page(settings.DEBUG and 300 or 0)
 def table_list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -120,7 +123,12 @@ def table_list(request):
 
 @require_GET
 @ajax_required
+@cache_page(settings.DEBUG and 300 or 0)
 def rows(request, oid):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
 
     table = gis_table_by_oid(oid)
 
@@ -149,7 +157,13 @@ def rows(request, oid):
 
     rsp = {
         'data': {
-            'fields': [f.attname for f in fields],
+            'fields': [
+                {
+                    'name': f.attname,
+                    'type': f.atttypid,
+                }
+                for f in fields
+            ],
             'rows': rows,
         }
     }
@@ -159,8 +173,14 @@ def rows(request, oid):
 @require_POST
 @ajax_required
 def add(request, payload):
+
     oid = payload.get('oid')
     data = payload.get('data')
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
     fields = gis_fields_by_oid(oid)
 
     tabne_data = gis_table_by_oid(oid)
@@ -222,9 +242,14 @@ def add(request, payload):
 @require_POST
 @ajax_required
 def save(request, payload, pk):
+
     oid = payload.get('oid')
     data = payload.get('data')
-    pk = pk
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
     tabne_data = gis_table_by_oid(oid)
     fields = gis_fields_by_oid(oid)
     table_fields_zow = ''
@@ -281,24 +306,86 @@ def save(request, payload, pk):
 
 @require_POST
 @ajax_required
-def delete(request, payload, pk):
-    oid = payload.get('oid')
-    tabne_data = gis_table_by_oid(oid)
+def delete(request, payload, oid, pk):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
     try:
+
         with connections['postgis_db'].cursor() as cursor:
-                sql = """ DELETE FROM {tabne_data} where id = {pk} """.format(
-                    tabne_data=tabne_data,
-                    pk=pk,
-                )
-                cursor.execute(sql)
+
+            sql = """
+                DELETE FROM
+                    {table}
+                WHERE id = %s
+            """.format(table=table)
+
+            cursor.execute(sql, [pk])
+
         rsp = {
             'success': True,
             'info': "Амжилттай",
         }
-        return JsonResponse(rsp)
+
     except Exception:
+
         rsp = {
             'success': False,
             'info': "Алдаа гарсан",
         }
-        return JsonResponse(rsp)
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def detail(request, oid, pk):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
+    get_object_or_404(bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    columns_to_select = [
+        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
+        for f in fields
+    ]
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            {columns}
+        FROM
+            {table}
+        WHERE
+            id = %s
+        LIMIT 1
+    """.format(
+        columns=', '.join(columns_to_select),
+        table=table,
+    )
+
+    cursor.execute(sql, [pk])
+    rows = list(dict_fetchall(cursor))
+
+    if len(rows) == 0:
+        raise Http404
+
+    rsp = {
+        'fields': [
+            {
+                'name': f.attname,
+                'type': f.atttypid,
+            }
+            for f in fields
+        ],
+        'values': rows[0],
+    }
+    return JsonResponse(rsp)

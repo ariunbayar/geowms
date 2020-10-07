@@ -12,29 +12,34 @@ export default class Index extends Component {
         return (
             <div className="card">
               <div className="card-body">
-                <ul className="nav nav-tabs nav-tabs-primary nav-justified">
+
+                <ul className="nav nav-tabs nav-tabs-primary">
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/`} activeClassName="nav-link active"  data-toggle="tab">
-                            <span className="hidden-xs gp-text-primary">MAP</span>
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/`} exact className="nav-link" activeClassName="active">
+                            <i className="fa fa-map"></i> {}
+                            <span className="hidden-xs">Газрын зургаар</span>
                         </NavLink>
                     </li>
                     <li className="nav-item">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} activeClassName="nav-link active"  data-toggle="tab">
-                            <span className="hidden-xs gp-text-primary">ЖАГСААЛТ</span>
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/жагсаалт/`} className="nav-link" activeClassName="active">
+                            <i className="fa fa-table"></i> {}
+                            <span className="hidden-xs">Хүснэгтээр</span>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/`} activeClassName="nav-link active"  data-toggle="tab">
-                            <span className="hidden-xs gp-text-primary">МАЯГТ</span>
+                        <NavLink to={`/gov/барилга-суурин-газар/${oid}/маягт/шинэ/`} className="nav-link" activeClassName="active">
+                            <i className="fa fa-edit"></i> {}
+                            <span className="hidden-xs">Өөрчлөлт</span>
                         </NavLink>
                     </li>
                 </ul>
 
                 <div className="tab-content">
                     <Switch>
-                        <Route path={`/gov/барилга-суурин-газар/:oid/жагсаалт/`} component={Жагсаалт} />
-                        <Route path={`/gov/барилга-суурин-газар/:oid/маягт/`} component={Маягт} />
-                        <Route path={`/gov/барилга-суурин-газар/:oid/`} component={Map} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/жагсаалт/" component={Жагсаалт} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/маягт/шинэ/" component={Маягт} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/маягт/:id/засах/" component={Маягт} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/" component={Map} />
                     </Switch>
                 </div>
               </div>

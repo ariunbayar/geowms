@@ -4,42 +4,84 @@ import Modal from "../../../src/components/Modal/DeleteModal"
 import { validationSchema } from './validationSchema'
 import { service } from "./service"
 
+
 export default class Маягт extends Component {
 
     constructor(props) {
         super(props)
 
         this.state = {
-            id: this.props.match.params.oid,
-            is_modal_delete_open: false,
-            data: {
-                fields: [],
-                rows: [],
-            },
+            is_loading: true,
+
+            oid: this.props.match.params.oid,
+            id: this.props.match.params.id,
+
+            fields: [],
+            values: {},
+
         }
 
+        this.onSubmit = this.onSubmit.bind(this)
+
+    }
+
+    onSubmit(values, { setStatus, setSubmitting }) {
+        this.setState({ values })
+        setStatus('checking')
+        setSubmitting(true)
+
+        service
+            .save(this.state.oid, values)
+            .then(({ success }) => {
+                if (success) {
+                    setStatus('saved')
+                    setSubmitting(false)
+                }
+            })
     }
 
     componentDidMount() {
 
         service
-            .rows(this.state.id)
-            .then(({ data }) => {
-                this.setState({ data })
-        })
+            .detail(this.state.oid, this.state.id)
+            .then(({ values, fields }) => {
 
+                /*
+                const values = {}
+
+                data.fields.forEach((field) => {
+                    if (field.type != 'geometry') {
+                        values[field.name] = ''
+                    }
+                })
+                */
+
+                this.setState({
+                    is_loading: false,
+                    fields,
+                    values,
+            })
+        })
     }
 
     render() {
-        const { fields } = this.state.data
+
+        if (this.state.is_loading) {
+            return (
+                <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
+            )
+        }
+
+        const { fields, values } = this.state
+
         return (
             <div>
                 <Formik
-                        enableReinitialize
-                        initialValues={this.state.values}
-                        validationSchema={validationSchema}
-                        onSubmit={this.onSubmit}
-                    >
+                    enableReinitialize
+                    initialValues={ values }
+                    onSubmit={ this.onSubmit }
+                    validate={ () => ({}) }
+                >
                     {({
                         errors,
                         status,
@@ -51,19 +93,29 @@ export default class Маягт extends Component {
                         isValid,
                         dirty,
                     }) => {
+
                         const has_error = Object.keys(errors).length > 0
+
                         return (
                             <Form>
-                                { fields.map((field, idx) =>
-                                    <div className="form-group" key={ idx }>
-                                        <label className="">{ field }</label>
-                                        <input className="form-control" placeholder={ field } />
-                                    </div>
-                                )}
+                                { fields.map((field, idx) => {
+                                    if (field.type == 'geometry')
+                                        return
+                                    else
+                                        return (
+                                            <div className="form-group row" key={ idx }>
+                                                <label className="col-sm-2 col-form-label">{ field.name }</label>
+                                                <div className="col-sm-10">
+                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
+                                                    <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                                </div>
+                                            </div>
+                                        )
+                                })}
 
                                 <div>
                                     <button type="submit" className="btn" disabled={isSubmitting || has_error}>
-                                        {isSubmitting && <i className="fas fa-spinner fa-pulse"></i>}
+                                        {isSubmitting && <i className="fa fa-spinner fa-pulse"></i>}
                                         {isSubmitting && 'Шалгаж байна.'}
                                         {!isSubmitting && 'Хадгалах'}
                                     </button>
