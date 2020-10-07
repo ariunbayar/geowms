@@ -31,22 +31,19 @@ function remove(oid, id) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/remove/`, opts).then(handleResponse)
 }
 
-function save(values) {
+function save(oid, values) {
 
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(values),
     }
 
-    return fetch(`/gov/api/barilga_suurin_gazar/add/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/add/`, opts).then(handleResponse)
 }
 
 function detail(oid, id) {
 
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify(values),
-    }
+    const opts = getGetOptions()
 
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/detail/`, opts).then(handleResponse)
 }

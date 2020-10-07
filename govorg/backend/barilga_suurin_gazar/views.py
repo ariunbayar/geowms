@@ -366,7 +366,7 @@ def detail(request, oid, pk):
             {table}
         WHERE
             id = %s
-        LIMIIT 1
+        LIMIT 1
     """.format(
         columns=', '.join(columns_to_select),
         table=table,
@@ -378,18 +378,14 @@ def detail(request, oid, pk):
     if len(rows) == 0:
         raise Http404
 
-    row = rows[0]
-
     rsp = {
-        'data': {
-            'fields': [
-                {
-                    'name': f.attname,
-                    'type': f.atttypid,
-                }
-                for f in fields
-            ],
-            'row': row,
-        }
+        'fields': [
+            {
+                'name': f.attname,
+                'type': f.atttypid,
+            }
+            for f in fields
+        ],
+        'values': rows[0],
     }
     return JsonResponse(rsp)

@@ -36,10 +36,10 @@ export default class Index extends Component {
 
                 <div className="tab-content">
                     <Switch>
-                        <Route path={`/gov/барилга-суурин-газар/:oid/жагсаалт/`} component={Жагсаалт} />
-                        <Route path={`/gov/барилга-суурин-газар/:oid/маягт/`} component={Маягт} />
-                        <Route path={`/gov/барилга-суурин-газар/:oid/маягт/:id/засах/`} component={Маягт} />
-                        <Route path={`/gov/барилга-суурин-газар/:oid/`} component={Map} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/жагсаалт/" component={Жагсаалт} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/маягт/шинэ/" component={Маягт} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/маягт/:id/засах/" component={Маягт} />
+                        <Route path="/gov/барилга-суурин-газар/:oid/" component={Map} />
                     </Switch>
                 </div>
               </div>

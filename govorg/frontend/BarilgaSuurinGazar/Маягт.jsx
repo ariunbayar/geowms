@@ -11,13 +11,14 @@ export default class Маягт extends Component {
         super(props)
 
         this.state = {
-            values: {},
             is_loading: true,
+
             oid: this.props.match.params.oid,
-            data: {
-                fields: [],
-                rows: [],
-            },
+            id: this.props.match.params.id,
+
+            fields: [],
+            values: {},
+
         }
 
         this.onSubmit = this.onSubmit.bind(this)
@@ -30,7 +31,7 @@ export default class Маягт extends Component {
         setSubmitting(true)
 
         service
-            .save(values)
+            .save(this.state.oid, values)
             .then(({ success }) => {
                 if (success) {
                     setStatus('saved')
@@ -40,10 +41,12 @@ export default class Маягт extends Component {
     }
 
     componentDidMount() {
-        service
-            .rows(this.state.oid)
-            .then(({ data }) => {
 
+        service
+            .detail(this.state.oid, this.state.id)
+            .then(({ values, fields }) => {
+
+                /*
                 const values = {}
 
                 data.fields.forEach((field) => {
@@ -51,22 +54,13 @@ export default class Маягт extends Component {
                         values[field.name] = ''
                     }
                 })
+                */
 
                 this.setState({
-                    values: '',
                     is_loading: false,
-                    data,
-                })
-
-        })
-        const { oid, item } = this.props
-        service
-            .detail(oid, '6')
-            .then(({ data }) => {
-                this.setState({
-                    is_loading: false,
-                    data,
-                })
+                    fields,
+                    values,
+            })
         })
     }
 
@@ -78,15 +72,15 @@ export default class Маягт extends Component {
             )
         }
 
-        const { fields } = this.state.data
+        const { fields, values } = this.state
 
         return (
             <div>
                 <Formik
                     enableReinitialize
-                    initialValues={this.state.values}
-                    onSubmit={this.onSubmit}
-                    validationSchema={ validationSchema }
+                    initialValues={ values }
+                    onSubmit={ this.onSubmit }
+                    validate={ () => ({}) }
                 >
                     {({
                         errors,
