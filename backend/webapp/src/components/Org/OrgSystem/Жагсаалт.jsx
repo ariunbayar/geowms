@@ -5,6 +5,7 @@ import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
 import {NavLink} from "react-router-dom"
 import { Pagination } from '../../../../../../src/components/Pagination/index'
+import ModalAlert from "../../ModalAlert";
 
 export class Жагсаалт extends Component {
 
@@ -23,10 +24,14 @@ export class Жагсаалт extends Component {
             govorgPerPage:20,
             load: 0,
             searchQuery: '',
+            modal_alert_status: "closed",
+            timer: null
         }
         this.paginate = this.paginate.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     paginate (page, query) {
@@ -62,9 +67,21 @@ export class Жагсаалт extends Component {
                 a ++
                 this.setState({ load: a })
                 this.paginate(1, searchQuery)
+                this.setState({modal_alert_status: 'open'})
             }
         })
+        this.modalCloseTime()
+    }
 
+    modalClose(){
+        this.setState({modal_alert_status: "closed"})
+        clearTimeout(this.state.timer)
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+        }, 2000)
     }
 
     render() {
@@ -125,6 +142,12 @@ export class Жагсаалт extends Component {
                                     paginate = {this.paginate}
                                     searchQuery = {this.state.searchQuery}
                                     load = {this.state.load}
+                                />
+                                <ModalAlert
+                                    modalAction={() => this.modalClose()}
+                                    status={this.state.modal_alert_status}
+                                    title="Амжилттай хадгаллаа"
+                                    model_type_icon = "success"
                                 />
                             </>
                         }

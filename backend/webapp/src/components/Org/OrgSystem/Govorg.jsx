@@ -8,7 +8,7 @@ export default class Govorg extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
+            modal_status: "closed"
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -17,14 +17,12 @@ export default class Govorg extends Component {
         this.handleRemove = this.handleRemove.bind(this);
     }
 
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
-
+    handleModalDeleteOpen(){
+        this.setState({modal_status: 'open'})
     }
 
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
+    handleModalDeleteClose(){
+        this.setState({modal_status: 'closed'})
     }
 
     handleRemove(){
@@ -33,9 +31,14 @@ export default class Govorg extends Component {
             success && this.props.handleUpdated()
         })
     }
+
+    modalClose(){
+        this.props.handleRemove()
+        this.setState({modal_status: 'closed'})
+    }
+
     render() {
         const {id, name, token, created_at} = this.props.values
-        const {is_modal_delete_open} = this.state
         const org_level = this.props.org_level
         const org_id = this.props.org_id
         const idx=this.props.idx
@@ -66,17 +69,16 @@ export default class Govorg extends Component {
 
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-
-                    {is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                        />
-                    }
+                    <Modal
+                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        title="Тохиргоог устгах"
+                        model_type_icon = "success"
+                        status={this.state.modal_status}
+                        modalClose={this.handleModalDeleteClose}
+                        modalAction={() => this.modalClose()}
+                    />
                 </td>
             </tr>
         )

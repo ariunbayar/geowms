@@ -30,6 +30,10 @@ export default class WMS extends Component {
         this.setState({modal_status: 'open'})
     }
 
+    handleModalDeleteClose() {
+        this.setState({modal_status: 'closed'})
+    }
+
     handleModalLimitOpen() {
         this.setState({is_modal_limit_open: !this.state.is_modal_limit_open})
      }
@@ -85,18 +89,20 @@ export default class WMS extends Component {
                 </td>
                 <td>
                     <NavLink to={`/back/wms/${id}/засах/`}>
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     <Modal
                         modalAction={this.props.handleRemove}
                         text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                         title="Тохиргоог устгах"
                         status={this.state.modal_status}
+                        model_type_icon = "success"
+                        modalClose = {() => this.handleModalDeleteClose()}
                     />
                 </td>
             </tr>

@@ -9,6 +9,7 @@ export default class ModalAlert extends Component {
             status: this.props.status || 'initial',
         }
         this.handleOpen = this.handleOpen.bind(this)
+        this.handleProceed = this.handleProceed.bind(this)
         this.handleClose = this.handleClose.bind(this)
     }
 
@@ -36,9 +37,18 @@ export default class ModalAlert extends Component {
         }, 0)
     }
 
-    handleClose() {
+    handleClose(callback) {
         this.setState({status: 'closing'})
-        this.props.modalClose(true)
+        setTimeout(() => {
+            this.setState({status: 'closed'})
+            if (callback) {
+                callback()
+            }
+        }, 150)
+    }
+
+    handleProceed() {
+        this.handleClose(this.props.modalAction)
     }
 
     render () {
@@ -58,7 +68,7 @@ export default class ModalAlert extends Component {
 
         return (
             <Fragment>
-                <div className={className} onClick={() => this.handleClose()}>
+                <div className={className} onClick={() => this.handleProceed()}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
                             <div className="d-flex justify-content-center">

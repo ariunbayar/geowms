@@ -3,6 +3,7 @@ import {OrgFormTable} from './OrgFormTable'
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
 import { Pagination } from "../../../../../src/components/Pagination/index"
+import ModalAlert from "../ModalAlert"
 
 export class OrgForm extends Component {
 
@@ -23,11 +24,13 @@ export class OrgForm extends Component {
             query_min: false,
             search_load: false,
             load: 0,
-            modal_alert_check: false,
+            modal_alert_status: 'closed',
+            timer: null,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
 
     }
 
@@ -75,20 +78,21 @@ export class OrgForm extends Component {
                 a++
                 this.setState({ load: a })
                 this.paginate(1, searchQuery, level, org_id)
-                this.setState({ modal_alert_check: true })
-                this.modalCloseTime()
+                this.setState({ modal_alert_status: 'open'})
             }
+            this.modalCloseTime()
         })
     }
 
     modalCloseTime(){
-        setTimeout(() => {
-            this.setState({modal_alert_check: false})
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
         }, 2000)
     }
 
     modalClose() {
-        this.setState({modal_alert_check: false})
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -109,33 +113,33 @@ export class OrgForm extends Component {
                             value={this.state.searchQuery}
                         />
                     </div>
-                    <div className="mb-3 mt-3 table-responsive">
-                        <table className="table" id="example">
-                            <thead>
-                                <tr>
-                                    <th scope="col">№</th>
-                                    <th scope="col">Байгууллага нэр</th>
-                                    <th scope="col"></th >
-                                    <th scope="col"></th >
-                                </tr>
-                            </thead>
-                            <tbody>
-                                { org_length ===0 ?
-                                    <tr><td>Байгууллага бүртгэлгүй байна</td></tr> :
-                                    orgs.map((org, idx) =>
-                                        <OrgFormTable
-                                            key={idx}
-                                            idx={(currentPage*20)-20+idx+1}
-                                            org_level={this.state.level}
-                                            org={org}
-                                            handleUserDelete={() => this.handleUserDelete(org.id)}
-                                            modal_alert_check = {this.state.modal_alert_check}
-                                            modalCloseTime = {() => this.modalCloseTime()}
-                                            modalClose = {() => this.modalClose()}
-                                        >
-                                        </OrgFormTable>
-                                )}
-                            </tbody>
+                    <div className="mb-3 mt-3">
+                        <table className="table-responsive">
+                            <table className="table example" id="example">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">№</th>
+                                        <th scope="col">Байгууллага нэр</th>
+                                        <th scope="col">Түвшин</th>
+                                        <th scope="col"></th >
+                                        <th scope="col"></th >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { org_length ===0 ?
+                                        <tr><td>Байгууллага бүртгэлгүй байна</td></tr> :
+                                        orgs.map((org, idx) =>
+                                            <OrgFormTable
+                                                key={idx}
+                                                idx={(currentPage*20)-20+idx+1}
+                                                org_level={this.state.level}
+                                                org={org}
+                                                handleUserDelete={() => this.handleUserDelete(org.id)}
+                                            >
+                                            </OrgFormTable>
+                                    )}
+                                </tbody>
+                            </table>
                         </table>
                     </div>
                     <Pagination
@@ -145,6 +149,12 @@ export class OrgForm extends Component {
                         load = { this.state.load }
                     />
                 </div>
+                <ModalAlert
+                    title="Амжилттай устгалаа"
+                    model_type_icon = "success"
+                    status={this.state.modal_alert_status}
+                    modalAction={() => this.modalClose()}
+                />
             </div>
         )
 

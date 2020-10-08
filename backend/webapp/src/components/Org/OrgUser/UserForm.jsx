@@ -3,6 +3,7 @@ import {UserFormTable} from './UserFormTable'
 import {service} from '../service'
 import {NavLink} from "react-router-dom"
 import { Pagination } from "../../../../../../src/components/Pagination/index"
+import ModalAlert from "../../ModalAlert"
 
 export class UserForm extends Component {
 
@@ -20,11 +21,15 @@ export class UserForm extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-            load: 0
+            load: 0,
+            modal_alert_status: "closed",
+            timer: null,
         }
         this.paginate = this.paginate.bind(this)
         this.handleGovorgDelete = this.handleGovorgDelete.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.modalCloseTime=this.modalCloseTime.bind(this)
+        this.modalClose=this.modalClose.bind(this)
     }
 
     paginate (page, query) {
@@ -63,8 +68,21 @@ export class UserForm extends Component {
                 a ++
                 this.setState({ load: a })
                 this.paginate(1, searchQuery)
+                this.setState({modal_alert_status: "open"})
             }
         })
+        this.modalCloseTime()
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+        }, 2000);
+    }
+
+    modalClose(){
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -128,6 +146,12 @@ export class UserForm extends Component {
                     paginate = { this.paginate }
                     searchQuery = { this.state.searchQuery }
                     load = { this.state.load }
+                />
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай устгалаа"
+                    model_type_icon = "success"
                 />
             </div>
         )

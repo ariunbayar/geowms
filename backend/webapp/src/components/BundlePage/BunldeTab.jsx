@@ -63,7 +63,7 @@ export class BundleTab extends Component {
             if(items){
              this.setState({
                 gis_list:items
-             })   
+             })
             }
         })
 
@@ -109,10 +109,10 @@ export class BundleTab extends Component {
                                 <NavLink to={`/back/дэд-сан/${id}/засах/postgis_db/`}  className="nav-link"  activeClassName="active" >postgis_db</NavLink>
                             </li>
                         </ul>
-                        <div className="tab-content">   
+                        <div className="tab-content">
                             <Switch>
                                 <Route path="/back/дэд-сан/:id/засах/postgis_db/"   component={BunleGisForms}/>
-                                <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} /> 
+                                <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} />
                             </Switch>
                         </div>
                     </div>

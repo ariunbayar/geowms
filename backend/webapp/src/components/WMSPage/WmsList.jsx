@@ -6,6 +6,7 @@ import WMS from './WMS'
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 import { Pagination } from "../../../../../src/components/Pagination/index"
+import ModalAlert from "../ModalAlert"
 
 export class WmsList extends Component {
 
@@ -30,7 +31,9 @@ export class WmsList extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-            firstIndexForSearch: 0
+            firstIndexForSearch: 0,
+            modal_alert_check: 'closed',
+            timer: null,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
@@ -41,6 +44,8 @@ export class WmsList extends Component {
         this.handleFormCancel = this.handleFormCancel.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleModalAlert=this.handleModalAlert.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     paginate (page, query) {
@@ -114,9 +119,16 @@ export class WmsList extends Component {
         service.remove(id).then(({success}) => {
             if (success) {
                 this.paginate(1, "")
+                this.setState({modal_alert_check: 'open'})
             }
         })
         this.modalClose()
+        this.modalCloseTime()
+    }
+
+    handleModalAlert(){
+        this.setState({modal_alert_check: 'closed'})
+        clearTimeout(this.state.timer)
     }
 
     handleWmsLayerRefresh(id) {
@@ -142,6 +154,12 @@ export class WmsList extends Component {
 
     handleFormCancel() {
         this.setState({is_form_open: false})
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_check: 'closed'})
+        }, 2000)
     }
 
     render() {
@@ -193,7 +211,6 @@ export class WmsList extends Component {
                                                         <WMS
                                                             key={values.id}
                                                             values={values}
-                                                            modalClose={() =>this.modalClose()}
                                                             idx={(this.state.currentPage*20)-20+index+1}
                                                             handleRemove={() => this.handleRemove(values.id)}
                                                             handleEdit={() => this.handleEdit(values)}
@@ -207,6 +224,12 @@ export class WmsList extends Component {
                                         searchQuery = { this.state.searchQuery }
                                     />
                             </div>
+                            <ModalAlert
+                                title="Амжилттай устгалаа"
+                                model_type_icon = "success"
+                                status={this.state.modal_alert_check}
+                                modalAction={this.handleModalAlert}
+                            />
                         </div>
                     </div>
                 </div>
