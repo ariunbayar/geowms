@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
 import Modal from "../Modal"
+import ModalAlert from "../ModalAlert"
 
 export default class Config extends Component {
 
@@ -13,7 +14,6 @@ export default class Config extends Component {
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
 
     }
 
@@ -22,8 +22,9 @@ export default class Config extends Component {
         this.setState({is_modal_delete_open: true})
     }
 
-    handleModalDeleteClose() {
+    modalClose(){
         this.setState({is_modal_delete_open: false})
+        this.props.modalClose()
     }
 
     render() {
@@ -44,18 +45,29 @@ export default class Config extends Component {
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true" style={{color:"red"}}></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     {is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                        />
+                        <>
+                            <Modal
+                                modalAction={this.props.handleRemove}
+                                text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                                title="Тохиргоог устгах"
+                                model_type_icon="success"
+                            />
+                            {
+                                this.props.modal_alert_check &&
+                                <ModalAlert
+                                    title="Амжилттай устгалаа"
+                                    model_type_icon = "success"
+                                    modalClose = {() => this.modalClose}
+                                />
+                            }
+                        </>
                     }
                 </td>
             </tr>
         )
     }
 }
+``

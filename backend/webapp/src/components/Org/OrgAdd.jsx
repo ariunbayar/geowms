@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
+import ModalAlert from "../ModalAlert";
 
 
 export class OrgAdd extends Component {
@@ -12,11 +13,13 @@ export class OrgAdd extends Component {
             org_name: '',
             edit: false,
             upadte_level: 1,
-            handleSaveIsLoad: false
+            handleSaveIsLoad: false,
+            modal_alert_check: false,
         }
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleGetAll=this.handleGetAll.bind(this)
+        this.modalClose=this.modalClose.bind(this)
     }
 
     componentDidMount(){
@@ -37,12 +40,7 @@ export class OrgAdd extends Component {
         const upadte_level = this.state.upadte_level
         const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level}
         service.org_add(org_level,values).then(({ success }) => {
-            if (success) {
-                setTimeout(() => {
-                    this.setState({handleSaveIsLoad:false})
-                    this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-                }, 1000)
-            }
+            success && this.setState({modal_alert_check: true})
         })
     }
 
@@ -59,6 +57,24 @@ export class OrgAdd extends Component {
                 })
             })
         }
+    }
+
+    modalClose(closeTime){
+        const org_level = this.props.match.params.level
+        closeTime && setTimeout(() => {
+            this.setState({handleSaveIsLoad:false})
+            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+            this.setState({modal_alert_check: false})
+        }, 0)
+    }
+
+    modalCloseTime(){
+        const org_level = this.props.match.params.level
+        setTimeout(() => {
+            this.setState({handleSaveIsLoad:false})
+            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+            this.setState({modal_alert_check: false})
+        }, 2000)
     }
 
     render() {
@@ -107,15 +123,26 @@ export class OrgAdd extends Component {
                         <div className="col-md-2">
                             <div className="form-group">
                                 {this.state.handleSaveIsLoad ?
-                                    <button className="btn btn-block gp-btn-primary">
-                                        <a className="spinner-border text-light" role="status">
-                                            <span className="sr-only">Loading...</span>
-                                        </a>
-                                        <span> Шалгаж байна. </span>
-                                    </button>:
-                                    <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
-                                        Хадгалах
-                                    </button>
+                                    <>
+                                        <button className="btn btn-block gp-btn-primary">
+                                            <a className="spinner-border text-light" role="status">
+                                                <span className="sr-only">Loading...</span>
+                                            </a>
+                                            <span> Шалгаж байна. </span>
+                                        </button>
+                                        {this.state.modal_alert_check &&
+                                            <ModalAlert
+                                                modalClose={this.modalClose}
+                                                modalCloseTime={this.modalCloseTime()}
+                                                title="Амжилттай хадгаллаа"
+                                                model_type_icon = "success"
+                                            />
+                                        }
+                                    </>
+                                :
+                                <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
+                                    Хадгалах
+                                </button>
                                 }
                             </div>
                         </div>
