@@ -15,6 +15,14 @@ from geoportal_app.models import Role
 from .forms import BundleForm
 from .models import Bundle, BundleLayer, BundleGIS
 
+def _layer_visible(layers):
+    check = False
+    for layer in layers:
+        if BundleLayer.objects.filter(layer_id = layer['id']):
+            check = True
+            break
+    return check
+
 
 def _get_bundle_options():
 
@@ -25,6 +33,7 @@ def _get_bundle_options():
         wms_display = {
             'name': wms.name,
             'is_active': wms.is_active,
+            'layer_visible': _layer_visible(layers),
             'layers': layers,
         }
         form_options.append(wms_display)

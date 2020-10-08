@@ -1101,14 +1101,6 @@ def tsegPersonal(request):
             file2 = request.FILES['file2']
         if request.POST.get('date'):
             date = request.POST.get('date')
-        check_id = True
-        while check_id:
-            unique_id = uuid.uuid4()
-            if Mpoint_view.objects.using('postgis_db').filter(id=unique_id):
-                check_id = True
-            else:
-                check_id = False
-
         x = float(request.POST.get('latlongx'))
         y = float(request.POST.get('latlongy'))
         cursor = connections['postgis_db'].cursor()
@@ -1117,7 +1109,6 @@ def tsegPersonal(request):
         geom = cursor.fetchone()
         ondor = request.POST.get('ondor')
         mpoint = Mpoint9.objects.using('postgis_db').create(
-                    id=unique_id,
                     objectid='null', point_id=point_id,
                     ondor=ondor,
                     point_name=request.POST.get('tesgiin_ner'),
@@ -1129,9 +1120,9 @@ def tsegPersonal(request):
                     t_type='g109',
                     point_class_name='Шинээр нэмэгдсэн төлөв'
         )
-        update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [geom, str(unique_id)])
+        update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [geom, str(mpoint.id)])
         tsegPersenal = TsegPersonal.objects.create(
-                    id=unique_id,
+                    id=mpoint.id,
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
                     latlongx=request.POST.get('latlongx'),
                     latlongy=request.POST.get('latlongy'),
