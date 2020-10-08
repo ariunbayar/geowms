@@ -131,6 +131,13 @@ export class DevPage extends Component {
                                 <li>Бүх 'GeoJSON' форматтай өгөгдөлд зориулсан сан</li>
                             </ul>
                         </div>
+                        <div>
+                            <strong>fpdf 1.7.2: </strong>
+                            <LinkExternal href="https://pypi.org/project/fpdf/"/>
+                            <ul>
+                                <li>Цэг бүртгэх үед цэгийн мэдээллийг pdf болгоход ашигласан.</li>
+                            </ul>
+                        </div>
                         <h3>Координатын формат</h3>
                         <div>
                             <ul>
