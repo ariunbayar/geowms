@@ -33,17 +33,7 @@ export default class Bundle extends Component {
         this.setState({is_modal_delete_open: false})
     }
 
-    getOidName(){
-        const oid_list = this.props.values.oid_list
-        service.getOidName(oid_list).then(({oid_name_list}) => {
-            if(oid_name_list){
-                this.setState({
-                    oid_names:oid_name_list,
-                })
-            }
-        })
-    }
-
+    
     render() {
         const {id, name, price, icon_url, wms_list, oid_list} = this.props.values
         const {is_modal_delete_open}=this.state

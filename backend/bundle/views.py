@@ -136,15 +136,53 @@ def _get_module_display(module):
     }
 
 
+def _fetch_oid_names(oids):
+        cursor = connections['postgis_db'].cursor()
+
+        sql = """
+            SELECT 
+                ns.nspname, c.relname
+            FROM 
+                pg_catalog.pg_class AS c
+            JOIN 
+                pg_catalog.pg_namespace AS ns ON c.relnamespace = ns.oid
+            WHERE
+                {oids}
+        """.format(oids=('c.oid = %s or ' * len(oids))[:-3] )  
+
+        cursor.execute(sql, oids)
+
+        table = list(dict_fetchall(cursor))
+        return table
+
+
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
-    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]    
+    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
+    cursor = connections['postgis_db'].cursor()
+
+    sql = """
+        SELECT 
+            ns.nspname, c.relname
+        FROM 
+            pg_catalog.pg_class AS c
+        JOIN 
+            pg_catalog.pg_namespace AS ns ON c.relnamespace = ns.oid
+        WHERE
+            {oids}
+    """.format(oids=('c.oid = %s or ' * len(oids))[:-3] )  
+
+    cursor.execute(sql, oids)
+
+    table = list(dict_fetchall(cursor)) 
+
     return {
         'id': bundle.id,
         'name': bundle.name,
         'price':modules,
         'oid_list':oid_list,
+        'oid_names':table,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
@@ -331,26 +369,4 @@ def move(request, payload):
     }
 
     return JsonResponse(rsp)
-def _fetch_oid_names(name):
-        find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute("""
-        SELECT c.relname FROM pg_catalog.pg_class c
-        LEFT JOIN pg_catalog.pg_class tc ON (c.reltoastrelid = tc.oid)
-        LEFT JOIN pg_catalog.pg_am am ON (c.relam = am.oid)
-        WHERE c.oid = %s;
-        """, [name])
-        oid_name = find_cursor.fetchone()
-        return oid_name
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def getOidName(request, payload):
-    names = payload.get("getOidName")
-    oid_names = []
-    if names:
-        oid_names = [_fetch_oid_names(name) for name in names]
-
-   
-    print(type(oid_names), oid_names)
-    return JsonResponse({'oid_name_list': oid_names})
