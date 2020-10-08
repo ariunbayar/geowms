@@ -1,7 +1,8 @@
 import React, { Component } from "react"
-import {Switch, Route} from "react-router-dom"
+import {Switch, Route, BrowserRouter} from "react-router-dom"
 import {BundleList} from './BundleList'
 import {BundleTab} from './BunldeTab'
+
 
 export class BundlePage extends Component {
 
@@ -11,7 +12,6 @@ export class BundlePage extends Component {
     }
 
     render() {
-
             return (
                 <Switch>
                     <Route path={"/back/дэд-сан/:id/засах/"} component={BundleTab}/>
@@ -19,7 +19,5 @@ export class BundlePage extends Component {
                     <Route exact path={"/back/дэд-сан/үүсгэх"} component={BundleTab}/>
                 </Switch>
             )
-
         }
-
     }

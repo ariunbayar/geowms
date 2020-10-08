@@ -99,22 +99,22 @@ export class BundleTab extends Component {
     render() {
         const id = this.props.match.params.id
             return (
-                <div>
-                    <div>
-                    <ul className="nav nav-tabs">
-                        <li className=" nav-item nav-link">
-                            <NavLink activeClassName="active" to={`/back/дэд-сан/${id}/засах/wms/`}>WMS</NavLink>
-                        </li>
-                        <li className=" nav-item nav-link">
-                            <NavLink activeClassName="active" to={`/back/дэд-сан/${id}/засах/postgis_db/`}>postgis_db</NavLink>
-                        </li>
-                    </ul>
-                    </div>
-                    <div>
-                    <Switch>
-                        <Route path="/back/дэд-сан/:id/засах/wms/" component={BundleForms}/> 
-                        <Route path="/back/дэд-сан/:id/засах/postgis_db/"  component={BunleGisForms}/>
-                    </Switch>
+                <div className="card">
+                    <div className="card-body">
+                        <ul className="nav nav-tabs ">
+                            <li className="nav-item gp-text-primary">
+                                <NavLink to={`/back/дэд-сан/${id}/засах/`} exact className="nav-link"  activeClassName="active">WMS</NavLink>
+                            </li>
+                            <li className="nav-item ">
+                                <NavLink to={`/back/дэд-сан/${id}/засах/postgis_db/`}  className="nav-link"  activeClassName="active" >postgis_db</NavLink>
+                            </li>
+                        </ul>
+                        <div className="tab-content">   
+                            <Switch>
+                                <Route path="/back/дэд-сан/:id/засах/postgis_db/"   component={BunleGisForms}/>
+                                <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} /> 
+                            </Switch>
+                        </div>
                     </div>
                 </div>
             );
