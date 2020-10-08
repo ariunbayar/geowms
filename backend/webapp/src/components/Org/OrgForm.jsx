@@ -109,36 +109,33 @@ export class OrgForm extends Component {
                             value={this.state.searchQuery}
                         />
                     </div>
-                    <div className="mb-3 mt-3">
-                        <table className="table-responsive">
-                            <table className="table example" id="example">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">№</th>
-                                        <th scope="col">Байгууллага нэр</th>
-                                        <th scope="col">Түвшин</th>
-                                        <th scope="col"></th >
-                                        <th scope="col"></th >
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { org_length ===0 ?
-                                        <tr><td>Байгууллага бүртгэлгүй байна</td></tr> :
-                                        orgs.map((org, idx) =>
-                                            <OrgFormTable
-                                                key={idx}
-                                                idx={(currentPage*20)-20+idx+1}
-                                                org_level={this.state.level}
-                                                org={org}
-                                                handleUserDelete={() => this.handleUserDelete(org.id)}
-                                                modal_alert_check = {this.state.modal_alert_check}
-                                                modalCloseTime = {() => this.modalCloseTime()}
-                                                modalClose = {() => this.modalClose()}
-                                            >
-                                            </OrgFormTable>
-                                    )}
-                                </tbody>
-                            </table>
+                    <div className="mb-3 mt-3 table-responsive">
+                        <table className="table" id="example">
+                            <thead>
+                                <tr>
+                                    <th scope="col">№</th>
+                                    <th scope="col">Байгууллага нэр</th>
+                                    <th scope="col"></th >
+                                    <th scope="col"></th >
+                                </tr>
+                            </thead>
+                            <tbody>
+                                { org_length ===0 ?
+                                    <tr><td>Байгууллага бүртгэлгүй байна</td></tr> :
+                                    orgs.map((org, idx) =>
+                                        <OrgFormTable
+                                            key={idx}
+                                            idx={(currentPage*20)-20+idx+1}
+                                            org_level={this.state.level}
+                                            org={org}
+                                            handleUserDelete={() => this.handleUserDelete(org.id)}
+                                            modal_alert_check = {this.state.modal_alert_check}
+                                            modalCloseTime = {() => this.modalCloseTime()}
+                                            modalClose = {() => this.modalClose()}
+                                        >
+                                        </OrgFormTable>
+                                )}
+                            </tbody>
                         </table>
                     </div>
                     <Pagination
