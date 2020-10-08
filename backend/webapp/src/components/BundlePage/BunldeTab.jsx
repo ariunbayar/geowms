@@ -63,7 +63,7 @@ export class BundleTab extends Component {
             if(items){
              this.setState({
                 gis_list:items
-             })   
+             })
             }
         })
 
@@ -112,12 +112,11 @@ export class BundleTab extends Component {
                     </div>
                     <div>
                     <Switch>
-                        <Route path="/back/дэд-сан/:id/засах/wms/" component={BundleForms}/> 
+                        <Route path="/back/дэд-сан/:id/засах/wms/" component={BundleForms}/>
                         <Route path="/back/дэд-сан/:id/засах/postgis_db/"  component={BunleGisForms}/>
                     </Switch>
                     </div>
              </BrowserRouter>
-          
             );
     }
 }

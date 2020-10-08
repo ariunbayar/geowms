@@ -10,26 +10,30 @@ export default class Bundle extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
+            modal_status: "closed",
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.modalClose = this.modalClose.bind(this)
 
     }
 
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
+    handleModalDeleteOpen() {
+        this.setState({modal_status: "open"})
     }
 
     handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
+        this.setState({modal_status: "closed"})
+    }
+
+    modalClose(){
+        this.props.handleRemove()
+        this.setState({modal_status: 'closed'})
     }
 
     render() {
         const {id, name, price, icon_url, wms_list, oid_list} = this.props.values
-        const {is_modal_delete_open}=this.state
         return (
             <tr>
                 <th scope="col">
@@ -91,15 +95,14 @@ export default class Bundle extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-
-                    {is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                        />
-                    }
+                    <Modal
+                        modalAction={() => this.modalClose()}
+                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        title="Байгууллага устгах"
+                        model_type_icon = "success"
+                        status={this.state.modal_status}
+                        modalClose={() => this.handleModalDeleteClose()}
+                    />
                 </td>
                 <td>
                     <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>

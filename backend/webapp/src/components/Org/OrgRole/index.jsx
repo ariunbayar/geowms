@@ -3,6 +3,7 @@ import {service} from '../service'
 import {NavLink} from "react-router-dom"
 
 import {Item} from './Item'
+import ModalAlert from "../../ModalAlert"
 
 
 export class OrgRole extends Component {
@@ -19,9 +20,12 @@ export class OrgRole extends Component {
             list:[],
             changedName:'',
             handleSaveIsLoad: false,
+            modal_alert_status: "closed",
+            timer: null,
         }
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleSave = this.handleSave.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     componentDidMount() {
@@ -51,8 +55,8 @@ export class OrgRole extends Component {
         service.rolesSave(level, id, this.state.org_roles).then(({success}) => {
             if (success) {
                 setTimeout(() => {
-                    this.setState({handleSaveIsLoad:false})
-                    this.handleListUpdated()
+                    this.setState({modal_alert_status: "open"})
+                    this.modalCloseTime()
                 }, 1000)
 
             }
@@ -65,6 +69,21 @@ export class OrgRole extends Component {
                 idx == _idx ? org_role_updated : org_role
             ),
         })
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: 'closed'})
+            this.setState({handleSaveIsLoad:false})
+            this.handleListUpdated()
+        }, 2000)
+    }
+
+    modalClose(){
+        this.setState({modal_alert_status: 'closed'})
+        clearTimeout(this.state.timer)
+        this.setState({handleSaveIsLoad:false})
+        this.handleListUpdated()
     }
 
     render() {
@@ -97,16 +116,25 @@ export class OrgRole extends Component {
                                 </table>
                             </div>
                             {this.state.handleSaveIsLoad ?
-                                <button className="btn gp-btn-primary my-3">
-                                    <div className="spinner-border text-light" role="status">
-                                        <span className="sr-only">Loading...</span>
-                                    </div>
-                                    <a className="text-light"> Шалгаж байна.</a>
-                                </button>:
-                                <button className="btn gp-btn-primary my-3" onClick={this.handleSave} >
+                                <>
+                                    <button className="btn gp-btn-primary my-3">
+                                        <div className="spinner-border text-light" role="status">
+                                            <span className="sr-only">Loading...</span>
+                                        </div>
+                                        <a className="text-light"> Шалгаж байна.</a>
+                                    </button>
+                                </>
+                                :
+                                <button className="btn gp-btn-primary my-3" onClick={() => this.handleSave()} >
                                     Хадгалах
                                 </button>
                             }
+                            <ModalAlert
+                                modalAction={() => this.modalClose()}
+                                status={this.state.modal_alert_status}
+                                title="Амжилттай хадгаллаа"
+                                model_type_icon = "success"
+                            />
                         </div>
                     </div>
                 </div>

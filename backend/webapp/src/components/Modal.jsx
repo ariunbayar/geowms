@@ -85,7 +85,7 @@ export default class Modal extends Component {
                                 <i class="fa fa-times-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
                             }
                             </div>
-                            <div className="d-flex justify-content-center my-3">
+                            <div className="d-flex justify-content-center">
                                 <h5 >{this.props.title}</h5>
                                 </div>
                             <div className="modal-body text-wrap ml-2 mr-2 text-justify">
