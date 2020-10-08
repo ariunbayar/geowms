@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import "./styles.css";
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
+import { service } from "./service";
 
 
 export default class Bundle extends Component {
@@ -11,11 +12,16 @@ export default class Bundle extends Component {
 
         this.state = {
             is_modal_delete_open: false,
+            oid_names:[]
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.getOidName = this.getOidName.bind(this)
 
+    }
+    componentDidMount(){
+        this.getOidName()
     }
 
     handleModalDeleteOpen(event) {
@@ -25,6 +31,17 @@ export default class Bundle extends Component {
 
     handleModalDeleteClose() {
         this.setState({is_modal_delete_open: false})
+    }
+
+    getOidName(){
+        const oid_list = this.props.values.oid_list
+        service.getOidName(oid_list).then(({oid_name_list}) => {
+            if(oid_name_list){
+                this.setState({
+                    oid_names:oid_name_list,
+                })
+            }
+        })
     }
 
     render() {
@@ -68,7 +85,7 @@ export default class Bundle extends Component {
                    </td>
                    <td>
                     <div className="col-md-12">
-                        {oid_list.map((oid, idx) =>
+                        {this.state.oid_names.map((oid, idx) =>
                                 <div key={idx} className="row">
                                     <div className="col-md-1">
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>

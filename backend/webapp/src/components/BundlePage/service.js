@@ -10,7 +10,8 @@ export const service = {
     detail,
     ModuleCheck,
     table_list_All,
-    updateGis
+    updateGis,
+    getOidName
 }
 
 const prefix = '/back'
@@ -171,4 +172,14 @@ function updateGis(values){
     }
 
     return fetch(`${prefix}/bundle/updateGis/`, opts).then(handleResponse)
+}
+
+
+function getOidName(getOidName){
+    const opts = {
+        ..._getPostOptions(),
+        body: JSON.stringify({getOidName}),
+    }
+
+    return fetch(`${prefix}/bundle/getOidName/`, opts).then(handleResponse)
 }

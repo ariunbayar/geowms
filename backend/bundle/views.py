@@ -10,6 +10,7 @@ from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
+from django.db import connections
 
 
 from .forms import BundleForm
@@ -330,3 +331,26 @@ def move(request, payload):
     }
 
     return JsonResponse(rsp)
+def _fetch_oid_names(name):
+        find_cursor = connections['postgis_db'].cursor()
+        find_cursor.execute("""
+        SELECT c.relname FROM pg_catalog.pg_class c
+        LEFT JOIN pg_catalog.pg_class tc ON (c.reltoastrelid = tc.oid)
+        LEFT JOIN pg_catalog.pg_am am ON (c.relam = am.oid)
+        WHERE c.oid = %s;
+        """, [name])
+        oid_name = find_cursor.fetchone()
+        return oid_name
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getOidName(request, payload):
+    names = payload.get("getOidName")
+    oid_names = []
+    if names:
+        oid_names = [_fetch_oid_names(name) for name in names]
+
+   
+    print(type(oid_names), oid_names)
+    return JsonResponse({'oid_name_list': oid_names})
