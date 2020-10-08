@@ -80,9 +80,9 @@ export default class Modal extends Component {
                             </div>
                             <div className="d-flex justify-content-center">
                             { this.props.model_type_icon == "success" ?
-                                <i class="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
+                                <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
                                 :
-                                <i class="fa fa-times-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
+                                <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
                             }
                             </div>
                             <div className="d-flex justify-content-center my-3">
@@ -93,15 +93,15 @@ export default class Modal extends Component {
                             </div>
                             <div className="modal-footer" style={{border: 'none'}}>
                                 <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
-                                    <i class="fa fa-times"></i>
+                                    <i className="fa fa-times"></i>
                                     {this.props.actionName ? this.props.actionName : "  БУЦАХ"}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={this.handleProceed}
-                                    class="btn btn-outline-primary waves-effect waves-light"
+                                    className="btn btn-outline-primary waves-effect waves-light"
                                 >
-                                    <i class="fa fa-check-square-o"></i>
+                                    <i className="fa fa-check-square-o"></i>
                                     {this.props.actionName ? this.props.actionName : "  УСТГАХ"}
                                 </button>
                             </div>
