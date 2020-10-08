@@ -160,7 +160,6 @@ class TsegUstsanLog(models.Model):
 
 
 class Mpoint1(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -184,7 +183,6 @@ class Mpoint1(models.Model):
 
 
 class Mpoint2(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -208,7 +206,6 @@ class Mpoint2(models.Model):
 
 
 class Mpoint3(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -231,7 +228,6 @@ class Mpoint3(models.Model):
         db_table = 'mpoint3'
 
 class Mpoint4(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -255,7 +251,6 @@ class Mpoint4(models.Model):
 
 
 class Mpoint5(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -279,7 +274,6 @@ class Mpoint5(models.Model):
 
 
 class Mpoint6(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -303,7 +297,6 @@ class Mpoint6(models.Model):
 
 
 class Mpoint7(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -327,7 +320,6 @@ class Mpoint7(models.Model):
 
 
 class Mpoint8(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -350,7 +342,6 @@ class Mpoint8(models.Model):
         db_table = 'mpoint8'
 
 class Mpoint9(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -374,7 +365,6 @@ class Mpoint9(models.Model):
 
 
 class Mpoint10(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
@@ -398,7 +388,6 @@ class Mpoint10(models.Model):
 
 
 class Mpoint_view(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
     objectid = models.CharField(max_length=4)
     point_id =  models.CharField(max_length=4)
     ondor = models.FloatField()
