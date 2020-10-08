@@ -6,7 +6,9 @@ export const service = {
     remove,
     save,
     detail,
-    update
+    update,
+    geomUpdate,
+    geomAdd
 }
 
 function geom() {
@@ -52,4 +54,22 @@ function update(oid, data, pk) {
         body: JSON.stringify(data),
     }
     return fetch(`/gov/api/bair_zuin_zurag/${oid}/${pk}/save/`, opts).then(handleResponse)
+}
+
+function geomUpdate(geojson, oid, pk) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({geojson}),
+    }
+    return fetch(`/gov/api/bair_zuin_zurag/${oid}/${pk}/geom-update/`, opts).then(handleResponse)
+}
+
+function geomAdd(geojson, oid) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({geojson}),
+    }
+    return fetch(`/gov/api/bair_zuin_zurag/${oid}/add-geom/`, opts).then(handleResponse)
 }
