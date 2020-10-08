@@ -24,18 +24,17 @@ export class DevPage extends Component {
                 <div className="card">
                     <div className="card-body">
                         <h3>Libraries</h3>
-
-                        <p>
+                        <div>
                             <strong>Fontawesome 4.7.0: </strong>
                             <LinkExternal href="https://fontawesome.com/v4.7.0/icons/"/>
-                        </p>
-
-                        <p>
+                        </div>
+                        <br/>
+                        <div>
                             <strong>Bootstrap 4.5.0: </strong>
                             <LinkExternal href="https://getbootstrap.com/docs/4.5/components/alerts/"/>
-                        </p>
-
-                        <p>
+                        </div>
+                        <br/>
+                        <div>
                             <strong>react-chartjs-2 (2.9.0): </strong><br/>
                             <ul>
                                 <li>
@@ -45,12 +44,11 @@ export class DevPage extends Component {
                                 </li>
                                 <li>NPM: <LinkExternal href="https://www.npmjs.com/package/react-chartjs-2"/></li>
                             </ul>
-                        </p>
-
-                        <p>
+                        </div>
+                        <div>
                             <strong>django-easy-audit 1.2.3: </strong>
                             <LinkExternal href="https://github.com/soynatan/django-easy-audit"/>
-                        </p>
+                        </div>
                         <ul>
                             <li>Бусад лог хөтөлдөг сангууд ихэвчлэн кодондоо ихээхэн өөрчлөлт хийхийг шаарддаг харин django-easy-audit бол ямарч өөрчлөлтийг шаардахгүй.</li>
                             <li>Хүссэн линкээ нэмэлтээр хориглож болно.</li>
