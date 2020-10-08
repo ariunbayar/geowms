@@ -99,7 +99,7 @@ export class BundleTab extends Component {
     render() {
         const id = this.props.match.params.id
             return (
-                <BrowserRouter >
+                <div>
                     <div>
                     <ul className="nav nav-tabs">
                         <li className=" nav-item nav-link">
@@ -116,8 +116,7 @@ export class BundleTab extends Component {
                         <Route path="/back/дэд-сан/:id/засах/postgis_db/"  component={BunleGisForms}/>
                     </Switch>
                     </div>
-             </BrowserRouter>
-          
+                </div>
             );
     }
 }

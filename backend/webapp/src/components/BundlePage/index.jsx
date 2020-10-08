@@ -14,8 +14,8 @@ export class BundlePage extends Component {
 
             return (
                 <Switch>
+                    <Route path={"/back/дэд-сан/:id/засах/"} component={BundleTab}/>
                     <Route exact path={"/back/дэд-сан/"} component={BundleList}/>
-                    <Route exact path={"/back/дэд-сан/:id/засах/"} component={BundleTab}/>
                     <Route exact path={"/back/дэд-сан/үүсгэх"} component={BundleTab}/>
                 </Switch>
             )
