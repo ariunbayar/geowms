@@ -37,7 +37,7 @@ export class Help extends Component {
                                     <strong>Qgis дээр 'plugin reloader' суулгах</strong>
                                     <ul className="list-unstyled">
                                         <li>
-                                            <h6>Qgis {"->"} Manage and Install Plugins {"->"} Not installed {"->"} Plugin builder <br/>Qgis {"->"} Manage and Install Plugins {"->"} Not installed {"->"} Plugin reloader</h6>
+                                            <h6>Qgis {"->"} Manage and Install Plugins {"->"} Not installed {"->"} Plugin reloader</h6>
                                             <img src="/static/assets/image/plugin/plugin.png" width='600px'/></li>
                                         <li className="mt-3">
                                             <img src="/static/assets/image/plugin/plugin_builder.png" width='600px'/></li>
