@@ -10,6 +10,8 @@ from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
 from main.utils import (
+    gis_delete,
+    gis_fetch_one,
     gis_fields_by_oid,
     gis_insert,
     gis_table_by_oid,
@@ -239,26 +241,12 @@ def save(request, payload, oid, pk):
 def delete(request, oid, pk):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+    gis_delete(oid, pk)
 
-    table = gis_table_by_oid(oid)
-    try:
-
-        with connections['postgis_db'].cursor() as cursor:
-
-            sql = """ DELETE FROM {table} WHERE id = {pk} """.format(table=table, pk=pk)
-            cursor.execute(sql)
-
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-        }
-
-    except Exception:
-
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
 
     return JsonResponse(rsp)
 
@@ -270,37 +258,12 @@ def detail(request, oid, pk):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
-    table = gis_table_by_oid(oid)
-
-    fields = gis_fields_by_oid(oid)
-
-    columns_to_select = [
-        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
-        for f in fields
-    ]
-
-    cursor = connections['postgis_db'].cursor()
-    sql = """
-        SELECT
-            {columns}
-        FROM
-            {table}
-        WHERE
-            id = %s
-        LIMIT 1
-    """.format(
-        columns=', '.join(columns_to_select),
-        table=table,
-    )
-
-    cursor.execute(sql, [pk])
-    rows = list(dict_fetchall(cursor))
-
-    if len(rows) == 0:
+    row = gis_fetch_one(oid, pk)
+    if not row:
         raise Http404
 
     rsp = {
-        'values': rows[0],
+        'values': row,
     }
     return JsonResponse(rsp)
 

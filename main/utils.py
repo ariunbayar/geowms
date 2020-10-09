@@ -117,3 +117,53 @@ def gis_insert(oid, fields, values, value_default=''):
 
     with connections['postgis_db'].cursor() as cursor:
         cursor.execute(sql, query_args)
+
+
+def gis_delete(oid, pk):
+
+    sql = """
+        DELETE FROM
+            {table}
+        WHERE
+            id = %s
+    """.format(
+        table=gis_table_by_oid(oid)
+    )
+
+    query_args = [pk]
+
+    with connections['postgis_db'].cursor() as cursor:
+        cursor.execute(sql, query_args)
+
+
+def gis_fetch_one(oid, pk):
+
+    table = gis_table_by_oid(oid)
+    fields = gis_fields_by_oid(oid)
+
+    columns_to_select = [
+        'ST_AsGeoJSON(ST_Transform("%s", 4326)) AS "%s"' % (f.attname, f.attname)
+        if f.atttypid == 'geometry' else '"%s"' % f.attname
+        for f in fields
+    ]
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            {columns}
+        FROM
+            {table}
+        WHERE
+            id = %s
+        LIMIT 1
+    """.format(
+        table=table,
+        columns=', '.join(columns_to_select),
+    )
+    query_args = [pk]
+
+    with connections['postgis_db'].cursor() as cursor:
+        cursor.execute(sql, query_args)
+        rows = list(dict_fetchall(cursor))
+
+    return len(rows) and rows[0] or None
