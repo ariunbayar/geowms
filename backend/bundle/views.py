@@ -135,6 +135,12 @@ def _get_module_display(module):
         'name': module[1],
     }
 
+def _dict_fetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    for row in cursor.fetchall():
+        yield dict(zip(columns, row))
+
 
 def _fetch_oid_names(oids):
         cursor = connections['postgis_db'].cursor()
@@ -152,7 +158,7 @@ def _fetch_oid_names(oids):
 
         cursor.execute(sql, oids)
 
-        table = list(dict_fetchall(cursor))
+        table = list(_dict_fetchall(cursor))
         return table
 
 
@@ -170,12 +176,12 @@ def _get_bundle_display(bundle):
         JOIN 
             pg_catalog.pg_namespace AS ns ON c.relnamespace = ns.oid
         WHERE
-            {oids}
-    """.format(oids=('c.oid = %s or ' * len(oids))[:-3] )  
+            c.oid IN ({oids})
+    """.format(oids=('%s, ' * len(oid_list))[:-2],)  
+    print(sql)
+    cursor.execute(sql, oid_list)
 
-    cursor.execute(sql, oids)
-
-    table = list(dict_fetchall(cursor)) 
+    table = list(_dict_fetchall(cursor)) 
 
     return {
         'id': bundle.id,

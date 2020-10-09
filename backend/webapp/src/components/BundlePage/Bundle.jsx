@@ -21,7 +21,7 @@ export default class Bundle extends Component {
 
     }
     componentDidMount(){
-        this.getOidName()
+        console.log(this.props.values)
     }
 
     handleModalDeleteOpen(event) {
@@ -75,7 +75,7 @@ export default class Bundle extends Component {
                    </td>
                    <td>
                     <div className="col-md-12">
-                        {this.state.oid_names.map((oid, idx) =>
+                        {this.state.oid_list.map((oid, idx) =>
                                 <div key={idx} className="row">
                                     <div className="col-md-1">
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
