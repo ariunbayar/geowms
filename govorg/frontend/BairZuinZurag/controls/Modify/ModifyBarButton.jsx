@@ -15,8 +15,10 @@ export class ModifyBarButton extends Control {
         const cssClasses = '⚙-toggle-search'
         const element = this.element
         element.className = cssClasses
-        const elementa = document.createElement('a')
-        elementa.setAttribute('href', '#')
+        const elementa = document.createElement('button')
+        elementa.setAttribute('data-toggle', 'tooltip')
+        elementa.setAttribute('data-placement', 'right')
+        elementa.setAttribute('title', 'Засварлах')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')

@@ -2,3 +2,18 @@
     width: 100%;
     height: calc( 100vh - 70px - 15px);
 }
+
+.btn-map{
+	width: 25px;
+    height: 25px;
+    font-size: 14px;
+    border-radius: 2px 2px 0 0;
+    background-color: rgba(123,152,188,0.5);
+    padding: 0;
+    border: none;
+}
+
+.icon-map{
+	color: white;
+	font-weight: 800;
+}
