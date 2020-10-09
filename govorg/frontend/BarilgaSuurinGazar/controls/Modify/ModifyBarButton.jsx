@@ -12,15 +12,17 @@ export class ModifyBarButton extends Control {
         })
 
 
-        const cssClasses = '⚙-toggle-search'
+        const cssClasses = '⚙-toggle-modify'
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
-        elementa.setAttribute('href', '#')
+        elementa.setAttribute('data-toggle', 'tooltip')
+        elementa.setAttribute('data-placement', 'right')
+        elementa.setAttribute('title', 'Засварлах')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.innerText = 'Modify'
+        elementi.className = 'fa fa-pencil-square-o text-white' 
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {

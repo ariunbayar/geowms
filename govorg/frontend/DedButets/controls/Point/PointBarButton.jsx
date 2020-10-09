@@ -12,15 +12,18 @@ export class PointBarButton extends Control {
         })
 
 
-        const cssClasses = '⚙-toggle-search'
+        const cssClasses = '⚙-toggle-point'
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
+        elementa.setAttribute('data-toggle', 'tooltip')
+        elementa.setAttribute('data-placement', 'right')
+        elementa.setAttribute('title', 'Цэг зурах')
         elementa.setAttribute('href', '#')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.innerText = 'Point'
+        elementi.className = 'fa fa-circle-o text-white'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {
