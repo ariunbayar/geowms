@@ -20,7 +20,7 @@ export class PolygonBarButton extends Control {
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.innerText = 'Polygon'
+        elementi.className = 'fa fa-cube gp-text-primary fa-2x'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {

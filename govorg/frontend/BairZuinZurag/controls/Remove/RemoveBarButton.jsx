@@ -19,8 +19,8 @@ export class RemoveBarButton extends Control {
         elementa.setAttribute('href', '#')
 
         const elementi = document.createElement('i')
-        elementi.setAttribute('aria-hidden', 'true')
-        elementi.innerText = 'Арилгах'
+        elementi.setAttribute('aria-hidden', 'true')        
+        elementi.className = 'fa fa-trash-o gp-text-primary fa-2x'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {
