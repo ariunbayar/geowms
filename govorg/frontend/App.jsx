@@ -158,7 +158,7 @@ export class App extends Component {
                                     { teevriin_suljee_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
-                                            icon="fa fa-table"
+                                            icon="fa fa-table gp-text-primary"
                                             url={`/gov/тээврийн-сүлжээ/${oid}/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>
@@ -176,7 +176,7 @@ export class App extends Component {
                                     { ded_butets_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
-                                            icon="fa fa-table"
+                                            icon="fa fa-table gp-text-primary"
                                             url={`/gov/дэд-бүтэц/${oid}/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>
@@ -194,7 +194,7 @@ export class App extends Component {
                                     { bair_zuin_zurag_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
-                                            icon="fa fa-table"
+                                            icon="fa fa-table gp-text-primary"
                                             url={`/gov/байр-зүйн-зураг/${oid}/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>
@@ -213,7 +213,7 @@ export class App extends Component {
                                     { barilga_suurin_gazar_table_list.map(({ oid, schema, table }, idx) =>
                                         <MenuItem
                                             key={ idx }
-                                            icon="fa fa-table"
+                                            icon="fa fa-table gp-text-primary"
                                             url={`/gov/барилга-суурин-газар/${oid}/`}
                                             text={schema + '.' + table}
                                         ></MenuItem>

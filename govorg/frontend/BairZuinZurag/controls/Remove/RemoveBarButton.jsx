@@ -12,15 +12,18 @@ export class RemoveBarButton extends Control {
         })
 
 
-        const cssClasses = '⚙-toggle-search'
+        const cssClasses = '⚙-toggle-remove'
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
+        elementa.setAttribute('data-toggle', 'tooltip')
+        elementa.setAttribute('data-placement', 'right')
+        elementa.setAttribute('title', 'Арилгах')
         elementa.setAttribute('href', '#')
 
         const elementi = document.createElement('i')
-        elementi.setAttribute('aria-hidden', 'true')        
-        elementi.className = 'fa fa-trash-o gp-text-primary fa-2x ml-2 mt-2'
+        elementi.setAttribute('aria-hidden', 'true')
+        elementi.className = 'fa fa-trash-o text-white'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {

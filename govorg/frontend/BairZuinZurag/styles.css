@@ -13,7 +13,110 @@
     border: none;
 }
 
-.icon-map{
-	color: white;
-	font-weight: 800;
+.⚙-toggle-line {
+    padding: 2px 4px;
+    font-size: 15px;
+    top: 82px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+}
+.⚙-toggle-line:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-line:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+
+.⚙-toggle-add {
+    padding: 2px 7px;
+    font-size: 15px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    top: 186px;
+
+}
+.⚙-toggle-add:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-add:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-modify {
+    padding: 2px 7px;
+    font-size: 15px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    top: 56px;
+
+}
+.⚙-toggle-modify:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-modify:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-point {
+    padding: 2px 7px;
+    font-size: 15px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    top: 108px;
+
+}
+.⚙-toggle-point:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-point:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-polygon {
+    padding: 2px 7px;
+    font-size: 15px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    top: 134px;
+
+}
+.⚙-toggle-polygon:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-polygon:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-remove {
+    padding: 2px 7px;
+    font-size: 15px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    top: 160px;
+}
+.⚙-toggle-remove:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-remove:hover{
+    background-color: rgba(0,60,136,0.7);
 }

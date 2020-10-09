@@ -12,15 +12,18 @@ export class LineBarButton extends Control {
         })
 
 
-        const cssClasses = '⚙-toggle-search'
+        const cssClasses = '⚙-toggle-line'
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
+        elementa.setAttribute('data-toggle', 'tooltip')
+        elementa.setAttribute('data-placement', 'right')
+        elementa.setAttribute('title', 'Зураас зурах')
         elementa.setAttribute('href', '#')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.className = 'fa fa-minus gp-text-primary fa-2x ml-2 mt-1'
+        elementi.className = 'fa fa-road text-white'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {
