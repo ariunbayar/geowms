@@ -5,6 +5,7 @@ import {service} from './service'
 import {ConfigForm} from './ConfigForm'
 import Config from './Config'
 import DiskSize from './DiskSize'
+import ModalAlert from "../ModalAlert"
 
 
 export class ConfigList extends Component {
@@ -15,11 +16,13 @@ export class ConfigList extends Component {
         this.state = {
             config_list: [],
             disk: {},
-            modal_alert_check: false,
+            modal_alert_check: "closed",
+            timer: null,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     componentDidMount() {
@@ -43,22 +46,22 @@ export class ConfigList extends Component {
     handleRemove(id){
         service.remove(id).then(({success}) => {
             if(success){
-                this.setState({modal_alert_check: true})
-                this.modalCloseTime()
+                this.setState({modal_alert_check: "open"})
             }
         })
+        this.modalCloseTime()
     }
 
     modalCloseTime(){
-        setTimeout(() => {
+        this.state.timer = setTimeout(() => {
             this.handleListUpdated()
-            this.setState({modal_alert_check: false})
+            this.setState({modal_alert_check: "closed"})
         }, 2000)
     }
 
     modalClose(){
         this.handleListUpdated()
-        this.setState({modal_alert_check: false})
+        this.setState({modal_alert_check: "closed"})
     }
 
     render() {
@@ -92,9 +95,6 @@ export class ConfigList extends Component {
                                             <Config key={config.id} values={config}
                                             handleRemove={()=>this.handleRemove(config.id)}
                                             handleUpdated={() => this.handleRemoved(config.id)}
-                                            modal_alert_check = {this.state.modal_alert_check}
-                                            modalCloseTime = {() => this.modalCloseTime()}
-                                            modalClose = {() => this.modalClose}
                                             />
                                         )}
                                     </tbody>
@@ -107,6 +107,12 @@ export class ConfigList extends Component {
                         </div>
                     </div>
                 </div>
+                <ModalAlert
+                    title="Амжилттай устгалаа"
+                    model_type_icon = "success"
+                    status={this.state.modal_alert_check}
+                    modalAction={() => this.modalClose()}
+                />
             </div>
         )
     }

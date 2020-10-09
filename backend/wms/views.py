@@ -13,6 +13,7 @@ from django.contrib.postgres.search import SearchVector
 from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
+from backend.payment.models import PaymentLayer
 from main.decorators import ajax_required
 
 from .models import WMS
@@ -185,6 +186,7 @@ def layerRemove(request, payload):
     wms_layer = get_object_or_404(WMSLayer, code=layer_name, wms=wmsId)
     wms_layer.legend_url.delete(save=False)
     BundleLayer.objects.filter(layer=wms_layer).delete()
+    PaymentLayer.objects.filter(wms_layer=layer).delete()
     wms_layer.delete()
 
     return JsonResponse({'success': True})
@@ -212,30 +214,45 @@ def create(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def update(request, payload):
-
-    wms = get_object_or_404(WMS, pk=payload.get('id'))
+    pk = payload.get('id')
+    wms = get_object_or_404(WMS, pk=pk)
     layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
     is_active = payload.get('is_active')
-    if(is_active):
-        wms.is_active = True
+    url_service = payload.get('url')
+    if is_active:
+        wms.is_active=True
     else:
-        wms.is_active = False
-    if form.is_valid():
+        wms.is_active=False
+    if url_service == wms.url:
+        if form.is_valid():
 
-        with transaction.atomic():
+            with transaction.atomic():
 
+                form.save()
+                wms = form.instance
+                for layer_choice in layer_choices:
+
+                    WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(
+                            name=layer_choice.get('name'),
+                            code=layer_choice.get('code'),
+                            )
+            rsp = { 'success': True }
+        else:
+            rsp = { 'success': False }
+    else:
+        if form.is_valid():
+            layers = WMSLayer.objects.filter(wms=wms)
+            for layer in layers:
+                PaymentLayer.objects.filter(wms_layer=layer).delete()
+                BundleLayer.objects.filter(layer=layer).delete()
+            layers.delete()
             form.save()
-            wms = form.instance
-            for layer_choice in layer_choices:
+            rsp = { 'success': True }
+        else:
+            rsp = { 'success': False }
 
-                WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(
-                        name=layer_choice.get('name'),
-                        code=layer_choice.get('code'),
-                        )
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
+    return JsonResponse(rsp)
 
 
 @require_POST

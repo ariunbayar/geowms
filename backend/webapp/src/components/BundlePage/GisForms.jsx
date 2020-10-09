@@ -60,7 +60,7 @@ export class BunleGisForms extends Component {
             if(items){
              this.setState({
                 gis_list:items
-             })   
+             })
             }
         })
     }
@@ -77,7 +77,7 @@ export class BunleGisForms extends Component {
                 }
             })
 
-        } 
+        }
     }
 
     handleRemove(id) {
