@@ -34,10 +34,11 @@ export default class Bundle extends Component {
 
     render() {
         const {id, name, price, icon_url, wms_list, oid_list} = this.props.values
+        const idx = this.props.idx
         return (
             <tr>
                 <th scope="col">
-                    {id}
+                    {idx + 1}
                 </th>
 
                 <td>
