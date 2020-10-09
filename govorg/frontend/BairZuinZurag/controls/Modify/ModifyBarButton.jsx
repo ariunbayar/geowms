@@ -20,7 +20,7 @@ export class ModifyBarButton extends Control {
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.innerText = 'Modify'
+        elementi.className = 'fa fa-pencil-square-o gp-text-primary fa-2x' 
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {

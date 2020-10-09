@@ -20,7 +20,7 @@ export class PointBarButton extends Control {
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.innerText = 'Point'
+        elementi.className = 'fa fa-circle-o gp-text-primary fa-2x'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {
