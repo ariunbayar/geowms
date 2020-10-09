@@ -239,6 +239,7 @@ def save(request, payload, oid, pk):
 def delete(request, oid, pk):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+    
     gis_delete(oid, pk)
 
     rsp = {

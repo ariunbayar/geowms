@@ -160,7 +160,7 @@ def rows(request, oid):
 def add(request, payload, oid):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
+    
     try:
 
         fields_to_update = gis_fields_by_oid(oid, exclude=['id', 'geom'])
@@ -235,6 +235,7 @@ def save(request, payload, oid, pk):
 def delete(request, oid, pk):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+    
     gis_delete(oid, pk)
 
     rsp = {
