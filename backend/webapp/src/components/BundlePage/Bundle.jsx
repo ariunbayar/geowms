@@ -17,11 +17,7 @@ export default class Bundle extends Component {
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-        this.getOidName = this.getOidName.bind(this)
 
-    }
-    componentDidMount(){
-        console.log(this.props.values)
     }
 
     handleModalDeleteOpen(event) {
@@ -35,7 +31,8 @@ export default class Bundle extends Component {
 
     
     render() {
-        const {id, name, price, icon_url, wms_list, oid_list} = this.props.values
+        const {id, name, price, icon_url, wms_list, oid_list, oid_table_list} = this.props.values
+        console.log(oid_table_list)
         const {is_modal_delete_open}=this.state
         return (
             <tr>
@@ -75,16 +72,17 @@ export default class Bundle extends Component {
                    </td>
                    <td>
                     <div className="col-md-12">
-                        {this.state.oid_list.map((oid, idx) =>
+                        {oid_table_list ? oid_table_list.map((oid, idx) =>
                                 <div key={idx} className="row">
                                     <div className="col-md-1">
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
                                      </div>
                                     <div className="col-md-8">
-                                        <a> {oid}</a>
+                                        <a> {oid.nspname}.{oid.relname}</a>
                                     </div>
                                 </div>
-                            )
+                            ) :
+                            null
                         }
                     </div>
                    </td>

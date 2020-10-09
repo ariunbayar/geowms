@@ -142,33 +142,11 @@ def _dict_fetchall(cursor):
         yield dict(zip(columns, row))
 
 
-def _fetch_oid_names(oids):
-        cursor = connections['postgis_db'].cursor()
-
-        sql = """
-            SELECT 
-                ns.nspname, c.relname
-            FROM 
-                pg_catalog.pg_class AS c
-            JOIN 
-                pg_catalog.pg_namespace AS ns ON c.relnamespace = ns.oid
-            WHERE
-                {oids}
-        """.format(oids=('c.oid = %s or ' * len(oids))[:-3] )  
-
-        cursor.execute(sql, oids)
-
-        table = list(_dict_fetchall(cursor))
-        return table
-
-
-def _get_bundle_display(bundle):
-    roles = _get_form_check_options(bundle.id)
-    modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
-    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
+def _fetch_oid_names(oid_list):
+    table =[]
     cursor = connections['postgis_db'].cursor()
-
-    sql = """
+    if oid_list:
+        sql = """
         SELECT 
             ns.nspname, c.relname
         FROM 
@@ -177,18 +155,26 @@ def _get_bundle_display(bundle):
             pg_catalog.pg_namespace AS ns ON c.relnamespace = ns.oid
         WHERE
             c.oid IN ({oids})
-    """.format(oids=('%s, ' * len(oid_list))[:-2],)  
-    print(sql)
-    cursor.execute(sql, oid_list)
+        """.format(oids=('%s,' * len(oid_list))[:-1], )  
+        cursor.execute(sql, oid_list)
 
-    table = list(_dict_fetchall(cursor)) 
+        table = list(_dict_fetchall(cursor))
+    return table
+
+
+def _get_bundle_display(bundle):
+    roles = _get_form_check_options(bundle.id)
+    modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
+    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
+    cursor = connections['postgis_db'].cursor()
+    table = _fetch_oid_names(oid_list)
 
     return {
         'id': bundle.id,
         'name': bundle.name,
         'price':modules,
         'oid_list':oid_list,
-        'oid_names':table,
+        'oid_table_list':table,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
