@@ -276,9 +276,14 @@ export default class BairZuinZurag extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-        if(this.state.modifyend_selected_feature_check && selectedFeature_ID !== this.state.modifyend_selected_feature_ID){
-          this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${selectedFeature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
-          this.setState({modifyend_selected_feature_check: false})
+        if(selectedFeature_ID){
+          if(this.state.modifyend_selected_feature_check && selectedFeature_ID !== this.state.modifyend_selected_feature_ID){
+            if(this.state.modifyend_selected_feature_ID < 999999)
+            {
+              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
+              this.setState({modifyend_selected_feature_check: false})
+            }
+          }
         }
         featureID_list.push(selectedFeature_ID)
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
@@ -341,6 +346,13 @@ export default class BairZuinZurag extends Component{
     }
 
     drawed(event){
+      const features = this.vector.getSource().getFeatures();
+      this.setState({modifyend_selected_feature_ID: null})
+      if(features.length > 0)
+      {
+          const lastFeature = features[features.length - 1];
+          this.vector.getSource().removeFeature(lastFeature);
+      }
       const feature = event.feature
       var featureID = this.state.featureID
       const vectorLayer = this.vectorLayer
@@ -348,8 +360,8 @@ export default class BairZuinZurag extends Component{
       let area = format.writeFeatureObject(feature,  {
         dataProjection: this.state.dataProjection,
         featureProjection: this.state.featureProjection,
-    })
-      featureID += 1
+      })
+      featureID += 1000000
       feature.setProperties({
           'id': featureID
       })
@@ -357,7 +369,6 @@ export default class BairZuinZurag extends Component{
       featureID = properties.id;
       const drawed = JSON.stringify(area)
       this.setState({drawed})
-      this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
     }
 
     clearMap() {
@@ -386,12 +397,12 @@ export default class BairZuinZurag extends Component{
     }
 
     AddButton(){
-      if(this.state.modifyend_selected_feature_check){
-          this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
-          this.setState({modifyend_selected_feature_check: false})
+      if(this.state.modifyend_selected_feature_ID){
+            this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
+            this.setState({modifyend_selected_feature_check: false})
       }
       else{
-        alert(`Уучлаарай ${this.state.modifyend_selected_feature_ID} дугаартай мэдээлэлд өөрчлөлт алга байна.`)
+        this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
       }
     }
 
