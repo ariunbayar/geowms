@@ -23,6 +23,7 @@ import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
 import {RemoveButton} from './controls/Remove/RemoveButton'
 import { set } from 'ol/transform';
 import {Modal} from "../../../src/components/MapModal/Modal"
+import {AddButton} from "./controls/Add/AddButton"
 
 export default class TeevriinSuljee extends Component{
 
@@ -77,6 +78,7 @@ export default class TeevriinSuljee extends Component{
       this.LineButton = this.LineButton.bind(this)
       this.PointButton = this.PointButton.bind(this)
       this.PolygonButton = this.PolygonButton.bind(this)
+      this.AddButton = this.AddButton.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
       this.modifiedFea = this.modifiedFea.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
@@ -203,6 +205,7 @@ export default class TeevriinSuljee extends Component{
           new PointBarButton({PointButton: this.PointButton}),
           new PolygonBarButton({PolygonButton: this.PolygonButton}),
           new RemoveBarButton({RemoveButton: this.RemoveButton}),
+          new AddButton({AddButton: this.AddButton}),
           this.controls.modifyBtn,
           this.controls.lineBtn,
           this.controls.pointBtn,
@@ -273,7 +276,7 @@ export default class TeevriinSuljee extends Component{
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
         if(this.state.modifyend_selected_feature_check && selectedFeature_ID !== this.state.modifyend_selected_feature_ID){
-          this.controls.modal.showModal(this.updateGeom, true, "Тийм", "Мэдээллийг хадгалах уу", null, null, "Үгүй")
+          this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${selectedFeature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
           this.setState({modifyend_selected_feature_check: false})
         }
         featureID_list.push(selectedFeature_ID)
@@ -283,7 +286,7 @@ export default class TeevriinSuljee extends Component{
       {
         this.setState({ send: false })
       }
-  }
+    }
 
     modifiedFea (event) {
       const features = event.features.getArray()
@@ -378,6 +381,16 @@ export default class TeevriinSuljee extends Component{
            )
         })
         this.setState({featureID_list: []})
+      }
+    }
+
+    AddButton(){
+      if(this.state.modifyend_selected_feature_check){
+          this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
+          this.setState({modifyend_selected_feature_check: false})
+      }
+      else{
+        alert(`Уучлаарай ${this.state.modifyend_selected_feature_ID} дугаартай мэдээлэлд өөрчлөлт алга байна.`)
       }
     }
 
