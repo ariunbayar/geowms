@@ -20,7 +20,7 @@ export class LineBarButton extends Control {
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
-        elementi.className = 'fa fa-minus gp-text-primary fa-2x'
+        elementi.className = 'fa fa-minus gp-text-primary fa-2x ml-2 mt-1'
         elementa.appendChild(elementi)
 
         element.addEventListener('click', (event) => {
