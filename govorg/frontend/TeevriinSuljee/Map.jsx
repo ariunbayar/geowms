@@ -22,6 +22,7 @@ import {PolygonButton} from './controls/Polygon/PolygonButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
 import {RemoveButton} from './controls/Remove/RemoveButton'
 import { set } from 'ol/transform';
+import {Modal} from "../../../src/components/MapModal/Modal"
 
 export default class TeevriinSuljee extends Component{
 
@@ -43,11 +44,14 @@ export default class TeevriinSuljee extends Component{
           featureID: null,
           featureID_list: [],
           selectedFeature_ID: null,
+          modifyend_selected_feature_ID: null,
+          modifyend_selected_feature_check: false,
           send: false,
           changedFeature: '',
           Mongolia: [11461613.630815497, 5878656.0228370065],
           chkbox: true,
           type: '',
+          drawed: null
       }
 
       this.controls = {
@@ -56,6 +60,7 @@ export default class TeevriinSuljee extends Component{
         pointBtn: new PointButton(),
         polygonBtn: new PolygonButton(),
         removeBtn: new RemoveButton(),
+        modal: new Modal(),
       }
 
       this.modifyE = this.ExampleModify()
@@ -202,6 +207,7 @@ export default class TeevriinSuljee extends Component{
           this.controls.lineBtn,
           this.controls.pointBtn,
           this.controls.polygonBtn,
+          this.controls.modal,
         ]),
         view: new View({
           center: this.state.Mongolia,
@@ -262,18 +268,22 @@ export default class TeevriinSuljee extends Component{
     };
 
     featureSelected(event){
-        if(event.selected[0])
-        {
-          const featureID_list = this.state.featureID_list
-          const selectedFeature_ID = event.selected[0].getProperties()['id']
-          featureID_list.push(selectedFeature_ID)
-          this.setState({ send: true, featureID_list, selectedFeature_ID })
+      if(event.selected[0])
+      {
+        const featureID_list = this.state.featureID_list
+        const selectedFeature_ID = event.selected[0].getProperties()['id']
+        if(this.state.modifyend_selected_feature_check && selectedFeature_ID !== this.state.modifyend_selected_feature_ID){
+          this.controls.modal.showModal(this.updateGeom, true, "Тийм", "Мэдээллийг хадгалах уу", null, null, "Үгүй")
+          this.setState({modifyend_selected_feature_check: false})
         }
-        else
-        {
-          this.setState({ send: false })
-        }
-    }
+        featureID_list.push(selectedFeature_ID)
+        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
+      }
+      else
+      {
+        this.setState({ send: false })
+      }
+  }
 
     modifiedFea (event) {
       const features = event.features.getArray()
@@ -283,8 +293,7 @@ export default class TeevriinSuljee extends Component{
         featureProjection: this.state.featureProjection,
     })
       const changedFeature = JSON.stringify(data)
-      this.setState({ changedFeature })
-      this.updateGeom(changedFeature)
+      this.setState({ changedFeature, modifyend_selected_feature_check: true })
     }
 
     loadRows() {
@@ -343,7 +352,8 @@ export default class TeevriinSuljee extends Component{
       const properties = feature.getProperties();
       featureID = properties.id;
       const drawed = JSON.stringify(area)
-      this.createGeom(drawed)
+      this.setState({drawed})
+      this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
     }
 
     clearMap() {
@@ -371,10 +381,10 @@ export default class TeevriinSuljee extends Component{
       }
     }
 
-    updateGeom(data){
+    updateGeom(){
       const id = this.state.selectedFeature_ID
       const oid = this.state.oid
-      const json = JSON.parse(data)
+      const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
         if(success) alert(info)
@@ -382,9 +392,9 @@ export default class TeevriinSuljee extends Component{
       })
     }
 
-    createGeom(data){
+    createGeom(){
       const oid = this.state.oid
-      const json = JSON.parse(data)
+      const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       const row_id = 30
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
@@ -400,6 +410,7 @@ export default class TeevriinSuljee extends Component{
         }
       })
     }
+
 
     saveData() {
       const vectorLayer = this.vectorLayer
