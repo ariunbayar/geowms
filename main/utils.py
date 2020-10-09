@@ -62,6 +62,31 @@ def gis_table_by_oid(oid):
     return '"{}"."{}"'.format(schema, table)
 
 
+def gis_tables_by_oids(oids):
+
+    sql = """
+        SELECT
+            c.oid as "oid",
+            n.nspname as "schema",
+            c.relname as "table"
+        FROM
+            pg_catalog.pg_class c
+        LEFT JOIN
+            pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        WHERE
+            c.oid IN ({oids})
+    """.format(
+        oids=('%s, ' * len(oids))[:-2],
+    )
+
+    query_args = oids
+
+    with connections['postgis_db'].cursor() as cursor:
+        cursor.execute(sql, query_args)
+        tables = list(dict_fetchall(cursor))
+    return tables
+
+
 def gis_fields_by_oid(oid, exclude=[]):
 
     with connections[GIS_CONNECTION].cursor() as cursor:

@@ -15,6 +15,7 @@ from main.utils import (
     gis_fields_by_oid,
     gis_insert,
     gis_table_by_oid,
+    gis_tables_by_oids,
     dict_fetchall
 )
 
@@ -91,24 +92,7 @@ def table_list(request):
 
     if len(oids):
 
-        with connections['postgis_db'].cursor() as cursor:
-
-            sql = """
-                SELECT
-                    c.oid as "oid",
-                    n.nspname as "schema",
-                    c.relname as "table"
-                FROM
-                    pg_catalog.pg_class c
-                LEFT JOIN
-                    pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-                WHERE
-                    c.oid IN ({oids})
-            """.format(
-                oids=('%s, ' * len(oids))[:-2],
-            )
-            cursor.execute(sql, oids)
-            tables = list(dict_fetchall(cursor))
+        tables = gis_tables_by_oids(oids)
 
         rows = [
             {
