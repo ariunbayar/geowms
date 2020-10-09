@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom"
 
 import { service } from "./service"
 import WMSCheckFormSort from './WMSCheckFormSort'
+import ModalAlert from '../ModalAlert'
 
 export class WMSForm extends Component {
 
@@ -19,7 +20,9 @@ export class WMSForm extends Component {
             layers_all: [],
             is_active:false,
             layer_choices: [],
-            is_active_change:true
+            is_active_change:true,
+            modal_alert_check: 'closed',
+            timer: null,
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -29,6 +32,7 @@ export class WMSForm extends Component {
         this.loadData = this.loadData.bind(this)
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
         this.ActiveChange=this.ActiveChange.bind(this)
+        this.modalCloseTime=this.modalCloseTime.bind(this)
 
     }
 
@@ -50,16 +54,19 @@ export class WMSForm extends Component {
             const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":true }
             if (id) {
                 service.update(values).then(({ success, item }) => {
-                    if (success) { this.props.history.push('/back/wms/') }
+                    this.setState({modal_alert_check: 'open'})
                 })
 
             } else {
 
                 service.create(values).then(({ success, item }) => {
-                    if (success) { this.props.history.push('/back/wms/') }
+                    if (success) {
+                        this.setState({modal_alert_check: 'open'})
+                    }
                 })
 
             }
+            this.modalCloseTime()
         }
         else{
             const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":false }
@@ -166,6 +173,20 @@ export class WMSForm extends Component {
         this.setState({ layers })
     }
 
+    handleModalAlert(){
+        this.props.history.push('/back/wms/')
+        this.setState({modal_alert_ceck: 'closed'})
+        clearTimeout(this.state.timer)
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.props.history.push('/back/wms/')
+            this.setState({modal_alert_check: 'closed'})
+        }, 2000)
+    }
+
+
     render() {
         const { layers_all, id,is_active } = this.state
         return (
@@ -214,7 +235,13 @@ export class WMSForm extends Component {
                             <div className="form-group">
                                 <button className="btn gp-btn-primary btn-block waves-effect waves-light m-1" onClick={this.handleSave} >
                                     Хадгал
-                                    </button>
+                                </button>
+                                <ModalAlert
+                                    title="Амжилттай хадгаллаа"
+                                    model_type_icon = "success"
+                                    status={this.state.modal_alert_check}
+                                    modalAction={() => this.handleModalAlert()}
+                                />
                             </div>
 
 

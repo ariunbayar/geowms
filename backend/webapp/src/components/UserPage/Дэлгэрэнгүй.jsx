@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {service} from './service'
 import {NavLink} from 'react-router-dom'
 import ModalLimit from "./ModalLimit"
+import ModalAlert from "../ModalAlert"
 
 
 
@@ -21,7 +22,9 @@ export class Дэлгэрэнгүй extends Component {
             is_superuser:false,
             is_active: false,
             is_modal_limit_open:false,
-            role_name:''
+            role_name:'',
+            modal_alert_check: "closed",
+            title_name: ""
         }
 
         this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
@@ -31,6 +34,7 @@ export class Дэлгэрэнгүй extends Component {
         this.handleOnClick=this.handleOnClick.bind(this)
         this.getRole=this.getRole.bind(this)
         this.handleSaveSuccess=this.handleSaveSuccess.bind(this)
+        this.closeModalTime=this.closeModalTime.bind(this)
     }
 
     componentDidMount() {
@@ -87,17 +91,39 @@ export class Дэлгэрэнгүй extends Component {
 
         service.userDetailChange(this.props.match.params.id, false)
         .then(({success}) => {
-            if(success){this.setState({is_active: false, is_modal_limit_open: false})}
+            if(success){
+                this.setState({is_active: false, is_modal_limit_open: false})
+                this.setState({modal_alert_check: 'open'})
+                this.setState({title_name: "хязгаарлалаа"})
+        }
         })
-
+        this.closeModalTime()
     }
+
     handleIsActiveTrue(){
         service.userDetailChange(this.props.match.params.id, true)
         .then(({success}) => {
-            if(success){this.setState({is_active: true})}
+            if(success){
+                this.setState({is_active: true})
+                this.setState({modal_alert_check: 'open'})
+                this.setState({title_name: "идэвхжилээ"})
+            }
         })
+        this.closeModalTime()
 
     }
+
+    handleModalAlert(){
+        this.setState({modal_alert_check: 'closed'})
+        clearTimeout(this.state.timer)
+    }
+
+    closeModalTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_check: 'closed'})
+        }, 2000)
+    }
+
     render() {
         const {id, first_name, email,is_sso, last_name, gender, username, last_login, date_joined} = this.state.user_detail
         const {is_modal_limit_open, check, is_active, role_name}=this.state
@@ -122,8 +148,15 @@ export class Дэлгэрэнгүй extends Component {
                             <p><strong>Хэрэглэгчийн эрх</strong>:{role_name} </p>
                             <p><strong>Идэвхитэй эсэх</strong>: {is_active ?  'Идэвхтэй': '-'}
                             &nbsp; {is_active ?
-                                    <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button> :
+                                    <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button>
+                                    :
                                     <button  className="btn gp-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхжүүлэх</button>}
+                                    <ModalAlert
+                                        title = {["Амжилттай ", this.state.title_name]}
+                                        model_type_icon = "success"
+                                        status={this.state.modal_alert_check}
+                                        modalAction={() => this.handleModalAlert()}
+                                    />
                         </p>
                             <p><strong>Бүртгүүлсэн огноо</strong>: {date_joined} </p>
                             <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>

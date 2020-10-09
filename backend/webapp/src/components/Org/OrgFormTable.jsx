@@ -8,7 +8,7 @@ export class OrgFormTable extends Component {
     constructor(props) {
         super(props)
         this.state={
-            is_modal_delete_open: false,
+            modal_status: 'closed'
         }
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
@@ -16,23 +16,22 @@ export class OrgFormTable extends Component {
     }
 
     handleModalDeleteOpen() {
-        this.setState({is_modal_delete_open: true})
+        this.setState({modal_status: 'open'})
     }
 
     handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
+        this.setState({modal_status: 'closed'})
     }
 
     modalClose(){
-        this.setState({is_modal_delete_open: false})
-        this.props.modalClose()
+        this.props.handleUserDelete()
+        this.setState({modal_status: 'closed'})
     }
 
     render() {
         const org = this.props.org
         const idx = this.props.idx
         const org_level = this.props.org_level
-        const is_modal_delete_open=this.state.is_modal_delete_open
         return (
             <tr>
                 <td>
@@ -45,34 +44,21 @@ export class OrgFormTable extends Component {
                 </td>
                 <td>
                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org.id}/засах`}>
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true" style={{color: "red"}}></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {is_modal_delete_open &&
-                        <>
-                            <Modal
-                                modalClose={this.handleModalDeleteClose}
-                                modalAction={this.props.handleUserDelete}
-                                text={(
-                                    <p>Та <b>"{org.name}"</b> нэртэй байгууллагыг устгахдаа итгэлтэй байна уу?</p>
-                                )}
-                                title="Байгууллага устгах"
-                                model_type_icon = "success"
-                            />
-                            {
-                                this.props.modal_alert_check &&
-                                <ModalAlert
-                                    title="Амжилттай устгалаа"
-                                    model_type_icon = "success"
-                                    modalClose = {this.modalClose}
-                                />
-                            }
-                        </>
-                    }
+                    <Modal
+                        modalAction={() => this.modalClose()}
+                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        title="Байгууллага устгах"
+                        model_type_icon = "success"
+                        status={this.state.modal_status}
+                        modalClose={() => this.handleModalDeleteClose()}
+                    />
                 </td>
             </tr>
         )

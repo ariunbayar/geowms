@@ -312,7 +312,7 @@ def updateGis(request, payload):
             saves.delete()
 
     for oid in oid_list:
-        bundle_gis = BundleGIS.objects.filter(oid=oid)
+        bundle_gis = BundleGIS.objects.filter(oid=oid, bundle_id=bundle_id)
         if not bundle_gis:
             BundleGIS.objects.create(oid=oid, bundle_id = bundle_id)
     return JsonResponse({'success': True})
