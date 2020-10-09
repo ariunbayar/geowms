@@ -1,25 +1,25 @@
-import requests
 import json
 from geojson import Feature, FeatureCollection
 
-from django.conf import settings
 from django.db import connections
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.views.decorators.cache import cache_page
+from django.http import JsonResponse, HttpResponseBadRequest, Http404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 
 from backend.bundle.models import Bundle
 from backend.changeset.models import ChangeSet
-from backend.org.models import Org
-from main.decorators import ajax_required
-from main.utils import dict_fetchall
-from main.utils import gis_table_by_oid, gis_fields_by_oid, dict_fetchall
+from main.decorators import ajax_required, gov_bundle_required
+from main.utils import (
+    gis_fields_by_oid,
+    gis_insert,
+    gis_table_by_oid,
+    dict_fetchall
+)
 
 
 def _get_changeset_display(ob):
 
-    geom= eval(ob.geom)
+    geom = eval(ob.geom)
     geometry = eval(geom['geom'])
     coordinates = geometry['coordinates']
     geom_type = geometry['type']
@@ -54,12 +54,10 @@ def _get_feature_coll(ob, changeset_list):
         point = MultiPoint((changeset_list[ob]['coordinate']))
         return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
-
     elif geom_type == 'MultiLineString':
         from geojson import MultiLineString
         point = MultiLineString((changeset_list[ob]['coordinate']))
         return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
-
 
     else:
         from geojson import MultiPolygon
@@ -74,7 +72,7 @@ def changeset_all(request):
     feature = []
     geoJson = []
     changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
-    features = [ _get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
+    features = [_get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
     feature_collection = FeatureCollection(features)
     rsp = {
         'GeoJson': feature_collection,
@@ -84,19 +82,15 @@ def changeset_all(request):
 
 @require_GET
 @ajax_required
-@cache_page(settings.DEBUG and 300 or 0)
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def table_list(request):
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BAIR_ZUIN_ZURAG)[0]
-    oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
     rows = []
+    oids = list(request.bundle.bundlegis_set.values_list('oid', flat=True))
 
     if len(oids):
 
         with connections['postgis_db'].cursor() as cursor:
-
-            oids = list(bundle.bundlegis_set.values_list('oid', flat=True))
 
             sql = """
                 SELECT
@@ -138,12 +132,10 @@ def table_list(request):
 
 @require_GET
 @ajax_required
-@cache_page(settings.DEBUG and 300 or 0)
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def rows(request, oid):
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BAIR_ZUIN_ZURAG)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
     table = gis_table_by_oid(oid)
 
@@ -178,14 +170,40 @@ def rows(request, oid):
 
 @require_POST
 @ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def add(request, payload, oid):
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BAIR_ZUIN_ZURAG)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
-    fields = gis_fields_by_oid(oid)
+    try:
+
+        fields_to_update = gis_fields_by_oid(oid, exclude=['id', 'geom'])
+        gis_insert(oid, fields_to_update, payload, value_default='')
+
+        rsp = {
+            'success': True,
+            'info': "Амжилттай",
+        }
+        return JsonResponse(rsp)
+
+    except Exception:
+
+        rsp = {
+            'success': False,
+            'info': "Өгөгдлийг зөв оруулна уу!",
+        }
+        return HttpResponseBadRequest(json.dumps(rsp))
+
+
+@require_POST
+@ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
+def save(request, payload, oid, pk):
+
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+
     table = gis_table_by_oid(oid)
+    fields = gis_fields_by_oid(oid)
 
     fields_to_update = [
         field.attname
@@ -200,83 +218,40 @@ def add(request, payload, oid):
 
     try:
         with connections['postgis_db'].cursor() as cursor:
-
             sql = """
-                INSERT INTO
+                UPDATE
                     {table}
-                    ({fields})
-                VALUES
-                    ({values})
+                SET
+                    {field_assignment}
+                WHERE
+                    id = %s
             """.format(
                 table=table,
-                fields=', '.join(['"{}"'.format(f) for f in fields_to_update]),
-                values=('%s, ' * len(values))[:-2]
+                pk=pk,
+                field_assignment=', '.join(['"{}" = %s'.format(f) for f in fields_to_update])
             )
-            cursor.execute(sql, values)
+            cursor.execute(sql, values + [pk])
 
         rsp = {
             'success': True,
             'info': "Амжилттай",
         }
 
-    except Exception as e:
-
-        if settings.DEBUG:
-            raise e
+    except Exception:
 
         rsp = {
             'success': False,
-            'info': "Өгөгдлийн зөв оруулна уу!",
+            'info': "Алдаа гарсан",
         }
 
     return JsonResponse(rsp)
 
 
-@require_POST
-@ajax_required
-def save(request, payload, oid, pk):
-
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BAIR_ZUIN_ZURAG)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
-
-    tabne_data = gis_table_by_oid(oid)
-    fields = gis_fields_by_oid(oid)
-    # query set beltgeh
-    fields_to_update = [
-        field.attname
-        for field in fields
-        if field.attname not in ['id', 'geom']
-    ]
-
-    values = [
-        payload.get(f, '')
-        for f in fields_to_update
-    ]
-
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {tabne_data} SET {fields} = %s WHERE id = {pk} """.format(tabne_data=tabne_data, pk=pk, fields='= %s, '.join(['"{}"'.format(f) for f in fields_to_update]))
-            cursor.execute(sql, values)
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-        }
-        return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
-
-
 @require_GET
 @ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def delete(request, oid, pk):
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BAIR_ZUIN_ZURAG)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
     table = gis_table_by_oid(oid)
     try:
@@ -303,11 +278,10 @@ def delete(request, oid, pk):
 
 @require_GET
 @ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def detail(request, oid, pk):
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BAIR_ZUIN_ZURAG)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
     table = gis_table_by_oid(oid)
 
@@ -348,10 +322,9 @@ def geoJsonConvertGeom(json):
     geojson = str(json)
     try:
         with connections['postgis_db'].cursor() as cursor:
-
-                    sql = """ SELECT ST_GeomFromGeoJSON(%s); """
-                    cursor.execute(sql, [geojson])
-                    geom = cursor.fetchone()
+            sql = """ SELECT ST_GeomFromGeoJSON(%s); """
+            cursor.execute(sql, [geojson])
+            geom = cursor.fetchone()
         return geom
     except Exception:
         return None
@@ -360,9 +333,9 @@ def geoJsonConvertGeom(json):
 def tableLastfindID(table_name):
     try:
         with connections['postgis_db'].cursor() as cursor:
-                    sql = """ select id from {table_name} order by id desc limit 1; """.format(table_name=table_name)
-                    cursor.execute(sql)
-                    row_id = cursor.fetchone()
+            sql = """ select id from {table_name} order by id desc limit 1; """.format(table_name=table_name)
+            cursor.execute(sql)
+            row_id = cursor.fetchone()
         return row_id
     except Exception:
         return None
@@ -378,14 +351,10 @@ def findGeomField(fields):
 
 @require_POST
 @ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def updateGeom(request, payload, oid, pk):
 
-    # pk = table row id
-    # geojson = {"type":"Point","coordinates":[106.956508889,48.70858]} point polygon alinch bolno
-    # oid = 89180 table id avna
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
     geojson = payload.get('geojson')
     table = gis_table_by_oid(oid)
@@ -401,8 +370,8 @@ def updateGeom(request, payload, oid, pk):
         return JsonResponse(rsp)
     try:
         with connections['postgis_db'].cursor() as cursor:
-                    sql = """ UPDATE {table} SET {geom_field} = %s WHERE id = %s """.format(table=table, geom_field=geom_field)
-                    cursor.execute(sql, [geom, pk])
+            sql = """ UPDATE {table} SET {geom_field} = %s WHERE id = %s """.format(table=table, geom_field=geom_field)
+            cursor.execute(sql, [geom, pk])
 
         rsp = {
             'success': True,
@@ -420,11 +389,10 @@ def updateGeom(request, payload, oid, pk):
 
 @require_POST
 @ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def geomAdd(request, payload, oid):
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    bundle = get_list_or_404(Bundle, module=Bundle.MODULE_BARILGA_SUURIN_GAZAR)[0]
-    get_object_or_404(bundle.bundlegis_set, oid=oid)
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
 
     geojson = payload.get('geojson')
     fields = gis_fields_by_oid(oid)
@@ -438,6 +406,7 @@ def geomAdd(request, payload, oid):
             'info': "Geojson алдаатай байна.",
         }
         return JsonResponse(rsp)
+
     try:
         with connections['postgis_db'].cursor() as cursor:
 
@@ -459,10 +428,7 @@ def geomAdd(request, payload, oid):
             'row_id': row_id
         }
 
-    except Exception as e:
-
-        if settings.DEBUG:
-            raise e
+    except Exception:
 
         rsp = {
             'success': False,

@@ -3,6 +3,9 @@ from functools import wraps
 
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, get_list_or_404
+
+from django.apps import apps
 
 
 def ajax_required(f):
@@ -20,7 +23,7 @@ def ajax_required(f):
 
             try:
                 return f(request, *args, **kwargs)
-            except Http404:
+            except Http404 as e:
                 return HttpResponseBadRequest('{"success": false}')
 
         if settings.DEBUG:
@@ -34,3 +37,50 @@ def ajax_required(f):
     wrap.__name__ = f.__name__
 
     return wrap
+
+
+def gov_required(f):
+
+    def wrap(request, *args, **kwargs):
+
+        if request.user.is_authenticated:
+            Org = apps.get_model('backend_org', 'Org')
+            org = get_object_or_404(Org, employee__user=request.user)
+            request.org = org
+            return f(request, *args, **kwargs)
+
+        raise Http404
+
+    wrap.__doc__ = f.__doc__
+    wrap.__name__ = f.__name__
+
+    return wrap
+
+
+def gov_bundle_required(module):
+
+    def inner(f):
+
+        def wrap(request, *args, **kwargs):
+
+            if request.user.is_authenticated:
+
+                Org = apps.get_model('backend_org', 'Org')
+                org = get_object_or_404(Org, employee__user=request.user)
+
+                Bundle = apps.get_model('backend_bundle', 'Bundle')
+                bundle = get_list_or_404(Bundle, module=module)[0]
+
+                request.org = org
+                request.bundle = bundle
+
+                return f(request, *args, **kwargs)
+
+            raise Http404
+
+        wrap.__doc__ = f.__doc__
+        wrap.__name__ = f.__name__
+
+        return wrap
+
+    return inner

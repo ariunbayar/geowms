@@ -62,7 +62,7 @@ def gis_table_by_oid(oid):
     return '"{}"."{}"'.format(schema, table)
 
 
-def gis_fields_by_oid(oid):
+def gis_fields_by_oid(oid, exclude=[]):
 
     with connections[GIS_CONNECTION].cursor() as cursor:
 
@@ -85,4 +85,35 @@ def gis_fields_by_oid(oid):
         cursor.execute(sql, [table])
         fields = list(named_tuple_fetchall(cursor))
 
-    return fields
+    fields_final = [
+        field
+        for field in fields
+        if field.attname not in exclude
+    ]
+
+    return fields_final
+
+
+def gis_insert(oid, fields, values, value_default=''):
+
+    table = gis_table_by_oid(oid)
+
+    sql = """
+        INSERT INTO
+            {table}
+            ({fields})
+        VALUES
+            ({values})
+    """.format(
+        table=table,
+        fields=', '.join(['"{}"'.format(f.attname) for f in fields]),
+        values=('%s, ' * len(fields))[:-2]
+    )
+
+    query_args = [
+        values.get(f.attname, value_default)
+        for f in fields
+    ]
+
+    with connections['postgis_db'].cursor() as cursor:
+        cursor.execute(sql, query_args)
