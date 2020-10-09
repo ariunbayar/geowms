@@ -93,9 +93,10 @@ export class BundleList extends Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {this.state.bundle_list.map((values) =>
+                                    {this.state.bundle_list.map((values, idx) =>
                                         <Bundle
                                             key={values.id}
+                                            idx={idx}
                                             values={values}
                                             handleRemove={() => this.handleRemove(values.id)}
                                             handleMove={this.handleMove}

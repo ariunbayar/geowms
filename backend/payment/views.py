@@ -25,7 +25,7 @@ def paymentList(request, payload):
         'user__first_name',
         'geo_unique_number'
         )
-    ).filter(search__icontains=query)
+    ).filter(search__icontains=query).order_by('-created_at')
     total_items = Paginator(payments, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
