@@ -138,11 +138,9 @@ def rows(request, oid):
             {columns}
         FROM
             {table}
-        LIMIT {limit}
     """.format(
         columns=', '.join(columns_to_select),
         table=table,
-        limit=500,
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
