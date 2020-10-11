@@ -1,47 +1,40 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+
 import 'ol/ol.css';
-import "./styles.css"
 import Map from 'ol/Map';
 import View from 'ol/View';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
-import {Draw, Modify, Select, Snap} from 'ol/interaction';
-import {OSM, Vector as VectorSource} from 'ol/source';
+import GeoJSON from 'ol/format/GeoJSON'
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-import { service } from './service';
-import GeoJSON from 'ol/format/GeoJSON';
-import { Feature } from 'ol';
-import {ModifyButton} from './controls/Modify/ModifyButton'
+import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
+import {Draw, Modify, Select, Snap} from 'ol/interaction'
+import {OSM, Vector as VectorSource} from 'ol/source'
+import { Feature } from 'ol'
+import { set } from 'ol/transform'
+
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
-import {LineButton} from './controls/Line/LineButton'
 import {PointBarButton} from './controls/Point/PointBarButton'
-import {PointButton} from './controls/Point/PointButton'
 import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
-import {PolygonButton} from './controls/Polygon/PolygonButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
-import {RemoveButton} from './controls/Remove/RemoveButton'
-import { set } from 'ol/transform';
+import {SaveBtn} from "./controls/Add/AddButton"
 import {Modal} from "../../../src/components/MapModal/Modal"
-import {AddButton} from "./controls/Add/AddButton"
+
+import "./styles.css"
+import { service } from './service'
 
 export default class BarilgaSuurinGazar extends Component{
 
     constructor(props){
       super(props)
-      this.type = 'Point'
+
       this.state = {
           format: new GeoJSON(),
-          GeoJson: [],
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
-          tables: [{"table_name": "test_point"}, {"table_name": "test_polygon"}],
-          select_table:'',
-          is_sidebar_open: false,
           oid: this.props.match.params.oid,
-
           rows: [],
-
+          geom_type: 'MULTIPOLYGON',
           featureID: null,
           featureID_list: [],
           selectedFeature_ID: null,
@@ -56,31 +49,26 @@ export default class BarilgaSuurinGazar extends Component{
       }
 
       this.controls = {
-        modifyBtn: new ModifyButton(),
-        lineBtn: new LineButton(),
-        pointBtn: new PointButton(),
-        polygonBtn: new PolygonButton(),
-        removeBtn: new RemoveButton(),
         modal: new Modal(),
       }
 
-      this.modifyE = this.ExampleModify()
-      this.drawE = this.ExampleDraw()
+      this.type = 'Line'
+
+      this.modifyE = this.Modify()
+      this.drawE = this.Draw()
 
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
       this.loadRows = this.loadRows.bind(this)
       this.clearMap = this.clearMap.bind(this)
-      this.remove = this.remove.bind(this)
-      this.saveData = this.saveData.bind(this)
       this.updateGeom = this.updateGeom.bind(this)
       this.ModifyButton = this.ModifyButton.bind(this)
       this.LineButton = this.LineButton.bind(this)
       this.PointButton = this.PointButton.bind(this)
       this.PolygonButton = this.PolygonButton.bind(this)
-      this.AddButton = this.AddButton.bind(this)
+      this.SaveBtn = this.SaveBtn.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
-      this.modifiedFea = this.modifiedFea.bind(this)
+      this.modifiedFeature = this.modifiedFeature.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
@@ -88,8 +76,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     componentDidMount(){
-      this.loadMap()
       this.loadRows()
+      this.loadMap()
     }
 
     loadData(){
@@ -145,39 +133,46 @@ export default class BarilgaSuurinGazar extends Component{
             }),
           }),
         };
+
         rows.map((value) => {
           const styleFunction = function (feature) {
             return styles[feature.getGeometry().getType()];
-          };
+          }
           const geoObject = value.geom
+
           const vs = new VectorSource({
-          features: new GeoJSON().readFeatures(geoObject, {
+            features: new GeoJSON().readFeatures(geoObject, {
               dataProjection: this.state.dataProjection,
               featureProjection: this.state.featureProjection,
               name: 'GEOJSON'
+            })
           })
-          });
+
           vs.getFeatures().forEach(function(f) {
             f.setProperties({
               id: value.id
             })
-          });
+          })
+
           const vectorLayer = new VectorLayer({
               name: 'vector_layer',
               source: vs,
               style: styleFunction,
-          });
-          map.addLayer(vectorLayer)
-          this.snap(vectorLayer)
+          })
 
+          map.addLayer(vectorLayer)
+
+          this.snap(vectorLayer)
           this.vectorLayer = vectorLayer
         })
     }
 
     loadMap(){
+
       const raster = new TileLayer({
-        source: new OSM(),
-      });
+          source: new OSM(),
+      })
+
       const vector = new VectorLayer({
         source: new VectorSource(),
         style: new Style({
@@ -195,49 +190,55 @@ export default class BarilgaSuurinGazar extends Component{
             }),
           }),
         }),
-      });
-      this.vector = vector
+      })
+      const control_list = [
+          new SaveBtn({SaveBtn: this.SaveBtn}),
+          new ModifyBarButton({ModifyButton: this.ModifyButton}),
+          new RemoveBarButton({RemoveButton: this.RemoveButton}),
+          this.controls.modal,
+        ]
+
+      if (this.state.geom_type.includes("LINE"))
+        control_list.push(new LineBarButton({LineButton: this.LineButton}))
+      if (this.state.geom_type.includes("POINT"))
+        control_list.push(new PointBarButton({PointButton: this.PointButton}))
+      if (this.state.geom_type.includes("POLYGON"))
+        control_list.push(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
-        controls: defaultControls().extend([
-          new ModifyBarButton({ModifyButton: this.ModifyButton}),
-          new LineBarButton({LineButton: this.LineButton}),
-          new PointBarButton({PointButton: this.PointButton}),
-          new PolygonBarButton({PolygonButton: this.PolygonButton}),
-          new RemoveBarButton({RemoveButton: this.RemoveButton}),
-          new AddButton({AddButton: this.AddButton}),
-          this.controls.modifyBtn,
-          this.controls.lineBtn,
-          this.controls.pointBtn,
-          this.controls.polygonBtn,
-          this.controls.modal,
-        ]),
+        controls: defaultControls().extend(control_list),
         view: new View({
           center: this.state.Mongolia,
           zoom: 5,
         }),
-      });
+      })
+
       this.map = map
+      this.vector = vector
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
     }
 
-    ExampleModify(){
+    Modify(){
       const init = () => {
         const select = new Select();
         this.map.addInteraction(select);
         select.on("select", event => this.featureSelected(event));
+
         const modify = new Modify({
           features: select.getFeatures(),
         })
-        modify.on("modifyend", event => this.modifiedFea(event));
+        modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
+
         this.select = select
         this.modify = modify
         this.modifyE.setEvents()
       }
+
       const setEvents = () => {
         var selectedFeatures = this.select.getFeatures();
         this.select.on('change:active', function () {
@@ -246,6 +247,7 @@ export default class BarilgaSuurinGazar extends Component{
           });
         });
       }
+
       const setActive = (active) => {
         this.select.setActive(active);
         this.modify.setActive(active);
@@ -253,7 +255,48 @@ export default class BarilgaSuurinGazar extends Component{
       return { funct: init, setEvents: setEvents, setActive: setActive }
     }
 
-    ExampleDraw(){
+    featureSelected(event){
+      if(event.selected[0])
+      {
+        const featureID_list = this.state.featureID_list
+        const selectedFeature_ID = event.selected[0].getProperties()['id']
+
+        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
+
+        event.selected[0].setProperties({'id':this.state.modifyend_selected_feature_ID})
+        
+        featureID_list.push(selectedFeature_ID)
+      }
+      else
+      {
+        this.setState({ send: false })
+      }
+    }
+
+    modifiedFeature(event) {
+
+      const features = event.features.getArray()
+      const {format} = this.state
+      const data = format.writeFeatureObject(features[0],  {
+        dataProjection: this.state.dataProjection,
+        featureProjection: this.state.featureProjection,
+    })
+      const changedFeature = JSON.stringify(data)
+      this.setState({ changedFeature, modifyend_selected_feature_check: true })
+    }
+
+    loadRows() {
+      service
+          .rows(this.state.oid)
+          .then(({ rows, geom_type }) => {
+              this.setState({ rows })
+              this.setState({ geom_type })
+              this.loadData()
+          })
+          
+    }
+
+    Draw(){
       const init = (elem) => {
         this.map.addInteraction(elem);
         elem.setActive(false);
@@ -268,50 +311,7 @@ export default class BarilgaSuurinGazar extends Component{
           this.draw.setActive(false);
         }
       }
-      return { init, init, getActive: getActive, setActive: setActive }
-    };
-
-    featureSelected(event){
-      if(event.selected[0])
-      {
-        const featureID_list = this.state.featureID_list
-        const selectedFeature_ID = event.selected[0].getProperties()['id']
-        if(selectedFeature_ID){
-          if(this.state.modifyend_selected_feature_check && selectedFeature_ID !== this.state.modifyend_selected_feature_ID){
-            if(this.state.modifyend_selected_feature_ID < 999999)
-            {
-              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
-              this.setState({modifyend_selected_feature_check: false})
-            }
-          }
-        }
-        featureID_list.push(selectedFeature_ID)
-        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
-      }
-      else
-      {
-        this.setState({ send: false })
-      }
-    }
-
-    modifiedFea (event) {
-      const features = event.features.getArray()
-      const {format} = this.state
-      const data = format.writeFeatureObject(features[0],  {
-        dataProjection: this.state.dataProjection,
-        featureProjection: this.state.featureProjection,
-    })
-      const changedFeature = JSON.stringify(data)
-      this.setState({ changedFeature, modifyend_selected_feature_check: true })
-    }
-
-    loadRows() {
-        service
-            .rows(this.state.oid)
-            .then(({ rows }) => {
-                this.setState({ rows })
-                this.loadData()
-            })
+      return { init, getActive: getActive, setActive: setActive }
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -347,26 +347,23 @@ export default class BarilgaSuurinGazar extends Component{
 
     drawed(event){
       const features = this.vector.getSource().getFeatures();
+
       this.setState({modifyend_selected_feature_ID: null})
+
       if(features.length > 0)
       {
           const lastFeature = features[features.length - 1];
           this.vector.getSource().removeFeature(lastFeature);
       }
+
       const feature = event.feature
-      var featureID = this.state.featureID
-      const vectorLayer = this.vectorLayer
+      const featureID = this.state.featureID
       const format = this.state.format
       let area = format.writeFeatureObject(feature,  {
         dataProjection: this.state.dataProjection,
         featureProjection: this.state.featureProjection,
       })
-      featureID += 1000000
-      feature.setProperties({
-          'id': featureID
-      })
-      const properties = feature.getProperties();
-      featureID = properties.id;
+
       const drawed = JSON.stringify(area)
       this.setState({drawed})
     }
@@ -377,10 +374,6 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     RemoveButton() {
-      this.remove()
-    }
-
-    remove(){
       const vector = this.vector
       const featureID_list = this.state.featureID_list
       const vectorLayer = this.vectorLayer
@@ -396,12 +389,11 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    AddButton(){
+    SaveBtn(){
       if(this.state.modifyend_selected_feature_ID){
             this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
             this.setState({modifyend_selected_feature_check: false})
-      }
-      else{
+      }else{
         this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
       }
     }
@@ -436,12 +428,6 @@ export default class BarilgaSuurinGazar extends Component{
       })
     }
 
-    saveData() {
-      const vectorLayer = this.vectorLayer
-      const {format} = this.state
-      data = format.writeFeatures(vectorLayer.getSource().getFeatures());
-    }
-
     ModifyButton(){
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
@@ -469,10 +455,10 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     render(){
-        return (
-            <div className="col-md-12">
-                  <div id="map"></div>
-            </div>
-        )
+      return (
+          <div className="col-md-12">
+                <div id="map"></div>
+          </div>
+      )
     }
 }
