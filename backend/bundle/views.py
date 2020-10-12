@@ -11,9 +11,10 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
 from django.db import connections
-from main.utils import dict_fetchall
-
-
+from main.utils import (
+    gis_tables_by_oids,
+    dict_fetchall
+)
 
 
 from .forms import BundleForm
@@ -164,7 +165,10 @@ def _get_bundle_display(bundle):
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
     oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
     cursor = connections['postgis_db'].cursor()
-    table = gis_tables_by_oids(oid_list)
+    table = []
+    if oid_list:
+        table = gis_tables_by_oids(oid_list)
+    
     return {
         'id': bundle.id,
         'name': bundle.name,
