@@ -165,7 +165,6 @@ def _get_bundle_display(bundle):
     oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
     cursor = connections['postgis_db'].cursor()
     table = gis_tables_by_oids(oid_list)
-
     return {
         'id': bundle.id,
         'name': bundle.name,
@@ -188,7 +187,6 @@ def _get_bundle_display(bundle):
 def all(request):
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
-
     rsp = {
         'bundle_list': bundle_list,
     }

@@ -38,6 +38,7 @@ export default class Bundle extends Component {
     render() {
         const {id, name, price, icon_url, wms_list, oid_list, oid_table_list} = this.props.values
         const {is_modal_delete_open}=this.state
+        const idx=this.props.idx
         return (
             <tr>
                 <th scope="col">
