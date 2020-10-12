@@ -2,8 +2,7 @@ import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { service } from "./service"
-import * as Yup from 'yup'
-
+import { validationSchema } from './validationSchema'
 
 export default class Маягт extends Component {
 
@@ -21,6 +20,7 @@ export default class Маягт extends Component {
         }
 
         this.onSubmit = this.onSubmit.bind(this)
+        this.validationSchema = validationSchema.bind(this)
 
     }
 
@@ -92,30 +92,6 @@ export default class Маягт extends Component {
 
         const { values, id } = this.state
         const { fields } = this.props
-        const schemaObj = []
-        fields.map((f) => {
-            if (id) {
-                if (f.type !== 'geometry') {
-                    if (f.type == 'integer' || f.type == 'double precision' || f.type == "bigint") {
-                        schemaObj[f.name] = Yup.number().typeError('Заавал тоо байх ёстой !').required('Нөхцөл хоосон байна !');
-                    }
-                    if (f.type == 'character varying') {
-                        schemaObj[f.name] = Yup.string().max(50, 'Хэт урт байна !').required('Нөхцөл хоосон байна !');
-                    }
-                }
-            }
-            else {
-                if (f.name !== 'id' && f.type !== 'geometry') {
-                    if (f.type == 'integer' || f.type == 'double precision' || f.type == "bigint") {
-                        schemaObj[f.name] = Yup.number().typeError('Заавал тоо байх ёстой !').required('Нөхцөл хоосон байна !');
-                    }
-                    if (f.type == 'character varying') {
-                        schemaObj[f.name] = Yup.string().max(50, 'Хэт урт байна !').required('Нөхцөл хоосон байна !');
-                    }
-                }
-            }
-        });
-        const validationSchema = Yup.object(schemaObj);
         return (
             <div>
                 <Formik
@@ -123,7 +99,7 @@ export default class Маягт extends Component {
                     initialValues={ values }
                     onSubmit={ this.onSubmit }
                     validate={ () => ({}) }
-                    validationSchema={validationSchema}
+                    validationSchema={ () => this.validationSchema(fields, id) }
                 >
                     {({
                         errors,
