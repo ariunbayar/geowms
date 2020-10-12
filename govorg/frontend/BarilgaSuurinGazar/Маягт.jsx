@@ -91,7 +91,10 @@ export default class Маягт extends Component {
         }
 
         const { values, id } = this.state
-        const { fields } = this.props
+        // const { fields } = this.props
+        const fields = [{name: 'id', type: "integer"},{name: 'geom', type: "geometry"}, {name: 'code', type: "bigint"},
+            {name:"double", type:"double precision"}, {name:"TOO", type:"integer"}, {name:"name", type:"character varying"}]
+
 
         return (
             <div>
@@ -136,10 +139,23 @@ export default class Маягт extends Component {
                                         return (
                                             <div className="form-group row" key={ idx }>
                                                 <label className="col-sm-2 col-form-label">{ field.name }</label>
-                                                <div className="col-sm-10">
-                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
+                                                <div className="col-sm-8">
+                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } aria-describedby="inputGroupPrepend" type="text"/>
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
                                                 </div>
+                                                <small className="text-muted col-sm-2">
+                                                    {
+                                                        field.type == 'bigint'
+                                                        ? 'Бүхэл том тоо оруулж болно.'
+                                                        : field.type == 'integer'
+                                                        ? 'Зөвхөн бүхэл тоо оруулна.'
+                                                        : field.type == 'character varying'
+                                                        ? 'Үсэг, тэмдэгт бичиж болно.'
+                                                        : field.type == 'double precision'
+                                                        ? 'Бутархай тоо оруулж болно.'
+                                                        : null
+                                                    }
+                                                </small>
                                             </div>
                                         )
                                 })}
