@@ -1,8 +1,8 @@
 import React, { Component } from "react"
-import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { Formik, Form, Field, ErrorMessage, validateYupSchema } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
-import { validationSchema } from './validationSchema'
 import { service } from "./service"
+import * as Yup from 'yup'
 
 
 export default class Маягт extends Component {
@@ -92,7 +92,30 @@ export default class Маягт extends Component {
 
         const { values, id } = this.state
         const { fields } = this.props
-
+        const schemaObj = []
+        fields.map((f) => {
+            if (id) {
+                if (f.type !== 'geometry') {
+                    if (f.type == 'integer' || f.type == 'double precision' || f.type == "bigint") {
+                        schemaObj[f.name] = Yup.number().typeError('Заавал тоо байх ёстой !').required('Нөхцөл хоосон байна !');
+                    }
+                    if (f.type == 'character varying') {
+                        schemaObj[f.name] = Yup.string().max(50, 'Хэт урт байна !').required('Нөхцөл хоосон байна !');
+                    }
+                }
+            }
+            else {
+                if (f.name !== 'id' && f.type !== 'geometry') {
+                    if (f.type == 'integer' || f.type == 'double precision' || f.type == "bigint") {
+                        schemaObj[f.name] = Yup.number().typeError('Заавал тоо байх ёстой !').required('Нөхцөл хоосон байна !');
+                    }
+                    if (f.type == 'character varying') {
+                        schemaObj[f.name] = Yup.string().max(50, 'Хэт урт байна !').required('Нөхцөл хоосон байна !');
+                    }
+                }
+            }
+        });
+        const validationSchema = Yup.object(schemaObj);
         return (
             <div>
                 <Formik
@@ -100,6 +123,7 @@ export default class Маягт extends Component {
                     initialValues={ values }
                     onSubmit={ this.onSubmit }
                     validate={ () => ({}) }
+                    validationSchema={validationSchema}
                 >
                     {({
                         errors,
@@ -112,7 +136,6 @@ export default class Маягт extends Component {
                         isValid,
                         dirty,
                     }) => {
-
                         const has_error = Object.keys(errors).length > 0
 
                         return (
@@ -137,7 +160,12 @@ export default class Маягт extends Component {
                                             <div className="form-group row" key={ idx }>
                                                 <label className="col-sm-2 col-form-label">{ field.name }</label>
                                                 <div className="col-sm-10">
-                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
+                                                    <Field
+                                                        name={ field.name }
+                                                        className={'form-control ' +
+                                                                (errors[field.name] &&
+                                                                touched[field.name] ? 'is-invalid' : '')}
+                                                        placeholder={ field.name } type="text"/>
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
                                                 </div>
                                             </div>
@@ -152,10 +180,10 @@ export default class Маягт extends Component {
                                     </button>
                                     {has_error
                                         ?
-                                        <p>
+                                        <p className="text-danger">
                                             <i className="far fa-times-circle"></i>
                                             {} Алдаатай утгыг засварлаж ахин оролдоно уу!
-                                            </p>
+                                        </p>
                                         : status == 'saved' && !dirty &&
                                         <p>
                                             <i className="fas fa-check-circle"></i>
