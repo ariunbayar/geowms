@@ -140,26 +140,6 @@ def _get_module_display(module):
     }
 
 
-def gis_tables_by_oids(oid_list):
-    table =[]
-    cursor = connections['postgis_db'].cursor()
-    if oid_list:
-        sql = """
-        SELECT 
-            ns.nspname, c.relname
-        FROM 
-            pg_catalog.pg_class AS c
-        JOIN 
-            pg_catalog.pg_namespace AS ns ON c.relnamespace = ns.oid
-        WHERE
-            c.oid IN ({oids})
-        """.format(oids=('%s,' * len(oid_list))[:-1], )  
-        cursor.execute(sql, oid_list)
-
-        table = list(dict_fetchall(cursor))
-    return table
-
-
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
