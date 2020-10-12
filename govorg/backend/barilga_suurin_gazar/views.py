@@ -245,6 +245,7 @@ def delete(request, oid, pk):
 def detail(request, oid, pk):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+
     row = gis_fetch_one(oid, pk)
     if not row:
         raise Http404
