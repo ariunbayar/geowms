@@ -11,6 +11,9 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
 from django.db import connections
+from main.utils import dict_fetchall
+
+
 
 
 from .forms import BundleForm
@@ -135,14 +138,8 @@ def _get_module_display(module):
         'name': module[1],
     }
 
-def _dict_fetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    for row in cursor.fetchall():
-        yield dict(zip(columns, row))
 
-
-def _fetch_oid_names(oid_list):
+def gis_tables_by_oids(oid_list):
     table =[]
     cursor = connections['postgis_db'].cursor()
     if oid_list:
@@ -158,7 +155,7 @@ def _fetch_oid_names(oid_list):
         """.format(oids=('%s,' * len(oid_list))[:-1], )  
         cursor.execute(sql, oid_list)
 
-        table = list(_dict_fetchall(cursor))
+        table = list(dict_fetchall(cursor))
     return table
 
 
@@ -167,7 +164,7 @@ def _get_bundle_display(bundle):
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
     oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
     cursor = connections['postgis_db'].cursor()
-    table = _fetch_oid_names(oid_list)
+    table = gis_tables_by_oids(oid_list)
 
     return {
         'id': bundle.id,
