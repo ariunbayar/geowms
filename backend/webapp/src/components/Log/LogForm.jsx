@@ -7,19 +7,14 @@ export class LogForm extends Component {
 
     constructor(props) {
         super(props)
-        this.too = 0,
-        this.time = null,
         this.state = {
             payment_all:[],
             pay_legth:null,
             currentPage:1,
             payPerPage:100,
             searchQuery:'',
-            show: false,
-            too: 0,
         }
         this.paginate = this.paginate.bind(this)
-        this.addNotif = this.addNotif.bind(this)
     }
 
     paginate (page, query) {
@@ -47,14 +42,12 @@ export class LogForm extends Component {
     }
 
     render() {
-        const {payment_all, pay_legth, show } = this.state
-        console.log("show in log", show )
+        const {payment_all, pay_legth } = this.state
         return (
                 <div className="card">
                     <div className="card-body">
                         <div className="row justify-content-between">
                             <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>
-                            <button type="button" className="btn btn-danger" onClick={(e) => this.addNotif(e)}></button>
                             <div className="col-md-4  mb-1">
                                 <input
                                     type="text"

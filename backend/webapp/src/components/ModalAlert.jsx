@@ -73,15 +73,15 @@ export default class ModalAlert extends Component {
                         <div className="modal-content" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
                             <div className="d-flex justify-content-center">
                                 {this.props.model_type_icon == "danger"?
-                                <i class="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
+                                <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
                                 :
                                 this.props.model_type_icon == "primary" ?
-                                <i class="fa fa-check-circle fa-3x my-3 animated bounceIn gp-text-primary" aria-hidden="true"></i>
+                                <i className="fa fa-check-circle fa-3x my-3 animated bounceIn gp-text-primary" aria-hidden="true"></i>
                                 :
                                 this.props.model_type_icon == "warning" ?
-                                <i class="fa fa-exclamation-circle fa-3x my-3 animated bounceIn text-warning" aria-hidden="true"></i>
+                                <i className="fa fa-exclamation-circle fa-3x my-3 animated bounceIn text-warning" aria-hidden="true"></i>
                                 :
-                                <i class="fa fa-check-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
+                                <i className="fa fa-check-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
                             }
                             </div>
                             <div className="d-flex justify-content-center my-1">

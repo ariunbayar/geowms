@@ -11,7 +11,6 @@ export class Жагсаалт extends Component {
     constructor(props) {
 
         super(props)
-        this.too = 0
         this.state = {
             user_list: [],
             user_length:null,
@@ -20,10 +19,9 @@ export class Жагсаалт extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-            }
+        }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.addNotif = this.addNotif.bind(this)
     }
 
     paginate (page, query) {
@@ -55,7 +53,6 @@ export class Жагсаалт extends Component {
         return (
             <div className="row">
                 <div className="col-md-12">
-                <button type="button" className="btn btn-danger" onClick={(e) => this.addNotif(e)}></button>
                     <div className="card">
                         <div className="card-body">
                             <div className="col-md-4 float-right">

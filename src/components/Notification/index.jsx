@@ -27,21 +27,21 @@ export class Notif extends Component {
         const {too, style, msg} = this.props
         if(this.props.show){
             this.key++
-            console.log(length, "urt", too)
             if(length > too && length !=  1){
-                console.log("hasasn", this.total)
                 this.total.shift()
+                this.setState({ status: 'устгасан' })
             }
             if(too > length && length > 0){
-                console.log("nemsen")
-                this.total = this.total.concat([<li key={this.key} className={`list-group-item list-group-item-${style} `}>{msg}</li>])
+                this.total = this.total.concat([<li key={this.key} className={`list-group-item list-group-item-${style} `}><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn`}></i>{msg}</li>])
+                this.setState({ status: 'нэмсэн' })
             }
             if(length == 0){
-                this.total.push(<li key={this.key} className={`list-group-item list-group-item-${style} `}>{msg}</li>)
+                this.total.push(<li key={this.key} className={`list-group-item list-group-item-${style} `}><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn`}></i>{msg}</li>)
+                this.setState({ status: 'нэмсэн' })
             }
             if(length == 1 && too == 0){
-                console.log("lesa")
-                this.total = []
+                this.total.pop();
+                this.setState({ status: 'устгасан' })
             }
         }
     }
