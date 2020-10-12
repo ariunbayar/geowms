@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
 import { service } from "../service"
 import { set } from "ol/transform"
+import ModalAlert from "../../ModalAlert"
 
 export class UserAdd extends Component {
 
@@ -40,6 +41,8 @@ export class UserAdd extends Component {
             positionError: false,
 
             handleSaveIsLoad:false,
+            modal_alert_status: "closed",
+            timer: null,
         }
 
         this.handleSave = this.handleSave.bind(this)
@@ -47,6 +50,7 @@ export class UserAdd extends Component {
         this.handleChangeReg = this.handleChangeReg.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.handleFormCheck = this.handleFormCheck.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
 
@@ -96,14 +100,13 @@ export class UserAdd extends Component {
                 }
                 if (success) {
                     setTimeout(() => {
-                        this.setState({handleSaveIsLoad:false})
-                        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
-
-                    }, 1200)
+                        this.setState({modal_alert_status: "open"})
+                    }, 0)
 
                 }
             })
         }
+        this.modalCloseTime()
 
 
     }
@@ -196,6 +199,24 @@ export class UserAdd extends Component {
         }
     }
 
+    modalCloseTime(){
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+            this.setState({handleSaveIsLoad:false})
+            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
+        }, 2000)
+    }
+
+    modalClose(){
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
+        this.setState({handleSaveIsLoad:false})
+        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
+    }
 
     render() {
         const org_emp = this.props.match.params.emp
@@ -350,12 +371,21 @@ export class UserAdd extends Component {
                                 </div>
                                 <div className="form-group">
                                     {this.state.handleSaveIsLoad ?
-                                        <button className="btn gp-btn-primary">
-                                            <a className="spinner-border text-light" role="status">
-                                                <span className="sr-only">Loading...</span>
-                                            </a>
-                                            <span> Шалгаж байна. </span>
-                                        </button>:
+                                        <>
+                                            <button className="btn gp-btn-primary">
+                                                <a className="spinner-border text-light" role="status">
+                                                    <span className="sr-only">Loading...</span>
+                                                </a>
+                                                <span> Шалгаж байна. </span>
+                                            </button>
+                                            <ModalAlert
+                                                modalAction={() => this.modalClose()}
+                                                status={this.state.modal_alert_status}
+                                                title="Амжилттай хадгаллаа"
+                                                model_type_icon = "success"
+                                            />
+                                        </>
+                                        :
                                         <button className="btn gp-btn-primary" onClick={this.handleFormCheck} >
                                             Хадгалах
                                         </button>

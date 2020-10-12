@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 
 import Modal from "../Modal"
-import ModalAlert from "../ModalAlert"
 
 export default class Config extends Component {
 
@@ -10,27 +9,29 @@ export default class Config extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
+            modal_status: "closed",
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
 
     }
 
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
+    handleModalDeleteOpen() {
+        this.setState({modal_status: "open"})
+    }
+
+    handleModalDeleteClose(){
+        this.setState({modal_status: "closed"})
     }
 
     modalClose(){
-        this.setState({is_modal_delete_open: false})
-        this.props.modalClose()
+        this.props.handleRemove()
+        this.setState({modal_status: 'closed'})
     }
 
     render() {
 
         const {id, name, value, updated_at} = this.props.values
-        const {is_modal_delete_open} = this.state
 
         return (
             <tr>
@@ -47,24 +48,14 @@ export default class Config extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {is_modal_delete_open &&
-                        <>
-                            <Modal
-                                modalAction={this.props.handleRemove}
-                                text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                                title="Тохиргоог устгах"
-                                model_type_icon="success"
-                            />
-                            {
-                                this.props.modal_alert_check &&
-                                <ModalAlert
-                                    title="Амжилттай устгалаа"
-                                    model_type_icon = "success"
-                                    modalClose = {() => this.modalClose}
-                                />
-                            }
-                        </>
-                    }
+                    <Modal
+                        modalAction={() => this.modalClose()}
+                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        title="Тохиргоог устгах"
+                        model_type_icon="success"
+                        status={this.state.modal_status}
+                        modalClose = {() => this.handleModalDeleteClose()}
+                    />
                 </td>
             </tr>
         )

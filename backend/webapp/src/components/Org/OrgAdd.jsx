@@ -14,7 +14,8 @@ export class OrgAdd extends Component {
             edit: false,
             upadte_level: 1,
             handleSaveIsLoad: false,
-            modal_alert_check: false,
+            modal_alert_status: "closed",
+            timer: null,
         }
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
@@ -40,8 +41,9 @@ export class OrgAdd extends Component {
         const upadte_level = this.state.upadte_level
         const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level}
         service.org_add(org_level,values).then(({ success }) => {
-            success && this.setState({modal_alert_check: true})
+            success && this.setState({modal_alert_status: "open"})
         })
+        this.modalCloseTime()
     }
 
     handleGetAll(org_level,id){
@@ -59,21 +61,20 @@ export class OrgAdd extends Component {
         }
     }
 
-    modalClose(closeTime){
+    modalClose(){
         const org_level = this.props.match.params.level
-        closeTime && setTimeout(() => {
-            this.setState({handleSaveIsLoad:false})
-            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-            this.setState({modal_alert_check: false})
-        }, 0)
+        this.setState({handleSaveIsLoad:false})
+        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+        this.setState({modal_alert_status: "closed"})
+        clearTimeout(this.state.timer)
     }
 
     modalCloseTime(){
         const org_level = this.props.match.params.level
-        setTimeout(() => {
+        this.state.timer = setTimeout(() => {
             this.setState({handleSaveIsLoad:false})
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-            this.setState({modal_alert_check: false})
+            this.setState({modal_alert_status: "closed"})
         }, 2000)
     }
 
@@ -130,14 +131,12 @@ export class OrgAdd extends Component {
                                             </a>
                                             <span> Шалгаж байна. </span>
                                         </button>
-                                        {this.state.modal_alert_check &&
-                                            <ModalAlert
-                                                modalClose={this.modalClose}
-                                                modalCloseTime={this.modalCloseTime()}
-                                                title="Амжилттай хадгаллаа"
-                                                model_type_icon = "success"
-                                            />
-                                        }
+                                        <ModalAlert
+                                            modalAction={() => this.modalClose()}
+                                            status={this.state.modal_alert_status}
+                                            title="Амжилттай хадгаллаа"
+                                            model_type_icon = "success"
+                                        />
                                     </>
                                 :
                                 <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >

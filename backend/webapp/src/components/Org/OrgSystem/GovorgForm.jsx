@@ -3,6 +3,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {TextField} from '../../../helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
+import ModalAlert from "../../ModalAlert"
 
 export class GovorgForm extends Component {
 
@@ -18,6 +19,7 @@ export class GovorgForm extends Component {
                 name: '',
             },
             layers: [],
+            modal_alert_status: "closed",
         }
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
@@ -71,7 +73,7 @@ export class GovorgForm extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
+                    this.setState({modal_alert_status: "open"})
                 }, 800)
             })
         }
@@ -82,12 +84,28 @@ export class GovorgForm extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
-
+                    this.setState({modal_alert_status: "open"})
                 }, 800)
             })
         }
+        this.modalCloseTime()
 
+    }
+
+    modalCloseTime(){
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        this.state.timer = setTimeout(() => {
+            this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
+        }, 2000)
+    }
+
+    modalClose(){
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
+        this.setState({modal_alert_status: "closed"})
+        clearTimeout(this.state.timer)
     }
 
     render() {
@@ -159,6 +177,12 @@ export class GovorgForm extends Component {
                                                     {isSubmitting && ' Шалгаж байна.'}
                                                     {!isSubmitting && 'Хадгалах' }
                                                 </button>
+                                                <ModalAlert
+                                                    modalAction={() => this.modalClose()}
+                                                    status={this.state.modal_alert_status}
+                                                    title="Амжилттай хадгаллаа"
+                                                    model_type_icon = "success"
+                                                />
                                             </div>
                                         </div>
                                     </Form>

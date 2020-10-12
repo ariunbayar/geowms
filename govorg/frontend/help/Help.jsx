@@ -30,19 +30,17 @@ export class Help extends Component {
                                     <LinkExternal href="/static/assets/qgis_plugin.zip" text={'Qgis plugin татах'}/>
                                  </li>
                                  <li>
-                                    <strong >Татаж авсан 'Zip' файлыг задлаад өөрийн компьютер дээрхи 'qgis' суусан замын 'plugin' хэсэгт байрлуулна. </strong>
+                                    <strong >Plugins{"->"} Manage and Install Plugins {"->"} Install from ZIP {"->"}ZIP file татаж авсан замыг заана {"->"} Install Plugin</strong>
                                     <img className="m-3" src="/static/assets/image/plugin/plugin_dir.png" width='600px'/>
                                  </li>
                                 <li>
-                                    <strong>Qgis дээр 'plugin' болон 'plugin reloader' суулгах</strong>
+                                    <strong>Qgis дээр 'plugin reloader' суулгах</strong>
                                     <ul className="list-unstyled">
                                         <li>
-                                            <h6>Qgis {"->"} Manage and Install Plugins {"->"} Not installed {"->"} Plugin builder <br/>Qgis {"->"} Manage and Install Plugins {"->"} Not installed {"->"} Plugin reloader</h6>
+                                            <h6>Qgis {"->"} Manage and Install Plugins {"->"} Not installed {"->"} Plugin reloader</h6>
                                             <img src="/static/assets/image/plugin/plugin.png" width='600px'/></li>
                                         <li className="mt-3">
                                             <img src="/static/assets/image/plugin/plugin_builder.png" width='600px'/></li>
-                                        <li className="mt-3">
-                                            <img src="/static/assets/image/plugin/plugin_view.png" width='600px'/></li>
                                     </ul>
                                 </li>
                                 <li>

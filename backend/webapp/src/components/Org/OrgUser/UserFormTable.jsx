@@ -44,7 +44,7 @@ export class UserFormTable extends Component {
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     {is_modal_delete_open &&
                         <Modal
@@ -52,6 +52,7 @@ export class UserFormTable extends Component {
                             modalAction={this.props.handleGovorgDelete}
                             text={`Та "${employee.first_name}" нэртэй хэрэглэгчийг устгахдаа итгэлтэй байна уу?`}
                             title="Хэрэглэгч устгах"
+                            model_type_icon = "success"
                         />
                     }
                 </td>
