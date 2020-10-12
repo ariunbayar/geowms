@@ -1,46 +1,58 @@
 import React, { Component } from "react"
 
 
-export class Notification extends Component {
+export class Notif extends Component {
 
     constructor(props) {
 
         super(props)
         this.alerts = [],
-        this.check = 0,
-        this.hasah = 0,
+        this.total = [],
+        this.array=[],
+        this.key = 0
         this.state = {
-            arr: [],
-            show: '',
         }
+
         this.loadNotif = this.loadNotif.bind(this)
     }
 
-    loadNotif(too){
-        if(this.props.show){
-            const length = this.alerts.length
-            console.log(too, "in index", length)
-            if(length == 0 || length >= too){
-                this.hasah ++
-                console.log("hasah", this.hasah)
-                this.alerts.shift()
-            }if(too > this.alerts.length){
-                this.check ++
-                console.log("nemeh ", this.check)
-                this.alerts.push(<div className={`alert alert-danger col-md-2 float-right`} role="alert">This is a danger alert—check it out!</div>)
-            }
+    componentDidUpdate(pP){
+        if(pP.too !== this.props.too){
+            this.loadNotif()
         }
     }
 
-    componentDidUpdate(pP){
-        console.log(pP.too, "odasoidasjdasdsas", this.props.too)
+    loadNotif(){
+        const length = this.total.length
+        const {too, style, msg} = this.props
+        if(this.props.show){
+            this.key++
+            console.log(length, "urt", too)
+            if(length > too && length !=  1){
+                console.log("hasasn", this.total)
+                this.total.shift()
+            }
+            if(too > length && length > 0){
+                console.log("nemsen")
+                this.total = this.total.concat([<li key={this.key} className={`list-group-item list-group-item-${style} `}>{msg}</li>])
+            }
+            if(length == 0){
+                this.total.push(<li key={this.key} className={`list-group-item list-group-item-${style} `}>{msg}</li>)
+            }
+            if(length == 1 && too == 0){
+                console.log("lesa")
+                this.total = []
+            }
+        }
     }
 
     render() {
         const {arr} = this.state
         return (
-            <div className="fixed-top">
-                {this.alerts}
+            <div className="position-fixed col-md-2" style={{zIndex: 1030, top:0, right:0}}>
+                <ul className="list-group">
+                    {this.total}
+                </ul>
             </div>
         )
     }

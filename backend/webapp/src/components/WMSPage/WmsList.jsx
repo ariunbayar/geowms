@@ -7,6 +7,7 @@ import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 import { Pagination } from "../../../../../src/components/Pagination/index"
 import ModalAlert from "../ModalAlert"
+import {Notif} from '../../../../../src/components/Notification/index'
 
 export class WmsList extends Component {
 
@@ -19,6 +20,8 @@ export class WmsList extends Component {
             name: '',
             url: '',
         }
+
+        this.too = 0,
 
         this.state = {
             is_form_open: false,
@@ -46,6 +49,7 @@ export class WmsList extends Component {
         this.handleSearch=this.handleSearch.bind(this)
         this.handleModalAlert=this.handleModalAlert.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.addNotif = this.addNotif(this)
     }
 
     paginate (page, query) {
@@ -162,10 +166,22 @@ export class WmsList extends Component {
         }, 2000)
     }
 
+    addNotif(){
+        this.too += 1
+        this.setState({ show: true })
+        const time = setInterval(() => {
+            this.too -= 1
+            console.log(this.too)
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
+    }
+
     render() {
         const {wms_list, wms_length }=this.state
         return (
                 <div className="row">
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} />
                     <div className="col-lg-12">
                         <div className="card">
                             <div className="card-body">

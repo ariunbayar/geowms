@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {LogFormTable} from './LogFormTable'
 import {service} from './service'
 import { Pagination } from "../../../../../src/components/Pagination/index"
-import {Notification} from '../../../../../src/components/Notification/index'
 
 export class LogForm extends Component {
 
@@ -47,23 +46,11 @@ export class LogForm extends Component {
         }
     }
 
-    addNotif(e){
-        this.too += 1
-        this.setState({ show: true })
-        const time = setInterval(() => {
-            this.too -= 1
-            console.log(this.too)
-            this.setState({ show: true })
-        }, 2000);
-        clearInterval(time)
-    }
-
     render() {
         const {payment_all, pay_legth, show } = this.state
         console.log("show in log", show )
         return (
                 <div className="card">
-                    <Notification show={show} too={this.too}/>
                     <div className="card-body">
                         <div className="row justify-content-between">
                             <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>

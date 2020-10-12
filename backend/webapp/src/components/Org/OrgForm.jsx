@@ -4,6 +4,7 @@ import {NavLink} from "react-router-dom"
 import {service} from "./service"
 import { Pagination } from "../../../../../src/components/Pagination/index"
 import ModalAlert from "../ModalAlert"
+import {Notif} from '../../../../../src/components/Notification/index'
 
 export class OrgForm extends Component {
 
@@ -13,6 +14,8 @@ export class OrgForm extends Component {
         this.initials = {
             currentPage: 1,
         }
+
+        this.too = 0,
 
         this.state = {
             level: this.props.match.params.level || 1,
@@ -31,6 +34,7 @@ export class OrgForm extends Component {
         this.handleSearch = this.handleSearch.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.addNotif = this.addNotif.bind(this)
 
     }
 
@@ -76,7 +80,8 @@ export class OrgForm extends Component {
             if (success) {
                 var a = load
                 a++
-                this.setState({ load: a })
+                this.setState({ load: a, msg: "Амжилттай боллоо", style: 'success' })
+                this.addNotif()
                 this.paginate(1, searchQuery, level, org_id)
                 this.setState({ modal_alert_status: 'open'})
             }
@@ -95,10 +100,22 @@ export class OrgForm extends Component {
         this.setState({modal_alert_status: "closed"})
     }
 
+    addNotif(){
+        this.too += 1
+        this.setState({ show: true })
+        const time = setInterval(() => {
+            this.too -= 1
+            console.log(this.too)
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
+    }
+
     render() {
         const {orgs,currentPage,org_length} = this.state
         return (
             <div className="main-content">
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} />
                 <div className="page-container my-4">
                     <div className="text-right">
                         <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
