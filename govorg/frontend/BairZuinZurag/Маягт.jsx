@@ -21,6 +21,7 @@ export default class Маягт extends Component {
         }
 
         this.onSubmit = this.onSubmit.bind(this)
+        this.validationSchema = validationSchema.bind(this)
 
     }
 
@@ -89,7 +90,7 @@ export default class Маягт extends Component {
             )
         }
 
-        const { values } = this.state
+        const { values, id } = this.state
         const { fields } = this.props
 
         return (
@@ -99,6 +100,7 @@ export default class Маягт extends Component {
                     initialValues={ values }
                     onSubmit={ this.onSubmit }
                     validate={ () => ({}) }
+                    validationSchema={ () => this.validationSchema(fields, id) }
                 >
                     {({
                         errors,
@@ -119,12 +121,30 @@ export default class Маягт extends Component {
                                 { fields.map((field, idx) => {
                                     if (field.type == 'geometry')
                                         return
+                                    else if (field.name == 'id')
+                                        if (id)
+                                            return (
+                                                <div className="form-group row" key={ idx }>
+                                                    <label className="col-sm-2 col-form-label">{ field.name }</label>
+                                                    <div className="col-sm-10">
+                                                        <input name={ field.name } className="form-control" disabled type="text" value={ id }/>
+                                                    </div>
+                                                </div>
+                                            )
+                                        else
+                                            return
                                     else
                                         return (
                                             <div className="form-group row" key={ idx }>
                                                 <label className="col-sm-2 col-form-label">{ field.name }</label>
                                                 <div className="col-sm-10">
-                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
+                                                    <Field
+                                                        name={ field.name }
+                                                        className={'form-control ' +
+                                                                (errors[field.name] &&
+                                                                touched[field.name] ? 'is-invalid' : '')}
+                                                        placeholder={ field.name } type="text"
+                                                    />
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
                                                 </div>
                                             </div>

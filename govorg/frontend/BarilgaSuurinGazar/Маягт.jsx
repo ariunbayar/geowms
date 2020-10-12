@@ -141,7 +141,8 @@ export default class Маягт extends Component {
                                                         className={'form-control ' +
                                                                 (errors[field.name] &&
                                                                 touched[field.name] ? 'is-invalid' : '')}
-                                                        placeholder={ field.name } type="text"/>
+                                                        placeholder={ field.name } type="text"
+                                                    />
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
                                                 </div>
                                             </div>
