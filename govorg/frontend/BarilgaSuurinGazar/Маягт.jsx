@@ -91,10 +91,7 @@ export default class Маягт extends Component {
         }
 
         const { values, id } = this.state
-        // const { fields } = this.props
-        const fields = [{name: 'id', type: "integer"},{name: 'geom', type: "geometry"}, {name: 'code', type: "bigint"},
-            {name:"double", type:"double precision"}, {name:"TOO", type:"integer"}, {name:"name", type:"character varying"}]
-
+        const { fields } = this.props
 
         return (
             <div>
