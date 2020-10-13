@@ -25,7 +25,7 @@ import { set } from 'ol/transform';
 import {Modal} from "../../../src/components/MapModal/Modal"
 import {AddButton} from "./controls/Add/AddButton"
 
-export default class DedButets extends Component{
+export default class BarilgaSuurinGazar extends Component{
 
     constructor(props){
       super(props)
@@ -41,7 +41,7 @@ export default class DedButets extends Component{
           oid: this.props.match.params.oid,
 
           rows: [],
-
+          is_loading:true,
           featureID: null,
           featureID_list: [],
           selectedFeature_ID: null,
@@ -78,8 +78,8 @@ export default class DedButets extends Component{
       this.LineButton = this.LineButton.bind(this)
       this.PointButton = this.PointButton.bind(this)
       this.PolygonButton = this.PolygonButton.bind(this)
-      this.RemoveButton = this.RemoveButton.bind(this)
       this.AddButton = this.AddButton.bind(this)
+      this.RemoveButton = this.RemoveButton.bind(this)
       this.modifiedFea = this.modifiedFea.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
@@ -150,32 +150,32 @@ export default class DedButets extends Component{
             return styles[feature.getGeometry().getType()];
           };
           const geoObject = value.geom
-          if(geoObject)
-          {
+
+          if(geoObject){
             const vs = new VectorSource({
-            features: new GeoJSON().readFeatures(geoObject, {
-                dataProjection: this.state.dataProjection,
-                featureProjection: this.state.featureProjection,
-                name: 'GEOJSON'
-            })
-            });
-            vs.getFeatures().forEach(function(f) {
-              f.setProperties({
-                id: value.id
+              features: new GeoJSON().readFeatures(geoObject, {
+                  dataProjection: this.state.dataProjection,
+                  featureProjection: this.state.featureProjection,
+                  name: 'GEOJSON'
               })
-            });
-            const vectorLayer = new VectorLayer({
-                name: 'vector_layer',
-                source: vs,
-                style: styleFunction,
-            });
-            map.addLayer(vectorLayer)
-            this.snap(vectorLayer)
-            return vectorLayer
+              });
+              vs.getFeatures().forEach(function(f) {
+                f.setProperties({
+                  id: value.id
+                })
+              });
+              const vectorLayer = new VectorLayer({
+                  name: 'vector_layer',
+                  source: vs,
+                  style: styleFunction,
+              });
+              map.addLayer(vectorLayer)
+              this.snap(vectorLayer)
+    
+              this.vectorLayer = vectorLayer
           }
         })
-        this.vectorLayer = vectorLayer
-    }
+      }
 
     loadMap(){
       const raster = new TileLayer({
@@ -312,7 +312,7 @@ export default class DedButets extends Component{
         service
             .rows(this.state.oid)
             .then(({ rows }) => {
-                this.setState({ rows })
+                this.setState({ rows, is_loading:false})
                 this.loadData()
             })
     }
@@ -432,9 +432,22 @@ export default class DedButets extends Component{
       const oid = this.state.oid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
+      this.setState({
+        is_loading:true
+      })
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
-        if(success) alert(info)
-        else alert(info)
+        if(success){
+          this.setState({
+            is_loading:false
+          })
+        }
+        else {
+          alert(info)
+          this.setState({
+            is_loading:false
+          })
+        }
+        
       })
     }
 
@@ -443,9 +456,17 @@ export default class DedButets extends Component{
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       const row_id = 30
+      this.setState({
+        is_loading:true
+      })
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
         if(success){
-          alert(info)
+          {
+            this.setState({
+              is_loading:false
+            })
+            alert(info)
+          }
           if(row_id){
             this.props.history.push(`/gov/барилга-суурин-газар/${oid}/маягт/${row_id}/засах/`)
           }
@@ -453,10 +474,12 @@ export default class DedButets extends Component{
         else
         {
           alert(info)
+          this.setState({
+            is_loading:false
+          })
         }
       })
     }
-
 
     saveData() {
       const vectorLayer = this.vectorLayer
@@ -493,6 +516,7 @@ export default class DedButets extends Component{
     render(){
         return (
             <div className="col-md-12">
+                  {this.state.is_loading ? <span className="text-center d-block"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
                   <div id="map"></div>
             </div>
         )
