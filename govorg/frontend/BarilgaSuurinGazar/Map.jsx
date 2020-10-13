@@ -285,7 +285,7 @@ export default class BarilgaSuurinGazar extends Component{
       service
           .rows(this.state.oid)
           .then(({ rows, geom_type }) => {
-              this.setState({ rows })
+              this.setState({ rows,  is_loading:false })
               this.setState({ geom_type })
               this.loadData()
           })

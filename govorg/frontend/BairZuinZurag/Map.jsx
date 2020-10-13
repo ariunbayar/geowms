@@ -150,7 +150,6 @@ export default class BarilgaSuurinGazar extends Component{
             return styles[feature.getGeometry().getType()];
           };
           const geoObject = value.geom
-
           if(geoObject){
             const vs = new VectorSource({
               features: new GeoJSON().readFeatures(geoObject, {
@@ -172,8 +171,6 @@ export default class BarilgaSuurinGazar extends Component{
               map.addLayer(vectorLayer)
               this.snap(vectorLayer)
     
-              this.vectorLayer = vectorLayer
-
               this.vectorLayer = vectorLayer
           }
         })
