@@ -141,6 +141,24 @@ def getGeomType(table, geom_field):
         return type
     return None
 
+
+@require_GET
+@ajax_required
+@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
+def geom_type(request, oid):
+
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    rsp = {
+        'type': ''.join(getGeomType(table, findGeomField(fields)))
+    }
+    return JsonResponse(rsp)
+
+
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
