@@ -252,16 +252,44 @@ def detail(request, oid, pk):
     return JsonResponse(rsp)
 
 
-def geoJsonConvertGeom(json):
+def geoJsonConvertGeom(json, table, geom_field):
+
+    schema = table.split('"')[1]
+    table = table.split('"')[3]
     geojson = str(json)
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ SELECT ST_GeomFromGeoJSON(%s); """
-            cursor.execute(sql, [geojson])
-            geom = cursor.fetchone()
+
+    with connections['postgis_db'].cursor() as cursor:
+        sql = """
+            SELECT coord_dimension, type
+            FROM
+                geometry_columns
+            WHERE
+                f_table_schema = '{schema}' and
+                f_table_name = '{table}' and
+                f_geometry_column = '{geom_field}';
+        """.format(
+            schema=schema,
+            table=table,
+            geom_field=geom_field)
+
+        cursor.execute(sql)
+        coord_dimension, type = cursor.fetchone()
+
+        sql = """ SELECT ST_GeomFromGeoJSON(%s); """
+
+        if coord_dimension == 3:
+                sql = """ SELECT ST_Force3D(ST_GeomFromGeoJSON(%s)); """
+
+        if 'MULTI' in type and coord_dimension == 2:
+                sql = """ SELECT ST_Multi(ST_GeomFromGeoJSON(%s)); """
+
+        if 'MULTI' in type and coord_dimension == 3:
+                sql = """ SELECT ST_Multi(ST_Force3D(ST_GeomFromGeoJSON(%s))); """
+
+        cursor.execute(sql, [geojson])
+        geom = cursor.fetchone()
         return geom
-    except Exception:
-        return None
+    return None
 
 
 def tableLastfindID(table_name):
