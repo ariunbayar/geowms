@@ -134,18 +134,18 @@ export default class BarilgaSuurinGazar extends Component{
           }),
         };
 
-        const features = rows.map((row) => {
-
+      const features = []
+      rows.map((row) => {
           const { id, geom } = row
+          if (geom){
+            const feature = (new GeoJSON().readFeatures(geom, {
+                dataProjection: this.state.dataProjection,
+                featureProjection: this.state.featureProjection,
+              }))[0]
+            feature.setProperties({ id })
 
-          const feature = (new GeoJSON().readFeatures(geom, {
-              dataProjection: this.state.dataProjection,
-              featureProjection: this.state.featureProjection,
-            }))[0]
-
-          feature.setProperties({ id })
-
-          return feature
+            features.push(feature)
+          }
         })
 
       const vectorSource = new VectorSource({
@@ -258,8 +258,6 @@ export default class BarilgaSuurinGazar extends Component{
         const selectedFeature_ID = event.selected[0].getProperties()['id']
 
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
-
-        event.selected[0].setProperties({'id':this.state.modifyend_selected_feature_ID})
         
         featureID_list.push(selectedFeature_ID)
       }

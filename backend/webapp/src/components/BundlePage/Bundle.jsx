@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import "./styles.css";
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
+import { service } from "./service";
 
 
 export default class Bundle extends Component {
@@ -10,6 +11,7 @@ export default class Bundle extends Component {
         super(props)
 
         this.state = {
+            is_modal_delete_open: false,
             modal_status: "closed",
         }
 
@@ -32,9 +34,11 @@ export default class Bundle extends Component {
         this.setState({modal_status: 'closed'})
     }
 
+    
     render() {
-        const {id, name, price, icon_url, wms_list, oid_list} = this.props.values
-        const idx = this.props.idx
+        const {id, name, price, icon_url, wms_list, oid_list, oid_table_list} = this.props.values
+        const {is_modal_delete_open}=this.state
+        const idx=this.props.idx
         return (
             <tr>
                 <th scope="col">
@@ -73,16 +77,17 @@ export default class Bundle extends Component {
                    </td>
                    <td>
                     <div className="col-md-12">
-                        {oid_list.map((oid, idx) =>
+                        {oid_table_list ? oid_table_list.map((oid, idx) =>
                                 <div key={idx} className="row">
                                     <div className="col-md-1">
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
                                      </div>
                                     <div className="col-md-8">
-                                        <a> {oid}</a>
+                                        <a> {oid.nspname}.{oid.relname}</a>
                                     </div>
                                 </div>
-                            )
+                            ) :
+                            null
                         }
                     </div>
                    </td>

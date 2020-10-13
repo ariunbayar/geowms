@@ -46,15 +46,21 @@ export default class GisForm extends Component {
 
 
     componentDidUpdate(prevProps) {
-        if (this.props.gis_list !== prevProps.gis_list) {
+        if (this.props.values.id !== prevProps.values.id) {
             const {id, name, oid_list} = this.props.values
             const gis_list = this.props.gis_list
-            this.setState({id, name, gis_list:gis_list, oid_list})
+            if(oid_list){
+                this.setState({id, name, gis_list:gis_list, oid_list})
+            }
+            else{
+                this.setState({id, name, gis_list:gis_list})
+            }
         }
     }
 
 
     render() {
+        const oid_list = this.state.oid_list
         return (    
             <>
                 <div className="form-group">
@@ -82,7 +88,7 @@ export default class GisForm extends Component {
                         <label>
                             <input
                                 type="checkbox"      
-                                checked={this.state.oid_list.indexOf(gis.oid) > -1}                          
+                                checked={oid_list.indexOf(gis.oid) > -1}                          
                                 onChange={this.handleLayerToggle}
                                 value={gis.oid}   
                             />
