@@ -20,6 +20,7 @@ export class RemoveBarButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Арилгах')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-remove-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
