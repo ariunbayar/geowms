@@ -69,6 +69,7 @@ export default class BarilgaSuurinGazar extends Component{
 
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
+      this.loadControls = this.loadControls.bind(this)
       this.loadRows = this.loadRows.bind(this)
       this.clearMap = this.clearMap.bind(this)
       this.remove = this.remove.bind(this)
@@ -88,8 +89,32 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     componentDidMount(){
+      service
+          .geomType(this.state.oid)
+          .then(({ type }) => {
+              this.setState({ type })
+              this.loadControls()
+          })
       this.loadMap()
       this.loadRows()
+    }
+
+    loadControls(){
+      const map = this.map
+      const { type } = this.state
+
+      map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
+      map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      map.addControl(new AddButton({AddButton: this.AddButton}))
+      map.addControl(this.controls.modal)
+
+      if (type.includes("LINE"))
+        map.addControl(new LineBarButton({LineButton: this.LineButton}))
+      if (type.includes("POINT"))
+        map.addControl(new PointBarButton({PointButton: this.PointButton}))
+      if (type.includes("POLYGON"))
+        map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+
     }
 
     loadData(){
@@ -202,19 +227,6 @@ export default class BarilgaSuurinGazar extends Component{
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
-        controls: defaultControls().extend([
-          new ModifyBarButton({ModifyButton: this.ModifyButton}),
-          new LineBarButton({LineButton: this.LineButton}),
-          new PointBarButton({PointButton: this.PointButton}),
-          new PolygonBarButton({PolygonButton: this.PolygonButton}),
-          new RemoveBarButton({RemoveButton: this.RemoveButton}),
-          new AddButton({AddButton: this.AddButton}),
-          this.controls.modifyBtn,
-          this.controls.lineBtn,
-          this.controls.pointBtn,
-          this.controls.polygonBtn,
-          this.controls.modal,
-        ]),
         view: new View({
           center: this.state.Mongolia,
           zoom: 5,
@@ -308,12 +320,12 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     loadRows() {
-        service
-            .rows(this.state.oid)
-            .then(({ rows }) => {
-                this.setState({ rows, is_loading:false})
-                this.loadData()
-            })
+      service
+          .rows(this.state.oid)
+          .then(({ rows }) => {
+              this.setState({ rows, is_loading:false})
+              this.loadData()
+          })
     }
 
     componentDidUpdate(prevProps, prevState) {

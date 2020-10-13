@@ -61,7 +61,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE = this.Draw()
 
       this.loadMap = this.loadMap.bind(this)
-      this.loadData = this.loadData.bind(this)
+      this.loadData = this.loadData.bind(this)      
+      this.loadControls = this.loadControls.bind(this)
       this.loadRows = this.loadRows.bind(this)
       this.clearMap = this.clearMap.bind(this)
       this.updateGeom = this.updateGeom.bind(this)
@@ -81,8 +82,33 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     componentDidMount(){
+      service
+          .geomType(this.state.oid)
+          .then(({ type }) => {
+              this.setState({ type })
+              this.loadControls()
+          })
       this.loadRows()
       this.loadMap()
+    }
+
+    loadControls(){
+      
+      const map = this.map
+      const { type } = this.state
+
+      map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
+      map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+      map.addControl(this.controls.modal)
+
+      if (type.includes("LINE"))
+        map.addControl(new LineBarButton({LineButton: this.LineButton}))
+      if (type.includes("POINT"))
+        map.addControl(new PointBarButton({PointButton: this.PointButton}))
+      if (type.includes("POLYGON"))
+        map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+
     }
 
     loadData(){
@@ -191,24 +217,10 @@ export default class BarilgaSuurinGazar extends Component{
           }),
         }),
       })
-      const control_list = [
-          new SaveBtn({SaveBtn: this.SaveBtn}),
-          new ModifyBarButton({ModifyButton: this.ModifyButton}),
-          new RemoveBarButton({RemoveButton: this.RemoveButton}),
-          this.controls.modal,
-        ]
-
-      if (this.state.geom_type.includes("LINE"))
-        control_list.push(new LineBarButton({LineButton: this.LineButton}))
-      if (this.state.geom_type.includes("POINT"))
-        control_list.push(new PointBarButton({PointButton: this.PointButton}))
-      if (this.state.geom_type.includes("POLYGON"))
-        control_list.push(new PolygonBarButton({PolygonButton: this.PolygonButton}))
 
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
-        controls: defaultControls().extend(control_list),
         view: new View({
           center: this.state.Mongolia,
           zoom: 5,
