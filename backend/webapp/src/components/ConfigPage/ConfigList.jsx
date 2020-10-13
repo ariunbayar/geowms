@@ -6,6 +6,7 @@ import {ConfigForm} from './ConfigForm'
 import Config from './Config'
 import DiskSize from './DiskSize'
 import ModalAlert from "../ModalAlert"
+import PostgresqlVersion from "./PostgresqlVersion"
 
 
 export class ConfigList extends Component {
@@ -18,6 +19,8 @@ export class ConfigList extends Component {
             disk: {},
             modal_alert_check: "closed",
             timer: null,
+            postgreVersion: '',
+            postGis: ''
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -35,6 +38,9 @@ export class ConfigList extends Component {
         })
         service.getDisk().then(({disk}) => {
             this.setState({disk})
+        })
+        service.getPostgeVersion().then(({postgreVersion, versionOfPostGis}) => {
+            this.setState({postgreVersion, versionOfPostGis})
         })
     }
 
@@ -66,7 +72,7 @@ export class ConfigList extends Component {
 
     render() {
 
-        const {config_list, disk} = this.state
+        const {config_list, disk, postgreVersion, versionOfPostGis} = this.state
 
         return (
             <div className="row">
@@ -102,6 +108,10 @@ export class ConfigList extends Component {
                                 <div className="col-md-12">
                                     <h4 className="my-4">Дискийн хэмжээ</h4>
                                     <DiskSize disk={disk}/>
+                                </div>
+                                <div className="col-md-12 text-wrap">
+                                    <h4 className="my-4">PostgreSQL болон PostGIS хувилбарууд</h4>
+                                    <PostgresqlVersion postgreVersion={postgreVersion} versionOfPostGis={versionOfPostGis}/>
                                 </div>
                             </div>
                         </div>

@@ -8,7 +8,8 @@ from django.views.decorators.cache import cache_page
 
 from main.decorators import ajax_required
 from .models import Config
-
+from django.db import connections
+from backend.payment.models import Payment
 CACHE_TIMEOUT_DISK_INFO = 5
 
 
@@ -112,3 +113,14 @@ def disk(request):
                 'mount_point': info['target'],
         }
     return JsonResponse({'success': True, 'disk': disk})
+
+@ajax_required
+def postresqlVersion(request):
+    versionOfPostgreSql = connections['postgis_db'].cursor()
+    versionOfPostgreSql.execute(''' Select version();''')
+    versionOfPostgreSql = versionOfPostgreSql.fetchone()
+    versionOfPostGis = connections['postgis_db'].cursor()
+    versionOfPostGis.execute(''' SELECT postgis_full_version();''')
+    versionOfPostGis = versionOfPostGis.fetchone()
+
+    return JsonResponse({'postgreVersion': versionOfPostgreSql, 'versionOfPostGis': versionOfPostGis})
