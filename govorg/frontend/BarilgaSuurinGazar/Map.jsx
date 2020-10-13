@@ -34,6 +34,7 @@ export default class BarilgaSuurinGazar extends Component{
           featureProjection: 'EPSG:3857',
           oid: this.props.match.params.oid,
           rows: [],
+          is_loading:true,
           geom_type: 'MULTIPOLYGON',
           featureID: null,
           featureID_list: [],
@@ -285,7 +286,7 @@ export default class BarilgaSuurinGazar extends Component{
       service
           .rows(this.state.oid)
           .then(({ rows, geom_type }) => {
-              this.setState({ rows })
+              this.setState({ rows,  is_loading:false })
               this.setState({ geom_type })
               this.loadData()
           })
@@ -425,6 +426,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(){
+      this.setState({ is_loading:true })
       if(this.state.modifyend_selected_feature_ID){
           if(this.state.modifyend_selected_feature_check)
           {
@@ -447,12 +449,17 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
-        if(success) {
-          alert(info)
-          this.modifyE.setActive(false);
-          this.setState({modifyend_selected_feature_ID: null, changedFeature: '', selectedFeature_ID: false})
+        if(success){
+          this.setState({
+            is_loading:false
+          })
         }
-        else alert(info)
+        else {
+          alert(info)
+          this.setState({
+            is_loading:false
+          })
+        }
       })
     }
 
@@ -463,7 +470,12 @@ export default class BarilgaSuurinGazar extends Component{
       const row_id = 30
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
         if(success){
-          alert(info)
+          {
+            this.setState({
+              is_loading:false
+            })
+            alert(info)
+          }
           if(row_id){
             this.props.history.push(`/gov/барилга-суурин-газар/${oid}/маягт/${row_id}/засах/`)
           }
@@ -471,6 +483,9 @@ export default class BarilgaSuurinGazar extends Component{
         else
         {
           alert(info)
+          this.setState({
+            is_loading:false
+          })
         }
       })
     }
@@ -520,10 +535,11 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     render(){
-      return (
-          <div className="col-md-12">
-                <div id="map"></div>
-          </div>
-      )
+        return (
+            <div className="col-md-12">
+                  {this.state.is_loading ? <span className="text-center d-block"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                  <div id="map"></div>
+            </div>
+        )
     }
 }
