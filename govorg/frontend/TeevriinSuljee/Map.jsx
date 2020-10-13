@@ -145,11 +145,12 @@ export default class BarilgaSuurinGazar extends Component{
             }),
           }),
         };
-        rows.map((value) => {
+        const vectorLayer = rows.map((value) => {
           const styleFunction = function (feature) {
             return styles[feature.getGeometry().getType()];
           };
           const geoObject = value.geom
+
           if(geoObject){
             const vs = new VectorSource({
               features: new GeoJSON().readFeatures(geoObject, {
@@ -172,8 +173,8 @@ export default class BarilgaSuurinGazar extends Component{
               this.snap(vectorLayer)
     
               this.vectorLayer = vectorLayer
-          }
-        })
+        }
+      })
     }
 
     loadMap(){
@@ -379,22 +380,39 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     RemoveButton() {
-      this.remove()
+      if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
+      else alert("Хоосон байна идэвхжүүлнэ үү")
     }
 
     remove(){
       const vector = this.vector
-      const featureID_list = this.state.featureID_list
       const vectorLayer = this.vectorLayer
+      const selectedFeature_ID = this.state.selectedFeature_ID
       var features = vector.getSource().getFeatures();
-      if (features != null && features.length > 0) {
-        features.map((x) => {
-          var id = x.getProperties()['id']
-          featureID_list.map((data, idx) =>
-            id == data && vector.getSource().removeFeature(x)
-           )
+      const oid = this.state.oid
+      if(selectedFeature_ID<999999){
+        service.remove(oid, selectedFeature_ID).then(({ success, info }) => {
+            if (success) {
+              alert(info)
+              this.setState({featureID_list: [], selectedFeature_ID: null})
+              if (vectorLayer != null && vectorLayer.length > 0) {
+                vectorLayer.map((vector) => {
+                  const feature = vector.getSource().getFeatures()[0]
+                  feature.getProperties()['id'] == selectedFeature_ID && vector.getSource().removeFeature(feature)
+                })
+              }
+            }
         })
-        this.setState({featureID_list: []})
+      }
+      else
+      {
+        if (features != null && features.length > 0) {
+          features.map((x) => {
+            var id = x.getProperties()['id']
+            id == selectedFeature_ID && vector.getSource().removeFeature(x)
+          })
+          this.setState({featureID_list: []})
+        }
       }
     }
 
@@ -404,7 +422,8 @@ export default class BarilgaSuurinGazar extends Component{
             this.setState({modifyend_selected_feature_check: false})
       }
       else{
-        this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        else alert("Шинэ мэдээлэл алга байна.")
       }
     }
 
