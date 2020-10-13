@@ -37,6 +37,8 @@ export default class BarilgaSuurinGazar extends Component{
           geom_type: 'MULTIPOLYGON',
           featureID: null,
           featureID_list: [],
+          remove_button_active: false,
+          modify_button_active: false,
           selectedFeature_ID: null,
           modifyend_selected_feature_ID: null,
           modifyend_selected_feature_check: false,
@@ -69,6 +71,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.SaveBtn = this.SaveBtn.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
       this.remove = this.remove.bind(this)
+      this.removeModal = this.removeModal.bind(this)
       this.modifiedFeature = this.modifiedFeature.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
@@ -152,7 +155,6 @@ export default class BarilgaSuurinGazar extends Component{
       const vectorSource = new VectorSource({
         features: features,
       })
-      
       const vectorLayer = new VectorLayer({
             name: 'vector_layer',
             source: vectorSource,
@@ -257,10 +259,9 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
-        
         featureID_list.push(selectedFeature_ID)
+        if(this.state.remove_button_active) this.removeModal()
       }
       else
       {
@@ -288,7 +289,6 @@ export default class BarilgaSuurinGazar extends Component{
               this.setState({ geom_type })
               this.loadData()
           })
-          
     }
 
     Draw(){
@@ -369,18 +369,36 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     RemoveButton() {
+      this.drawE.setActive(false);
+      this.modifyE.setActive(true);
+      if(this.state.remove_button_active)
+      {
+        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({ remove_button_active: false })
+      }
+      else
+      {
+        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({ remove_button_active: true, modify_button_active: false })
+      }
+    }
+    removeModal(){
       if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
-      else alert("Хоосон байна идэвхжүүлнэ үү")
+      else
+      {
+        if(this.state.drawed) this.controls.modal.showModal(this.remove, true, "Тийм", `Шинээр үүссэн цэгийг устгах уу`, null, 'danger', "Үгүй")
+        else alert("Хоосон байна идэвхжүүлнэ үү")
+      }
     }
 
     remove(){
-
       const vector = this.vector
       const vectorLayer = this.vectorLayer
       const selectedFeature_ID = this.state.selectedFeature_ID
       var features = vector.getSource().getFeatures();
       const oid = this.state.oid
-      if(selectedFeature_ID<999999){
+      if(selectedFeature_ID){
         service.remove(oid, selectedFeature_ID).then(({ success, info }) => {
             if (success) {
               alert(info)
@@ -401,18 +419,24 @@ export default class BarilgaSuurinGazar extends Component{
             var id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
-          this.setState({featureID_list: []})
+          this.setState({featureID_list: [], drawed: null})
         }
       }
     }
 
     SaveBtn(){
       if(this.state.modifyend_selected_feature_ID){
+          if(this.state.modifyend_selected_feature_check)
+          {
             this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
             this.setState({modifyend_selected_feature_check: false})
+          }
+          else{
+            alert("Өөрчлөлт алга байна.")
+          }
       }
       else{
-        if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
         else alert("Шинэ мэдээлэл алга байна.")
       }
     }
@@ -423,7 +447,11 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
-        if(success) alert(info)
+        if(success) {
+          alert(info)
+          this.modifyE.setActive(false);
+          this.setState({modifyend_selected_feature_ID: null, changedFeature: '', selectedFeature_ID: false})
+        }
         else alert(info)
       })
     }
@@ -448,11 +476,23 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     ModifyButton(){
+      if(this.state.modify_button_active){
+        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({modify_button_active: false})
+      }
+      else{
+        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({modify_button_active: true,  remove_button_active: false})
+      }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
     }
 
     LineButton(){
+      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -460,6 +500,9 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PointButton(){
+      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -467,6 +510,9 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PolygonButton(){
+      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
       this.drawE.setActive(true);
