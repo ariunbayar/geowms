@@ -31,7 +31,7 @@ class ModalComponent extends Component{
                                 </button>
                             </div>
                             <div className="d-flex justify-content-center">
-                            { this.props.model_type_icon == "success" ?
+                            { this.props.model_type_icon == "danger" ?
                                 <i className="fa fa-times-circle fa-3x animated bounceIn text-danger" aria-hidden="true"></i>
                                 :
                                 <i className="fa fa-times-circle fa-3x animated bounceIn text-success" aria-hidden="true"></i>

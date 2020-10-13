@@ -1,7 +1,7 @@
 import {Control} from 'ol/control'
 
 
-export class AddButton extends Control {
+export class SaveBtn extends Control {
 
     constructor(opt_options) {
 
@@ -27,7 +27,7 @@ export class AddButton extends Control {
 
         element.addEventListener('click', (event) => {
             event.preventDefault()
-            options.AddButton()
+            options.SaveBtn()
         })
         element.appendChild(elementa)
 

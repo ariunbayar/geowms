@@ -10,7 +10,7 @@ export const service = {
     detail,
     ModuleCheck,
     table_list_All,
-    updateGis
+    updateGis,
 }
 
 const prefix = '/back'
