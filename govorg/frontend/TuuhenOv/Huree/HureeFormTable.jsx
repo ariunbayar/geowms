@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import Modal from "../../Components/helpers/Modal"
 import {service} from '../service'
+import ModalAlert  from "../../Components/helpers/ModalAlert"
 
 export default class HureeFormTable extends Component {
 
@@ -18,6 +19,8 @@ export default class HureeFormTable extends Component {
             save_is_error: false,
             perms: this.props.perms,
             is_editable : this.props.is_editable,
+            modal_alert_status: 'closed',
+            timer: null
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -25,6 +28,8 @@ export default class HureeFormTable extends Component {
         this.updateData = this.updateData.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
 
     }
     handleInput(field, e) {
@@ -74,9 +79,8 @@ export default class HureeFormTable extends Component {
             else{
                 service.hureeUpdate(tuuhen_ov,  x, y, id, tuuh_soyl_huree_id).then(({success}) => {
                     if (success) {
-                        setTimeout(() => {
-                            this.setState({disable: false, save_is_load: false, save_is_error:false})
-                        }, 1000)
+                        this.setState({modal_alert_status: 'open'})
+                        this.modalCloseTime()
                     }
                 })
             }
@@ -85,6 +89,19 @@ export default class HureeFormTable extends Component {
         {
             this.setState({disable: true})
         }
+    }
+
+    modalCloseTime() {
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: 'closed'})
+            this.setState({disable: false, save_is_load: false, save_is_error:false})
+        }, 2000)
+    }
+
+    modalClose() {
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: 'closed'})
+        this.setState({disable: false, save_is_load: false, save_is_error:false})
     }
 
     render() {
@@ -131,7 +148,8 @@ export default class HureeFormTable extends Component {
                         (this.state.save_is_load ?
                             <div className="spinner-border text-primary" role="status">
                                 <span className="sr-only">Loading...</span>
-                            </div>:
+                            </div>
+                            :
                             <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Хадгалах">
                                 <i className="fa fa-floppy-o text-success" aria-hidden="true"></i>
                             </a>
@@ -160,12 +178,19 @@ export default class HureeFormTable extends Component {
                                 modalAction={this.props.handleRemove}
                                 text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
                                 title="Тохиргоог устгах"
+                                model_type_icon="success"
                             />
                         }
                     </td>
                     :
                     perms.perm_remove && perms.perm_create ? null: <td rowSpan="1"></td>
                 }
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай заслаа"
+                    model_type_icon = "success"
+                />
             </tr>
         )
     }

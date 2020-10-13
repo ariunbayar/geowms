@@ -5,6 +5,7 @@ import {NavLink} from "react-router-dom"
 import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import Maps from '../../../Components/map/Map'
+import ModalAlert from '../../../Components/helpers/ModalAlert'
 
 export  class Forms extends Component {
 
@@ -71,7 +72,9 @@ export  class Forms extends Component {
             points_ids:[],
             hors_shinj_baidal_list:[],
             checkNull:[],
-            bairshil_error:false
+            bairshil_error:false,
+            modal_alert_status: 'closed',
+            timer: null
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -85,6 +88,8 @@ export  class Forms extends Component {
         this.handleCoordinatCheck = this.handleCoordinatCheck.bind(this)
         this.handleSearchWithName = this.handleSearchWithName.bind(this)
         this.checkError = this.checkError.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
     handleBoxOver (e){
         this.setState({ showBox: true })
@@ -188,7 +193,10 @@ export  class Forms extends Component {
                 checkError:error
             })
         }
-
+        else{
+            this.setState({modal_alert_status: 'open'})
+            this.modalCloseTime()
+        }
 
     }
 
@@ -326,6 +334,7 @@ export  class Forms extends Component {
             this.setState({[name+'_error']: true})
         }
     }
+
     handleSubmit(values, { setStatus, setSubmitting }) {
         setStatus('checking')
         setSubmitting(true)
@@ -479,6 +488,17 @@ export  class Forms extends Component {
 
         }
 
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+        }, 2000)
+    }
+
+    modalClose(){
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -1094,6 +1114,12 @@ export  class Forms extends Component {
                                 </div>
                             </div>
                         </div>
+                        <ModalAlert
+                            modalAction={() => this.modalClose()}
+                            status={this.state.modal_alert_status}
+                            title="Амжилттай нэмлээ"
+                            model_type_icon = "success"
+                        />
                     </div>
                  </Form>
                 )

@@ -99,6 +99,7 @@ export default class FormTable extends Component {
                             modalAction={this.props.handleRemove}
                             text={`Та "${point_name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
+                            model_type_icon = 'success'
                         />
                     }
                 </th>
@@ -129,8 +130,10 @@ export default class FormTable extends Component {
                             modalClose={(e) => this.handleModalSuccessClose(e)}
                             modalAction={this.props.handleSuccess}
                             text={`Та "${point_name}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
-                            title="Баталгаажуулах"
-                            actionName="Баталгаажуул"
+                            title="Баталгаажуулах уу?"
+                            actionNameBack="    Үгүй"
+                            actionNameDelete="  Тийм"
+                            model_type_icon='warning'
                         />
                     }
                 </th>

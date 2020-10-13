@@ -3,6 +3,7 @@ import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
 import {service} from './service'
 import {Pagination} from '../../../Components/pagination/pagination'
+import ModalAlert from '../../../Components/helpers/ModalAlert'
 
 export class List extends Component {
 
@@ -17,10 +18,16 @@ export class List extends Component {
             searchQuery: '',
             list: [],
             list_length: null,
+            modal_alert_status: 'closed',
+            timer: null,
+            modal_text: '',
+            modal_icon: ''
         }
         this.paginate = this.paginate.bind(this)
         this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     paginate (page, query) {
@@ -50,7 +57,18 @@ export class List extends Component {
     handleTsegSuccess(id){
         service.tseg_success(id).then(({ success }) => {
             if (success) {
+                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_text: 'Амжилттай баталгаажлаа'})
+                this.setState({modal_icon: 'success'})
                 this.paginate(1,"")
+                this.modalCloseTime()
+            }
+            else{
+                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_text: 'Баталгаажуулахад алдаа гарлаа'})
+                this.setState({modal_icon: 'danger'})
+                this.paginate(1,"")
+                this.modalCloseTime()
             }
         })
     }
@@ -58,12 +76,30 @@ export class List extends Component {
     handleRemove(id){
         service.tseg_remove(id).then(({ success }) => {
             if (success) {
+                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_text: 'Амжилттай утсгалаа'})
+                this.setState({modal_icon: 'success'})
                 this.paginate(1,"")
+                this.modalCloseTime()
             }
             else {
-                alert("Aldaa")
+                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_text: 'Утгахад алдаа гарлаа'})
+                this.setState({modal_icon: 'danger'})
+                this.modalCloseTime()
             }
         })
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+        }, 2000)
+    }
+
+    modalClose(){
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -120,6 +156,12 @@ export class List extends Component {
                         <Pagination
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
+                        />
+                        <ModalAlert
+                            modalAction={() => this.modalClose()}
+                            status={this.state.modal_alert_status}
+                            title={`${this.state.modal_text}`}
+                            model_type_icon = {`${this.state.modal_icon}`}
                         />
                     </div>
                 </div>

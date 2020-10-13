@@ -86,10 +86,8 @@ export class UserAdd extends Component {
         if(org_emp){
             service.employee_update(org_level, org_id, paylaod).then(({ success }) => {
                 if (success) {
-                    setTimeout(() => {
-                        this.setState({handleSaveIsLoad:false})
-                        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
-                    }, 1200)
+                    this.setState({modal_alert_status: "open"})
+                    this.modalCloseTime()
                 }
             })
         }
@@ -99,14 +97,11 @@ export class UserAdd extends Component {
                     this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна.", handleSaveIsLoad: false})
                 }
                 if (success) {
-                    setTimeout(() => {
-                        this.setState({modal_alert_status: "open"})
-                    }, 0)
-
+                    this.setState({modal_alert_status: "open"})
+                    this.modalCloseTime()
                 }
             })
         }
-        this.modalCloseTime()
 
 
     }

@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import Maps from './map/Map'
 import {service} from './service'
 import FormTable from './FormTable'
+import ModalAlert from '../Components/helpers/ModalAlert'
 
 export class Forms extends Component {
 
@@ -26,14 +27,16 @@ export class Forms extends Component {
             baga_id: -1,
             zip_id: -1,
             wms_list: [],
-            success_msg: false,
-            danger_msg: false,
             disabled: false,
             root_check: false,
             root1: '',
             root2: '',
             root3: '',
             root4: -1,
+            modal_alert_status: 'closed',
+            timer: null,
+            modal_text: '',
+            modal_icon: ''
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -45,6 +48,8 @@ export class Forms extends Component {
         this.handleEdit = this.handleEdit.bind(this)
         this.handlefeatureDataRead = this.handlefeatureDataRead.bind(this)
         this.handleInpuZereg = this.handleInpuZereg.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
     handleInpuZereg(value){
         this.setState({search_table: value, search_query: '0'})
@@ -81,19 +86,18 @@ export class Forms extends Component {
     handleEdit(root, name, x, y, root1, root2){
         this.setState({root1: '', root2: '', root3: '', root4: -1, latx: '', laty: '', root_check: true})
         this.setState({latx:x, laty:y, zip_code:root, zip_code_before:root})
-
         if(this.state.search_table == 'AU_AimagUnit'){
             this.handleInputAimag(root, true, true)
         }
-        if(this.state.search_table == 'AU_SumUnit')
-        {
-            this.handleInputAimag(root1, true, true)
-            this.setState({root2:root})
-        }
-        if(this.state.search_table == 'zipcode'){
-            this.handleInputAimag(root1, true, true)
-            this.setState({root2:root2, root4: root})
-        }
+        // if(this.state.search_table == 'AU_SumUnit')
+        // {
+        //     this.handleInputAimag(root1, true, true)
+        //     this.setState({root2:root})
+        // }
+        // if(this.state.search_table == 'zipcode'){
+        //     this.handleInputAimag(root1, true, true)
+        //     this.setState({root2:root2, root4: root})
+        // }
     }
 
     handleSearch(value, name){
@@ -148,8 +152,7 @@ export class Forms extends Component {
             if(success){
                 this.setState({sum: info})
                 if(this.state.root2 != ''){
-
-                    this.handleInputSum(this.state.root2, check, check_search)
+                    this.handleInpSutum(this.state.root2, check, check_search)
                 }
             }
             else{
@@ -222,20 +225,22 @@ export class Forms extends Component {
         service.zipUpdate(aimag_id, sum_id, baga_id, zip_id,  zip_code, zip_code_before).then(({success}) => {
             if(success){
                 setTimeout(() => {
-                   this.setState({success_msg:true ,handle_save:false, latx:'', laty:'', latx:'', sum:[], baga:[], aimag_id: -1, sum_id: -1, baga_id: -1,zip_id: -1, zip_code:''})
+                   this.setState({handle_save:false, latx:'', laty:'', latx:'', sum:[], baga:[], aimag_id: -1, sum_id: -1, baga_id: -1,zip_id: -1, zip_code:''})
                    this.getAimag()
                    this.handleSearch(this.state.search_query,this.state.search_table)
                 }, 1000);
-                setTimeout(() => {
-                    this.setState({success_msg:false})
-                }, 2500);
+                this.setState({modal_text: "Амжилттай хадгаллаа"})
+                this.setState({modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open'})
+                this.modalCloseTime()
             }else{
                 setTimeout(() => {
-                    this.setState({handle_save:false, danger_msg:true})
+                    this.setState({handle_save:false})
                 }, 1000);
-                setTimeout(() => {
-                    this.setState({danger_msg:false})
-                }, 2500);
+                this.setState({modal_text: "Алдаа гарлаа"})
+                this.setState({modal_icon: 'danger'})
+                this.setState({modal_alert_status: 'open'})
+                this.modalCloseTime()
             }
         })
     }
@@ -261,6 +266,17 @@ export class Forms extends Component {
                 this.setState({error_msg: ''})
             }, 2222);
         })
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+        }, 2000)
+    }
+
+    modalClose(){
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -345,20 +361,6 @@ export class Forms extends Component {
                                 Хадгалах
                             </button>
                         }
-                        {this.state.success_msg ?
-                        <div className="alert alert-success col-md-4 my-4" role="alert">
-                            Амжилттай хадгалагдлаа
-                        </div>
-                        :
-                        null
-                        }
-                        {this.state.danger_msg ?
-                        <div className="alert alert-danger col-md-4 my-4" role="alert">
-                            Алдаа гарлаа.
-                        </div>
-                        :
-                        null
-                        }
                     </div>
                     <div className="my-4 mt-4 col-md">
                     <input
@@ -398,6 +400,12 @@ export class Forms extends Component {
                         </div>
                     </div>
                 </div>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title={this.state.modal_text}
+                    model_type_icon = {this.state.modal_icon}
+                />
             </div>
         )
     }

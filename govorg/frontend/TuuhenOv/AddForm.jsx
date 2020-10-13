@@ -128,13 +128,10 @@ export class AddForm extends Component {
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
                             {
-                                perms.perm_create
-                                ?
+                                perms.perm_create &&
                                 <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
                                     Нэмэх
                                 </NavLink>
-                                :
-                                null
                             }
                             <input
                                 type="text"

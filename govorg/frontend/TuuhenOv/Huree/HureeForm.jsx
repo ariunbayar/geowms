@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import HureeFormTable from "./HureeFormTable"
+import ModalAlert from '../../Components/helpers/ModalAlert'
 
 export class HureeForm extends Component {
 
@@ -15,13 +16,18 @@ export class HureeForm extends Component {
             handle_save_succes_huree: false,
             save_is_error: false,
             perms : this.props.perms,
-            is_editable: this.props.is_editable
+            is_editable: this.props.is_editable,
+            modal_alert_status: 'closed',
+            timer: null,
+            text: ''
         }
 
         this.handleRemove = this.handleRemove.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.handleHureeSave = this.handleHureeSave.bind(this)
         this.hureeData = this.hureeData.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
 
     }
 
@@ -53,7 +59,9 @@ export class HureeForm extends Component {
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         service.hureeDelete(ayul_id, tuuhen_ov, tuuh_soyl_huree_id).then(({success}) => {
             if(success){
-                this.hureeData()
+                this.setState({text: 'устгалаа'})
+                this.setState({modal_alert_status: 'open'})
+                this.modalCloseTime()
             }
         })
     }
@@ -70,14 +78,28 @@ export class HureeForm extends Component {
         else{
             service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
                 if (success) {
-                    setTimeout(() => {
-                        this.setState({handle_save_succes_huree:false, save_is_error:false})
-                        this.hureeData()
-                    }, 1000)
+                    this.setState({text: 'нэмлээ'})
+                    this.setState({modal_alert_status: 'open'})
+                    this.modalCloseTime()
                 }
             })
         }
     }
+
+    modalCloseTime() {
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: 'closed'})
+            this.setState({handle_save_succes_huree:false, save_is_error:false})
+            this.hureeData()
+        }, 2000)
+    }
+
+    modalClose() {
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: 'closed'})
+        this.setState({handle_save_succes_huree:false, save_is_error:false})
+        this.hureeData()
+}
 
     render() {
         const tuuhen_ov = this.props.dursgalt_id
@@ -166,6 +188,12 @@ export class HureeForm extends Component {
                         }
                     </tbody>
                 </table>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title={`Амжилтай ${this.state.text}`}
+                    model_type_icon = "success"
+                />
             </div>
         )
     }
