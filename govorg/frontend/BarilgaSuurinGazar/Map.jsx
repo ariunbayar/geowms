@@ -402,7 +402,8 @@ export default class BarilgaSuurinGazar extends Component{
             this.setState({modifyend_selected_feature_check: false})
       }
       else{
-        this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        else alert("Шинээх үүссэн мэдээлэл алга байна.")
       }
     }
 
@@ -412,7 +413,10 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
-        if(success) alert(info)
+        if(success) {
+          alert(info)
+          this.setState({modifyend_selected_feature_ID: null, changedFeature: ''})
+        }
         else alert(info)
       })
     }
@@ -443,6 +447,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     ModifyButton(){
+      this.setState({modifyend_selected_feature_ID: null, changedFeature: '',selectedFeature_ID: null})
+      this.modifyE.setActive(false);
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
     }
