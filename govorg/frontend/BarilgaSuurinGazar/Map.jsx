@@ -408,6 +408,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(){
+      this.setState({ is_loading:true })
       if(this.state.modifyend_selected_feature_ID){
             this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
             this.setState({modifyend_selected_feature_check: false})
@@ -423,9 +424,6 @@ export default class BarilgaSuurinGazar extends Component{
       const oid = this.state.oid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
-      this.setState({
-        is_loading:true
-      })
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
         if(success){
           this.setState({
@@ -447,9 +445,6 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       const row_id = 30
-      this.setState({
-        is_loading:true
-      })
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
         if(success){
           {
