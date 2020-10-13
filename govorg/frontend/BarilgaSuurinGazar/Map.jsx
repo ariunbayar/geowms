@@ -134,38 +134,34 @@ export default class BarilgaSuurinGazar extends Component{
           }),
         };
 
-        rows.map((value) => {
-          const styleFunction = function (feature) {
-            return styles[feature.getGeometry().getType()];
-          }
-          const geoObject = value.geom
+        const features = rows.map((row) => {
 
-          const vs = new VectorSource({
-            features: new GeoJSON().readFeatures(geoObject, {
+          const { id, geom } = row
+
+          const feature = (new GeoJSON().readFeatures(geom, {
               dataProjection: this.state.dataProjection,
               featureProjection: this.state.featureProjection,
-              name: 'GEOJSON'
-            })
-          })
+            }))[0]
 
-          vs.getFeatures().forEach(function(f) {
-            f.setProperties({
-              id: value.id
-            })
-          })
+          feature.setProperties({ id })
 
-          const vectorLayer = new VectorLayer({
-              name: 'vector_layer',
-              source: vs,
-              style: styleFunction,
-          })
-
-          map.addLayer(vectorLayer)
-
-          this.snap(vectorLayer)
-          this.vectorLayer = vectorLayer
+          return feature
         })
-    }
+
+      const vectorSource = new VectorSource({
+        features: features,
+      })
+      
+      const vectorLayer = new VectorLayer({
+            name: 'vector_layer',
+            source: vectorSource,
+            style: (feature) => styles[feature.getGeometry().getType()],
+        })
+
+      map.addLayer(vectorLayer)
+      this.snap(vectorLayer)
+      this.vectorLayer = vectorLayer
+  }
 
     loadMap(){
 

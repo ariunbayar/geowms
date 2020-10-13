@@ -167,7 +167,7 @@ def rows(request, oid):
     """.format(
         columns=', '.join(columns_to_select),
         table=table,
-        limit=1,
+        limit=5,
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
