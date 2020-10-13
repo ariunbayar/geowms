@@ -314,7 +314,8 @@ def geoJsonConvertGeom(json, table, geom_field):
 
         cursor.execute(sql, [geojson])
         geom = cursor.fetchone()
-    return geom
+        return geom
+    return None
 
 
 def tableLastfindID(table_name):
