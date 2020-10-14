@@ -152,6 +152,7 @@ export default class AyulFormTable extends Component {
                                 modalAction={this.props.handleRemove}
                                 text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
                                 title="Тохиргоог устгах"
+                                model_type_icon="success"
                             />
                         }
                     </td>

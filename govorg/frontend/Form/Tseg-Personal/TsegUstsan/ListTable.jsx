@@ -70,11 +70,13 @@ export default class ListTable extends Component {
                 </button>
                 {is_modal_success_open &&
                     <Modal
-                        modalClose={this.handleModalSuccessOpen}
+                        modalClose={this.handleModalSuccessClose}
                         modalAction={this.props.handleTsegSuccess}
                         text={`Та "${name}" цэгийг устгахдаа итгэлтэй байна уу?`}
-                        title="Устгах"
-                        actionName="Баталгаажуул"
+                        title="Баталгаажуулах уу?"
+                        actionNameBack="    Үгүй"
+                        actionNameDelete="  Тийм"
+                        model_type_icon = "warning"
                     />
                 }
                 </td> : null}
@@ -88,6 +90,7 @@ export default class ListTable extends Component {
                             modalAction={this.props.handleRemove}
                             text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
+                            model_type_icon='success'
                         />
                     }
                 </td> : null}

@@ -4,6 +4,7 @@ import {validationSchema} from './validationSchema'
 import {HureeEdit} from './HureeEdit'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import Maps from '../Components/map/Map'
+import ModalAlert from '../Components/helpers/ModalAlert'
 
 export class Forms extends Component {
 
@@ -19,7 +20,8 @@ export class Forms extends Component {
             },
             aimagname: '',
             sumname: '',
-
+            modal_alert_status: "closed",
+            timer: null
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
@@ -27,6 +29,8 @@ export class Forms extends Component {
         this.hureeAdd = this.hureeAdd.bind(this)
         this.handleRefresh = this.handleRefresh.bind(this)
         this.handleXY = this.handleXY.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     hureeRemove(id){
@@ -93,10 +97,9 @@ export class Forms extends Component {
             const form_datas = this.state.values
             service.update(form_datas, this.state.aimagname, this.state.sumname).then(({success}) => {
                 if (success) {
-                    setTimeout(() => {
-                        setStatus('saved')
-                        this.props.history.push( `/gov/tuuhen-ov/`)
-                    }, 1000)
+                    setStatus('saved')
+                    this.setState({modal_alert_status: "open"})
+                    this.modalCloseTime()
                 }
             })
         }
@@ -104,13 +107,25 @@ export class Forms extends Component {
             const form_datas = this.state.values
             service.create(form_datas,  this.state.aimagname, this.state.sumname).then(({success}) => {
                 if (success) {
-                    setTimeout(() => {
-                        setStatus('saved')
-                        this.props.history.push( `/gov/tuuhen-ov/`)
-                    }, 1000)
+                    setStatus('saved')
+                    this.setState({modal_alert_status: "open"})
+                    this.modalCloseTime()
                 }
             })
         }
+    }
+
+    modalClose() {
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
+        this.props.history.push( `/gov/tuuhen-ov/`)
+    }
+
+    modalCloseTime() {
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+            this.props.history.push( `/gov/tuuhen-ov/`)
+        }, 2000)
     }
 
     render() {
@@ -249,11 +264,10 @@ export class Forms extends Component {
                                     <div className="span3 my-3">
                                         {has_error
                                             ?
-                                                <p> </p>
-                                            : status == 'saved' && !dirty &&
-                                                <p>
-                                                    Амжилттай нэмэгдлээ
-                                                </p>
+                                                <p></p>
+                                            :
+                                            status == 'saved' && !dirty &&
+                                                <p>Амжилттай нэмэгдлээ</p>
                                         }
                                         <div>
                                             <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
@@ -262,6 +276,12 @@ export class Forms extends Component {
                                                 {!isSubmitting && 'Нэмэх' }
                                             </button>
                                         </div>
+                                        <ModalAlert
+                                            modalAction={() => this.modalClose()}
+                                            status={this.state.modal_alert_status}
+                                            title="Амжилттай нэмлээ"
+                                            model_type_icon = "success"
+                                        />
                                     </div>
                                 </div>
                             </div>

@@ -3,6 +3,7 @@ import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
 import {service} from './service'
 import {Pagination} from '../Components/pagination/pagination'
+import ModalAlert from '../Components/helpers/ModalAlert'
 
 export class FormList extends Component {
 
@@ -18,11 +19,15 @@ export class FormList extends Component {
             msg: [],
             alert: false,
             perms: props.perms,
+            modal_alert_status: "closed",
+            timer: null,
         }
 
         this.paginate = this.paginate.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     paginate (page, query) {
@@ -52,11 +57,8 @@ export class FormList extends Component {
     handleRemove(id) {
         service.remove(id).then(({success, msg}) => {
             if (success){
-                this.setState({ msg, alert: success })
-                setTimeout(() => {
-                    this.setState({ alert: false, msg: [] })
-                }, 3000);
-                this.paginate(1, "")
+                this.setState({ msg, alert: success, alert: false, msg: [], modal_alert_status: 'open' })
+                this.modalCloseTime()
             }else{
                 this.setState({ msg, alert: false })
                 setTimeout(() => {
@@ -66,6 +68,18 @@ export class FormList extends Component {
         })
     }
 
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: "closed"})
+        }, 3000);
+        this.paginate(1, "")
+    }
+
+    modalClose(){
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
+        this.paginate(1, "")
+    }
 
     render() {
         const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.state.perms
@@ -134,6 +148,12 @@ export class FormList extends Component {
                             <Pagination
                                 paginate = {this.paginate}
                                 searchQuery = {searchQuery}
+                            />
+                            <ModalAlert
+                                modalAction={() => this.modalClose()}
+                                status={this.state.modal_alert_status}
+                                title="Амжилттай устгалаа"
+                                model_type_icon = "success"
                             />
                         </div>
                     </div>
