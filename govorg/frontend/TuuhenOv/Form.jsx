@@ -229,7 +229,7 @@ export class Forms extends Component {
                                                 <th scope="row">Хамрах хүруу тоо ширхэг</th>
                                                 {tuuh_id ?
                                                 <td>
-                                                        <button type="button" class="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1"  onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
+                                                        <button type="button" className="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1"  onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
                                                         <br></br>
                                                         <hr className="my-2"></hr>
                                                         {huree_components}

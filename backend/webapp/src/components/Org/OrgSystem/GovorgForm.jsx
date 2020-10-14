@@ -177,12 +177,6 @@ export class GovorgForm extends Component {
                                                     {isSubmitting && ' Шалгаж байна.'}
                                                     {!isSubmitting && 'Хадгалах' }
                                                 </button>
-                                                <ModalAlert
-                                                    modalAction={() => this.modalClose()}
-                                                    status={this.state.modal_alert_status}
-                                                    title="Амжилттай хадгаллаа"
-                                                    model_type_icon = "success"
-                                                />
                                             </div>
                                         </div>
                                     </Form>
@@ -224,6 +218,12 @@ export class GovorgForm extends Component {
                     )}
                     </div>
                 </div>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon = "success"
+                />
             </div>
 
         )
