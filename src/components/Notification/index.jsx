@@ -33,17 +33,16 @@ export class Notif extends Component {
             }
             if(too > length && length > 0){
                 this.total = this.total.concat([
-                    <li key={this.key} className={`list-group-item list-group-item-${style} `}>
-                        <i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn`}></i>
-                        {msg}
+                    <li key={this.key} className={`list-group-item list-group-item-${style} my-1`}>
+                        <a><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn my-1`}></i> {msg}</a>
                     </li>
                 ])
                 this.setState({ status: 'нэмсэн' })
             }
             if(length == 0){
-                this.total.push(<li key={this.key} className={`list-group-item list-group-item-${style} `}>
-                    <i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn`}></i>
-                    {msg}
+                this.total.push(
+                    <li key={this.key} className={`list-group-item list-group-item-${style} my-1`}>
+                        <a><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn my-1`}></i> {msg}</a>
                     </li>
                 )
                 this.setState({ status: 'нэмсэн' })

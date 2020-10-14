@@ -166,7 +166,7 @@ export class WMSForm extends Component {
 
             service.layerRemove(layerCode, wmsId).then(({ success }) => {
                 if (success) {
-                    this.addNotif('info', 'Амжилттай устгалаа', 'times')
+                    this.addNotif('success', 'Амжилттай устгалаа', 'times')
                     this.handleWmsLayerRefresh()
                 }
             })
