@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
+import { Typify } from "../Components/helpers/typify"
 import { validationSchema } from './validationSchema'
 import { service } from "./service"
 
@@ -119,6 +120,18 @@ export default class Маягт extends Component {
                                 { fields.map((field, idx) => {
                                     if (field.type == 'geometry')
                                         return
+                                    else if (field.name == 'id')
+                                        if (id)
+                                            return (
+                                                <div className="form-group row" key={ idx }>
+                                                    <label className="col-sm-2 col-form-label">{ field.name }</label>
+                                                    <div className="col-sm-10">
+                                                        <input name={ field.name } className="form-control" disabled type="text" value={ id }/>
+                                                    </div>
+                                                </div>
+                                            )
+                                        else
+                                            return
                                     else
                                         return (
                                             <div className="form-group row" key={ idx }>
@@ -126,6 +139,7 @@ export default class Маягт extends Component {
                                                 <div className="col-sm-10">
                                                     <Field name={ field.name } className="form-control" placeholder={ field.name } type="text"/>
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                                    <Typify field={field.type} />
                                                 </div>
                                             </div>
                                         )

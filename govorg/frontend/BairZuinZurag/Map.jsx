@@ -475,7 +475,6 @@ export default class BairZuinZurag extends Component{
       const oid = this.state.oid
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
-      const row_id = 30
       this.setState({ is_loading:true })
       
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {

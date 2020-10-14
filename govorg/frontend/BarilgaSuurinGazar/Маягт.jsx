@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
+import { Typify } from "../Components/helpers/typify"
 import { validationSchema } from './validationSchema'
 import { service } from "./service"
 
@@ -139,20 +140,9 @@ export default class Маягт extends Component {
                                                 <div className="col-sm-8">
                                                     <Field name={ field.name } className="form-control" placeholder={ field.name } aria-describedby="inputGroupPrepend" type="text"/>
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                                    <Typify field={field.type} />
+                                                    
                                                 </div>
-                                                <small className="text-muted col-sm-2">
-                                                    {
-                                                        field.type == 'bigint'
-                                                        ? 'Бүхэл том тоо оруулж болно.'
-                                                        : field.type == 'integer'
-                                                        ? 'Зөвхөн бүхэл тоо оруулна.'
-                                                        : field.type == 'character varying'
-                                                        ? 'Үсэг, тэмдэгт бичиж болно.'
-                                                        : field.type == 'double precision'
-                                                        ? 'Бутархай тоо оруулж болно.'
-                                                        : null
-                                                    }
-                                                </small>
                                             </div>
                                         )
                                 })}
