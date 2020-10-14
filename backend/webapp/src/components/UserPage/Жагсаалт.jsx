@@ -11,7 +11,6 @@ export class Жагсаалт extends Component {
     constructor(props) {
 
         super(props)
-
         this.state = {
             user_list: [],
             user_length:null,
@@ -20,7 +19,7 @@ export class Жагсаалт extends Component {
             searchQuery: '',
             query_min: false,
             search_load: false,
-            }
+        }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
     }
@@ -50,7 +49,7 @@ export class Жагсаалт extends Component {
     }
 
     render() {
-        const { user_list, user_length, usersPerPage} = this.state
+        const { user_list, user_length, usersPerPage } = this.state
         return (
             <div className="row">
                 <div className="col-md-12">

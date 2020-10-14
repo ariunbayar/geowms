@@ -187,6 +187,7 @@ def layerRemove(request, payload):
     wms_layer.legend_url.delete(save=False)
     BundleLayer.objects.filter(layer=wms_layer).delete()
     PaymentLayer.objects.filter(wms_layer=wms_layer).delete()
+    wms_layer.delete()
 
     return JsonResponse({'success': True})
 

@@ -12,7 +12,7 @@ export class LogForm extends Component {
             pay_legth:null,
             currentPage:1,
             payPerPage:100,
-            searchQuery:''
+            searchQuery:'',
         }
         this.paginate = this.paginate.bind(this)
     }
@@ -42,9 +42,8 @@ export class LogForm extends Component {
     }
 
     render() {
-        const {payment_all, pay_legth} = this.state
+        const {payment_all, pay_legth } = this.state
         return (
-            <>
                 <div className="card">
                     <div className="card-body">
                         <div className="row justify-content-between">
@@ -96,7 +95,6 @@ export class LogForm extends Component {
                         />
                     </div>
                 </div>
-            </>
         )
     }
 }
