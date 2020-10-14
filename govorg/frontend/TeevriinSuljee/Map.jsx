@@ -431,6 +431,7 @@ export default class TeevriinSuljee extends Component{
             var id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
+          this.addNotif('success', "Шинээр үүссэн мэдээллийг устгав.", 'check')
           this.setState({featureID_list: [], drawed: null})
         }
       }

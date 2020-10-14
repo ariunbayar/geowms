@@ -394,6 +394,7 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({ remove_button_active: true, modify_button_active: false })
       }
     }
+
     removeModal(){
       if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
       else
@@ -431,6 +432,7 @@ export default class BarilgaSuurinGazar extends Component{
             var id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
+          this.addNotif('success', "Шинээр үүссэн мэдээллийг устгав.", 'check')
           this.setState({featureID_list: [], drawed: null})
         }
       }
