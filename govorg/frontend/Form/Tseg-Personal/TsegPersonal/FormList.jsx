@@ -59,9 +59,7 @@ export class FormList extends Component {
     handleRemove(id) {
         service.tsegPersonalRemove(id).then(({success}) => {
             if (success) {
-                this.setState({modal_alert_status: 'open'})
-                this.setState({modal_text: 'устгалаа'})
-                this.setState({modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open', modal_text: 'устгалаа', modal_icon: 'success'})
                 this.paginate(1, this.state.searchQuery)
                 this.modalCloseTime()
             }
@@ -71,20 +69,14 @@ export class FormList extends Component {
     handleSuccess(point_type, objectid, point_class, t_type) {
         service.tsegPersonalSuccess(point_type, objectid, point_class, t_type).then(({success, msg}) => {
             if(success){
-                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_alert_status: 'open', error: !success, error_msg: msg, modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
                 this.paginate(1, this.state.searchQuery)
-                this.setState({ error: !success, error_msg: msg })
                 this.modalCloseTime('success')
-                this.setState({modal_text: 'Амжилттай баталгаажлаа'})
-                this.setState({modal_icon: 'success'})
             }
             else
             {
-                this.setState({modal_alert_status: 'open'})
-                this.setState({ error: false, error_msg: [] })
+                this.setState({modal_alert_status: 'open', error: false, error_msg: [], modal_text: 'Баталгаажлахад алдаа гарлаа', modal_icon: 'danger'})
                 this.modalCloseTime('danger')
-                this.setState({modal_text: 'Баталгаажлахад алдаа гарлаа'})
-                this.setState({modal_icon: 'danger'})
             }
         })
     }

@@ -93,15 +93,13 @@ export default class HureeFormTable extends Component {
 
     modalCloseTime() {
         this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: 'closed'})
-            this.setState({disable: false, save_is_load: false, save_is_error:false})
+            this.setState({modal_alert_status: 'closed', disable: false, save_is_load: false, save_is_error:false})
         }, 2000)
     }
 
     modalClose() {
         clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: 'closed'})
-        this.setState({disable: false, save_is_load: false, save_is_error:false})
+        this.setState({modal_alert_status: 'closed', disable: false, save_is_load: false, save_is_error:false})
     }
 
     render() {

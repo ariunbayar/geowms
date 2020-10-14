@@ -59,8 +59,7 @@ export class HureeForm extends Component {
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         service.hureeDelete(ayul_id, tuuhen_ov, tuuh_soyl_huree_id).then(({success}) => {
             if(success){
-                this.setState({text: 'устгалаа'})
-                this.setState({modal_alert_status: 'open'})
+                this.setState({text: 'устгалаа', modal_alert_status: 'open'})
                 this.modalCloseTime()
             }
         })
@@ -78,8 +77,7 @@ export class HureeForm extends Component {
         else{
             service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
                 if (success) {
-                    this.setState({text: 'нэмлээ'})
-                    this.setState({modal_alert_status: 'open'})
+                    this.setState({text: 'нэмлээ', modal_alert_status: 'open'})
                     this.modalCloseTime()
                 }
             })
@@ -88,16 +86,14 @@ export class HureeForm extends Component {
 
     modalCloseTime() {
         this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: 'closed'})
-            this.setState({handle_save_succes_huree:false, save_is_error:false})
+            this.setState({modal_alert_status: 'closed', handle_save_succes_huree:false, save_is_error:false})
             this.hureeData()
         }, 2000)
     }
 
     modalClose() {
         clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: 'closed'})
-        this.setState({handle_save_succes_huree:false, save_is_error:false})
+        this.setState({modal_alert_status: 'closed', handle_save_succes_huree:false, save_is_error:false})
         this.hureeData()
 }
 

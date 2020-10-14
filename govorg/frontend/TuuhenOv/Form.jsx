@@ -267,12 +267,7 @@ export class Forms extends Component {
                                                 <p></p>
                                             :
                                             status == 'saved' && !dirty &&
-                                                <ModalAlert
-                                                    modalAction={() => this.modalClose()}
-                                                    status={this.state.modal_alert_status}
-                                                    title="Амжилттай нэмлээ"
-                                                    model_type_icon = "success"
-                                                />
+                                                <p>Амжилттай нэмэгдлээ</p>
                                         }
                                         <div>
                                             <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
@@ -281,6 +276,12 @@ export class Forms extends Component {
                                                 {!isSubmitting && 'Нэмэх' }
                                             </button>
                                         </div>
+                                        <ModalAlert
+                                            modalAction={() => this.modalClose()}
+                                            status={this.state.modal_alert_status}
+                                            title="Амжилттай нэмлээ"
+                                            model_type_icon = "success"
+                                        />
                                     </div>
                                 </div>
                             </div>

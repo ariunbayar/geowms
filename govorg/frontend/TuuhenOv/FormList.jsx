@@ -57,9 +57,7 @@ export class FormList extends Component {
     handleRemove(id) {
         service.remove(id).then(({success, msg}) => {
             if (success){
-                this.setState({ msg, alert: success })
-                this.setState({ alert: false, msg: [] })
-                this.setState({modal_alert_status: 'open'})
+                this.setState({ msg, alert: success, alert: false, msg: [], modal_alert_status: 'open' })
                 this.modalCloseTime()
             }else{
                 this.setState({ msg, alert: false })

@@ -84,20 +84,19 @@ export class Forms extends Component {
     }
 
     handleEdit(root, name, x, y, root1, root2){
-        this.setState({root1: '', root2: '', root3: '', root4: -1, latx: '', laty: '', root_check: true})
-        this.setState({latx:x, laty:y, zip_code:root, zip_code_before:root})
+        this.setState({root1: '', root2: '', root3: '', root4: -1, latx: '', laty: '', root_check: true, latx:x, laty:y, zip_code:root, zip_code_before:root})
         if(this.state.search_table == 'AU_AimagUnit'){
             this.handleInputAimag(root, true, true)
         }
-        // if(this.state.search_table == 'AU_SumUnit')
-        // {
-        //     this.handleInputAimag(root1, true, true)
-        //     this.setState({root2:root})
-        // }
-        // if(this.state.search_table == 'zipcode'){
-        //     this.handleInputAimag(root1, true, true)
-        //     this.setState({root2:root2, root4: root})
-        // }
+        if(this.state.search_table == 'AU_SumUnit')
+        {
+            this.handleInputAimag(root1, true, true)
+            this.setState({root2:root})
+        }
+        if(this.state.search_table == 'zipcode'){
+            this.handleInputAimag(root1, true, true)
+            this.setState({root2:root2, root4: root})
+        }
     }
 
     handleSearch(value, name){
@@ -229,17 +228,13 @@ export class Forms extends Component {
                    this.getAimag()
                    this.handleSearch(this.state.search_query,this.state.search_table)
                 }, 1000);
-                this.setState({modal_text: "Амжилттай хадгаллаа"})
-                this.setState({modal_icon: 'success'})
-                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_text: "Амжилттай хадгаллаа", modal_icon: 'success', modal_alert_status: 'open'})
                 this.modalCloseTime()
             }else{
                 setTimeout(() => {
                     this.setState({handle_save:false})
                 }, 1000);
-                this.setState({modal_text: "Алдаа гарлаа"})
-                this.setState({modal_icon: 'danger'})
-                this.setState({modal_alert_status: 'open'})
+                this.setState({modal_text: "Алдаа гарлаа", modal_icon: 'danger', modal_alert_status: 'open'})
                 this.modalCloseTime()
             }
         })

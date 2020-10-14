@@ -57,16 +57,12 @@ export class List extends Component {
     handleTsegSuccess(id){
         service.tseg_success(id).then(({ success }) => {
             if (success) {
-                this.setState({modal_alert_status: 'open'})
-                this.setState({modal_text: 'Амжилттай баталгаажлаа'})
-                this.setState({modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
             else{
-                this.setState({modal_alert_status: 'open'})
-                this.setState({modal_text: 'Баталгаажуулахад алдаа гарлаа'})
-                this.setState({modal_icon: 'danger'})
+                this.setState({modal_alert_status: 'open', modal_text: 'Баталгаажуулахад алдаа гарлаа', modal_icon: 'danger'})
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
@@ -76,16 +72,12 @@ export class List extends Component {
     handleRemove(id){
         service.tseg_remove(id).then(({ success }) => {
             if (success) {
-                this.setState({modal_alert_status: 'open'})
-                this.setState({modal_text: 'Амжилттай утсгалаа'})
-                this.setState({modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай утсгалаа', modal_icon: 'success'})
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
             else {
-                this.setState({modal_alert_status: 'open'})
-                this.setState({modal_text: 'Утгахад алдаа гарлаа'})
-                this.setState({modal_icon: 'danger'})
+                this.setState({modal_alert_status: 'open', modal_text: 'Утгахад алдаа гарлаа', modal_icon: 'danger'})
                 this.modalCloseTime()
             }
         })

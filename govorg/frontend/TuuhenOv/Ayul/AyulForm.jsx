@@ -60,8 +60,7 @@ export class AyulForm extends Component {
         const ayul_id = id
         service.ayulDelete(ayul_id, tuuhen_ov).then(({success}) => {
             if(success){
-                this.setState({modal_alert_status: 'open'})
-                this.setState({text: "устгалаа"})
+                this.setState({modal_alert_status: 'open', text: "устгалаа"})
                 this.modalCloseTime()
                 this.hureeData()
             }
@@ -79,8 +78,7 @@ export class AyulForm extends Component {
         else{
             service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
                 if (success) {
-                    this.setState({modal_alert_status: 'open'})
-                    this.setState({text: "нэмлээ"})
+                    this.setState({modal_alert_status: 'open', text: "нэмлээ"})
                     this.modalCloseTime()
                     this.hureeData()
                 }
@@ -91,8 +89,7 @@ export class AyulForm extends Component {
 
     modalCloseTime() {
         this.state.timer = setTimeout(() => {
-            this.setState({handle_save_succes_huree:false, save_is_error:false})
-            this.setState({modal_alert_status: 'closed'})
+            this.setState({handle_save_succes_huree:false, save_is_error:false, modal_alert_status: 'closed'})
         }, 2000)
     }
 
