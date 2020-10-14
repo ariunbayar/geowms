@@ -10,6 +10,11 @@ from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
+from django.db import connections
+from main.utils import (
+    gis_tables_by_oids,
+    dict_fetchall
+)
 
 
 from .forms import BundleForm
@@ -138,12 +143,18 @@ def _get_module_display(module):
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
-    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]    
+    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
+    cursor = connections['postgis_db'].cursor()
+    table = []
+    if oid_list:
+        table = gis_tables_by_oids(oid_list)
+    
     return {
         'id': bundle.id,
         'name': bundle.name,
         'price':modules,
         'oid_list':oid_list,
+        'oid_table_list':table,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
@@ -160,7 +171,6 @@ def _get_bundle_display(bundle):
 def all(request):
 
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
-
     rsp = {
         'bundle_list': bundle_list,
     }
@@ -330,3 +340,4 @@ def move(request, payload):
     }
 
     return JsonResponse(rsp)
+

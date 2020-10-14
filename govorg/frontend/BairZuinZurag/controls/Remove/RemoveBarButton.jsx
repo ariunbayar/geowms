@@ -16,6 +16,7 @@ export class RemoveBarButton extends Control {
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
+        element.setAttribute('id', '⚙-toggle-remove-id')
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Арилгах')

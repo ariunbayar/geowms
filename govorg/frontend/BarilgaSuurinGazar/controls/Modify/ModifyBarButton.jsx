@@ -19,6 +19,7 @@ export class ModifyBarButton extends Control {
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Засварлах')
+        element.setAttribute('id', '⚙-toggle-modify-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')

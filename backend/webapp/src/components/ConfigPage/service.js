@@ -7,7 +7,8 @@ export const service = {
     getDetail,
     update,
     create,
-    remove
+    remove,
+    getPostgeVersion
 }
 
 
@@ -52,4 +53,9 @@ function create(values) {
 function remove(id) {
     const opts = {...getPostOptions()}
     return fetch(`${prefix}/${id}/delete/`, opts).then(handleResponse)
+}
+
+function getPostgeVersion() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/postresqlVersion/`, requestOptions).then(handleResponse)
 }
