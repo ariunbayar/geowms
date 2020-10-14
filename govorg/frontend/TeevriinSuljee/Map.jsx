@@ -405,17 +405,18 @@ export default class BarilgaSuurinGazar extends Component{
       const vector = this.vector
       const vectorLayer = this.vectorLayer
       const selectedFeature_ID = this.state.selectedFeature_ID
-      var features = vector.getSource().getFeatures();
+      var features_new = vector.getSource().getFeatures();
+      var features = vectorLayer.getSource().getFeatures();
       const oid = this.state.oid
       if(selectedFeature_ID){
         service.remove(oid, selectedFeature_ID).then(({ success, info }) => {
             if (success) {
               alert(info)
               this.setState({featureID_list: [], selectedFeature_ID: null})
-              if (vectorLayer != null && vectorLayer.length > 0) {
-                vectorLayer.map((vector) => {
-                  const feature = vector.getSource().getFeatures()[0]
-                  feature.getProperties()['id'] == selectedFeature_ID && vector.getSource().removeFeature(feature)
+              if (features != null && features.length > 0) {
+                features.map((x) => {
+                  const id = x.getProperties()['id']
+                  id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
                 })
               }
             }
@@ -423,8 +424,8 @@ export default class BarilgaSuurinGazar extends Component{
       }
       else
       {
-        if (features != null && features.length > 0) {
-          features.map((x) => {
+        if (features_new != null && features_new.length > 0) {
+          features_new.map((x) => {
             var id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
