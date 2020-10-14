@@ -6,7 +6,6 @@ import {ConfigForm} from './ConfigForm'
 import Config from './Config'
 import DiskSize from './DiskSize'
 import ModalAlert from "../ModalAlert"
-import PostgresqlVersion from "./PostgresqlVersion"
 
 
 export class ConfigList extends Component {
@@ -110,8 +109,11 @@ export class ConfigList extends Component {
                                     <DiskSize disk={disk}/>
                                 </div>
                                 <div className="col-md-12 text-wrap">
-                                    <h4 className="my-4">PostgreSQL болон PostGIS хувилбарууд</h4>
-                                    <PostgresqlVersion postgreVersion={postgreVersion} versionOfPostGis={versionOfPostGis}/>
+                                    <h4 className="my-4">PostgreSQL хувилбар</h4>
+                                    <p>{postgreVersion}</p>
+                                    <p></p>
+                                    <h4 className="my-4">PostGIS хувилбар</h4>
+                                    <p>{versionOfPostGis}</p>
                                 </div>
                             </div>
                         </div>
