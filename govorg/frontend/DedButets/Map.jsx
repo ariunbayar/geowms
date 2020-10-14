@@ -489,7 +489,7 @@ export default class BarilgaSuurinGazar extends Component{
             alert(info)
           }
           if(row_id){
-            this.props.history.push(`/gov/барилга-суурин-газар/${oid}/маягт/${row_id}/засах/`)
+            this.props.history.push(`/gov/дэд-бүтэц/${oid}/маягт/${row_id}/засах/`)
           }
         }
         else
