@@ -192,7 +192,6 @@ def rows(request, oid):
 
     rsp = {
         'rows': rows,
-        'geom_type': ''.join(getGeomType(table, findGeomField(fields)))
     }
     return JsonResponse(rsp)
 
@@ -370,7 +369,7 @@ def updateGeom(request, payload, oid, pk):
     fields = gis_fields_by_oid(oid)
     geom_field = findGeomField(fields)
 
-    geom = geoJsonConvertGeom(geojson)
+    geom = geoJsonConvertGeom(geojson, table, geom_field)
     if not geom:
         rsp = {
             'success': False,

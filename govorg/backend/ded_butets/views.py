@@ -152,6 +152,50 @@ def rows(request, oid):
     return JsonResponse(rsp)
 
 
+def getGeomType(table, geom_field):
+
+    schema = table.split('"')[1]
+    table = table.split('"')[3]
+    geojson = str(json)
+
+    with connections['postgis_db'].cursor() as cursor:
+        sql = """
+            SELECT type
+            FROM
+                geometry_columns
+            WHERE
+                f_table_schema = '{schema}' and
+                f_table_name = '{table}' and
+                f_geometry_column = '{geom_field}';
+        """.format(
+            schema=schema,
+            table=table,
+            geom_field=geom_field)
+
+        cursor.execute(sql)
+
+        type = cursor.fetchone()
+        return type
+    return None
+
+
+@require_GET
+@ajax_required
+@gov_bundle_required(Bundle.MODULE_DED_BUTETS)
+def geom_type(request, oid):
+
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    rsp = {
+        'type': ''.join(getGeomType(table, findGeomField(fields)))
+    }
+    return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_DED_BUTETS)
@@ -325,7 +369,7 @@ def updateGeom(request, payload, oid, pk):
     fields = gis_fields_by_oid(oid)
     geom_field = findGeomField(fields)
 
-    geom = geoJsonConvertGeom(geojson)
+    geom = geoJsonConvertGeom(geojson, table, geom_field)
     if not geom:
         rsp = {
             'success': False,
@@ -362,7 +406,7 @@ def geomAdd(request, payload, oid):
     fields = gis_fields_by_oid(oid)
     table = gis_table_by_oid(oid)
     geom_field = findGeomField(fields)
-    geom = geoJsonConvertGeom(geojson)
+    geom = geoJsonConvertGeom(geojson, table, geom_field)
 
     if not geom:
         rsp = {

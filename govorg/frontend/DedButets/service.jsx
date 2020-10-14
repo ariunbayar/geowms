@@ -8,7 +8,8 @@ export const service = {
     detail,
     update,
     geomUpdate,
-    geomAdd
+    geomAdd,
+    geomType,
 }
 
 function geom() {
@@ -20,6 +21,11 @@ function geom() {
 function rows(oid) {
     const requestOptions = getGetOptions()
     return fetch(`/gov/api/ded_butets/${oid}/rows/`, requestOptions).then(handleResponse)
+}
+
+function geomType(oid) {
+    const requestOptions = getGetOptions()
+    return fetch(`/gov/api/ded_butets/${oid}/geom-type/`, requestOptions).then(handleResponse)
 }
 
 function remove(oid, id) {

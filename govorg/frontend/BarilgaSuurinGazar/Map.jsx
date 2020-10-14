@@ -35,7 +35,6 @@ export default class BarilgaSuurinGazar extends Component{
           oid: this.props.match.params.oid,
           rows: [],
           is_loading:true,
-          geom_type: 'MULTIPOLYGON',
           featureID: null,
           featureID_list: [],
           remove_button_active: false,
@@ -54,8 +53,6 @@ export default class BarilgaSuurinGazar extends Component{
       this.controls = {
         modal: new Modal(),
       }
-
-      this.type = 'Line'
 
       this.modifyE = this.Modify()
       this.drawE = this.Draw()
@@ -297,9 +294,8 @@ export default class BarilgaSuurinGazar extends Component{
     loadRows() {
       service
           .rows(this.state.oid)
-          .then(({ rows, geom_type }) => {
+          .then(({ rows }) => {
               this.setState({ rows,  is_loading:false })
-              this.setState({ geom_type })
               this.loadData()
           })
     }
@@ -438,7 +434,6 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(){
-      this.setState({ is_loading:true })
       if(this.state.modifyend_selected_feature_ID){
           if(this.state.modifyend_selected_feature_check)
           {
@@ -460,6 +455,8 @@ export default class BarilgaSuurinGazar extends Component{
       const oid = this.state.oid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
+      this.setState({ is_loading:true })
+
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
         if(success){
           this.setState({
@@ -480,6 +477,8 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       const row_id = 30
+      this.setState({ is_loading:true })
+      
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
         if(success){
           {
