@@ -4,12 +4,15 @@ import { NavLink } from "react-router-dom"
 import { service } from "./service"
 import WMSCheckFormSort from './WMSCheckFormSort'
 import ModalAlert from '../ModalAlert'
+import {Notif} from '../../../../../src/components/Notification/index'
 
 export class WMSForm extends Component {
 
     constructor(props) {
 
         super(props)
+
+        this.too = 0,
 
         this.state = {
             id: props.match.params.id,
@@ -33,6 +36,7 @@ export class WMSForm extends Component {
         this.handleWmsLayerRefresh = this.handleWmsLayerRefresh.bind(this)
         this.ActiveChange=this.ActiveChange.bind(this)
         this.modalCloseTime=this.modalCloseTime.bind(this)
+        this.addNotif = this.addNotif.bind(this)
 
     }
 
@@ -151,6 +155,7 @@ export class WMSForm extends Component {
 
             service.layerAdd(layerName, wmsId, legendURL, layerCode).then(({ success }) => {
                 if (success) {
+                    this.addNotif('success', 'Амжилттай нэмлээ', 'check')
                     this.handleWmsLayerRefresh()
                 }
             })
@@ -161,6 +166,7 @@ export class WMSForm extends Component {
 
             service.layerRemove(layerCode, wmsId).then(({ success }) => {
                 if (success) {
+                    this.addNotif('success', 'Амжилттай устгалаа', 'times')
                     this.handleWmsLayerRefresh()
                 }
             })
@@ -186,11 +192,22 @@ export class WMSForm extends Component {
         }, 2000)
     }
 
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style: style, msg: msg, icon: icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
+    }
+
 
     render() {
         const { layers_all, id,is_active } = this.state
         return (
             <div className="row">
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <div className="col-lg-4">
                     <div className="card">
                         <div className="card-body">
