@@ -193,10 +193,10 @@ export class WMSForm extends Component {
     }
 
     addNotif(style, msg, icon){
-        this.too += 1
+        this.too ++
         this.setState({ show: true, style: style, msg: msg, icon: icon })
         const time = setInterval(() => {
-            this.too -= 1
+            this.too --
             this.setState({ show: true })
             clearInterval(time)
         }, 2000);
