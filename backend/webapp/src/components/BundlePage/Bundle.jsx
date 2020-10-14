@@ -83,7 +83,7 @@ export default class Bundle extends Component {
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
                                      </div>
                                     <div className="col-md-8">
-                                        <a> {oid.nspname}.{oid.relname}</a>
+                                        <a> {oid.schema}.{oid.table}</a>
                                     </div>
                                 </div>
                             ) :
