@@ -18,6 +18,8 @@ export class ConfigList extends Component {
             disk: {},
             modal_alert_check: "closed",
             timer: null,
+            postgreVersion: '',
+            postGis: ''
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -35,6 +37,9 @@ export class ConfigList extends Component {
         })
         service.getDisk().then(({disk}) => {
             this.setState({disk})
+        })
+        service.getPostgeVersion().then(({postgreVersion, versionOfPostGis}) => {
+            this.setState({postgreVersion, versionOfPostGis})
         })
     }
 
@@ -66,7 +71,7 @@ export class ConfigList extends Component {
 
     render() {
 
-        const {config_list, disk} = this.state
+        const {config_list, disk, postgreVersion, versionOfPostGis} = this.state
 
         return (
             <div className="row">
@@ -102,6 +107,13 @@ export class ConfigList extends Component {
                                 <div className="col-md-12">
                                     <h4 className="my-4">Дискийн хэмжээ</h4>
                                     <DiskSize disk={disk}/>
+                                </div>
+                                <div className="col-md-12 text-wrap">
+                                    <h4 className="my-4">PostgreSQL хувилбар</h4>
+                                    <p>{postgreVersion}</p>
+                                    <p></p>
+                                    <h4 className="my-4">PostGIS хувилбар</h4>
+                                    <p>{versionOfPostGis}</p>
                                 </div>
                             </div>
                         </div>

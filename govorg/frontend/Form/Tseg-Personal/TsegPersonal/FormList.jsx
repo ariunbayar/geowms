@@ -3,6 +3,7 @@ import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
 import {service} from '../../service'
 import {Pagination} from '../../../Components/pagination/pagination'
+import ModalAlert from '../../../Components/helpers/ModalAlert'
 
 export class FormList extends Component {
 
@@ -18,11 +19,17 @@ export class FormList extends Component {
             query_min: false,
             error: false,
             error_msg: [],
+            modal_alert_status: 'closed',
+            timer: null,
+            modal_text: '',
+            modal_icon: ''
         }
 
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
     paginate (page, query) {
@@ -51,27 +58,45 @@ export class FormList extends Component {
 
     handleRemove(id) {
         service.tsegPersonalRemove(id).then(({success}) => {
-            if (success) this.paginate(1, this.state.searchQuery)
+            if (success) {
+                this.setState({modal_alert_status: 'open', modal_text: 'устгалаа', modal_icon: 'success'})
+                this.paginate(1, this.state.searchQuery)
+                this.modalCloseTime()
+            }
         })
     }
 
     handleSuccess(point_type, objectid, point_class, t_type) {
         service.tsegPersonalSuccess(point_type, objectid, point_class, t_type).then(({success, msg}) => {
             if(success){
+                this.setState({modal_alert_status: 'open', error: !success, error_msg: msg, modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
                 this.paginate(1, this.state.searchQuery)
-                this.setState({ error: !success, error_msg: msg })
-                setTimeout(() => {
-                    this.setState({ error: false, error_msg: [] })
-                }, 1500);
+                this.modalCloseTime('success')
             }
             else
             {
-                this.setState({ error: !success, error_msg: msg })
-                setTimeout(() => {
-                    this.setState({ error: false, error_msg: [] })
-                }, 1500);
+                this.setState({modal_alert_status: 'open', error: false, error_msg: [], modal_text: 'Баталгаажлахад алдаа гарлаа', modal_icon: 'danger'})
+                this.modalCloseTime('danger')
             }
         })
+    }
+
+    modalCloseTime(value){
+        if(value == 'success'){
+            this.state.timer = setTimeout(() => {
+                this.setState({modal_alert_status: "closed"})
+            }, 2000)
+        }
+        else{
+            this.state.timer = setTimeout(() => {
+                this.setState({modal_alert_status: "closed"})
+            }, 2000)
+        }
+    }
+
+    modalClose(){
+        clearTimeout(this.state.timer)
+        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -145,6 +170,12 @@ export class FormList extends Component {
                             <Pagination
                                     paginate = {this.paginate}
                                     searchQuery = {this.state.searchQuery}
+                            />
+                            <ModalAlert
+                                modalAction={() => this.modalClose()}
+                                status={this.state.modal_alert_status}
+                                title={this.state.modal_text}
+                                model_type_icon = {this.state.modal_icon}
                             />
                         </div>
                     </div>

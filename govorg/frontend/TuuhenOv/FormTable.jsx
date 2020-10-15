@@ -64,8 +64,9 @@ export default class FormTable extends Component {
                         <Modal
                             modalClose={this.handleModalDeleteClose}
                             modalAction={this.props.handleRemove}
-                            text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            text={`Та "${dugaar}" бүртгэлийн дугаарыг устгахдаа итгэлтэй байна уу?`}
                             title="Тохиргоог устгах"
+                            model_type_icon = "success"
                         />
                     }
                 </th> : null

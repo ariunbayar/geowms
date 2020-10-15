@@ -74,6 +74,7 @@ export default class DursgaltGazarTable extends Component {
                                 modalAction={this.props.handleRemove}
                                 text={`Та "${dursgal}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                                 title="Тохиргоог устгах"
+                                model_type_icon="success"
                             />
                         }
                     </th>
