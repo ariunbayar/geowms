@@ -90,7 +90,7 @@ export default class Маягт extends Component {
             )
         }
 
-        const { values } = this.state
+        const { values, id } = this.state
         const { fields } = this.props
 
         return (
