@@ -1,49 +1,44 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+
 import 'ol/ol.css';
-import "./styles.css"
 import Map from 'ol/Map';
 import View from 'ol/View';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
-import {Draw, Modify, Select, Snap} from 'ol/interaction';
-import {OSM, Vector as VectorSource} from 'ol/source';
+import GeoJSON from 'ol/format/GeoJSON'
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-import { service } from './service';
-import GeoJSON from 'ol/format/GeoJSON';
-import { Feature } from 'ol';
-import {ModifyButton} from './controls/Modify/ModifyButton'
+import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
+import {Draw, Modify, Select, Snap} from 'ol/interaction'
+import {OSM, Vector as VectorSource} from 'ol/source'
+import { Feature } from 'ol'
+import { set } from 'ol/transform'
+
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
-import {LineButton} from './controls/Line/LineButton'
 import {PointBarButton} from './controls/Point/PointBarButton'
-import {PointButton} from './controls/Point/PointButton'
 import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
-import {PolygonButton} from './controls/Polygon/PolygonButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
-import {RemoveButton} from './controls/Remove/RemoveButton'
-import { set } from 'ol/transform';
+import {SaveBtn} from "./controls/Add/AddButton"
 import {Modal} from "../../../src/components/MapModal/Modal"
-import {AddButton} from "./controls/Add/AddButton"
+
+import "./styles.css"
+import { service } from './service'
 
 export default class BairZuinZurag extends Component{
 
     constructor(props){
       super(props)
-      this.type = 'Point'
+
       this.state = {
           format: new GeoJSON(),
-          GeoJson: [],
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
-          tables: [{"table_name": "test_point"}, {"table_name": "test_polygon"}],
-          select_table:'',
-          is_sidebar_open: false,
           oid: this.props.match.params.oid,
-
           rows: [],
-
+          is_loading:true,
           featureID: null,
           featureID_list: [],
+          remove_button_active: false,
+          modify_button_active: false,
           selectedFeature_ID: null,
           modifyend_selected_feature_ID: null,
           modifyend_selected_feature_check: false,
@@ -56,31 +51,27 @@ export default class BairZuinZurag extends Component{
       }
 
       this.controls = {
-        modifyBtn: new ModifyButton(),
-        lineBtn: new LineButton(),
-        pointBtn: new PointButton(),
-        polygonBtn: new PolygonButton(),
-        removeBtn: new RemoveButton(),
         modal: new Modal(),
       }
 
-      this.modifyE = this.ExampleModify()
-      this.drawE = this.ExampleDraw()
+      this.modifyE = this.Modify()
+      this.drawE = this.Draw()
 
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
+      this.loadControls = this.loadControls.bind(this)
       this.loadRows = this.loadRows.bind(this)
       this.clearMap = this.clearMap.bind(this)
-      this.remove = this.remove.bind(this)
-      this.saveData = this.saveData.bind(this)
       this.updateGeom = this.updateGeom.bind(this)
       this.ModifyButton = this.ModifyButton.bind(this)
       this.LineButton = this.LineButton.bind(this)
       this.PointButton = this.PointButton.bind(this)
       this.PolygonButton = this.PolygonButton.bind(this)
-      this.AddButton = this.AddButton.bind(this)
+      this.SaveBtn = this.SaveBtn.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
-      this.modifiedFea = this.modifiedFea.bind(this)
+      this.remove = this.remove.bind(this)
+      this.removeModal = this.removeModal.bind(this)
+      this.modifiedFeature = this.modifiedFeature.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
@@ -88,8 +79,32 @@ export default class BairZuinZurag extends Component{
     }
 
     componentDidMount(){
-      this.loadMap()
+      service
+          .geomType(this.state.oid)
+          .then(({ type }) => {
+              this.setState({ type })
+              this.loadControls()
+          })
       this.loadRows()
+      this.loadMap()
+    }
+
+    loadControls(){
+      const map = this.map
+      const { type } = this.state
+
+      map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
+      map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+      map.addControl(this.controls.modal)
+
+      if (type.includes("LINE"))
+        map.addControl(new LineBarButton({LineButton: this.LineButton}))
+      if (type.includes("POINT"))
+        map.addControl(new PointBarButton({PointButton: this.PointButton}))
+      if (type.includes("POLYGON"))
+        map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+
     }
 
     loadData(){
@@ -145,39 +160,41 @@ export default class BairZuinZurag extends Component{
             }),
           }),
         };
-        rows.map((value) => {
-          const styleFunction = function (feature) {
-            return styles[feature.getGeometry().getType()];
-          };
-          const geoObject = value.geom
-          const vs = new VectorSource({
-          features: new GeoJSON().readFeatures(geoObject, {
-              dataProjection: this.state.dataProjection,
-              featureProjection: this.state.featureProjection,
-              name: 'GEOJSON'
-          })
-          });
-          vs.getFeatures().forEach(function(f) {
-            f.setProperties({
-              id: value.id
-            })
-          });
-          const vectorLayer = new VectorLayer({
-              name: 'vector_layer',
-              source: vs,
-              style: styleFunction,
-          });
-          map.addLayer(vectorLayer)
-          this.snap(vectorLayer)
 
-          this.vectorLayer = vectorLayer
+      const features = []
+      rows.map((row) => {
+          const { id, geom } = row
+          if (geom){
+            const feature = (new GeoJSON().readFeatures(geom, {
+                dataProjection: this.state.dataProjection,
+                featureProjection: this.state.featureProjection,
+              }))[0]
+            feature.setProperties({ id })
+
+            features.push(feature)
+          }
         })
-    }
+
+      const vectorSource = new VectorSource({
+        features: features,
+      })
+      const vectorLayer = new VectorLayer({
+            name: 'vector_layer',
+            source: vectorSource,
+            style: (feature) => styles[feature.getGeometry().getType()],
+        })
+
+      map.addLayer(vectorLayer)
+      this.snap(vectorLayer)
+      this.vectorLayer = vectorLayer
+  }
 
     loadMap(){
+
       const raster = new TileLayer({
-        source: new OSM(),
-      });
+          source: new OSM(),
+      })
+
       const vector = new VectorLayer({
         source: new VectorSource(),
         style: new Style({
@@ -195,49 +212,41 @@ export default class BairZuinZurag extends Component{
             }),
           }),
         }),
-      });
-      this.vector = vector
+      })
+
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
-        controls: defaultControls().extend([
-          new ModifyBarButton({ModifyButton: this.ModifyButton}),
-          new LineBarButton({LineButton: this.LineButton}),
-          new PointBarButton({PointButton: this.PointButton}),
-          new PolygonBarButton({PolygonButton: this.PolygonButton}),
-          new RemoveBarButton({RemoveButton: this.RemoveButton}),
-          new AddButton({AddButton: this.AddButton}),
-          this.controls.modifyBtn,
-          this.controls.lineBtn,
-          this.controls.pointBtn,
-          this.controls.polygonBtn,
-          this.controls.modal,
-        ]),
         view: new View({
           center: this.state.Mongolia,
           zoom: 5,
         }),
-      });
+      })
+
       this.map = map
+      this.vector = vector
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
     }
 
-    ExampleModify(){
+    Modify(){
       const init = () => {
         const select = new Select();
         this.map.addInteraction(select);
         select.on("select", event => this.featureSelected(event));
+
         const modify = new Modify({
           features: select.getFeatures(),
         })
-        modify.on("modifyend", event => this.modifiedFea(event));
+        modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
+
         this.select = select
         this.modify = modify
         this.modifyE.setEvents()
       }
+
       const setEvents = () => {
         var selectedFeatures = this.select.getFeatures();
         this.select.on('change:active', function () {
@@ -246,6 +255,7 @@ export default class BairZuinZurag extends Component{
           });
         });
       }
+
       const setActive = (active) => {
         this.select.setActive(active);
         this.modify.setActive(active);
@@ -253,7 +263,43 @@ export default class BairZuinZurag extends Component{
       return { funct: init, setEvents: setEvents, setActive: setActive }
     }
 
-    ExampleDraw(){
+    featureSelected(event){
+      if(event.selected[0])
+      {
+        const featureID_list = this.state.featureID_list
+        const selectedFeature_ID = event.selected[0].getProperties()['id']
+        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
+        featureID_list.push(selectedFeature_ID)
+        if(this.state.remove_button_active) this.removeModal()
+      }
+      else
+      {
+        this.setState({ send: false })
+      }
+    }
+
+    modifiedFeature(event) {
+
+      const features = event.features.getArray()
+      const {format} = this.state
+      const data = format.writeFeatureObject(features[0],  {
+        dataProjection: this.state.dataProjection,
+        featureProjection: this.state.featureProjection,
+    })
+      const changedFeature = JSON.stringify(data)
+      this.setState({ changedFeature, modifyend_selected_feature_check: true })
+    }
+
+    loadRows() {
+      service
+          .rows(this.state.oid)
+          .then(({ rows }) => {
+              this.setState({ rows,  is_loading:false })
+              this.loadData()
+          })
+    }
+
+    Draw(){
       const init = (elem) => {
         this.map.addInteraction(elem);
         elem.setActive(false);
@@ -268,50 +314,7 @@ export default class BairZuinZurag extends Component{
           this.draw.setActive(false);
         }
       }
-      return { init, init, getActive: getActive, setActive: setActive }
-    };
-
-    featureSelected(event){
-      if(event.selected[0])
-      {
-        const featureID_list = this.state.featureID_list
-        const selectedFeature_ID = event.selected[0].getProperties()['id']
-        if(selectedFeature_ID){
-          if(this.state.modifyend_selected_feature_check && selectedFeature_ID !== this.state.modifyend_selected_feature_ID){
-            if(this.state.modifyend_selected_feature_ID < 999999)
-            {
-              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
-              this.setState({modifyend_selected_feature_check: false})
-            }
-          }
-        }
-        featureID_list.push(selectedFeature_ID)
-        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
-      }
-      else
-      {
-        this.setState({ send: false })
-      }
-    }
-
-    modifiedFea (event) {
-      const features = event.features.getArray()
-      const {format} = this.state
-      const data = format.writeFeatureObject(features[0],  {
-        dataProjection: this.state.dataProjection,
-        featureProjection: this.state.featureProjection,
-    })
-      const changedFeature = JSON.stringify(data)
-      this.setState({ changedFeature, modifyend_selected_feature_check: true })
-    }
-
-    loadRows() {
-        service
-            .rows(this.state.oid)
-            .then(({ rows }) => {
-                this.setState({ rows })
-                this.loadData()
-            })
+      return { init, getActive: getActive, setActive: setActive }
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -347,26 +350,23 @@ export default class BairZuinZurag extends Component{
 
     drawed(event){
       const features = this.vector.getSource().getFeatures();
+
       this.setState({modifyend_selected_feature_ID: null})
+
       if(features.length > 0)
       {
           const lastFeature = features[features.length - 1];
           this.vector.getSource().removeFeature(lastFeature);
       }
+
       const feature = event.feature
-      var featureID = this.state.featureID
-      const vectorLayer = this.vectorLayer
+      const featureID = this.state.featureID
       const format = this.state.format
       let area = format.writeFeatureObject(feature,  {
         dataProjection: this.state.dataProjection,
         featureProjection: this.state.featureProjection,
       })
-      featureID += 1000000
-      feature.setProperties({
-          'id': featureID
-      })
-      const properties = feature.getProperties();
-      featureID = properties.id;
+
       const drawed = JSON.stringify(area)
       this.setState({drawed})
     }
@@ -377,32 +377,76 @@ export default class BairZuinZurag extends Component{
     }
 
     RemoveButton() {
-      this.remove()
+      this.drawE.setActive(false);
+      this.modifyE.setActive(true);
+      if(this.state.remove_button_active)
+      {
+        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({ remove_button_active: false })
+      }
+      else
+      {
+        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({ remove_button_active: true, modify_button_active: false })
+      }
+    }
+    removeModal(){
+      if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
+      else
+      {
+        if(this.state.drawed) this.controls.modal.showModal(this.remove, true, "Тийм", `Шинээр үүссэн цэгийг устгах уу`, null, 'danger', "Үгүй")
+        else alert("Хоосон байна идэвхжүүлнэ үү")
+      }
     }
 
     remove(){
       const vector = this.vector
-      const featureID_list = this.state.featureID_list
       const vectorLayer = this.vectorLayer
-      var features = vector.getSource().getFeatures();
-      if (features != null && features.length > 0) {
-        features.map((x) => {
-          var id = x.getProperties()['id']
-          featureID_list.map((data, idx) =>
-            id == data && vector.getSource().removeFeature(x)
-           )
+      const selectedFeature_ID = this.state.selectedFeature_ID
+      var features_new = vector.getSource().getFeatures();
+      var features = vectorLayer.getSource().getFeatures();
+      const oid = this.state.oid
+      if(selectedFeature_ID){
+        service.remove(oid, selectedFeature_ID).then(({ success, info }) => {
+            if (success) {
+              alert(info)
+              this.setState({featureID_list: [], selectedFeature_ID: null})
+              if (features != null && features.length > 0) {
+                features.map((x) => {
+                  const id = x.getProperties()['id']
+                  id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
+                })
+              }
+            }
         })
-        this.setState({featureID_list: []})
+      }
+      else
+      {
+        if (features_new != null && features_new.length > 0) {
+          features_new.map((x) => {
+            var id = x.getProperties()['id']
+            id == selectedFeature_ID && vector.getSource().removeFeature(x)
+          })
+          this.setState({featureID_list: [], drawed: null})
+        }
       }
     }
 
-    AddButton(){
+    SaveBtn(){
       if(this.state.modifyend_selected_feature_ID){
+          if(this.state.modifyend_selected_feature_check)
+          {
             this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
             this.setState({modifyend_selected_feature_check: false})
+          }
+          else{
+            alert("Өөрчлөлт алга байна.")
+          }
       }
       else{
-        this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        else alert("Шинэ мэдээлэл алга байна.")
       }
     }
 
@@ -411,9 +455,20 @@ export default class BairZuinZurag extends Component{
       const oid = this.state.oid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
+      this.setState({ is_loading:true })
+
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
-        if(success) alert(info)
-        else alert(info)
+        if(success){
+          this.setState({
+            is_loading:false
+          })
+        }
+        else {
+          alert(info)
+          this.setState({
+            is_loading:false
+          })
+        }
       })
     }
 
@@ -422,33 +477,48 @@ export default class BairZuinZurag extends Component{
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       const row_id = 30
+      this.setState({ is_loading:true })
+      
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
         if(success){
-          alert(info)
+          {
+            this.setState({
+              is_loading:false
+            })
+            alert(info)
+          }
           if(row_id){
-            this.props.history.push(`/gov/барилга-суурин-газар/${oid}/маягт/${row_id}/засах/`)
+            this.props.history.push(`/gov/байр-зүйн-зураг/${oid}/маягт/${row_id}/засах/`)
           }
         }
         else
         {
           alert(info)
+          this.setState({
+            is_loading:false
+          })
         }
       })
     }
 
-
-    saveData() {
-      const vectorLayer = this.vectorLayer
-      const {format} = this.state
-      data = format.writeFeatures(vectorLayer.getSource().getFeatures());
-    }
-
     ModifyButton(){
+      if(this.state.modify_button_active){
+        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({modify_button_active: false})
+      }
+      else{
+        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({modify_button_active: true,  remove_button_active: false})
+      }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
     }
 
     LineButton(){
+      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -456,6 +526,9 @@ export default class BairZuinZurag extends Component{
     }
 
     PointButton(){
+      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -463,6 +536,9 @@ export default class BairZuinZurag extends Component{
     }
 
     PolygonButton(){
+      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -472,6 +548,7 @@ export default class BairZuinZurag extends Component{
     render(){
         return (
             <div className="col-md-12">
+                  {this.state.is_loading ? <span className="text-center d-block"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
                   <div id="map"></div>
             </div>
         )

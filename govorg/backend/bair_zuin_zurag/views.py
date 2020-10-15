@@ -119,6 +119,23 @@ def table_list(request):
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
+def geom_type(request, oid):
+
+    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+
+    table = gis_table_by_oid(oid)
+
+    fields = gis_fields_by_oid(oid)
+
+    rsp = {
+        'type': ''.join(getGeomType(table, findGeomField(fields)))
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@gov_bundle_required(Bundle.MODULE_BAIR_ZUIN_ZURAG)
 def rows(request, oid):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
@@ -268,16 +285,44 @@ def detail(request, oid, pk):
     return JsonResponse(rsp)
 
 
-def geoJsonConvertGeom(json):
+def geoJsonConvertGeom(json, table, geom_field):
+
+    schema = table.split('"')[1]
+    table = table.split('"')[3]
     geojson = str(json)
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ SELECT ST_GeomFromGeoJSON(%s); """
-            cursor.execute(sql, [geojson])
-            geom = cursor.fetchone()
+
+    with connections['postgis_db'].cursor() as cursor:
+        sql = """
+            SELECT coord_dimension, type
+            FROM
+                geometry_columns
+            WHERE
+                f_table_schema = '{schema}' and
+                f_table_name = '{table}' and
+                f_geometry_column = '{geom_field}';
+        """.format(
+            schema=schema,
+            table=table,
+            geom_field=geom_field)
+
+        cursor.execute(sql)
+        coord_dimension, type = cursor.fetchone()
+
+        sql = """ SELECT ST_GeomFromGeoJSON(%s); """
+
+        if coord_dimension == 3:
+                sql = """ SELECT ST_Force3D(ST_GeomFromGeoJSON(%s)); """
+
+        if 'MULTI' in type and coord_dimension == 2:
+                sql = """ SELECT ST_Multi(ST_GeomFromGeoJSON(%s)); """
+
+        if 'MULTI' in type and coord_dimension == 3:
+                sql = """ SELECT ST_Multi(ST_Force3D(ST_GeomFromGeoJSON(%s))); """
+
+        cursor.execute(sql, [geojson])
+        geom = cursor.fetchone()
         return geom
-    except Exception:
-        return None
+    return None
 
 
 def tableLastfindID(table_name):
@@ -311,7 +356,7 @@ def updateGeom(request, payload, oid, pk):
     fields = gis_fields_by_oid(oid)
     geom_field = findGeomField(fields)
 
-    geom = geoJsonConvertGeom(geojson)
+    geom = geoJsonConvertGeom(geojson, table, geom_field)
     if not geom:
         rsp = {
             'success': False,
@@ -348,7 +393,7 @@ def geomAdd(request, payload, oid):
     fields = gis_fields_by_oid(oid)
     table = gis_table_by_oid(oid)
     geom_field = findGeomField(fields)
-    geom = geoJsonConvertGeom(geojson)
+    geom = geoJsonConvertGeom(geojson, table, geom_field)
 
     if not geom:
         rsp = {

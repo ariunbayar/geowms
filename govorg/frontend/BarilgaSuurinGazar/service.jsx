@@ -11,6 +11,7 @@ export const service = {
     update,
     geomUpdate,
     geomAdd,
+    geomType
 }
 
 
@@ -23,6 +24,11 @@ function geom() {
 function rows(oid) {
     const requestOptions = getGetOptions()
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/rows/`, requestOptions).then(handleResponse)
+}
+
+function geomType(oid) {
+    const requestOptions = getGetOptions()
+    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/geom-type/`, requestOptions).then(handleResponse)
 }
 
 function remove(oid, id) {
