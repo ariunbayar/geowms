@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import LThemes, LPackages, LFeatures
 from main.decorators import ajax_required
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import user_passes_test
 
@@ -33,5 +33,14 @@ def bundleButetsAll(request):
     rsp = {
         'success': True,
         'data': data,
+        'fields': [{'field_name': 'theme_name'}, {'field_name': 'field_id'}],
     }
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def bundleButetsGetFields(request, pk):
+    print("ded", pk)
+    return JsonResponse({'rsp': 'rsp'})

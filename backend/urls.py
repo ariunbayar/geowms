@@ -177,6 +177,7 @@ urlpatterns = [
 
     path('dedsan-butests/', include(([
         path('all/', zipcode_dedsan_butets.bundleButetsAll),
+        path('getFields/<int:pk>/', zipcode_dedsan_butets.bundleButetsGetFields),
     ], 'dedsan-butests'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
