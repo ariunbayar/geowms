@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'backend.changeset.apps.ChangesetConfig',
     'backend.gis.apps.GisConfig',
     'backend.dedsanButets.apps.DedsanbutetsConfig',
+    'backend.inspire.apps.InspireConfig',
 
     # API apps
 
