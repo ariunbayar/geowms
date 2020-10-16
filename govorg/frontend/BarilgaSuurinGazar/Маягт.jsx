@@ -1,10 +1,9 @@
 import React, { Component } from "react"
-import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { Formik, Form, Field, ErrorMessage, validateYupSchema } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { Typify } from "../Components/helpers/typify"
-import { validationSchema } from './validationSchema'
 import { service } from "./service"
-
+import { validationSchema } from './validationSchema'
 
 export default class Маягт extends Component {
 
@@ -22,6 +21,7 @@ export default class Маягт extends Component {
         }
 
         this.onSubmit = this.onSubmit.bind(this)
+        this.validationSchema = validationSchema.bind(this)
 
     }
 
@@ -93,7 +93,6 @@ export default class Маягт extends Component {
 
         const { values, id } = this.state
         const { fields } = this.props
-
         return (
             <div>
                 <Formik
@@ -101,6 +100,7 @@ export default class Маягт extends Component {
                     initialValues={ values }
                     onSubmit={ this.onSubmit }
                     validate={ () => ({}) }
+                    validationSchema={ () => this.validationSchema(fields, id) }
                 >
                     {({
                         errors,
@@ -113,7 +113,6 @@ export default class Маягт extends Component {
                         isValid,
                         dirty,
                     }) => {
-
                         const has_error = Object.keys(errors).length > 0
 
                         return (
@@ -137,6 +136,7 @@ export default class Маягт extends Component {
                                         return (
                                             <div className="form-group row" key={ idx }>
                                                 <label className="col-sm-2 col-form-label">{ field.name }</label>
+
                                                 <div className="col-sm-8">
                                                     <Field name={ field.name } className="form-control" placeholder={ field.name } aria-describedby="inputGroupPrepend" type="text"/>
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
@@ -155,10 +155,10 @@ export default class Маягт extends Component {
                                     </button>
                                     {has_error
                                         ?
-                                        <p>
+                                        <p className="text-danger">
                                             <i className="far fa-times-circle"></i>
                                             {} Алдаатай утгыг засварлаж ахин оролдоно уу!
-                                            </p>
+                                        </p>
                                         : status == 'saved' && !dirty &&
                                         <p>
                                             <i className="fas fa-check-circle"></i>
