@@ -151,12 +151,6 @@ export class Дэлгэрэнгүй extends Component {
                                     <button  className="btn btn-outline-danger" onClick={this.handleModalLimitOpen} >Хязгаарлах</button>
                                     :
                                     <button  className="btn gp-outline-primary"  onClick={this.handleIsActiveTrue}>Идэвхжүүлэх</button>}
-                                    <ModalAlert
-                                        title = {["Амжилттай ", this.state.title_name]}
-                                        model_type_icon = "success"
-                                        status={this.state.modal_alert_check}
-                                        modalAction={() => this.handleModalAlert()}
-                                    />
                         </p>
                             <p><strong>Бүртгүүлсэн огноо</strong>: {date_joined} </p>
                             <p><strong>Сүүлд нэвтэрсэн огноо</strong>: {last_login} </p>
@@ -193,6 +187,12 @@ export class Дэлгэрэнгүй extends Component {
                             <br/>
                                 {check && <button type="button" className="btn gp-outline-primary" onClick={this.getRole}>Хадгалах</button>}
                         </div>
+                        <ModalAlert
+                            title = {["Амжилттай ", this.state.title_name]}
+                            model_type_icon = "success"
+                            status={this.state.modal_alert_check}
+                            modalAction={() => this.handleModalAlert()}
+                        />
                     </div>
                 </div>
             </div>

@@ -121,9 +121,9 @@ export default class AyulFormTable extends Component {
                     <td>
                     {this.state.disable ?
                         (this.state.save_is_load ?
-                            <div className="spinner-border text-primary" role="status">
+                            <a className="spinner-border text-primary" role="status">
                                 <span className="sr-only">Loading...</span>
-                            </div>:
+                            </a>:
                             <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Хадгалах">
                                 <i className="fa fa-floppy-o" aria-hidden="true"></i>
                             </a>
