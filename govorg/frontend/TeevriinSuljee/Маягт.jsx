@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
+import { Typify } from "../Components/helpers/typify"
 import { validationSchema } from './validationSchema'
 import { service } from "./service"
 
@@ -145,6 +146,7 @@ export default class Маягт extends Component {
                                                         placeholder={ field.name } type="text"
                                                     />
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                                    <Typify field={field.type} />
                                                 </div>
                                             </div>
                                         )

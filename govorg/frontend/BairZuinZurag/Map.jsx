@@ -57,6 +57,8 @@ export default class BairZuinZurag extends Component{
       this.modifyE = this.Modify()
       this.drawE = this.Draw()
 
+      this.addNotif = this.props.addNotif
+
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
       this.loadControls = this.loadControls.bind(this)
@@ -396,7 +398,7 @@ export default class BairZuinZurag extends Component{
       else
       {
         if(this.state.drawed) this.controls.modal.showModal(this.remove, true, "Тийм", `Шинээр үүссэн цэгийг устгах уу`, null, 'danger', "Үгүй")
-        else alert("Хоосон байна идэвхжүүлнэ үү")
+        else this.addNotif('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
       }
     }
 
@@ -410,7 +412,7 @@ export default class BairZuinZurag extends Component{
       if(selectedFeature_ID){
         service.remove(oid, selectedFeature_ID).then(({ success, info }) => {
             if (success) {
-              alert(info)
+              this.addNotif('success', info, 'check')
               this.setState({featureID_list: [], selectedFeature_ID: null})
               if (features != null && features.length > 0) {
                 features.map((x) => {
@@ -428,6 +430,7 @@ export default class BairZuinZurag extends Component{
             var id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
+          this.addNotif('success', "Шинээр үүссэн мэдээллийг устгав.", 'check')
           this.setState({featureID_list: [], drawed: null})
         }
       }
@@ -441,12 +444,12 @@ export default class BairZuinZurag extends Component{
             this.setState({modifyend_selected_feature_check: false})
           }
           else{
-            alert("Өөрчлөлт алга байна.")
+            this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }
       }
       else{
         if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
-        else alert("Шинэ мэдээлэл алга байна.")
+        else this.addNotif('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
       }
     }
 
@@ -459,12 +462,13 @@ export default class BairZuinZurag extends Component{
 
       service.geomUpdate(datas, oid, id).then(({success, info}) => {
         if(success){
+          this.addNotif('success', info, 'check')
           this.setState({
             is_loading:false
           })
         }
         else {
-          alert(info)
+          this.addNotif('danger', info, 'times')
           this.setState({
             is_loading:false
           })
@@ -476,16 +480,15 @@ export default class BairZuinZurag extends Component{
       const oid = this.state.oid
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
-      const row_id = 30
       this.setState({ is_loading:true })
-      
+
       service.geomAdd(datas, oid).then(({success, info, row_id}) => {
         if(success){
           {
+            this.addNotif('success', info, 'check')
             this.setState({
               is_loading:false
             })
-            alert(info)
           }
           if(row_id){
             this.props.history.push(`/gov/байр-зүйн-зураг/${oid}/маягт/${row_id}/засах/`)
@@ -493,7 +496,7 @@ export default class BairZuinZurag extends Component{
         }
         else
         {
-          alert(info)
+          this.addNotif('danger', info, 'times')
           this.setState({
             is_loading:false
           })

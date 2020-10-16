@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema } from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
+import { Typify } from "../Components/helpers/typify"
 import { service } from "./service"
 import { validationSchema } from './validationSchema'
 
@@ -135,15 +136,12 @@ export default class Маягт extends Component {
                                         return (
                                             <div className="form-group row" key={ idx }>
                                                 <label className="col-sm-2 col-form-label">{ field.name }</label>
-                                                <div className="col-sm-10">
-                                                    <Field
-                                                        name={ field.name }
-                                                        className={'form-control ' +
-                                                                (errors[field.name] &&
-                                                                touched[field.name] ? 'is-invalid' : '')}
-                                                        placeholder={ field.name } type="text"
-                                                    />
+
+                                                <div className="col-sm-8">
+                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } aria-describedby="inputGroupPrepend" type="text"/>
                                                     <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
+                                                    <Typify field={field.type} />
+                                                    
                                                 </div>
                                             </div>
                                         )
