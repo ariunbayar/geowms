@@ -16,7 +16,7 @@ export function validationSchema(fields, id) {
                             .typeError('Заавал тоо байх ёстой !')
                             .required('Нөхцөл хоосон байна !');
                 }
-                if (f.type == 'character varying') {
+                if (f.type == 'character varying' || f.type == 'character' ) {
                     schemaObj[f.name] =
                         Yup.string()
                             .max(50, 'Хэт урт байна !')
@@ -36,7 +36,7 @@ export function validationSchema(fields, id) {
                             .typeError('Заавал тоо байх ёстой !')
                             .required('Нөхцөл хоосон байна !');
                 }
-                if (f.type == 'character varying') {
+                if (f.type == 'character varying' || f.type == 'character' ) {
                     schemaObj[f.name] =
                         Yup.string()
                             .max(50, 'Хэт урт байна !')
