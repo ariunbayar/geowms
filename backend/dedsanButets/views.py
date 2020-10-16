@@ -33,7 +33,6 @@ def bundleButetsAll(request):
     rsp = {
         'success': True,
         'data': data,
-        'fields': [{'field_name': 'theme_name'}, {'field_name': 'field_id'}],
     }
     return JsonResponse(rsp)
 
@@ -41,6 +40,23 @@ def bundleButetsAll(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def bundleButetsGetFields(request, pk):
-    print("ded", pk)
-    return JsonResponse({'rsp': 'rsp'})
+def bundleButetsGetFields(request, name, pk):
+    if name == 'feature':
+        name = LFeatures
+    if name == 'package':
+        name = LPackages
+    if name == 'theme':
+        name = LThemes
+    datas = []
+    values = name.objects.all()[:10]
+    for value in values:
+        datas.append({
+            value
+        })
+    print(type(datas))
+    rsp = {
+        'success': True,
+        'fields': [f.name for f in name._meta.get_fields()],
+        # 'values': datas,
+    }
+    return JsonResponse(rsp)

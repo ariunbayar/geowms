@@ -13,9 +13,9 @@ function getall() {
     return fetch(`${prefix}/all/`, opts).then(handleResponse)
 }
 
-function getFields(id) {
+function getFields(id, name) {
     const opts = {
         ...getPostOptions(),
     }
-    return fetch(`${prefix}/getFields/${id}/`, opts).then(handleResponse)
+    return fetch(`${prefix}/getFields/${id}/${name}/`, opts).then(handleResponse)
 }
