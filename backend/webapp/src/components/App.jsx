@@ -14,6 +14,7 @@ import {Gis} from "./Gis"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
 import MenuItem from "../../../../src/components/MenuItem"
+import {DedsanBvtets} from './DedsanBvtets'
 
 export default class App extends Component {
 
@@ -52,7 +53,11 @@ export default class App extends Component {
 
                 <MenuItem icon="gp-text-primary fa fa-history" url="/back/access/login/" text="ХАНДАЛТ"></MenuItem>
                 <MenuItem icon="gp-text-primary fa fa-bank" url="/back/log/" text="БАНК ЛОГ"></MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-database" url="/back/дэд-сан/" text="ДЭД САН"></MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-database" url="/back/дэд-сан/" text="ДЭД САН">
+                    <ul className="sidebar-submenu">
+                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан-бүтэц/" text="Дэд сан бүтэц"></MenuItem>
+                    </ul>
+                </MenuItem>
                 <MenuItem icon="gp-text-primary zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
 
                 <MenuItem icon="gp-text-primary fa fa-users" url="/back/байгууллага/түвшин/" text="БАЙГУУЛЛАГА">
@@ -75,6 +80,7 @@ export default class App extends Component {
             <Switch>
               <Route path={"/back/wms/"} component={WMSPage} />
               <Route path={"/back/байгууллага/"} component={Org} />
+              <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
               <Route exact path={"/back/log/"} component={Log} />
               <Route path={"/back/access/"} component={Access} />
               <Route exact path={"/back/huulga/"} component={Huulga} />
