@@ -9,6 +9,8 @@ from django.views.decorators.http import require_GET, require_POST
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
+from backend.inspire.models import LThemes, LPackages, LFeatures
+from django.contrib.auth.decorators import user_passes_test
 from main.utils import (
     gis_delete,
     gis_fetch_one,
@@ -72,6 +74,18 @@ def _get_feature_coll(ob, changeset_list):
         return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
+def _get_package(theme_id):
+    package_data = []
+    for package in LPackages.objects.filter(theme_id=theme_id):
+        package_data.append({
+                'id': package.package_id,
+                'code': package.package_code,
+                'name': package.package_name,
+                'features': list(LFeatures.objects.filter(package_id=package.package_id).extra(select={'id': 'feature_id', 'code': 'feature_code', 'name': 'feature_name'}).values('id', 'code', 'name'))
+            })
+    return package_data
+
+
 @require_GET
 @ajax_required
 def changeset_all(request):
@@ -89,12 +103,30 @@ def changeset_all(request):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def bundleButetsAll(request):
+    data = []
+    for themes in LThemes.objects.all():
+        if themes.theme_name =='Барилга, суурин газар':
+            data.append({
+                    'id': themes.theme_id,
+                    'code': themes.theme_code,
+                    'name': themes.theme_name,
+                    'packages': _get_package(themes.theme_id),
+                })
+    rsp = {
+        'success': True,
+        'data': data,
+    }
+    return JsonResponse(rsp)
+
+@require_GET
+@ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
 def table_list(request):
 
     rows = []
     oids = list(request.bundle.bundlegis_set.values_list('oid', flat=True))
-
     if len(oids):
 
         tables = gis_tables_by_oids(oids)
