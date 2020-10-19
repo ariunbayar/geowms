@@ -4,15 +4,12 @@ import {TextField} from '../../../helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
-import {Notif} from '../../../../../../src/components/Notification/index'
 
 export class GovorgForm extends Component {
 
     constructor(props) {
 
         super(props)
-
-        this.too = 0,
 
         this.state = {
             govorg: {},
@@ -27,7 +24,6 @@ export class GovorgForm extends Component {
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.addNotif = this.addNotif.bind(this)
 
     }
 
@@ -53,10 +49,8 @@ export class GovorgForm extends Component {
 
         if (e.target.checked) {
             layers.push(value)
-            this.addNotif('success', 'Амжилттай нэмлээ', 'check')
         } else {
             layers = layers.filter((id) => id != value)
-            this.addNotif('success', 'Амжилттай устгалаа', 'times')
         }
         this.setState({layers})
     }
@@ -114,23 +108,12 @@ export class GovorgForm extends Component {
         clearTimeout(this.state.timer)
     }
 
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style: style, msg: msg, icon: icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
-    }
-
     render() {
         const {name, token} = this.state.govorg
         return (
 
             <div className="my-4">
                 <div className="row">
-                    <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                     <div className="col-md-12 mb-4">
                         <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                             <i className="fa fa-angle-double-left"></i> Буцах
