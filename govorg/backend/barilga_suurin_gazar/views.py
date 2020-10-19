@@ -22,10 +22,14 @@ from main.utils import (
 
 def _get_changeset_display(ob):
 
-    geom = eval(ob.geom)
-    geometry = eval(geom['geom'])
-    coordinates = geometry['coordinates']
-    geom_type = geometry['type']
+    geom = ob.geom.replace("\'", "\"")
+    geom1 = geom[:9]
+    geom2 = geom[10:-2]
+    geom3 = geom[-1]
+    geom4 = geom1 + geom2 +geom3
+    values_list = json.loads(geom4)
+    coordinates = values_list['geom']['coordinates']
+    geom_type = values_list['geom']['type']
 
     return {
         'coordinate':coordinates,
