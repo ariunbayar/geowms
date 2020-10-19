@@ -1,13 +1,15 @@
 import React, { Component } from "react"
 import "./styles.css";
 import {service} from './service'
-
+import {Notif} from '../../../../../src/components/Notification/index'
 
 export default class BundleFormTable extends Component {
 
     constructor(props) {
 
         super(props)
+
+        this.too = 0;
 
         this.state = {
             id: props.values.id,
@@ -18,6 +20,7 @@ export default class BundleFormTable extends Component {
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.DefaultCheck = this.DefaultCheck.bind(this)
+        this.addNotif = this.addNotif.bind(this)
 
     }
     handleLayerToggle(e) {
@@ -51,13 +54,17 @@ export default class BundleFormTable extends Component {
             this.setState({check: 1})
             const data = {"bundleId":bundleId, "layerId":layerId, "check": 1}
             service.defaultCheckUpdate(data).then(({success, item}) => {
-                if (success) { }
+                if (success) {
+                    this.addNotif('success', 'Амжилттай нэмлээ', 'check')
+                }
             })
         } else {
             this.setState({check: 0})
             const data = {"bundleId":bundleId, "layerId":layerId, "check": 0}
             service.defaultCheckUpdate(data).then(({success, item}) => {
-                if (success) { }
+                if (success) {
+                    this.addNotif('success', 'Амжилттай устгалаа', 'times')
+                }
             })
 
         }
@@ -67,10 +74,21 @@ export default class BundleFormTable extends Component {
 
     }
 
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style: style, msg: msg, icon: icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
+    }
+
     render() {
         const {id, name, price} = this.props.values
         return (
             <tr>
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <td >
                    {name}
                 </td>
