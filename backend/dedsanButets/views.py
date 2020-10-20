@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from backend.inspire.models import LThemes, LPackages, LFeatures
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
 from main.decorators import ajax_required
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, Http404
@@ -58,5 +58,154 @@ def bundleButetsGetFields(request, name, pk):
         'success': True,
         'fields': [f.name for f in name._meta.get_fields()],
         # 'values': datas,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def bundleButetsGetProperty(request, payload, pk, name, code):
+    print("HAHAHAHAHa")
+    haha = payload.get('code')
+    print("HAHAHAHAHa", haha)
+    if name == 'feature':
+        name = LFeatures
+    if name == 'package':
+        name = LPackages
+    if name == 'theme':
+        name = LThemes
+    datas = []
+    print(code)
+    feat = LFeatures.objects.filter(feature_code=code)
+    print(feat)
+    values = name.objects.all()[:10]
+    for value in values:
+        datas.append({
+            value
+        })
+    print(type(datas))
+    rsp = {
+        'success': True,
+        'fields': [f.name for f in name._meta.get_fields()],
+        # 'values': datas,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def Property(request, code):
+    feature_names = []
+    feature_configs_name = []
+    data_type_names = []
+    property_names = []
+    value_type_names = []
+    code_list_values = []
+    features = LFeatures.objects.filter(feature_code=code)
+    for feature in features:
+        print(feature.feature_id)
+        feature_names.append({
+            'feature_id': feature.feature_id,
+            'feature_code': feature.feature_code,
+            'feature_name': feature.feature_name,
+        })
+        f_configs = LFeatureConfigs.objects.filter(feature_id=feature.feature_id)
+        for f_config in f_configs:
+            data_type_id = f_config.data_type_id
+            connect_feature_id = f_config.connect_feature_id
+            if data_type_id is not None:
+                feature_configs_name.append({
+                    'data_type_id': data_type_id,
+                    'feature_config_id': f_config.feature_config_id,
+                    'feature_id': f_config.feature_id,
+                    'data_type_display_name': f_config.data_type_display_name,
+                })
+                data_types = LDataTypes.objects.filter(data_type_id=data_type_id)
+                for data_type in data_types:
+                    if data_type:
+                        data_type_names.append({
+                            'data_type_id': data_type.data_type_id,
+                            'data_type_name': data_type.data_type_name,
+                            'data_type_code': data_type.data_type_code,
+                            'data_type_definition': data_type.data_type_definition,
+                            'is_active': data_type.is_active,
+                        })
+                        data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type.data_type_id)
+                        if data_type_configs:
+                            for data_type_config in data_type_configs:
+                                property_id = data_type_config.property_id
+                                properties = LProperties.objects.filter(property_id=property_id)
+                                if properties:
+                                    for prop in properties:
+                                        property_names.append({
+                                            'data_type_id': data_type_config.data_type_id,
+                                            'property_id': property_id,
+                                            'property_code': prop.property_code,
+                                            'property_name': prop.property_name,
+                                            'property_definition': prop.property_definition,
+                                            'value_type_id': prop.value_type_id,
+                                        })
+                                        if prop.value_type_id == 'single-select':
+                                            code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+                                            if code_list_configs:
+                                                for code_list_config in code_list_configs:
+                                                    property_id = code_list_config.property_id
+                                                    to_property_id = code_list_config.to_property_id
+                                                    if property_id == to_property_id:
+                                                        to_property_id += 1
+                                                    x_range = range(property_id, to_property_id)
+                                                    for i in x_range:
+                                                        code_lists = LCodeLists.objects.filter(property_id=code_list_config.property_id)
+                                                        if code_lists:
+                                                            for code_list in code_lists:
+                                                                code_list_values.append({
+                                                                    'code_list_id': code_list.code_list_id,
+                                                                    'property_id': code_list.property_id,
+                                                                    'code_list_code': code_list.code_list_code,
+                                                                    'code_list_name': code_list.code_list_name,
+                                                                    'code_list_definition': code_list.code_list_definition,
+                                                                })
+                                        value_types = LValueTypes.objects.filter(value_type_id=prop.value_type_id)
+                                        if value_types:
+                                            for value_type in value_types:
+                                                value_type_names.append({
+                                                    'value_type_id': value_type.value_type_id,
+                                                    'value_type_name': value_type.value_type_name,
+                                                })
+            else:
+                print("connected ", connect_feature_id)
+                connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
+                for connect_feature in connect_features:
+                    connected_feature_id = connect_feature.connect_feature_id
+                    data_type_id = connect_feature.data_type_id
+                    if data_type_id is not None:
+                        data_types = LDataTypes.objects.filter(data_type_id=data_type_id)
+                        if data_types:
+                            for data_type in data_types:
+                                data_type_names.append({
+                                    'data_type_id': data_type.data_type_id,
+                                    'data_type_name': data_type.data_type_name,
+                                    'data_type_code': data_type.data_type_code,
+                                    'data_type_definition': data_type.data_type_definition,
+                                    'is_active': data_type.is_active,
+                                })
+                    if connect_feature.feature_id == connect_feature_id:
+                        if connected_feature_id is None:
+                            feature_configs_name.append({
+                                'data_type_id': data_type_id,
+                                'feature_config_id': connect_feature.feature_config_id,
+                                'feature_id': connect_feature.feature_id,
+                                'data_type_display_name': connect_feature.data_type_display_name,
+                            })
+    rsp = {
+        'success': True,
+        'feature_names': feature_names,
+        'feature_configs_name': feature_configs_name,
+        'data_type_names': data_type_names,
+        'property_names': property_names,
+        'value_type_names': value_type_names,
+        'code_list_values': code_list_values,
     }
     return JsonResponse(rsp)
