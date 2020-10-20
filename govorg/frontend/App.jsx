@@ -64,10 +64,10 @@ export class App extends Component {
 
         service
             .tableListBarilgaSuurinGazar()
-            .then(({ items }) => {
-                this.setState({
-                    barilga_suurin_gazar_table_list: items,
-                })
+            .then(({ success, data }) => {
+                if(success){
+                    this.setState({barilga_suurin_gazar_table_list:data})
+                }
             })
 
         service
@@ -209,16 +209,28 @@ export class App extends Component {
                                 url="/gov/барилга-суурин-газар/"
                                 text="Барилга суурин газар"
                             >
-                                <ul className="sidebar-submenu">
-                                    { barilga_suurin_gazar_table_list.map(({ oid, schema, table }, idx) =>
+                            <ul className="sidebar-submenu">
+                                { barilga_suurin_gazar_table_list.map(({packages}) =>
+                                    packages.map((pack, idx)=>
                                         <MenuItem
-                                            key={ idx }
-                                            icon="fa fa-table gp-text-primary"
-                                            url={`/gov/барилга-суурин-газар/${oid}/`}
-                                            text={schema + '.' + table}
-                                        ></MenuItem>
-                                    )}
-                                </ul>
+                                        key={ idx }
+                                        url={`/gov/барилга-суурин-газар/${pack.id}/`}
+                                        text={pack.name}
+                                        >
+                                        <ul className="sidebar-submenu">    
+                                            {pack.features.map((feat,idf)=>
+                                                <MenuItem 
+                                                key={ idf}
+                                                icon="fa fa-table gp-text-primary"
+                                                url={`/gov/барилга-суурин-газар/${pack.id}/${feat.id}/`}
+                                                text={feat.name}
+                                                />
+
+                                                )}
+                                        </ul>
+                                        </MenuItem>)
+                                )}
+                            </ul>
                             </MenuItem>
                         }
                     </ul>
@@ -272,12 +284,12 @@ export class App extends Component {
                             }
 
                             { barilga_suurin_gazar.perm_view &&
-                                <Route path="/gov/барилга-суурин-газар/:oid/" render={(routeProps) =>
+                                <Route path="/gov/барилга-суурин-газар/:pid/:fid/" render={(routeProps) =>
                                     <БарилгаСууринГазар
                                         { ...routeProps }
                                         fields={
-                                            barilga_suurin_gazar_table_list.reduce((acc, { oid, fields }) => {
-                                                return oid == routeProps.match.params.oid ? fields : acc
+                                            barilga_suurin_gazar_table_list.reduce((acc, pack) => {
+                                                return pack.id == routeProps.match.params.pid ? fields : acc
                                             }, [])
                                         }
                                     />

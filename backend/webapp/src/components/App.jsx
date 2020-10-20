@@ -55,7 +55,8 @@ export default class App extends Component {
                 <MenuItem icon="gp-text-primary fa fa-bank" url="/back/log/" text="БАНК ЛОГ"></MenuItem>
                 <MenuItem icon="gp-text-primary fa fa-database" url="/back/дэд-сан/" text="ДЭД САН">
                     <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан-бүтэц/" text="Дэд сан бүтэц"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
                     </ul>
                 </MenuItem>
                 <MenuItem icon="gp-text-primary zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>

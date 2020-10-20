@@ -83,7 +83,6 @@ class LFeatureConfigs(models.Model):
     has_class = models.BooleanField(default=True)
     data_type_id = models.IntegerField()
     data_type_display_name = models.CharField(max_length=255)
-    property_id = models.IntegerField()
     is_connect_to_feature = models.BooleanField(default=True)
     connect_feature_id = models.IntegerField()
     connect_feature_property_id = models.IntegerField()

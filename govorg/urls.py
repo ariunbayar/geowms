@@ -34,7 +34,7 @@ urlpatterns = [
 
         path('barilga_suurin_gazar/', include(([
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
-            path('table_list/', govorg.backend.barilga_suurin_gazar.views.table_list),
+            path('table_list/', govorg.backend.barilga_suurin_gazar.views.bundleButetsAll),
             path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
             path('<int:oid>/geom-type/', govorg.backend.barilga_suurin_gazar.views.geom_type),
             path('<int:oid>/add/', govorg.backend.barilga_suurin_gazar.views.add),
