@@ -65,8 +65,8 @@ class LDataTypes(models.Model):
     data_type_name_eng = models.CharField(max_length=255)
     data_type_definition = models.CharField(max_length=500)
     data_type_definition_eng = models.CharField(max_length=500)
-    order_no = models.IntegerField()
     is_active = models.BooleanField(default=True)
+    is_read_only = models.BooleanField(default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
     modified_on = models.DateTimeField(auto_now=True)
@@ -174,7 +174,7 @@ class LValueTypes(models.Model):
         db_table = 'l_value_types'
         managed = False
 
-    value_type_id = models.AutoField(primary_key=True)
+    value_type_id = models.CharField(max_length=255, primary_key=True)
     value_type_name = models.CharField(max_length=255)
     value_type_name_eng = models.CharField(max_length=255)
     order_no = models.IntegerField()
