@@ -32,7 +32,8 @@ export default class BarilgaSuurinGazar extends Component{
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
-          oid: this.props.match.params.oid,
+          pid: this.props.match.params.pid,
+          fid: this.props.match.params.fid,
           rows: [],
           is_loading:true,
           featureID: null,
@@ -295,7 +296,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     loadRows() {
       service
-          .rows(this.state.oid)
+          .rows(this.state.pid, this.state.fid)
           .then(({ rows }) => {
               this.setState({ rows,  is_loading:false })
               this.loadData()

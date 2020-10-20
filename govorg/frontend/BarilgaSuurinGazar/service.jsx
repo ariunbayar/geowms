@@ -21,9 +21,9 @@ function geom() {
 }
 
 
-function rows(oid) {
+function rows(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/rows/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/rows/`, requestOptions).then(handleResponse)
 }
 
 function geomType(oid) {

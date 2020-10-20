@@ -197,35 +197,21 @@ def geom_type(request, oid):
 
 @require_GET
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def rows(request, oid):
+def rows(request, pid, fid):
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    table = gis_table_by_oid(oid)
-
-    fields = gis_fields_by_oid(oid)
-
-    columns_to_select = [
-        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
-        for f in fields
-    ]
-
-    cursor = connections['postgis_db'].cursor()
+    cursor = connections['default'].cursor()
     sql = """
         SELECT
-            {columns}
+            geo_id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
         FROM
-            {table}
+            m_geo_datas
+        limit 10
     """.format(
-        columns=', '.join(columns_to_select),
-        table=table,
-        limit=1
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
     rows = list(rows)
-
+    print(rows)
     rsp = {
         'rows': rows,
     }
