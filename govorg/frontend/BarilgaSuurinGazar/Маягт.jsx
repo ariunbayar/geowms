@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { Formik, Form, Field, ErrorMessage, validateYupSchema } from 'formik'
+import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { Typify } from "../Components/helpers/typify"
 import { service } from "./service"
@@ -27,6 +27,8 @@ export default class Маягт extends Component {
 
     onSubmit(values, { setStatus, setSubmitting }) {
         this.setState({ values })
+        console.log(values)
+
         setStatus('checking')
         setSubmitting(true)
         if(this.state.id){
@@ -52,34 +54,19 @@ export default class Маягт extends Component {
     }
 
     componentDidMount() {
-
-        if (this.state.id) {
-
+        const gid = this.props.match.params.gid
+        if(gid){
             service
-                .detail(this.state.oid, this.state.id)
-                .then(({ values }) => {
-
+            .detail(gid)
+            .then(({success, datas}) => {
+                if(success){
+                    console.log(datas)
                     this.setState({
-                        is_loading: false,
-                        values,
-                })
-            })
-
-        } else {
-
-            const values = {}
-
-            this.props.fields.forEach((field) => {
-                if (field.type != 'geometry') {
-                    values[field.name] = ''
+                        values:datas,
+                        is_loading: false
+                    })
                 }
-            })
-
-            this.setState({
-                values,
-                is_loading: false,
-            })
-
+         })
         }
     }
 
@@ -92,84 +79,50 @@ export default class Маягт extends Component {
         }
 
         const { values, id } = this.state
-        const { fields } = this.props
+        const values_fields = values
+        // const { fields } = this.props
         return (
             <div>
                 <Formik
-                    enableReinitialize
-                    initialValues={ values }
-                    onSubmit={ this.onSubmit }
-                    validate={ () => ({}) }
-                    validationSchema={ () => this.validationSchema(fields, id) }
-                >
-                    {({
-                        errors,
-                        status,
-                        touched,
-                        isSubmitting,
-                        setFieldValue,
-                        handleBlur,
-                        values,
-                        isValid,
-                        dirty,
-                    }) => {
-                        const has_error = Object.keys(errors).length > 0
-
-                        return (
-                            <Form>
-                                { fields.map((field, idx) => {
-                                    if (field.type == 'geometry')
-                                        return
-                                    else if (field.name == 'id')
-                                        if (id)
-                                            return (
-                                                <div className="form-group row" key={ idx }>
-                                                    <label className="col-sm-2 col-form-label">{ field.name }</label>
-                                                    <div className="col-sm-10">
-                                                        <input name={ field.name } className="form-control" disabled type="text" value={ id }/>
-                                                    </div>
-                                                </div>
-                                            )
-                                        else
-                                            return
-                                    else
-                                        return (
-                                            <div className="form-group row" key={ idx }>
-                                                <label className="col-sm-2 col-form-label">{ field.name }</label>
-
-                                                <div className="col-sm-8">
-                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } aria-describedby="inputGroupPrepend" type="text"/>
-                                                    <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
-                                                    <Typify field={field.type} />
-                                                    
-                                                </div>
-                                            </div>
-                                        )
-                                })}
-
+                    initialValues={{ friends: values }}
+                    onSubmit={values =>
+                        setTimeout(() => {
+                        console.log(JSON.stringify(values, null, 2));
+                        }, 500)
+                    }
+                    render={({ values }) => (
+                        <Form>
+                        <FieldArray
+                            name="friends"
+                            render={arrayHelpers => (
+                            <div>
+                                {values.friends && values.friends.length > 0 ? (
+                                values.friends.map((friend, index) => (
+                                    <div key={index} className="row my-3">
+                                        <div className="col-md-2">
+                                            <label className="col-form-label">{friend.property_code}</label>
+                                        </div>
+                                        <div className="col-md-9">
+                                            <Field name={`friends.${index}.data`} className='form-control 'placeholder={ friend.property_name} type={friend.value_type} />
+                                            <small>{friend.property_definition}</small>
+                                        </div>
+                                    </div>
+                                ))
+                                ) : (
+                                <button type="button" onClick={() => arrayHelpers.push('')}>
+                                    {/* show this when user has removed all friends from the list */}
+                                    Add a friend
+                                </button>
+                                )}
                                 <div>
-                                    <button type="submit" className="btn" disabled={isSubmitting || has_error}>
-                                        {isSubmitting && <i className="fa fa-spinner fa-pulse"></i>}
-                                        {isSubmitting && 'Шалгаж байна.'}
-                                        {!isSubmitting && 'Хадгалах'}
-                                    </button>
-                                    {has_error
-                                        ?
-                                        <p className="text-danger">
-                                            <i className="far fa-times-circle"></i>
-                                            {} Алдаатай утгыг засварлаж ахин оролдоно уу!
-                                        </p>
-                                        : status == 'saved' && !dirty &&
-                                        <p>
-                                            <i className="fas fa-check-circle"></i>
-                                            {} Амжилттай хадгаллаа
-                                            </p>
-                                    }
+                                <button type="submit">Submit</button>
                                 </div>
-                            </Form>
-                        )
-                    }}
-                </Formik>
+                            </div>
+                            )}
+                        />
+                        </Form>
+                    )}
+                    />
             </div>
         )
     }

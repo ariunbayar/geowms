@@ -59,11 +59,10 @@ function update(oid, data, pk) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${pk}/save/`, opts).then(handleResponse)
 }
 
-function detail(oid, id) {
-
+function detail(gid) {
     const opts = getGetOptions()
 
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/detail/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${gid}/detail/`, opts).then(handleResponse)
 }
 
 function sendFeature(data, oid, id) {

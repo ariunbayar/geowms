@@ -86,6 +86,7 @@ def _get_package(theme_id):
     return package_data
 
 
+
 @require_GET
 @ajax_required
 def changeset_all(request):
@@ -316,24 +317,92 @@ def delete(request, oid, pk):
 
     return JsonResponse(rsp)
 
+def _code_list_values(ob):
+    return {
+        'code_list_id':ob[0],
+        'code_list_name':ob[2]
+    }
+
+def _get_property(ob):
+    data = ''
+    value_type = ''
+    data_list = []
+    if ob['value_type_id'] == ('number' and 'double'):
+        value_type = 'number'
+        data = ob['value_number'],
+
+    elif ob['value_type_id'] == ('text' and 'multi-text'):
+        value_type = 'text'
+        data = ob['value_text'],
+    elif ob['value_type_id'] == 'date':
+        value_type = 'date'
+        data = ob['value_date'],
+    elif ob['value_type_id'] == 'link':
+        value_type = 'url'
+        data = ob['value_text'],
+    elif ob['value_type_id'] == 'boolean': 
+        value_type = 'checkbox'
+        data = ob['value_text'],
+    elif ob['value_type_id'] == 'single-select':
+        value_type = 'option'
+        data = ob['value_text'],
+
+    return {
+        'building_id':ob['building_id'],
+        'geo_id':ob['geo_id'],
+        'property_name':ob['property_name'],
+        'property_code':ob['property_code'],
+        'property_definition':ob['property_definition'],
+        'value_type_id':ob['value_type_id'],
+        'value_type':value_type,
+        'property_id':ob['property_id'],
+        'data':data
+    }
 
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def detail(request, oid, pk):
+def detail(request, pk):
+    #try:
+    Properties = []
+    find_cursor = connections['default'].cursor()
+    find_cursor.execute(''' 
+    select 
+        datas.building_id,
+        datas.geo_id, 
+        l.property_name, 
+        l.property_code,
+        l.property_definition,
+        l.value_type_id,  
+        datas.property_id,
+        datas.value_text,
+        datas.value_number,
+        datas.value_date
+    from l_properties l
+    inner join m_datas_building datas on 
+        l.property_id = datas.property_id
+    where 
+        datas.geo_id = %s'''
+    , [pk])
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    row = gis_fetch_one(oid, pk)
-    if not row:
-        raise Http404
+    data = dict_fetchall(find_cursor)
+    data = list(data)
+    properties = [_get_property(ob) for ob in data]
 
     rsp = {
-        'values': row,
+        'success': True,
+        'datas': properties
     }
     return JsonResponse(rsp)
 
+        # except Exception:
+        #     rsp = {
+        #         'success': False,
+        #         'info': "Алдаа гарсан",
+        #     }
+        # return JsonResponse(rsp)
 
+    
 def geoJsonConvertGeom(json, table, geom_field):
 
     schema = table.split('"')[1]

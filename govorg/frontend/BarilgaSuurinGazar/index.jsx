@@ -29,6 +29,7 @@ export default class Index extends Component {
         }, 2000);
     }
 
+    
     render() {
 
         const { fields } = this.props
@@ -71,9 +72,7 @@ export default class Index extends Component {
                             <Маягт { ...routeProps } fields={ fields }/>
                         }/>
 
-                        <Route path="/gov/барилга-суурин-газар/:pid/:fid/маягт/:id/засах/" render={(routeProps) =>
-                            <Маягт { ...routeProps } fields={ fields }/>
-                        }/>
+                        <Route path="/gov/барилга-суурин-газар/:pid/:fid/маягт/:gid/засах/" component={Маягт}/>
 
                         <Route path="/gov/барилга-суурин-газар/:pid/:fid/map/" render={(routeProps) =>
                             <Map { ...routeProps } fields={ fields } addNotif={ this.addNotif } />

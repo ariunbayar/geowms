@@ -39,7 +39,7 @@ urlpatterns = [
             path('<int:oid>/geom-type/', govorg.backend.barilga_suurin_gazar.views.geom_type),
             path('<int:oid>/add/', govorg.backend.barilga_suurin_gazar.views.add),
             path('<int:oid>/<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
-            path('<int:oid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
+            path('<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
             path('<int:oid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
             path('<int:oid>/<str:pk>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
             path('<int:oid>/add-geom/', govorg.backend.barilga_suurin_gazar.views.geomAdd),
