@@ -41,9 +41,8 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
             path('<int:pid>/<int:fid>/<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
             path('<int:pid>/<int:fid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
-            path('<int:pid>/<int:fid>/<str:pk>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
-            path('<int:pid>/<int:fid>/add-geom/', govorg.backend.barilga_suurin_gazar.views.geomAdd),
-
+            path('<int:fid>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
+            path('<int:fid>/add-geom/', govorg.backend.barilga_suurin_gazar.views.geomAdd),
         ], 'barilga_suurin_gazar'))),
 
         path('ded_butets/', include(([

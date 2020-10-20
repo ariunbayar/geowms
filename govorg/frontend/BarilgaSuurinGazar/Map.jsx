@@ -460,12 +460,12 @@ export default class BarilgaSuurinGazar extends Component{
 
     updateGeom(){
       const id = this.state.selectedFeature_ID
-      const oid = this.state.oid
+      const fid = this.state.fid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       this.setState({ is_loading:true })
-
-      service.geomUpdate(datas, oid, id).then(({success, info}) => {
+      console.log(id, fid)
+      service.geomUpdate(datas, fid, id).then(({success, info}) => {
         if(success){
           this.addNotif('success', info, 'check')
           this.setState({
@@ -482,12 +482,12 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     createGeom(){
-      const oid = this.state.oid
+      const fid = this.state.fid
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       this.setState({ is_loading:true })
 
-      service.geomAdd(datas, oid).then(({success, info, row_id}) => {
+      service.geomAdd(datas, fid).then(({success, info, row_id}) => {
         if(success){
           {
             this.addNotif('success', info, 'check')
