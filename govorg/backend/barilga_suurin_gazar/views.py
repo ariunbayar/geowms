@@ -198,20 +198,22 @@ def geom_type(request, oid):
 @require_GET
 @ajax_required
 def rows(request, pid, fid):
-
+    print(pid, fid)
+    print(pid, fid)
+    print(pid, fid)
+    print(pid, fid)
     cursor = connections['default'].cursor()
     sql = """
         SELECT
             geo_id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
         FROM
             m_geo_datas
-        limit 10
+        limit 200
     """.format(
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
     rows = list(rows)
-    print(rows)
     rsp = {
         'rows': rows,
     }
