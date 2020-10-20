@@ -26,9 +26,9 @@ function rows(pid, fid) {
     return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/rows/`, requestOptions).then(handleResponse)
 }
 
-function geomType(oid) {
+function geomType(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/geom-type/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/geom-type/`, requestOptions).then(handleResponse)
 }
 
 function remove(oid, id) {

@@ -5,6 +5,8 @@ from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas
+from django.contrib.gis.geos import GEOSGeometry
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
@@ -181,35 +183,34 @@ def getGeomType(table, geom_field):
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def geom_type(request, oid):
+def geom_type(request, pid, fid):
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    table = gis_table_by_oid(oid)
-
-    fields = gis_fields_by_oid(oid)
-
-    rsp = {
-        'type': ''.join(getGeomType(table, findGeomField(fields)))
-    }
+    data = MGeoDatas.objects.filter(feature_id=38).first()
+    if data:
+        rsp = {
+            'type': GEOSGeometry(data.geo_data).geom_type
+        }
+    else:
+        rsp = {
+            'type': None
+        }
     return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
 def rows(request, pid, fid):
-    print(pid, fid)
-    print(pid, fid)
-    print(pid, fid)
-    print(pid, fid)
     cursor = connections['default'].cursor()
     sql = """
         SELECT
-            geo_id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
+            geo_id as id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
         FROM
             m_geo_datas
-        limit 200
+        WHERE
+            feature_id = {fid}
+        limit 1000
     """.format(
+        fid=fid
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
