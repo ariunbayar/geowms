@@ -102,10 +102,47 @@ export default class Маягт extends Component {
                                         <div className="col-md-2">
                                             <label className="col-form-label">{friend.property_code}</label>
                                         </div>
-                                        <div className="col-md-9">
-                                            <Field name={`friends.${index}.data`} className='form-control 'placeholder={ friend.property_name} type={friend.value_type} />
+                                        {friend.value_type != 'option' ?
+                                            <div className="col-md-9">
+                                                <Field 
+                                                    name={`friends.${index}.data`} 
+                                                    className='form-control' 
+                                                    placeholder={ friend.property_name}
+                                                    type={friend.value_type} 
+                                                    />
+                                                <small>{friend.property_definition}</small>
+                                            </div>
+                                            :
+                                            friend.value_type_id == '"single-select"' ?
+                                            <div className="col-md-9">
+                                            <Field  
+                                                name={`friends.${index}.data`} 
+                                                as="select"
+                                                className='form-control' 
+                                                >
+                                                    {friend.data_list ? 
+                                                    friend.data_list.map((data, idy) =>
+                                                    
+                                                    <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
+                                                    )
+                                                    :
+                                                    null
+                                                    }
+                                                </Field>
                                             <small>{friend.property_definition}</small>
-                                        </div>
+                                        </div> 
+                                        :
+                                            <div className="col-md-9">
+                                            <Field  
+                                                name={`friends.${index}.data`} 
+                                                as="select"
+                                                className='form-control' 
+                                                >
+                                                    <option>...</option>
+                                                </Field>
+                                            <small>{friend.property_definition}</small>
+                                            </div>
+                                        }
                                     </div>
                                 ))
                                 ) : (

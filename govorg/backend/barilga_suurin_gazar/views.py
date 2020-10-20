@@ -311,46 +311,72 @@ def delete(request, oid, pk):
 
     return JsonResponse(rsp)
 
-def _code_list_values(ob):
-    return {
-        'code_list_id':ob[0],
-        'code_list_name':ob[2]
-    }
+
+def __datetime_display(ob):
+    code_lists = []
+    find_cursor = connections['default'].cursor()
+    find_cursor.execute(''' 
+        select
+            c.code_list_id, c.code_list_code, c.code_list_name
+        from 
+            l_code_lists c
+        where property_id =  %s 
+        '''
+    , [ob] )
+    code_list_code = dict_fetchall(find_cursor)
+    code_list_code = list(code_list_code)
+     
+    for i in code_list_code:
+        code_lists = {
+            'propery_id':ob,
+            'code_list_id':i['code_list_id'],
+            'code_list_name':i['code_list_name'],
+            'code_list_code':i['code_list_code']
+        }
+
+    return code_lists
+
+def _datetime_display(dt):
+    return dt.strftime('%Y-%m-%d') if dt else None
 
 def _get_property(ob):
-    data = ''
+    data = None
     value_type = ''
     data_list = []
-    if ob['value_type_id'] == ('number' and 'double'):
+    #print("ob['value_type_id']", (ob['value_type_id']))
+    if ob['value_type_id'] == ('number' or 'double'):
         value_type = 'number'
         data = ob['value_number'],
 
-    elif ob['value_type_id'] == ('text' and 'multi-text'):
+    elif ob['value_type_id'] == ('text' or 'multi-text'):
         value_type = 'text'
         data = ob['value_text'],
     elif ob['value_type_id'] == 'date':
         value_type = 'date'
-        data = ob['value_date'],
+        data = _datetime_display(ob['value_date']),
     elif ob['value_type_id'] == 'link':
         value_type = 'url'
         data = ob['value_text'],
     elif ob['value_type_id'] == 'boolean': 
-        value_type = 'checkbox'
+        value_type = 'text'
         data = ob['value_text'],
-    elif ob['value_type_id'] == 'single-select':
+    else:
         value_type = 'option'
-        data = ob['value_text'],
+        data_list =[ __datetime_display(ob['property_id'])]
+        
 
     return {
         'building_id':ob['building_id'],
         'geo_id':ob['geo_id'],
         'property_name':ob['property_name'],
+        'property_id':ob['property_id'],
         'property_code':ob['property_code'],
         'property_definition':ob['property_definition'],
         'value_type_id':ob['value_type_id'],
         'value_type':value_type,
         'property_id':ob['property_id'],
-        'data':data
+        'data':data,
+        'data_list': data_list if data_list else []
     }
 
 @require_GET
