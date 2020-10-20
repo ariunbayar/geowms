@@ -174,7 +174,7 @@ class LValueTypes(models.Model):
         db_table = 'l_value_types'
         managed = False
 
-    value_type_id = models.AutoField(primary_key=True)
+    value_type_id = models.CharField(max_length=255, primary_key=True)
     value_type_name = models.CharField(max_length=255)
     value_type_name_eng = models.CharField(max_length=255)
     order_no = models.IntegerField()
