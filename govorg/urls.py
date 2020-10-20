@@ -35,15 +35,14 @@ urlpatterns = [
         path('barilga_suurin_gazar/', include(([
             path('', govorg.backend.barilga_suurin_gazar.views.changeset_all),
             path('table_list/', govorg.backend.barilga_suurin_gazar.views.bundleButetsAll),
-            path('<int:oid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
-            path('<int:oid>/geom-type/', govorg.backend.barilga_suurin_gazar.views.geom_type),
-            path('<int:oid>/add/', govorg.backend.barilga_suurin_gazar.views.add),
-            path('<int:oid>/<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
+            path('<int:pid>/<int:fid>/rows/', govorg.backend.barilga_suurin_gazar.views.rows),
+            path('<int:pid>/<int:fid>/geom-type/', govorg.backend.barilga_suurin_gazar.views.geom_type),
+            path('<int:pid>/<int:fid>/add/', govorg.backend.barilga_suurin_gazar.views.add),
+            path('<int:pid>/<int:fid>/<str:pk>/save/', govorg.backend.barilga_suurin_gazar.views.save),
             path('<str:pk>/detail/', govorg.backend.barilga_suurin_gazar.views.detail),
-            path('<int:oid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
-            path('<int:oid>/<str:pk>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
-            path('<int:oid>/add-geom/', govorg.backend.barilga_suurin_gazar.views.geomAdd),
-
+            path('<int:pid>/<int:fid>/<str:pk>/remove/', govorg.backend.barilga_suurin_gazar.views.delete),
+            path('<int:fid>/geom-update/', govorg.backend.barilga_suurin_gazar.views.updateGeom),
+            path('<int:fid>/add-geom/', govorg.backend.barilga_suurin_gazar.views.geomAdd),
         ], 'barilga_suurin_gazar'))),
 
         path('ded_butets/', include(([

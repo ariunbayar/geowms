@@ -32,7 +32,8 @@ export default class BarilgaSuurinGazar extends Component{
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
-          oid: this.props.match.params.oid,
+          pid: this.props.match.params.pid,
+          fid: this.props.match.params.fid,
           rows: [],
           is_loading:true,
           featureID: null,
@@ -47,7 +48,8 @@ export default class BarilgaSuurinGazar extends Component{
           Mongolia: [11461613.630815497, 5878656.0228370065],
           chkbox: true,
           type: '',
-          drawed: null
+          drawed: null,
+          togle_islaod: true
       }
 
       this.controls = {
@@ -82,7 +84,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     componentDidMount(){
       service
-          .geomType(this.state.oid)
+          .geomType(this.state.pid, this.state.fid)
           .then(({ type }) => {
               this.setState({ type })
               this.loadControls()
@@ -101,11 +103,11 @@ export default class BarilgaSuurinGazar extends Component{
       map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       map.addControl(this.controls.modal)
 
-      if (type.includes("LINE"))
+      if (type.includes("Line"))
         map.addControl(new LineBarButton({LineButton: this.LineButton}))
-      if (type.includes("POINT"))
+      if (type.includes("Point"))
         map.addControl(new PointBarButton({PointButton: this.PointButton}))
-      if (type.includes("POLYGON"))
+      if (type.includes("Polygon"))
         map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
 
     }
@@ -271,6 +273,7 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
+        console.log(selectedFeature_ID)
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
@@ -295,7 +298,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     loadRows() {
       service
-          .rows(this.state.oid)
+          .rows(this.state.pid, this.state.fid)
           .then(({ rows }) => {
               this.setState({ rows,  is_loading:false })
               this.loadData()
@@ -457,12 +460,12 @@ export default class BarilgaSuurinGazar extends Component{
 
     updateGeom(){
       const id = this.state.selectedFeature_ID
-      const oid = this.state.oid
+      const fid = this.state.fid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       this.setState({ is_loading:true })
-
-      service.geomUpdate(datas, oid, id).then(({success, info}) => {
+      console.log(id, fid)
+      service.geomUpdate(datas, fid, id).then(({success, info}) => {
         if(success){
           this.addNotif('success', info, 'check')
           this.setState({
@@ -479,12 +482,12 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     createGeom(){
-      const oid = this.state.oid
+      const fid = this.state.fid
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       this.setState({ is_loading:true })
 
-      service.geomAdd(datas, oid).then(({success, info, row_id}) => {
+      service.geomAdd(datas, fid).then(({success, info, row_id}) => {
         if(success){
           {
             this.addNotif('success', info, 'check')
@@ -553,8 +556,23 @@ export default class BarilgaSuurinGazar extends Component{
     render(){
         return (
             <div className="col-md-12">
-                  {this.state.is_loading ? <span className="text-center d-block"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
-                  <div id="map"></div>
+                <div className={this.state.togle_islaod ? "toggled" : ""} id="wrapper-map" >
+                  <div id="sidebar-wrapper-map">
+                          asdasdas
+                          asdasdas
+                          asdasdas
+                          asdasdas
+                          asdasdas
+                  </div>
+                  <div className="content-wrapper-map">
+                    <div id="map"></div>
+                  </div>
+                </div>
+                <a class="nav-link toggle-menu-map btn" onClick={() =>  this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))}>sain</a>
+                {this.state.is_loading ? <span className="text-center d-block"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+
+
+
             </div>
         )
     }
