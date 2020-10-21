@@ -19,7 +19,6 @@ export class Fields extends Component {
     render() {
         const { handleClose, features } = this.props
         const { show_side } = this.state
-        console.log('haha', features)
         return (
             <div className={`card col-md-6 border border-danger ` + (show_side ? 'd-block' : 'd-none')}>
                 <div className="card-body ">

@@ -48,6 +48,7 @@ export default class Propterties extends Component {
         const {property_id} = this.props
         return (
             <div>
+                properties : &nbsp;
                     <input
                         value={property_name}
                         onChange={(e) => this.handleChange(e)}
