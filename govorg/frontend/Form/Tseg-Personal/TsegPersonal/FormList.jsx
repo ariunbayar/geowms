@@ -68,8 +68,6 @@ export class FormList extends Component {
 
     handleSuccess(point_type, objectid, point_class, t_type) {
         service.tsegPersonalSuccess(point_type, objectid, point_class, t_type).then(({success, msg}) => {
-            console.log(success);
-            console.log(msg);
             if(success){
                 this.setState({modal_alert_status: 'open', error: !success, error_msg: msg, modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
                 this.paginate(1, this.state.searchQuery)
