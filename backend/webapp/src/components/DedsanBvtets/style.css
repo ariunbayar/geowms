@@ -1,5 +1,6 @@
 .display-block{
     display: block;
     right: 0;
-    top:5%
+    top:5%;
+    list-style-type: disc;
 }

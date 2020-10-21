@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Propties from './propertyList'
 
 export default class SideBar extends Component {
 
@@ -6,104 +7,111 @@ export default class SideBar extends Component {
         super(props)
         this.data_type_span = 0
         this.f_c_span = 0
-        this.close= this.close.bind(this)
+
+        this.state = {
+            disabled: true,
+            changeText: '',
+        }
+
+        this.changeText = this.changeText.bind(this)
     }
 
-    close(){
-        this.props.handleClose()
+    changeText(e){
+        console.log(e.target.value)
+        this.setState({ changeText: e.target.value })
     }
 
     render() {
-        const {show_side, features} = this.props
+        const {features, check} = this.props
+        const {disabled} = this.state
+        console.log(features, check)
         return (
-            <div className={`col-md-12 border border-danger position-fixed table-responsive ` + (show_side ? 'display-block' : 'd-none')} style={{zIndex:'1030', backgroundColor:'white'}}>
-                {
-                    this.props.show_side
-                    ?
-                    <button className="btn btn-danger float-right" onClick={() => this.close()}> X </button>
-                    :
-                    null
-                }
-                {
-                    features.length !== 0 && features[0].feature_names.length > 0
-                    ?
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                    {features[0].feature_names.map((value, idx) =>
-                                        <th
-                                            key={idx}
-                                            colSpan="10"
-                                        >
-                                            {value.feature_name}
-                                        </th>
-                                    )}
-                                </tr>
-                                <tr>
-                                    {features[0].feature_configs_name.map((value, idx) =>
-                                        <th
-                                            key={idx}
-                                            colSpan={
-                                                features[0].data_type_names.map(val => {
-                                                    if(val.data_type_id != value.data_type_id){
-                                                        if(this.f_c_span > 0){
-                                                            return this.f_c_span
-                                                        }
-                                                        this.f_c_span = 1
-                                                    }
-                                                    else{
-                                                        this.f_c_span ++
-                                                    }
-                                                    if(this.f_c_span > 0){
-                                                        return Math.max(this.f_c_span)
-                                                }
-                                            })
-                                        }
-                                        >
-                                            {value.data_type_display_name} : {value.data_type_id}
-                                        </th>
-                                    )}
-                                </tr>
-                                <tr>
-                                    {features[0].data_type_names.map((value, idx) =>
-                                        <th
-                                            key={idx}
-                                            colSpan={
-                                                features[0].property_names.map(val => {
-                                                    console.log(val.data_type_id , value.data_type_id)
-                                                    if(val.data_type_id != value.data_type_id){
-                                                        this.data_type_span = 1
-                                                    }
-                                                    else
-                                                    {
-                                                        this.data_type_span ++
-                                                    }
-                                                    if(features[0].property_names.length == this.data_type_span){
-                                                        return this.data_type_span
-                                                    }
-                                            })}
-                                        >
-                                            {value.data_type_name} : {value.data_type_id}
-                                        </th>
-                                    )}
-                                </tr>
-                                <tr>
-                                    {features[0].property_names.map((value, idx) =>
-                                        <th
-                                            key={idx}
-                                        >
-                                            {value.property_name} : {value.data_type_id}
-                                        </th>
-                                    )}
-                                </tr>
-                            </thead>
-                        </table>
-                    :
-                    <h3>Хоосон байна</h3>
-                }
-            </div>
+            <form className={`card col-md-7`} style={{left:"10px"}}>
+                <div className="card-body">
+                    {
+                        features.length > 0 && check == 'байгаа'
+                        ?
+                                features.map((feature, idx) =>
+                                    <div className="table-responsive" key={idx}>
+                                        <h1 className="text-center">{feature.feature_name}</h1>
+                                        <ol>
+                                            {feature.f_configs.map((f_config, idx) =>
+                                                <li className="mt-3" key={idx}>
+                                                    <h5>{f_config.data_type_display_name}</h5>
+
+                                                    <table className="table table-bordered">
+                                                        {f_config.data_types.map((data_type, idx) =>
+                                                            <thead key={idx}>
+                                                                <tr>
+                                                                    <th colSpan="2" className="text-center">
+                                                                        {data_type.data_type_name}
+                                                                    </th>
+                                                                </tr>
+                                                                {data_type.data_type_configs.map((data_type_config, idx) =>
+                                                                    <tr key={idx}>
+                                                                        <th className="text-center align-middle" >
+                                                                            <Propties
+                                                                                property_name={data_type_config.property_name}
+                                                                                property_id={data_type_config.property_id}
+                                                                            />
+                                                                        </th>
+                                                                            {/* <span>
+                                                                                <p> {data_type_config.property_definition}</p>
+                                                                            </span> */}
+                                                                        <th>
+                                                                            <ul>
+                                                                                {data_type_config.value_types.map((value_type, idx) =>
+                                                                                    <li key={idx}>
+                                                                                        <span>
+                                                                                            {value_type.value_type_name}
+                                                                                        </span>
+
+                                                                                        {
+                                                                                            value_type.code_lists.length > 0 &&
+                                                                                            value_type.value_type_id == 'single-select'
+                                                                                            ?
+                                                                                            <ul style={{listStyleType: '"- "'}}>
+                                                                                                {value_type.code_lists.map((code, idx) =>
+                                                                                                    <li key={idx}>
+                                                                                                        <span>{code.code_list_name}</span>
+                                                                                                    </li>
+                                                                                                )}
+                                                                                            </ul>
+                                                                                            :
+                                                                                            null
+                                                                                        }
+
+                                                                                    </li>
+                                                                                )}
+                                                                            </ul>
+                                                                        </th>
+                                                                    </tr>
+                                                                )}
+                                                                {/* </tr> */}
+                                                            </thead>
+                                                        )}
+                                                   </table>
+                                                </li>
+                                            )}
+                                        </ol>
+                                    </div>
+                                )
+                        :
+                            check === ""
+                            ?
+                                <h1 className="text-center">Feature сонгоно уу</h1>
+                            :
+                            check == 'байхгүй'
+                            ?
+                                <h1 className="text-center">
+                                    <i className="fa fa-exclamation-circle text-warning"></i>
+                                    &nbsp;Feature-ийн мэдээлэл алга
+                                </h1>
+                            :
+                            null
+                    }
+                </div>
+            </form>
         )
     }
-
 }
-
