@@ -306,7 +306,10 @@ def _get_property(ob):
     data = None
     value_type = ''
     data_list = []
-    if ob['value_type_id'] == ('number' or 'double'):
+    if ob['value_type_id'] == 'number':
+        value_type = 'number'
+        data = ob.get('value_number'),
+    elif ob['value_type_id'] == 'double':
         value_type = 'number'
         data = ob.get('value_number'),
     elif ob['value_type_id'] == ('text' or 'multi-text'):
@@ -440,35 +443,54 @@ def get_rows(fid):
     return rows
 
 
+def geoJsonConvertGeom(geojson, fid):
+    with connections['default'].cursor() as cursor:
+
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        return geom
+    return None
+
+
 @require_POST
 @ajax_required
 def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
-    fields = get_rows(fid)
-    geom = GEOSGeometry(str(geojson))
-    count = MGeoDatas.objects.filter(feature_id=fid).count()
-    # nice = MGeoDatas.objects.create(geo_id = str(count)+'test',geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
-    nice = str(count +2)+'test1'
-    if nice:
-        for field in fields:
-            MDatasBuilding.objects.create(
-                geo_id = nice,
-                feature_config_id = field['feature_config_id'],
-                data_type_id = field['data_type_id'],
-                property_id = field['property_id'],
-                created_by = 1,
-                modified_by = 1
-            )
-        rsp = {
-            'success': True,
-            'info': "Ажилттай ",
-            'id': nice
-        }
-    else:
+    geom = geoJsonConvertGeom(geojson, fid)
+    if not geom:
         rsp = {
             'success': False,
-            'info': "Амжилтгүй  geom үүссэнгүй",
+            'info': "Geojson алдаатай байна.",
+            'id': None
         }
-    return JsonResponse(rsp)
+        return JsonResponse(rsp)
 
+
+    count = MGeoDatas.objects.filter(feature_id=fid).count()
+    count = str(count+22)+'test'
+
+    with connections['default'].cursor() as cursor:
+        sql = """
+                INSERT INTO public.m_geo_datas(
+                geo_id, geo_data, feature_id, created_by , modified_by)
+                VALUES (%s, %s ,%s, 1, 1);
+            """
+        cursor.execute(sql, [count, geom, fid])
+    fields = get_rows(fid)
+    for field in fields:
+        MDatasBuilding.objects.create(
+            geo_id = count,
+            feature_config_id = field['feature_config_id'],
+            data_type_id = field['data_type_id'],
+            property_id = field['property_id'],
+            created_by = 1,
+            modified_by = 1
+        )
+    rsp = {
+        'success': True,
+        'info': "Ажилттай ",
+        'id': count
+    }
+    return JsonResponse(rsp)

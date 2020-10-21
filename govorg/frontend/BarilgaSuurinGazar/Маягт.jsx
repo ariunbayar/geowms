@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { Typify } from "../Components/helpers/typify"
@@ -30,6 +30,7 @@ export default class Маягт extends Component {
             .update(values, this.state.pid, this.state.fid)
             .then(({ success }) => {
                 if (success) {
+                    this.setState({is_loading:true})
                     this.handleUpdate(gid)
 
                 }
@@ -90,7 +91,7 @@ export default class Маягт extends Component {
         const { values, id } = this.state
         return (
             <div className='overflow-auto card-body'>
-                {this.props.gid &&<h4 className="text-center">geom дугаар{this.props.gid}</h4>}
+                {this.props.gid &&<h4 className="text-center">Geom дугаар-{this.props.gid}</h4>}
                 <hr></hr>
                 <Formik
                     enableReinitialize
@@ -110,11 +111,8 @@ export default class Маягт extends Component {
                                         </div>
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
-                                                <Field
-                                                    name={`form_values.${index}.data`}
-                                                    as="select"
-                                                    className='form-control'
-                                                    >
+                                                <Fragment>
+                                                    <Field name={`form_values.${index}.data`} as="select" className="form-control">
                                                         <option>...</option>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
@@ -122,19 +120,28 @@ export default class Маягт extends Component {
                                                             )
                                                         }
                                                     </Field>
+                                                </Fragment>
                                                 <small>{friend.property_definition}</small>
                                             </div>
                                             :
                                             <div className="col-md-9">
-                                                {friend.value_type_id == 'boolean' ? 'boolean' : null}
-                                                {friend.value_type_id}
-                                                {friend.value_type}
+                                                {friend.value_type_id == 'boolean' ?
+                                                <Field
+                                                name={`form_values.${index}.data`}
+                                                as="select"
+                                                className='form-control'
+                                                >
+                                                    <option value="true">True</option>
+                                                    <option value="false">False</option>
+                                                </Field>
+                                                :
                                                 <Field
                                                     name={`form_values.${index}.data`}
                                                     className='form-control'
                                                     placeholder={ friend.property_name}
                                                     type={friend.value_type}
                                                     />
+                                                }
                                                 <small>{friend.property_definition}</small>
                                             </div>
                                         }

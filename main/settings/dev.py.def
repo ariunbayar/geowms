@@ -14,7 +14,7 @@ ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': '',
         'USER': '',
         'PASSWORD': '',
@@ -22,7 +22,7 @@ DATABASES = {
         'PORT': '5432',
     },
     'postgis_db': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': '',
         'USER': '',
         'PASSWORD': '',
