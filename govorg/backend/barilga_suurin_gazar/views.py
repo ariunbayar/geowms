@@ -157,7 +157,6 @@ def table_list(request):
 
 @require_GET
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
 def geom_type(request, pid, fid):
 
     data = MGeoDatas.objects.filter(feature_id=fid).first()
@@ -262,8 +261,8 @@ def delete(request, payload, pid, fid):
     geom = MDatasBuilding.objects.filter(geo_id=gid)
     datas = MGeoDatas.objects.filter(geo_id=gid)
     if geom and datas:
-        # geom.delete()
-        # datas.delete()
+        geom.delete()
+        datas.delete()
         rsp = {
         'success': True,
         'info': "Амжилттай",
@@ -343,9 +342,9 @@ def _get_property(ob):
         'data_list': data_list
     }
 
+
 @require_GET
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
 def detail(request, pk):
     Properties = []
     find_cursor = connections['default'].cursor()
@@ -420,7 +419,6 @@ def updateGeom(request, payload, fid):
         'info': "Амжилттай",
     }
     return JsonResponse(rsp)
-
 
 
 def get_rows(fid):
