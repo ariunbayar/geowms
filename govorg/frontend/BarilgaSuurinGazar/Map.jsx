@@ -471,7 +471,6 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       this.setState({ is_loading:true })
-      console.log(id, fid)
       service.geomUpdate(datas, fid, id).then(({success, info}) => {
         if(success){
           this.addNotif('success', info, 'check')
@@ -494,7 +493,7 @@ export default class BarilgaSuurinGazar extends Component{
       const datas = json.geometry
       this.setState({ is_loading:true })
 
-      service.geomAdd(datas, fid).then(({success, info, row_id}) => {
+      service.geomAdd(datas, fid).then(({success, info, id}) => {
         if(success){
           {
             this.addNotif('success', info, 'check')
@@ -502,8 +501,8 @@ export default class BarilgaSuurinGazar extends Component{
               is_loading:false
             })
           }
-          if(row_id){
-            this.props.history.push(`/gov/барилга-суурин-газар/${oid}/маягт/${row_id}/засах/`)
+          if(id){
+            this.setState({selectedFeature_ID: id, togle_islaod: false})
           }
         }
         else

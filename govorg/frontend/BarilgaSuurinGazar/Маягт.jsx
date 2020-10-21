@@ -26,14 +26,10 @@ export default class Маягт extends Component {
         console.log(values)
         const gid = this.props.gid
 
-        // setStatus('checking')
-        // setSubmitting(true)
         service
             .update(values, this.state.pid, this.state.fid)
             .then(({ success }) => {
                 if (success) {
-                    // setStatus('saved')
-                    // setSubmitting(false)
                     this.handleUpdate(gid)
 
                 }
@@ -92,8 +88,6 @@ export default class Маягт extends Component {
         }
 
         const { values, id } = this.state
-        const values_fields = values
-        // const { fields } = this.props
         return (
             <div className='overflow-auto card-body'>
                 {this.props.gid &&<h4 className="text-center">geom дугаар{this.props.gid}</h4>}
@@ -121,12 +115,11 @@ export default class Маягт extends Component {
                                                     as="select"
                                                     className='form-control'
                                                     >
-                                                        {friend.data_list ?
+                                                        <option>...</option>
+                                                        {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
                                                             )
-                                                            :
-                                                            <option>...</option>
                                                         }
                                                     </Field>
                                                 <small>{friend.property_definition}</small>

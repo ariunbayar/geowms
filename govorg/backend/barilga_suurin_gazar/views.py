@@ -308,8 +308,7 @@ def _get_property(ob):
     data_list = []
     if ob['value_type_id'] == ('number' or 'double'):
         value_type = 'number'
-        data = ob['value_number'],
-
+        data = ob.get('value_number'),
     elif ob['value_type_id'] == ('text' or 'multi-text'):
         value_type = 'text'
         data = ob['value_text'],
@@ -325,6 +324,8 @@ def _get_property(ob):
     else:
         value_type = 'option'
         data_list = _code_list_display(ob['property_id'])
+    if data:
+        data = data[0]
     return {
         'building_id':ob['building_id'],
         'geo_id':ob['geo_id'],
@@ -448,8 +449,7 @@ def geomAdd(request, payload, fid):
     geom = GEOSGeometry(str(geojson))
     count = MGeoDatas.objects.filter(feature_id=fid).count()
     # nice = MGeoDatas.objects.create(geo_id = str(count)+'test',geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
-    nice = str(count)+'test'
-
+    nice = str(count +2)+'test1'
     if nice:
         for field in fields:
             MDatasBuilding.objects.create(
@@ -463,6 +463,7 @@ def geomAdd(request, payload, fid):
         rsp = {
             'success': True,
             'info': "Ажилттай ",
+            'id': nice
         }
     else:
         rsp = {
