@@ -23,7 +23,6 @@ export default class Маягт extends Component {
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        console.log(values)
         const gid = this.props.gid
 
         service
@@ -40,7 +39,6 @@ export default class Маягт extends Component {
     handleUpdate(gid){
         service.detail(gid).then(({success, datas}) => {
             if(success){
-                console.log(datas)
                 this.setState({
                     values:datas,
                     is_loading: false

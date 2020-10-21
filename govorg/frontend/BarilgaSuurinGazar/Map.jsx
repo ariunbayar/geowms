@@ -276,7 +276,6 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-        console.log(selectedFeature_ID)
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
