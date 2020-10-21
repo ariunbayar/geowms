@@ -177,8 +177,6 @@ urlpatterns = [
 
     path('dedsan-butests/', include(([
         path('all/', zipcode_dedsan_butets.bundleButetsAll),
-        path('getFields/<int:pk>/<str:name>/', zipcode_dedsan_butets.bundleButetsGetFields),
-        path('getProperties/<int:pk>/<str:name>/<int:code>/', zipcode_dedsan_butets.bundleButetsGetProperty),
         path('prop/<str:code>/', zipcode_dedsan_butets.Property),
         path('editName/', zipcode_dedsan_butets.Edit_name),
     ], 'dedsan-butests'))),

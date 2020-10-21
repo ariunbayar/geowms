@@ -1,8 +1,6 @@
 import {getGetOptions,handleResponse,getPostOptions} from '../../helpers/service'
 export const service ={
     getall,
-    getFields,
-    getProperties,
     getprop,
     editName,
 }
@@ -14,21 +12,6 @@ function getall() {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/all/`, opts).then(handleResponse)
-}
-
-function getFields(id, name) {
-    const opts = {
-        ...getPostOptions(),
-    }
-    return fetch(`${prefix}/getFields/${id}/${name}/`, opts).then(handleResponse)
-}
-
-function getProperties(id, name, code) {
-    const opts = {
-        ...getPostOptions(),
-        body: code,
-    }
-    return fetch(`${prefix}/getProperties/${id}/${name}/${code}/`, opts).then(handleResponse)
 }
 
 function getprop(code) {

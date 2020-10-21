@@ -37,62 +37,6 @@ def bundleButetsAll(request):
     return JsonResponse(rsp)
 
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def bundleButetsGetFields(request, name, pk):
-    if name == 'feature':
-        name = LFeatures
-    if name == 'package':
-        name = LPackages
-    if name == 'theme':
-        name = LThemes
-    datas = []
-    values = name.objects.all()[:10]
-    for value in values:
-        datas.append({
-            value
-        })
-    print(type(datas))
-    rsp = {
-        'success': True,
-        'fields': [f.name for f in name._meta.get_fields()],
-        # 'values': datas,
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def bundleButetsGetProperty(request, payload, pk, name, code):
-    print("HAHAHAHAHa")
-    haha = payload.get('code')
-    print("HAHAHAHAHa", haha)
-    if name == 'feature':
-        name = LFeatures
-    if name == 'package':
-        name = LPackages
-    if name == 'theme':
-        name = LThemes
-    datas = []
-    print(code)
-    feat = LFeatures.objects.filter(feature_code=code)
-    print(feat)
-    values = name.objects.all()[:10]
-    for value in values:
-        datas.append({
-            value
-        })
-    print(type(datas))
-    rsp = {
-        'success': True,
-        'fields': [f.name for f in name._meta.get_fields()],
-        # 'values': datas,
-    }
-    return JsonResponse(rsp)
-
-
 def _lfeatureconfig(feature_id):
     feature_configs_name = []
     f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
