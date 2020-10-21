@@ -41,6 +41,9 @@ export default class Propterties extends Component {
                 if(rsp.success){
                     this.props.addNotif('success', rsp.info, 'times')
                 }
+                else{
+                    this.props.addNotif('danger', rsp.info, 'check')
+                }
             })
     }
 
