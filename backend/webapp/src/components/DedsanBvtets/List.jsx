@@ -52,17 +52,17 @@ export class List extends Component {
                         <ul>
                         {list_all.map((theme, idx) =>
                             <li key={idx}>
-                                    <span>{theme.id} : {theme.name} : {theme.code}</span>
+                                    <span> {theme.name} </span>
                                 <ul>
                                     {theme.package.map((packages, idx) =>
                                         <li key={idx}>
-                                                <span>{packages.id} : {packages.name} : {packages.code}</span>
+                                                <span> {packages.name} </span>
                                             <ul>
                                                 {packages.features.map((feature, idx) =>
                                                     <li key={idx}>
                                                         <a onClick={() => this.getProperties(feature.code)}>
                                                             <i className="fa fa-table"></i> &nbsp;
-                                                            <span role="button" className="hidden-xs gp-text-primary" >{feature.name} : {feature.code}</span>
+                                                            <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
                                                         </a>
                                                     </li>
                                                 )}
@@ -81,4 +81,3 @@ export class List extends Component {
     }
 
 }
-

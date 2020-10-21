@@ -235,13 +235,18 @@ def Property(request, code):
 def Edit_name(request, payload):
     id = payload.get('id')
     property_name = payload.get('name')
-    print("Haha")
-    print(id)
-    properties = LProperties.objects.filter(property_id=id)
-    properties.update(
-        property_name=property_name
-    )
-    rsp = {
-        'success': True,
-    }
+    try:
+        properties = LProperties.objects.filter(property_id=id)
+        properties.update(
+            property_name=property_name
+        )
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+        }
+    except Exception:
+        sp = {
+            'success': False,
+            'info': 'Алдаа гарлаа'
+        }
     return JsonResponse(rsp)

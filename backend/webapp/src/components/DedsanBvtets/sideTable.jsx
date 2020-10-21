@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Propties from './propertyList'
-// import {Notif} from '../../../../../src/components/Notification's
+import {Notif} from '../../../../../src/components/Notification'
 
 export default class SideBar extends Component {
 
@@ -8,17 +8,11 @@ export default class SideBar extends Component {
         super(props)
         this.data_type_span = 0
         this.f_c_span = 0
-
+        this.too = 0
         this.state = {
-            disabled: true,
-            changeText: '',
+            show: false,
         }
-
-        this.changeText = this.changeText.bind(this)
-    }
-
-    changeText(e){
-        this.setState({ changeText: e.target.value })
+        this.addNotif = this.addNotif.bind(this)
     }
 
     addNotif(style, msg, icon){
@@ -33,28 +27,27 @@ export default class SideBar extends Component {
 
     render() {
         const {features, check} = this.props
-        const {disabled} = this.state
         return (
             <form className={`card col-md-7`} style={{left:"10px"}}>
-                {/* <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/> */}
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <div className="card-body">
                     {
                         features.length > 0 && check == 'байгаа'
                         ?
                                 features.map((feature, idx) =>
                                     <div className="table-responsive" key={idx}>
-                                        <h1 className="text-center">feature : {feature.feature_name}</h1>
+                                        <h2 className="text-center"> {feature.feature_name} </h2>
                                         <ol>
                                             {feature.f_configs.map((f_config, idx) =>
                                                 <li className="mt-3" key={idx}>
-                                                    <h5>feature_configs :  {f_config.data_type_display_name}</h5>
+                                                    <h5> {f_config.data_type_display_name} </h5>
 
                                                     <table className="table table-bordered">
                                                         {f_config.data_types.map((data_type, idx) =>
                                                             <thead key={idx}>
                                                                 <tr>
                                                                     <th colSpan="2" className="text-center">
-                                                                        datatype :  {data_type.data_type_name}
+                                                                        {data_type.data_type_name}
                                                                     </th>
                                                                 </tr>
                                                                 {data_type.data_type_configs.map((data_type_config, idx) =>
@@ -63,17 +56,15 @@ export default class SideBar extends Component {
                                                                             <Propties
                                                                                 property_name={data_type_config.property_name}
                                                                                 property_id={data_type_config.property_id}
+                                                                                addNotif={this.addNotif}
                                                                             />
                                                                         </th>
-                                                                            {/* <span>
-                                                                                <p> {data_type_config.property_definition}</p>
-                                                                            </span> */}
                                                                         <th>
                                                                             <ul>
                                                                                 {data_type_config.value_types.map((value_type, idx) =>
                                                                                     <li key={idx}>
                                                                                         <span>
-                                                                                            value_types : {value_type.value_type_name}
+                                                                                            {value_type.value_type_name}
                                                                                         </span>
 
                                                                                         {
@@ -83,7 +74,7 @@ export default class SideBar extends Component {
                                                                                             <ul style={{listStyleType: '"- "'}}>
                                                                                                 {value_type.code_lists.map((code, idx) =>
                                                                                                     <li key={idx}>
-                                                                                                        <span> codelist : {code.code_list_name}</span>
+                                                                                                        <span> {code.code_list_name}</span>
                                                                                                     </li>
                                                                                                 )}
                                                                                             </ul>

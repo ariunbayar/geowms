@@ -38,7 +38,9 @@ export default class Propterties extends Component {
         service
             .editName(id, property_name)
             .then(rsp => {
-                console.log(rsp)
+                if(rsp.success){
+                    this.props.addNotif('success', rsp.info, 'times')
+                }
             })
     }
 
@@ -48,19 +50,11 @@ export default class Propterties extends Component {
         const {property_id} = this.props
         return (
             <div className="row">
-                properties : &nbsp;
-                <input
-                    value={property_name}
-                    className={`col-10 form-control ` +(disabled ? `-plaintext` : ``)}
-                    onChange={(e) => this.handleChange(e)}
-                    disabled={disabled ? 'disabled' : ''}
-                />
-                &nbsp;
                 {
                     toggleButton
                     ?
                     <i
-                        className="fa fa-floppy-o text-success col-2"
+                        className="fa fa-floppy-o mt-2 text-success col-1"
                         role="button"
                         onClick={() => this.saveText(property_id)}
                         aria-hidden="true"
@@ -68,13 +62,20 @@ export default class Propterties extends Component {
                     ></i>
                     :
                     <i
-                        className="fa fa-pencil-square-o text-warning"
+                        className="fa fa-pencil-square-o mt-2 col-1 text-info"
                         role="button"
                         onClick={() => this.textEdit()}
                         aria-hidden="true"
                         title="Засах"
                     ></i>
                 }
+                &nbsp;
+                <input
+                    value={property_name}
+                    className={`col-10 form-control` +(disabled ? `-plaintext` : ``)}
+                    onChange={(e) => this.handleChange(e)}
+                    disabled={disabled ? 'disabled' : ''}
+                />
             </div>
         )
     }
