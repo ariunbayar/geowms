@@ -20,6 +20,7 @@ from django.db.models import Q
 import re
 from django.conf import settings
 from fpdf import FPDF
+from django.contrib.gis.geos import GEOSGeometry, Point
 # Create your models here.
 
 def createPdf(pk):
@@ -688,6 +689,9 @@ def tsegPersonalUpdate(request, payload):
     data = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
     search_cursor.execute(''' SELECT ST_X(ST_TRANSFORM(ST_CENTROID(%s),4326)) AS x,  ST_Y(ST_CENTROID(ST_TRANSFORM(%s,4326))) AS y FROM mpoint_view where id = %s ''', [data.geom, data.geom, str(pk)])
     search_cursor_data = search_cursor.fetchone()
+    print('\n\n------------------------------------------')
+    print(search_cursor_data)
+    print('\n\n')
     if search_cursor_data:
         latlongx = search_cursor_data[0]
         latlongy = search_cursor_data[1]
@@ -881,9 +885,7 @@ def tsegPersonal(request):
 
         y = float(request.POST.get('latlongy'))
         x = float(request.POST.get('latlongx'))
-        cursor = connections['postgis_db'].cursor()
-        cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
-        geom = cursor.fetchone()
+        geom = Point(x, y)
         ondor = request.POST.get('ondor')
         mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
         if request.POST.get('suljeenii_torol'):
@@ -901,11 +903,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
+                        point_class_name='GNSS-ийн байнгын ажиллагаатай станц',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint2 SET geom = %s WHERE id = %s ''', [geom, pk])
-
         if mpoints.t_type == 'g103':
             Mpoint3.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -917,10 +917,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                         point_class_name='GPS-ийн сүлжээний цэг'
+                        point_class_name='GPS-ийн сүлжээний цэг',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint3 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g104':
             Mpoint4.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -932,10 +931,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Триангуляцийн сүлжээний цэг'
+                        point_class_name='Триангуляцийн сүлжээний цэг',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint4 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g105':
             Mpoint5.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -947,10 +945,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Полигонометрийн сүлжээний цэг'
+                        point_class_name='Полигонометрийн сүлжээний цэг',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint5 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g106':
             Mpoint6.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -962,10 +959,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Гравиметрийн сүлжээний цэг'
+                        point_class_name='Гравиметрийн сүлжээний цэг',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint6 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g107':
             Mpoint7.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -977,10 +973,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Өндрийн сүлжээний цэг'
+                        point_class_name='Өндрийн сүлжээний цэг',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint7 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g108':
             Mpoint8.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -992,10 +987,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Зураглалын сүлжээний цэг'
+                        point_class_name='Зураглалын сүлжээний цэг',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint8 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g109':
             Mpoint9.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -1007,10 +1001,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Шинээр нэмэгдсэн төлөв'
+                        point_class_name='Шинээр нэмэгдсэн төлөв',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [geom, pk])
         if mpoints.t_type == 'g110':
             Mpoint10.objects.using('postgis_db').filter(id=pk).update(
                         objectid="null" ,point_id=point_id,
@@ -1022,10 +1015,9 @@ def tsegPersonal(request):
                         aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
                         sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
                         sheet3=request.POST.get('cc'),
-                        point_class_name='Устсан төлөв'
+                        point_class_name='Устсан төлөв',
+                        geom = geom
             )
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint10 SET geom = %s WHERE id = %s ''', [geom, pk])
         TsegPersonal.objects.filter(id=pk).update(
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
                     latlongx=request.POST.get('latlongx'),
@@ -1729,6 +1721,8 @@ def tsegPersonalSearch(request, payload):
 @require_POST
 @ajax_required
 def tsegPersonalSuccess(request, payload):
+    print('--------------------------------------------')
+    print(payload)
     try:
         point_type = int(payload.get('point_type')) # zereg
 
