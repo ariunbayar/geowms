@@ -21,23 +21,22 @@ function geom() {
 }
 
 
-function rows(oid) {
+function rows(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/rows/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/rows/`, requestOptions).then(handleResponse)
 }
 
-function geomType(oid) {
+function geomType(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/geom-type/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/geom-type/`, requestOptions).then(handleResponse)
 }
 
-function remove(oid, id) {
-
+function remove(pid, fid, gid) {
     const opts = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({gid}),
     }
-
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/remove/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/remove/`, opts).then(handleResponse)
 }
 
 function save(oid, values) {
@@ -50,20 +49,19 @@ function save(oid, values) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/add/`, opts).then(handleResponse)
 }
 
-function update(oid, data, pk) {
+function update(data, pid, fid) {
 
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(data),
     }
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${pk}/save/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/save/`, opts).then(handleResponse)
 }
 
-function detail(oid, id) {
-
+function detail(gid) {
     const opts = getGetOptions()
 
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/detail/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${gid}/detail/`, opts).then(handleResponse)
 }
 
 function sendFeature(data, oid, id) {
@@ -74,20 +72,20 @@ function sendFeature(data, oid, id) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/save/`, opts).then(handleResponse)
 }
 
-function geomUpdate(geojson, oid, pk) {
+function geomUpdate(geojson, fid, id) {
 
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({geojson}),
+        body: JSON.stringify({geojson, fid, id}),
     }
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${pk}/geom-update/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${fid}/geom-update/`, opts).then(handleResponse)
 }
 
-function geomAdd(geojson, oid) {
+function geomAdd(geojson, fid) {
 
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({geojson}),
     }
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/add-geom/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${fid}/add-geom/`, opts).then(handleResponse)
 }

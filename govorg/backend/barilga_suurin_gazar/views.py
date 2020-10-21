@@ -5,12 +5,15 @@ from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas, LCodeListConfigs, LCodeLists
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
 from backend.inspire.models import LThemes, LPackages, LFeatures
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter
+
 from main.utils import (
     gis_delete,
     gis_fetch_one,
@@ -86,6 +89,7 @@ def _get_package(theme_id):
     return package_data
 
 
+
 @require_GET
 @ajax_required
 def changeset_all(request):
@@ -122,7 +126,6 @@ def bundleButetsAll(request):
 
 @require_GET
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
 def table_list(request):
 
     rows = []
@@ -151,81 +154,46 @@ def table_list(request):
 
     return JsonResponse(rsp)
 
-def getGeomType(table, geom_field):
-
-    schema = table.split('"')[1]
-    table = table.split('"')[3]
-    geojson = str(json)
-
-    with connections['postgis_db'].cursor() as cursor:
-        sql = """
-            SELECT type
-            FROM
-                geometry_columns
-            WHERE
-                f_table_schema = '{schema}' and
-                f_table_name = '{table}' and
-                f_geometry_column = '{geom_field}';
-        """.format(
-            schema=schema,
-            table=table,
-            geom_field=geom_field)
-
-        cursor.execute(sql)
-
-        type = cursor.fetchone()
-        return type
-    return None
-
 
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def geom_type(request, oid):
+def geom_type(request, pid, fid):
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    table = gis_table_by_oid(oid)
-
-    fields = gis_fields_by_oid(oid)
-
-    rsp = {
-        'type': ''.join(getGeomType(table, findGeomField(fields)))
-    }
+    data = MGeoDatas.objects.filter(feature_id=fid).first()
+    if data:
+        rsp = {
+            'success': True,
+            'type': GEOSGeometry(data.geo_data).geom_type
+        }
+    else:
+        rsp = {
+            'success': False,
+            'type': None
+        }
     return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def rows(request, oid):
-
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    table = gis_table_by_oid(oid)
-
-    fields = gis_fields_by_oid(oid)
-
-    columns_to_select = [
-        'ST_AsGeoJSON(ST_Transform(%s,4326)) AS %s' % (f.attname, f.attname) if f.atttypid == 'geometry' else '"%s"' % f.attname
-        for f in fields
-    ]
-
-    cursor = connections['postgis_db'].cursor()
+def rows(request, pid, fid):
+    cursor = connections['default'].cursor()
     sql = """
         SELECT
-            {columns}
+            geo_id as id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
         FROM
-            {table}
+            m_geo_datas
+        WHERE
+            feature_id = {fid}
+        order by geo_id desc
+        limit {limit}
     """.format(
-        columns=', '.join(columns_to_select),
-        table=table,
-        limit=1
+        fid=fid,
+        limit=1000
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
     rows = list(rows)
-
     rsp = {
         'rows': rows,
     }
@@ -261,117 +229,155 @@ def add(request, payload, oid):
 
 @require_POST
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def save(request, payload, oid, pk):
+def save(request, payload, pid, fid):
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    tabne_data = gis_table_by_oid(oid)
-    fields = gis_fields_by_oid(oid)
-    # query set beltgeh
-    fields_to_update = [
-        field.attname
-        for field in fields
-        if field.attname not in ['id', 'geom']
-    ]
-
-    values = [
-        payload.get(f, '')
-        for f in fields_to_update
-    ]
-
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {tabne_data} SET {fields} = %s WHERE id = {pk} """.format(tabne_data=tabne_data, pk=pk, fields='= %s, '.join(['"{}"'.format(f) for f in fields_to_update]))
-            cursor.execute(sql, values)
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-        }
-        return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
+    form_values = payload.get('form_values')
+    for data in form_values:
+        if data['value_type'] == 'number':
+            if data['data'] != [None]:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_number=data['data'])
+        elif data['value_type'] == 'option':
+            if data['data'] != [None]:
+                if data['data']:
+                    MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(code_list_id=data['data'])
+        elif data['value_type'] == 'text':
+            if data['data'] != [None]:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_text=data['data'])
+        elif data['value_type'] == 'date':
+            if data['data'] != [None]:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_date=data['data'])
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
+    return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def delete(request, oid, pk):
+def delete(request, payload, pid, fid):
+    gid = payload.get('gid')
+    get_object_or_404(MGeoDatas, geo_id=gid)
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-    row = gis_fetch_one(oid, pk)
-
-    if row:
-        gis_delete(oid, pk)
+    geom = MDatasBuilding.objects.filter(geo_id=gid)
+    datas = MGeoDatas.objects.filter(geo_id=gid)
+    if geom and datas:
+        # geom.delete()
+        # datas.delete()
         rsp = {
         'success': True,
         'info': "Амжилттай",
         }
     else:
-        raise Http404
-
+        rsp = {
+        'success': False,
+        'info': "Амжилтгүй",
+        }
     return JsonResponse(rsp)
 
+
+def _code_list_display(property_id):
+    code_list_values = []
+    code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+    if code_list_configs:
+        for code_list_config in code_list_configs:
+            property_id = code_list_config.property_id
+            to_property_id = code_list_config.to_property_id
+            if property_id == to_property_id:
+                to_property_id += 1
+            x_range = range(property_id, to_property_id)
+            for i in x_range:
+                code_lists = LCodeLists.objects.filter(property_id=i)
+                if code_lists:
+                    for code_list in code_lists:
+                        code_list_values.append({
+                            'code_list_id': code_list.code_list_id,
+                            'code_list_name': code_list.code_list_name,
+                            'code_list_definition': code_list.code_list_definition,
+                        })
+    return code_list_values
+
+
+def _datetime_display(dt):
+    return dt.strftime('%Y-%m-%d') if dt else None
+
+
+def _get_property(ob):
+    data = None
+    value_type = ''
+    data_list = []
+    if ob['value_type_id'] == 'number':
+        value_type = 'number'
+        data = ob.get('value_number'),
+    elif ob['value_type_id'] == 'double':
+        value_type = 'number'
+        data = ob.get('value_number'),
+    elif ob['value_type_id'] == ('text' or 'multi-text'):
+        value_type = 'text'
+        data = ob['value_text'],
+    elif ob['value_type_id'] == 'date':
+        value_type = 'date'
+        data = _datetime_display(ob['value_date']),
+    elif ob['value_type_id'] == 'link':
+        value_type = 'text'
+        data = ob['value_text'],
+    elif ob['value_type_id'] == 'boolean':
+        value_type = 'text'
+        data = ob['value_text'],
+    else:
+        value_type = 'option'
+        data_list = _code_list_display(ob['property_id'])
+    if data:
+        data = data[0]
+    return {
+        'building_id':ob['building_id'],
+        'geo_id':ob['geo_id'],
+        'property_name':ob['property_name'],
+        'property_id':ob['property_id'],
+        'property_code':ob['property_code'],
+        'property_definition':ob['property_definition'],
+        'value_type_id':ob['value_type_id'],
+        'value_type':value_type,
+        'property_id':ob['property_id'],
+        'data':data,
+        'data_list': data_list
+    }
 
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def detail(request, oid, pk):
+def detail(request, pk):
+    Properties = []
+    find_cursor = connections['default'].cursor()
+    find_cursor.execute('''
+    select
+        datas.building_id,
+        datas.geo_id,
+        l.property_name,
+        l.property_code,
+        l.property_definition,
+        l.value_type_id,
+        datas.property_id,
+        datas.value_text,
+        datas.value_number,
+        datas.value_date
+    from l_properties l
+    inner join m_datas_building datas on
+        l.property_id = datas.property_id
+    where
+        datas.geo_id = %s
+    order by property_name asc
+    '''
+    , [pk])
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    row = gis_fetch_one(oid, pk)
-    if not row:
-        raise Http404
-
+    data = dict_fetchall(find_cursor)
+    data = list(data)
+    properties = [_get_property(ob) for ob in data]
     rsp = {
-        'values': row,
+        'success': True,
+        'datas': properties
     }
     return JsonResponse(rsp)
-
-
-def geoJsonConvertGeom(json, table, geom_field):
-
-    schema = table.split('"')[1]
-    table = table.split('"')[3]
-    geojson = str(json)
-
-    with connections['postgis_db'].cursor() as cursor:
-        sql = """
-            SELECT coord_dimension, type
-            FROM
-                geometry_columns
-            WHERE
-                f_table_schema = '{schema}' and
-                f_table_name = '{table}' and
-                f_geometry_column = '{geom_field}';
-        """.format(
-            schema=schema,
-            table=table,
-            geom_field=geom_field)
-
-        cursor.execute(sql)
-        coord_dimension, type = cursor.fetchone()
-
-        sql = """ SELECT ST_GeomFromGeoJSON(%s); """
-
-        if coord_dimension == 3:
-                sql = """ SELECT ST_Force3D(ST_GeomFromGeoJSON(%s)); """
-
-        if 'MULTI' in type and coord_dimension == 2:
-                sql = """ SELECT ST_Multi(ST_GeomFromGeoJSON(%s)); """
-
-        if 'MULTI' in type and coord_dimension == 3:
-                sql = """ SELECT ST_Multi(ST_Force3D(ST_GeomFromGeoJSON(%s))); """
-
-        cursor.execute(sql, [geojson])
-        geom = cursor.fetchone()
-        return geom
-    return None
 
 
 def tableLastfindID(table_name):
@@ -396,86 +402,95 @@ def findGeomField(fields):
 @require_POST
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def updateGeom(request, payload, oid, pk):
-
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
+def updateGeom(request, payload, fid):
     geojson = payload.get('geojson')
-    table = gis_table_by_oid(oid)
-    fields = gis_fields_by_oid(oid)
-    geom_field = findGeomField(fields)
+    geo_id = payload.get('id')
 
-    geom = geoJsonConvertGeom(geojson, table, geom_field)
+    get_object_or_404(MGeoDatas, feature_id=fid, geo_id=geo_id)
+    geom = GEOSGeometry(str(geojson))
     if not geom:
         rsp = {
             'success': False,
             'info': "Geojson алдаатай байна.",
         }
         return JsonResponse(rsp)
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {table} SET {geom_field} = %s WHERE id = %s """.format(table=table, geom_field=geom_field)
-            cursor.execute(sql, [geom, pk])
+    MGeoDatas.objects.filter(geo_id=geo_id).update(geo_data=geom)
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
+    return JsonResponse(rsp)
 
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-        }
-        return JsonResponse(rsp)
 
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
+
+def get_rows(fid):
+    cursor = connections['default'].cursor()
+    sql = """
+        select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id  
+        from l_properties l
+        inner join (select l_feature_configs.feature_id, l_feature_configs.feature_config_id, l_feature_configs.data_type_id,l_data_type_configs.property_id 
+        from l_feature_configs
+        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
+        where l_feature_configs.feature_id = {fid}
+        ) datas
+        on datas.property_id = l.property_id
+    """.format(
+        fid=fid
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
+
+
+def geoJsonConvertGeom(geojson, fid):
+    with connections['default'].cursor() as cursor:
+
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        return geom
+    return None
 
 
 @require_POST
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def geomAdd(request, payload, oid):
-
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
+def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
-
-    fields = gis_fields_by_oid(oid)
-    table = gis_table_by_oid(oid)
-    geom_field = findGeomField(fields)
-    geom = geoJsonConvertGeom(geojson, table, geom_field)
-
+    geom = geoJsonConvertGeom(geojson, fid)
     if not geom:
         rsp = {
             'success': False,
             'info': "Geojson алдаатай байна.",
+            'id': None
         }
         return JsonResponse(rsp)
-    try:        
-        with connections['postgis_db'].cursor() as cursor:
 
-            sql = """
-                INSERT INTO
-                    {table}
-                    ("{geom}")
-                VALUES
-                    (%s)
-            """.format(
-                table=table,
-                geom=geom_field,
-            )
-            cursor.execute(sql, geom)
-        row_id = tableLastfindID(table)[0]
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-            'row_id': row_id
-        }
 
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Өгөгдлийн зөв оруулна уу!",
-        }
+    count = MGeoDatas.objects.filter(feature_id=fid).count()
+    count = str(count+22)+'test'
 
+    with connections['default'].cursor() as cursor:
+        sql = """
+                INSERT INTO public.m_geo_datas(
+                geo_id, geo_data, feature_id, created_by , modified_by)
+                VALUES (%s, %s ,%s, 1, 1);
+            """
+        cursor.execute(sql, [count, geom, fid])
+    fields = get_rows(fid)
+    for field in fields:
+        MDatasBuilding.objects.create(
+            geo_id = count,
+            feature_config_id = field['feature_config_id'],
+            data_type_id = field['data_type_id'],
+            property_id = field['property_id'],
+            created_by = 1,
+            modified_by = 1
+        )
+    rsp = {
+        'success': True,
+        'info': "Ажилттай ",
+        'id': count
+    }
     return JsonResponse(rsp)

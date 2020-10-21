@@ -13,6 +13,10 @@ $(".toggle-menu").on("click", function(e) {
         $("#wrapper").toggleClass("toggled");
     });
 
+$(".toggle-menu-map").on("click", function(e) {
+        e.preventDefault();
+        $("#wrapper-map").toggleClass("toggled");
+    });
 
 // === sidebar menu activation js
 

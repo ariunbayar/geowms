@@ -1,5 +1,5 @@
-import React, { Component } from "react"
-import { Formik, Form, Field, ErrorMessage, validateYupSchema } from 'formik'
+import React, { Component, Fragment } from "react"
+import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import Modal from "../../../src/components/Modal/DeleteModal"
 import { Typify } from "../Components/helpers/typify"
 import { service } from "./service"
@@ -12,74 +12,69 @@ export default class Маягт extends Component {
 
         this.state = {
             is_loading: true,
-
-            oid: this.props.match.params.oid,
-            id: this.props.match.params.id,
-
+            pid: props.pid,
+            fid: props.fid,
             values: {},
-
         }
 
         this.onSubmit = this.onSubmit.bind(this)
+        this.handleUpdate = this.handleUpdate.bind(this)
         this.validationSchema = validationSchema.bind(this)
-
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        this.setState({ values })
-        setStatus('checking')
-        setSubmitting(true)
-        if(this.state.id){
-            service
-                .update(this.state.oid, values, this.state.id)
-                .then(({ success }) => {
-                    if (success) {
-                        setStatus('saved')
-                        setSubmitting(false)
-                    }
+        const gid = this.props.gid
+
+        service
+            .update(values, this.state.pid, this.state.fid)
+            .then(({ success }) => {
+                if (success) {
+                    this.setState({is_loading:true})
+                    this.handleUpdate(gid)
+
+                }
+            })
+    }
+
+    handleUpdate(gid){
+        service.detail(gid).then(({success, datas}) => {
+            if(success){
+                this.setState({
+                    values:datas,
+                    is_loading: false
                 })
+            }
+        })
+    }
+    componentDidUpdate(pP){
+        if(pP.togle_islaod !== this.props.togle_islaod)
+        {
+            const gid = this.props.gid
+            if(!this.props.togle_islaod && gid)
+            {
+                this.handleUpdate(gid)
+                this.setState({is_loading:true})
+            }
         }
-        else{
-            service
-                .save(this.state.oid, values)
-                .then(({ success }) => {
-                    if (success) {
-                        setStatus('saved')
-                        setSubmitting(false)
-                    }
-                })
+        if(pP.gid !== this.props.gid)
+        {
+            const gid = this.props.gid
+            if(!this.props.togle_islaod && gid)
+            {
+                this.handleUpdate(gid)
+                this.setState({is_loading:true})
+            }
         }
     }
 
     componentDidMount() {
-
-        if (this.state.id) {
-
-            service
-                .detail(this.state.oid, this.state.id)
-                .then(({ values }) => {
-
-                    this.setState({
-                        is_loading: false,
-                        values,
-                })
-            })
-
-        } else {
-
-            const values = {}
-
-            this.props.fields.forEach((field) => {
-                if (field.type != 'geometry') {
-                    values[field.name] = ''
-                }
-            })
-
-            this.setState({
-                values,
-                is_loading: false,
-            })
-
+        const gid = this.props.gid
+        if(gid){
+            if(!this.props.togle_islaod)
+            {
+                this.handleUpdate(gid)
+                this.setState({is_loading:true})
+            }
         }
     }
 
@@ -92,84 +87,75 @@ export default class Маягт extends Component {
         }
 
         const { values, id } = this.state
-        const { fields } = this.props
         return (
-            <div>
+            <div className='overflow-auto card-body'>
+                {this.props.gid &&<h4 className="text-center">Geom дугаар-{this.props.gid}</h4>}
+                <hr></hr>
                 <Formik
                     enableReinitialize
-                    initialValues={ values }
-                    onSubmit={ this.onSubmit }
-                    validate={ () => ({}) }
-                    validationSchema={ () => this.validationSchema(fields, id) }
-                >
-                    {({
-                        errors,
-                        status,
-                        touched,
-                        isSubmitting,
-                        setFieldValue,
-                        handleBlur,
-                        values,
-                        isValid,
-                        dirty,
-                    }) => {
-                        const has_error = Object.keys(errors).length > 0
-
-                        return (
-                            <Form>
-                                { fields.map((field, idx) => {
-                                    if (field.type == 'geometry')
-                                        return
-                                    else if (field.name == 'id')
-                                        if (id)
-                                            return (
-                                                <div className="form-group row" key={ idx }>
-                                                    <label className="col-sm-2 col-form-label">{ field.name }</label>
-                                                    <div className="col-sm-10">
-                                                        <input name={ field.name } className="form-control" disabled type="text" value={ id }/>
-                                                    </div>
-                                                </div>
-                                            )
-                                        else
-                                            return
-                                    else
-                                        return (
-                                            <div className="form-group row" key={ idx }>
-                                                <label className="col-sm-2 col-form-label">{ field.name }</label>
-
-                                                <div className="col-sm-8">
-                                                    <Field name={ field.name } className="form-control" placeholder={ field.name } aria-describedby="inputGroupPrepend" type="text"/>
-                                                    <ErrorMessage name={ field.name } component="span" className="invalid-feedback"/>
-                                                    <Typify field={field.type} />
-                                                    
-                                                </div>
+                    initialValues={{ form_values: values }}
+                    onSubmit={ this.onSubmit}
+                    render={({ values }) => (
+                        <Form>
+                        <FieldArray
+                            name="form_values"
+                            render={arrayHelpers => (
+                            <div>
+                                {values.form_values && values.form_values.length > 0 ? (
+                                values.form_values.map((friend, index) => (
+                                    <div key={index} className="row my-3">
+                                        <div className="col-md-3">
+                                            <label className="col-form-label">{friend.property_code}</label>
+                                        </div>
+                                        {friend.value_type == 'option' ?
+                                            <div className="col-md-9">
+                                                <Fragment>
+                                                    <Field name={`form_values.${index}.data`} as="select" className="form-control">
+                                                        <option>...</option>
+                                                        {friend.data_list &&
+                                                            friend.data_list.map((data, idy) =>
+                                                            <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
+                                                            )
+                                                        }
+                                                    </Field>
+                                                </Fragment>
+                                                <small>{friend.property_definition}</small>
                                             </div>
-                                        )
-                                })}
-
+                                            :
+                                            <div className="col-md-9">
+                                                {friend.value_type_id == 'boolean' ?
+                                                <Field
+                                                name={`form_values.${index}.data`}
+                                                as="select"
+                                                className='form-control'
+                                                >
+                                                    <option value="true">True</option>
+                                                    <option value="false">False</option>
+                                                </Field>
+                                                :
+                                                <Field
+                                                    name={`form_values.${index}.data`}
+                                                    className='form-control'
+                                                    placeholder={ friend.property_name}
+                                                    type={friend.value_type}
+                                                    />
+                                                }
+                                                <small>{friend.property_definition}</small>
+                                            </div>
+                                        }
+                                    </div>
+                                ))
+                                ) : ( null
+                                )}
                                 <div>
-                                    <button type="submit" className="btn" disabled={isSubmitting || has_error}>
-                                        {isSubmitting && <i className="fa fa-spinner fa-pulse"></i>}
-                                        {isSubmitting && 'Шалгаж байна.'}
-                                        {!isSubmitting && 'Хадгалах'}
-                                    </button>
-                                    {has_error
-                                        ?
-                                        <p className="text-danger">
-                                            <i className="far fa-times-circle"></i>
-                                            {} Алдаатай утгыг засварлаж ахин оролдоно уу!
-                                        </p>
-                                        : status == 'saved' && !dirty &&
-                                        <p>
-                                            <i className="fas fa-check-circle"></i>
-                                            {} Амжилттай хадгаллаа
-                                            </p>
-                                    }
+                                <button type="submit" className="btn btn-block gp-btn-primary">Submit</button>
                                 </div>
-                            </Form>
-                        )
-                    }}
-                </Formik>
+                            </div>
+                            )}
+                        />
+                        </Form>
+                    )}
+                    />
             </div>
         )
     }

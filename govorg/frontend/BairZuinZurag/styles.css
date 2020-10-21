@@ -40,7 +40,7 @@
     border-radius: 3px;
     width: 25px;
     height: 25px;
-    top: 82px;
+    top: 83px;
 
 }
 .⚙-toggle-add:active{
@@ -118,5 +118,23 @@
     background-color: rgba(0,60,136,0.7);
 }
 .⚙-toggle-remove:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+
+.⚙-toggle-form {
+    padding: 2px 7px;
+    font-size: 15px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    top: 161px;
+}
+.⚙-toggle-form:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-form:hover{
     background-color: rgba(0,60,136,0.7);
 }

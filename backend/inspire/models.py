@@ -197,7 +197,7 @@ class MDatasBoundary(models.Model):
     code_list_id = models.IntegerField()
     value_text = models.CharField(max_length=4000)
     value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=True)
+    value_date = models.DateTimeField(auto_now=False)
     value_connected_geo_id = models.CharField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
@@ -218,7 +218,7 @@ class MDatasBuilding(models.Model):
     code_list_id = models.IntegerField()
     value_text = models.CharField(max_length=4000)
     value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=True)
+    value_date = models.DateTimeField(auto_now=False)
     value_connected_geo_id = models.CharField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
@@ -239,7 +239,7 @@ class MDatasCadastral(models.Model):
     code_list_id = models.IntegerField()
     value_text = models.CharField(max_length=4000)
     value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=True)
+    value_date = models.DateTimeField(auto_now=False)
     value_connected_geo_id = models.CharField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
@@ -260,7 +260,7 @@ class MDatasGeographical(models.Model):
     code_list_id = models.IntegerField()
     value_text = models.CharField(max_length=4000)
     value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=True)
+    value_date = models.DateTimeField(auto_now=False)
     value_connected_geo_id = models.CharField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
@@ -281,7 +281,7 @@ class MDatasHydrography(models.Model):
     code_list_id = models.IntegerField()
     value_text = models.CharField(max_length=4000)
     value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=True)
+    value_date = models.DateTimeField(auto_now=False)
     value_connected_geo_id = models.CharField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
@@ -295,7 +295,7 @@ class MGeoDatas(models.Model):
         managed= False
 
     geo_id = models.CharField(primary_key=True, max_length=100)
-    geo_data = models.GeometryCollectionField(srid=32648) #geometry(GeometryZ,32648),
+    geo_data = models.GeometryCollectionField(srid=4326) #geometry(GeometryZ,32648),
     feature_id = models.IntegerField()
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
