@@ -13,6 +13,7 @@ from main.decorators import ajax_required, gov_bundle_required
 from backend.inspire.models import LThemes, LPackages, LFeatures
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter
+import random
 
 from main.utils import (
     gis_delete,
@@ -188,7 +189,7 @@ def rows(request, pid, fid):
         limit {limit}
     """.format(
         fid=fid,
-        limit=1000
+        limit=4000
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
@@ -311,7 +312,10 @@ def _get_property(ob):
     elif ob['value_type_id'] == 'double':
         value_type = 'number'
         data = ob.get('value_number'),
-    elif ob['value_type_id'] == ('text' or 'multi-text'):
+    elif ob['value_type_id'] == 'multi-text':
+        value_type = 'text'
+        data = ob['value_text'],
+    elif ob['value_type_id'] == 'text':
         value_type = 'text'
         data = ob['value_text'],
     elif ob['value_type_id'] == 'date':
@@ -325,6 +329,7 @@ def _get_property(ob):
         data = ob['value_text'],
     else:
         value_type = 'option'
+        data = ob['code_list_id'],
         data_list = _code_list_display(ob['property_id'])
     if data:
         data = data[0]
@@ -359,7 +364,8 @@ def detail(request, pk):
         datas.property_id,
         datas.value_text,
         datas.value_number,
-        datas.value_date
+        datas.value_date,
+        datas.code_list_id
     from l_properties l
     inner join m_datas_building datas on
         l.property_id = datas.property_id
@@ -464,22 +470,21 @@ def geomAdd(request, payload, fid):
             'id': None
         }
         return JsonResponse(rsp)
+    check = True
 
-
-    count = MGeoDatas.objects.filter(feature_id=fid).count()
-    count = str(count+22)+'test'
-
-    with connections['default'].cursor() as cursor:
-        sql = """
-                INSERT INTO public.m_geo_datas(
-                geo_id, geo_data, feature_id, created_by , modified_by)
-                VALUES (%s, %s ,%s, 1, 1);
-            """
-        cursor.execute(sql, [count, geom, fid])
+    count = random.randint(106942, 996942)
+    geo_id = str(count)+'geo'
+    # with connections['default'].cursor() as cursor:
+    #     sql = """
+    #             INSERT INTO public.m_geo_datas(
+    #             geo_id, geo_data, feature_id, created_by , modified_by)
+    #             VALUES (%s, %s ,%s, 1, 1);
+    #         """
+    #     cursor.execute(sql, [count, geom, fid])
     fields = get_rows(fid)
     for field in fields:
         MDatasBuilding.objects.create(
-            geo_id = count,
+            geo_id = geo_id,
             feature_config_id = field['feature_config_id'],
             data_type_id = field['data_type_id'],
             property_id = field['property_id'],
@@ -489,6 +494,6 @@ def geomAdd(request, payload, fid):
     rsp = {
         'success': True,
         'info': "Ажилттай ",
-        'id': count
+        'id': geo_id
     }
     return JsonResponse(rsp)
