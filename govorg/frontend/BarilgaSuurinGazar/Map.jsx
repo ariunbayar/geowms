@@ -17,11 +17,13 @@ import {LineBarButton} from './controls/Line/LineBarButton'
 import {PointBarButton} from './controls/Point/PointBarButton'
 import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
+import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
 import {Modal} from "../../../src/components/MapModal/Modal"
 
 import "./styles.css"
 import { service } from './service'
+import Маягт from "./Маягт"
 
 export default class BarilgaSuurinGazar extends Component{
 
@@ -32,8 +34,8 @@ export default class BarilgaSuurinGazar extends Component{
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
-          pid: this.props.match.params.pid,
-          fid: this.props.match.params.fid,
+          pid: props.match.params.pid,
+          fid: props.match.params.fid,
           rows: [],
           is_loading:true,
           featureID: null,
@@ -73,6 +75,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.PolygonButton = this.PolygonButton.bind(this)
       this.SaveBtn = this.SaveBtn.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
+      this.FormButton = this.FormButton.bind(this)
       this.remove = this.remove.bind(this)
       this.removeModal = this.removeModal.bind(this)
       this.modifiedFeature = this.modifiedFeature.bind(this)
@@ -100,9 +103,9 @@ export default class BarilgaSuurinGazar extends Component{
 
       map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      map.addControl(new FormBarButton({FormButton: this.FormButton}))
       map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       map.addControl(this.controls.modal)
-
       if (type.includes("Line"))
         map.addControl(new LineBarButton({LineButton: this.LineButton}))
       if (type.includes("Point"))
@@ -397,6 +400,9 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({ remove_button_active: true, modify_button_active: false })
       }
     }
+    FormButton(){
+      this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))
+    }
 
     removeModal(){
       if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
@@ -413,9 +419,10 @@ export default class BarilgaSuurinGazar extends Component{
       const selectedFeature_ID = this.state.selectedFeature_ID
       var features_new = vector.getSource().getFeatures();
       var features = vectorLayer.getSource().getFeatures();
-      const oid = this.state.oid
+      const fid = this.state.fid
+      const pid = this.state.pid
       if(selectedFeature_ID){
-        service.remove(oid, selectedFeature_ID).then(({ success, info }) => {
+        service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
             if (success) {
               this.addNotif('success', info, 'check')
               this.setState({featureID_list: [], selectedFeature_ID: null})
@@ -557,22 +564,22 @@ export default class BarilgaSuurinGazar extends Component{
         return (
             <div className="col-md-12">
                 <div className={this.state.togle_islaod ? "toggled" : ""} id="wrapper-map" >
-                  <div id="sidebar-wrapper-map">
-                          asdasdas
-                          asdasdas
-                          asdasdas
-                          asdasdas
-                          asdasdas
+                  <div id="sidebar-wrapper-map" className="overflow-auto">
+                    <div className="card-body">
+                        <Маягт
+                          pid = {this.props.match.params.pid}
+                          fid = {this.props.match.params.fea}
+                          gid = {this.state.selectedFeature_ID}
+                          togle_islaod = {this.state.togle_islaod}
+                        >
+                        </Маягт>
+                      </div>
                   </div>
                   <div className="content-wrapper-map">
                     <div id="map"></div>
                   </div>
                 </div>
-                <a class="nav-link toggle-menu-map btn" onClick={() =>  this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))}>sain</a>
-                {this.state.is_loading ? <span className="text-center d-block"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
-
-
-
+                {this.state.is_loading ? <span className="text-center d-block" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>
         )
     }

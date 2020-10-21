@@ -12,61 +12,74 @@ export default class Маягт extends Component {
 
         this.state = {
             is_loading: true,
-
-            oid: this.props.match.params.oid,
-            id: this.props.match.params.id,
-
+            pid: props.pid,
+            fid: props.fid,
             values: {},
-
         }
 
         this.onSubmit = this.onSubmit.bind(this)
+        this.handleUpdate = this.handleUpdate.bind(this)
         this.validationSchema = validationSchema.bind(this)
-
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        this.setState({ values })
         console.log(values)
+        const gid = this.props.gid
 
-        setStatus('checking')
-        setSubmitting(true)
-        if(this.state.id){
-            service
-                .update(this.state.oid, values, this.state.id)
-                .then(({ success }) => {
-                    if (success) {
-                        setStatus('saved')
-                        setSubmitting(false)
-                    }
+        // setStatus('checking')
+        // setSubmitting(true)
+        service
+            .update(values, this.state.pid, this.state.fid)
+            .then(({ success }) => {
+                if (success) {
+                    // setStatus('saved')
+                    // setSubmitting(false)
+                    this.handleUpdate(gid)
+
+                }
+            })
+    }
+
+    handleUpdate(gid){
+        service.detail(gid).then(({success, datas}) => {
+            if(success){
+                console.log(datas)
+                this.setState({
+                    values:datas,
+                    is_loading: false
                 })
+            }
+        })
+    }
+    componentDidUpdate(pP){
+        if(pP.togle_islaod !== this.props.togle_islaod)
+        {
+            const gid = this.props.gid
+            if(!this.props.togle_islaod && gid)
+            {
+                this.handleUpdate(gid)
+                this.setState({is_loading:true})
+            }
         }
-        else{
-            service
-                .save(this.state.oid, values)
-                .then(({ success }) => {
-                    if (success) {
-                        setStatus('saved')
-                        setSubmitting(false)
-                    }
-                })
+        if(pP.gid !== this.props.gid)
+        {
+            const gid = this.props.gid
+            if(!this.props.togle_islaod && gid)
+            {
+                this.handleUpdate(gid)
+                this.setState({is_loading:true})
+            }
         }
     }
 
     componentDidMount() {
-        const gid = this.props.match.params.gid
+        const gid = this.props.gid
         if(gid){
-            service
-            .detail(gid)
-            .then(({success, datas}) => {
-                if(success){
-                    console.log(datas)
-                    this.setState({
-                        values:datas,
-                        is_loading: false
-                    })
-                }
-         })
+            if(!this.props.togle_islaod)
+            {
+                this.handleUpdate(gid)
+                this.setState({is_loading:true})
+            }
         }
     }
 
@@ -82,77 +95,62 @@ export default class Маягт extends Component {
         const values_fields = values
         // const { fields } = this.props
         return (
-            <div>
+            <div className='overflow-auto card-body'>
+                {this.props.gid &&<h4 className="text-center">geom дугаар{this.props.gid}</h4>}
+                <hr></hr>
                 <Formik
-                    initialValues={{ friends: values }}
-                    onSubmit={values =>
-                        setTimeout(() => {
-                        console.log(JSON.stringify(values, null, 2));
-                        }, 500)
-                    }
+                    enableReinitialize
+                    initialValues={{ form_values: values }}
+                    onSubmit={ this.onSubmit}
                     render={({ values }) => (
                         <Form>
                         <FieldArray
-                            name="friends"
+                            name="form_values"
                             render={arrayHelpers => (
                             <div>
-                                {values.friends && values.friends.length > 0 ? (
-                                values.friends.map((friend, index) => (
+                                {values.form_values && values.form_values.length > 0 ? (
+                                values.form_values.map((friend, index) => (
                                     <div key={index} className="row my-3">
-                                        <div className="col-md-2">
+                                        <div className="col-md-3">
                                             <label className="col-form-label">{friend.property_code}</label>
                                         </div>
-                                        {friend.value_type != 'option' ?
+                                        {friend.value_type == 'option' ?
                                             <div className="col-md-9">
-                                                <Field 
-                                                    name={`friends.${index}.data`} 
-                                                    className='form-control' 
-                                                    placeholder={ friend.property_name}
-                                                    type={friend.value_type} 
-                                                    />
+                                                <Field
+                                                    name={`form_values.${index}.data`}
+                                                    as="select"
+                                                    className='form-control'
+                                                    >
+                                                        {friend.data_list ?
+                                                            friend.data_list.map((data, idy) =>
+                                                            <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
+                                                            )
+                                                            :
+                                                            <option>...</option>
+                                                        }
+                                                    </Field>
                                                 <small>{friend.property_definition}</small>
                                             </div>
                                             :
-                                            friend.value_type_id == '"single-select"' ?
                                             <div className="col-md-9">
-                                            <Field  
-                                                name={`friends.${index}.data`} 
-                                                as="select"
-                                                className='form-control' 
-                                                >
-                                                    {friend.data_list ? 
-                                                    friend.data_list.map((data, idy) =>
-                                                    
-                                                    <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
-                                                    )
-                                                    :
-                                                    null
-                                                    }
-                                                </Field>
-                                            <small>{friend.property_definition}</small>
-                                        </div> 
-                                        :
-                                            <div className="col-md-9">
-                                            <Field  
-                                                name={`friends.${index}.data`} 
-                                                as="select"
-                                                className='form-control' 
-                                                >
-                                                    <option>...</option>
-                                                </Field>
-                                            <small>{friend.property_definition}</small>
+                                                {friend.value_type_id == 'boolean' ? 'boolean' : null}
+                                                {friend.value_type_id}
+                                                {friend.value_type}
+                                                <Field
+                                                    name={`form_values.${index}.data`}
+                                                    className='form-control'
+                                                    placeholder={ friend.property_name}
+                                                    type={friend.value_type}
+                                                    />
+                                                <small>{friend.property_definition}</small>
                                             </div>
                                         }
                                     </div>
                                 ))
-                                ) : (
-                                <button type="button" onClick={() => arrayHelpers.push('')}>
-                                    {/* show this when user has removed all friends from the list */}
-                                    Add a friend
-                                </button>
+                                ) : ( null
                                 )}
                                 <div>
-                                <button type="submit">Submit</button>
+                                <button type="submit" className="btn btn-block gp-btn-primary">Submit</button>
                                 </div>
                             </div>
                             )}

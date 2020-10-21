@@ -31,13 +31,12 @@ function geomType(pid, fid) {
     return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/geom-type/`, requestOptions).then(handleResponse)
 }
 
-function remove(oid, id) {
-
+function remove(pid, fid, gid) {
     const opts = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({gid}),
     }
-
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${id}/remove/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/remove/`, opts).then(handleResponse)
 }
 
 function save(oid, values) {
@@ -50,13 +49,13 @@ function save(oid, values) {
     return fetch(`/gov/api/barilga_suurin_gazar/${oid}/add/`, opts).then(handleResponse)
 }
 
-function update(oid, data, pk) {
+function update(data, pid, fid) {
 
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(data),
     }
-    return fetch(`/gov/api/barilga_suurin_gazar/${oid}/${pk}/save/`, opts).then(handleResponse)
+    return fetch(`/gov/api/barilga_suurin_gazar/${pid}/${fid}/save/`, opts).then(handleResponse)
 }
 
 function detail(gid) {

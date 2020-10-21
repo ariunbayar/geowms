@@ -5,7 +5,7 @@ from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas, LCodeListConfigs, LCodeLists
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
@@ -126,7 +126,6 @@ def bundleButetsAll(request):
 
 @require_GET
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
 def table_list(request):
 
     rows = []
@@ -154,32 +153,6 @@ def table_list(request):
     }
 
     return JsonResponse(rsp)
-
-def getGeomType(table, geom_field):
-
-    schema = table.split('"')[1]
-    table = table.split('"')[3]
-    geojson = str(json)
-
-    with connections['postgis_db'].cursor() as cursor:
-        sql = """
-            SELECT type
-            FROM
-                geometry_columns
-            WHERE
-                f_table_schema = '{schema}' and
-                f_table_name = '{table}' and
-                f_geometry_column = '{geom_field}';
-        """.format(
-            schema=schema,
-            table=table,
-            geom_field=geom_field)
-
-        cursor.execute(sql)
-
-        type = cursor.fetchone()
-        return type
-    return None
 
 
 @require_GET
@@ -212,12 +185,12 @@ def rows(request, pid, fid):
             m_geo_datas
         WHERE
             feature_id = {fid}
+        order by geo_id desc
         limit {limit}
     """.format(
         fid=fid,
         limit=1000
     )
-    # geo_id='386642Ub'
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
     rows = list(rows)
@@ -256,94 +229,83 @@ def add(request, payload, oid):
 
 @require_POST
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def save(request, payload, oid, pk):
+def save(request, payload, pid, fid):
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-
-    tabne_data = gis_table_by_oid(oid)
-    fields = gis_fields_by_oid(oid)
-    # query set beltgeh
-    fields_to_update = [
-        field.attname
-        for field in fields
-        if field.attname not in ['id', 'geom']
-    ]
-
-    values = [
-        payload.get(f, '')
-        for f in fields_to_update
-    ]
-
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ UPDATE {tabne_data} SET {fields} = %s WHERE id = {pk} """.format(tabne_data=tabne_data, pk=pk, fields='= %s, '.join(['"{}"'.format(f) for f in fields_to_update]))
-            cursor.execute(sql, values)
-        rsp = {
-            'success': True,
-            'info': "Амжилттай",
-        }
-        return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
+    form_values = payload.get('form_values')
+    for data in form_values:
+        if data['value_type'] == 'number':
+            if data['data'] != [None]:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_number=data['data'])
+        elif data['value_type'] == 'option':
+            if data['data'] != [None]:
+                if data['data']:
+                    MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(code_list_id=data['data'])
+        elif data['value_type'] == 'text':
+            if data['data'] != [None]:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_text=data['data'])
+        elif data['value_type'] == 'date':
+            if data['data'] != [None]:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_date=data['data'])
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
+    return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-@gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
-def delete(request, oid, pk):
+def delete(request, payload, pid, fid):
+    gid = payload.get('gid')
+    get_object_or_404(MGeoDatas, geo_id=gid)
 
-    get_object_or_404(request.bundle.bundlegis_set, oid=oid)
-    row = gis_fetch_one(oid, pk)
-
-    if row:
-        gis_delete(oid, pk)
+    geom = MDatasBuilding.objects.filter(geo_id=gid)
+    datas = MGeoDatas.objects.filter(geo_id=gid)
+    if geom and datas:
+        # geom.delete()
+        # datas.delete()
         rsp = {
         'success': True,
         'info': "Амжилттай",
         }
     else:
-        raise Http404
-
+        rsp = {
+        'success': False,
+        'info': "Амжилтгүй",
+        }
     return JsonResponse(rsp)
 
 
-def __datetime_display(ob):
-    code_lists = []
-    find_cursor = connections['default'].cursor()
-    find_cursor.execute(''' 
-        select
-            c.code_list_id, c.code_list_code, c.code_list_name
-        from 
-            l_code_lists c
-        where property_id =  %s 
-        '''
-    , [ob] )
-    code_list_code = dict_fetchall(find_cursor)
-    code_list_code = list(code_list_code)
-     
-    for i in code_list_code:
-        code_lists = {
-            'propery_id':ob,
-            'code_list_id':i['code_list_id'],
-            'code_list_name':i['code_list_name'],
-            'code_list_code':i['code_list_code']
-        }
+def _code_list_display(property_id):
+    code_list_values = []
+    code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+    if code_list_configs:
+        for code_list_config in code_list_configs:
+            property_id = code_list_config.property_id
+            to_property_id = code_list_config.to_property_id
+            if property_id == to_property_id:
+                to_property_id += 1
+            x_range = range(property_id, to_property_id)
+            for i in x_range:
+                code_lists = LCodeLists.objects.filter(property_id=i)
+                if code_lists:
+                    for code_list in code_lists:
+                        code_list_values.append({
+                            'code_list_id': code_list.code_list_id,
+                            'code_list_name': code_list.code_list_name,
+                            'code_list_definition': code_list.code_list_definition,
+                        })
+    return code_list_values
 
-    return code_lists
 
 def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
+
 
 def _get_property(ob):
     data = None
     value_type = ''
     data_list = []
-    #print("ob['value_type_id']", (ob['value_type_id']))
     if ob['value_type_id'] == ('number' or 'double'):
         value_type = 'number'
         data = ob['value_number'],
@@ -355,16 +317,14 @@ def _get_property(ob):
         value_type = 'date'
         data = _datetime_display(ob['value_date']),
     elif ob['value_type_id'] == 'link':
-        value_type = 'url'
+        value_type = 'text'
         data = ob['value_text'],
-    elif ob['value_type_id'] == 'boolean': 
+    elif ob['value_type_id'] == 'boolean':
         value_type = 'text'
         data = ob['value_text'],
     else:
         value_type = 'option'
-        data_list =[ __datetime_display(ob['property_id'])]
-        
-
+        data_list = _code_list_display(ob['property_id'])
     return {
         'building_id':ob['building_id'],
         'geo_id':ob['geo_id'],
@@ -376,51 +336,44 @@ def _get_property(ob):
         'value_type':value_type,
         'property_id':ob['property_id'],
         'data':data,
-        'data_list': data_list if data_list else []
+        'data_list': data_list
     }
 
 @require_GET
 @ajax_required
 @gov_bundle_required(Bundle.MODULE_BARILGA_SUURIN_GAZAR)
 def detail(request, pk):
-    #try:
     Properties = []
     find_cursor = connections['default'].cursor()
-    find_cursor.execute(''' 
-    select 
+    find_cursor.execute('''
+    select
         datas.building_id,
-        datas.geo_id, 
-        l.property_name, 
+        datas.geo_id,
+        l.property_name,
         l.property_code,
         l.property_definition,
-        l.value_type_id,  
+        l.value_type_id,
         datas.property_id,
         datas.value_text,
         datas.value_number,
         datas.value_date
     from l_properties l
-    inner join m_datas_building datas on 
+    inner join m_datas_building datas on
         l.property_id = datas.property_id
-    where 
-        datas.geo_id = %s'''
+    where
+        datas.geo_id = %s
+    order by property_name asc
+    '''
     , [pk])
 
     data = dict_fetchall(find_cursor)
     data = list(data)
     properties = [_get_property(ob) for ob in data]
-
     rsp = {
         'success': True,
         'datas': properties
     }
     return JsonResponse(rsp)
-
-        # except Exception:
-        #     rsp = {
-        #         'success': False,
-        #         'info': "Алдаа гарсан",
-        #     }
-        # return JsonResponse(rsp)
 
 
 def tableLastfindID(table_name):

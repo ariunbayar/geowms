@@ -186,10 +186,9 @@ hr {
     position: absolute;
     top: 0;
     left: 0px;
-    z-index: 1000;
     overflow: hidden;
     width: 50%;
-    height: calc( 100vh - 70px - 15px);;
+    height: calc( 100vh - 85px - 15px);;
    -webkit-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -233,7 +232,6 @@ hr {
 	padding-top: 70px;
 	padding-left: 15px;
     padding-right: 15px;
-    padding-bottom: 70px;
     overflow-x: hidden;
 	-webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
