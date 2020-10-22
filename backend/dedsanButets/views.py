@@ -194,3 +194,28 @@ def Edit_name(request, payload):
             'info': 'Алдаа гарлаа'
         }
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def Get_fields(request, payload):
+    # id = payload.get('id')
+    model_name = payload.get('name')
+    try:
+        if model_name == 'theme':
+            model_name = LThemes
+        if model_name == 'package':
+            model_name = LPackages
+        if model_name == 'feature':
+            model_name == LFeatures
+        rsp = {
+            'success': True,
+            'fields': [f.name for f in model_name._meta.get_fields()]
+        }
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': 'Алдаа гарлаа'
+        }
+    return JsonResponse(rsp)
