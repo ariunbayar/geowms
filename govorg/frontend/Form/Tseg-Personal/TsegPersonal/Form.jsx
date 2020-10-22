@@ -101,9 +101,10 @@ export  class Forms extends Component {
 
     componentDidMount(){
         const id = this.props.data.match.params.id
+        const t_type = this.props.data.match.params.id
         if(id) {
-            this.setState({id})
-            this.tsegUpdate(id)
+            this.setState({id, t_type})
+            this.tsegUpdate(id, t_type)
         }
     }
 
@@ -409,8 +410,8 @@ export  class Forms extends Component {
         })
     }
 
-    tsegUpdate(id){
-        service.updateTseg(id).then(({tseg_display}) =>{
+    tsegUpdate(id, t_type){
+        service.updateTseg(id, t_type).then(({tseg_display}) =>{
             if(tseg_display){
                 tseg_display.map((item, idx) =>
                 {
@@ -475,8 +476,9 @@ export  class Forms extends Component {
 
     getItem(){
         const id = this.props.data.match.params.id
+        const t_type = this.props.data.match.params.t_type
         if(id){
-            service.updateTseg(id).then(({tseg_display})=> {
+            service.updateTseg(id, t_type).then(({tseg_display})=> {
                 if(tseg_display){
                     const latx = tseg_display[0]["latlongx"]
                     const laty = tseg_display[0]["latlongy"]

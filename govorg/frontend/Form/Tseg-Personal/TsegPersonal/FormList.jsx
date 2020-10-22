@@ -56,8 +56,8 @@ export class FormList extends Component {
         }
     }
 
-    handleRemove(id) {
-        service.tsegPersonalRemove(id).then(({success}) => {
+    handleRemove(id, t_type) {
+        service.tsegPersonalRemove(id, t_type).then(({success}) => {
             if (success) {
                 this.setState({modal_alert_status: 'open', modal_text: 'устгалаа', modal_icon: 'success'})
                 this.paginate(1, this.state.searchQuery)
@@ -159,7 +159,7 @@ export class FormList extends Component {
                                                 idx = {idx}
                                                 values={values}
                                                 perms={this.props.perms}
-                                                handleRemove={() => this.handleRemove(values.id)}
+                                                handleRemove={() => this.handleRemove(values.id, values.t_type)}
                                                 handleMove={this.handleMove}
                                                 handleSuccess = {() => this.handleSuccess(values.point_type, values.id, values.point_class ,values.t_type)}
                                             />

@@ -76,12 +76,12 @@ export default class FormTable extends Component {
                 <th>{point_name}</th>
                 <th>{point_id}</th>
                 <th>{this.state.point_class}</th>
-                <th>{ point_type > 4 && point_type ? <a>{point_type} зэрэг</a> : point_type < 4 && point_type ? <a>{point_type} анги</a> :''} </th>
+                <th>{point_type > 4 && point_type ? <a>{point_type} зэрэг</a> : point_type < 4 && point_type ? <a>{point_type} анги</a> :''} </th>
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 {perm_remove && perm_view && perm_create ?
                 <th>
-                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/${id}/засах/`}>
+                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/${id}/${t_type}/засах/`}>
                             <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </th>

@@ -26,7 +26,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point
 def createPdf(pk):
 
     tseg = TsegPersonal.objects.filter(id=pk).first()
-    data = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+    data = Mpoint_view.objects.using('postgis_db').filter(point_id=pk).first()
     if tseg.latlongy and tseg.latlongx:
         L = float(tseg.latlongy)
         B = float(tseg.latlongx)
@@ -53,7 +53,7 @@ def createPdf(pk):
         Lchar = ''
         utmx = ''
         utmy = ''
-    data = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+    data = Mpoint_view.objects.using('postgis_db').filter(point_id=pk).first()
     pdf = FPDF()
     pdf.add_page()
     pdf.set_xy(0, 0)
@@ -641,7 +641,8 @@ def tseg_personal_list(request, payload):
 @ajax_required
 def tsegPersonalRemove(request, payload):
     pk = payload.get('id')
-    class_type = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+    networkType = payload.get('t_type')
+    class_type = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=networkType).first()
     data = None
     if class_type.t_type == 'g102':
         data = Mpoint2.objects.using('postgis_db').filter(id=pk).first()
@@ -661,28 +662,35 @@ def tsegPersonalRemove(request, payload):
         data = Mpoint9.objects.using('postgis_db').filter(id=pk).first()
     if data:
         mpoint10 = Mpoint10.objects.using('postgis_db').create(
-            id=data.id, objectid=data.objectid,
-            point_id=data.point_id, point_name=data.point_name,
-            point_class_name='Устсан төлөв', pid=data.pid,
-            point_class=10, mclass=data.mclass,
-            center_typ=data.center_typ,aimag=data.aimag, sum=data.sum,
-            sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-            ondor=data.ondor, ondor_type=data.ondor_type, t_type='g110'
+            objectid=data.objectid,
+            point_id=data.point_id,
+            point_name=data.point_name,
+            point_class_name='Устсан төлөв',
+            pid=data.pid,
+            point_class=10,
+            mclass=data.mclass,
+            center_typ=data.center_typ,
+            aimag=data.aimag,
+            sum=data.sum,
+            sheet1=data.sheet1,
+            sheet2=data.sheet2,
+            sheet3=data.sheet3,
+            ondor=data.ondor,
+            ondor_type=data.ondor_type,
+            t_type='g110',
+            geom=data.geom
         )
         if mpoint10:
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint10 SET geom =
-            %s WHERE id = %s ''', [data.geom, str(mpoint10.id)])
             data.delete()
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
 
-
 @require_POST
 @ajax_required
 def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
+    t_type = payload.get('t_type')
     tseg_display = []
     tseg = TsegPersonal.objects.filter(id = pk).first()
     search_cursor = connections['postgis_db'].cursor()
@@ -868,17 +876,18 @@ def tsegPersonal(request):
     pk = request.POST.get('idx')
     point_id = request.POST.get('toviin_dugaar')
     ondor_type = request.POST.get('ondor_torol')
+    pointName = request.POST.get('tesgiin_ner')
     if(len(point_id)<4):
         point_id.zfill(4)
 
     if pk:
         date = None
         tseg_personal = TsegPersonal.objects.filter(id=pk).first()
-        if not tseg_personal:
-            TsegPersonal.objects.create(id=pk)
+        # if not tseg_personal:
+        #     TsegPersonal.objects.create(id=pointName)
 
-        if request.POST.get('date'):
-            date = request.POST.get('date')
+        # if request.POST.get('date'):
+        #     date = request.POST.get('date')
 
         y = float(request.POST.get('latlongy'))
         x = float(request.POST.get('latlongx'))
@@ -889,183 +898,183 @@ def tsegPersonal(request):
             point_class = int(request.POST.get('suljeenii_torol'))
         else:
             point_class = 0
-        if mpoints.t_type == 'g102':
-            Mpoint2.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='GNSS-ийн байнгын ажиллагаатай станц',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g103':
-            Mpoint3.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='GPS-ийн сүлжээний цэг',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g104':
-            Mpoint4.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Триангуляцийн сүлжээний цэг',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g105':
-            Mpoint5.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Полигонометрийн сүлжээний цэг',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g106':
-            Mpoint6.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Гравиметрийн сүлжээний цэг',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g107':
-            Mpoint7.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Өндрийн сүлжээний цэг',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g108':
-            Mpoint8.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        ondor_type=ondor_type,
-                        point_class=point_class,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Зураглалын сүлжээний цэг',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g109':
-            Mpoint9.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        ondor_type=ondor_type,
-                        point_class=point_class,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Шинээр нэмэгдсэн төлөв',
-                        geom = geom
-            )
-        if mpoints.t_type == 'g110':
-            Mpoint10.objects.using('postgis_db').filter(id=pk).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        ondor_type=ondor_type,
-                        point_class=point_class,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name='Устсан төлөв',
-                        geom = geom
-            )
-        TsegPersonal.objects.filter(id=pk).update(
-                    suljeenii_torol=request.POST.get('suljeenii_torol'),
-                    latlongx=request.POST.get('latlongx'),
-                    latlongy=request.POST.get('latlongy'),
-                    barishil_tuhai=request.POST.get('barishil_tuhai'),
-                    sudalga_or_shine=request.POST.get('sudalga_or_shine'),
-                    hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
-                    date=date, hotolson=request.POST.get('hotolson'),
-                    alban_tushaal=request.POST.get('alban_tushaal'),
-                    alban_baiguullga=request.POST.get('alban_baiguullga'),
-        )
-        tseg_personal = TsegPersonal.objects.filter(id=pk).first()
-        if request.POST.get('tseg_oiroos_img_url') and len(request.POST.get('tseg_oiroos_img_url')) > 2000:
-            if tseg_personal.tseg_oiroos_img_url:
-                tseg_personal.tseg_oiroos_img_url.delete(save=False)
-            [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_oiroos_img_url'), [(720, 720)])
-            tseg_personal.tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
-            tseg_personal.save()
-        if request.POST.get('tseg_holoos_img_url') and len(request.POST.get('tseg_holoos_img_url')) > 2000:
-            if tseg_personal.tseg_holoos_img_url:
-                tseg_personal.tseg_holoos_img_url.delete(save=False)
-            [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_holoos_img_url'), [(720, 720)])
-            tseg_personal.tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
-            tseg_personal.save()
-        if request.POST.get('bairshil_tseg_oiroos_img_url')  and len(request.POST.get('bairshil_tseg_oiroos_img_url')) > 2000:
-            if tseg_personal.bairshil_tseg_oiroos_img_url:
-                tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
-            tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
-            [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_oiroos_img_url'), [(720, 720)])
-            tseg_personal.bairshil_tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
-            tseg_personal.save()
-        if  request.POST.get('bairshil_tseg_holoos_img_url') and len(request.POST.get('bairshil_tseg_holoos_img_url')) > 2000:
-            if tseg_personal.bairshil_tseg_holoos_img_url:
-                tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
-            [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_holoos_img_url'), [(720, 720)])
-            tseg_personal.bairshil_tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
-            tseg_personal.save()
-        if not request.POST.get('file1'):
-            tseg_personal.file_path1.delete(save=False)
-            tseg_personal.file_path1 = request.FILES['file1']
-            tseg_personal.save()
-        if not request.POST.get('file2'):
-            tseg_personal.file_path2.delete(save=False)
-            tseg_personal.file_path2 = request.FILES['file2']
-            tseg_personal.save()
-        pdf_id = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
-        file_name = pdf_id.pid + '.pdf'
-        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
-        pdf = createPdf(pk)
-        pdf.output(src_file, 'F')
-        return JsonResponse({'success': True, 'name': False, 'ids':False})
+        # if mpoints.t_type == 'g102':
+        #     Mpoint2.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 point_class=point_class,
+        #                 ondor_type=ondor_type,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='GNSS-ийн байнгын ажиллагаатай станц',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g103':
+        #     Mpoint3.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 point_class=point_class,
+        #                 ondor_type=ondor_type,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='GPS-ийн сүлжээний цэг',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g104':
+        #     Mpoint4.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 point_class=point_class,
+        #                 ondor_type=ondor_type,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Триангуляцийн сүлжээний цэг',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g105':
+        #     Mpoint5.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 point_class=point_class,
+        #                 ondor_type=ondor_type,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Полигонометрийн сүлжээний цэг',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g106':
+        #     Mpoint6.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 point_class=point_class,
+        #                 ondor_type=ondor_type,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Гравиметрийн сүлжээний цэг',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g107':
+        #     Mpoint7.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 point_class=point_class,
+        #                 ondor_type=ondor_type,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Өндрийн сүлжээний цэг',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g108':
+        #     Mpoint8.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 ondor_type=ondor_type,
+        #                 point_class=point_class,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Зураглалын сүлжээний цэг',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g109':
+        #     Mpoint9.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 ondor_type=ondor_type,
+        #                 point_class=point_class,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Шинээр нэмэгдсэн төлөв',
+        #                 geom = geom
+        #     )
+        # if mpoints.t_type == 'g110':
+        #     Mpoint10.objects.using('postgis_db').filter(id=pk).update(
+        #                 objectid="null" ,point_id=point_id,
+        #                 point_name=request.POST.get('tesgiin_ner'),
+        #                 ondor=ondor,
+        #                 ondor_type=ondor_type,
+        #                 point_class=point_class,
+        #                 mclass=request.POST.get('center_typ'),
+        #                 aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+        #                 sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+        #                 sheet3=request.POST.get('cc'),
+        #                 point_class_name='Устсан төлөв',
+        #                 geom = geom
+            # )
+        # TsegPersonal.objects.filter(id=pointName).update(
+        #             suljeenii_torol=request.POST.get('suljeenii_torol'),
+        #             latlongx=request.POST.get('latlongx'),
+        #             latlongy=request.POST.get('latlongy'),
+        #             barishil_tuhai=request.POST.get('barishil_tuhai'),
+        #             sudalga_or_shine=request.POST.get('sudalga_or_shine'),
+        #             hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
+        #             date=date, hotolson=request.POST.get('hotolson'),
+        #             alban_tushaal=request.POST.get('alban_tushaal'),
+        #             alban_baiguullga=request.POST.get('alban_baiguullga'),
+        # )
+    #     tseg_personal = TsegPersonal.objects.filter(id=pointName).first()
+    #     if request.POST.get('tseg_oiroos_img_url') and len(request.POST.get('tseg_oiroos_img_url')) > 2000:
+    #         if tseg_personal.tseg_oiroos_img_url:
+    #             tseg_personal.tseg_oiroos_img_url.delete(save=False)
+    #         [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_oiroos_img_url'), [(720, 720)])
+    #         tseg_personal.tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
+    #         tseg_personal.save()
+    #     if request.POST.get('tseg_holoos_img_url') and len(request.POST.get('tseg_holoos_img_url')) > 2000:
+    #         if tseg_personal.tseg_holoos_img_url:
+    #             tseg_personal.tseg_holoos_img_url.delete(save=False)
+    #         [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_holoos_img_url'), [(720, 720)])
+    #         tseg_personal.tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
+    #         tseg_personal.save()
+    #     if request.POST.get('bairshil_tseg_oiroos_img_url')  and len(request.POST.get('bairshil_tseg_oiroos_img_url')) > 2000:
+    #         if tseg_personal.bairshil_tseg_oiroos_img_url:
+    #             tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
+    #         tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
+    #         [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_oiroos_img_url'), [(720, 720)])
+    #         tseg_personal.bairshil_tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
+    #         tseg_personal.save()
+    #     if  request.POST.get('bairshil_tseg_holoos_img_url') and len(request.POST.get('bairshil_tseg_holoos_img_url')) > 2000:
+    #         if tseg_personal.bairshil_tseg_holoos_img_url:
+    #             tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
+    #         [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_holoos_img_url'), [(720, 720)])
+    #         tseg_personal.bairshil_tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
+    #         tseg_personal.save()
+    #     if not request.POST.get('file1'):
+    #         tseg_personal.file_path1.delete(save=False)
+    #         tseg_personal.file_path1 = request.FILES['file1']
+    #         tseg_personal.save()
+    #     if not request.POST.get('file2'):
+    #         tseg_personal.file_path2.delete(save=False)
+    #         tseg_personal.file_path2 = request.FILES['file2']
+    #         tseg_personal.save()
+    #     pdf_id = Mpoint_view.objects.using('postgis_db').filter(id=pk).first()
+    #     file_name = pdf_id.pid + '.pdf'
+    #     src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+    #     pdf = createPdf(pk)
+    #     pdf.output(src_file, 'F')
+    #     return JsonResponse({'success': True, 'name': False, 'ids':False})
     else:
         tesgiin_ner = request.POST.get('tesgiin_ner')
         objectid = request.POST.get('toviin_dugaar')
@@ -1092,26 +1101,29 @@ def tsegPersonal(request):
             date = request.POST.get('date')
         x = float(request.POST.get('latlongx'))
         y = float(request.POST.get('latlongy'))
-        cursor = connections['postgis_db'].cursor()
-        update_cursor = connections['postgis_db'].cursor()
-        cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326)''', [x, y])
-        geom = cursor.fetchone()
+        geom = Point(x, y)
         ondor = request.POST.get('ondor')
+        point_id = request.POST.get('toviin_dugaar')
         mpoint = Mpoint9.objects.using('postgis_db').create(
-                    objectid='null', point_id=point_id,
+                    objectid='null',
+                    point_id=point_id,
                     ondor=ondor,
                     point_name=request.POST.get('tesgiin_ner'),
                     ondor_type=ondor_type,
-                    pid=for_db_pdf_name, point_class=request.POST.get('suljeenii_torol'), mclass=request.POST.get('center_typ'),
-                    aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('BA'),
+                    pid=for_db_pdf_name,
+                    point_class=request.POST.get('suljeenii_torol'),
+                    mclass=request.POST.get('center_typ'),
+                    aimag=request.POST.get('aimag_name'),
+                    sum=request.POST.get('sum_name'),
+                    sheet1=request.POST.get('trapetsiin_dugaar'),
+                    sheet2=request.POST.get('BA'),
                     sheet3=request.POST.get('LA'),
                     t_type='g109',
-                    point_class_name='Шинээр нэмэгдсэн төлөв'
+                    point_class_name='Шинээр нэмэгдсэн төлөв',
+                    geom = geom
         )
-        update_cursor.execute(''' UPDATE mpoint9 SET geom = %s WHERE id = %s ''', [geom, str(mpoint.id)])
         tsegPersenal = TsegPersonal.objects.create(
-                    id=mpoint.id,
+                    id=point_id,
                     suljeenii_torol=request.POST.get('suljeenii_torol'),
                     latlongx=request.POST.get('latlongx'),
                     latlongy=request.POST.get('latlongy'),
@@ -1150,6 +1162,8 @@ def tsegPersonal(request):
         if request.POST.get('date'):
             date = request.POST.get('date')
         src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        print('\n\n------------------------------------------------------')
+        print(tsegPersenal.id)
         pdf = createPdf(tsegPersenal.id)
         pdf.output(src_file, 'F')
     return JsonResponse({'success': True, 'name': False, 'ids':False})
