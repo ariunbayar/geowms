@@ -28,9 +28,9 @@ export default class SideBar extends Component {
     render() {
         const {features, check} = this.props
         return (
-            <form className={`card col-md-7`} style={{left:"10px"}}>
+            <form>
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
-                <div className="card-body">
+                <div>
                     {
                         features.length > 0 && check == 'байгаа'
                         ?
