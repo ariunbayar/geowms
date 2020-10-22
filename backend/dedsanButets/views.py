@@ -199,8 +199,7 @@ def Edit_name(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def Get_fields(request, payload):
-    # id = payload.get('id')
+def getFields(request, payload):
     model_name = payload.get('name')
     try:
         if model_name == 'theme':
@@ -209,9 +208,24 @@ def Get_fields(request, payload):
             model_name = LPackages
         if model_name == 'feature':
             model_name == LFeatures
+        fields = []
+        for i in LThemes._meta.get_fields():
+            type_name = i.get_internal_type()
+            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not i.name == 'AutoField':
+                if type_name == "CharField":
+                    type_name = 'text'
+                if type_name == "IntegerField" and type_name == "BigIntegerField":
+                    type_name = 'number'
+                if type_name == "BooleanField":
+                    type_name = 'radio'
+                fields.append({
+                    'field_name': i.name,
+                    'field_type': type_name,
+                    'data': None
+                })
         rsp = {
             'success': True,
-            'fields': [f.name for f in model_name._meta.get_fields()]
+            'fields': fields
         }
     except Exception:
         rsp = {

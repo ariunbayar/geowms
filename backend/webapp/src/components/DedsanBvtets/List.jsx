@@ -3,6 +3,7 @@ import { service } from './service'
 import {Switch, Route, NavLink} from "react-router-dom"
 import { CompilationStatus } from 'webpack-build-notifier/dist/types'
 import SideBar from './sideTable'
+import Forms from './Form'
 import './style.css'
 
 export class List extends Component {
@@ -104,7 +105,10 @@ export class List extends Component {
                     <div className="card-body">
                         {this.state.form_is_laod ?
                         <SideBar features={this.state.feature_lists} check={this.state.check}/>:
-                        <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
+                        <div>
+                            <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
+                            <Forms></Forms>
+                        </div>
                         }
                     </div>
                 </div>
