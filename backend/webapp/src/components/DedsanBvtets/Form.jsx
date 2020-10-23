@@ -11,6 +11,8 @@ export default class Forms extends Component {
             is_loading: true,
             pid: props.pid,
             fid: props.fid,
+            model_id: null,
+            model_name: null,
             values: {},
         }
 
@@ -20,14 +22,13 @@ export default class Forms extends Component {
 
     onSubmit(values, { setStatus, setSubmitting }) {
         console.log(values)
-        // service
-        //     .update(values, this.state.pid, this.state.fid)
-        //     .then(({ success }) => {
-        //         if (success) {
-        //             this.setState({is_loading:true})
-
-        //         }
-        //     })
+        const {model_name} = this.state
+        service.save(values, model_name).then(({ success, info }) => {
+            if (success) {
+                alert(info)
+                this.setState({is_loading:true})
+            }
+        })
     }
 
     componentDidUpdate(pP){
@@ -71,7 +72,7 @@ export default class Forms extends Component {
         const { values, id } = this.state
         return (
             <div className='overflow-auto card-body'>
-                {this.props.model_name &&<h4 className="text-center">Model-{this.props.model_name}</h4>}
+                {this.props.model_name &&<h4 className="text-center">Model-{this.props.model_name}-{this.props.model_id}</h4>}
                 <hr></hr>
                 <Formik
                     enableReinitialize

@@ -245,65 +245,59 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
-def _saveData(id, datas, model_name):
-    name = model_name._meta.object_name
-    order_no = len(model_name.objects.all()) + 1
-    if id:
-        if name == 'LPackages':
-            data = model_name(
-                package_code='datas.package_code',
-                package_name='datas.package_name',
-                package_name_eng='datas.package_name_eng',
-                theme_id=id,
-                order_no=order_no
-            )
-        if name == 'LFeatures':
-            data = model_name(
-                feature_code='datas.feature_code',
-                feature_name='datas.feature_name',
-                feature_name_eng='datas.feature_name_eng',
-                package_id=id,
-                order_no=order_no
-            )
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай хадгалсан'
-        }
-    else:
-        if name == 'LThemes':
-            data = model_name(
-                theme_code='datas.theme_code',
-                theme_name='datas.theme_name',
-                theme_name_eng='datas.theme_name_eng',
-                order_no=order_no,
-            )
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай хадгалсан'
-        }
-    # data.save()
-    return (rsp)
+def getModel(model_name):
+    if model_name == 'theme':
+        model_name = LThemes
+    if model_name == 'package':
+        model_name = LPackages
+    if model_name == 'feature':
+        model_name = LFeatures
+    return model_name
+
 
 @require_POST
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def save_data(request, payload):
-    id = payload.get('id')
-    model_name = payload.get('name')
-    datas = payload.get('data')
-    try:
-        if model_name == 'theme':
-            model_name = LThemes
-            rsp = _saveData(id, datas, model_name)
-        if model_name == 'package':
-            model_name = LPackages
-            rsp = _saveData(id, datas, model_name)
-        if model_name == 'feature':
-            model_name == LFeatures
-            rsp = _saveData(id, datas, model_name)
-    except Exception:
+def save(request, payload):
+    model_name = payload.get("model_name")
+    json = payload.get("form_values")
+    model_name = getModel(model_name)
+    json = json['form_values']
+    fields = []
+    for i in model_name._meta.get_fields():
+        type_name = i.get_internal_type()
+        if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
+            if type_name == "CharField":
+                type_name = 'text'
+            if type_name == "IntegerField" or type_name == "BigIntegerField":
+                type_name = 'number'
+            if type_name == "BooleanField":
+                type_name = 'radio'
+            fields.append(i.name)
+
+    check = True
+    datas = {}
+    for data in json:
+        if data['field_name'] in fields:
+            if data['field_type'] == 'radio':
+                if data['data'] == 'true':
+                    datas[data['field_name']] = True
+                else:
+                    datas[data['field_name']] = False
+            else:
+                datas[data['field_name']] = data['data']
+        else:
+            check = False
+
+    if check:
+        sain = model_name.objects.create(**datas)
         rsp = {
-            'success': False,
+            'success': True,
+            'info': 'Амжилттай'
+        }
+    else:
+        rsp = {
+            'success': True,
             'info': 'Алдаа гарлаа'
         }
+
     return JsonResponse(rsp)
