@@ -12,7 +12,7 @@ from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
 from backend.zipcode import views as zipcode_views
-from backend.dedsanButets import views as zipcode_dedsan_butets
+from backend.dedsanButets import views as dedsan_butets
 import backend.gis.views
 
 
@@ -176,10 +176,11 @@ urlpatterns = [
     ], 'gis'))),
 
     path('dedsan-butests/', include(([
-        path('all/', zipcode_dedsan_butets.bundleButetsAll),
-        path('prop/<str:code>/', zipcode_dedsan_butets.Property),
-        path('editName/', zipcode_dedsan_butets.Edit_name),
-        path('get-fields/', zipcode_dedsan_butets.getFields),
+        path('all/', dedsan_butets.bundleButetsAll),
+        path('prop/<str:code>/', dedsan_butets.Property),
+        path('editName/', dedsan_butets.Edit_name),
+        path('get-fields/', dedsan_butets.getFields),
+        path('save/', dedsan_butets.save),
     ], 'dedsan-butests'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

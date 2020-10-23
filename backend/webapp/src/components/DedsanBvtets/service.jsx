@@ -3,7 +3,8 @@ export const service ={
     getall,
     getprop,
     editName,
-    getFields
+    getFields,
+    save
 }
 
 const prefix = '/back/dedsan-butests'
@@ -36,4 +37,12 @@ function getFields(name){
         body: JSON.stringify({ name }),
     }
     return fetch(`${prefix}/get-fields/`, opts).then(handleResponse)
+}
+
+function save(form_values, model_name){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({form_values, model_name}),
+    }
+    return fetch(`${prefix}/save/`, opts).then(handleResponse)
 }
