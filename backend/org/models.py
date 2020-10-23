@@ -52,7 +52,7 @@ class OrgInspireRoles(models.Model):
     )
 
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
-    module_root_id = models.BigIntegerField()
+    module_root_id = models.BigIntegerField(null=True)
     module_id = models.BigIntegerField()
     module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
     perm_view = models.BooleanField(db_index=True)
