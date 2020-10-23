@@ -10,6 +10,7 @@ from .models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
 from backend.govorg.models import GovOrg
+from .models import OrgInspireRoles
 from django.contrib.postgres.search import SearchVector
 
 
@@ -390,3 +391,53 @@ def employeeList(request,payload, level, pk):
     }
 
     return JsonResponse(rsp)
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def rolesAdd(request, payload, level, pk):
+    form_datas = payload.get("form_values")
+    org = get_object_or_404(Org, pk=pk)
+    def role_update(roles, table_name, root_id, id):
+        if root_id:
+            org_check = OrgInspireRoles.objects.filter(module_root_id=root_id , module_id=id, module=table_name)
+        else:
+            org_check = OrgInspireRoles.objects.filter(module_id=id, module=table_name)
+        if org_check:
+            org_check.update(
+                perm_view=roles[0],
+                perm_create=roles[1],
+                perm_remove=roles[2],
+                perm_update=roles[3],
+                perm_revoke=roles[4],
+                perm_review=roles[5],
+                perm_approve=roles[6]
+            )
+        else:
+            orgRole = OrgInspireRoles.objects.create(
+                org=org,
+                module_id=id,
+                module=table_name,
+                perm_view=roles[0],
+                perm_create=roles[1],
+                perm_remove=roles[2],
+                perm_update=roles[3],
+                perm_revoke=roles[4],
+                perm_review=roles[5],
+                perm_approve=roles[6]
+            )
+            if orgRole and root_id:
+                orgRole.module_root_id = root_id
+                orgRole.save()
+
+
+    for themes in form_datas:
+        role_update(themes['roles'], 1, None, themes['id'])
+        for packages in themes['packages']:
+            role_update(packages['roles'], 2, themes['id'], packages['id'])
+            for features in packages['features']:
+                role_update(features['roles'], 3, packages['id'], features['id'])
+                for properties in features['properties']:
+                    role_update(properties['roles'], 4, features['id'], properties['id'])
+
+    return JsonResponse({'success': True})

@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import {service} from '../service'
 import {NavLink} from "react-router-dom"
+import ModalAlert from "../../ModalAlert"
 
 
 export class OrgInspireRole extends Component {
@@ -11,14 +12,36 @@ export class OrgInspireRole extends Component {
 
         this.state = {
             form_datas: [],
+            handleSaveIsLoad: false,
+            modal_alert_status: "closed",
+            timer: null,
+            model_type_icon: '',
+            title: '',
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
+
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        console.log(values)
+        const {level, id} = this.props.match.params
+        this.setState({handleSaveIsLoad: true})
+        service.rolesAdd(level, id, values).then(({success}) => {
+            if (success) {
+                setTimeout(() => {
+                    this.setState({modal_alert_status: "open", model_type_icon: 'success', title: 'Амжилттай хадгаллаа', handleSaveIsLoad: false})
+                    this.modalCloseTime()
+                }, 1000);
+            }
+            else{
+                setTimeout(() => {
+                    this.setState({modal_alert_status: "open", model_type_icon: 'danger', title: 'Алдаа гарлаа', handleSaveIsLoad: false})
+                    this.modalCloseTime()
+                }, 1000);
+            }
+        })
     }
     componentDidMount() {
         const form_datas = [{
@@ -43,7 +66,14 @@ export class OrgInspireRole extends Component {
                            "code":"au-au-ahl",
                            "name":"bagana1",
                            "roles":[false,false,false,false,false,false,false]
-                        }]
+                        },
+                        {
+                            "id":2,
+                            "code":"au-au-ahl",
+                            "name":"bagana1",
+                            "roles":[false,false,false,false,false,false,false]
+                         }
+                        ]
                      }
                   ]
                }
@@ -53,6 +83,20 @@ export class OrgInspireRole extends Component {
     }
 
     handleListUpdated() {
+    }
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_status: 'closed'})
+            this.setState({handleSaveIsLoad:false})
+            this.handleListUpdated()
+        }, 2000)
+    }
+
+    modalClose(){
+        this.setState({modal_alert_status: 'closed'})
+        clearTimeout(this.state.timer)
+        this.setState({handleSaveIsLoad:false})
+        this.handleListUpdated()
     }
 
 
@@ -144,6 +188,7 @@ export class OrgInspireRole extends Component {
                                                                             </div>
                                                                             )}
                                                                         </div>
+                                                                        <hr></hr>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -161,7 +206,10 @@ export class OrgInspireRole extends Component {
                                     ) : ( null
                                     )}
                                     <div>
-                                    <button type="submit" className="btn btn-block gp-btn-primary my-3">Хадгалах</button>
+                                    {this.state.handleSaveIsLoad ?
+                                        <button className="btn btn-block gp-btn-primary my-3">Уншиж байна</button>:
+                                        <button type="submit" className="btn btn-block gp-btn-primary my-3">Хадгалах</button>
+                                    }
                                     </div>
                                 </div>
                                 )}
@@ -169,6 +217,12 @@ export class OrgInspireRole extends Component {
                         </Form>
                     )}
                 />
+            <ModalAlert
+                modalAction={() => this.modalClose()}
+                status={this.state.modal_alert_status}
+                title={this.state.title}
+                model_type_icon={this.state.model_type_icon}
+            />
 
             </div>
         )

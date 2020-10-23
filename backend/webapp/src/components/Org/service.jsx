@@ -14,6 +14,7 @@ export const service = {
     employee_list,
     orgList,
     orgAll,
+    rolesAdd
 }
 
 
@@ -115,4 +116,12 @@ function employee_list(page, perpage, query, level, org_id) {
         body: JSON.stringify({page, perpage, query, level, org_id}),
     }
     return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
+}
+
+function rolesAdd(level, org_id, values) {
+    const opts = {
+        ...getPostOptions(),
+           body: JSON.stringify(values),
+    }
+    return fetch(`${prefix}/level-${level}/${org_id}/roles-add/`, opts).then(handleResponse)
 }
