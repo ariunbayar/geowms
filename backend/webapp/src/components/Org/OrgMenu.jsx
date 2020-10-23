@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {Switch , Route, Link, NavLink} from "react-router-dom"
-import {OrgForm} from './OrgForm'
 import {OrgRole} from './OrgRole'
+import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 
@@ -59,15 +59,15 @@ export class OrgMenu extends Component {
                                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active nav-link"  data-toggle="tab"><i className="icon-home"></i> <span className="hidden-xs">Эрх</span></NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active nav-link"  data-toggle="tab"><i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span><small classNameName="badge float-right badge-info">{this.state.employee_count}</small></NavLink>
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active nav-link"  data-toggle="tab"><i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span><small className="badge float-right badge-info">{this.state.employee_count}</small></NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} className="active nav-link"  data-toggle="tab"><i className="icon-envelope-open"></i> <span className="hidden-xs">Систем</span><small classNameName="badge float-right badge-info">{this.state.sistem_count}</small></NavLink>
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} className="active nav-link"  data-toggle="tab"><i className="icon-envelope-open"></i> <span className="hidden-xs">Систем</span><small className="badge float-right badge-info">{this.state.sistem_count}</small></NavLink>
                             </li>
                         </ul>
                         <div className="tab-content">
                         <Switch>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgInspireRole}/>
                             <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
                             <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
                         </Switch>
