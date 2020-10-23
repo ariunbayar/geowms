@@ -52,28 +52,40 @@ export class OrgMenu extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
-                <div className="row">
-                    <div className="col-lg-12">
-                        <ul className="nav nav-tabs nav-tabs-dark nav-justified">
-                            <li className="nav-item">
-                                    <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} activeClassName="active nav-link"  data-toggle="tab"><i className="icon-home"></i> <span className="hidden-xs">Эрх</span></NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} activeClassName="active nav-link"  data-toggle="tab"><i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span><small className="badge float-right badge-info">{this.state.employee_count}</small></NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} className="active nav-link"  data-toggle="tab"><i className="icon-envelope-open"></i> <span className="hidden-xs">Систем</span><small className="badge float-right badge-info">{this.state.sistem_count}</small></NavLink>
-                            </li>
-                        </ul>
-                        <div className="tab-content">
-                        <Switch>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgInspireRole}/>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
-                        </Switch>
-                        </div>
-                    </div>
+            <div>
+                <ul className="nav nav-tabs nav-tabs-dark nav-justified">
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} className="nav-link"
+                            activeClassName="active"  data-toggle="tab">
+                            <i className="icon-home"></i> <span className="hidden-xs">Эрх</span>
+                        </NavLink>
+                    </li>
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/inspire/`} className="nav-link"
+                            activeClassName="active"  data-toggle="tab">
+                            <i className="icon-home"></i> <span className="hidden-xs">Эрх inspire</span>
+                        </NavLink>
+                    </li>
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} className="nav-link"
+                            activeClassName="active"  data-toggle="tab">
+                        <i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span></NavLink>
+                    </li>
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} className="nav-link"
+                                activeClassName="active"  data-toggle="tab"><i className="icon-envelope-open">
+                        </i> <span className="hidden-xs">Систем</span></NavLink>
+                    </li>
+                </ul>
+                <div className="tab-content">
+                    <Switch>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/inspire/" component={OrgInspireRole}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
+                    </Switch>
                 </div>
+            </div>
         )
     }
 }
