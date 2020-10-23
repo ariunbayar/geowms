@@ -31,14 +31,23 @@ export default class Forms extends Component {
     }
 
     componentDidUpdate(pP){
+        if(pP.model_name !== this.props.model_name)
+        {
+            const {model_id, model_name} = this.props
+            this.setState({model_id, model_name})
+            if(model_name) this.getFields(model_name)
+
+        }
     }
 
     componentDidMount() {
-        this.getFields('theme')
+        const {model_id, model_name} = this.props
+        this.setState({model_id, model_name})
+        if(model_name) this.getFields(model_name)
     }
 
-    getFields(name){
-        service.getFields(name).then(({ fields }) => {
+    getFields(model_name){
+        service.getFields(model_name).then(({ fields }) => {
            if(fields)
            {
                console.log(fields)
@@ -58,7 +67,7 @@ export default class Forms extends Component {
         const { values, id } = this.state
         return (
             <div className='overflow-auto card-body'>
-                {this.props.gid &&<h4 className="text-center">Geom дугаар-{this.props.gid}</h4>}
+                {this.props.model_name &&<h4 className="text-center">Model-{this.props.model_name}</h4>}
                 <hr></hr>
                 <Formik
                     enableReinitialize

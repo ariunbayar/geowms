@@ -207,14 +207,14 @@ def getFields(request, payload):
         if model_name == 'package':
             model_name = LPackages
         if model_name == 'feature':
-            model_name == LFeatures
+            model_name = LFeatures
         fields = []
-        for i in LThemes._meta.get_fields():
+        for i in model_name._meta.get_fields():
             type_name = i.get_internal_type()
-            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not i.name == 'AutoField':
+            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
                 if type_name == "CharField":
                     type_name = 'text'
-                if type_name == "IntegerField" and type_name == "BigIntegerField":
+                if type_name == "IntegerField" or type_name == "BigIntegerField":
                     type_name = 'number'
                 if type_name == "BooleanField":
                     type_name = 'radio'
