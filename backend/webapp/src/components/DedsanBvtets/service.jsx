@@ -31,6 +31,7 @@ function editName(id, name){
 }
 
 function getFields(name){
+    console.log(name)
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({ name }),

@@ -208,6 +208,16 @@ def getFields(request, payload):
             model_name = LPackages
         if model_name == 'feature':
             model_name = LFeatures
+        if model_name == 'property':
+            model_name = LProperties
+        if model_name == 'feature_config':
+            model_name = LFeatureConfigs
+        if model_name == 'data_type':
+            model_name = LDataTypes
+        if model_name == 'value_type':
+            model_name = LValueTypes
+        if model_name == 'code_list':
+            model_name = LCodeLists
         fields = []
         for i in model_name._meta.get_fields():
             type_name = i.get_internal_type()

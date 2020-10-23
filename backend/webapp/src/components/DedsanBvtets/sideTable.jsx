@@ -77,6 +77,17 @@ export default class SideBar extends Component {
                                                                                                         <span> {code.code_list_name}</span>
                                                                                                     </li>
                                                                                                 )}
+                                                                                                <li className="text-danger">
+                                                                                                    <a
+                                                                                                        type="button"
+                                                                                                        className="gp-text-primary"
+                                                                                                        onClick={() => this.props.handleFormLeft('code_list', 1)}
+                                                                                                    >
+                                                                                                        <i className="fa fa-plus-circle gp-text-primary"></i>
+                                                                                                        &nbsp;
+                                                                                                        code list neme
+                                                                                                    h</a>
+                                                                                                </li>
                                                                                             </ul>
                                                                                             :
                                                                                             null
@@ -84,16 +95,51 @@ export default class SideBar extends Component {
 
                                                                                     </li>
                                                                                 )}
+                                                                                <li className="text-danger">
+                                                                                    <a
+                                                                                        type="button"
+                                                                                        className="gp-text-primary"
+                                                                                        onClick={() => this.props.handleFormLeft('value_type', 1)}
+                                                                                    >
+                                                                                        <i className="fa fa-plus-circle gp-text-primary"></i>
+                                                                                        &nbsp;
+                                                                                        value type nemeh
+                                                                                    </a>
+                                                                                </li>
                                                                             </ul>
                                                                         </th>
                                                                     </tr>
                                                                 )}
+                                                                <tr>
+                                                                    <th colSpan="2" className="text-danger">
+                                                                        <a
+                                                                            type="button"
+                                                                            className="gp-text-primary"
+                                                                            onClick={() => this.props.handleFormLeft('property', 1)}
+                                                                        >
+                                                                            <i className="fa fa-plus-circle gp-text-primary"></i>
+                                                                            &nbsp;
+                                                                            property nemeh
+                                                                        </a>
+                                                                    </th>
+                                                                </tr>
                                                                 {/* </tr> */}
                                                             </thead>
                                                         )}
                                                    </table>
                                                 </li>
                                             )}
+                                            <li className="text-danger">
+                                                <a
+                                                    type="button"
+                                                    className="gp-text-primary"
+                                                    onClick={() => this.props.handleFormLeft('feature_config', 1)}
+                                                >
+                                                    <i className="fa fa-plus-circle gp-text-primary"></i>
+                                                    &nbsp;
+                                                    f config nemeh
+                                                </a>
+                                            </li>
                                         </ol>
                                     </div>
                                 )

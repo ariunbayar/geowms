@@ -56,10 +56,9 @@ export class List extends Component {
         this.setState({form_is_laod:false, model_id, model_name})
     }
 
-    handleFormLeft(id){
-        console.log(id)
-
-        this.setState({form_is_laod_left:false})
+    handleFormLeft(model_name, model_id){
+        console.log(model_name)
+        this.setState({form_is_laod_left:false, model_name, model_id})
     }
 
     render() {
@@ -97,7 +96,10 @@ export class List extends Component {
                             <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm("theme", null)}><i className="fa fa-plus-circle gp-text-primary"></i> Дэд сан нэмэх</a></li>
                             </ul>
                             :
-                            <a onClick={() => this.setState({form_is_laod_left:true})}>bolsoon</a>
+                            <div>
+                                <a onClick={() => this.setState({form_is_laod_left:true})}>bolsoon</a>
+                                <Forms model_name={model_name} model_id={model_id}></Forms>
+                            </div>
                         }
 
 
@@ -106,7 +108,7 @@ export class List extends Component {
                 <div className={`card col-md-7`} style={{left:"10px"}}>
                     <div className="card-body">
                         {this.state.form_is_laod ?
-                        <SideBar features={this.state.feature_lists} check={this.state.check}/>:
+                        <SideBar features={this.state.feature_lists} check={this.state.check} handleFormLeft={this.handleFormLeft} handleForm={() => this.handleForm()}/>:
                         <div>
                             <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
                             <Forms model_name={model_name} model_id={model_id}></Forms>

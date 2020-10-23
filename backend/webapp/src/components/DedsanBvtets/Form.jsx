@@ -50,8 +50,12 @@ export default class Forms extends Component {
         service.getFields(model_name).then(({ fields }) => {
            if(fields)
            {
-               console.log(fields)
-               this.setState({values: fields, is_loading:false})
+                console.log(fields)
+                this.setState({values: fields, is_loading:false})
+           }
+           else
+           {
+                console.log('get fields gg')
            }
         })
     }
@@ -87,14 +91,25 @@ export default class Forms extends Component {
                                         </div>
                                             <div className="col-md-9">
                                                 {friend.field_type == 'radio' ?
-                                                <div role="group" aria-labelledby="my-radio-group">
+                                                <div role="group" className="form-check" aria-labelledby="my-radio-group">
                                                     <label>
-                                                    <Field type="radio" name={`form_values.${index}.data`} value="true" />
-                                                        True
-                                                    </label>&nbsp;
+                                                        <Field
+                                                            type="radio"
+                                                            className="form-check-input"
+                                                            name={`form_values.${index}.data`}
+                                                            value="true"
+                                                        />
+                                                            <b className="text-center">True</b>
+                                                    </label>
+                                                        <br/>
                                                     <label>
-                                                    <Field type="radio" name={`form_values.${index}.data`} value="false" />
-                                                        False
+                                                        <Field
+                                                            type="radio"
+                                                            className="form-check-input"
+                                                            name={`form_values.${index}.data`}
+                                                            value="false"
+                                                        />
+                                                            <b className="text-center">False</b>
                                                     </label>
                                                 </div>
                                                 :
