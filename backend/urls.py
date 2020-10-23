@@ -179,6 +179,7 @@ urlpatterns = [
         path('all/', zipcode_dedsan_butets.bundleButetsAll),
         path('prop/<str:code>/', zipcode_dedsan_butets.Property),
         path('editName/', zipcode_dedsan_butets.Edit_name),
+        path('get-fields/', zipcode_dedsan_butets.getFields),
     ], 'dedsan-butests'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

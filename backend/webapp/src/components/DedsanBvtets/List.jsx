@@ -3,6 +3,7 @@ import { service } from './service'
 import {Switch, Route, NavLink} from "react-router-dom"
 import { CompilationStatus } from 'webpack-build-notifier/dist/types'
 import SideBar from './sideTable'
+import Forms from './Form'
 import './style.css'
 
 export class List extends Component {
@@ -15,7 +16,9 @@ export class List extends Component {
             feature_lists: [],
             check: '',
             form_is_laod: true,
-            form_is_laod_left: true
+            form_is_laod_left: true,
+            model_id: null,
+            model_name: null
         }
         this.getAll = this.getAll.bind(this)
         this.handleForm = this.handleForm.bind(this)
@@ -48,9 +51,9 @@ export class List extends Component {
         })
     }
 
-    handleForm(id){
-        console.log(id)
-        this.setState({form_is_laod:false})
+    handleForm(model_name, model_id){
+        console.log(model_id)
+        this.setState({form_is_laod:false, model_id, model_name})
     }
 
     handleFormLeft(id){
@@ -60,7 +63,7 @@ export class List extends Component {
     }
 
     render() {
-        const { list_all, form_is_laod_left } = this.state
+        const { list_all, form_is_laod_left, model_name, model_id } = this.state
         return (
             <div className="row m-0">
                 <div className="card col-md-5">
@@ -83,15 +86,15 @@ export class List extends Component {
                                                             </a>
                                                         </li>
                                                     )}
-                                                    <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm(packages.package_id)}><i className="fa fa-plus-circle gp-text-primary"></i> Давхрага нэмэх</a></li>
+                                                    <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm('feature', packages.id)}><i className="fa fa-plus-circle gp-text-primary"></i> Давхрага нэмэх</a></li>
                                                 </ul>
                                             </li>
                                         )}
-                                        <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm(theme.theme_id)}><i className="fa fa-plus-circle gp-text-primary"></i> Багц нэмэх</a></li>
+                                        <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm('package', theme.id)}><i className="fa fa-plus-circle gp-text-primary"></i> Багц нэмэх</a></li>
                                     </ul>
                                 </li>
                             )}
-                            <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm("theme")}><i className="fa fa-plus-circle gp-text-primary"></i> Дэд сан нэмэх</a></li>
+                            <li><a type="button" className="gp-text-primary" onClick={() => this.handleForm("theme", null)}><i className="fa fa-plus-circle gp-text-primary"></i> Дэд сан нэмэх</a></li>
                             </ul>
                             :
                             <a onClick={() => this.setState({form_is_laod_left:true})}>bolsoon</a>
@@ -104,7 +107,10 @@ export class List extends Component {
                     <div className="card-body">
                         {this.state.form_is_laod ?
                         <SideBar features={this.state.feature_lists} check={this.state.check}/>:
-                        <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
+                        <div>
+                            <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
+                            <Forms model_name={model_name} model_id={model_id}></Forms>
+                        </div>
                         }
                     </div>
                 </div>
