@@ -695,9 +695,7 @@ def tsegPersonalUpdate(request, payload):
     data = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
     point_id = data.point_id
     tseg = TsegPersonal.objects.filter(id = point_id).first()
-    search_cursor = connections['postgis_db'].cursor()
-    search_cursor.execute(''' SELECT ST_X(ST_TRANSFORM(ST_CENTROID(%s),4326)) AS x,  ST_Y(ST_CENTROID(ST_TRANSFORM(%s,4326))) AS y FROM mpoint_view where id = %s ''', [data.geom, data.geom, str(pk)])
-    search_cursor_data = search_cursor.fetchone()
+    search_cursor_data = GEOSGeometry(data.geom)
     if search_cursor_data:
         latlongx = search_cursor_data[0]
         latlongy = search_cursor_data[1]
