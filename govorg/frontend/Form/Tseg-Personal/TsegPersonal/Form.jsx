@@ -101,7 +101,7 @@ export  class Forms extends Component {
 
     componentDidMount(){
         const id = this.props.data.match.params.id
-        const t_type = this.props.data.match.params.id
+        const t_type = this.props.data.match.params.t_type
         if(id) {
             this.setState({id, t_type})
             this.tsegUpdate(id, t_type)
@@ -379,6 +379,8 @@ export  class Forms extends Component {
         form_datas.append('alban_tushaal', this.state.values.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.values.alban_baiguullga)
         const id = this.props.data.match.params.id
+        const t_type = this.props.data.match.params.t_type
+        form_datas.append('t_type', t_type)
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
                 setTimeout(() => {

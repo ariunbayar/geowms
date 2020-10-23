@@ -14,7 +14,6 @@ export class Forms extends Component {
         return (
             <div className="">
                 {perm_view ?
-                    
                     <Switch>
                         <Route path="/gov/froms/tseg-info/" component={()=><Bar perms={this.props.perms}/>}/>
                     </Switch>
