@@ -219,3 +219,67 @@ def Get_fields(request, payload):
             'info': 'Алдаа гарлаа'
         }
     return JsonResponse(rsp)
+
+
+def _saveData(id, datas, model_name):
+    name = model_name._meta.object_name
+    order_no = len(model_name.objects.all()) + 1
+    if id:
+        if name == 'LPackages':
+            data = model_name(
+                package_code='datas.package_code',
+                package_name='datas.package_name',
+                package_name_eng='datas.package_name_eng',
+                theme_id=id,
+                order_no=order_no
+            )
+        if name == 'LFeatures':
+            data = model_name(
+                feature_code='datas.feature_code',
+                feature_name='datas.feature_name',
+                feature_name_eng='datas.feature_name_eng',
+                package_id=id,
+                order_no=order_no
+            )
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хадгалсан'
+        }
+    else:
+        if name == 'LThemes':
+            data = model_name(
+                theme_code='datas.theme_code',
+                theme_name='datas.theme_name',
+                theme_name_eng='datas.theme_name_eng',
+                order_no=order_no,
+            )
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хадгалсан'
+        }
+    # data.save()
+    return (rsp)
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def save_data(request, payload):
+    id = payload.get('id')
+    model_name = payload.get('name')
+    datas = payload.get('data')
+    try:
+        if model_name == 'theme':
+            model_name = LThemes
+            rsp = _saveData(id, datas, model_name)
+        if model_name == 'package':
+            model_name = LPackages
+            rsp = _saveData(id, datas, model_name)
+        if model_name == 'feature':
+            model_name == LFeatures
+            rsp = _saveData(id, datas, model_name)
+    except Exception:
+        rsp = {
+            'success': False,
+            'info': 'Алдаа гарлаа'
+        }
+    return JsonResponse(rsp)
