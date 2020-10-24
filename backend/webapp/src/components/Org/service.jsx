@@ -14,7 +14,8 @@ export const service = {
     employee_list,
     orgList,
     orgAll,
-    rolesAdd
+    rolesAdd,
+    inspireRoles,
 }
 
 
@@ -49,6 +50,11 @@ function org_remove(level, org_id) {
         body: JSON.stringify({org_id}),
     }
     return fetch(`${prefix}/level-${level}/org-remove/`, opts).then(handleResponse)
+}
+
+function inspireRoles(level, org_id) {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/level-${level}/${org_id}/Inspireroles/`, requestOptions).then(handleResponse)
 }
 
 

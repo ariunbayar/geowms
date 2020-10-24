@@ -22,28 +22,29 @@ def _get_property(org_id, feature_id):
     property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values("property_id")
     properties = LProperties.objects.filter(property_id__in=[property_ids]).values('property_id', "property_code", "property_name")
     for prop in properties:
-
         properties_list.append({
             'id':prop['property_id'],
             'code':prop['property_code'],
             'name':prop['property_name'],
-            'roles': _get_roles(org_id,prop['property_id'], 4, feature_id)
+            'roles': _get_roles(org_id, prop['property_id'], 4, feature_id)
         })
+
     return properties_list
 
 
 def _get_features(org_id, package_id,):
     feat_values = []
-    features = LFeatures.objects.filter(package_id=15)
+    features = LFeatures.objects.filter(package_id=package_id   )
 
     for feat in features:
         feat_values.append({
             'id':feat.feature_id,
             'code':feat.feature_code,
             'name':feat.feature_name,
-            'roles': _get_roles(org_id, 38, 3, 15),
-            'property': _get_property(org_id, 38)
+            'roles': _get_roles(org_id, feat.feature_id, 3, package_id),
+            'properties': _get_property(org_id, feat.feature_id)
         })
+
     return feat_values
 
 
@@ -51,113 +52,35 @@ def _get_package(org_id, theme_id):
     
     package_data = []
     roles = []
-    for package in LPackages.objects.filter(theme_id=6):        
-        roles = _get_roles(org_id,package.package_id, 2, theme_id)
+    for package in LPackages.objects.filter(theme_id=theme_id):        
+        roles = _get_roles(org_id, package.package_id, 2, theme_id)
         package_data.append({
                 'id': package.package_id,
                 'code': package.package_code,
                 'name': package.package_name,
                 'roles':roles,
-                'features': _get_features(1, package.package_id)
+                'features': _get_features(org_id, package.package_id)
             })    
         
     return package_data
 
 
-def _get_roles(org_id, module_id, module, module_root_id):  
+def _get_roles(org_id, module_id, module, module_root_id): 
+
     roles = []
     if module_root_id:
-        for module in OrgInspireRoles.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ):
-            roles = [
-                module.perm_view,
-                module.perm_create, 
-                module.perm_remove, 
-                module.perm_update, 
-                module.perm_revoke,
-                module.perm_review,
-                module.perm_approve
-                ]
-                
+        module = OrgInspireRoles.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
+        if module:
+            if module.perm_view or module.perm_create or  module.perm_remove or module.perm_update or module.perm_revoke or module.perm_review or module.perm_approve:
+                roles = [module.perm_view,module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
+            else:
+                roles = [False,False,False,False,False,False,False]
+        else:
+            roles = [False,False,False,False,False,False,False]
+
     else:
-        for module in OrgInspireRoles.objects.filter( org_id=org_id, module_id=module_id):
-            roles = [
-                module.perm_view,
-                module.perm_create, 
-                module.perm_remove, 
-                module.perm_update, 
-                module.perm_revoke,
-                module.perm_review,
-                module.perm_approve
-                ]
-            
+        roles = [False,False,False,False,False,False,False]
     return roles
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def InspireRolesCreate(request, payload, level, pk):
-
-    for i in hoho:
-        print("them_id", i['id'])
-        print("roles", i['roles'])
-        print("role1", i['roles'][0])
-
-        OrgInspireRoles.objects.create(
-            module_id=i['id'],
-            module=1,
-            perm_view=i['roles'][0], 
-            perm_create=i['roles'][1], 
-            perm_remove=i['roles'][2], 
-            perm_update=i['roles'][3], 
-            perm_revoke=i['roles'][4], 
-            perm_review=i['roles'][5],
-            perm_approve=i['roles'][6],
-            org_id=1)
-        for j in i['package']:
-            OrgInspireRoles.objects.create(
-            module_root_id=i['id'],
-            module_id=j['id'],
-            module=2,
-            perm_view=j['roles'][0], 
-            perm_create=j['roles'][1], 
-            perm_remove=j['roles'][2], 
-            perm_update=j['roles'][3], 
-            perm_revoke=j['roles'][4], 
-            perm_review=j['roles'][5],
-            perm_approve=j['roles'][6],
-            org_id=1)
-            for k in j['features']:            
-                OrgInspireRoles.objects.create(
-                module_root_id=j['id'],
-                module_id=k['id'],
-                module=3,
-                perm_view=k['roles'][0], 
-                perm_create=k['roles'][1], 
-                perm_remove=k['roles'][2], 
-                perm_update=k['roles'][3], 
-                perm_revoke=k['roles'][4], 
-                perm_review=k['roles'][5],
-                perm_approve=k['roles'][6],
-                org_id=1)
-                for m in k['property']:
-                    OrgInspireRoles.objects.create(
-                    module_root_id=k['id'],
-                    module_id=m['id'],
-                    module=4,
-                    perm_view=m['roles'][0], 
-                    perm_create=m['roles'][1], 
-                    perm_remove=m['roles'][2], 
-                    perm_update=m['roles'][3], 
-                    perm_revoke=m['roles'][4], 
-                    perm_review=m['roles'][5],
-                    perm_approve=m['roles'][6],
-                    org_id=1)
-
-    return JsonResponse({
-        'data': data,
-        'success': True
-    })
 
 
 @require_GET
@@ -167,14 +90,16 @@ def Inspireroles(request, level, pk):
 
     roles = []
     data = []
+    org = get_object_or_404(Org, pk=pk, level=level)
+
+
     for themes in LThemes.objects.all():
-        
         data.append({
                 'id': themes.theme_id,
                 'code': themes.theme_code,
                 'name': themes.theme_name,
-                'package': _get_package(1, themes.theme_id),
-                'roles': _get_roles(1, 6, 1, None)
+                'packages': _get_package(1, themes.theme_id),
+                'roles': _get_roles(org.id, themes.theme_id, 1, None)
             })
     
     return JsonResponse({

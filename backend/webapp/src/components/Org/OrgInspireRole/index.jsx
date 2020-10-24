@@ -44,46 +44,18 @@ export class OrgInspireRole extends Component {
         })
     }
     componentDidMount() {
-        const form_datas = [{
-            "id":1,
-            "code":"au",
-            "name":"Хил зааг",
-            "roles":[false,false,false,false,false,false,false],
-            "packages":[
-               {
-                  "id":6,
-                  "code":"au-au",
-                  "name":"Засаг захиргааны нэгж",
-                  "roles":[false,false,false,false,false,false,false],
-                  "features":[
-                     {
-                        "id":1,
-                        "code":"au-au-ahl",
-                        "name":"Засаг захиргааны түвшний шатлал",
-                        "roles":[false,false,false,false,false,false,false],
-                        "properties":[{
-                           "id":1,
-                           "code":"au-au-ahl",
-                           "name":"bagana1",
-                           "roles":[false,false,false,false,false,false,false]
-                        },
-                        {
-                            "id":2,
-                            "code":"au-au-ahl",
-                            "name":"bagana1",
-                            "roles":[false,false,false,false,false,false,false]
-                         }
-                        ]
-                     }
-                  ]
-               }
-            ]
-         }]
-        this.setState({form_datas})
+        this.handleListUpdated()
     }
 
     handleListUpdated() {
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        service.inspireRoles(org_level, org_id).then(({ success, data }) => {
+            console.log(data)
+            this.setState({form_datas:data})
+          });
     }
+
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: 'closed'})
@@ -102,7 +74,7 @@ export class OrgInspireRole extends Component {
 
     render() {
         const {form_datas} = this.state
-
+        console.log(form_datas)
         return (
             <div className="my-4">
                 <Formik
@@ -138,7 +110,7 @@ export class OrgInspireRole extends Component {
                                                         <a className="text-dark pl-1"><i class="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{name}</a>
                                                     </div>
                                                         {roles.map((role, role_index) =>
-                                                        <div className="col-md-1">
+                                                        <div className="col-md-1" key={role_index}>
 
                                                             <Field type="checkbox" name={`form_values.${theme_index}.roles.${role_index}`} />
                                                         </div>
@@ -147,7 +119,7 @@ export class OrgInspireRole extends Component {
                                                 <hr></hr>
 
 
-                                                {packages.map((package_data, package_index) =>
+                                                {packages ? packages.map((package_data, package_index) =>
                                                     <div key={package_index}>
                                                         <div className="row">
                                                             <div className="col-md-5">
@@ -175,27 +147,27 @@ export class OrgInspireRole extends Component {
                                                                 </div>
                                                                 <hr></hr>
 
-                                                                {feature_data.properties.map((property_data, property_index) =>
+                                                                {feature_data.properties.length > 0 ? feature_data.properties.map((property_data, property_index) =>
                                                                     <div key={property_index}>
                                                                         <div className="row">
                                                                             <div className="col-md-5 ">
                                                                                 <a className="text-dark pl-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-chevron-right gp-text-primary" aria-hidden="true"></i>&nbsp;{property_data.name}</a>
                                                                             </div>
-                                                                            {property_data.roles.map((role, role_index) =>
+                                                                            {property_data ? property_data.roles.map((role, role_index) =>
                                                                             <div className="col-md-1">
 
                                                                                 <Field type="checkbox" name={`form_values.${theme_index}.packages.${package_index}.features.${feature_index}.properties.${property_index}.roles.${role_index}`} />
                                                                             </div>
-                                                                            )}
+                                                                            ):null}
                                                                         </div>
                                                                         <hr></hr>
                                                                     </div>
-                                                                )}
+                                                                ):null }
                                                             </div>
                                                         )}
 
                                                     </div>
-                                                )}
+                                                ):null }
                                                 <hr></hr>
                                                 <hr></hr>
                                             </div>
