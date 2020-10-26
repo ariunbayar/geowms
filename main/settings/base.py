@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'backend.gis.apps.GisConfig',
     'backend.dedsanButets.apps.DedsanbutetsConfig',
     'backend.inspire.apps.InspireConfig',
+    'backend.geoserver.apps.GeoserverConfig',
 
     # API apps
 

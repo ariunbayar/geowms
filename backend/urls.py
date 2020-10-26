@@ -14,6 +14,7 @@ from backend.forms import views as forms_views
 from backend.zipcode import views as zipcode_views
 from backend.dedsanButets import views as zipcode_dedsan_butets
 import backend.gis.views
+from backend.geoserver import views as geoserver_views
 
 
 app_name = 'backend'
@@ -183,6 +184,10 @@ urlpatterns = [
         path('prop/<str:code>/', zipcode_dedsan_butets.Property),
         path('editName/', zipcode_dedsan_butets.Edit_name),
     ], 'dedsan-butests'))),
+
+    path('geoserver/rest/', include(([
+        path('layers/', geoserver_views.layers),
+    ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
 ]
