@@ -1651,6 +1651,7 @@ def tsegPersonalSearch(request, payload):
         }
         return JsonResponse(rsp)
 
+
 @require_POST
 @ajax_required
 def tsegPersonalSuccess(request, payload):
