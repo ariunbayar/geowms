@@ -105,7 +105,7 @@ export class OrgInspireRole extends Component {
                                             <div key={theme_index}>
                                                 <div className="row">
                                                     <div className="col-md-5">
-                                                        <a className="text-dark pl-1"><i class="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{name}</a>
+                                                        <a className="text-dark pl-1"><i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{name}</a>
                                                     </div>
                                                         {roles.map((role, role_index) =>
                                                         <div className="col-md-1" key={role_index}>
@@ -121,10 +121,10 @@ export class OrgInspireRole extends Component {
                                                     <div key={package_index}>
                                                         <div className="row">
                                                             <div className="col-md-5">
-                                                                <a className="text-dark pl-2">&nbsp;&nbsp;&nbsp;<i class="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{package_data.name}</a>
+                                                                <a className="text-dark pl-2">&nbsp;&nbsp;&nbsp;<i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{package_data.name}</a>
                                                             </div>
                                                             {package_data.roles.map((role, role_index) =>
-                                                            <div className="col-md-1">
+                                                            <div className="col-md-1" key={role_index}>
                                                                 <Field type="checkbox" name={`form_values.${theme_index}.packages.${package_index}.roles.${role_index}`} />
                                                             </div>
                                                             )}
@@ -135,10 +135,10 @@ export class OrgInspireRole extends Component {
                                                             <div key={feature_index}>
                                                                 <div className="row">
                                                                     <div className="col-md-5">
-                                                                        <a className="text-dark pl-3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{feature_data.name}</a>
+                                                                        <a className="text-dark pl-3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>&nbsp;{feature_data.name}</a>
                                                                     </div>
                                                                     {feature_data.roles.map((role, role_index) =>
-                                                                    <div className="col-md-1">
+                                                                    <div className="col-md-1"key={role_index}>
                                                                         <Field type="checkbox" name={`form_values.${theme_index}.packages.${package_index}.features.${feature_index}.roles.${role_index}`} />
                                                                     </div>
                                                                     )}
@@ -149,10 +149,10 @@ export class OrgInspireRole extends Component {
                                                                     <div key={property_index}>
                                                                         <div className="row">
                                                                             <div className="col-md-5 ">
-                                                                                <a className="text-dark pl-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-chevron-right gp-text-primary" aria-hidden="true"></i>&nbsp;{property_data.name}</a>
+                                                                                <a className="text-dark pl-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-chevron-right gp-text-primary" aria-hidden="true"></i>&nbsp;{property_data.name}</a>
                                                                             </div>
                                                                             {property_data ? property_data.roles.map((role, role_index) =>
-                                                                            <div className="col-md-1">
+                                                                            <div className="col-md-1" key={role_index}>
 
                                                                                 <Field type="checkbox" name={`form_values.${theme_index}.packages.${package_index}.features.${feature_index}.properties.${property_index}.roles.${role_index}`} />
                                                                             </div>
