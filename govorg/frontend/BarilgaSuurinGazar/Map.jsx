@@ -574,10 +574,10 @@ export default class BarilgaSuurinGazar extends Component{
                       </div>
                   </div>
                   <div className="content-wrapper-map">
-                    <div id="map"></div>
+                    <div id="map" className={(this.state.is_loading ? 'opac' : '')}></div>
                   </div>
                 </div>
-                {this.state.is_loading ? <span className="text-center d-block" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                {this.state.is_loading ? <span className="text-center position-absolute text-sp" style={{zIndex: 1030, right:0,left:0, top:'50%'}}><i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү...</span> :null}
             </div>
         )
     }
