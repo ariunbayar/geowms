@@ -18,7 +18,7 @@ from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary
 
 def _get_property(org_id, feature_id):
     properties_list = []
-    data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")    
+    data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
     property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values("property_id")
     properties = LProperties.objects.filter(property_id__in=[property_ids]).values('property_id', "property_code", "property_name")
     for prop in properties:
@@ -49,10 +49,10 @@ def _get_features(org_id, package_id,):
 
 
 def _get_package(org_id, theme_id):
-    
+
     package_data = []
     roles = []
-    for package in LPackages.objects.filter(theme_id=theme_id):        
+    for package in LPackages.objects.filter(theme_id=theme_id):
         roles = _get_roles(org_id, package.package_id, 2, theme_id)
         package_data.append({
                 'id': package.package_id,
@@ -60,24 +60,17 @@ def _get_package(org_id, theme_id):
                 'name': package.package_name,
                 'roles':roles,
                 'features': _get_features(org_id, package.package_id)
-            })    
-        
+            })
+
     return package_data
 
 
-def _get_roles(org_id, module_id, module, module_root_id): 
+def _get_roles(org_id, module_id, module, module_root_id):
 
     roles = []
-    if module_root_id:
-        module = OrgInspireRoles.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
-        if module:
-            if module.perm_view or module.perm_create or  module.perm_remove or module.perm_update or module.perm_revoke or module.perm_review or module.perm_approve:
-                roles = [module.perm_view,module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
-            else:
-                roles = [False,False,False,False,False,False,False]
-        else:
-            roles = [False,False,False,False,False,False,False]
-
+    module = OrgInspireRoles.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
+    if module:
+        roles = [module.perm_view,module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
     else:
         roles = [False,False,False,False,False,False,False]
     return roles
@@ -92,7 +85,6 @@ def Inspireroles(request, level, pk):
     data = []
     org = get_object_or_404(Org, pk=pk, level=level)
 
-
     for themes in LThemes.objects.all():
         data.append({
                 'id': themes.theme_id,
@@ -101,7 +93,7 @@ def Inspireroles(request, level, pk):
                 'packages': _get_package(1, themes.theme_id),
                 'roles': _get_roles(org.id, themes.theme_id, 1, None)
             })
-    
+
     return JsonResponse({
         'data': data,
         'success': True
@@ -325,11 +317,11 @@ def employee_add(request, payload, level, pk):
             is_superuser = False
 
         user = User.objects.create(
-            is_superuser=is_superuser, username=username, 
-            first_name=first_name, last_name=last_name, 
+            is_superuser=is_superuser, username=username,
+            first_name=first_name, last_name=last_name,
             email=email, gender=gender, register=register
         )
-        user.roles.add(2)          
+        user.roles.add(2)
         user.set_password(password)
         user.save()
 
