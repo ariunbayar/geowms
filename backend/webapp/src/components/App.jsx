@@ -15,6 +15,7 @@ import {Access} from "./Access"
 import {Huulga} from "./Huulga"
 import MenuItem from "../../../../src/components/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
+import {Geoserver} from './Geoserver'
 
 export default class App extends Component {
 
@@ -76,12 +77,18 @@ export default class App extends Component {
                 <MenuItem icon="gp-text-primary fa fa-connectdevelop" url="/back/dev/" text="ХӨГЖҮҮЛЭЛТ"></MenuItem>
                 <MenuItem icon="gp-text-primary fa fa-user" url="/back/user/" text="ХЭРЭГЛЭГЧ"></MenuItem>
                 <MenuItem icon="gp-text-primary icon-map" url="/back/gis/" text="GIS"></MenuItem>
+                <MenuItem icon="gp-text-primary fa fa-server" url="/back/geoserver/" text="GEOSERVER">
+                    <ul className="sidebar-submenu">
+                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/geoserver/layers/" text="layers"></MenuItem>
+                    </ul>
+                </MenuItem>
                 <MenuItem icon="gp-text-primary fa fa-cogs" url="/back/тохиргоо/" text="ТОХИРГОО"></MenuItem>
             </ul>
           </div>
           <div className="content-wrapper">
             <Switch>
               <Route path={"/back/wms/"} component={WMSPage} />
+              <Route path={"/back/geoserver/"} component={Geoserver} />
               <Route path={"/back/байгууллага/"} component={Org} />
               <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
               <Route exact path={"/back/log/"} component={Log} />
