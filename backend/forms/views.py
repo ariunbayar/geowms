@@ -1229,26 +1229,24 @@ def tsegUstsanSuccess(request, payload):
     class_type = Mpoint_view.objects.using('postgis_db').filter(id=mpoint.id).first()
     data = None
     if class_type.t_type == 'g102':
-        data = Mpoint2.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint2.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g103':
-        data = Mpoint3.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint3.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g104':
-        data = Mpoint4.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint4.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g105':
-        data = Mpoint5.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint5.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g106':
-        data = Mpoint6.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint6.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g107':
-        data = Mpoint7.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint7.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g108':
-        data = Mpoint8.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint8.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if class_type.t_type == 'g109':
-        data = Mpoint9.objects.using('postgis_db').filter(id=mpoint.id).first()
+        data = Mpoint9.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if data:
-        mpoint10 = Mpoint10.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=10, mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g110')
+        mpoint10 = Mpoint10.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=data.point_class, mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g110', geom=data.geom, ondor_type=data.ondor_type)
         if mpoint10:
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE mpoint10 SET geom = %s WHERE id = %s ''', [data.geom, str(mpoint10.id)])
             data.delete()
             tseg_ustsan.delete()
         return JsonResponse({'success': True})
@@ -1702,132 +1700,64 @@ def tsegPersonalSuccess(request, payload):
 
         if data:
             if data.point_class == 2:
-                mpoint_data = Mpoint2.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id,
-                    point_name=data.point_name,
-                    pid=data.pid, point_class=2,
-                    ondor_type=data.ondor_type,
-                    point_class_name='GNSS-ийн байнгын ажиллагаатай станц',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag, sheet1=data.sheet1,
-                    sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor,
-                    t_type='g102',
-                    geom = data.geom
-                )
-                data.delete()
+                point_class = 2
+                Mpoint = Mpoint2
+                point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
+                t_type='g102',
             if data.point_class == 3:
-                mpoint_data = Mpoint3.objects.using('postgis_db').create(
-                    id=data.id,
-                    objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=3,
-                    ondor_type=data.ondor_type,
-                    point_class_name='GPS-ийн сүлжээний цэг',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g103',
-                    geom = data.geom
-                )
-                data.delete()
+                Mpoint = Mpoint3
+                point_class=3
+                point_class_name='GPS-ийн сүлжээний цэг'
+                t_type='g103'
             if data.point_class == 4:
-                mpoint_data = Mpoint4.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=4,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Триангуляцийн сүлжээний цэг',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g104',
-                    geom = data.geom
-                )
-                data.delete()
+                Mpoint = Mpoint4
+                point_class=4
+                point_class_name='Триангуляцийн сүлжээний цэг'
+                t_type='g104'
             if data.point_class == 5:
-                mpoint_data = Mpoint5.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=5,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Полигонометрийн сүлжээний цэг',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g105',
-                    geom = data.geom
-                    )
-                data.delete()
+                Mpoint = Mpoint5
+                point_class=5
+                point_class_name='Полигонометрийн сүлжээний цэг'
+                t_type='g105'
             if data.point_class == 6:
-                mpoint_data = Mpoint6.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=6,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Гравиметрийн сүлжээний цэг',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g106',
-                    geom = data.geom
-                    )
-                data.delete()
+                Mpoint = Mpoint6
+                point_class=6
+                point_class_name='Гравиметрийн сүлжээний цэг'
+                t_type='g106'
             if data.point_class == 7:
-                mpoint_data = Mpoint7.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=7,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Өндрийн сүлжээний цэг',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g107',
-                    geom = data.geom
-                    )
-                data.delete()
+                Mpoint = Mpoint7
+                point_class=7
+                point_class_name='Өндрийн сүлжээний цэг'
+                t_type='g107'
             if data.point_class == 8:
-                mpoint_data = Mpoint8.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=8,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Зураглалын сүлжээний цэг',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g108',
-                    geom = data.geom
-                    )
-                data.delete()
+                Mpoint = Mpoint8
+                point_class=8
+                point_class_name='Зураглалын сүлжээний цэг'
+                t_type='g108'
             if data.point_class == 9:
-                mpoint_data = Mpoint9.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=9,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Шинээр нэмэгдсэн төлөв',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g109',
-                    geom = data.geom
-                    )
-                data.delete()
+                Mpoint = Mpoint9
+                point_class=9
+                point_class_name='Шинээр нэмэгдсэн төлөв'
+                t_type='g109'
             if data.point_class == 10:
-                mpoint_data = Mpoint10.objects.using('postgis_db').create(
-                    id=data.id, objectid=data.objectid,
-                    point_id=data.point_id, point_name=data.point_name,
-                    pid=data.pid, point_class=10,
-                    ondor_type=data.ondor_type,
-                    point_class_name='Устсан төлөв',
-                    mclass=data.mclass, center_typ=data.center_typ,
-                    sum=data.sum, aimag=data.aimag,
-                    sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                    ondor=data.ondor, t_type='g110',
-                    geom = data.geom
-                    )
+                Mpoint = Mpoint10
+                point_class=10
+                point_class_name='Устсан төлөв'
+                t_type='g110'
+            Mpoint.objects.using('postgis_db').create(
+                objectid=data.objectid,
+                point_id=data.point_id, point_name=data.point_name,
+                pid=data.pid, point_class=point_class,
+                ondor_type=data.ondor_type,
+                point_class_name=point_class_name,
+                mclass=data.mclass, center_typ=data.center_typ,
+                sum=data.sum, aimag=data.aimag,
+                sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
+                ondor=data.ondor, t_type=t_type,
+                geom = data.geom
+                )
+
+            data.delete()
             rsp = {
                 'success': True,
                 'msg': "Амжилттай боллоо",
