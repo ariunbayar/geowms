@@ -51,7 +51,6 @@ export class OrgInspireRole extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         service.inspireRoles(org_level, org_id).then(({ success, data }) => {
-            console.log(data)
             this.setState({form_datas:data})
           });
     }
@@ -74,7 +73,6 @@ export class OrgInspireRole extends Component {
 
     render() {
         const {form_datas} = this.state
-        console.log(form_datas)
         return (
             <div className="my-4">
                 <Formik
@@ -119,7 +117,7 @@ export class OrgInspireRole extends Component {
                                                 <hr></hr>
 
 
-                                                {packages ? packages.map((package_data, package_index) =>
+                                                {packages.length > 0 && roles[0] ? packages.map((package_data, package_index) =>
                                                     <div key={package_index}>
                                                         <div className="row">
                                                             <div className="col-md-5">
@@ -133,7 +131,7 @@ export class OrgInspireRole extends Component {
                                                         </div>
                                                         <hr></hr>
 
-                                                        {package_data.features.map((feature_data, feature_index) =>
+                                                        {package_data.features.length>0 && package_data.roles[0] ? package_data.features.map((feature_data, feature_index) =>
                                                             <div key={feature_index}>
                                                                 <div className="row">
                                                                     <div className="col-md-5">
@@ -147,7 +145,7 @@ export class OrgInspireRole extends Component {
                                                                 </div>
                                                                 <hr></hr>
 
-                                                                {feature_data.properties.length > 0 ? feature_data.properties.map((property_data, property_index) =>
+                                                                {feature_data.properties.length && feature_data.roles[0] > 0 ? feature_data.properties.map((property_data, property_index) =>
                                                                     <div key={property_index}>
                                                                         <div className="row">
                                                                             <div className="col-md-5 ">
@@ -164,7 +162,8 @@ export class OrgInspireRole extends Component {
                                                                     </div>
                                                                 ):null }
                                                             </div>
-                                                        )}
+                                                        ):null}
+
 
                                                     </div>
                                                 ):null }
