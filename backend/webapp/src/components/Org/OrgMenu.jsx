@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {Switch , Route, Link, NavLink} from "react-router-dom"
-import {OrgForm} from './OrgForm'
 import {OrgRole} from './OrgRole'
+import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 
@@ -61,6 +61,12 @@ export class OrgMenu extends Component {
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/inspire/`} className="nav-link"
+                            activeClassName="active"  data-toggle="tab">
+                            <i className="icon-home"></i> <span className="hidden-xs">Эрх inspire</span>
+                        </NavLink>
+                    </li>
+                    <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
                         <i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span></NavLink>
@@ -74,6 +80,7 @@ export class OrgMenu extends Component {
                 <div className="tab-content">
                     <Switch>
                         <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/inspire/" component={OrgInspireRole}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
                     </Switch>

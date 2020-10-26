@@ -14,6 +14,8 @@ export const service = {
     employee_list,
     orgList,
     orgAll,
+    rolesAdd,
+    inspireRoles,
 }
 
 
@@ -48,6 +50,11 @@ function org_remove(level, org_id) {
         body: JSON.stringify({org_id}),
     }
     return fetch(`${prefix}/level-${level}/org-remove/`, opts).then(handleResponse)
+}
+
+function inspireRoles(level, org_id) {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/level-${level}/${org_id}/Inspireroles/`, requestOptions).then(handleResponse)
 }
 
 
@@ -115,4 +122,12 @@ function employee_list(page, perpage, query, level, org_id) {
         body: JSON.stringify({page, perpage, query, level, org_id}),
     }
     return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
+}
+
+function rolesAdd(level, org_id, values) {
+    const opts = {
+        ...getPostOptions(),
+           body: JSON.stringify(values),
+    }
+    return fetch(`${prefix}/level-${level}/${org_id}/roles-add/`, opts).then(handleResponse)
 }
