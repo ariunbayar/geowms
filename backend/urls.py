@@ -12,7 +12,7 @@ from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
 from backend.zipcode import views as zipcode_views
-from backend.dedsanButets import views as zipcode_dedsan_butets
+from backend.dedsanbutets import views as zipcode_dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
 

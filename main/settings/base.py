@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     'backend.zipcode.apps.ZipcodeConfig',
     'backend.changeset.apps.ChangesetConfig',
     'backend.gis.apps.GisConfig',
-    'backend.dedsanButets.apps.DedsanbutetsConfig',
+    'backend.dedsanbutets.apps.DedsanbutetsConfig',
     'backend.inspire.apps.InspireConfig',
     'backend.geoserver.apps.GeoserverConfig',
 

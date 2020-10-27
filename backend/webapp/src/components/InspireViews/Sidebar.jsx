@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { service } from './service'
+import ModalAlert from '../ModalAlert'
 
 export default class SideBar extends Component {
 
@@ -7,10 +8,16 @@ export default class SideBar extends Component {
         super(props)
         this.state = {
             show: false,
-            id_list: []
+            id_list: [],
+            save_is_load: false,
+            modal_alert_check: 'closed',
+            title: '',
+            model_type_icon: 'success'
+
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleSave = this.handleSave.bind(this)
+
     }
     handleInput(e){
         let id_list = this.state.id_list
@@ -26,35 +33,85 @@ export default class SideBar extends Component {
     handleSave(){
         const fid = this.props.fid
         const id_list = this.state.id_list
-        service.setPropertyFields(fid, id_list).then(({success}) => {
+        this.setState({save_is_load: true})
+        service.setPropertyFields(fid, id_list).then(({success, info}) => {
             if(success){
+                this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
+                this.modalCloseTime()
+            }
+            else{
+                this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'danger'})
+                this.modalCloseTime()
             }
         })
     }
 
+    componentDidMount(){
+        const id_list = this.props.id_list
+        this.setState({id_list})
+    }
+
+    componentDidUpdate(pP){
+        if(pP.fields !== this.props.fields){
+            const fields = this.props.fields
+            this.setState({fields})
+        }
+        if(pP.id_list !== this.props.id_list){
+            const id_list = this.props.id_list
+            this.setState({id_list})
+        }
+    }
+
+    handleModalAlert(){
+        this.setState({modal_alert_check: 'closed'})
+        clearTimeout(this.state.timer)
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({modal_alert_check: 'closed'})
+        }, 2000)
+    }
     render() {
         const {fields, fid} = this.props
-        const {id_list} = this.state
+        const {id_list, save_is_load} = this.state
         return (
-            <form className={`card col-md-7`} style={{left:"10px"}}>
+            <div className={`card col-md-7`} style={{left:"10px"}}>
                 <div className="card-body">
-                    <h4>{fid}</h4>
-                    {fields.map((property, idx) =>
-                        <div key={idx}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={id_list.indexOf(property['property_id']) > -1}
-                                    onChange={this.handleInput}
-                                    value={property['property_id']}
-                                />
-                                <a> {property['property_code']}</a>
-                            </label>
-                        </div>
-                    )}
-                    <button className="btn btn-primary" onClick={this.handleSave}>submit</button>
+                    {fields.length > 0 ?
+                    <div>
+                        <h4 className="text-center">Feature id: {fid}</h4>
+                        {fields.map((property, idx) =>
+                            <div key={idx} className='form-group'>
+                                <div class="icheck-primary">
+                                    <input
+                                        id={property['property_code']}
+                                        type="checkbox"
+                                        checked={id_list.indexOf(property['property_id']) > -1}
+                                        onChange={this.handleInput}
+                                        value={property['property_id']}
+                                    />
+                                    <label for={property['property_code']}>{property['property_code']}</label>
+                                </div>
+                            </div>
+                        )}
+                        {save_is_load ? 
+                        <a className="btn btn-block gp-btn-primary text-white">Уншиж байна</a>:
+                        <a onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</a>
+                        }
+                    </div>:
+                    <div>
+                        <h4 className="text-center">Property Хоосон байна</h4>
+                    </div>
+                    }
+                    <ModalAlert
+                        title={this.state.title}
+                        model_type_icon ={this.state.model_type_icon}
+                        status={this.state.modal_alert_check}
+                        modalAction={() => this.handleModalAlert()}
+                    />
                 </div>
-            </form>
+            </div>
         )
     }
 }

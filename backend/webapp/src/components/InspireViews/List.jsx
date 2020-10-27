@@ -11,7 +11,8 @@ export class List extends Component {
             list_all:[],
             fields: [],
             check: '',
-            fid: null
+            fid: null,
+            id_list: []
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -33,11 +34,9 @@ export class List extends Component {
 
     getProperties(fid) {
         this.setState({fid})
-        service.getPropertyFields(fid).then(({fields}) => {
-            if(fields){
-                this.setState({
-                    fields: fields
-                })
+        service.getPropertyFields(fid).then(({success ,fields, id_list}) => {
+            if(success){
+                this.setState({fields, id_list})
             }
         })
     }
@@ -74,7 +73,7 @@ export class List extends Component {
                         </ul>
                     </div>
                 </div>
-                <SideBar fields={this.state.fields} fid={this.state.fid}/>
+                <SideBar fields={this.state.fields} fid={this.state.fid} id_list={this.state.id_list}/>
             </div>
         )
     }
