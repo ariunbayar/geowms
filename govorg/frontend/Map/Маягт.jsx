@@ -22,7 +22,6 @@ export default class Маягт extends Component {
 
     onSubmit(values, { setStatus, setSubmitting }) {
         const gid = this.props.gid
-        console.log(values)
         service
             .update(values, this.state.pid, this.state.fid)
             .then(({ success }) => {
@@ -109,10 +108,10 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data`} as="select" className="form-control">
+                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
-                                                            <option key = {idy} value={data.code_list_id} disabled={friend.role}>{data.code_list_name}</option>
+                                                            <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
                                                             )
                                                         }
                                                     </Field>
@@ -123,7 +122,7 @@ export default class Маягт extends Component {
                                             <div className="col-md-9">
                                                 {friend.value_type_id == 'boolean' ?
                                                 <Field
-                                                name={`form_values.${index}.data`}
+                                                name={`form_values.${index}.data`|| ""}
                                                 as="select"
                                                 className='form-control'
                                                 disabled={friend.role}
@@ -133,10 +132,10 @@ export default class Маягт extends Component {
                                                 </Field>
                                                 :
                                                 <Field
-                                                    name={`form_values.${index}.data `}
+                                                    name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
                                                     disabled={friend.role}
-                                                    placeholder={ friend.property_name}
+                                                    placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                     />
                                                 }

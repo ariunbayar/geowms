@@ -55,7 +55,7 @@ function save(oid, values) {
 }
 
 function update(data, pid, fid) {
-
+    
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(data),

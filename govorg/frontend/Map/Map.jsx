@@ -117,29 +117,21 @@ export default class BarilgaSuurinGazar extends Component{
 
 
     loadControls(){
-
       const map = this.map
       const { type, roles } = this.state
-      if (roles[1]){
-        map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
-        if (type.includes("Line"))
-        map.addControl(new LineBarButton({LineButton: this.LineButton}))
-        if (type.includes("Point"))
-          map.addControl(new PointBarButton({PointButton: this.PointButton}))
-        if (type.includes("Polygon"))
-          map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
-        map.addControl(this.controls.modal)
-        
+      console.log("roles", roles)
+      map.addControl(this.controls.modal)
+      if(roles[1]){
+        if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
+        if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
+        if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
       }
-      if(roles[2]){
-        map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
-        map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-        map.addControl(this.controls.modal)
-      }
+      if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+      if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      
       if(roles[3]){
-        map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
-        map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
+        map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
     }
 
@@ -354,6 +346,8 @@ export default class BarilgaSuurinGazar extends Component{
 
     componentDidUpdate(prevProps, prevState) {
         const oid_old = prevProps.match.params.oid
+        const old_roles = prevState.roles
+        const roles = this.state.roles
         const oid = this.props.match.params.oid
         const type = this.state.type
         if(prevState.type !== type){
@@ -372,6 +366,11 @@ export default class BarilgaSuurinGazar extends Component{
         if (oid_old != oid) {
           this.setState({ oid }, () => {
               this.loadRows()
+          })
+        }
+        if(old_roles != roles) {
+          this.setState({
+            roles
           })
         }
     }
@@ -422,7 +421,7 @@ export default class BarilgaSuurinGazar extends Component{
       else
       {
         document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        if(this.state.selectedFeature_ID) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({ remove_button_active: true, modify_button_active: false })
       }
     }
@@ -544,12 +543,12 @@ export default class BarilgaSuurinGazar extends Component{
 
     ModifyButton(){
       if(this.state.modify_button_active){
-        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: false})
       }
       else{
-        document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: true,  remove_button_active: false})
       }
       this.drawE.setActive(false);
@@ -557,8 +556,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     LineButton(){
-      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
@@ -567,8 +566,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PointButton(){
-      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
@@ -577,8 +576,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PolygonButton(){
-      document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()

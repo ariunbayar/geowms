@@ -262,17 +262,16 @@ def save(request, payload, pid, fid):
     form_values = payload.get('form_values')
     for data in form_values:
         if data['value_type'] == 'number':
-            if data['data'] != [None]:
+            if data['data']:
                 MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_number=data['data'])
         elif data['value_type'] == 'option':
-            if data['data'] != [None]:
-                if data['data']:
-                    MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(code_list_id=data['data'])
+            if data['data']:
+                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(code_list_id=data['data'])
         elif data['value_type'] == 'text':
-            if data['data'] != [None]:
+            if data['data']:
                 MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_text=data['data'])
         elif data['value_type'] == 'date':
-            if data['data'] != [None]:
+            if data['data']:
                 MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_date=data['data'])
     rsp = {
         'success': True,
@@ -370,15 +369,15 @@ def _get_property(ob):
         'property_definition':ob['property_definition'],
         'value_type_id':ob['value_type_id'],
         'value_type':value_type,
-        'data':data,
-        'data_list': data_list
+        'data':data if data else '',
+        'data_list': data_list,
+        'role':False
     }
 
 
 @require_GET
 @ajax_required
 def detail(request, pk, fid):
-
     org = get_object_or_404(Org, employee__user=request.user)
     org_properties = OrgInspireRoles.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
     
@@ -427,7 +426,7 @@ def detail(request, pk, fid):
                 })
     rsp = {
         'success': True,
-        'datas': org_propties_front
+        'datas': properties
     }
     return JsonResponse(rsp)
 
@@ -545,3 +544,4 @@ def geomAdd(request, payload, fid):
         'id': geo_id
     }
     return JsonResponse(rsp)
+
