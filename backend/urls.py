@@ -181,6 +181,8 @@ urlpatterns = [
         path('editName/', dedsan_butets.Edit_name),
         path('get-fields/', dedsan_butets.getFields),
         path('save/', dedsan_butets.save),
+        path('remove/', dedsan_butets.remove),
+        path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
     ], 'dedsan-butests'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

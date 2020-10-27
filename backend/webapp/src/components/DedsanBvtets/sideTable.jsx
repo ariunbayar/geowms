@@ -25,6 +25,7 @@ export default class SideBar extends Component {
         }, 2000);
     }
 
+
     render() {
         const {features, check} = this.props
         return (
@@ -36,18 +37,52 @@ export default class SideBar extends Component {
                         ?
                                 features.map((feature, idx) =>
                                     <div className="table-responsive" key={idx}>
-                                        <h2 className="text-center"> {feature.feature_name} </h2>
+                                        <h2 className="text-center">
+                                            <a
+                                                href="#"
+                                                onClick={() => this.props.handleFormLeft('feature', feature.feature_id, feature.feature_name)}
+                                            >
+                                                {feature.feature_name}
+                                            </a>
+                                        </h2>
                                         <ol>
                                             {feature.f_configs.map((f_config, idx) =>
                                                 <li className="mt-3" key={idx}>
-                                                    <h5> {f_config.data_type_display_name} </h5>
+                                                    <h5>
+                                                        <a
+                                                            href="#"
+                                                            onClick={() => this.props.handleFormLeft('feature_config', f_config.feature_config_id, f_config.data_type_display_name)}
+                                                        >
+                                                            {f_config.data_type_display_name}
+                                                        </a>
+                                                    </h5>
 
                                                     <table className="table table-bordered">
                                                         {f_config.data_types.map((data_type, idx) =>
                                                             <thead key={idx}>
                                                                 <tr>
                                                                     <th colSpan="2" className="text-center">
-                                                                        {data_type.data_type_name}
+                                                                        <a
+                                                                            href="#"
+                                                                            onClick={() => this.props.handleFormLeft('data_type', data_type.data_type_id, data_type.data_type_name)}
+                                                                        >
+                                                                            {data_type.data_type_name} = {data_type.data_type_id}
+                                                                        </a>
+                                                                        {
+                                                                            data_type.is_read_only
+                                                                            ?
+                                                                                <i
+                                                                                    className="fa fa-eye fa-1x"
+                                                                                    aria-hidden="true"
+                                                                                    title="Зөвхөн харах"
+                                                                                ></i>
+                                                                            :
+                                                                                <i
+                                                                                    className="fa fa-pencil fa-1x"
+                                                                                    aria-hidden="true"
+                                                                                    title="засаж болно"
+                                                                                ></i>
+                                                                        }
                                                                     </th>
                                                                 </tr>
                                                                 {data_type.data_type_configs.map((data_type_config, idx) =>
@@ -56,7 +91,9 @@ export default class SideBar extends Component {
                                                                             <Propties
                                                                                 property_name={data_type_config.property_name}
                                                                                 property_id={data_type_config.property_id}
+                                                                                handleFormLef={this.props.handleFormLeft}
                                                                                 addNotif={this.addNotif}
+                                                                                is_read_only={data_type_config.is_read_only}
                                                                             />
                                                                         </th>
                                                                         <th>
@@ -64,9 +101,27 @@ export default class SideBar extends Component {
                                                                                 {data_type_config.value_types.map((value_type, idx) =>
                                                                                     <li key={idx}>
                                                                                         <span>
-                                                                                            {value_type.value_type_name}
+                                                                                            <a
+                                                                                                href="#"
+                                                                                                onClick={() => this.props.handleFormLeft('value_type', value_type.value_type_id, value_type.value_type_name)}
+                                                                                            >
+                                                                                                {value_type.value_type_name}
+                                                                                            </a>
                                                                                         </span>
-
+                                                                                        {
+                                                                                            value_type.value_type_id == 'single-select'
+                                                                                            ?
+                                                                                                <a
+                                                                                                    type="button"
+                                                                                                    className="gp-text-primary"
+                                                                                                    onClick={() => this.props.handleFormLeft('code_list_config', data_type_config.property_id)}
+                                                                                                >
+                                                                                                    <i className="fa fa-pencil-square-o mt-2 col-1 text-info"></i>
+                                                                                                    code list zaswar
+                                                                                                </a>
+                                                                                            :
+                                                                                            null
+                                                                                        }
                                                                                         {
                                                                                             value_type.code_lists.length > 0 &&
                                                                                             value_type.value_type_id == 'single-select'
@@ -77,35 +132,42 @@ export default class SideBar extends Component {
                                                                                                         <span> {code.code_list_name}</span>
                                                                                                     </li>
                                                                                                 )}
-                                                                                                <li className="text-danger">
-                                                                                                    <a
-                                                                                                        type="button"
-                                                                                                        className="gp-text-primary"
-                                                                                                        onClick={() => this.props.handleFormLeft('code_list', 1)}
-                                                                                                    >
-                                                                                                        <i className="fa fa-plus-circle gp-text-primary"></i>
-                                                                                                        &nbsp;
-                                                                                                        code list neme
-                                                                                                    h</a>
-                                                                                                </li>
+                                                                                                    <li className="text-danger">
+                                                                                                        <a
+                                                                                                            type="button"
+                                                                                                            className="gp-text-primary"
+                                                                                                            onClick={() => this.props.handleFormLeft('code_list', data_type_config.property_id)}
+                                                                                                        >
+                                                                                                            <i className="fa fa-plus-circle gp-text-primary"></i>
+                                                                                                            &nbsp;
+                                                                                                            code list nemeh
+                                                                                                        </a>
+                                                                                                    </li>
                                                                                             </ul>
                                                                                             :
-                                                                                            null
+                                                                                            (
+                                                                                                value_type.value_type_id == 'single-select' &&
+                                                                                                value_type.code_lists.length == 0
+                                                                                                ?
+                                                                                                    <ul style={{listStyleType: '"- "'}}>
+                                                                                                        <li className="text-danger">
+                                                                                                            <a
+                                                                                                                type="button"
+                                                                                                                className="gp-text-primary"
+                                                                                                                onClick={() => this.props.handleFormLeft('code_list', data_type_config.property_id)}
+                                                                                                            >
+                                                                                                                <i className="fa fa-plus-circle gp-text-primary"></i>
+                                                                                                                &nbsp;
+                                                                                                                utga nemj oruulah
+                                                                                                            </a>
+                                                                                                        </li>
+                                                                                                    </ul>
+                                                                                                :
+                                                                                                    null
+                                                                                            )
                                                                                         }
-
                                                                                     </li>
                                                                                 )}
-                                                                                <li className="text-danger">
-                                                                                    <a
-                                                                                        type="button"
-                                                                                        className="gp-text-primary"
-                                                                                        onClick={() => this.props.handleFormLeft('value_type', 1)}
-                                                                                    >
-                                                                                        <i className="fa fa-plus-circle gp-text-primary"></i>
-                                                                                        &nbsp;
-                                                                                        value type nemeh
-                                                                                    </a>
-                                                                                </li>
                                                                             </ul>
                                                                         </th>
                                                                     </tr>
@@ -115,7 +177,7 @@ export default class SideBar extends Component {
                                                                         <a
                                                                             type="button"
                                                                             className="gp-text-primary"
-                                                                            onClick={() => this.props.handleFormLeft('property', 1)}
+                                                                            onClick={() => this.props.handleFormLeft('data_type_config', data_type.data_type_id)}
                                                                         >
                                                                             <i className="fa fa-plus-circle gp-text-primary"></i>
                                                                             &nbsp;
@@ -129,15 +191,17 @@ export default class SideBar extends Component {
                                                    </table>
                                                 </li>
                                             )}
-                                            <li className="text-danger">
+                                            <li>
                                                 <a
                                                     type="button"
                                                     className="gp-text-primary"
-                                                    onClick={() => this.props.handleFormLeft('feature_config', 1)}
-                                                >
+                                                    onClick={() => this.props.handleFormLeft('feature_config', feature.feature_id)}
+                                                    href="#"
+                                                ><h5 className="text-danger">
                                                     <i className="fa fa-plus-circle gp-text-primary"></i>
                                                     &nbsp;
                                                     f config nemeh
+                                                </h5>
                                                 </a>
                                             </li>
                                         </ol>
