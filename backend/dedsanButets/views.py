@@ -4,6 +4,10 @@ from main.decorators import ajax_required
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import user_passes_test
+from django.db import connections
+from main.utils import (
+    dict_fetchall
+)
 
 # Create your views here.
 def _get_package(theme_id):
@@ -194,3 +198,101 @@ def Edit_name(request, payload):
             'info': 'Алдаа гарлаа'
         }
     return JsonResponse(rsp)
+
+
+def get_rows(fid):
+    cursor = connections['default'].cursor()
+    sql = """
+        select datas.property_id, l.property_code
+        from l_properties l
+        inner join (select l_feature_configs.feature_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
+        from l_feature_configs
+        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
+        where l_feature_configs.feature_id = {fid}
+        ) datas
+        on datas.property_id = l.property_id
+    """.format(
+        fid=fid
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def propertyFields(request, fid):
+    
+    fields = get_rows(fid)
+    rsp = {
+        'success': True,
+        'fields': fields,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def propertyFieldsSave(request, payload):
+    
+    id_list = payload.get('fields')
+    print(id_list)
+    print("dfgdf")
+    print("dfgdf")
+    print("dfgdf")
+    print("dfgdf")
+    print("dfgdf")
+    print("dfgdf")
+    print("dfgdf")
+
+
+
+    ids = [1,2,3,4,5,6,7,8]
+    table_name = "tuuguu"
+    check = createView(ids, table_name)
+    if check:
+        rsp = {
+            'success': True,
+        }
+    else:
+        rsp = {
+            'success': True,
+        }
+    return JsonResponse(rsp)
+
+def createView(ids, table_name):
+    data = LProperties.objects.filter(property_id__in=ids)
+    fields = [row.property_code for row in data]
+    query = '''
+        CREATE OR REPLACE VIEW public.{table_name}
+            AS
+        SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
+        FROM crosstab('select b.geo_id, b.property_id, b.value_text from m_datas_building b where property_id in ({properties}) order by 1,2'::text) 
+        ct(geo_id character varying(100), {create_columns})
+        JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+
+        ALTER TABLE public.{table_name}
+        OWNER TO postgres;
+    '''.format(
+            table_name = table_name,
+            columns=', '.join(['ct.{}'.format(f) for f in fields]),
+            properties=', '.join(['{}'.format(f) for f in ids]),
+            create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+    with connections['default'].cursor() as cursor:
+            cursor.execute(query)
+    return True
+
+
+def removeView(table_name):
+    query = '''
+        drop view {table_name}
+    '''.format(table_name = table_name)
+    with connections['default'].cursor() as cursor:
+        cursor.execute(query)
+    return True
+
+ids = [1,2,3,4,5,6,7,8]
+table_name = "tuuguu"
+check = createView(ids, table_name)

@@ -182,6 +182,8 @@ urlpatterns = [
     path('dedsan-butests/', include(([
         path('all/', zipcode_dedsan_butets.bundleButetsAll),
         path('prop/<str:code>/', zipcode_dedsan_butets.Property),
+        path('property-fields/<int:fid>/', zipcode_dedsan_butets.propertyFields),
+        path('property-fields/save/', zipcode_dedsan_butets.propertyFieldsSave),
         path('editName/', zipcode_dedsan_butets.Edit_name),
     ], 'dedsan-butests'))),
 

@@ -16,6 +16,7 @@ import {Huulga} from "./Huulga"
 import MenuItem from "../../../../src/components/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
 import {Geoserver} from './Geoserver'
+import {InspireViews} from './InspireViews'
 
 export default class App extends Component {
 
@@ -60,6 +61,7 @@ export default class App extends Component {
                     <ul className="sidebar-submenu">
                         <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
                         <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/inspire-views/" text="View"></MenuItem>
                     </ul>
                 </MenuItem>
                 <MenuItem icon="gp-text-primary zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
@@ -91,6 +93,7 @@ export default class App extends Component {
               <Route path={"/back/geoserver/"} component={Geoserver} />
               <Route path={"/back/байгууллага/"} component={Org} />
               <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
+              <Route path={"/back/inspire-views/"} component={InspireViews} />
               <Route exact path={"/back/log/"} component={Log} />
               <Route path={"/back/access/"} component={Access} />
               <Route exact path={"/back/huulga/"} component={Huulga} />
