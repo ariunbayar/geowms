@@ -20,7 +20,7 @@ from django.db.models import Q
 import re
 from django.conf import settings
 from fpdf import FPDF
-from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import GEOSGeometry, Point, Polygon, LinearRing
 # Create your models here.
 
 def createPdf(pk):
@@ -320,15 +320,13 @@ def dursgaltGazarUpdate(request, payload):
     tuuhsoyl = TuuhSoyol.objects.using('postgis_db').filter(id=form_datas['tuuhenov_id']).first()
     x = float(form_datas['torol_zuil_dursgalt_gazriin_coordinatx'])
     y = float(form_datas['torol_zuil_dursgalt_gazriin_coordinaty'])
-    cursor = connections['postgis_db'].cursor()
-    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [y, x])
+    geom = Point(y, x)
     dursgal = form_datas_values['torol_zuil_dursgalt_gazriin_ner']
     dursgal2 = 'None'
     type2 = form_datas['torol_zuil_torol_zuil_tree']
     if form_datas['torol_zuil_torol_zuil_tree2']:
         type2 = form_datas['torol_zuil_torol_zuil_tree2']
     stone = form_datas_values['torol_zuiltorol_zuil_name']
-    geom = cursor.fetchone()
     length =form_datas_values['hemjee_urt']
     width =form_datas_values['hemjee_orgon']
     hight =form_datas_values['hemjee_ondor']
@@ -389,9 +387,8 @@ def dursgaltGazarUpdate(request, payload):
                             other1=other1,
                             x=x, y=y,
                             ondor=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
+                            geom = geom
                             )
-    update_cursor = connections['postgis_db'].cursor()
-    update_cursor.execute(''' UPDATE tuuhsoyolpoint SET geom = %s WHERE id = %s ''', [geom, form_datas['durgal_id']])
     return JsonResponse({'success': True})
 
 
@@ -403,15 +400,13 @@ def dursgaltGazarCreate(request, payload):
     tuuhsoyl = TuuhSoyol.objects.using('postgis_db').filter(id=form_datas['tuuhenov_id']).first()
     x = float(form_datas['torol_zuil_dursgalt_gazriin_coordinatx'])
     y = float(form_datas['torol_zuil_dursgalt_gazriin_coordinaty'])
-    cursor = connections['postgis_db'].cursor()
-    cursor.execute('''SELECT ST_SetSRID(ST_MakePoint(%s, %s),4326)''', [y, x])
+    geom = Point(y, x)
     dursgal = form_datas_values['torol_zuil_dursgalt_gazriin_ner']
     dursgal2 = 'None'
     type2 = form_datas['torol_zuil_torol_zuil_tree']
     if form_datas['torol_zuil_torol_zuil_tree2']:
         type2 = form_datas['torol_zuil_torol_zuil_tree2']
     stone = form_datas_values['torol_zuiltorol_zuil_name']
-    geom = cursor.fetchone()
     length =form_datas_values['hemjee_urt']
     width =form_datas_values['hemjee_orgon']
     area =form_datas_values['hemjee_talbai']
@@ -473,9 +468,8 @@ def dursgaltGazarCreate(request, payload):
                             other1=other1,
                             x=x, y=y,
                             ondor=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
+                            geom = geom
                             )
-    update_cursor = connections['postgis_db'].cursor()
-    update_cursor.execute(''' UPDATE tuuhsoyolpoint SET geom = %s WHERE id = %s ''', [geom, tuuhsoyolpoint.id])
     return JsonResponse({'success': True})
 
 
@@ -1323,21 +1317,24 @@ def hureeCreate(request, payload):
     y_t=float(y)
     TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
     tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
-    cursor = connections['postgis_db'].cursor()
-    geom_data = 'LINESTRING( '
+    point = []
+    points = []
     if tuuh_hure_datas.count() > 2:
-        geom_data = 'LINESTRING( '
         for tuuh_hure in tuuh_hure_datas:
-            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
-        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
-        geom_data = geom_data + ' )'
-        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
-        geom = cursor.fetchone()
+            x = float(tuuh_hure.x)
+            y = float(tuuh_hure.y)
+            point = (y, x)
+            points.append(point)
+        x = float(tuuh_hure_datas[0].x)
+        y = float(tuuh_hure_datas[0].y)
+        point = (y, x)
+        points.append(point)
+        geom = Polygon(points)
         check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
         if not check:
-            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
-        update_cursor = connections['postgis_db'].cursor()
-        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, dursgalt_id,tuuh_soyl_huree_id])
+            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        else:
+            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1352,20 +1349,22 @@ def hureeUpdate(request, payload):
     y = payload.get('y')
     x_t=float(x)
     y_t=float(y)
+    point = []
+    points = []
     TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
     tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
-    cursor = connections['postgis_db'].cursor()
-    geom_data = 'LINESTRING( '
     if tuuh_hure_datas.count() > 2:
-        geom_data = 'LINESTRING( '
         for tuuh_hure in tuuh_hure_datas:
-            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
-        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
-        geom_data = geom_data + ' )'
-        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
-        geom = cursor.fetchone()
-        update_cursor = connections['postgis_db'].cursor()
-        update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, tuuhen_ov,tuuh_soyl_huree_id])
+            x = float(tuuh_hure.x)
+            y = float(tuuh_hure.y)
+            point = (y, x)
+            points.append(point)
+        x = float(tuuh_hure_datas[0].x)
+        y = float(tuuh_hure_datas[0].y)
+        point = (y, x)
+        points.append(point)
+        geom = Polygon(points)
+        TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1378,22 +1377,24 @@ def hureeDelete(request, payload):
     tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     tuuhsoyl = TuuhSoyolHuree.objects.filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
     tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
-    cursor = connections['postgis_db'].cursor()
+    point = []
+    points = []
     if tuuhsoyl:
         tuuhsoyl.delete()
-        geom_data = 'LINESTRING( '
         if tuuh_hure_datas.count() > 2:
-            geom_data = 'LINESTRING( '
             for tuuh_hure in tuuh_hure_datas:
-                geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
-            geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
-            geom_data = geom_data + ' )'
-            cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
-            geom = cursor.fetchone()
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE tuuhsoyolhureepol SET geom = %s WHERE tuuh_soyl = %s and tuuh_soyl_huree_id = %s''', [geom, tuuhen_ov,tuuh_soyl_huree_id])
+                x = float(tuuh_hure.x)
+                y = float(tuuh_hure.y)
+                point = (y, x)
+                points.append(point)
+            x = float(tuuh_hure_datas[0].x)
+            y = float(tuuh_hure_datas[0].y)
+            point = (y, x)
+            points.append(point)
+            geom = Polygon(points)
+            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).delete()
+            tuuh_soyl_pol = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
@@ -1440,22 +1441,24 @@ def ayulHureeCreate(request, payload):
     x_t=float(x)
     y_y=float(y)
     TuuhSoyolAyuulHuree.objects.create(tuuh_soyl = idx, x=x, y=y)
-    cursor = connections['postgis_db'].cursor()
-    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = idx)
-    geom_data = 'LINESTRING( '
+    point = []
+    points = []
     if tuuh_hure_datas.count() > 2:
-        geom_data = 'LINESTRING( '
         for tuuh_hure in tuuh_hure_datas:
-            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
-        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
-        geom_data = geom_data + ' )'
-        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
-        geom = cursor.fetchone()
+            x = float(tuuh_hure.x)
+            y = float(tuuh_hure.y)
+            point = (y, x)
+            points.append(point)
+        x = float(tuuh_hure_datas[0].x)
+        y = float(tuuh_hure_datas[0].y)
+        point = (y, x)
+        points.append(point)
+        geom = Polygon(points)
         check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
         if not check:
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx)
-        update_cursor = connections['postgis_db'].cursor()
-        update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, idx])
+            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        else:
+            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1470,19 +1473,20 @@ def ayulHureeUpdate(request, payload):
     x_t=float(x)
     y_t=float(y)
     TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, pk=huree_id).update(x=x, y=y)
-    cursor = connections['postgis_db'].cursor()
-    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov)
-    geom_data = 'LINESTRING( '
+    point = []
+    points = []
     if tuuh_hure_datas.count() > 2:
-        geom_data = 'LINESTRING( '
         for tuuh_hure in tuuh_hure_datas:
-            geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
-        geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
-        geom_data = geom_data + ' )'
-        cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
-        geom = cursor.fetchone()
-        update_cursor = connections['postgis_db'].cursor()
-        update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, tuuhen_ov])
+            x = float(tuuh_hure.x)
+            y = float(tuuh_hure.y)
+            point = (y, x)
+            points.append(point)
+        x = float(tuuh_hure_datas[0].x)
+        y = float(tuuh_hure_datas[0].y)
+        point = (y, x)
+        points.append(point)
+        geom = Polygon(points)
+        TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
     return JsonResponse({'success': True})
 
 
@@ -1496,18 +1500,18 @@ def ayulHureeDelete(request, payload):
     cursor = connections['postgis_db'].cursor()
     if tuuhsoyl:
         tuuhsoyl.delete()
-        geom_data = 'LINESTRING( '
         if tuuh_hure_datas.count() > 2:
-            geom_data = 'LINESTRING( '
             for tuuh_hure in tuuh_hure_datas:
-                geom_data = geom_data + tuuh_hure.y + ' ' + tuuh_hure.x + ', '
-
-            geom_data = geom_data + tuuh_hure_datas[0].y + ' ' + tuuh_hure_datas[0].x
-            geom_data = geom_data + ' )'
-            cursor.execute('''SELECT ST_Polygon(ST_GeomFromText(%s), 4326);''', [geom_data])
-            geom = cursor.fetchone()
-            update_cursor = connections['postgis_db'].cursor()
-            update_cursor.execute(''' UPDATE tuuhsoyolayuulhureepol SET geom = %s WHERE tuuh_soyl = %s ''', [geom, tuuhen_ov])
+                x = float(tuuh_hure.x)
+                y = float(tuuh_hure.y)
+                point = (y, x)
+                points.append(point)
+            x = float(tuuh_hure_datas[0].x)
+            y = float(tuuh_hure_datas[0].y)
+            point = (y, x)
+            points.append(point)
+            geom = Polygon(points)
+            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
             TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov).delete()
     else:
