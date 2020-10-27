@@ -9,7 +9,7 @@ from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
-from main.decorators import ajax_required, gov_bundle_required, gov_org_required
+from main.decorators import ajax_required, gov_bundle_required
 from backend.inspire.models import LThemes, LPackages, LFeatures
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter
@@ -188,7 +188,6 @@ def table_list(request):
 
 @require_GET
 @ajax_required
-@gov_org_required(OrgInspireRoles.PROPERTY)
 def geom_type(request, pid, fid):
     data = MGeoDatas.objects.filter(feature_id=fid).first()
     if data:
@@ -232,7 +231,6 @@ def rows(request, pid, fid):
 
 @require_POST
 @ajax_required
-@gov_org_required(OrgInspireRoles.PROPERTY)
 def add(request, payload, oid):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
@@ -379,7 +377,6 @@ def _get_property(ob):
 
 @require_GET
 @ajax_required
-@gov_org_required(OrgInspireRoles.PROPERTY)
 def detail(request, pk, fid):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -456,7 +453,6 @@ def findGeomField(fields):
 
 @require_POST
 @ajax_required
-@gov_org_required(OrgInspireRoles.PROPERTY)
 def updateGeom(request, payload, fid):
     geojson = payload.get('geojson')
     geo_id = payload.get('id')

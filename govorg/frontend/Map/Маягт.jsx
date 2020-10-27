@@ -1,7 +1,5 @@
 import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
-import Modal from "../../../src/components/Modal/DeleteModal"
-import { Typify } from "../Components/helpers/typify"
 import { service } from "./service"
 import { validationSchema } from './validationSchema'
 
@@ -24,7 +22,7 @@ export default class Маягт extends Component {
 
     onSubmit(values, { setStatus, setSubmitting }) {
         const gid = this.props.gid
-
+        console.log(values)
         service
             .update(values, this.state.pid, this.state.fid)
             .then(({ success }) => {
