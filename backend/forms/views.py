@@ -1394,7 +1394,7 @@ def hureeDelete(request, payload):
             geom = Polygon(points)
             TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
-            tuuh_soyl_pol = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov).delete()
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
