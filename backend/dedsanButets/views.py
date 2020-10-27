@@ -249,8 +249,10 @@ def getFields(request, payload):
                     for data in datas:
                         data_obj = model_to_dict(data)
                         dat = data_obj[i.name]
-                        print(dat)
-                        print('------------')
+                        if dat == True:
+                            dat = 'true'
+                        if dat == False:
+                            dat = 'false'
                         fields.append({
                             'field_name': i.name,
                             'field_type': type_name,
@@ -376,6 +378,12 @@ def Get_Datas(request, name):
                 'id': data.property_id,
                 'name': data.property_name,
             })
+    if name == 'feature':
+        for data in datas:
+            types.append({
+                'id': data.feature_id,
+                'name': data.feature_name,
+            })
     rsp = {
         'success': True,
         'datas': types
@@ -388,6 +396,7 @@ def Get_Datas(request, name):
 def remove(request, payload):
     model_name = payload.get('model_name')
     model_id = payload.get('model_id')
+    print(model_name, model_id)
     model_name = getModel(model_name)
     try:
         data = model_name.objects.filter(pk=model_id)
@@ -395,16 +404,16 @@ def remove(request, payload):
             data.delete()
             rsp = {
                 'success': True,
-                'info': 'Good'
+                'info': 'Амжилттай устгалаа'
             }
         else:
             rsp = {
                 'success': False,
-                'info': 'no data'
+                'info': 'Хоосон байна'
             }
-    except Exception:
+    except Exception as e:
         rsp = {
             'success': False,
-            'info': 'Bad'
+            'info': 'Алдаа гарсан байна: ' + str(e)
         }
     return JsonResponse(rsp)

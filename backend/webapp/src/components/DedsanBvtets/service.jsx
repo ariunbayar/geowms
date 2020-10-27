@@ -56,10 +56,10 @@ function getDatas(name){
     return fetch(`${prefix}/getDatas/${name}/`, opts).then(handleResponse)
 }
 
-function remove(name, id){
+function remove(model_name, model_id){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ name, id }),
+        body: JSON.stringify({ model_name, model_id }),
     }
     return fetch(`${prefix}/remove/`, opts).then(handleResponse)
 }

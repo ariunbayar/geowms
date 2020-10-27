@@ -27,12 +27,14 @@ export default class SideBar extends Component {
 
 
     render() {
-        const {features, check} = this.props
+        const {features, check, hide} = this.props
         return (
             <form>
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <div>
                     {
+                        hide
+                        ?
                         features.length > 0 && check == 'байгаа'
                         ?
                                 features.map((feature, idx) =>
@@ -129,7 +131,14 @@ export default class SideBar extends Component {
                                                                                             <ul style={{listStyleType: '"- "'}}>
                                                                                                 {value_type.code_lists.map((code, idx) =>
                                                                                                     <li key={idx}>
-                                                                                                        <span> {code.code_list_name}</span>
+                                                                                                        <span>
+                                                                                                            <a
+                                                                                                               href="#"
+                                                                                                               onClick={() => this.props.handleFormLeft('code_list', code.code_list_id, code.code_list_name)}
+                                                                                                            >
+                                                                                                                {code.code_list_name}
+                                                                                                            </a>
+                                                                                                        </span>
                                                                                                     </li>
                                                                                                 )}
                                                                                                     <li className="text-danger">
@@ -220,6 +229,8 @@ export default class SideBar extends Component {
                                 </h1>
                             :
                             null
+                        :
+                        null
                     }
                 </div>
             </form>

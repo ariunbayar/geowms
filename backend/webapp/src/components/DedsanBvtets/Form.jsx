@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import { service } from "./service"
-import Modal from '../../../../../src/components/Modal/DeleteModal'
 
 export default class Forms extends Component {
 
@@ -24,14 +23,11 @@ export default class Forms extends Component {
             before_name: '',
             jumped: false,
             edit_name: '',
-            modal_status: "closed",
         }
 
         this.onSubmit = this.onSubmit.bind(this)
         this.getFields = this.getFields.bind(this)
         this.makeModel = this.makeModel.bind(this)
-        this.backToSide = this.backToSide.bind(this)
-        this.closeForm = this.closeForm.bind(this)
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
@@ -40,7 +36,7 @@ export default class Forms extends Component {
         service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
             if (success) {
                 this.setState({ is_loading: false, info })
-                this.backToSide('open')
+                this.props.statusModal('hide')
                 if (code !== '') this.props.refresh(code)
                 else this.props.refresh()
             }
@@ -86,6 +82,10 @@ export default class Forms extends Component {
                     var name = 'property_id'
                     var find = 'property'
                 }
+                if (model_name == 'feature_config') {
+                    var name = 'connect_feature_id'
+                    var find = 'feature'
+                }
                 fields.map(field => {
                     if (field.field_name == name)
                     {
@@ -120,25 +120,10 @@ export default class Forms extends Component {
         }
     }
 
-    backToSide(type){
-        if (type == 'back') this.modalClose()
-        if (type == 'close') this.setState({ modal_status: type })
-        if (type == 'open') this.setState({ modal_status: type })
-    }
-
-    modalClose(){
-        const { before_id, before_name } = this.state
-        this.setState({ jumped: false, modal_status: "close" })
-        this.props.handleFormLeft(before_name, before_id)
-    }
-
-    closeForm(){
-        console.log('close')
-        this.props.done()
-    }
-
     render() {
-
+        const prop_name = this.props.model_name
+        const prop_edit_name = this.props.edit_name
+        const prop_id = this.props.model_id
         if (this.state.is_loading) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
@@ -157,11 +142,11 @@ export default class Forms extends Component {
                         null
                 }
                 {
-                    this.props.edit_name && this.props.model_name
+                    prop_edit_name && prop_name
                     ?
-                    <h4 className="text-center">{this.props.model_name}-{this.props.edit_name}{(this.props.model_id ? `-` + this.props.model_id : '')}</h4>
+                    <h4 className="text-center">{prop_name}-{prop_edit_name}{(prop_id ? `-` + prop_id : '')}</h4>
                     :
-                    <h4 className="text-center"> Model-{this.props.model_name}{(this.props.model_id ? `-` + this.props.model_id : '')}</h4>
+                    <h4 className="text-center"> Model-{prop_name}{(prop_id ? `-` + prop_id : '')}</h4>
                 }
                 <hr></hr>
                 <Formik
@@ -207,6 +192,7 @@ export default class Forms extends Component {
                                                                 onChange={(e) => {
                                                                     handleChange(e)
                                                                     if (friend.field_name == 'is_connect_to_feature') {
+                                                                        setFieldValue(`form_values.${index - 3}.data`, 'false')
                                                                         this.setState({ isTrue: true })
                                                                     }
                                                                 }}
@@ -223,6 +209,7 @@ export default class Forms extends Component {
                                                                 onChange={(e) => {
                                                                     handleChange(e)
                                                                     if (friend.field_name == 'is_connect_to_feature') {
+                                                                        setFieldValue(`form_values.${index - 3}.data`, 'true')
                                                                         this.setState({ isTrue: false })
                                                                     }
                                                                 }}
@@ -232,10 +219,11 @@ export default class Forms extends Component {
                                                     </div>
                                                     :
                                                         (
-                                                            (friend.field_name == 'data_type_id' && this.props.model_name !== 'data_type_config')||
-                                                            (friend.field_name == 'property_id' && this.props.model_name === 'data_type_config')||
-                                                            (friend.field_name == 'value_type_id' && this.props.model_name !== 'value_type') ||
-                                                            ((friend.field_name == 'property_id' || friend.field_name == 'to_property_id') && this.props.model_name == 'code_list_config')
+                                                            (friend.field_name == 'data_type_id' && prop_name !== 'data_type_config')||
+                                                            (friend.field_name == 'property_id' && prop_name === 'data_type_config')||
+                                                            (friend.field_name.includes('connect_feature') &&  prop_name === 'feature_config')||
+                                                            (friend.field_name == 'value_type_id' && prop_name !== 'value_type') ||
+                                                            ((friend.field_name.includes('property_id') && prop_name == 'code_list_config'))
                                                             ?
                                                             <div className="input-group">
                                                                 <Field
@@ -243,8 +231,9 @@ export default class Forms extends Component {
                                                                     className='form-control'
                                                                     placeholder={friend.field_name}
                                                                     as='select'
+                                                                    disabled = {friend.field_name.includes('connect_feature') && isTrue ? 'disabled' : ''}
                                                                 >
-                                                                    <option value=""> ... </option>
+                                                                    <option value=""> --- Сонгоно уу --- </option>
                                                                     {datas.map((data, idx) =>
                                                                         <option
                                                                             key={idx}
@@ -255,51 +244,33 @@ export default class Forms extends Component {
                                                                     )}
                                                                 </Field>
                                                                 {
-                                                                    this.props.model_name != 'code_list_config'
+                                                                    prop_name != 'code_list_config'
                                                                     ?
-                                                                        <a className="input-group-btn">
-                                                                            <i
-                                                                                role="button"
-                                                                                className="fa fa-plus-square gp-text-primary input-group-addon fa-2x m-0 p-0"
-                                                                                onClick={() => this.makeModel()}
-                                                                                aria-hidden="true"
-                                                                            >
-                                                                            </i>
-                                                                        </a>
+                                                                        !(friend.field_name.includes('connect_feature'))
+                                                                        ?
+                                                                            <a className="input-group-btn">
+                                                                                <i
+                                                                                    role="button"
+                                                                                    className="fa fa-plus-square gp-text-primary input-group-addon fa-2x m-0 p-0"
+                                                                                    onClick={() => this.makeModel()}
+                                                                                    aria-hidden="true"
+                                                                                >
+                                                                                </i>
+                                                                            </a>
+                                                                        : null
                                                                     :
                                                                         null
 
                                                                 }
                                                             </div>
                                                             :
-                                                            (
-                                                                (friend.field_name.includes('id') &&
-                                                                !(friend.field_name.includes('connect_feature')))
-                                                                ?
-                                                                    <Field
-                                                                        name={`form_values.${index}.data`}
-                                                                        className='form-control'
-                                                                        placeholder={friend.field_name}
-                                                                        type={friend.field_type}
-                                                                        disabled={(friend.field_name == 'top_theme_id') || (friend.field_name == 'value_type_id' && edit_name == '') ? '' : 'disabled'}
-                                                                    />
-                                                                :
-                                                                    <Field
-                                                                        name={`form_values.${index}.data`}
-                                                                        className='form-control'
-                                                                        placeholder={friend.field_name}
-                                                                        type={friend.field_type}
-                                                                        disabled={
-                                                                            (!isTrue &&
-                                                                                (friend.field_name.includes('connect_feature')))
-                                                                            ?
-                                                                                'disabled'
-                                                                            :
-                                                                                ''
-                                                                        }
+                                                                <Field
+                                                                    name={`form_values.${index}.data`}
+                                                                    className='form-control'
+                                                                    placeholder={friend.field_name}
+                                                                    type={friend.field_type}
+                                                                    disabled={(friend.field_name == 'value_type_id' && edit_name == '') ? 'disabled' : ''}
                                                                 />
-
-                                                            )
                                                         )
                                                     }
                                                 </div>
@@ -309,7 +280,7 @@ export default class Forms extends Component {
                                     )}
                                     <div className={edit_name !== '' ? ' row' : ''}>
                                         {
-                                            edit_name &&  <button type="submit" className="btn col-md-4 btn-danger mr-5">Устгах</button>
+                                            edit_name &&  <a className="btn col-md-4 btn-danger mr-5 text-white" onClick={() => this.props.remove(prop_name, prop_id, prop_edit_name)}>Устгах</a>
                                         }
                                         <button type="submit" className={`btn ` + (edit_name ? 'col-md-7' : 'btn-block') +` gp-btn-primary`}>{edit_name !== '' ? 'Засах' : 'Хадгалах'}</button>
                                     </div>
@@ -319,16 +290,6 @@ export default class Forms extends Component {
                         </Form>
                     )}}
                 </Formik>
-                <Modal
-                    modalAction={() => this.backToSide('close')}
-                    title={info || ''}
-                    text={`Үргэлжлүүлэх үү ?`}
-                    model_type_icon = "danger"
-                    status={this.state.modal_status}
-                    modalClose={() => this.closeForm()}
-                    actionName='Үргэлжлүүлэх'
-                    actionNameBack='Болсон'
-                />
             </div>
         )
     }

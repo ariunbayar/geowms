@@ -5,6 +5,7 @@ import { CompilationStatus } from 'webpack-build-notifier/dist/types'
 import SideBar from './sideTable'
 import Forms from './Form'
 import './style.css'
+import Modal from '../../../../../src/components/Modal/DeleteModal'
 
 export class List extends Component {
 
@@ -22,6 +23,9 @@ export class List extends Component {
             code: '',
             edit_name: '',
             is_delete: false,
+            modal_status: "closed",
+            name: '',
+            hideRight: false,
         }
         this.getAll = this.getAll.bind(this)
         this.handleForm = this.handleForm.bind(this)
@@ -29,6 +33,7 @@ export class List extends Component {
         this.handleFormLeft = this.handleFormLeft.bind(this)
         this.isDelete = this.isDelete.bind(this)
         this.remove = this.remove.bind(this)
+        this.delete = this.delete.bind(this)
     }
 
     componentDidMount(){
@@ -50,7 +55,7 @@ export class List extends Component {
 
     getProperties(code) {
         console.log(code, "this is a code")
-        this.setState({ form_is_laod: true })
+        this.setState({ form_is_laod: true, hideRight: true })
         service.getprop(code).then(rsp => {
             if(rsp.success){
                 this.setState({
@@ -64,10 +69,10 @@ export class List extends Component {
 
     handleForm(model_name, model_id, edit_name){
         if (edit_name) {
-            this.setState({ form_is_laod: false, model_id, edit_name, model_name })
+            this.setState({ form_is_laod: false, model_id, edit_name, model_name, hideRight: true })
         }
         else {
-            this.setState({ form_is_laod: false, model_name, model_id, edit_name: '' })
+            this.setState({ form_is_laod: false, model_name, model_id, edit_name: '', hideRight: true })
 
         }
     }
@@ -90,15 +95,34 @@ export class List extends Component {
         this.setState({ is_delete: !this.state.is_delete })
     }
 
-    remove(model_name, model_id){
-        console.log(model_name, model_id)
-        service.remove(model_name, model_id).then(rsp => {
-            console.log(rsp)
+    remove(model_name, model_id, name){
+        console.log(model_name, model_id, name)
+        this.setState({ modal_status: "open", model_name, model_id, name })
+    }
+
+    delete(){
+        const { model_name, model_id } = this.state
+        service.remove(model_name, model_id).then(({success, info}) => {
+            if (success) {
+                console.log(info)
+                this.getAll();
+            }
+            else {
+                alert(info)
+            }
+            this.setState({ info, modal_status: "closed", hideRight: false })
         })
     }
 
+    statusModal(type){
+        console.log(type)
+        if (type == 'open') this.setState({ modal_status: "open" })
+        if (type == 'close') this.setState({ modal_status: "closed" })
+        if (type == 'hide') this.setState({ hideRight: false })
+    }
+
     render() {
-        const { list_all, form_is_laod_left, model_name, model_id, code, edit_name, is_delete } = this.state
+        const { list_all, form_is_laod_left, model_name, model_id, code, edit_name, is_delete, info } = this.state
         console.log(is_delete)
         return (
             <div className="row m-0">
@@ -121,7 +145,7 @@ export class List extends Component {
                                                 <i
                                                     className="fa fa-trash text-danger fa-1x"
                                                     role="button"
-                                                    onClick={() => this.remove('theme', theme.id)}
+                                                    onClick={() => this.remove('theme', theme.id, theme.name)}
                                                 ></i>
                                             }
                                         </span>
@@ -137,7 +161,7 @@ export class List extends Component {
                                                             <i
                                                                 className="fa fa-trash text-danger fa-1x"
                                                                 role="button"
-                                                                onClick={() => this.remove('package', packages.id)}
+                                                                onClick={() => this.remove('package', packages.id, packages.name)}
                                                             ></i>
                                                         }
                                                     </span>
@@ -152,7 +176,7 @@ export class List extends Component {
                                                                 <i
                                                                     className="fa fa-trash text-danger fa-1x"
                                                                     role="button"
-                                                                    onClick={() => this.remove('feature', feature.id)}
+                                                                    onClick={() => this.remove('feature', feature.id, feature.name)}
                                                                 ></i>
                                                             }
                                                         </li>
@@ -178,6 +202,7 @@ export class List extends Component {
                                     code={code}
                                     done={() => this.done()}
                                     edit_name={edit_name}
+                                    remove={this.remove}
                                 ></Forms>
                             </div>
                         }
@@ -185,6 +210,16 @@ export class List extends Component {
 
                     </div>
                 </div>
+                <Modal
+                    modalAction={() => this.delete()}
+                    title={'Устгах'}
+                    text={`Та "${this.state.name}" нэртэй "${this.state.model_name}"-г устгахдаа итгэлтэй байна уу?`}
+                    model_type_icon = "success"
+                    status={this.state.modal_status}
+                    modalClose={() => this.statusModal('close')}
+                    actionName='Устгах'
+                    actionNameBack='Болих'
+                />
                 <div className={`card col-md-7`} style={{left:"10px"}}>
                     <div className="card-body">
                         {this.state.form_is_laod ?
@@ -202,6 +237,8 @@ export class List extends Component {
                                 refresh={this.getAll}
                                 done={() => this.done()}
                                 edit_name={edit_name}
+                                remove={this.remove}
+                                statusModal={this.statusModal}
                             ></Forms>
                         </div>
                         }
