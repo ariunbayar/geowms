@@ -119,7 +119,6 @@ export default class BarilgaSuurinGazar extends Component{
     loadControls(){
       const map = this.map
       const { type, roles } = this.state
-      console.log("roles", roles)
       map.addControl(this.controls.modal)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
@@ -527,7 +526,7 @@ export default class BarilgaSuurinGazar extends Component{
               is_loading:false
             })
           }
-          if(id){
+          if(id && this.state.roles[3]){
             this.setState({selectedFeature_ID: id, togle_islaod: false})
           }
         }

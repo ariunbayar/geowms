@@ -171,6 +171,7 @@ export class App extends Component {
                                                         theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
                                                         <MenuItem
                                                             key={ idy }
+                                                            icon="fa fa-folder-open gp-text-primary"
                                                             url={`/gov/org/map/${theme.id}/${pack.id}`}
                                                             text={pack.name}
                                                         >
@@ -180,14 +181,14 @@ export class App extends Component {
                                                                     <MenuItem
                                                                         key={idz}
                                                                         icon="fa fa-table gp-text-primary"
-                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`} 
+                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
                                                                         text={feat.name}
-                                                                    > 
+                                                                    >
                                                                     </MenuItem>
                                                                 ): null
                                                             }
                                                         </ul>
-                                                        </MenuItem> 
+                                                        </MenuItem>
                                                         ):null
                                                     }
                                                 </ul>
@@ -195,7 +196,7 @@ export class App extends Component {
                                         ):null}
                                     </ul>
                         </MenuItem>
-                        {teevriin_suljee.perm_view &&
+                        {/* {teevriin_suljee.perm_view &&
                             <MenuItem
                                 icon="gp-text-primary icon-map"
                                 url="/gov/тээврийн-сүлжээ/"
@@ -279,7 +280,7 @@ export class App extends Component {
                                 )}
                             </ul>
                             </MenuItem>
-                        }
+                        } */}
                     </ul>
                 </div>
 

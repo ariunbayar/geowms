@@ -28,7 +28,6 @@ export default class Bundles extends Component {
             clearInterval(time)
         }, 2000);
     }
-    
 
     componentDidMount(){
         const {tid, pid, fid} = this.props.match.params

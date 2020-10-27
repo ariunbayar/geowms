@@ -35,23 +35,23 @@ def _get_packages(org, theme_id):
                     })
     return packages
 
-       
+
 def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
     perms = []
     org_inspire = []
     roles_inspire = OrgInspireRoles.objects.filter(org=org, perm_view=True)
     if roles_inspire:
-        for i in roles_inspire:    
+        for i in roles_inspire:
             if i.module == 1:
-                themes = LThemes.objects.filter(theme_id=i.module_id).values('theme_name', 'theme_id')        
+                themes = LThemes.objects.filter(theme_id=i.module_id).values('theme_name', 'theme_id')
                 for theme in themes:
                     org_inspire.append({
                         'id':theme['theme_id'],
                         'name':theme['theme_name'],
                         'packages': _get_packages(org, theme['theme_id'],)
                     })
- 
+
     for module in Bundle.MODULE_CHOICES:
         roles = OrgRole.objects.filter(org=org, bundle__module=module[0]).distinct('bundle')
 
