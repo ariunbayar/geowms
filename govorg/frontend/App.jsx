@@ -7,6 +7,7 @@ import ТээврийнСүлжээ from './TeevriinSuljee'
 import ДэдБүтэц from './DedButets'
 import БайрЗүйнЗураг from './BairZuinZurag'
 import БарилгаСууринГазар from './BarilgaSuurinGazar'
+import Bundles from './Map/index'
 import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
@@ -33,8 +34,10 @@ export class App extends Component {
             ded_butets_table_list: [],
             teevriin_suljee_table_list: [],
             teevriin_suljee: {},
-            tseg_burtgel: {}
+            tseg_burtgel: {},
+            map_list:[],
         }
+        this.handleMapComponens = this.handleMapComponens.bind(this)
     }
 
     componentDidMount(){
@@ -93,7 +96,11 @@ export class App extends Component {
                     ded_butets_table_list: items,
                 })
             })
-
+        
+        this.handleMapComponens()
+    }
+    handleMapComponens(){
+        service.component
     }
 
     render() {
@@ -109,6 +116,8 @@ export class App extends Component {
             ded_butets,
             barilga_suurin_gazar_table_list,
         } = this.state
+        const org_inspire = this.props.org.org_inspire
+
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -120,7 +129,7 @@ export class App extends Component {
                     </div>
                     <ul className="sidebar-menu do-nicescrol">
                         <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
-                        <MenuItem icon="gp-text-primary fa fa-database" url="/gov/bundle/" text="ДЭД САН"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-key" url="/gov/bundle/" text="ЭРХ"></MenuItem>
                         <MenuItem icon="gp-text-primary icon-user" url="/gov/employees/" text="ХЭРЭГЛЭГЧ"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="СИСТЕМ"></MenuItem>
                         {tuuhen_ov.perm_view &&
@@ -148,7 +157,46 @@ export class App extends Component {
                         }
                         <MenuItem icon="gp-text-primary zmdi zmdi-group-work" url="/gov/zip-code/" text="ЗИПКОД"></MenuItem>
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="ТУСЛАМЖ"></MenuItem>
-                        {teevriin_suljee.perm_view &&
+                        <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="ДЭД САН">
+                            <ul className="sidebar-submenu">
+                                        { org_inspire.length >0  ? org_inspire.map((theme, idx) =>
+                                            <MenuItem
+                                                key={ idx }
+                                                icon="gp-text-primary icon-map"
+                                                url={`/gov/org/map/${theme.id}`}
+                                                text={theme.name}
+                                            >
+                                                <ul className="sidebar-submenu">
+                                                    {
+                                                        theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
+                                                        <MenuItem
+                                                            key={ idy }
+                                                            icon="fa fa-folder-open gp-text-primary"
+                                                            url={`/gov/org/map/${theme.id}/${pack.id}`}
+                                                            text={pack.name}
+                                                        >
+                                                        <ul className="sidebar-submenu">
+                                                            {
+                                                                pack.features.length>0 ? pack.features.map((feat, idz)=>
+                                                                    <MenuItem
+                                                                        key={idz}
+                                                                        icon="fa fa-table gp-text-primary"
+                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                        text={feat.name}
+                                                                    >
+                                                                    </MenuItem>
+                                                                ): null
+                                                            }
+                                                        </ul>
+                                                        </MenuItem>
+                                                        ):null
+                                                    }
+                                                </ul>
+                                            </MenuItem>
+                                        ):null}
+                                    </ul>
+                        </MenuItem>
+                        {/* {teevriin_suljee.perm_view &&
                             <MenuItem
                                 icon="gp-text-primary icon-map"
                                 url="/gov/тээврийн-сүлжээ/"
@@ -232,7 +280,7 @@ export class App extends Component {
                                 )}
                             </ul>
                             </MenuItem>
-                        }
+                        } */}
                     </ul>
                 </div>
 
@@ -295,6 +343,7 @@ export class App extends Component {
                                     />
                                 }/>
                             }
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route exact path="/gov/employees/" component={ Employee }/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>

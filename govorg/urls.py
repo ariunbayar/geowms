@@ -10,6 +10,7 @@ from govorg.backend.ded_butets import views as ded_butets_veiws
 from govorg.backend.teevriin_suljee import views as teevriin_suljee_views
 
 import govorg.backend.barilga_suurin_gazar.views
+from  govorg.backend.govorg_inspire import views as govorg_inspire_views
 
 urlpatterns = [
     path('api/', include(([
@@ -70,6 +71,21 @@ urlpatterns = [
             path('<int:oid>/<str:pk>/geom-update/', govorg.backend.teevriin_suljee.views.updateGeom),
             path('<int:oid>/add-geom/', govorg.backend.teevriin_suljee.views.geomAdd),
         ], 'teevriin_suljee'))),
+        
+        path('inspire/', include(([
+            path('', govorg_inspire_views.changeset_all),
+            path('<int:pid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),
+            path('table_list/', govorg_inspire_views.bundleButetsAll),
+            path('<int:pid>/<int:fid>/rows/', govorg_inspire_views.rows),
+            path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
+            path('<int:pid>/<int:fid>/add/', govorg_inspire_views.add),
+            path('<int:pid>/<str:fid>/save/', govorg_inspire_views.save),
+            path('<str:pk>/<str:fid>/detail/', govorg_inspire_views.detail),
+            path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
+            path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
+            path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
+            
+        ], 'inspire'))),
 
     ], 'back_org'))),
 

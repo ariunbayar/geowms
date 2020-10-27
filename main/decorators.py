@@ -84,3 +84,30 @@ def gov_bundle_required(module):
         return wrap
 
     return inner
+
+
+def gov_org_required(module):
+    def inner(f):
+
+        def wrap(request, *args, **kwargs):
+
+            if request.user.is_authenticated:
+
+                Org = apps.get_model('backend_org', 'Org')
+                org = get_object_or_404(Org, employee__user=request.user)
+
+                Org_Inspire = apps.get_model('backend_org', 'OrgInspireRoles')
+                org_inspire = get_list_or_404(Org_Inspire, module=module, perm_create=True, perm_update=True, perm_remove=True)
+                request.org = org
+                request.org_inspire = org_inspire
+
+                return f(request, *args, **kwargs)
+
+            raise Http404
+
+        wrap.__doc__ = f.__doc__
+        wrap.__name__ = f.__name__
+
+        return wrap
+
+    return inner
