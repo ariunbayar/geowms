@@ -111,10 +111,10 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data`} as="select" className="form-control">
+                                                    <Field name={`form_values.${index}.data`} as="select" className="form-control" disabled={friend.role}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
-                                                            <option key = {idy} value={data.code_list_id} disabled={friend.role}>{data.code_list_name}</option>
+                                                            <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
                                                             )
                                                         }
                                                     </Field>
