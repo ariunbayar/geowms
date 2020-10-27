@@ -53,17 +53,17 @@ export class OrgMenu extends Component {
         const org_id = this.props.match.params.id
         return (
             <div>
-                <ul className="nav nav-tabs nav-tabs-dark nav-justified">
+                <ul className="nav nav-tabs nav-tabs-primary">
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
-                            <i className="icon-home"></i> <span className="hidden-xs">Эрх</span>
+                            <i className="fa fa-lock"></i> <span className="hidden-xs">Эрх</span>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/inspire/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
-                            <i className="icon-home"></i> <span className="hidden-xs">Эрх inspire</span>
+                            <i className="fa fa-lock"></i> <span className="hidden-xs">Эрх inspire</span>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">

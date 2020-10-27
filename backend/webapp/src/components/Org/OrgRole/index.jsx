@@ -97,7 +97,7 @@ export class OrgRole extends Component {
                         <div className="mb-3 mt-3">
                             <div className="table-responsive">
                                 <table className="table table-bordered w-auto">
-                                    <thead>
+                                    <thead className="thead-light">
                                         <tr>
                                             <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
                                             <th scope="col" className="vertical"><span>харах</span></th>
