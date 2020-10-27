@@ -1351,6 +1351,7 @@ def hureeUpdate(request, payload):
     y_t=float(y)
     point = []
     points = []
+    TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
     tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     if tuuh_hure_datas.count() > 2:
         for tuuh_hure in tuuh_hure_datas:
@@ -1443,9 +1444,6 @@ def ayulHureeCreate(request, payload):
     tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=idx)
     point = []
     points = []
-    print(idx)
-    print(idx)
-    print(idx)
     if tuuh_hure_datas.count() > 2:
         for tuuh_hure in tuuh_hure_datas:
             x = float(tuuh_hure.x)
@@ -1475,7 +1473,8 @@ def ayulHureeUpdate(request, payload):
     y = payload.get('y')
     x_t=float(x)
     y_t=float(y)
-    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, id = huree_id)
+    TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov, id = huree_id)
     point = []
     points = []
     if tuuh_hure_datas.count() > 2:
