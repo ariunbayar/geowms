@@ -1351,7 +1351,6 @@ def hureeUpdate(request, payload):
     y_t=float(y)
     point = []
     points = []
-    TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
     tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     if tuuh_hure_datas.count() > 2:
         for tuuh_hure in tuuh_hure_datas:
@@ -1441,8 +1440,12 @@ def ayulHureeCreate(request, payload):
     x_t=float(x)
     y_y=float(y)
     TuuhSoyolAyuulHuree.objects.create(tuuh_soyl = idx, x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=idx)
     point = []
     points = []
+    print(idx)
+    print(idx)
+    print(idx)
     if tuuh_hure_datas.count() > 2:
         for tuuh_hure in tuuh_hure_datas:
             x = float(tuuh_hure.x)
@@ -1456,9 +1459,9 @@ def ayulHureeCreate(request, payload):
         geom = Polygon(points)
         check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
         if not check:
-            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx, geom = geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = idx, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1472,7 +1475,7 @@ def ayulHureeUpdate(request, payload):
     y = payload.get('y')
     x_t=float(x)
     y_t=float(y)
-    TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, pk=huree_id).update(x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, id = huree_id)
     point = []
     points = []
     if tuuh_hure_datas.count() > 2:
@@ -1486,7 +1489,7 @@ def ayulHureeUpdate(request, payload):
         point = (y, x)
         points.append(point)
         geom = Polygon(points)
-        TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
     return JsonResponse({'success': True})
 
 
@@ -1497,7 +1500,8 @@ def ayulHureeDelete(request, payload):
     ayul_id = payload.get('ayul_id')
     tuuhsoyl = TuuhSoyolAyuulHuree.objects.filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
     tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov)
-    cursor = connections['postgis_db'].cursor()
+    point = []
+    points = []
     if tuuhsoyl:
         tuuhsoyl.delete()
         if tuuh_hure_datas.count() > 2:
@@ -1511,7 +1515,7 @@ def ayulHureeDelete(request, payload):
             point = (y, x)
             points.append(point)
             geom = Polygon(points)
-            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = tuuhen_ov, geom = geom)
         else:
             TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov).delete()
     else:
