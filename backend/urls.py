@@ -12,7 +12,7 @@ from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
 from backend.zipcode import views as zipcode_views
-from backend.dedsanButets import views as zipcode_dedsan_butets
+from backend.dedsanbutets import views as zipcode_dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
 
@@ -182,6 +182,8 @@ urlpatterns = [
     path('dedsan-butests/', include(([
         path('all/', zipcode_dedsan_butets.bundleButetsAll),
         path('prop/<str:code>/', zipcode_dedsan_butets.Property),
+        path('property-fields/<int:fid>/', zipcode_dedsan_butets.propertyFields),
+        path('property-fields/save/', zipcode_dedsan_butets.propertyFieldsSave),
         path('editName/', zipcode_dedsan_butets.Edit_name),
     ], 'dedsan-butests'))),
 

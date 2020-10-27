@@ -62,7 +62,6 @@ p.incr, .incr p {
    
 .caps { 
   font-variant: small-caps; 
-  letter-spacing: 1px; 
   text-transform: lowercase; 
   font-size:1.2em;
   line-height:1%;

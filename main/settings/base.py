@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     'backend.zipcode.apps.ZipcodeConfig',
     'backend.changeset.apps.ChangesetConfig',
     'backend.gis.apps.GisConfig',
-    'backend.dedsanButets.apps.DedsanbutetsConfig',
+    'backend.dedsanbutets.apps.DedsanbutetsConfig',
     'backend.inspire.apps.InspireConfig',
     'backend.geoserver.apps.GeoserverConfig',
 
@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'govorg.backend.barilga_suurin_gazar.apps.BarilgaSuurinGazarConfig',
     'govorg.backend.ded_butets.apps.DedButetsConfig',
     'govorg.backend.teevriin_suljee.apps.TeevriinSuljeeConfig',
+    'govorg.backend.govorg_inspire.apps.InspireConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
