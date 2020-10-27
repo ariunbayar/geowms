@@ -56,7 +56,6 @@ body {
     font-family: 'Roboto', sans-serif;
     font-size: 15px;
     color: #636363;
-    letter-spacing: 1px;
 }
 [tabindex="-1"]:focus {
 	outline: 0!important
@@ -722,7 +721,6 @@ hr {
 .btn{
 	font-size: .75rem;
     font-weight: 500;
-    letter-spacing: 1px;
     padding: 10px 20px;
     border-radius: .25rem;
     text-transform: uppercase;
@@ -2209,7 +2207,6 @@ label {
     color: #6b6b6b;
     font-size: .75rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
     font-weight: 500;
     margin-bottom: 10px;
 }
@@ -2406,7 +2403,6 @@ table.grid td {
     font-size: .72rem;
     padding-top: .75rem;
     padding-bottom: .75rem;
-    letter-spacing: 1px;
     text-transform: uppercase;
     border-bottom: 1px solid #e9ecef;
 }
@@ -3575,7 +3571,6 @@ table.grid td {
 	color: #223035;
 	font-size: 12px;
     text-align: center;
-	letter-spacing: 1px;
     font-weight: 600;
 	margin: 2px;
     margin-bottom: 0;
@@ -3683,7 +3678,6 @@ table.grid td {
     color: #223035;
     font-size: 12px;
     text-align: center;
-    letter-spacing: 1px;
     font-weight: 600;
     margin: 2px;
     margin-right: -1px;
@@ -3812,7 +3806,6 @@ table.grid td {
     color: #223035;
     font-size: 12px;
     text-align: center;
-	letter-spacing: 1px;
     font-weight: 600;
     text-transform: uppercase;
 	margin: 3px;

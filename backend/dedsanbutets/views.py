@@ -4,6 +4,13 @@ from main.decorators import ajax_required
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import user_passes_test
+from django.db import connections
+from .models import ViewNames, ViewProperties
+from django.shortcuts import get_object_or_404
+
+from main.utils import (
+    dict_fetchall
+)
 
 # Create your views here.
 def _get_package(theme_id):
@@ -194,3 +201,130 @@ def Edit_name(request, payload):
             'info': 'Алдаа гарлаа'
         }
     return JsonResponse(rsp)
+
+
+def get_rows(fid):
+    cursor = connections['default'].cursor()
+    sql = """
+        select datas.property_id, l.property_code
+        from l_properties l
+        inner join (select l_feature_configs.feature_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
+        from l_feature_configs
+        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
+        where l_feature_configs.feature_id = {fid}
+        ) datas
+        on datas.property_id = l.property_id
+    """.format(
+        fid=fid
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def propertyFields(request, fid):
+    fields = get_rows(fid)
+    view_name = ViewNames.objects.filter(feature_id=fid).first()
+    if not view_name == None:
+        id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
+        rsp = {
+            'success': True,
+            'fields': fields,
+            'id_list': id_list
+        }
+    else:
+        rsp = {
+            'success': True,
+            'fields': fields,
+            'id_list': []
+        }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def propertyFieldsSave(request, payload):
+    id_list = payload.get('fields')
+    fid = payload.get('fid')
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+
+    if not feature:
+        rsp = {
+            'success': False,
+            'info': 'Алдаа гарлаа'
+        }
+        return JsonResponse(rsp)
+
+    check_name = ViewNames.objects.filter(feature_id=fid).first()
+    if check_name:
+        table_name = check_name.view_name
+        removeView(table_name)
+        check = createView(id_list, table_name)
+        if check:
+            ViewProperties.objects.filter(view=check_name).delete()
+            for idx in id_list:
+                ViewProperties.objects.create(view=check_name, property_id=idx)
+
+
+    else:
+        table_name = feature.feature_name_eng.split(' ')[0].lower() + '_view'
+        check = createView(id_list, table_name)
+        if check:
+            new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
+            for idx in id_list:
+                ViewProperties.objects.create(view=new_view, property_id=idx)
+
+
+    if check:
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+
+        }
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Амжилтгүй хадгаллаа'
+        }
+    return JsonResponse(rsp)
+
+
+def createView(ids, table_name):
+    data = LProperties.objects.filter(property_id__in=ids)
+    fields = [row.property_code for row in data]
+    try:
+
+        query = '''
+            CREATE OR REPLACE VIEW public.{table_name}
+                AS
+            SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from m_datas_building b where property_id in ({properties}) order by 1,2'::text)
+            ct(geo_id character varying(100), {create_columns})
+            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+
+        '''.format(
+                table_name = table_name,
+                columns=', '.join(['ct.{}'.format(f) for f in fields]),
+                properties=', '.join(['{}'.format(f) for f in ids]),
+                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+        with connections['default'].cursor() as cursor:
+                cursor.execute(query)
+        return True
+
+    except Exception:
+        return False
+
+def removeView(table_name):
+    try:
+        query = '''
+            drop view {table_name};
+        '''.format(table_name = table_name)
+        with connections['default'].cursor() as cursor:
+            cursor.execute(query)
+        return True
+    except Exception:
+        return False
