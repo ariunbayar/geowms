@@ -67,6 +67,7 @@ class TuuhSoyolPoint(models.Model):
     y = models.CharField(max_length=50)
     ondor = models.CharField(max_length=101)
     created_at = models.DateTimeField(auto_now_add=True)
+    geom = models.PointField(srid=4326)
     class Meta:
         db_table = 'tuuhsoyolpoint'
         managed = False
@@ -86,6 +87,7 @@ class TuuhSoyolHureePol(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
     tuuh_soyl_huree_id = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    geom = models.PolygonField(srid=4326)
     class Meta:
         db_table = 'tuuhsoyolhureepol'
         managed = False
@@ -102,6 +104,7 @@ class TuuhSoyolAyuulHuree(models.Model):
 class TuuhSoyolAyuulHureePol(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    geom = models.PolygonField(srid=4326)
     class Meta:
         db_table = 'tuuhsoyolayuulhureepol'
         managed = False
