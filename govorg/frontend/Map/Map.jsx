@@ -34,6 +34,7 @@ export default class BarilgaSuurinGazar extends Component{
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
           featureProjection: 'EPSG:3857',
+          tid: props.match.params.tid,
           pid: props.match.params.pid,
           fid: props.match.params.fid,
           rows: [],
@@ -52,7 +53,9 @@ export default class BarilgaSuurinGazar extends Component{
           chkbox: true,
           type: '',
           drawed: null,
-          togle_islaod: true
+          togle_islaod: true,
+          geojson: {},
+          null_form_isload: false
       }
 
       this.controls = {
@@ -294,7 +297,7 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID })
+        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
       }
@@ -401,7 +404,7 @@ export default class BarilgaSuurinGazar extends Component{
       })
 
       const drawed = JSON.stringify(area)
-      this.setState({drawed})
+      this.setState({drawed, selectedFeature_ID: null})
     }
 
     clearMap() {
@@ -443,21 +446,32 @@ export default class BarilgaSuurinGazar extends Component{
       const selectedFeature_ID = this.state.selectedFeature_ID
       var features_new = vector.getSource().getFeatures();
       var features = vectorLayer.getSource().getFeatures();
+      const tid = this.state.tid
       const fid = this.state.fid
       const pid = this.state.pid
       if(selectedFeature_ID){
-        service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
-            if (success) {
-              this.addNotif('success', info, 'check')
-              this.setState({featureID_list: [], selectedFeature_ID: null})
-              if (features != null && features.length > 0) {
-                features.map((x) => {
-                  const id = x.getProperties()['id']
-                  id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
-                })
+          if(this.state.roles[4] || this.state.roles[5] || this.state.roles[6]){
+            service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
+              if (success) {
+                this.addNotif('success', 'Амжилттай', 'check')
+                this.setState({featureID_list: [], selectedFeature_ID: null})
               }
-            }
-        })
+            })
+          }
+          else{
+            service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
+              if (success) {
+                this.addNotif('success', info, 'check')
+                this.setState({featureID_list: [], selectedFeature_ID: null})
+                if (features != null && features.length > 0) {
+                  features.map((x) => {
+                    const id = x.getProperties()['id']
+                    id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
+                  })
+                }
+              }
+            })
+          }
       }
       else
       {
@@ -490,26 +504,39 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     updateGeom(){
+      const {tid, fid, pid} = this.state
       const id = this.state.selectedFeature_ID
-      const fid = this.state.fid
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       this.setState({ is_loading:true })
-      service.geomUpdate(datas, fid, id).then(({success, info}) => {
-        
-        if(success){
-          this.addNotif('success', info, 'check')
-          this.setState({
-            is_loading:false
-          })
-        }
-        else {
-          this.addNotif('danger', info, 'times')
-          this.setState({
-            is_loading:false
-          })
-        }
-      })
+      if(this.state.roles[4] || this.state.roles[5] || this.state.roles[6]){
+        service.createUpd(tid, pid, fid, null, datas, id).then(({success}) => {
+          if(success){
+            this.addNotif('success', 'Амжилттай', 'check')
+            this.setState({is_loading:false})
+          }
+          else {
+            this.addNotif('danger', 'Амжилтгүй', 'times')
+            this.setState({is_loading:false})
+          }
+        })
+      }
+      else{
+        service.geomUpdate(datas, fid, id).then(({success, info}) => {
+          if(success){
+            this.addNotif('success', info, 'check')
+            this.setState({
+              is_loading:false
+            })
+          }
+          else {
+            this.addNotif('danger', info, 'times')
+            this.setState({
+              is_loading:false
+            })
+          }
+        })
+      }
     }
 
     createGeom(){
@@ -517,27 +544,32 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       this.setState({ is_loading:true })
-
-      service.geomAdd(datas, fid).then(({success, info, id}) => {
-        if(success){
+      if(this.state.roles[4] || this.state.roles[5] || this.state.roles[6]){
+        this.setState({ is_loading:false, geojson: datas, null_form_isload: true, togle_islaod: false})
+      }
+      else
+      {
+        service.geomAdd(datas, fid).then(({success, info, id}) => {
+          if(success){
+            {
+              this.addNotif('success', info, 'check')
+              this.setState({
+                is_loading:false
+              })
+            }
+            if(id && this.state.roles[3]){
+              this.setState({selectedFeature_ID: id, togle_islaod: false})
+            }
+          }
+          else
           {
-            this.addNotif('success', info, 'check')
+            this.addNotif('danger', info, 'times')
             this.setState({
               is_loading:false
             })
           }
-          if(id && this.state.roles[3]){
-            this.setState({selectedFeature_ID: id, togle_islaod: false})
-          }
-        }
-        else
-        {
-          this.addNotif('danger', info, 'times')
-          this.setState({
-            is_loading:false
-          })
-        }
-      })
+        })
+      }
     }
 
     ModifyButton(){
@@ -591,10 +623,15 @@ export default class BarilgaSuurinGazar extends Component{
                   <div id="sidebar-wrapper-map" className="overflow-auto">
                     <div className="card-body">
                         <Маягт
+                          tid = {this.props.match.params.tid}
                           pid = {this.props.match.params.pid}
                           fid = {this.props.match.params.fid}
+                          geojson = {this.state.geojson}
+                          roles = {this.state.roles}
                           gid = {this.state.selectedFeature_ID}
                           togle_islaod = {this.state.togle_islaod}
+                          null_form_isload = {this.state.null_form_isload}
+                          addNotif = {this.addNotif}
                         >
                         </Маягт>
                       </div>
