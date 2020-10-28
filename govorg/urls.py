@@ -89,7 +89,7 @@ urlpatterns = [
         ], 'inspire'))),
 
         path('org-request/', include(([
-            
+            path('', org_request_views.getAll),
         ], 'org-request'))),
 
     ], 'back_org'))),

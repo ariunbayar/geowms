@@ -8,6 +8,7 @@ import ДэдБүтэц from './DedButets'
 import БайрЗүйнЗураг from './BairZuinZurag'
 import БарилгаСууринГазар from './BarilgaSuurinGazar'
 import Bundles from './Map/index'
+import OrgRequest from './OrgRequest'
 import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
@@ -196,6 +197,8 @@ export class App extends Component {
                                         ):null}
                                     </ul>
                         </MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/org-request/" text="ХҮСЭЛТ"></MenuItem>
+                       
                         {/* {teevriin_suljee.perm_view &&
                             <MenuItem
                                 icon="gp-text-primary icon-map"
@@ -345,6 +348,7 @@ export class App extends Component {
                             }
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
+                            <Route path="/gov/org-request/" component={OrgRequest}/>
                             <Route exact path="/gov/employees/" component={ Employee }/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
                             <Route exact path="/gov/org/help/" component={Help}/>
