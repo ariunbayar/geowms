@@ -116,11 +116,11 @@ def disk(request):
 
 @ajax_required
 def postresqlVersion(request):
-    version_postgre_sql = connections['postgis_db'].cursor()
-    version_postgre_sql.execute(''' Select version();''')
+    version_postgre_sql = connections['default'].cursor()
+    version_postgre_sql.execute("SELECT version()")
     version_postgre_sql_data = version_postgre_sql.fetchone()
-    version_post_gis = connections['postgis_db'].cursor()
-    version_post_gis.execute(''' SELECT postgis_full_version();''')
+    version_post_gis = connections['default'].cursor()
+    version_post_gis.execute("SELECT postgis_full_version()")
     version_post_gis_data = version_post_gis.fetchone()
 
     return JsonResponse({'postgreVersion': version_postgre_sql_data, 'versionOfPostGis': version_post_gis_data})
