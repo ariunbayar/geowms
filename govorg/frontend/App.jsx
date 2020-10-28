@@ -96,7 +96,7 @@ export class App extends Component {
                     ded_butets_table_list: items,
                 })
             })
-        
+
         this.handleMapComponens()
     }
     handleMapComponens(){
@@ -128,74 +128,80 @@ export class App extends Component {
                         </a>
                     </div>
                     <ul className="sidebar-menu do-nicescrol">
-                        <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
-                        <MenuItem icon="gp-text-primary fa fa-key" url="/gov/bundle/" text="ЭРХ"></MenuItem>
-                        <MenuItem icon="gp-text-primary icon-user" url="/gov/employees/" text="ХЭРЭГЛЭГЧ"></MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="СИСТЕМ"></MenuItem>
-                        {tuuhen_ov.perm_view &&
-                            <MenuItem icon="gp-text-primary fa fa-history" url="/gov/tuuhen-ov/" text="ТҮҮХЭН ӨВ БҮРТГЭЛ"></MenuItem>
-                        }
-                        {tseg_burtgel.perm_view &&
-                            <MenuItem
-                                icon="gp-text-primary zmdi zmdi-photo-size-select-small"
-                                url="/gov/froms/tseg-info/tsegpersonal/"
-                                text="ХҮСЭЛТ"
-                            >
-                                <ul className="sidebar-submenu">
+                        <MenuItem icon="gp-text-primary fa fa-key" url="/gov/bundle/" text="Эрх">
+                            <ul className="sidebar-submenu">
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/bundle/" text="Байгууллага"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/employees/" text="Хэрэглэгч"></MenuItem>
+                            </ul>
+                        </MenuItem>
+
+
+                        <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
+
+                        <MenuItem icon="gp-text-primary fa fa-inbox" url="#" text="Хүсэлт">
+                            <ul className="sidebar-submenu">
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/received/" text="Илгээсэн хүсэлт"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/sent/" text="Шийдвэрлэх хүсэлт"></MenuItem>
+                            </ul>
+                        </MenuItem>
+
+                        <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
+                            <ul className="sidebar-submenu">
+                                {tuuhen_ov.perm_view &&
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
+                                }
+                                {tseg_burtgel.perm_view &&
                                     <MenuItem
                                         icon="gp-text-primary fa fa-circle-o"
                                         url="/gov/froms/tseg-info/tsegpersonal/"
-                                        text="ЦЭГИЙН МЭДЭЭЛЭЛ"
+                                        text="Цэгийн мэдээлэл"
                                     >
                                         <ul className="sidebar-submenu">
-                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/" text="ШИНЭ ЦЭГ"></MenuItem>
-                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="ЦЭГ УСТГАХ"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
                                         </ul>
                                     </MenuItem>
-                                </ul>
-                            </MenuItem>
-                        }
-                        <MenuItem icon="gp-text-primary zmdi zmdi-group-work" url="/gov/zip-code/" text="ЗИПКОД"></MenuItem>
-                        <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="ТУСЛАМЖ"></MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="ДЭД САН">
-                            <ul className="sidebar-submenu">
-                                        { org_inspire.length >0  ? org_inspire.map((theme, idx) =>
-                                            <MenuItem
-                                                key={ idx }
-                                                icon="gp-text-primary icon-map"
-                                                url={`/gov/org/map/${theme.id}`}
-                                                text={theme.name}
-                                            >
+                                }
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
+                                { org_inspire.length >0  ? org_inspire.map((theme, idx) =>
+                                    <MenuItem
+                                        key={ idx }
+                                        icon="gp-text-primary icon-map"
+                                        url={`/gov/org/map/${theme.id}`}
+                                        text={theme.name}
+                                    >
+                                        <ul className="sidebar-submenu">
+                                            {
+                                                theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
+                                                <MenuItem
+                                                    key={ idy }
+                                                    icon="fa fa-folder-open gp-text-primary"
+                                                    url={`/gov/org/map/${theme.id}/${pack.id}`}
+                                                    text={pack.name}
+                                                >
                                                 <ul className="sidebar-submenu">
                                                     {
-                                                        theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
-                                                        <MenuItem
-                                                            key={ idy }
-                                                            icon="fa fa-folder-open gp-text-primary"
-                                                            url={`/gov/org/map/${theme.id}/${pack.id}`}
-                                                            text={pack.name}
-                                                        >
-                                                        <ul className="sidebar-submenu">
-                                                            {
-                                                                pack.features.length>0 ? pack.features.map((feat, idz)=>
-                                                                    <MenuItem
-                                                                        key={idz}
-                                                                        icon="fa fa-table gp-text-primary"
-                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
-                                                                        text={feat.name}
-                                                                    >
-                                                                    </MenuItem>
-                                                                ): null
-                                                            }
-                                                        </ul>
-                                                        </MenuItem>
-                                                        ):null
+                                                        pack.features.length>0 ? pack.features.map((feat, idz)=>
+                                                            <MenuItem
+                                                                key={idz}
+                                                                icon="fa fa-table gp-text-primary"
+                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                text={feat.name}
+                                                            >
+                                                            </MenuItem>
+                                                        ): null
                                                     }
                                                 </ul>
-                                            </MenuItem>
-                                        ):null}
-                                    </ul>
+                                                </MenuItem>
+                                                ):null
+                                            }
+                                        </ul>
+                                    </MenuItem>
+                                ):null}
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
+                            </ul>
                         </MenuItem>
+                        <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="Тусламж"></MenuItem>
                         {/* {teevriin_suljee.perm_view &&
                             <MenuItem
                                 icon="gp-text-primary icon-map"
@@ -265,9 +271,9 @@ export class App extends Component {
                                         url={`/gov/барилга-суурин-газар/${pack.id}/`}
                                         text={pack.name}
                                         >
-                                        <ul className="sidebar-submenu">    
+                                        <ul className="sidebar-submenu">
                                             {pack.features.map((feat,idf)=>
-                                                <MenuItem 
+                                                <MenuItem
                                                 key={ idf}
                                                 icon="fa fa-table gp-text-primary"
                                                 url={`/gov/барилга-суурин-газар/${pack.id}/${feat.id}/`}
