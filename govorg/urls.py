@@ -8,6 +8,7 @@ from govorg.backend.bair_zuin_zurag import views as bair_zuin_zurag_views
 from govorg.backend.barilga_suurin_gazar import views as barilga_suurin_gazar_views
 from govorg.backend.ded_butets import views as ded_butets_veiws
 from govorg.backend.teevriin_suljee import views as teevriin_suljee_views
+from govorg.backend.org_request import views as org_request_views
 
 import govorg.backend.barilga_suurin_gazar.views
 from  govorg.backend.govorg_inspire import views as govorg_inspire_views
@@ -86,6 +87,10 @@ urlpatterns = [
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
             
         ], 'inspire'))),
+
+        path('org-request/', include(([
+            
+        ], 'org-request'))),
 
     ], 'back_org'))),
 
