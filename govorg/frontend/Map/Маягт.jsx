@@ -10,27 +10,51 @@ export default class Маягт extends Component {
 
         this.state = {
             is_loading: true,
+            tid: props.tid,
             pid: props.pid,
             fid: props.fid,
             values: {},
+            geojson: {}
         }
 
         this.onSubmit = this.onSubmit.bind(this)
         this.handleUpdate = this.handleUpdate.bind(this)
         this.validationSchema = validationSchema.bind(this)
+        this.addNotif = this.props.addNotif
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
         const gid = this.props.gid
-        service
-            .update(values, this.state.pid, this.state.fid)
-            .then(({ success }) => {
+        if(this.props.roles[4] || this.props.roles[5] || this.props.roles[6]){
+
+            if(this.props.null_form_isload){
+
+                service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
+                    if (success) {
+                        this.setState({is_loading:true})
+                        this.addNotif('success', 'Амжилттай', 'check')
+                    }
+                })
+            }
+            else{
+
+                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
+                    if (success) {
+                        this.setState({is_loading:true})
+                        this.addNotif('success', 'Амжилттай', 'check')
+                    }
+                })
+            }
+        }
+        else{
+            service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
                 if (success) {
                     this.setState({is_loading:true})
                     this.handleUpdate(gid)
 
                 }
             })
+        }
     }
 
     handleUpdate(gid){
@@ -44,24 +68,55 @@ export default class Маягт extends Component {
             }
         })
     }
+    handleCreate(){
+
+        service.detailNone(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
+            if(success){
+                this.setState({
+                    values:datas,
+                    is_loading: false
+                })
+            }
+        })
+    }
+
     componentDidUpdate(pP){
         if(pP.togle_islaod !== this.props.togle_islaod)
         {
-            const gid = this.props.gid
-            if(!this.props.togle_islaod && gid)
+            const {gid, tid, pid, fid, geojson} = this.props
+
+            this.setState({geojson, tid, pid, fid})
+            if(!this.props.togle_islaod)
             {
-                this.handleUpdate(gid)
-                this.setState({is_loading:true})
+                if(this.props.null_form_isload){
+                    this.handleCreate()
+                    this.setState({is_loading:true})
+                }
+                else{
+                    this.handleUpdate(gid)
+                    this.setState({is_loading:true})
+                }
             }
         }
         if(pP.gid !== this.props.gid)
         {
             const gid = this.props.gid
-            if(!this.props.togle_islaod && gid)
+            if(!this.props.togle_islaod)
             {
-                this.handleUpdate(gid)
-                this.setState({is_loading:true})
+                if(this.props.null_form_isload){
+                    this.handleCreate()
+                    this.setState({is_loading:true})
+                }
+                else{
+                    this.handleUpdate(gid)
+                    this.setState({is_loading:true})
+                }
             }
+        }
+        if(pP.null_form_isload !== this.props.null_form_isload)
+        {
+            this.handleCreate()
+            this.setState({is_loading:true})
         }
     }
 
@@ -70,24 +125,28 @@ export default class Маягт extends Component {
         if(gid){
             if(!this.props.togle_islaod)
             {
-                this.handleUpdate(gid)
-                this.setState({is_loading:true})
+                if(this.props.null_form_isload){
+                    this.setState({is_loading:true})
+                }
+                else{
+                    this.handleUpdate(gid)
+                    this.setState({is_loading:true})
+                }
             }
         }
     }
 
     render() {
-
-        if (this.state.is_loading) {
+        const { values, id } = this.state
+        if (this.state.is_loading || values.length == 0) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
         }
 
-        const { values, id } = this.state
         return (
             <div className='overflow-auto card-body'>
-                {this.props.gid &&<h4 className="text-center">Geom дугаар-{this.props.gid}</h4>}
+                {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
                 <hr></hr>
                 <Formik
                     enableReinitialize
@@ -147,7 +206,10 @@ export default class Маягт extends Component {
                                 ) : ( null
                                 )}
                                 <div>
-                                <button type="submit" className="btn btn-block gp-btn-primary">Submit</button>
+                                    {this.props.roles[4] || this.props.roles[5] || this.props.roles[6] ?
+                                    <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>:
+                                    <button type="submit" className="btn btn-block gp-btn-primary">Хадгалах</button>
+                                    }
                                 </div>
                             </div>
                             )}

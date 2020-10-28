@@ -8,6 +8,7 @@ from govorg.backend.bair_zuin_zurag import views as bair_zuin_zurag_views
 from govorg.backend.barilga_suurin_gazar import views as barilga_suurin_gazar_views
 from govorg.backend.ded_butets import views as ded_butets_veiws
 from govorg.backend.teevriin_suljee import views as teevriin_suljee_views
+from govorg.backend.org_request import views as org_request_views
 
 import govorg.backend.barilga_suurin_gazar.views
 from  govorg.backend.govorg_inspire import views as govorg_inspire_views
@@ -80,12 +81,20 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
             path('<int:pid>/<int:fid>/add/', govorg_inspire_views.add),
             path('<int:pid>/<str:fid>/save/', govorg_inspire_views.save),
+            path('create/', govorg_inspire_views.create),
+            path('createDel/', govorg_inspire_views.createDel),
+            path('createUpd/', govorg_inspire_views.createUpd),
             path('<str:pk>/<str:fid>/detail/', govorg_inspire_views.detail),
+            path('<int:tid>/<int:pid>/<int:fid>/detail/', govorg_inspire_views.detailNone),
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
             
         ], 'inspire'))),
+
+        path('org-request/', include(([
+            
+        ], 'org-request'))),
 
     ], 'back_org'))),
 

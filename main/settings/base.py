@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'govorg.backend.ded_butets.apps.DedButetsConfig',
     'govorg.backend.teevriin_suljee.apps.TeevriinSuljeeConfig',
     'govorg.backend.govorg_inspire.apps.InspireConfig',
+    'govorg.backend.org_request.apps.OrgRequestConfig'
 ]
 
 USER_AGENTS_CACHE = 'default'

@@ -1,6 +1,5 @@
 import {handleResponse, getGetOptions, getPostOptions} from '../Components/helpers/service'
 
-
 export const service = {
     geom,
     rows,
@@ -13,6 +12,10 @@ export const service = {
     geomAdd,
     geomType,
     getRole,
+    detailNone,
+    create,
+    createUpd,
+    createDel
 }
 
 
@@ -55,7 +58,6 @@ function save(oid, values) {
 }
 
 function update(data, pid, fid) {
-    
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(data),
@@ -67,6 +69,12 @@ function detail(gid, fid) {
     const opts = getGetOptions()
 
     return fetch(`/gov/api/inspire/${gid}/${fid}/detail/`, opts).then(handleResponse)
+}
+
+function detailNone(tid, pid, fid) {
+    const opts = getGetOptions()
+
+    return fetch(`/gov/api/inspire/${tid}/${pid}/${fid}/detail/`, opts).then(handleResponse)
 }
 
 function sendFeature(data, oid, id) {
@@ -93,4 +101,28 @@ function geomAdd(geojson, fid) {
         body: JSON.stringify({geojson}),
     }
     return fetch(`/gov/api/inspire/${fid}/add-geom/`, opts).then(handleResponse)
+}
+
+function create(tid, pid, fid, form_json, geo_json) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({tid, pid, fid, form_json, geo_json}),
+    }
+    return fetch(`/gov/api/inspire/create/`, opts).then(handleResponse)
+}
+
+function createUpd(tid, pid, fid, form_json, geo_json, old_geo_id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({tid, pid, fid, form_json, geo_json, old_geo_id}),
+    }
+    return fetch(`/gov/api/inspire/createUpd/`, opts).then(handleResponse)
+}
+
+function createDel(tid, pid, fid, old_geo_id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({tid, pid, fid, old_geo_id}),
+    }
+    return fetch(`/gov/api/inspire/createDel/`, opts).then(handleResponse)
 }

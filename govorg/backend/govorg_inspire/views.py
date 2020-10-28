@@ -6,11 +6,11 @@ from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas, LCodeListConfigs, LCodeLists
+from govorg.backend.org_request.models import ChangeRequest
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
-from backend.inspire.models import LThemes, LPackages, LFeatures
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter
 import random
@@ -375,6 +375,26 @@ def _get_property(ob):
     }
 
 
+def _get_type(value_type_id):
+    if value_type_id == 'number':
+        value_type = 'number'
+    elif value_type_id == 'double':
+        value_type = 'number'
+    elif value_type_id == 'multi-text':
+        value_type = 'text'
+    elif value_type_id == 'text':
+        value_type = 'text'
+    elif value_type_id == 'date':
+        value_type = 'date'
+    elif value_type_id == 'link':
+        value_type = 'text'
+    elif value_type_id == 'boolean':
+        value_type = 'text'
+    else:
+        value_type = 'option'
+    return value_type
+
+
 @require_GET
 @ajax_required
 def detail(request, pk, fid):
@@ -427,6 +447,52 @@ def detail(request, pk, fid):
     rsp = {
         'success': True,
         'datas': properties
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def detailNone(request, tid, pid, fid):
+    org = get_object_or_404(Org, employee__user=request.user)
+    org_properties = OrgInspireRoles.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
+    find_cursor = connections['default'].cursor()
+    find_cursor.execute('''
+        select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id
+        from l_properties l
+        inner join (select l_feature_configs.feature_id, l_feature_configs.feature_config_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
+        from l_feature_configs
+        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
+        where l_feature_configs.feature_id = 38
+        ) datas
+        on datas.property_id = l.property_id
+    '''
+    , [fid])
+
+    data = dict_fetchall(find_cursor)
+    datas = list(data)
+    org_propties_front = []
+
+
+    for data in datas:
+        org_propties_front.append({
+            'property_name':data['property_name'],
+            'property_id':data['property_id'],
+            'property_code':data['property_code'],
+            'property_definition':data['property_definition'],
+            'value_type_id':data['value_type_id'],
+            'feature_id' : data['feature_id'],
+            'theme_id' : tid,
+            'package_id' : pid,
+            'value_type' : _get_type(data['value_type_id']),
+            'data': None,
+            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else [],
+            # 'role': not org_prop.perm_update
+        })
+
+    rsp = {
+        'success': True,
+        'datas': org_propties_front
     }
     return JsonResponse(rsp)
 
@@ -545,3 +611,97 @@ def geomAdd(request, payload, fid):
     }
     return JsonResponse(rsp)
 
+
+
+@require_POST
+@ajax_required
+def create(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
+    tid = payload.get('tid')
+    pid = payload.get('pid')
+    fid = payload.get('fid')
+    form_json = payload.get('form_json')
+    geo_json = payload.get('geo_json')
+
+    ChangeRequest.objects.create(
+            old_geo_id = None,
+            new_geo_id = None,
+            theme_id = tid,
+            package_id = pid,
+            feature_id = fid,
+            employee = employee,
+            state = 1,
+            kind = 1,
+            form_json = form_json,
+            geo_json = geo_json
+    )
+
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def createDel(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
+    tid = payload.get('tid')
+    pid = payload.get('pid')
+    fid = payload.get('fid')
+    old_geo_id = payload.get('old_geo_id')
+
+    ChangeRequest.objects.create(
+            old_geo_id = old_geo_id,
+            new_geo_id = None,
+            theme_id = tid,
+            package_id = pid,
+            feature_id = fid,
+            employee = employee,
+            state = 1,
+            kind = 3,
+            form_json = None,
+            geo_json = None
+    )
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def createUpd(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
+    tid = payload.get('tid')
+    pid = payload.get('pid')
+    fid = payload.get('fid')
+    old_geo_id = payload.get('old_geo_id')
+    form_json = payload.get('form_json')
+    geo_json = payload.get('geo_json')
+
+    if not form_json:
+        form_json = ''
+    if not geo_json:
+        geo_json = ''
+
+    ChangeRequest.objects.create(
+            old_geo_id = old_geo_id,
+            new_geo_id = None,
+            theme_id = tid,
+            package_id = pid,
+            feature_id = fid,
+            employee = employee,
+            state = 1,
+            kind = 2,
+            form_json = form_json,
+            geo_json = geo_json
+    )
+
+    rsp = {
+        'success': True,
+        'info': "Амжилттай",
+    }
+    return JsonResponse(rsp)
