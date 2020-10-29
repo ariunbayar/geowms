@@ -7,6 +7,7 @@ export default class Forms extends Component {
     constructor(props) {
         super(props)
 
+        this.options = []
         this.state = {
             is_loading: true,
             pid: props.pid,
@@ -82,10 +83,10 @@ export default class Forms extends Component {
                     var name = 'property_id'
                     var find = 'property'
                 }
-                if (model_name == 'feature_config') {
-                    var name = 'connect_feature_id'
-                    var find = 'feature'
-                }
+                // if (model_name == 'feature_config') {
+                //     var name = 'connect_feature_id'
+                //     var find = 'feature'
+                // }
                 fields.map(field => {
                     if (field.field_name == name)
                     {
@@ -129,6 +130,18 @@ export default class Forms extends Component {
         else {
             this.props.handleFormLeft(before_name, before_id)
         }
+    }
+
+    getOptions(){
+        this.options = []
+        service.getDatas('feature').then(rsp => {
+            if(rsp.success){
+                rsp.datas.map((data, idx) =>
+                    this.options.push(<option key={idx} value={data.id}>{data.name}</option>)
+                )
+            }
+        })
+        return this.options
     }
 
     render() {
@@ -246,14 +259,20 @@ export default class Forms extends Component {
                                                                     disabled = {friend.field_name.includes('connect_feature') && isTrue ? 'disabled' : ''}
                                                                 >
                                                                     <option value=""> --- Сонгоно уу --- </option>
-                                                                    {datas.map((data, idx) =>
-                                                                        <option
-                                                                            key={idx}
-                                                                            value={data.id}
-                                                                        >
-                                                                            {data.name}
-                                                                        </option>
-                                                                    )}
+                                                                    {
+                                                                        friend.field_name.includes('connect_feature') && isTrue
+                                                                        ?
+                                                                        this.getOptions()
+                                                                        :
+                                                                        datas.map((data, idx) =>
+                                                                            <option
+                                                                                key={idx}
+                                                                                value={data.id}
+                                                                            >
+                                                                                {data.name}
+                                                                            </option>
+                                                                        )
+                                                                    }
                                                                 </Field>
                                                                 {
                                                                     prop_name != 'code_list_config'
