@@ -1,12 +1,32 @@
-from django.shortcuts import render
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
-from main.decorators import ajax_required
-from django.views.decorators.http import require_GET, require_POST
-from django.http import JsonResponse, Http404
-from django.contrib.auth.decorators import user_passes_test
+import os
+import datetime
 from django.db import connections
+from django.conf import settings
+from django.shortcuts import render
+from django.http import JsonResponse, Http404
+
 from .models import ViewNames, ViewProperties
-from django.shortcuts import get_object_or_404
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding
+from django.forms.models import model_to_dict
+
+from django.views.decorators.http import require_GET, require_POST
+from main.decorators import ajax_required
+
+from django.core.management import call_command
+from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import FileSystemStorage
+
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import WKBWriter, WKBReader
+from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import fromstr
+from django.contrib.gis.gdal import OGRGeometry
+from django.db.utils import InternalError
+from django.contrib.gis.geos.error import GEOSException
+from django.contrib.gis.gdal.error import GDALException
+from django.contrib.gis.geos.collections import GeometryCollection
+from django.contrib.auth.decorators import user_passes_test
 
 from main.utils import (
     dict_fetchall
@@ -328,3 +348,198 @@ def removeView(table_name):
         return True
     except Exception:
         return False
+
+
+def geoJsonConvertGeom(geojson):
+    with connections['default'].cursor() as cursor:
+
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        return geom
+    return None
+
+
+def _saveToMainData(values, model_name):
+    try:
+        model_name = _MDatasName(model_name)
+        if not isinstance(model_name, str):
+            print(values)
+            datas = {}
+            # for i in model_name._meta.get_fields():
+            #     type_name = i.get_internal_type()
+            #     if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField' and not type_name == 'BigAutoField':
+            #         if type_name == "CharField" or type_name == 'String':
+            #             type_name = 'haha'
+            #         if type_name == "IntegerField" or type_name == "BigIntegerField" or type_name == 'Integer':
+            #             type_name = 1
+            #         if type_name == 'FloatField' or type_name == 'Real':
+            #             type_name = 1.23232
+            #         if type_name == 'DateTimeField':
+            #             type_name = datetime.datetime.now()
+            #         datas[i.name] = type_name
+            # print(datas)
+            # sain = model_name.objects.create(**datas)
+            # print(sain)
+            rsp = {
+                'success': True,
+                'info': 'Амжилттай хадгалалаа',
+            }
+        else:
+            rsp = {
+                'success': True,
+                'info': 'Алдаа гарсан байна.' + model_name,
+            }
+    except Exception as e:
+        rsp = {
+            'success': True,
+            'info': 'Алдаа гарсан байна.' + str(e),
+        }
+    return rsp
+
+
+def _MDatasName(model_name):
+    if model_name == 'Boundary':
+        model_name = MDatasBoundary
+    if model_name == 'Building':
+        model_name = MDatasBuilding
+    return model_name
+
+
+@require_POST
+@ajax_required
+def FileUploadSaveData(request):
+    form = request.FILES.getlist('data')
+    file_name = ''
+    try:
+        for fo in form:
+            if '.shp' in fo.name:
+                file_name = fo.name
+            if '.geojson' in fo.name:
+                file_name = fo.name
+            if '.gml' in fo.name:
+                file_name = fo.name
+            fs = FileSystemStorage(
+                location=os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas')
+            )
+            file = fs.save(fo.name, fo)
+            fileurl = fs.url(file)
+        # the fileurl variable now contains the url to the file. This can be used to serve the file when needed.
+        path = os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_name)
+        ds = DataSource(path)
+        if len(ds) <= 0:
+            rsp = {
+                'success': False,
+                'info': 'Source олдсонгүй'
+            }
+            return JsonResponse(rsp)
+        layer = ds[0]
+        print(layer)
+        print ([fld.__name__ for fld in layer.field_types])
+        print(layer.num_feat)
+        print(layer.name)
+        need_id = MGeoDatas.objects.all().count()
+        for val in layer:
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            values = []
+            try:
+                for name in layer.fields:
+                    print('----------')
+                    field_name = val[name].name
+                    print("field name: ", field_name) # field name
+                    if field_name == 'id' or field_name == 'gml_id':
+                        geom = ''
+                        geom_type = ''
+                        g_id = val.get(name)
+                        dim = val.geom.coord_dim
+                        print("dimension: ", dim)
+                        geom = val.geom.json
+                        print("nym: ", val.geom)
+                        layer_type = str(val.geom.geom_type)
+                        print(type(layer_type))
+                        srid = GEOSGeometry(geom).srid
+                        print("srid ni: ", srid)
+                        if geom:
+                            if srid != 4326:
+                                geom = GEOSGeometry(geom, srid=4326)
+                            print("geom iin dimension: ", val.geom.coord_dim)
+                            if dim == 3:
+                                print('geom:json ', geom)
+                                geom_type = GEOSGeometry(geom).geom_type
+                                print("field turul: ",geom_type)
+                                geom = GEOSGeometry(geom).hex
+                                geom = geom.decode("utf-8") #binary hurwuuleh
+                                geom = GEOSGeometry(geom)
+                                print('geom ', geom)
+                            if dim == 2:
+                                print('geom:json ', geom)
+                                geom = geoJsonConvertGeom(geom)
+                                geom =  ''.join(geom)
+                                geom = GEOSGeometry(geom)
+                                geom_type = GEOSGeometry(geom).geom_type
+                                print("field turul: ",geom_type)
+                                print('geom ', geom)
+                            if geom_type == 'Point':
+                                print("MultiPoint bologj bna ")
+                                geom = MultiPoint(geom, srid=4326)
+                            if geom_type == 'LineString':
+                                geom = MultiLineString(geom, srid=4326)
+                            if geom_type == 'Polygon':
+                                print("MultiPolygon bologj bna ")
+                                geom = MultiPolygon(geom, srid=4326)
+                            if geom:
+                                id_made = str(need_id) + 'odko' + str(g_id)
+                                geo = MGeoDatas.objects.create(
+                                    geo_id=id_made,
+                                    geo_data=geom,
+                                    feature_id=100,
+                                    created_by=1,
+                                    modified_by=1,
+                                )
+                        else:
+                            rsp = {
+                                "success": False,
+                                'info': 'geom байхгүй дата',
+                            }
+                            return JsonResponse(rsp)
+                    type_name = val[name].type_name
+                    type_name = type_name.decode('utf-8')
+                    print("turliin name: ",type_name) # type ner
+                    type_code = val[name].type
+                    print("turliin dugaar: ", type_code) # type code
+                    value = val.get(name)
+                    print("hariu ni: ", value) # value ni
+                    print('----------')
+                    values.append({
+                        field_name: value,
+                        'types': type_name,
+                    })
+            except InternalError as e:
+                rsp = {
+                    'success': False,
+                    'info': file_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй '
+                }
+                return JsonResponse(rsp)
+            except GEOSException as e:
+                rsp = {
+                    'success': False,
+                    'info': file_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
+                }
+                return JsonResponse(rsp)
+            model_name = 'Boundary'
+            saved = _saveToMainData(values, model_name)
+    except GDALException as e:
+        rsp = {
+            'success': False,
+            'info': file_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
+        }
+        return JsonResponse(rsp)
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print(ds)
+    print(path)
+    print("ds urt ",len(ds))
+    rsp = {
+        'success': True,
+        'data': 'data'
+    }
+    return JsonResponse(rsp)

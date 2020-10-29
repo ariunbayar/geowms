@@ -3,6 +3,7 @@ export const service ={
     getall,
     getprop,
     editName,
+    send,
 }
 
 const prefix = '/back/dedsan-butests'
@@ -27,4 +28,12 @@ function editName(id, name){
         body: JSON.stringify({ id, name }),
     }
     return fetch(`${prefix}/editName/`, opts).then(handleResponse)
+}
+
+function send(formData){
+    const opts = {
+        ...getPostOptions(),
+        body: formData,
+    }
+    return fetch(`${prefix}/send-data/`, opts).then(handleResponse)
 }
