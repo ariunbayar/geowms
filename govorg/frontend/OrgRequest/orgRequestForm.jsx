@@ -41,6 +41,7 @@ export default class OrgRequestForm extends Component {
                                     <th scope="col">Огноо</th >
                                     <th></th>
                                     <th>Төлөв</th>
+                                    <th>Төлвийн төрөл</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -48,6 +49,7 @@ export default class OrgRequestForm extends Component {
                                     org_request.length > 0 ? org_request.map((req, idx) =>
                                         <OrgRequestTable
                                             key={idx}
+                                            idx={idx}
                                             values = {req}
                                         />
                                     )

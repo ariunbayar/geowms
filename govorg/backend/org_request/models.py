@@ -5,16 +5,12 @@ from backend.org.models import Employee
 
 class ChangeRequest(models.Model):
 
-    STATE_CREATE = 1
-    STATE_REVOKE = 2
-    STATE_REVIEW = 3
-    STATE_APPROVE = 4
+    STATE_REJECT = 1
+    STATE_APPROVE = 2
 
     STATE_CHOICES = (
-        (STATE_CREATE, 'Шинээр үүссэн'),
-        (STATE_REVOKE, 'Цуцлах'),
-        (STATE_REVIEW, 'Хянах'),
-        (STATE_APPROVE, 'Батлах'),
+        (STATE_REJECT, 'ТАТГАЛЗСАН'),
+        (STATE_APPROVE, 'ЗӨВШӨӨРСӨН'),
     )
 
     KIND_CREATE = 1

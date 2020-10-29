@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import RequestModal from './requestModal'
+import {service} from './service'
 
 
 export class OrgRequestTable extends Component {
@@ -11,6 +12,7 @@ export class OrgRequestTable extends Component {
         }
         this.handleRequestOpen = this.handleRequestOpen.bind(this)
         this.handleRequestClose = this.handleRequestClose.bind(this)
+        this.handleRequestApprove = this.handleRequestApprove.bind(this)
     }
     componentDidMount(){
     }
@@ -21,12 +23,20 @@ export class OrgRequestTable extends Component {
     handleRequestClose() {
         this.setState({is_model_request_open: false})
     }
-
+    
+    handleRequestApprove(id){
+        const values = this.props.values
+        service.requestApprove(id, values).then(({success})=>{
+            if(success){
+                this.handleRequestClose()
+            }
+        })
+    }
 
     render() {
         const is_model_request_open = this.state.is_model_request_open
         const idx = this.props.idx
-        const {theme_name, package_name, feature_name, state, form_json, geo_json, employee, org, created_at} = this.props.values
+        const {id, theme_name, package_name, feature_name, state, form_json, geo_json, employee, org, created_at, kind} = this.props.values
         return (
             <tr>
                 <td>
@@ -48,17 +58,18 @@ export class OrgRequestTable extends Component {
                     {is_model_request_open &&
                         <RequestModal
                             modalClose={this.handleRequestClose}
-                            modalAction={this.props.handleGovorgDelete}
+                            modalAction={() =>this.handleRequestApprove(id)}
                             form_json = {form_json}
                             geo_json = {geo_json}
                             title="Шийдвэрлэх"
-                            model_type_icon = "success"
+                            id = {id}
                         />
                     }
                 </td>
                 <td>
-                    {state}
+                    {state ? state : ''}
                 </td>
+                <td>{kind}</td>
             </tr>
         )
 

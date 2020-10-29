@@ -432,16 +432,16 @@ def detail(request, pk, fid):
         for inspire_prop in properties:
             if org_prop.module_id == inspire_prop['property_id']:
                 org_propties_front.append({
-                    'building_id':inspire_prop['building_id'],
-                    'geo_id':inspire_prop['geo_id'],
-                    'property_name':inspire_prop['property_name'],
-                    'property_id':inspire_prop['property_id'],
-                    'property_code':inspire_prop['property_code'],
-                    'property_definition':inspire_prop['property_definition'],
-                    'value_type_id':inspire_prop['value_type_id'],
-                    'value_type':inspire_prop['value_type'],
-                    'data':inspire_prop['data'],
-                    'data_list':inspire_prop['data_list'],
+                    'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
+                    'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
+                    'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
+                    'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
+                    'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
+                    'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
+                    'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
+                    'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
+                    'data': inspire_prop['data'] if inspire_prop['data'] else '',
+                    'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
                     'role': not org_prop.perm_update
                 })
     rsp = {
@@ -476,17 +476,17 @@ def detailNone(request, tid, pid, fid):
 
     for data in datas:
         org_propties_front.append({
-            'property_name':data['property_name'],
-            'property_id':data['property_id'],
-            'property_code':data['property_code'],
-            'property_definition':data['property_definition'],
-            'value_type_id':data['value_type_id'],
-            'feature_id' : data['feature_id'],
+            'property_name':data['property_name'] if data['property_name'] else '' ,
+            'property_id':data['property_id'] if data['property_id'] else '',
+            'property_code':data['property_code'] if data['property_code'] else '',
+            'property_definition': data['property_definition'] if data['property_definition'] else '',
+            'value_type_id':data['value_type_id'] if data['value_type_id'] else '',
+            'feature_id' : data['feature_id'] if data['feature_id'] else '',
             'theme_id' : tid,
             'package_id' : pid,
-            'value_type' : _get_type(data['value_type_id']),
-            'data': None,
-            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else [],
+            'value_type' : _get_type(data['value_type_id']) if _get_type(data['value_type_id']) else '',
+            'data': '',
+            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else '',
             # 'role': not org_prop.perm_update
         })
 
