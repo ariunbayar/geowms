@@ -2815,7 +2815,10 @@ table.grid td {
     color: #fff;
     background-color: #223035;
 }
-
+.badge-dark-primary {
+    color: #fff;
+    background-color: #034ea2;
+}
 
 /* Paginations */
 .pagination {
@@ -3664,6 +3667,17 @@ table.grid td {
     border-top: 3px solid #223035;
 }
 
+.nav-tabs-dark-gray.nav-tabs{
+	border-bottom: 1px solid #95a7b5;
+}
+
+.nav-tabs-dark-gray .nav-link.active, .nav-tabs-dark-gray .nav-item.show>.nav-link {
+    color: #034ea2;
+    background-color: #fff;
+    border-color: #95a7b5 #95a7b5 #fff;
+    border-top: 1px solid #95a7b5;
+}
+
 .nav-tabs-secondary.nav-tabs{
 	border-bottom: 1px solid #75808a;
 }
@@ -4265,6 +4279,9 @@ table.grid td {
 .text-light {
     color: #e9eaea!important;
 }
+.text-dark-gray {
+    color: #95a7b5!important;
+}
 
 /* Shadows */
 .shadow-primary{
@@ -4639,13 +4656,11 @@ table.grid td {
   -ms-transform: translateZ(0);
   -o-transform: translateZ(0);
   transform: translateZ(0);
-  -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
   text-align: center;
   width: 2.5em;
   height: 2.5em;
   line-height: 2.5em;
   border-radius: 50%;
-  -webkit-mask-image: none;
 }
 .waves-input-wrapper {
   border-radius: 0.2em;
@@ -4847,19 +4862,18 @@ table.grid td {
     margin-left: 0px;
     font-size: 15px;
     color: #223035;
-    
-.card { 
+}
+.card {
      margin-bottom:20px;
-	 }
-	 
+}
 .card-deck {
     margin-bottom: 20px;
 }
 
 .card-group {
 	margin-bottom: 20px;
-}	 
-	 
+}
+
 .content-wrapper {
     margin-left: 0px;
     padding-left: 5px;
