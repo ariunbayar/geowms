@@ -270,6 +270,11 @@ def getFields(request, payload):
             'fields': fields
         }
     except Exception:
+        rsp = {
+            'success': False,
+            'fields': 'Алдаа гарсан байна'
+        }
+    return JsonResponse(rsp)
 
 
 def get_rows(fid):
