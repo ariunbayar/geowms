@@ -44,47 +44,45 @@ export default class App extends Component {
     return (
       <div>
         <BrowserRouter>
-          <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
+          <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true" className="color-sidebar bg-dark">
             <div className="brand-logo">
-              <a href={'/'}>
+              <a href="/">
                 <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
                 <h5 className="logo-text">ГЕОПОРТАЛ</h5>
               </a>
             </div>
             <ul className="sidebar-menu do-nicescrol">
 
-                <li className="sidebar-header">УДИРДАГЧИЙН ХЭСЭГ</li>
-
-                <MenuItem icon="gp-text-primary fa fa-history" url="/back/access/login/" text="ХАНДАЛТ"></MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-bank" url="/back/log/" text="БАНК ЛОГ"></MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-database" url="/back/дэд-сан/" text="ДЭД САН">
+                <MenuItem icon="fa fa-history" url="/back/access/login/" text="Хандалт"></MenuItem>
+                <MenuItem icon="fa fa-bank" url="/back/log/" text="Банк лог"></MenuItem>
+                <MenuItem icon="fa fa-database" url="/back/дэд-сан/" text="Дэд сан">
                     <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/inspire-views/" text="View"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/inspire-views/" text="View"></MenuItem>
                     </ul>
                 </MenuItem>
-                <MenuItem icon="gp-text-primary zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
+                <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
 
-                <MenuItem icon="gp-text-primary fa fa-users" url="/back/байгууллага/түвшин/" text="БАЙГУУЛЛАГА">
+                <MenuItem icon="fa fa-users" url="/back/байгууллага/түвшин/" text="Байгууллага">
                     <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/байгууллага/түвшин/1/" text="1-р түвшин"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/байгууллага/түвшин/2/" text="2-р түвшин"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/байгууллага/түвшин/3/" text="3-р түвшин"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/байгууллага/түвшин/4/" text="4-р түвшин"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/1/" text="1-р түвшин"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/2/" text="2-р түвшин"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/3/" text="3-р түвшин"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин"></MenuItem>
                     </ul>
                 </MenuItem>
 
-                <MenuItem icon="gp-text-primary icon-layers" url="/back/суурь-давхарга/" text="СУУРЬ ДАВХРАГА"></MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-connectdevelop" url="/back/dev/" text="ХӨГЖҮҮЛЭЛТ"></MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-user" url="/back/user/" text="ХЭРЭГЛЭГЧ"></MenuItem>
-                <MenuItem icon="gp-text-primary icon-map" url="/back/gis/" text="GIS"></MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-server" url="/back/geoserver/" text="GEOSERVER">
+                <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
+                <MenuItem icon="fa fa-connectdevelop" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
+                <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч"></MenuItem>
+                <MenuItem icon="icon-map" url="/back/gis/" text="GIS"></MenuItem>
+                <MenuItem icon="fa fa-server" url="/back/geoserver/" text="GeoServer">
                     <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o gp-text-primary" url="/back/geoserver/layers/" text="layers"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="layers"></MenuItem>
                     </ul>
                 </MenuItem>
-                <MenuItem icon="gp-text-primary fa fa-cogs" url="/back/тохиргоо/" text="ТОХИРГОО"></MenuItem>
+                <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо"></MenuItem>
             </ul>
           </div>
           <div className="content-wrapper">
