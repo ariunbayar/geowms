@@ -341,7 +341,6 @@ def employee_remove(request, payload, level, pk):
     user = User.objects.filter(pk=user_id)
     employee = Employee.objects.filter(user_id=user_id)
     employee.delete()
-    user.delete()
 
     return JsonResponse({'success': True})
 

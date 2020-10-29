@@ -309,3 +309,25 @@ a.active .list-group-item{
     -webkit-writing-mode: vertical-lr;
     -ms-writing-mode: vertical-lr;
 }
+
+/* scroll */
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #ffffff; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #484848; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #034ea2; 
+}
