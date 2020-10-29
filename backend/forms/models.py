@@ -1,5 +1,5 @@
-from django.db import models
- # Create your models here.
+# from django.db import models
+from django.contrib.gis.db import models
 
 class TuuhSoyol(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
@@ -7,7 +7,7 @@ class TuuhSoyol(models.Model):
     date = models.DateTimeField(null=True)
     inspireid = models.CharField(max_length=25)
     too_shirheg = models.PositiveIntegerField()
-    aimagname = models.CharField(max_length=30)	
+    aimagname = models.CharField(max_length=30)
     sumname = models.CharField(max_length=30)
     burtgegch = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -18,7 +18,7 @@ class TuuhSoyol(models.Model):
 
 class TuuhSoyolPoint(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
-    dursgal = models.CharField(max_length=100) 
+    dursgal = models.CharField(max_length=100)
     dursgal2 = models.CharField(max_length=100)
     descriptio = models.CharField(max_length=150)
     type1 = models.CharField(max_length=200)
@@ -67,6 +67,7 @@ class TuuhSoyolPoint(models.Model):
     y = models.CharField(max_length=50)
     ondor = models.CharField(max_length=101)
     created_at = models.DateTimeField(auto_now_add=True)
+    geom = models.PointField(srid=4326)
     class Meta:
         db_table = 'tuuhsoyolpoint'
         managed = False
@@ -86,6 +87,7 @@ class TuuhSoyolHureePol(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
     tuuh_soyl_huree_id = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    geom = models.PolygonField(srid=4326)
     class Meta:
         db_table = 'tuuhsoyolhureepol'
         managed = False
@@ -102,6 +104,7 @@ class TuuhSoyolAyuulHuree(models.Model):
 class TuuhSoyolAyuulHureePol(models.Model):
     tuuh_soyl = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    geom = models.PolygonField(srid=4326)
     class Meta:
         db_table = 'tuuhsoyolayuulhureepol'
         managed = False
@@ -175,7 +178,7 @@ class Mpoint1(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
@@ -198,7 +201,7 @@ class Mpoint2(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
@@ -221,11 +224,12 @@ class Mpoint3(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
         db_table = 'mpoint3'
+
 
 class Mpoint4(models.Model):
     objectid = models.CharField(max_length=4)
@@ -243,7 +247,7 @@ class Mpoint4(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
@@ -266,7 +270,7 @@ class Mpoint5(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
@@ -289,12 +293,11 @@ class Mpoint6(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
         db_table = 'mpoint6'
-
 
 class Mpoint7(models.Model):
     objectid = models.CharField(max_length=4)
@@ -312,7 +315,7 @@ class Mpoint7(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
@@ -335,11 +338,12 @@ class Mpoint8(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
         db_table = 'mpoint8'
+
 
 class Mpoint9(models.Model):
     objectid = models.CharField(max_length=4)
@@ -357,7 +361,7 @@ class Mpoint9(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False
@@ -380,7 +384,7 @@ class Mpoint10(models.Model):
     sheet1 = models.CharField(max_length=1)
     sheet2 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
     sheet3 = models.DecimalField(blank=True, max_digits=20,  decimal_places=10)
-    geom = models.DecimalField(max_digits=300,  decimal_places=10)
+    geom = models.PointField(srid=4326)
     t_type = models.CharField(max_length=100)
     class Meta:
         managed = False

@@ -56,10 +56,10 @@ export class FormList extends Component {
         }
     }
 
-    handleRemove(id) {
-        service.tsegPersonalRemove(id).then(({success}) => {
+    handleRemove(id, t_type) {
+        service.tsegPersonalRemove(id, t_type).then(({success}) => {
             if (success) {
-                this.setState({modal_alert_status: 'open', modal_text: 'устгалаа', modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай устлаа', modal_icon: 'success'})
                 this.paginate(1, this.state.searchQuery)
                 this.modalCloseTime()
             }
@@ -108,17 +108,6 @@ export class FormList extends Component {
                 <div  className="card-body">
                     <div className="row">
                         <div className="col-md-12 ">
-                            {
-                                error && error_bn
-                                ?
-                                <div className="text-left">
-                                    <div className="text-danger">{error_msg}</div>
-                                </div>
-                                :
-                                <div className="text-left">
-                                    <div className="text-success">{error_msg}</div>
-                                </div>
-                            }
                             {perm_create ?
                                 <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                     Нэмэх
@@ -159,7 +148,7 @@ export class FormList extends Component {
                                                 idx = {idx}
                                                 values={values}
                                                 perms={this.props.perms}
-                                                handleRemove={() => this.handleRemove(values.id)}
+                                                handleRemove={() => this.handleRemove(values.id, values.t_type)}
                                                 handleMove={this.handleMove}
                                                 handleSuccess = {() => this.handleSuccess(values.point_type, values.id, values.point_class ,values.t_type)}
                                             />

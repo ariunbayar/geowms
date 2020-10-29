@@ -96,16 +96,16 @@ export class OrgRole extends Component {
                         <div className="text"></div>
                         <div className="mb-3 mt-3">
                             <div className="table-responsive">
-                                <table className="table table-bordered">
-                                    <thead>
+                                <table className="table table-bordered w-auto">
+                                    <thead className="thead-light">
                                         <tr>
-                                        <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
-                                        <th scope="col">харах</th>
-                                        <th scope="col">нэмэх</th>
-                                        <th scope="col">хасах</th>
-                                        <th scope="col">цуцлах</th>
-                                        <th scope="col">хянах</th>
-                                        <th scope="col">батлах</th>
+                                            <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
+                                            <th scope="col" className="vertical"><span>харах</span></th>
+                                            <th scope="col" className="vertical"><span>нэмэх</span></th>
+                                            <th scope="col" className="vertical"><span>хасах</span></th>
+                                            <th scope="col" className="vertical"><span>цуцлах</span></th>
+                                            <th scope="col" className="vertical"><span>хянах</span></th>
+                                            <th scope="col" className="vertical"><span>батлах</span></th>
                                         </tr>
                                     </thead>
                                     <tbody>

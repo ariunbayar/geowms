@@ -56,7 +56,6 @@ body {
     font-family: 'Roboto', sans-serif;
     font-size: 15px;
     color: #636363;
-    letter-spacing: 1px;
 }
 [tabindex="-1"]:focus {
 	outline: 0!important
@@ -172,7 +171,7 @@ hr {
   left: 0px;
   z-index: 1000;
   overflow: hidden;
-  width: 240px;
+  width: 280px;
   height: 100%;
  -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
@@ -198,7 +197,7 @@ hr {
 
 #wrapper.toggled #sidebar-wrapper {
 	 position: fixed;
-     left: -240px;
+     left: -280px;
 	 
 }
 
@@ -228,7 +227,7 @@ hr {
 
 /* Page Content Wrapper */
 .content-wrapper {
-    margin-left: 240px;
+    margin-left: 280px;
 	padding-top: 70px;
 	padding-left: 15px;
     padding-right: 15px;
@@ -370,7 +369,7 @@ hr {
 }
 
 .toggle-menu i {
-   margin-left: 240px;
+   margin-left: 280px;
    font-size: 14px;
    font-weight: 600;
    color: #223035;
@@ -382,7 +381,7 @@ hr {
 }
 
 .toggle-menu-map i {
-    margin-left: 240px;
+    margin-left: 280px;
     font-size: 14px;
     font-weight: 600;
     color: #223035;
@@ -722,7 +721,6 @@ hr {
 .btn{
 	font-size: .75rem;
     font-weight: 500;
-    letter-spacing: 1px;
     padding: 10px 20px;
     border-radius: .25rem;
     text-transform: uppercase;
@@ -1970,7 +1968,7 @@ hr {
   overflow: hidden;
 }
 .icon-container {
-  width: 240px; 
+  width: 280px; 
   padding: .7em 0;
   float: left; 
   position: relative;
@@ -2209,7 +2207,6 @@ label {
     color: #6b6b6b;
     font-size: .75rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
     font-weight: 500;
     margin-bottom: 10px;
 }
@@ -2406,7 +2403,6 @@ table.grid td {
     font-size: .72rem;
     padding-top: .75rem;
     padding-bottom: .75rem;
-    letter-spacing: 1px;
     text-transform: uppercase;
     border-bottom: 1px solid #e9ecef;
 }
@@ -2819,7 +2815,10 @@ table.grid td {
     color: #fff;
     background-color: #223035;
 }
-
+.badge-dark-primary {
+    color: #fff;
+    background-color: #034ea2;
+}
 
 /* Paginations */
 .pagination {
@@ -3575,7 +3574,6 @@ table.grid td {
 	color: #223035;
 	font-size: 12px;
     text-align: center;
-	letter-spacing: 1px;
     font-weight: 600;
 	margin: 2px;
     margin-bottom: 0;
@@ -3669,6 +3667,17 @@ table.grid td {
     border-top: 3px solid #223035;
 }
 
+.nav-tabs-dark-gray.nav-tabs{
+	border-bottom: 1px solid #95a7b5;
+}
+
+.nav-tabs-dark-gray .nav-link.active, .nav-tabs-dark-gray .nav-item.show>.nav-link {
+    color: #034ea2;
+    background-color: #fff;
+    border-color: #95a7b5 #95a7b5 #fff;
+    border-top: 1px solid #95a7b5;
+}
+
 .nav-tabs-secondary.nav-tabs{
 	border-bottom: 1px solid #75808a;
 }
@@ -3683,7 +3692,6 @@ table.grid td {
     color: #223035;
     font-size: 12px;
     text-align: center;
-    letter-spacing: 1px;
     font-weight: 600;
     margin: 2px;
     margin-right: -1px;
@@ -3812,7 +3820,6 @@ table.grid td {
     color: #223035;
     font-size: 12px;
     text-align: center;
-	letter-spacing: 1px;
     font-weight: 600;
     text-transform: uppercase;
 	margin: 3px;
@@ -4272,6 +4279,9 @@ table.grid td {
 .text-light {
     color: #e9eaea!important;
 }
+.text-dark-gray {
+    color: #95a7b5!important;
+}
 
 /* Shadows */
 .shadow-primary{
@@ -4528,7 +4538,7 @@ table.grid td {
   padding: 12px 30px;
   position: absolute;
   right: 0;
-  left: 240px;
+  left: 280px;
   background-color: #f9f9f9;
   border-top: 1px solid rgb(223, 223, 255);
   -webkit-transition: all 0.3s ease;
@@ -4646,13 +4656,11 @@ table.grid td {
   -ms-transform: translateZ(0);
   -o-transform: translateZ(0);
   transform: translateZ(0);
-  -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
   text-align: center;
   width: 2.5em;
   height: 2.5em;
   line-height: 2.5em;
   border-radius: 50%;
-  -webkit-mask-image: none;
 }
 .waves-input-wrapper {
   border-radius: 0.2em;
@@ -4815,10 +4823,10 @@ table.grid td {
 	background: #ffffff;
     position: fixed;
 	top: 0px;
-    left: -240px;
+    left: -280px;
     z-index: 1000;
     overflow-y: auto;
-    width: 240px;
+    width: 280px;
     height: 100%;
     -webkit-transition: all 0.2s ease;
     -moz-transition: all 0.2s ease;
@@ -4854,19 +4862,18 @@ table.grid td {
     margin-left: 0px;
     font-size: 15px;
     color: #223035;
-    
-.card { 
+}
+.card {
      margin-bottom:20px;
-	 }
-	 
+}
 .card-deck {
     margin-bottom: 20px;
 }
 
 .card-group {
 	margin-bottom: 20px;
-}	 
-	 
+}
+
 .content-wrapper {
     margin-left: 0px;
     padding-left: 5px;

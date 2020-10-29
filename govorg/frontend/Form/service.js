@@ -27,10 +27,10 @@ function tsegPersonalList(page, perpage, query){
     return fetch(`${prefix}/tseg-personal/list/`, requestOptions).then(handleResponse)
 }
 
-function tsegPersonalRemove(id) {
+function tsegPersonalRemove(id, t_type) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id}),
+        body: JSON.stringify({id, t_type}),
     }
 
     return fetch(`${prefix}/tseg-personal/remove/`, opts).then(handleResponse)
@@ -78,10 +78,10 @@ function tsegustsanEdit(id) {
     return fetch(`${prefix}/tseg-ustsan_edit/`, opts).then(handleResponse)
 }
 
-function updateTseg(id){
+function updateTseg(id, t_type){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id}),
+        body: JSON.stringify({id, t_type}),
     }
     return fetch(`${prefix}/tseg-personal/update/`, opts).then(handleResponse)
 }

@@ -538,12 +538,10 @@ export class FormTseg extends Component {
                                                 </th>
                                             </tr>
                                             <tr>
-                                                <th style={{width: "0%"}} scope="row"></th>
                                                 <th className="text-center" colSpan="2" scope="rowgroup">холоос</th>
                                                 <th className="text-center" colSpan="2" scope="rowgroup">ойроос</th>
                                             </tr>
                                             <tr>
-                                                <th style={{width: "5%"}} scope="row"></th>
                                                 <th colSpan="2" scope="rowgroup" style={{width: "50%"}}>
                                                     <ImageUploader
                                                         withPreview={true}
@@ -605,12 +603,10 @@ export class FormTseg extends Component {
                                                 </td>
                                             </tr>
                                             <tr className={showMore ? 'd-show' : "d-none"}>
-                                                <th style={{width: "5%"}} scope="row"></th>
                                                 <th className="text-center" colSpan="2" scope="rowgroup">Баруун</th>
                                                 <th className="text-center" colSpan="2" scope="rowgroup">Зүүн</th>
                                             </tr>
                                             <tr className={showMore ? 'd-show' : "d-none"}>
-                                                <th style={{width: "5%"}} scope="row"></th>
                                                 <th colSpan="2" scope="rowgroup">
                                                     <ImageUploader
                                                         withPreview={true}
@@ -641,7 +637,7 @@ export class FormTseg extends Component {
                                                         buttonText='Зураг оруулах'
                                                         onChange={(e) =>this.onDrop(e, 'zurag_zuun')}
                                                         imgExtension={['.jpg', '.png']}
-                                                        maxFileSize={1529173}
+                                                        maxFileSize={5529173}
                                                         singleImage={true}
                                                         label=''
                                                         fileSizeError='Хэт их байна "1MB" зураг'
@@ -659,12 +655,10 @@ export class FormTseg extends Component {
                                                 </th>
                                             </tr>
                                             <tr className={showMore ? 'd-show' : "d-none"}>
-                                                <th style={{width: "5%"}} scope="row"></th>
                                                 <th className="text-center" colSpan="2" scope="rowgroup">Хойно</th>
                                                 <th className="text-center" colSpan="2" scope="rowgroup">Өмнө</th>
                                             </tr>
                                             <tr className={showMore ? 'd-show' : "d-none"}>
-                                                <th style={{width: "5%"}} scope="row"></th>
                                                 <th colSpan="2" scope="rowgroup">
                                                     <ImageUploader
                                                         withPreview={true}
@@ -672,7 +666,7 @@ export class FormTseg extends Component {
                                                         buttonText='Зураг оруулах'
                                                         onChange={(e) =>this.onDrop(e, 'zurag_hoid')}
                                                         imgExtension={['.jpg', '.png']}
-                                                        maxFileSize={1529173}
+                                                        maxFileSize={5529173}
                                                         singleImage={true}
                                                         label=''
                                                         fileSizeError='Хэт их байна "1MB" зураг'

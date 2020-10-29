@@ -5,7 +5,7 @@ export const service = {
     tableListTeevriinSuljee,
     tableListBairZuinZurag,
     tableListBarilgaSuurinGazar,
-    tableListDedButets
+    tableListDedButets,
 }
 
 function tableListTeevriinSuljee() {
@@ -32,3 +32,4 @@ function tableListDedButets() {
 
     return fetch('/gov/api/ded_butets/table_list/', requestOptions).then(handleResponse)
 }
+
