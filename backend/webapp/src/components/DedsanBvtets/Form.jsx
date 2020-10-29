@@ -49,7 +49,7 @@ export default class Forms extends Component {
     componentDidUpdate(pP){
         const {model_id, model_name, edit_name} = this.props
         if(pP.model_id !== model_id){
-            this.setState({ before_id: pP.model_id, before_name: pP.model_name })
+            this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
         }
         if(pP.model_name !== model_name || pP.edit_name !== edit_name)
         {
@@ -98,7 +98,7 @@ export default class Forms extends Component {
                         })
                     }
                 })
-                this.setState({values: fields, is_loading:false})
+                this.setState({values: fields, is_loading:false, model_id, model_name})
            }
            else
            {
@@ -112,11 +112,22 @@ export default class Forms extends Component {
         if (this.props.model_name == 'feature_config') {
             this.props.handleFormLeft('data_type', '')
         }
-        if (this.props.model_name == 'property') {
+        if ((this.props.model_name == 'property') || (this.props.model_name == 'value_type')) {
             this.props.handleFormLeft('value_type', '')
         }
         if (this.props.model_name == 'data_type_config') {
             this.props.handleFormLeft('property', '')
+        }
+    }
+
+    backToForm(){
+        const { before_id , before_name, before_edit_name } = this.state
+        console.log("backToForm")
+        if (before_edit_name !== ''){
+            this.props.handleFormLeft(before_name, before_id, before_edit_name)
+        }
+        else {
+            this.props.handleFormLeft(before_name, before_id)
         }
     }
 
@@ -130,13 +141,14 @@ export default class Forms extends Component {
             )
         }
         const { values, model_id, datas, isTrue, isC, jumped, edit_name, info } = this.state
+        console.log('zasaj bolno', edit_name)
         return (
             <div className='overflow-auto card-body'>
                  {
                     jumped
                     ?
                         <div className="mb-2">
-                            <button type="button" className="btn btn-block gp-btn-primary" onClick={() => this.backToSide('back')}>Буцах</button>
+                            <button type="button" className="btn btn-block gp-btn-primary" onClick={() => this.backToForm()}>Буцах</button>
                         </div>
                     :
                         null
@@ -167,7 +179,6 @@ export default class Forms extends Component {
                         isValid,
                         dirty,
                     }) => {
-                        console.log(values)
                     return(
                         <Form>
                         <FieldArray
@@ -223,6 +234,7 @@ export default class Forms extends Component {
                                                             (friend.field_name == 'property_id' && prop_name === 'data_type_config')||
                                                             (friend.field_name.includes('connect_feature') &&  prop_name === 'feature_config')||
                                                             (friend.field_name == 'value_type_id' && prop_name !== 'value_type') ||
+                                                            (friend.field_name == 'value_type_id' && prop_name == 'value_type' && edit_name !== '') ||
                                                             ((friend.field_name.includes('property_id') && prop_name == 'code_list_config'))
                                                             ?
                                                             <div className="input-group">
@@ -269,7 +281,7 @@ export default class Forms extends Component {
                                                                     className='form-control'
                                                                     placeholder={friend.field_name}
                                                                     type={friend.field_type}
-                                                                    disabled={(friend.field_name == 'value_type_id' && edit_name == '') ? 'disabled' : ''}
+                                                                    disabled={(((friend.field_name.includes('id') && !(friend.field_name == 'value_type_id'))) && edit_name == '') ? 'disabled' : ''}
                                                                 />
                                                         )
                                                     }

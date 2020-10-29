@@ -37,31 +37,29 @@ export class List extends Component {
     }
 
     componentDidMount(){
-        var haha = 'type_id'
-        console.log(haha.includes('id'))
         this.getAll()
     }
 
     getAll(){
-        console.log("this is a getAll")
         service.getall().then(({success, data }) => {
             if(success){
                 this.setState({
                     list_all: data,
                 })
             }
+            this.setState({ hideRight: false })
         })
     }
 
     getProperties(code) {
-        console.log(code, "this is a code")
-        this.setState({ form_is_laod: true, hideRight: true })
+        this.setState({ form_is_laod: true, })
         service.getprop(code).then(rsp => {
             if(rsp.success){
                 this.setState({
                     feature_lists: rsp.feature_lists,
                     check: rsp.check,
                     code: code,
+                    hideRight: true
                 })
             }
         })
@@ -78,6 +76,7 @@ export class List extends Component {
     }
 
     handleFormLeft(model_name, model_id, edit_name){
+        console.log('handleFormLeft', model_name, model_id, edit_name)
         if (edit_name) {
             this.setState({ form_is_laod_left:false, model_name, edit_name, model_id })
         }
@@ -87,7 +86,6 @@ export class List extends Component {
     }
 
     done(){
-        console.log("tath donew")
         this.setState({form_is_laod_left: true})
     }
 
@@ -96,7 +94,6 @@ export class List extends Component {
     }
 
     remove(model_name, model_id, name){
-        console.log(model_name, model_id, name)
         this.setState({ modal_status: "open", model_name, model_id, name })
     }
 
@@ -104,7 +101,6 @@ export class List extends Component {
         const { model_name, model_id } = this.state
         service.remove(model_name, model_id).then(({success, info}) => {
             if (success) {
-                console.log(info)
                 this.getAll();
             }
             else {
@@ -115,15 +111,15 @@ export class List extends Component {
     }
 
     statusModal(type){
-        console.log(type)
         if (type == 'open') this.setState({ modal_status: "open" })
         if (type == 'close') this.setState({ modal_status: "closed" })
-        if (type == 'hide') this.setState({ hideRight: false })
+        if (type == 'hide'){
+            this.componentDidMount()
+        }
     }
 
     render() {
-        const { list_all, form_is_laod_left, model_name, model_id, code, edit_name, is_delete, info } = this.state
-        console.log(is_delete)
+        const { list_all, form_is_laod_left, model_name, model_id, code, edit_name, is_delete, info, hideRight } = this.state
         return (
             <div className="row m-0">
                 <div className="card col-md-5">
@@ -228,6 +224,7 @@ export class List extends Component {
                             check={this.state.check}
                             handleFormLeft={this.handleFormLeft}
                             handleForm={() => this.handleForm()}
+                            hide={hideRight}
                         />:
                         <div>
                             <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
