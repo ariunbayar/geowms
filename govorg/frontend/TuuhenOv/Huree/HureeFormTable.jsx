@@ -183,12 +183,6 @@ export default class HureeFormTable extends Component {
                     :
                     perms.perm_remove && perms.perm_create ? null: <td rowSpan="1"></td>
                 }
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай заслаа"
-                    model_type_icon = "success"
-                />
             </tr>
         )
     }

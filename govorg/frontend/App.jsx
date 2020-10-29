@@ -22,7 +22,6 @@ export class App extends Component {
     constructor(props) {
         super(props)
         this.state={
-            perms: props.org.perms,
             org_level: props.org.org_level,
             name: props.org.name,
             tuuhen_ov: {},
@@ -42,8 +41,7 @@ export class App extends Component {
 
     componentDidMount(){
 
-        const { perms } = this.state
-
+        const { perms } = this.props.org
         perms.map((perm) => {
             if(perm.module_id == 1){
                 this.setState({tuuhen_ov: perm})
@@ -64,38 +62,21 @@ export class App extends Component {
                 this.setState({barilga_suurin_gazar: perm})
             }
         })
+        
+        // Promise.all([
+        //     service.tableListBarilgaSuurinGazar(),
+        //     service.tableListTeevriinSuljee(),
+        //     service.tableListBairZuinZurag(),
+        //     service.tableListDedButets(),
+        // ]).then(([{success, data}, {items}, {items}, {items}]) => {
 
-        service
-            .tableListBarilgaSuurinGazar()
-            .then(({ success, data }) => {
-                if(success){
-                    this.setState({barilga_suurin_gazar_table_list:data})
-                }
-            })
+        //     this.setState({barilga_suurin_gazar_table_list:data})
+        //     this.setState({teevriin_suljee_table_list:items})
+        //     this.setState({bair_zuin_zurag_table_list:items})
+        //     this.setState({ded_butets_table_list:items})
 
-        service
-            .tableListTeevriinSuljee()
-            .then(({ items }) => {
-                this.setState({
-                    teevriin_suljee_table_list: items,
-                })
-            })
+        // })
 
-        service
-            .tableListBairZuinZurag()
-            .then(({ items }) => {
-                this.setState({
-                    bair_zuin_zurag_table_list: items,
-                })
-            })
-
-        service
-            .tableListDedButets()
-            .then(({ items }) => {
-                this.setState({
-                    ded_butets_table_list: items,
-                })
-            })
 
         this.handleMapComponens()
     }

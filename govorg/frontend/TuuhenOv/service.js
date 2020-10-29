@@ -23,6 +23,7 @@ export const service = {
     ayulUpdate,
     ayulDelete,
     list,
+    rows,
 }
 function all() {
     const requestOptions = {
@@ -191,4 +192,12 @@ function ayulAll(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/ayul-all/`, opts).then(handleResponse)
+}
+
+function rows(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/rows/`, opts).then(handleResponse)
 }

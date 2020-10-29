@@ -21,6 +21,15 @@ import re
 from django.conf import settings
 from fpdf import FPDF
 from django.contrib.gis.geos import GEOSGeometry, Point, Polygon, LinearRing
+from main.utils import (
+    gis_delete,
+    gis_fetch_one,
+    gis_fields_by_oid,
+    gis_insert,
+    gis_table_by_oid,
+    gis_tables_by_oids,
+    dict_fetchall
+)
 # Create your models here.
 
 def createPdf(pk):
@@ -1815,5 +1824,26 @@ def tuuhenOvList(request, payload):
         'items': display_item,
         'page': page,
         'total_page': total_page,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def rows(request, payload):
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
+        FROM
+            tuuhsoyolhureepol
+        ORDER BY id ASC
+    """
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    rsp = {
+        'rows': rows,
     }
     return JsonResponse(rsp)

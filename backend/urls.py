@@ -161,6 +161,7 @@ urlpatterns = [
         path('dursgalt-gazar/ayul-update/', forms_views.ayulHureeUpdate, name='dursgalt-gazar-ayul-update'),
         path('dursgalt-gazar/ayul-delete/', forms_views.ayulHureeDelete, name='dursgalt-gazar-ayul-delete'),
         path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
+        path('rows/', forms_views.rows, name='rows'),
 
     ], 'tuuhen_ov'))),
 

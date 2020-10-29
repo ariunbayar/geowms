@@ -26,6 +26,7 @@ export class AddForm extends Component {
             perms: this.props.perms,
             id: this.props.id.match.params.id,
             load: 0,
+            rows: [],
         }
 
         this.paginate = this.paginate.bind(this)
@@ -34,6 +35,7 @@ export class AddForm extends Component {
         this.handleInput = this.handleInput.bind(this)
         this.hureeTooShirheg = this.hureeTooShirheg.bind(this)
         this.handleXY = this.handleXY.bind(this)
+        this.loadRows = this.loadRows.bind(this)
     }
 
     handleXY(values, info){
@@ -51,6 +53,7 @@ export class AddForm extends Component {
         }
         this.hureeTooShirheg()
         this.paginate(1, "")
+        this.loadRows()
     }
 
     paginate (page, query) {
@@ -97,6 +100,16 @@ export class AddForm extends Component {
         })
     }
 
+    loadRows() {
+        service
+            .rows(this.state.id)
+            .then(({ rows }) => {
+                this.setState({ rows })
+
+        })
+    }
+
+
     render() {
         const { perms, is_editable, currentPage } = this.state
         const dursgalt_id = this.state.id
@@ -111,16 +124,11 @@ export class AddForm extends Component {
         return (
             <div  className="card">
                 <div className="row">
-                    {
-                        perms.perm_create || perms.perm_remove
-                        ?
-                        <Maps
-                            handleXY={this.handleXY}
-                            coordinatCheck={true}
-                        />
-                        :
-                        null
-                    }
+                    <Maps
+                        geoms={this.state.rows}
+                        handleXY={this.handleXY}
+                        coordinatCheck={true}
+                    />
                     <div className="card-body col-md-11 ml-5">
                         {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
                         <div className="text-right my-3">
