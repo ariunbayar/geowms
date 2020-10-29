@@ -260,49 +260,6 @@ body {
   height: calc(4px + 0.7em);
   margin-right: calc(5px + 0.2em);
 }
-/* fixed scroll table css */
-.scroll-body{
-  background-color: white;
-}
-.scroll-fixed{
-  width: 100%;
-}
-.scroll-fixed tbody{
-  height: calc( 83vh - 134px - 15px);
-  overflow-y:auto;
-  width: 100%;
-}
-.scroll-fixed thead,tbody,tfoot,tr,td,th{
-  display:block;
-}
-
-.scroll-fixed tbody th, td{
-  float:left;
-}
-
-.scroll-fixed thead tr th{
-  float:left;
-}
-
-.scroll-fixed tfoot tr th{
-  float:left;
-}
-
-.scroll-fixed thead{
-  padding-right: 30px;
-}
-
-.scroll-fixed tfoot{
-  padding-right: 30px;
-}
-
-.scroll-fixed tfoot tr{
-  border: none;
-}
-
-.scroll-fixed .table-bordered {
-  border: 0px solid #dee2e6;
-}
 /* help table end*/
 
 /* service img */

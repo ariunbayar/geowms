@@ -72,9 +72,9 @@ export class OrgInspireRole extends Component {
     render() {
         const {form_datas} = this.state
         return (
-            <div className="scroll-fixed ">
+            <div className="scroll-fixed">
                 <table className="table table-bordered row">
-                    <thead className="thead-light col-12">
+                    <thead className="thead-light scroll-thead col-12">
                         <tr className="row">
                             <th scope="col" className="text-center col-5">Оронзайн суурь өгөгдлийн сан</th>
                             <th scope="col" className="text-center col-1"><span>харах</span></th>
@@ -97,7 +97,7 @@ export class OrgInspireRole extends Component {
                                     render={arrayHelpers => (
                                     <>
                                         {values.form_values && values.form_values.length > 0 ? (
-                                            <tbody className="col-12">
+                                            <tbody className="col-12 scroll-tbody">
                                             {values.form_values.map(({name, roles, packages}, theme_index) => (
                                                 <>
                                                     <tr className="row">
@@ -163,7 +163,7 @@ export class OrgInspireRole extends Component {
 
                                         ) : ( null
                                         )}
-                                        <tfoot className="col-12">
+                                        <tfoot className="col-12 scroll-tfoot">
                                             <tr className="row">
                                                 {this.state.handleSaveIsLoad ?
                                                     <a className="col-12 btn btn-block gp-btn-primary my-3 text-white">Уншиж байна</a>:

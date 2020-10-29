@@ -1,0 +1,42 @@
+.scroll-body{
+    background-color: white;
+}
+.scroll-fixed{
+    width: 100%;
+}
+.scroll-fixed  .scroll-tbody{
+    height: calc( 83vh - 134px - 15px);
+    overflow-y:auto;
+    width: 100%;
+}
+.scroll-fixed .scroll-thead, .scroll-tbody, .scroll-tfoot{
+    display:block;
+}
+
+.scroll-fixed  .scroll-tbody{
+    float:left;
+}
+
+.scroll-fixed .scroll-thead{
+    float:left;
+}
+
+.scroll-fixed .scroll-tfoot{
+    float:left;
+}
+
+.scroll-fixed .scroll-thead{
+    padding-right: 30px;
+}
+
+.scroll-fixed .scroll-tfoot{
+    padding-right: 30px;
+}
+
+.scroll-fixed .scroll-tfoot{
+    border: none;
+}
+
+.scroll-fixed .table-bordered {
+    border: 0px solid #dee2e6;
+}
