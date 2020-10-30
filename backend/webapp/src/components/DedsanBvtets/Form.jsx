@@ -306,29 +306,7 @@ export default class Forms extends Component {
                                                                     className='form-control'
                                                                     placeholder={friend.field_name}
                                                                     type={friend.field_type}
-                                                                    disabled={
-                                                                        (
-                                                                            (((
-                                                                                    friend.field_name.includes('id') &&
-                                                                                        !(friend.field_name.includes('connect_feature')))
-                                                                                    &&
-                                                                                    edit_name == ''
-                                                                                ) ||
-                                                                                (friend.field_name.includes('connect_feature') && isTrue)
-                                                                                || (friend.field_name == 'value_type_id' && friend.data !== '')
-                                                                                || (friend.field_name.includes('id') && friend.data == '' &&  edit_name == '')
-                                                                                || (friend.field_name == 'property_id' && prop_name == 'code_list' )
-                                                                            )
-                                                                        ?
-                                                                            (friend.field_name == 'value_type_id' && friend.data == '' && edit_name == '') ||
-                                                                            (friend.field_name == 'top_theme_id')
-                                                                            ?
-                                                                            ""
-                                                                            :
-                                                                            'disabled'
-                                                                        :
-                                                                            ''
-                                                                        )}
+                                                                    disabled={(friend.data !== '' && friend.field_name.includes("id")) ? 'disabled' : ''}
                                                                 />
                                                         )
                                                     }
