@@ -163,7 +163,7 @@ export class App extends Component {
                                 { org_inspire.length >0  ? org_inspire.map((theme, idx) =>
                                     <MenuItem
                                         key={ idx }
-                                        icon="gp-text-primary icon-map"
+                                        icon="gp-text-primary fa fa-circle-o"
                                         url={`/gov/org/map/${theme.id}`}
                                         text={theme.name}
                                     >
@@ -172,7 +172,7 @@ export class App extends Component {
                                                 theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
                                                 <MenuItem
                                                     key={ idy }
-                                                    icon="fa fa-folder-open gp-text-primary"
+                                                    icon="fa fa-circle-o gp-text-primary"
                                                     url={`/gov/org/map/${theme.id}/${pack.id}`}
                                                     text={pack.name}
                                                 >
@@ -181,7 +181,7 @@ export class App extends Component {
                                                         pack.features.length>0 ? pack.features.map((feat, idz)=>
                                                             <MenuItem
                                                                 key={idz}
-                                                                icon="fa fa-table gp-text-primary"
+                                                                icon="fa fa-circle-o gp-text-primary"
                                                                 url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
                                                                 text={feat.name}
                                                             >
