@@ -8,6 +8,7 @@ import ДэдБүтэц from './DedButets'
 import БайрЗүйнЗураг from './BairZuinZurag'
 import БарилгаСууринГазар from './BarilgaSuurinGazar'
 import Bundles from './Map/index'
+import OrgRequest from './OrgRequest'
 import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
@@ -138,12 +139,8 @@ export class App extends Component {
 
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
 
-                        <MenuItem icon="gp-text-primary fa fa-inbox" url="#" text="Хүсэлт">
-                            <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/received/" text="Илгээсэн хүсэлт"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/sent/" text="Шийдвэрлэх хүсэлт"></MenuItem>
-                            </ul>
-                        </MenuItem>
+
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/org-request/" text="Хүсэлт"></MenuItem>
 
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
@@ -201,6 +198,7 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>
+
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="Тусламж"></MenuItem>
                         {/* {teevriin_suljee.perm_view &&
                             <MenuItem
@@ -351,6 +349,7 @@ export class App extends Component {
                             }
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
+                            <Route path="/gov/org-request/" component={OrgRequest}/>
                             <Route exact path="/gov/employees/" component={ Employee }/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
                             <Route exact path="/gov/org/help/" component={Help}/>
