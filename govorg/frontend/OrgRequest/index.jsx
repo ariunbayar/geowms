@@ -5,6 +5,12 @@ import OrgRequestForm from './orgRequestForm'
 
 export default class OrgRequest extends Component {
 
+    constructor(props) {
+        super(props)
+        this.state={
+        }
+    }
+
     render() {
         return (
             <div className="card">

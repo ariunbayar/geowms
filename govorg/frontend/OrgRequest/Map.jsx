@@ -12,7 +12,7 @@ import {Vector as VectorSource} from 'ol/source';
 import {Vector as VectorLayer} from 'ol/layer';
 
 export default class RequestMap extends Component {
-constructor(props) {
+    constructor(props) {
 
         super(props)
 
