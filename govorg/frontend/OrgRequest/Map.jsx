@@ -21,41 +21,59 @@ constructor(props) {
             featureProjection: 'EPSG:3857',
         }
         this.loadMapData = this.loadMapData.bind(this)
+        this.loadMap = this.loadMap.bind(this)
     }
 
     componentDidMount() {
         const geoJson = this.props.geoJson
+          this.loadMap()
         if(geoJson['type']){
           this.loadMapData(geoJson)
         }
     }
 
+    loadMap(){
+      const map = new Map({
+        layers: [
+            new TileLayer({
+              source: new OSM(),
+            }),
+        ],
+        target: 'map',
+        view: new View({
+            center: [11461613.630815497, 5878656.0228370065],
+            zoom: 5.041301562246971,
+        }),
+      });
+      this.map = map
+    }
+
     loadMapData(GeoJson){
 
-        const styles = {
+        const styles_new = {
           'MultiPolygon': new Style({
             stroke: new Stroke({
-              color: 'blue',
-              width: 3,
+              color: 'green',
+              width: 2,
             }),
             fill: new Fill({
-              color: 'rgba(255, 255, 0, 0.1)',
+              color: 'rgba(0,255,0,0.3)',
             }),
           }),
           'Polygon': new Style({
             stroke: new Stroke({
-              color: 'orange',
-              width: 4,
+              color: 'green',
+              width: 2,
             }),
             fill: new Fill({
-              color: 'rgba(255, 255, 0, 0.1)',
+              color: 'rgba(0,255,0,0.3)',
             }),
           }),
           'Point': new Style({
             image: new CircleStyle({
               radius: 5,
               fill: new Fill({
-                color: 'blue',
+                color: 'green',
               }),
             }),
           }),
@@ -75,42 +93,97 @@ constructor(props) {
             image: new CircleStyle({
               radius: 5,
               fill: new Fill({
-                color: 'orange',
+                color: 'green',
               }),
             }),
           }),
-          };
+        };
 
-        const styleFunction = function (feature) {
-          return styles[feature.getGeometry().getType()];
+        const styles_old = {
+          'MultiPolygon': new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 2,
+            }),
+            fill: new Fill({
+              color: 'rgba(255,0,0,0.3)',
+            }),
+          }),
+          'Polygon': new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 2,
+            }),
+            fill: new Fill({
+              color: 'rgba(255,0,0,0.3)',
+            }),
+          }),
+          'Point': new Style({
+            image: new CircleStyle({
+              radius: 5,
+              fill: new Fill({
+                color: 'blue',
+              }),
+            }),
+          }),
+          'LineString': new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 2,
+            }),
+          }),
+          'MultiLineString': new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 2,
+            }),
+          }),
+          'MultiPoint': new Style({
+            image: new CircleStyle({
+              radius: 5,
+              fill: new Fill({
+                color: 'red',
+              }),
+            }),
+          }),
         };
 
         const geojsonObject =  GeoJson
-        const vectorSource = new VectorSource({
-          features: new GeoJSON().readFeatures(geojsonObject, {
-            dataProjection: this.state.dataProjection,
-            featureProjection: this.state.featureProjection,
-          }),
-        });
-
-        const vectorLayer = new VectorLayer({
-              source: vectorSource,
-              style: styleFunction,
-            });
-
-        const map = new Map({
-            layers: [
-                new TileLayer({
-                  source: new OSM(),
-                }),
-                vectorLayer
-            ],
-                target: 'map',
-            view: new View({
-                center: [11461613.630815497, 5878656.0228370065],
-                zoom: 5.041301562246971,
+        if(geojsonObject['features'][0]){
+          const vectorSourceNew = new VectorSource({
+            features: new GeoJSON().readFeatures(geojsonObject['features'][0], {
+              dataProjection: this.state.dataProjection,
+              featureProjection: this.state.featureProjection,
             }),
-        });
+          });
+
+          const vectorLayerNew = new VectorLayer({
+            source: vectorSourceNew,
+            style: function (feature) {
+              return styles_new[feature.getGeometry().getType()];
+            }
+          });
+          this.map.addLayer(vectorLayerNew)
+        }
+
+        if(geojsonObject['features'].length > 1){
+
+          const vectorSourceOld = new VectorSource({
+            features: new GeoJSON().readFeatures(geojsonObject['features'][1], {
+              dataProjection: this.state.dataProjection,
+              featureProjection: this.state.featureProjection,
+            }),
+          });
+
+          const vectorLayerOld = new VectorLayer({
+            source: vectorSourceOld,
+            style: function (feature) {
+              return styles_old[feature.getGeometry().getType()];
+            }
+          });
+
+          this.map.addLayer(vectorLayerOld)
+        }
     }
 
     render() {

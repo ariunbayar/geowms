@@ -125,9 +125,13 @@ def _get_org_request(ob):
             if old_geo_data:
                 old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
                 geo_json = _get_geoJson(old_geo_data)
+                geo_json = FeatureCollection([geo_json])
+
     else:
         geo_json = _convert_text_json(ob.geo_json)
         geo_json = _get_geoJson(geo_json)
+        geo_json = FeatureCollection([geo_json])
+
 
     return {
         'old_geo_id':ob.old_geo_id,
@@ -275,7 +279,7 @@ def requestApprove(request, payload, pk):
                 }
         else:
             geom = []
-            geo_json = geo_json['geometry']
+            geo_json = geo_json['features'][0]['geometry']
             geo_json = str(geo_json).replace("\'", "\"")
             geo_data = geoJsonConvertGeom(geo_json)
             geom =  ''.join(geo_data)
