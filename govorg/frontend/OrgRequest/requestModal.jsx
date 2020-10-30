@@ -103,6 +103,7 @@ export default class RequestModal extends Component {
 
 
                                 <div className="row">
+                                    {form_json &&
                                     <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
                                         {
                                         form_json ? form_json.form_values.map((prop, idx)=>
@@ -125,7 +126,8 @@ export default class RequestModal extends Component {
                                             ):null
                                         }
                                     </div>
-                                    <div className="col-md-6">
+                                    }
+                                    <div className= {form_json ? "col-md-6" : "col-md-12"}>
                                         <RequestMap geoJson ={this.props.geo_json}/>
                                     </div>
                                 </div>
