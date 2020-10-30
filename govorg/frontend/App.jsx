@@ -139,12 +139,8 @@ export class App extends Component {
 
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
 
-                        <MenuItem icon="gp-text-primary fa fa-inbox" url="#" text="Хүсэлт">
-                            <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/received/" text="Илгээсэн хүсэлт"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/sent/" text="Шийдвэрлэх хүсэлт"></MenuItem>
-                            </ul>
-                        </MenuItem>
+
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/org-request/" text="Хүсэлт"></MenuItem>
 
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
@@ -203,7 +199,6 @@ export class App extends Component {
                             </ul>
                         </MenuItem>
 
-                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/org-request/" text="ХҮСЭЛТ"></MenuItem>
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="Тусламж"></MenuItem>
                         {/* {teevriin_suljee.perm_view &&
                             <MenuItem
