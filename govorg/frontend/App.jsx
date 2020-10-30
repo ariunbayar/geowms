@@ -66,37 +66,37 @@ export class App extends Component {
             }
         })
 
-        service
-            .tableListBarilgaSuurinGazar()
-            .then(({ success, data }) => {
-                if(success){
-                    this.setState({barilga_suurin_gazar_table_list:data})
-                }
-            })
+        // service
+        //     .tableListBarilgaSuurinGazar()
+        //     .then(({ success, data }) => {
+        //         if(success){
+        //             this.setState({barilga_suurin_gazar_table_list:data})
+        //         }
+        //     })
 
-        service
-            .tableListTeevriinSuljee()
-            .then(({ items }) => {
-                this.setState({
-                    teevriin_suljee_table_list: items,
-                })
-            })
+        // service
+        //     .tableListTeevriinSuljee()
+        //     .then(({ items }) => {
+        //         this.setState({
+        //             teevriin_suljee_table_list: items,
+        //         })
+        //     })
 
-        service
-            .tableListBairZuinZurag()
-            .then(({ items }) => {
-                this.setState({
-                    bair_zuin_zurag_table_list: items,
-                })
-            })
+        // service
+        //     .tableListBairZuinZurag()
+        //     .then(({ items }) => {
+        //         this.setState({
+        //             bair_zuin_zurag_table_list: items,
+        //         })
+        //     })
 
-        service
-            .tableListDedButets()
-            .then(({ items }) => {
-                this.setState({
-                    ded_butets_table_list: items,
-                })
-            })
+        // service
+        //     .tableListDedButets()
+        //     .then(({ items }) => {
+        //         this.setState({
+        //             ded_butets_table_list: items,
+        //         })
+        //     })
 
         this.handleMapComponens()
     }
