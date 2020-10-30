@@ -26,6 +26,8 @@ export class List extends Component {
             modal_status: "closed",
             name: '',
             hideRight: false,
+            formLorR: '',
+            top_id: '',
         }
         this.getAll = this.getAll.bind(this)
         this.handleForm = this.handleForm.bind(this)
@@ -34,6 +36,7 @@ export class List extends Component {
         this.isDelete = this.isDelete.bind(this)
         this.remove = this.remove.bind(this)
         this.delete = this.delete.bind(this)
+        this.deleteAndRemove = this.deleteAndRemove.bind(this)
     }
 
     componentDidMount(){
@@ -41,13 +44,18 @@ export class List extends Component {
     }
 
     getAll(){
+        const { formLorR, code } = this.state
         service.getall().then(({success, data }) => {
             if(success){
                 this.setState({
                     list_all: data,
                 })
             }
-            this.setState({ hideRight: false })
+            if ( formLorR == 'right') {
+                this.getProperties(code)
+                this.setState({ hideRight: true })
+            }
+            if ( formLorR == 'left') this.setState({ hideRight: false })
         })
     }
 
@@ -75,13 +83,12 @@ export class List extends Component {
         }
     }
 
-    handleFormLeft(model_name, model_id, edit_name){
-        console.log('handleFormLeft', model_name, model_id, edit_name)
+    handleFormLeft(model_name, model_id, edit_name, top_id){
         if (edit_name) {
-            this.setState({ form_is_laod_left:false, model_name, edit_name, model_id })
+            this.setState({ form_is_laod_left:false, model_name, edit_name, model_id, top_id })
         }
         else {
-            this.setState({ form_is_laod_left:false, model_name, model_id, edit_name: '' })
+            this.setState({ form_is_laod_left:false, model_name, model_id, edit_name: '', top_id })
         }
     }
 
@@ -93,28 +100,51 @@ export class List extends Component {
         this.setState({ is_delete: !this.state.is_delete })
     }
 
-    remove(model_name, model_id, name){
-        this.setState({ modal_status: "open", model_name, model_id, name })
+    remove(model_name, model_id, name, formLorR){
+        alert(formLorR)
+        this.setState({ modal_status: "open", model_name, model_id, name, formLorR })
     }
 
-    delete(){
-        const { model_name, model_id } = this.state
+    deleteAndRemove(model_name, model_id){
         service.remove(model_name, model_id).then(({success, info}) => {
             if (success) {
+                this.setState({ hideRight: false })
                 this.getAll();
             }
             else {
                 alert(info)
             }
-            this.setState({ info, modal_status: "closed", hideRight: false })
+            this.setState({ info, modal_status: "closed", top_id: '' })
         })
+    }
+
+    delete(){
+        const { model_name, model_id, formLorR, code, top_id } = this.state
+        if (formLorR == 'left'){
+            this.deleteAndRemove(model_name, model_id)
+        }
+        if (formLorR == 'right' && top_id){
+            service.erese(model_name, model_id, top_id).then(({success, info}) => {
+                if (success) {
+                    this.setState({ hideRight: true })
+                    this.getProperties(code)
+                }
+                else {
+                    alert(info)
+                }
+                this.setState({ info, modal_status: "closed", top_id: '' })
+            })
+        }
+        else {
+            this.deleteAndRemove(model_name, model_id)
+        }
     }
 
     statusModal(type){
         if (type == 'open') this.setState({ modal_status: "open" })
         if (type == 'close') this.setState({ modal_status: "closed" })
         if (type == 'hide'){
-            this.componentDidMount()
+            this.getAll()
         }
     }
 
@@ -199,6 +229,9 @@ export class List extends Component {
                                     done={() => this.done()}
                                     edit_name={edit_name}
                                     remove={this.remove}
+                                    statusModal={() => this.statusModal()}
+                                    type="right"
+                                    top_id={this.state.top_id}
                                 ></Forms>
                             </div>
                         }
@@ -235,6 +268,7 @@ export class List extends Component {
                                 done={() => this.done()}
                                 edit_name={edit_name}
                                 remove={this.remove}
+                                type="left"
                                 statusModal={this.statusModal}
                             ></Forms>
                         </div>

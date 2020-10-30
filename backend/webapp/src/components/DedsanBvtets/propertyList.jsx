@@ -50,7 +50,7 @@ export default class Propterties extends Component {
 
     render() {
         const {property_name, disabled, toggleButton} = this.state
-        const { property_id, is_read_only } = this.props
+        const { property_id, is_read_only, top_id } = this.props
         return (
             <div className="row">
                 {
@@ -71,7 +71,7 @@ export default class Propterties extends Component {
                 &nbsp;
                 <a
                     href="#"
-                    onClick={() => this.props.handleFormLef('property', property_id, property_name)}
+                    onClick={() => this.props.handleFormLef('property', property_id, property_name, top_id)}
                 >
                     {property_name}
                 </a>

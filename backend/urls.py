@@ -185,6 +185,7 @@ urlpatterns = [
         path('get-fields/', dedsan_butets.getFields),
         path('save/', dedsan_butets.save),
         path('remove/', dedsan_butets.remove),
+        path('erese/', dedsan_butets.erese),
         path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
     ], 'dedsan-butests'))),
 

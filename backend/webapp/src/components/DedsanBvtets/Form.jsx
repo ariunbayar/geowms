@@ -24,11 +24,13 @@ export default class Forms extends Component {
             before_name: '',
             jumped: false,
             edit_name: '',
+            options: false,
         }
 
         this.onSubmit = this.onSubmit.bind(this)
         this.getFields = this.getFields.bind(this)
         this.makeModel = this.makeModel.bind(this)
+        this.getOptions = this.getOptions.bind(this)
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
@@ -67,9 +69,8 @@ export default class Forms extends Component {
 
     getFields(model_name, model_id, edit_name){
         this.setState({ values: {} })
-        console.log(model_name, model_id, edit_name)
-        service.getFields(model_name, model_id, edit_name).then(({ fields }) => {
-           if(fields)
+        service.getFields(model_name, model_id, edit_name).then(({ success, fields }) => {
+           if(success)
            {
                 if (model_name == 'property'){
                     var name = 'value_type_id'
@@ -83,10 +84,6 @@ export default class Forms extends Component {
                     var name = 'property_id'
                     var find = 'property'
                 }
-                // if (model_name == 'feature_config') {
-                //     var name = 'connect_feature_id'
-                //     var find = 'feature'
-                // }
                 fields.map(field => {
                     if (field.field_name == name)
                     {
@@ -98,12 +95,15 @@ export default class Forms extends Component {
                                 }
                         })
                     }
+                    if (field.field_name == 'connect_feature_id' ) {
+                        this.getOptions()
+                    }
                 })
                 this.setState({values: fields, is_loading:false, model_id, model_name})
            }
            else
            {
-                console.log('get fields gg')
+                console.log(fields)
            }
         })
     }
@@ -123,7 +123,6 @@ export default class Forms extends Component {
 
     backToForm(){
         const { before_id , before_name, before_edit_name } = this.state
-        console.log("backToForm")
         if (before_edit_name !== ''){
             this.props.handleFormLeft(before_name, before_id, before_edit_name)
         }
@@ -140,8 +139,8 @@ export default class Forms extends Component {
                     this.options.push(<option key={idx} value={data.id}>{data.name}</option>)
                 )
             }
+            this.setState({ options: true })
         })
-        return this.options
     }
 
     render() {
@@ -154,7 +153,6 @@ export default class Forms extends Component {
             )
         }
         const { values, model_id, datas, isTrue, isC, jumped, edit_name, info } = this.state
-        console.log('zasaj bolno', edit_name)
         return (
             <div className='overflow-auto card-body'>
                  {
@@ -219,6 +217,10 @@ export default class Forms extends Component {
                                                                         setFieldValue(`form_values.${index - 3}.data`, 'false')
                                                                         this.setState({ isTrue: true })
                                                                     }
+                                                                    if (friend.field_name == 'has_class') {
+                                                                        setFieldValue(`form_values.${index + 3}.data`, 'false')
+                                                                        this.setState({ isTrue: false })
+                                                                    }
                                                                 }}
                                                             />
                                                                 <b className="text-center">True</b>
@@ -236,6 +238,10 @@ export default class Forms extends Component {
                                                                         setFieldValue(`form_values.${index - 3}.data`, 'true')
                                                                         this.setState({ isTrue: false })
                                                                     }
+                                                                    if (friend.field_name == 'has_class') {
+                                                                        setFieldValue(`form_values.${index + 3}.data`, 'true')
+                                                                        this.setState({ isTrue: true })
+                                                                    }
                                                                 }}
                                                             />
                                                                 <b className="text-center">False</b>
@@ -247,7 +253,7 @@ export default class Forms extends Component {
                                                             (friend.field_name == 'property_id' && prop_name === 'data_type_config')||
                                                             (friend.field_name.includes('connect_feature') &&  prop_name === 'feature_config')||
                                                             (friend.field_name == 'value_type_id' && prop_name !== 'value_type') ||
-                                                            (friend.field_name == 'value_type_id' && prop_name == 'value_type' && edit_name !== '') ||
+                                                            // (friend.field_name == 'value_type_id' && prop_name == 'value_type' && edit_name != '') ||
                                                             ((friend.field_name.includes('property_id') && prop_name == 'code_list_config'))
                                                             ?
                                                             <div className="input-group">
@@ -260,9 +266,9 @@ export default class Forms extends Component {
                                                                 >
                                                                     <option value=""> --- Сонгоно уу --- </option>
                                                                     {
-                                                                        friend.field_name.includes('connect_feature') && isTrue
+                                                                        friend.field_name.includes('connect_feature') && !isTrue && this.state.options
                                                                         ?
-                                                                        this.getOptions()
+                                                                        this.options
                                                                         :
                                                                         datas.map((data, idx) =>
                                                                             <option
@@ -300,7 +306,29 @@ export default class Forms extends Component {
                                                                     className='form-control'
                                                                     placeholder={friend.field_name}
                                                                     type={friend.field_type}
-                                                                    disabled={(((friend.field_name.includes('id') && !(friend.field_name == 'value_type_id'))) && edit_name == '') ? 'disabled' : ''}
+                                                                    disabled={
+                                                                        (
+                                                                            (((
+                                                                                    friend.field_name.includes('id') &&
+                                                                                        !(friend.field_name.includes('connect_feature')))
+                                                                                    &&
+                                                                                    edit_name == ''
+                                                                                ) ||
+                                                                                (friend.field_name.includes('connect_feature') && isTrue)
+                                                                                || (friend.field_name == 'value_type_id' && friend.data !== '')
+                                                                                || (friend.field_name.includes('id') && friend.data == '' &&  edit_name == '')
+                                                                                || (friend.field_name == 'property_id' && prop_name == 'code_list' )
+                                                                            )
+                                                                        ?
+                                                                            (friend.field_name == 'value_type_id' && friend.data == '' && edit_name == '') ||
+                                                                            (friend.field_name == 'top_theme_id')
+                                                                            ?
+                                                                            ""
+                                                                            :
+                                                                            'disabled'
+                                                                        :
+                                                                            ''
+                                                                        )}
                                                                 />
                                                         )
                                                     }
@@ -311,7 +339,13 @@ export default class Forms extends Component {
                                     )}
                                     <div className={edit_name !== '' ? ' row' : ''}>
                                         {
-                                            edit_name &&  <a className="btn col-md-4 btn-danger mr-5 text-white" onClick={() => this.props.remove(prop_name, prop_id, prop_edit_name)}>Устгах</a>
+                                            edit_name ?
+                                                prop_name != 'value_type' ?
+                                                <a className="btn col-md-4 btn-danger mr-5 text-white" onClick={() => this.props.remove(prop_name, prop_id, prop_edit_name, this.props.type, this.props.top_id)}>
+                                                    Устгах
+                                                </a>
+                                                : null
+                                                : null
                                         }
                                         <button type="submit" className={`btn ` + (edit_name ? 'col-md-7' : 'btn-block') +` gp-btn-primary`}>{edit_name !== '' ? 'Засах' : 'Хадгалах'}</button>
                                     </div>

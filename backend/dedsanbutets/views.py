@@ -114,6 +114,7 @@ def _data_type_configs(data_type_id):
             if properties:
                 for prop in properties:
                     property_names.append({
+                        'data_type_config_id': data_type_config.data_type_config_id,
                         'data_type_id': data_type_config.data_type_id,
                         'property_id': property_id,
                         'property_code': prop.property_code,
@@ -220,11 +221,9 @@ def Edit_name(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def getFields(request, payload):
     model_name = payload.get('name')
+    savename = payload.get('name')
     id = payload.get('id')
     edit_name = payload.get('edit_name')
-    print("+++++++++++")
-    print(edit_name)
-    print("+++++++++++")
     try:
         model_name = getModel(model_name)
         fields = []
@@ -240,39 +239,63 @@ def getFields(request, payload):
                     type_name = 'radio'
                 if edit_name == '':
                     if 'id' in i.name and not 'connect' in i.name:
-                        fields.append({
-                            'field_name': i.name,
-                            'field_type': type_name,
-                            'data': id
-                        })
+                        if '_' in savename:
+                            if savename == 'data_type_config' and i.name == 'data_type_id':
+                                fields.append({
+                                    'field_name': i.name,
+                                    'field_type': type_name,
+                                    'data': id
+                                })
+                            else:
+                                out = savename.split('_')
+                                if not str(out[0]) in i.name:
+                                    fields.append({
+                                        'field_name': i.name,
+                                        'field_type': type_name,
+                                        'data': id
+                                    })
+                                else:
+                                    fields.append({
+                                        'field_name': i.name,
+                                        'field_type': type_name,
+                                        'data': ''
+                                    })
+                        else:
+                            fields.append({
+                                'field_name': i.name,
+                                'field_type': type_name,
+                                'data': id
+                            })
                     else:
                         fields.append({
                             'field_name': i.name,
                             'field_type': type_name,
-                            'data': None
+                            'data': ''
                         })
                 if edit_name != '':
                     datas = model_name.objects.filter(pk=id)
                     for data in datas:
                         data_obj = model_to_dict(data)
                         dat = data_obj[i.name]
-                        if dat == True:
+                        if dat == True and not 1:
                             dat = 'true'
-                        if dat == False:
+                        if dat == False and not 0:
                             dat = 'false'
+                        else:
+                            dat = dat
                         fields.append({
                             'field_name': i.name,
                             'field_type': type_name,
-                            'data': dat
+                            'data': dat if dat else ""
                         })
         rsp = {
             'success': True,
             'fields': fields
         }
-    except Exception:
+    except Exception as e:
         rsp = {
             'success': False,
-            'fields': 'Алдаа гарсан байна'
+            'fields': 'Алдаа гарсан байна' + str(e)
         }
     return JsonResponse(rsp)
 
@@ -375,11 +398,9 @@ def save(request, payload):
     model_name = payload.get("model_name")
     model_id = payload.get("model_id")
     edit_name = payload.get("edit_name")
-    print(edit_name)
     json = payload.get("form_values")
     model_name = getModel(model_name)
     json = json['form_values']
-    # print(json)
     fields = []
     for i in model_name._meta.get_fields():
         type_name = i.get_internal_type()
@@ -410,7 +431,6 @@ def save(request, payload):
                 datas[data['field_name']] = data['data']
         else:
             check = False
-    print(datas)
     if check:
         if edit_name == '':
             sain = model_name.objects.create(**datas)
@@ -471,7 +491,6 @@ def Get_Datas(request, name):
 def remove(request, payload):
     model_name = payload.get('model_name')
     model_id = payload.get('model_id')
-    print(model_name, model_id)
     model_name = getModel(model_name)
     try:
         data = model_name.objects.filter(pk=model_id)
@@ -493,38 +512,45 @@ def remove(request, payload):
         }
     return JsonResponse(rsp)
 
-    check_name = ViewNames.objects.filter(feature_id=fid).first()
-    if check_name:
-        table_name = check_name.view_name
-        removeView(table_name)
-        check = createView(id_list, table_name)
-        if check:
-            ViewProperties.objects.filter(view=check_name).delete()
-            for idx in id_list:
-                ViewProperties.objects.create(view=check_name, property_id=idx)
 
-
-    else:
-        table_name = feature.feature_name_eng.split(' ')[0].lower() + '_view'
-        check = createView(id_list, table_name)
-        if check:
-            new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
-            for idx in id_list:
-                ViewProperties.objects.create(view=new_view, property_id=idx)
-
-
-    if check:
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай хадгаллаа'
-
-        }
-    else:
+@require_POST
+@ajax_required
+def erese(request, payload):
+    model_name = payload.get('model_name')
+    top_id = payload.get('top_id')
+    model_id = payload.get('model_id')
+    if model_name == 'property':
+        field_name = 'property_id'
+        model_name = 'data_type_config'
+    if model_name == 'data_type':
+        field_name = 'data_type_id'
+        model_name = 'feature_config'
+    model_name = getModel(model_name)
+    try:
+        savename = payload.get('model_name')
+        updateData = {}
+        data = model_name.objects.filter(pk=top_id)
+        for i in model_name._meta.get_fields():
+            if str(field_name) == str(i.name):
+                updateData[field_name] = None
+        if updateData != {}:
+            data.update(**updateData)
+            rsp = {
+                'success': True,
+                'info': 'Амжилттай устгалаа'
+            }
+        else:
+            rsp = {
+                'success': False,
+                'info': 'Хоосон байна'
+            }
+    except Exception as e:
         rsp = {
             'success': False,
-            'info': 'Амжилтгүй хадгаллаа'
+            'info': 'Алдаа гарсан байна: ' + str(e)
         }
     return JsonResponse(rsp)
+
 
 
 def createView(ids, table_name):

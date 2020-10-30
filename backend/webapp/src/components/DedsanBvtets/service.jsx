@@ -7,6 +7,7 @@ export const service ={
     save,
     getDatas,
     remove,
+    erese,
 }
 
 const prefix = '/back/dedsan-butests'
@@ -62,4 +63,12 @@ function remove(model_name, model_id){
         body: JSON.stringify({ model_name, model_id }),
     }
     return fetch(`${prefix}/remove/`, opts).then(handleResponse)
+}
+
+function erese(model_name, model_id, top_id){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ model_name, model_id, top_id }),
+    }
+    return fetch(`${prefix}/erese/`, opts).then(handleResponse)
 }

@@ -66,9 +66,9 @@ export default class SideBar extends Component {
                                                                     <th colSpan="2" className="text-center">
                                                                         <a
                                                                             href="#"
-                                                                            onClick={() => this.props.handleFormLeft('data_type', data_type.data_type_id, data_type.data_type_name)}
+                                                                            onClick={() => this.props.handleFormLeft('data_type', data_type.data_type_id, data_type.data_type_name, f_config.feature_config_id)}
                                                                         >
-                                                                            {data_type.data_type_name} = {data_type.data_type_id}
+                                                                            {data_type.data_type_name}
                                                                         </a>
                                                                         {
                                                                             data_type.is_read_only
@@ -91,6 +91,7 @@ export default class SideBar extends Component {
                                                                     <tr key={idx}>
                                                                         <th className="text-center align-middle" >
                                                                             <Propties
+                                                                                top_id={data_type_config.data_type_config_id}
                                                                                 property_name={data_type_config.property_name}
                                                                                 property_id={data_type_config.property_id}
                                                                                 handleFormLef={this.props.handleFormLeft}
