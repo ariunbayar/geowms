@@ -994,6 +994,36 @@ hr {
 	box-shadow: none
 }
 
+.gp-btn-outline-primary {
+	color:#034ea2;
+	background-color: transparent;
+	background-image: none;
+	border-color:#034ea2
+}
+.gp-btn-outline-primary:hover {
+	color: #fff;
+	background-color:#034ea2;
+	border-color:#034ea2
+}
+.gp-btn-outline-primary.focus, .gp-btn-outline-primary:focus {
+	color: #fff;
+	background-color:#034ea2;
+	border-color:#034ea2;
+	box-shadow: none
+}
+.gp-btn-outline-primary.disabled, .gp-btn-outline-primary:disabled {
+	color:#034ea2;
+	background-color: transparent
+}
+.gp-btn-outline-primary:not(:disabled):not(.disabled).active, .gp-btn-outline-primary:not(:disabled):not(.disabled):active, .show>.gp-btn-outline-primary.dropdown-toggle {
+	color: #fff;
+	background-color:#034ea2;
+	border-color:#034ea2
+}
+.gp-btn-outline-primary:not(:disabled):not(.disabled).active:focus, .gp-btn-outline-primary:not(:disabled):not(.disabled):active:focus, .show>.gp-btn-outline-primary.dropdown-toggle:focus {
+	box-shadow: none
+}
+
 .btn-outline-secondary {
 	color: #75808a;
 	background-color: transparent;
