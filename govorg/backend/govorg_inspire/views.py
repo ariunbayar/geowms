@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas, LCodeListConfigs, LCodeLists
 from govorg.backend.org_request.models import ChangeRequest
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
@@ -214,7 +215,7 @@ def rows(request, pid, fid):
             m_geo_datas
         WHERE
             feature_id = {fid}
-        order by geo_id desc
+        order by created_on desc
         limit {limit}
     """.format(
         fid=fid,
@@ -400,7 +401,6 @@ def _get_type(value_type_id):
 def detail(request, pk, fid):
     org = get_object_or_404(Org, employee__user=request.user)
     org_properties = OrgInspireRoles.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
-    
     find_cursor = connections['default'].cursor()
     find_cursor.execute('''
     select
@@ -432,16 +432,16 @@ def detail(request, pk, fid):
         for inspire_prop in properties:
             if org_prop.module_id == inspire_prop['property_id']:
                 org_propties_front.append({
-                    'building_id':inspire_prop['building_id'],
-                    'geo_id':inspire_prop['geo_id'],
-                    'property_name':inspire_prop['property_name'],
-                    'property_id':inspire_prop['property_id'],
-                    'property_code':inspire_prop['property_code'],
-                    'property_definition':inspire_prop['property_definition'],
-                    'value_type_id':inspire_prop['value_type_id'],
-                    'value_type':inspire_prop['value_type'],
-                    'data':inspire_prop['data'],
-                    'data_list':inspire_prop['data_list'],
+                    'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
+                    'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
+                    'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
+                    'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
+                    'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
+                    'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
+                    'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
+                    'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
+                    'data': inspire_prop['data'] if inspire_prop['data'] else '',
+                    'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
                     'role': not org_prop.perm_update
                 })
     rsp = {
@@ -476,17 +476,17 @@ def detailNone(request, tid, pid, fid):
 
     for data in datas:
         org_propties_front.append({
-            'property_name':data['property_name'],
-            'property_id':data['property_id'],
-            'property_code':data['property_code'],
-            'property_definition':data['property_definition'],
-            'value_type_id':data['value_type_id'],
-            'feature_id' : data['feature_id'],
+            'property_name':data['property_name'] if data['property_name'] else '' ,
+            'property_id':data['property_id'] if data['property_id'] else '',
+            'property_code':data['property_code'] if data['property_code'] else '',
+            'property_definition': data['property_definition'] if data['property_definition'] else '',
+            'value_type_id':data['value_type_id'] if data['value_type_id'] else '',
+            'feature_id' : data['feature_id'] if data['feature_id'] else '',
             'theme_id' : tid,
             'package_id' : pid,
-            'value_type' : _get_type(data['value_type_id']),
-            'data': None,
-            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else [],
+            'value_type' : _get_type(data['value_type_id']) if _get_type(data['value_type_id']) else '',
+            'data': '',
+            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else '',
             # 'role': not org_prop.perm_update
         })
 
@@ -540,7 +540,7 @@ def updateGeom(request, payload, fid):
 
 def get_rows(fid):
     rows = []
-    
+
     cursor = connections['default'].cursor()
     sql = """
         select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id  
@@ -560,12 +560,25 @@ def get_rows(fid):
     return rows
 
 
-def geoJsonConvertGeom(geojson, fid):
+def geoJsonConvertGeom(geojson):
     with connections['default'].cursor() as cursor:
 
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom).hex
+        geom = geom.decode("utf-8")
+
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom)
+        geom_type = GEOSGeometry(geom).geom_type
+        if geom_type == 'Point':
+            geom = MultiPoint(geom, srid=4326)
+        if geom_type == 'LineString':
+            geom = MultiLineString(geom, srid=4326)
+        if geom_type == 'Polygon':
+            geom = MultiPolygon(geom, srid=4326)
         return geom
     return None
 
@@ -575,7 +588,7 @@ def geoJsonConvertGeom(geojson, fid):
 def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
-    geom = geoJsonConvertGeom(geojson, fid)
+    geom = geoJsonConvertGeom(geojson)
     if not geom:
         rsp = {
             'success': False,
@@ -584,16 +597,9 @@ def geomAdd(request, payload, fid):
         }
         return JsonResponse(rsp)
     check = True
-
-    count = random.randint(106942, 996942)
-    geo_id = str(count)+'geo'
-    # with connections['default'].cursor() as cursor:
-    #     sql = """
-    #             INSERT INTO public.m_geo_datas(
-    #             geo_id, geo_data, feature_id, created_by , modified_by)
-    #             VALUES (%s, %s ,%s, 1, 1);
-    #         """
-    #     cursor.execute(sql, [count, geom, fid])
+    count = random.randint(1062, 9969)
+    geo_id = str(fid) + str(count) + 'geo'
+    MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
     fields = get_rows(fid)
     for field in fields:
         MDatasBuilding.objects.create(
