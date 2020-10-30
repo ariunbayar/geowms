@@ -1,9 +1,9 @@
 import React, { Component } from "react"
-import RequestModal from './requestModal'
+import ChangeRequestModal from './changeRequestModal'
 import {service} from './service'
 
 
-export class OrgRequestTable extends Component {
+export class ChangeRequestTable extends Component {
 
     constructor(props) {
         super(props)
@@ -12,7 +12,6 @@ export class OrgRequestTable extends Component {
         }
         this.handleRequestOpen = this.handleRequestOpen.bind(this)
         this.handleRequestClose = this.handleRequestClose.bind(this)
-        this.handleRequestApprove = this.handleRequestApprove.bind(this)
     }
 
     componentDidMount(){
@@ -24,16 +23,6 @@ export class OrgRequestTable extends Component {
 
     handleRequestClose() {
         this.setState({is_model_request_open: false})
-    }
-
-    handleRequestApprove(id){
-        const values = this.props.values
-        service.requestApprove(id, values).then(({success})=>{
-            if(success){
-                this.props.getAll()
-                this.handleRequestClose()
-            }
-        })
     }
 
     render() {
@@ -67,15 +56,13 @@ export class OrgRequestTable extends Component {
                 state ==1 ?
                     <td>
                     <button className="btn btn-primary" onClick={this.handleRequestOpen}>
-                        ШИЙДВЭРЛЭХ
+                        ДЭЛГЭРЭНГҮЙ
                     </button>
                     {is_model_request_open &&
-                        <RequestModal
+                        <ChangeRequestModal
                             modalClose={this.handleRequestClose}
-                            modalAction={() =>this.handleRequestApprove(id)}
-                            form_json = {form_json}
                             geo_json = {geo_json}
-                            title="Шийдвэрлэх"
+                            title="Илгээсэн хүсэлт"
                             kind={kind}
                             id = {id}
                             getAll={this.props.getAll}

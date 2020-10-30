@@ -1,6 +1,8 @@
 import React, {Component, Fragment} from "react"
 import RequestMap from './Map'
 import {service} from './service'
+import Modal from '.././Components/helpers/Modal'
+
 
 export default class RequestModal extends Component {
 
@@ -8,12 +10,40 @@ export default class RequestModal extends Component {
         super(props)
         this.state = {
             status: this.props.status || "initial",
+            is_modal_approve_open:false,
+            is_modal_reject_open:false
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleProceed = this.handleProceed.bind(this)
+        this.handleModalRejectClose=this.handleModalRejectClose.bind(this)
+        this.handleModalRejectOpen=this.handleModalRejectOpen.bind(this)
+        this.handleModalApproveOpen=this.handleModalApproveOpen.bind(this)
+        this.handleModalApproveClose=this.handleModalApproveClose.bind(this)
+    }
+    handleModalRejectClose(){
+        this.setState({
+            is_modal_reject_open:false
+        })
     }
 
+    handleModalRejectOpen(){
+        this.setState({
+            is_modal_reject_open:true
+        })
+    }
+
+    handleModalApproveOpen(){
+        this.setState({
+            is_modal_approve_open:true
+        })
+    }
+
+    handleModalApproveClose(){
+        this.setState({
+            is_modal_approve_open:false
+        })
+    }
 
     componentDidMount() {
         if (this.state.status == "initial") {
@@ -79,19 +109,18 @@ export default class RequestModal extends Component {
             (status == "closed" ? " d-none" : "")
         const form_json = this.props.form_json
         const id = this.props.id
+        const kind = this.props.kind
+        const {is_modal_approve_open, is_modal_reject_open} = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
+      
                             <div className="col-md-12">
-
-
-
-
                                 <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
                                     <div className="col-md-11">
-                                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэр</h5>
+                                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
                                     </div>
                                     <div className="col-md-1">
                                         <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
@@ -99,8 +128,6 @@ export default class RequestModal extends Component {
                                         </button>
                                     </div>
                                 </div>
-
-
 
                                 <div className="row">
                                     {form_json &&
@@ -132,16 +159,42 @@ export default class RequestModal extends Component {
                                     </div>
                                 </div>
                                 <div className="row my-2 mr-1 float-right">
-                                    <button type="button mr-2 ml-2" onClick={() => this.handleClose(id)} className="btn gp-btn-primary waves-effect waves-light">
-                                        <i className="fa fa-times">Татгалзах</i>
+                                    <button type="button mr-2 ml-2" onClick={() => this.handleModalRejectOpen()} className="btn gp-btn-primary waves-effect waves-light">
+                                        <i className="fa fa-check-square-o">Татгалзах</i>
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => this.handleProceed()}
-                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                    >
-                                        <i className="fa fa-check-square-o">Зөвшөөрөх</i>
+                                    { 
+                                     is_modal_reject_open &&
+                                        <Modal
+                                            modalAction={() => this.handleClose(id)}
+                                            modalClose = {() => this.handleModalRejectClose()}
+                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг' 
+                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
+                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
+                                            татгалзахдаа итгэлтэй байна уу ?`}
+                                            title="Тохиргоог татгалзах"
+                                            status={this.state.status}
+                                            model_type_icon = "success" 
+                                            actionNameDelete="татгалзах"
+                                        />
+                                    }
+                                    <button type="button mr-2 ml-2" onClick={() => this.handleModalApproveOpen()} className="btn gp-btn-outline-primary waves-effect waves-light ml-2">
+                                        <i className="fa fa-check">Зөвшөөрөх</i>
                                     </button>
+                                    { 
+                                     is_modal_approve_open &&
+                                        <Modal
+                                            modalAction={() => this.handleProceed()}
+                                            modalClose = {() => this.handleModalApproveClose()}
+                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг' 
+                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
+                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
+                                            зөвшөөрөхдөө итгэлтэй байна уу ?`}
+                                            title="Тохиргоог зөвшөөрөх"
+                                            status={this.state.status}
+                                            model_type_icon = "success" 
+                                            actionNameDelete="зөвшөөрөх"
+                                        />
+                                    }
                                 </div>
                             </div>
                         </div>
