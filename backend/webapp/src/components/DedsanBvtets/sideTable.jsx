@@ -39,14 +39,14 @@ export default class SideBar extends Component {
                         ?
                                 features.map((feature, idx) =>
                                     <div className="table-responsive" key={idx}>
-                                        <h2 className="text-center">
+                                        <h3 className="text-center">
                                             <a
                                                 href="#"
                                                 onClick={() => this.props.handleFormLeft('feature', feature.feature_id, feature.feature_name)}
                                             >
                                                 {feature.feature_name}
                                             </a>
-                                        </h2>
+                                        </h3>
                                         <ol>
                                             {feature.f_configs.map((f_config, idx) =>
                                                 <li className="mt-3" key={idx}>

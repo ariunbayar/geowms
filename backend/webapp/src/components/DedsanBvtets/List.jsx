@@ -154,9 +154,10 @@ export class List extends Component {
             <div className="row m-0">
                 <div className="card col-md-5">
                     <div className="card-body">
-                    <label className="float-right" htmlFor="Delete">Устгах
-                        <input type="checkbox" id="Delete" onChange={() => this.isDelete()}/>
-                    </label>
+                    <div className="icheck-danger float-right">
+						<input type="checkbox" id="active-delete" onChange={() => this.isDelete()}/>
+						<label htmlFor="active-delete">Устгах</label>
+					</div>
                         {form_is_laod_left ?
                             <ul>
                             {list_all.map((theme, idx) =>
@@ -183,6 +184,7 @@ export class List extends Component {
                                                         >
                                                             {packages.name}
                                                         </a>
+                                                        &nbsp;
                                                         {is_delete &&
                                                             <i
                                                                 className="fa fa-trash text-danger fa-1x"
@@ -198,6 +200,7 @@ export class List extends Component {
                                                                 <i className="fa fa-table"></i> &nbsp;
                                                                 <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
                                                             </a>
+                                                            &nbsp;
                                                             {is_delete &&
                                                                 <i
                                                                     className="fa fa-trash text-danger fa-1x"

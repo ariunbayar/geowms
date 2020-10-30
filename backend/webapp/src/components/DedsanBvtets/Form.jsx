@@ -39,7 +39,6 @@ export default class Forms extends Component {
         service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
             if (success) {
                 this.setState({ is_loading: false, info })
-                this.props.statusModal('hide')
                 if (code !== '') this.props.refresh(code)
                 else this.props.refresh()
             }
@@ -52,6 +51,7 @@ export default class Forms extends Component {
     componentDidUpdate(pP){
         const {model_id, model_name, edit_name} = this.props
         if(pP.model_id !== model_id){
+            if(model_id) this.getFields(model_name, model_id, edit_name)
             this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
         }
         if(pP.model_name !== model_name || pP.edit_name !== edit_name)
