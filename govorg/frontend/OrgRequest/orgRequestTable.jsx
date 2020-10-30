@@ -14,8 +14,10 @@ export class OrgRequestTable extends Component {
         this.handleRequestClose = this.handleRequestClose.bind(this)
         this.handleRequestApprove = this.handleRequestApprove.bind(this)
     }
+
     componentDidMount(){
     }
+
     handleRequestOpen() {
         this.setState({is_model_request_open: true})
     }
@@ -23,11 +25,12 @@ export class OrgRequestTable extends Component {
     handleRequestClose() {
         this.setState({is_model_request_open: false})
     }
-    
+
     handleRequestApprove(id){
         const values = this.props.values
         service.requestApprove(id, values).then(({success})=>{
             if(success){
+                this.props.getAll()
                 this.handleRequestClose()
             }
         })
@@ -40,7 +43,7 @@ export class OrgRequestTable extends Component {
         return (
             <tr>
                 <td>
-                    {idx}
+                    {idx + 1}
                 </td>
                 <td>
                     {theme_name + '/'+ package_name + '/' +feature_name}
@@ -51,6 +54,15 @@ export class OrgRequestTable extends Component {
                 <td>
                     {created_at}
                 </td>
+                {state==1 ? <td className="text-priamry">ШИНЭ</td>:
+                state==2 ? <td className="text-danger">ТАТГАЛЗСАН</td>:
+                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>: null
+                }
+
+                {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
+                kind==2 ? <td className="text-primary">ЗАССАН</td>:
+                kind==3 ? <td className="text-danger">УСТГАСАН</td>: null
+                }
                 <td>
                     <button className="btn btn-primary" onClick={this.handleRequestOpen}>
                         ШИЙДВЭРЛЭХ
@@ -63,13 +75,10 @@ export class OrgRequestTable extends Component {
                             geo_json = {geo_json}
                             title="Шийдвэрлэх"
                             id = {id}
+                            getAll={this.props.getAll}
                         />
                     }
                 </td>
-                <td>
-                    {state ? state : ''}
-                </td>
-                <td>{kind}</td>
             </tr>
         )
 

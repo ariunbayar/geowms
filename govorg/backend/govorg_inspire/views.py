@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas, LCodeListConfigs, LCodeLists
 from govorg.backend.org_request.models import ChangeRequest
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
@@ -214,7 +215,7 @@ def rows(request, pid, fid):
             m_geo_datas
         WHERE
             feature_id = {fid}
-        order by geo_id desc
+        order by created_on desc
         limit {limit}
     """.format(
         fid=fid,
@@ -400,7 +401,6 @@ def _get_type(value_type_id):
 def detail(request, pk, fid):
     org = get_object_or_404(Org, employee__user=request.user)
     org_properties = OrgInspireRoles.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
-    
     find_cursor = connections['default'].cursor()
     find_cursor.execute('''
     select
@@ -540,7 +540,7 @@ def updateGeom(request, payload, fid):
 
 def get_rows(fid):
     rows = []
-    
+
     cursor = connections['default'].cursor()
     sql = """
         select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id  
@@ -560,12 +560,25 @@ def get_rows(fid):
     return rows
 
 
-def geoJsonConvertGeom(geojson, fid):
+def geoJsonConvertGeom(geojson):
     with connections['default'].cursor() as cursor:
 
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom).hex
+        geom = geom.decode("utf-8")
+
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom)
+        geom_type = GEOSGeometry(geom).geom_type
+        if geom_type == 'Point':
+            geom = MultiPoint(geom, srid=4326)
+        if geom_type == 'LineString':
+            geom = MultiLineString(geom, srid=4326)
+        if geom_type == 'Polygon':
+            geom = MultiPolygon(geom, srid=4326)
         return geom
     return None
 
@@ -575,7 +588,7 @@ def geoJsonConvertGeom(geojson, fid):
 def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
-    geom = geoJsonConvertGeom(geojson, fid)
+    geom = geoJsonConvertGeom(geojson)
     if not geom:
         rsp = {
             'success': False,
@@ -584,16 +597,9 @@ def geomAdd(request, payload, fid):
         }
         return JsonResponse(rsp)
     check = True
-
-    count = random.randint(106942, 996942)
-    geo_id = str(count)+'geo'
-    # with connections['default'].cursor() as cursor:
-    #     sql = """
-    #             INSERT INTO public.m_geo_datas(
-    #             geo_id, geo_data, feature_id, created_by , modified_by)
-    #             VALUES (%s, %s ,%s, 1, 1);
-    #         """
-    #     cursor.execute(sql, [count, geom, fid])
+    count = random.randint(1062, 9969)
+    geo_id = str(fid) + str(count) + 'geo'
+    MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
     fields = get_rows(fid)
     for field in fields:
         MDatasBuilding.objects.create(

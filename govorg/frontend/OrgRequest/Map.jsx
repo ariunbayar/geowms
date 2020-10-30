@@ -27,8 +27,7 @@ constructor(props) {
         const geoJson = this.props.geoJson
         if(geoJson['type']){
           this.loadMapData(geoJson)
-        }  
-       
+        }
     }
 
     loadMapData(GeoJson){

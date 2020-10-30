@@ -204,7 +204,6 @@ export class App extends Component {
                         </MenuItem>
 
                         <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/org-request/" text="ХҮСЭЛТ"></MenuItem>
-                       
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/org/help/" text="Тусламж"></MenuItem>
                         {/* {teevriin_suljee.perm_view &&
                             <MenuItem

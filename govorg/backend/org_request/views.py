@@ -26,7 +26,6 @@ from main.utils import (
 )
 
 
-
 def _get_geom(geo_id, fid):
     cursor = connections['default'].cursor()
     sql = """
@@ -50,13 +49,13 @@ def _get_geom(geo_id, fid):
 
 
 def _get_geoJson(data):
-          
     geom_type = data['type']
     coordinates = data['coordinates']
     if geom_type == 'Point':
         from geojson import Point
         point = Point(coordinates)
         return Feature(geometry=point)
+
     elif geom_type == 'LineString':
         from geojson import LineString
         point = LineString(coordinates)
@@ -86,7 +85,7 @@ def _get_geoJson(data):
 def _convert_text_json(data):
     data = data.replace("\'", "\"")
     data = json.loads(data)
-    
+
     return data
 
 
@@ -94,7 +93,7 @@ def _get_state_and_kind(type_of, module):
     data = ''
     for i in module:
         if i[0] == type_of:
-            data = i[1]
+            data = i[0]
     return data
 
 
@@ -126,11 +125,9 @@ def _get_org_request(ob):
             if old_geo_data:
                 old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
                 geo_json = _get_geoJson(old_geo_data)
-            
     else:
         geo_json = _convert_text_json(ob.geo_json)
         geo_json = _get_geoJson(geo_json)
-        
 
     return {
         'old_geo_id':ob.old_geo_id,
@@ -158,11 +155,9 @@ def _get_org_request(ob):
 @ajax_required
 def getAll(request):
     org_request = []
-    org_request_list = ChangeRequest.objects.all() 
-
+    org_request_list = ChangeRequest.objects.filter(state=1)
     if org_request_list:
         org_request = [_get_org_request(ob) for ob in org_request_list]
-
     rsp = {
         'org_request': org_request,
     }
@@ -173,7 +168,8 @@ def getAll(request):
 @ajax_required
 def requestDelete(request, pk):
 
-    change_request = ChangeRequest.objects.filter(id = pk).update(kind=1)
+    get_object_or_404(ChangeRequest, id=pk)
+    change_request = ChangeRequest.objects.filter(id = pk).update(state=2)
 
     rsp = {
         'success': True,
@@ -212,13 +208,13 @@ def _get_ids(fid, pid):
     cursor = connections['default'].cursor()
     sql = """
         select
-            f.feature_config_id, 
-            d.data_type_id 
+            f.feature_config_id,
+            d.data_type_id
         from l_feature_configs as f
-        inner join 
-            l_data_type_configs as d 
+        inner join
+            l_data_type_configs as d
         on d.data_type_id=f.data_type_id
-        where 
+        where
             f.feature_id='{fid}'  and  d.property_id={pid}
     """.format(
         fid=fid,
@@ -232,15 +228,14 @@ def _get_ids(fid, pid):
 
 @require_POST
 @ajax_required
-def requestApprove (request, payload, pk):
+def requestApprove(request, payload, pk):
 
     values = payload.get("values")
     request_object  = ChangeRequest.objects.filter(id=pk)
     if request_object:
-        
         old_geo_id = values['old_geo_id']
         feature_id = values['feature_id']
-        old_geo_json = values["old_geo_json"]    
+        old_geo_json = values["old_geo_json"]
         theme_code = values["theme_code"]
         form_json = values['form_json']
         geo_json = values['geo_json']
@@ -256,7 +251,6 @@ def requestApprove (request, payload, pk):
                 geom =  ''.join(geo_data)
                 geom = GEOSGeometry(geom)
                 geom_type = GEOSGeometry(geom).geom_type
-            
                 if geom_type == 'Point':
                     geom = MultiPoint(geom, srid=4326)
                 if geom_type == 'LineString':
@@ -265,7 +259,7 @@ def requestApprove (request, payload, pk):
                     geom = MultiPolygon(geom, srid=4326)
 
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
-                ChangeRequest.objects.filter(id = pk).update(kind=2)
+                ChangeRequest.objects.filter(id = pk).update(state=3)
                 rsp = {
                     'success': True,
                 }
@@ -275,12 +269,10 @@ def requestApprove (request, payload, pk):
                 data.delete()
                 geo_data_model = _get_model_name(theme_code).objects.filter(geo_id=old_geo_id)
                 geo_data_model.delete()
-                ChangeRequest.objects.filter(id = pk).update(kind=2)
+                ChangeRequest.objects.filter(id = pk).update(state=3)
                 rsp = {
                     'success': True,
                 }
-            
-        
         else:
             geom = []
             geo_json = geo_json['geometry']
@@ -289,7 +281,6 @@ def requestApprove (request, payload, pk):
             geom =  ''.join(geo_data)
             geom = GEOSGeometry(geom)
             geom_type = GEOSGeometry(geom).geom_type
-        
             if geom_type == 'Point':
                 geom = MultiPoint(geom, srid=4326)
             if geom_type == 'LineString':
@@ -339,17 +330,15 @@ def requestApprove (request, payload, pk):
                         property_id = i['property_id'],
                         value_text = value_data
                     )
-            ChangeRequest.objects.filter(id = pk).update(kind=2)      
+            ChangeRequest.objects.filter(id = pk).update(state=3)
             rsp = {
                 'success': True,
             }
 
-    
-
     else:
         rsp = {
-                'success': False,
-            }
+            'success': False,
+        }
 
     return JsonResponse(rsp)
 

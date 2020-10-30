@@ -39,9 +39,10 @@ export default class OrgRequestForm extends Component {
                                     <th scope="col">Орон зайн өгөгдөл</th>
                                     <th scope="col">Байгууллага / мэргэжилтэн</th>
                                     <th scope="col">Огноо</th >
-                                    <th></th>
                                     <th>Төлөв</th>
                                     <th>Төлвийн төрөл</th>
+                                    <th></th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -51,9 +52,10 @@ export default class OrgRequestForm extends Component {
                                             key={idx}
                                             idx={idx}
                                             values = {req}
+                                            getAll = {this.getAll}
                                         />
                                     )
-                                    :null 
+                                    :null
                                 }
                             </tbody>
                         </table>

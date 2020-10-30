@@ -47,6 +47,7 @@ export default class RequestModal extends Component {
                 setTimeout(() => {
                     this.setState({status: "closed"})
                     this.props.modalClose()
+                    this.props.getAll()
                 }, 150)
             })
         }
@@ -80,15 +81,27 @@ export default class RequestModal extends Component {
         const id = this.props.id
         return (
             <Fragment>
-                <div className={className + " ml-5 mr-5 mb-5 mt-5 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 100vh - 85px - 15px)"}}>
+                <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
-                            <div className="col-md-12 card-body">
-                                <div className="row" style={{background:"white"}}>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
-                                    </button>
+                            <div className="col-md-12">
+
+
+
+
+                                <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
+                                    <div className="col-md-11">
+                                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэр</h5>
+                                    </div>
+                                    <div className="col-md-1">
+                                        <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
                                 </div>
+
+
+
                                 <div className="row">
                                     <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
                                         {
@@ -116,24 +129,19 @@ export default class RequestModal extends Component {
                                         <RequestMap geoJson ={this.props.geo_json}/>
                                     </div>
                                 </div>
-                                <div className="row my-2 mr-2 mx-2 float-right">
-                                    <label className="ol-form-label text-center">Хүсэлт шийдвэрлэх</label>
-                                    <button type="button" onClick={() => this.handleClose(id)} className="btn btn-primary waves-effect waves-light">
+                                <div className="row my-2 mr-1 float-right">
+                                    <button type="button mr-2 ml-2" onClick={() => this.handleClose(id)} className="btn gp-btn-primary waves-effect waves-light">
                                         <i className="fa fa-times">Татгалзах</i>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => this.handleProceed()}
-                                        className="btn btn-outline-primary waves-effect waves-light"
+                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
                                     >
                                         <i className="fa fa-check-square-o">Зөвшөөрөх</i>
                                     </button>
                                 </div>
-
-
-
                             </div>
-
                         </div>
                     </div>
                 </div>
