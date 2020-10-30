@@ -12,10 +12,9 @@ from backend.log import views as log_views
 from backend.payment import views as payment_views
 from backend.forms import views as forms_views
 from backend.zipcode import views as zipcode_views
-from backend.dedsanbutets import views as zipcode_dedsan_butets
+from backend.dedsanbutets import views as dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
-
 
 app_name = 'backend'
 urlpatterns = [
@@ -180,11 +179,16 @@ urlpatterns = [
     ], 'gis'))),
 
     path('dedsan-butests/', include(([
-        path('all/', zipcode_dedsan_butets.bundleButetsAll),
-        path('prop/<str:code>/', zipcode_dedsan_butets.Property),
-        path('property-fields/<int:fid>/', zipcode_dedsan_butets.propertyFields),
-        path('property-fields/save/', zipcode_dedsan_butets.propertyFieldsSave),
-        path('editName/', zipcode_dedsan_butets.Edit_name),
+        path('all/', dedsan_butets.bundleButetsAll),
+        path('prop/<str:code>/', dedsan_butets.Property),
+        path('editName/', dedsan_butets.Edit_name),
+        path('get-fields/', dedsan_butets.getFields),
+        path('save/', dedsan_butets.save),
+        path('property-fields/<int:fid>/', dedsan_butets.propertyFields),
+        path('property-fields/save/', dedsan_butets.propertyFieldsSave),
+        path('remove/', dedsan_butets.remove),
+        path('erese/', dedsan_butets.erese),
+        path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
     ], 'dedsan-butests'))),
 
     path('geoserver/rest/', include(([

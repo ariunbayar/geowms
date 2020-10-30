@@ -18,11 +18,13 @@ class ChangeRequest(models.Model):
     KIND_CREATE = 1
     KIND_DELETE = 2
     KIND_UPDATE = 3
+    KIND_DIRECT = 4
 
     KIND_CHOICES = (
         (KIND_CREATE, 'ҮҮССЭН'),
         (KIND_DELETE, 'ЗАССАН'),
         (KIND_UPDATE, 'УСТГАСАН'),
+        (KIND_DIRECT, 'ШУУД'),
     )
 
     old_geo_id = models.CharField(max_length=100, null=True)

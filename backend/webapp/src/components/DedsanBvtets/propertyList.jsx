@@ -50,35 +50,30 @@ export default class Propterties extends Component {
 
     render() {
         const {property_name, disabled, toggleButton} = this.state
-        const {property_id} = this.props
+        const { property_id, is_read_only, top_id } = this.props
         return (
-            <div className="row">
+            <div className="float-left">
                 {
-                    toggleButton
+                    is_read_only
                     ?
-                    <i
-                        className="fa fa-floppy-o mt-2 text-success col-1"
-                        role="button"
-                        onClick={() => this.saveText(property_id)}
-                        aria-hidden="true"
-                        title="Хадгалах"
-                    ></i>
+                        <i
+                            className="fa fa-eye fa-1x"
+                            aria-hidden="true"
+                            title="Зөвхөн харах"
+                        ></i>
                     :
-                    <i
-                        className="fa fa-pencil-square-o mt-2 col-1 text-info"
-                        role="button"
-                        onClick={() => this.textEdit()}
-                        aria-hidden="true"
-                        title="Засах"
-                    ></i>
+                        <i
+                            className="fa fa-pencil fa-1x"
+                            aria-hidden="true"
+                            title="засаж болно"
+                        ></i>
                 }
                 &nbsp;
-                <input
-                    value={property_name}
-                    className={`col-10 form-control` +(disabled ? `-plaintext` : ``)}
-                    onChange={(e) => this.handleChange(e)}
-                    disabled={disabled ? 'disabled' : ''}
-                />
+                <span role="button" className="gp-text-primary"
+                    onClick={() => this.props.handleFormLef('property', property_id, property_name, top_id)}
+                >
+                    {property_name}
+                </span>
             </div>
         )
     }

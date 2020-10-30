@@ -82,19 +82,19 @@ export default class Modal extends Component {
                             { this.props.model_type_icon == "success" ?
                                 <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
                                 :
-                                <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
+                                <i className="fa fa-check-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
                             }
                             </div>
                             <div className="d-flex justify-content-center my-3">
                                 <h5 >{this.props.title}</h5>
-                                </div>
-                            <div className="modal-body text-wrap ml-2 mr-2 text-justify">
+                            </div>
+                            <div className="modal-body text-wrap ml-2 mr-2 text-center">
                                 {this.props.text}
                             </div>
                             <div className="modal-footer" style={{border: 'none'}}>
                                 <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
                                     <i className="fa fa-times"></i>
-                                    {this.props.actionName ? this.props.actionName : "  БУЦАХ"}
+                                    {this.props.actionNameBack ? this.props.actionNameBack : '  БУЦАХ'}
                                 </button>
                                 <button
                                     type="button"
