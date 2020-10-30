@@ -319,7 +319,7 @@ export default class Forms extends Component {
                                         {
                                             edit_name ?
                                                 prop_name != 'value_type' ?
-                                                <a className="btn col-md-4 btn-danger mr-5 text-white" onClick={() => this.props.remove(prop_name, prop_id, prop_edit_name, this.props.type, this.props.top_id)}>
+                                                <a className="btn col-md-4 btn-danger mr-1 text-white" onClick={() => this.props.remove(prop_name, prop_id, prop_edit_name, this.props.type, this.props.top_id)}>
                                                     Устгах
                                                 </a>
                                                 : null

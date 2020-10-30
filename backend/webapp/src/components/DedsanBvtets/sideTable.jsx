@@ -38,25 +38,25 @@ export default class SideBar extends Component {
                         features.length > 0 && check == 'байгаа'
                         ?
                                 features.map((feature, idx) =>
-                                    <div className="table-responsive" key={idx}>
+                                    <div key={idx}>
                                         <h3 className="text-center">
-                                            <a
-                                                href="#"
+                                            <span
+                                                className="gp-text-primary" role="button"
                                                 onClick={() => this.props.handleFormLeft('feature', feature.feature_id, feature.feature_name)}
                                             >
                                                 {feature.feature_name}
-                                            </a>
+                                            </span>
                                         </h3>
                                         <ol>
                                             {feature.f_configs.map((f_config, idx) =>
                                                 <li className="mt-3" key={idx}>
                                                     <h5>
-                                                        <a
-                                                            href="#"
+                                                        <span
+                                                            className="gp-text-primary" role="button"
                                                             onClick={() => this.props.handleFormLeft('feature_config', f_config.feature_config_id, f_config.data_type_display_name)}
                                                         >
                                                             {f_config.data_type_display_name}
-                                                        </a>
+                                                        </span>
                                                     </h5>
 
                                                     <table className="table table-bordered">
@@ -64,12 +64,14 @@ export default class SideBar extends Component {
                                                             <thead key={idx}>
                                                                 <tr>
                                                                     <th colSpan="2" className="text-center">
-                                                                        <a
-                                                                            href="#"
+                                                                        <span
+                                                                            className="gp-text-primary" role="button"
                                                                             onClick={() => this.props.handleFormLeft('data_type', data_type.data_type_id, data_type.data_type_name, f_config.feature_config_id)}
                                                                         >
                                                                             {data_type.data_type_name}
-                                                                        </a>
+                                                                        </span>
+                                                                        &nbsp;
+                                                                        &nbsp;
                                                                         {
                                                                             data_type.is_read_only
                                                                             ?
@@ -103,14 +105,14 @@ export default class SideBar extends Component {
                                                                             <ul>
                                                                                 {data_type_config.value_types.map((value_type, idx) =>
                                                                                     <li key={idx}>
-                                                                                        <span>
-                                                                                            <a
-                                                                                                href="#"
+                                                                                        <a>
+                                                                                            <span
+                                                                                                className="gp-text-primary" role="button"
                                                                                                 onClick={() => this.props.handleFormLeft('value_type', value_type.value_type_id, value_type.value_type_name)}
                                                                                             >
                                                                                                 {value_type.value_type_name}
-                                                                                            </a>
-                                                                                        </span>
+                                                                                            </span>
+                                                                                        </a>
                                                                                         {
                                                                                             value_type.value_type_id == 'single-select'
                                                                                             ?
@@ -119,8 +121,8 @@ export default class SideBar extends Component {
                                                                                                     className="gp-text-primary"
                                                                                                     onClick={() => this.props.handleFormLeft('code_list_config', data_type_config.property_id)}
                                                                                                 >
-                                                                                                    <i className="fa fa-pencil-square-o mt-2 col-1 text-info"></i>
-                                                                                                    code list zaswar
+                                                                                                    <i className="fa fa-plus-circle mt-2 col-1 gp-text-primary"></i>
+                                                                                                    <span className="gp-text-primary">Code list засах</span>
                                                                                                 </a>
                                                                                             :
                                                                                             null
@@ -132,14 +134,14 @@ export default class SideBar extends Component {
                                                                                             <ul style={{listStyleType: '"- "'}}>
                                                                                                 {value_type.code_lists.map((code, idx) =>
                                                                                                     <li key={idx}>
-                                                                                                        <span>
-                                                                                                            <a
-                                                                                                               href="#"
+                                                                                                        <a>
+                                                                                                            <span
+                                                                                                               className="gp-text-primary" role="button"
                                                                                                                onClick={() => this.props.handleFormLeft('code_list', code.code_list_id, code.code_list_name)}
                                                                                                             >
                                                                                                                 {code.code_list_name}
-                                                                                                            </a>
-                                                                                                        </span>
+                                                                                                            </span>
+                                                                                                        </a>
                                                                                                     </li>
                                                                                                 )}
                                                                                                     <li className="text-danger">
@@ -150,7 +152,7 @@ export default class SideBar extends Component {
                                                                                                         >
                                                                                                             <i className="fa fa-plus-circle gp-text-primary"></i>
                                                                                                             &nbsp;
-                                                                                                            code list nemeh
+                                                                                                            Code list нэмэх
                                                                                                         </a>
                                                                                                     </li>
                                                                                             </ul>
@@ -168,7 +170,7 @@ export default class SideBar extends Component {
                                                                                                             >
                                                                                                                 <i className="fa fa-plus-circle gp-text-primary"></i>
                                                                                                                 &nbsp;
-                                                                                                                utga nemj oruulah
+                                                                                                                Утга нэмж оруулах
                                                                                                             </a>
                                                                                                         </li>
                                                                                                     </ul>
@@ -191,7 +193,7 @@ export default class SideBar extends Component {
                                                                         >
                                                                             <i className="fa fa-plus-circle gp-text-primary"></i>
                                                                             &nbsp;
-                                                                            property nemeh
+                                                                            Property нэмэх
                                                                         </a>
                                                                     </th>
                                                                 </tr>
@@ -206,11 +208,11 @@ export default class SideBar extends Component {
                                                     type="button"
                                                     className="gp-text-primary"
                                                     onClick={() => this.props.handleFormLeft('feature_config', feature.feature_id)}
-                                                    href="#"
+                                                    className="gp-text-primary" role="button"
                                                 ><h5 className="text-danger">
                                                     <i className="fa fa-plus-circle gp-text-primary"></i>
                                                     &nbsp;
-                                                    f config nemeh
+                                                    Feature config нэмэх
                                                 </h5>
                                                 </a>
                                             </li>

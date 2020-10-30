@@ -152,7 +152,7 @@ export class List extends Component {
         const { list_all, form_is_laod_left, model_name, model_id, code, edit_name, is_delete, info, hideRight } = this.state
         return (
             <div className="row m-0">
-                <div className="card col-md-5">
+                <div className="card col-md-4">
                     <div className="card-body">
                     <div className="icheck-danger float-right">
 						<input type="checkbox" id="active-delete" onChange={() => this.isDelete()}/>
@@ -162,11 +162,11 @@ export class List extends Component {
                             <ul>
                             {list_all.map((theme, idx) =>
                                 <li key={idx}>
-                                        <span>
-                                            <a href="#" onClick={() => this.handleForm('theme', theme.id, theme.name)}
+                                        <a>
+                                            <span role="button" className="gp-text-primary" onClick={() => this.handleForm('theme', theme.id, theme.name)}
                                             >
                                                 {theme.name}
-                                            </a>
+                                            </span>
                                             &nbsp;
                                             {is_delete &&
                                                 <i
@@ -175,15 +175,15 @@ export class List extends Component {
                                                     onClick={() => this.remove('theme', theme.id, theme.name)}
                                                 ></i>
                                             }
-                                        </span>
+                                        </a>
                                     <ul>
                                         {theme.package.map((packages, idx) =>
                                             <li key={idx}>
-                                                    <span>
-                                                        <a href="#" onClick={() => this.handleForm('package', packages.id, packages.name )}
+                                                    <a>
+                                                        <span role="button" className="gp-text-primary" onClick={() => this.handleForm('package', packages.id, packages.name )}
                                                         >
                                                             {packages.name}
-                                                        </a>
+                                                        </span>
                                                         &nbsp;
                                                         {is_delete &&
                                                             <i
@@ -192,7 +192,7 @@ export class List extends Component {
                                                                 onClick={() => this.remove('package', packages.id, packages.name)}
                                                             ></i>
                                                         }
-                                                    </span>
+                                                    </a>
                                                 <ul>
                                                     {packages.features.map((feature, idx) =>
                                                         <li key={idx}>
@@ -218,7 +218,7 @@ export class List extends Component {
                                     </ul>
                                 </li>
                             )}
-                            <li><a href="#" type="button" className="gp-text-primary" onClick={() => this.handleForm("theme", null)}><i className="fa fa-plus-circle gp-text-primary"></i> Дэд сан нэмэх</a></li>
+                            <li><a className="gp-text-primary" type="button" className="gp-text-primary" onClick={() => this.handleForm("theme", null)}><i className="fa fa-plus-circle gp-text-primary"></i> Дэд сан нэмэх</a></li>
                             </ul>
                             :
                             <div>
@@ -252,7 +252,7 @@ export class List extends Component {
                     actionName='Устгах'
                     actionNameBack='Болих'
                 />
-                <div className={`card col-md-7`} style={{left:"10px"}}>
+                <div className={`card col-md-8`} style={{left:"10px"}}>
                     <div className="card-body">
                         {this.state.form_is_laod ?
                         <SideBar
@@ -263,7 +263,6 @@ export class List extends Component {
                             hide={hideRight}
                         />:
                         <div>
-                            <a onClick={() => this.handleFormLeft(1)}>asdasdasdas</a>
                             <Forms
                                 model_name={model_name}
                                 model_id={model_id}

@@ -52,7 +52,7 @@ export default class Propterties extends Component {
         const {property_name, disabled, toggleButton} = this.state
         const { property_id, is_read_only, top_id } = this.props
         return (
-            <div className="row">
+            <div className="float-left">
                 {
                     is_read_only
                     ?
@@ -69,12 +69,11 @@ export default class Propterties extends Component {
                         ></i>
                 }
                 &nbsp;
-                <a
-                    href="#"
+                <span role="button" className="gp-text-primary"
                     onClick={() => this.props.handleFormLef('property', property_id, property_name, top_id)}
                 >
                     {property_name}
-                </a>
+                </span>
             </div>
         )
     }
