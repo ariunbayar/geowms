@@ -322,6 +322,28 @@ def get_rows(fid):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def propertyFields(request, fid):
+    fields = get_rows(fid)
+    view_name = ViewNames.objects.filter(feature_id=fid).first()
+    if not view_name == None:
+        id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
+        rsp = {
+            'success': True,
+            'fields': fields,
+            'id_list': id_list
+        }
+    else:
+        rsp = {
+            'success': True,
+            'fields': fields,
+            'id_list': []
+        }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
 def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
