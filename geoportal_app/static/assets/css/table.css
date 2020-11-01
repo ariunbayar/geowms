@@ -1,0 +1,64 @@
+.scroll-body{
+    background-color: white;
+}
+.scroll-fixed{
+    width: 100%;
+}
+.scroll-fixed .scroll-tbody{
+    height: calc( 83vh - 134px - 15px);
+    overflow-y:auto;
+    width: 100%;
+}
+.scroll-fixed .scroll-thead, .scroll-tbody, .scroll-tfoot{
+    display:block;
+}
+
+.scroll-fixed {
+    float:left;
+}
+
+.scroll-fixed .scroll-thead{
+    float:left;
+}
+
+.scroll-fixed .scroll-tfoot{
+    float:left;
+}
+
+.scroll-fixed .scroll-thead{
+    padding-right: 17px;
+}
+
+.scroll-fixed .scroll-tfoot{
+    padding-right: 17px;
+}
+
+.scroll-fixed .scroll-tfoot{
+    border: none;
+}
+
+.scroll-fixed .table-bordered {
+    border: 0px solid #dee2e6;
+}
+
+.scroll-fixed::-webkit-scrollbar {
+    width: 2px;
+  }
+
+/* Track */
+.scroll-fixed::-webkit-scrollbar-track {
+    background: #ffffff; 
+}
+
+/* Handle */
+.scroll-fixed::-webkit-scrollbar-thumb {
+    background: #484848; 
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+.scroll-fixed::-webkit-scrollbar-thumb:hover {
+    background: #034ea2; 
+}
+
+

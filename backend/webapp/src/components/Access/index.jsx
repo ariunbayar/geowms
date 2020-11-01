@@ -32,20 +32,20 @@ export class Access extends Component {
         return (
             <div className="card">
               <div className="card-body">
-                <ul className="nav nav-tabs nav-tabs-primary nav-justified">
+                <ul className="nav nav-tabs nav-tabs-dark-gray nav-justified">
                   <li className="nav-item">
-                    <NavLink to={"/back/access/login/"} activeClassName="nav-link active"  data-toggle="tab">
-                    <span className="hidden-xs gp-text-primary">ОРОЛТ ГАРАЛТ</span>
+                    <NavLink to={"/back/access/login/"} activeClassName="active" className="nav-link"  data-toggle="tab">
+                    <span className="hidden-xs">ОРОЛТ ГАРАЛТ</span>
                     </NavLink>
                   </li>
                   <li className="nav-item gp-text-primary">
-                    <NavLink to={"/back/access/logout/"} activeClassName="nav-link active"  data-toggle="tab">
-                        <span className="hidden-xs gp-text-primary">ҮЙЛДЭЛ</span>
+                    <NavLink to={"/back/access/logout/"} activeClassName="active" className="nav-link"  data-toggle="tab">
+                        <span className="hidden-xs">ҮЙЛДЭЛ</span>
                     </NavLink>
                   </li>
                   <li className="nav-item gp-text-primary">
-                    <NavLink to={"/back/access/page/"} activeClassName="nav-link active"  data-toggle="tab">
-                        <span className="hidden-xs gp-text-primary">ХУУДАС ХАНДАЛТ</span>
+                    <NavLink to={"/back/access/page/"} activeClassName="active" className="nav-link"  data-toggle="tab">
+                        <span className="hidden-xs">ХУУДАС ХАНДАЛТ</span>
                     </NavLink>
                   </li>
                 </ul>
