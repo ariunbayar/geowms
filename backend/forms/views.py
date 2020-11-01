@@ -1343,7 +1343,7 @@ def hureeCreate(request, payload):
         if not check:
             TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1373,7 +1373,7 @@ def hureeUpdate(request, payload):
         point = (y, x)
         points.append(point)
         geom = Polygon(points)
-        TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl=tuuhen_ov).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1401,9 +1401,9 @@ def hureeDelete(request, payload):
             point = (y, x)
             points.append(point)
             geom = Polygon(points)
-            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov).delete()
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
@@ -1468,7 +1468,7 @@ def ayulHureeCreate(request, payload):
         if not check:
             TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx, geom = geom)
         else:
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = idx, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx).update(tuuh_soyl = idx, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1845,5 +1845,26 @@ def rows(request, payload):
     rows = list(rows)
     rsp = {
         'rows': rows,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def ayuul_geoms(request, payload):
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
+        FROM
+            tuuhsoyolayuulhureepol
+        ORDER BY id ASC
+    """
+    cursor.execute(sql)
+    ayuul_geoms = dict_fetchall(cursor)
+    ayuul_geoms = list(ayuul_geoms)
+    rsp = {
+        'ayuul_geoms': ayuul_geoms,
     }
     return JsonResponse(rsp)

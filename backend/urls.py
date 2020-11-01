@@ -162,6 +162,7 @@ urlpatterns = [
         path('dursgalt-gazar/ayul-delete/', forms_views.ayulHureeDelete, name='dursgalt-gazar-ayul-delete'),
         path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
         path('rows/', forms_views.rows, name='rows'),
+        path('ayuul_geoms/', forms_views.ayuul_geoms, name='ayuul_geoms'),
 
     ], 'tuuhen_ov'))),
 

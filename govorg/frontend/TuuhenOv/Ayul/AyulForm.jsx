@@ -61,6 +61,7 @@ export class AyulForm extends Component {
         service.ayulDelete(ayul_id, tuuhen_ov).then(({success}) => {
             if(success){
                 this.setState({modal_alert_status: 'open', text: "устгалаа"})
+                this.props.loadAyuulRows()
                 this.modalCloseTime()
                 this.hureeData()
             }
@@ -79,6 +80,7 @@ export class AyulForm extends Component {
             service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
                 if (success) {
                     this.setState({modal_alert_status: 'open', text: "нэмлээ"})
+                    this.props.loadAyuulRows()
                     this.modalCloseTime()
                     this.hureeData()
                 }
@@ -133,6 +135,7 @@ export class AyulForm extends Component {
                                 handleRemove={() => this.handleRemove(data.id)}
                                 perms = {perms}
                                 is_editable = {is_editable}
+                                loadAyuulRows = {() => this.props.loadAyuulRows()}
                             ></AyulFormTable>
                         )}
                         {perms.perm_create ?

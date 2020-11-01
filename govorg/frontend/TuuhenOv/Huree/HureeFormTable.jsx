@@ -80,6 +80,7 @@ export default class HureeFormTable extends Component {
                 service.hureeUpdate(tuuhen_ov,  x, y, id, tuuh_soyl_huree_id).then(({success}) => {
                     if (success) {
                         this.setState({modal_alert_status: 'open'})
+                        this.props.loadRows()
                         this.modalCloseTime()
                     }
                 })

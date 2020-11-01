@@ -27,6 +27,7 @@ export class AddForm extends Component {
             id: this.props.id.match.params.id,
             load: 0,
             rows: [],
+            ayuul_geoms: [],
         }
 
         this.paginate = this.paginate.bind(this)
@@ -36,6 +37,7 @@ export class AddForm extends Component {
         this.hureeTooShirheg = this.hureeTooShirheg.bind(this)
         this.handleXY = this.handleXY.bind(this)
         this.loadRows = this.loadRows.bind(this)
+        this.loadAyuulRows = this.loadAyuulRows.bind(this)
     }
 
     handleXY(values, info){
@@ -54,6 +56,7 @@ export class AddForm extends Component {
         this.hureeTooShirheg()
         this.paginate(1, "")
         this.loadRows()
+        this.loadAyuulRows()
     }
 
     paginate (page, query) {
@@ -105,7 +108,14 @@ export class AddForm extends Component {
             .rows(this.state.id)
             .then(({ rows }) => {
                 this.setState({ rows })
+        })
+    }
 
+    loadAyuulRows() {
+        service
+            .ayuul_geoms(this.state.id)
+            .then(({ ayuul_geoms }) => {
+                this.setState({ ayuul_geoms })
         })
     }
 
@@ -118,7 +128,7 @@ export class AddForm extends Component {
         if(perms.perm_create || perms.perm_view){
             for(var i=1; i<=huree_len; i++)
             {
-                huree_components.push(<HureeForm key={i} dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y} perms={perms} is_editable={is_editable}></HureeForm>)
+                huree_components.push(<HureeForm key={i} dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y} perms={perms} is_editable={is_editable} loadRows={() => this.loadRows()}></HureeForm>)
             }
         }
         return (
@@ -128,6 +138,7 @@ export class AddForm extends Component {
                         geoms={this.state.rows}
                         handleXY={this.handleXY}
                         coordinatCheck={true}
+                        ayuul_geoms = {this.state.ayuul_geoms}
                     />
                     <div className="card-body col-md-11 ml-5">
                         {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
@@ -212,6 +223,7 @@ export class AddForm extends Component {
                                 y={this.state.y}
                                 perms = {perms}
                                 is_editable = {is_editable}
+                                loadAyuulRows={() => this.loadAyuulRows()}
                             >
                             </AyulForm>
                             :

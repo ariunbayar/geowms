@@ -37,7 +37,8 @@ export default class Maps extends Component {
             info:[],
             xy: [],
             map_open:true,
-            geoms: []
+            geoms: [],
+            ayuul_geoms: [],
         }
 
         this.controls = {
@@ -51,6 +52,7 @@ export default class Maps extends Component {
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
         this.loadGeojson = this.loadGeojson.bind(this)
+        this.snap = this.snap.bind(this)
     }
 
     initMarker() {
@@ -79,22 +81,21 @@ export default class Maps extends Component {
             this.handleMapDataLoaded(base_layer_list)
         })
     }
-    loadGeojson(rows){
+
+    snap(vector){
+        const snap = new Snap({
+            source: vector.getSource(),
+        });
+        this.map.addInteraction(snap);
+    }
+
+    loadGeojson(rows, color_type){
 
         const map = this.map
         const styles = {
-          'MultiPolygon': new Style({
-            stroke: new Stroke({
-              color: 'blue',
-              width: 3,
-            }),
-            fill: new Fill({
-              color: 'rgba(255, 255, 0, 0.1)',
-            }),
-          }),
           'Polygon': new Style({
             stroke: new Stroke({
-              color: 'orange',
+              color: color_type,
               width: 4,
             }),
             fill: new Fill({
@@ -106,26 +107,6 @@ export default class Maps extends Component {
               radius: 5,
               fill: new Fill({
                 color: 'blue',
-              }),
-            }),
-          }),
-          'LineString': new Style({
-            stroke: new Stroke({
-              color: 'green',
-              width: 2,
-            }),
-          }),
-          'MultiLineString': new Style({
-            stroke: new Stroke({
-              color: 'green',
-              width: 2,
-            }),
-          }),
-          'MultiPoint': new Style({
-            image: new CircleStyle({
-              radius: 5,
-              fill: new Fill({
-                color: 'orange',
               }),
             }),
           }),
@@ -153,9 +134,14 @@ export default class Maps extends Component {
             source: vectorSource,
             style: (feature) => styles[feature.getGeometry().getType()],
         })
-
         map.addLayer(vectorLayer)
-        this.vectorLayer = vectorLayer
+        this.snap(vectorLayer)
+        if(color_type == 'orange') {
+            this.vectorLayer = vectorLayer
+        }
+        if(color_type == 'red') {
+            this.ayuul_vectorLayer = vectorLayer
+        }
 
     }
 
@@ -226,7 +212,7 @@ export default class Maps extends Component {
             target: 'map',
             controls: defaultControls().extend([
                 new MousePosition({
-                    projection: this.state.projection_display,
+                    projection: this.state.dataProjection,
                     coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                     undefinedHTML: '',
                 }),
@@ -254,7 +240,7 @@ export default class Maps extends Component {
     handleMapClick(event) {
             this.marker.point.setCoordinates(event.coordinate)
             const projection = event.map.getView().getProjection()
-            const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+            const map_coord = transformCoordinate(event.coordinate, projection, this.state.dataProjection)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
             this.showFeaturesAt(coordinate_clicked)
@@ -281,9 +267,16 @@ export default class Maps extends Component {
             this.handleSetCenter()
         }
         if(pP.geoms !== this.props.geoms){
+            if (this.vectorLayer) this.vectorLayer.getSource().clear();
             const geoms = this.props.geoms
             this.setState({geoms})
-            this.loadGeojson(geoms)
+            this.loadGeojson(geoms, 'orange')
+        }
+        if(pP.ayuul_geoms !== this.props.ayuul_geoms){
+            if (this.ayuul_vectorLayer) this.ayuul_vectorLayer.getSource().clear();
+            const ayuul_geoms = this.props.ayuul_geoms
+            this.setState({ayuul_geoms})
+            this.loadGeojson(ayuul_geoms, 'red')
         }
     }
 
@@ -292,7 +285,7 @@ export default class Maps extends Component {
         if(coord[0]>60){
             const view = this.map.getView()
             const map_projection = view.getProjection()
-            const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+            const map_coord = transformCoordinate(coord, this.state.dataProjection, map_projection)
             this.marker.point.setCoordinates(map_coord)
             view.setCenter(map_coord)
         }

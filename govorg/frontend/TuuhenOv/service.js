@@ -24,6 +24,7 @@ export const service = {
     ayulDelete,
     list,
     rows,
+    ayuul_geoms,
 }
 function all() {
     const requestOptions = {
@@ -200,4 +201,12 @@ function rows(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/rows/`, opts).then(handleResponse)
+}
+
+function ayuul_geoms(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/ayuul_geoms/`, opts).then(handleResponse)
 }
