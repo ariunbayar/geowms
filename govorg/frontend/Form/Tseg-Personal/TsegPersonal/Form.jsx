@@ -994,7 +994,7 @@ export  class Forms extends Component {
                                             </tr>
                                             <tr>
                                                 <th colSpan="1" scope="rowgroup">13.</th>
-                                                <th colSpan="2" scope="rowgroup">Цэг тэмдэгт судалгасан огноо:</th>
+                                                <th colSpan="2" scope="rowgroup">Цэг тэмдэгт суулгасан огноо:</th>
                                                 <td colSpan="3" scope="input-group date">
                                                     <Field
                                                         className={'form-control ' + (errors.date ? 'is-invalid' : '')}
