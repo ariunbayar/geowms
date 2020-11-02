@@ -39,6 +39,7 @@ export default class Maps extends Component {
             map_open:true,
             geoms: [],
             ayuul_geoms: [],
+            geom_points: [],
         }
 
         this.controls = {
@@ -141,6 +142,9 @@ export default class Maps extends Component {
         }
         if(color_type == 'red') {
             this.ayuul_vectorLayer = vectorLayer
+        }
+        if(color_type == 'blue') {
+            this.geom_point_layer = vectorLayer
         }
 
     }
@@ -277,6 +281,12 @@ export default class Maps extends Component {
             const ayuul_geoms = this.props.ayuul_geoms
             this.setState({ayuul_geoms})
             this.loadGeojson(ayuul_geoms, 'red')
+        }
+        if(pP.geom_points !== this.props.geom_points){
+            if (this.geom_point_layer) this.geom_point_layer.getSource().clear();
+            const geom_points = this.props.geom_points
+            this.setState({geom_points})
+            this.loadGeojson(geom_points, 'blue')
         }
     }
 

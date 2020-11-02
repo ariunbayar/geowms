@@ -549,6 +549,7 @@ export class DursgaltGazar extends Component {
                         setStatus('saved')
                         this.props.history.goBack()
                         this.props.history.push( `/back/froms/tuuhen-ov/${id}/add/`)
+                        this.props.loadGeomPoints()
                     }, 1000)
                 }
             })

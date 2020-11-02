@@ -28,6 +28,7 @@ export class AddForm extends Component {
             load: 0,
             rows: [],
             ayuul_geoms: [],
+            geom_points: [],
         }
 
         this.paginate = this.paginate.bind(this)
@@ -38,6 +39,7 @@ export class AddForm extends Component {
         this.handleXY = this.handleXY.bind(this)
         this.loadRows = this.loadRows.bind(this)
         this.loadAyuulRows = this.loadAyuulRows.bind(this)
+        this.loadGeomPoints = this.loadGeomPoints.bind(this)
     }
 
     handleXY(values, info){
@@ -57,6 +59,7 @@ export class AddForm extends Component {
         this.paginate(1, "")
         this.loadRows()
         this.loadAyuulRows()
+        this.loadGeomPoints()
     }
 
     paginate (page, query) {
@@ -100,6 +103,7 @@ export class AddForm extends Component {
     handleRemove(id) {
         service.dursgaltGazarRemove(id).then(({success}) => {
             if (success) this.paginate()
+            this.loadGeomPoints()
         })
     }
 
@@ -116,6 +120,14 @@ export class AddForm extends Component {
             .ayuul_geoms(this.state.id)
             .then(({ ayuul_geoms }) => {
                 this.setState({ ayuul_geoms })
+        })
+    }
+
+    loadGeomPoints() {
+        service
+            .geom_points(this.state.id)
+            .then(({ geom_points }) => {
+                this.setState({ geom_points })
         })
     }
 
@@ -139,6 +151,7 @@ export class AddForm extends Component {
                         handleXY={this.handleXY}
                         coordinatCheck={true}
                         ayuul_geoms = {this.state.ayuul_geoms}
+                        geom_points = {this.state.geom_points}
                     />
                     <div className="card-body col-md-11 ml-5">
                         {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
@@ -197,6 +210,7 @@ export class AddForm extends Component {
                                                 handleMove={this.handleMove}
                                                 perms = {perms}
                                                 is_editable = {is_editable}
+                                                loadGeomPoints = {() => loadGeomPoints()}
                                             />
                                         )
                                         :

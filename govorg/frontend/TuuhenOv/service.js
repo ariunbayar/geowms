@@ -25,6 +25,7 @@ export const service = {
     list,
     rows,
     ayuul_geoms,
+    geom_points,
 }
 function all() {
     const requestOptions = {
@@ -209,4 +210,12 @@ function ayuul_geoms(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/ayuul_geoms/`, opts).then(handleResponse)
+}
+
+function geom_points(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/geom_points/`, opts).then(handleResponse)
 }

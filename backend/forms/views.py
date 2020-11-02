@@ -1832,14 +1832,19 @@ def tuuhenOvList(request, payload):
 @ajax_required
 def rows(request, payload):
 
+    tuuh_soyl = payload.get('id')
+
+
     cursor = connections['postgis_db'].cursor()
     sql = """
         SELECT
             id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
         FROM
             tuuhsoyolhureepol
+        WHERE
+            tuuh_soyl = '{tuuh_soyl}'
         ORDER BY id ASC
-    """
+    """.format(tuuh_soyl = tuuh_soyl)
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
     rows = list(rows)
@@ -1853,18 +1858,47 @@ def rows(request, payload):
 @ajax_required
 def ayuul_geoms(request, payload):
 
+    tuuh_soyl = payload.get('id')
+
     cursor = connections['postgis_db'].cursor()
     sql = """
         SELECT
             id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
         FROM
             tuuhsoyolayuulhureepol
+        WHERE
+            tuuh_soyl = '{tuuh_soyl}'
         ORDER BY id ASC
-    """
+    """.format(tuuh_soyl = tuuh_soyl)
     cursor.execute(sql)
     ayuul_geoms = dict_fetchall(cursor)
     ayuul_geoms = list(ayuul_geoms)
     rsp = {
         'ayuul_geoms': ayuul_geoms,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def geom_points(request, payload):
+
+    tuuh_soyl = payload.get('id')
+
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
+        FROM
+            tuuhsoyolpoint
+        WHERE
+            tuuh_soyl = '{tuuh_soyl}'
+        ORDER BY id ASC
+    """.format(tuuh_soyl = tuuh_soyl)
+    cursor.execute(sql)
+    geom_points = dict_fetchall(cursor)
+    geom_points = list(geom_points)
+    rsp = {
+        'geom_points': geom_points,
     }
     return JsonResponse(rsp)
