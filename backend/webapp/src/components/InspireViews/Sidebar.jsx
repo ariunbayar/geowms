@@ -32,9 +32,10 @@ export default class SideBar extends Component {
 
     handleSave(){
         const fid = this.props.fid
+        const tid = this.props.tid
         const id_list = this.state.id_list
         this.setState({save_is_load: true})
-        service.setPropertyFields(fid, id_list).then(({success, info}) => {
+        service.setPropertyFields(fid, id_list, tid).then(({success, info}) => {
             if(success){
                 this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
                 this.modalCloseTime()
