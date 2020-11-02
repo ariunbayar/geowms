@@ -94,6 +94,7 @@ urlpatterns = [
 
         path('org-request/', include(([
             path('', org_request_views.getAll),
+            path('change-request/', org_request_views.getChangeAll),
             path('<int:pk>/delete/', org_request_views.requestDelete),
             path('<int:pk>/approve/', org_request_views.requestApprove),
         ], 'org-request'))),
