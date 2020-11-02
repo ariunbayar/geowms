@@ -26,10 +26,8 @@ export default class RequestMap extends Component {
 
     componentDidMount() {
         const geoJson = this.props.geoJson
-          this.loadMap()
-        if(geoJson['type']){
-          this.loadMapData(geoJson)
-        }
+        this.loadMap()
+        this.loadMapData(geoJson)
     }
 
     loadMap(){
@@ -192,7 +190,7 @@ export default class RequestMap extends Component {
             <div className="container-fluid">
                 <div className="row">
                     <div className="col-md-12 px-0 reaquest">
-                        {geoJson['type'] ? <div id="map"></div> :<a>Устсан өгөгдөл</a> }
+                        <div id="map"></div>
                     </div>
                 </div>
             </div>

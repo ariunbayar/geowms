@@ -4,7 +4,6 @@ export const service = {
 }
 
 function getAll() {
-    console.log("hohohohohohohooh   ")
     const requestOptions = {...getGetOptions()}
     return fetch(`/gov/api/org-request/change-request/`, requestOptions).then(handleResponse)
 }

@@ -167,31 +167,31 @@ export default class RequestModal extends Component {
                                         <Modal
                                             modalAction={() => this.handleClose(id)}
                                             modalClose = {() => this.handleModalRejectClose()}
-                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг' 
+                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
                                             : kind == 2 ? 'засагдсан геометр өгөгдлийг':
                                             kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
                                             татгалзахдаа итгэлтэй байна уу ?`}
                                             title="Тохиргоог татгалзах"
                                             status={this.state.status}
-                                            model_type_icon = "success" 
+                                            model_type_icon = "success"
                                             actionNameDelete="татгалзах"
                                         />
                                     }
                                     <button type="button mr-2 ml-2" onClick={() => this.handleModalApproveOpen()} className="btn gp-btn-outline-primary waves-effect waves-light ml-2">
                                         <i className="fa fa-check">Зөвшөөрөх</i>
                                     </button>
-                                    { 
+                                    {
                                      is_modal_approve_open &&
                                         <Modal
                                             modalAction={() => this.handleProceed()}
                                             modalClose = {() => this.handleModalApproveClose()}
-                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг' 
+                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
                                             : kind == 2 ? 'засагдсан геометр өгөгдлийг':
                                             kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
                                             зөвшөөрөхдөө итгэлтэй байна уу ?`}
                                             title="Тохиргоог зөвшөөрөх"
                                             status={this.state.status}
-                                            model_type_icon = "success" 
+                                            model_type_icon = "success"
                                             actionNameDelete="зөвшөөрөх"
                                         />
                                     }

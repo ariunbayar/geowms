@@ -101,7 +101,6 @@ def _get_org_request(ob, org):
     if org:
         org_role = OrgInspireRoles.objects.filter(org=org, module=3, module_root_id=ob.package_id, module_id=ob.feature_id, perm_approve=True)
         if org_role:
-                
             geo_json = []
             collection = []
             old_geo_data = []
@@ -109,7 +108,6 @@ def _get_org_request(ob, org):
             current_geo_json = []
             user = get_object_or_404(User,  employee__id=ob.employee_id)
             org = get_object_or_404(Org, employee__user=user)
-
             feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
             package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
             theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
@@ -129,6 +127,8 @@ def _get_org_request(ob, org):
                     if old_geo_data:
                         old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
                         geo_json = _get_geoJson(old_geo_data)
+                        geo_json = FeatureCollection([geo_json])
+
             else:
                 geo_json = _convert_text_json(ob.geo_json)
                 geo_json = _get_geoJson(geo_json)
@@ -186,6 +186,8 @@ def _get_org_request(ob, org):
                 if old_geo_data:
                     old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
                     geo_json = _get_geoJson(old_geo_data)
+                    geo_json = FeatureCollection([geo_json])
+
         else:
             geo_json = _convert_text_json(ob.geo_json)
             geo_json = _get_geoJson(geo_json)
@@ -215,7 +217,6 @@ def _get_org_request(ob, org):
 @require_GET
 @ajax_required
 def getChangeAll(request):
-
     org_request = []
     org_request_list = ChangeRequest.objects.all()
     org= ''
@@ -239,7 +240,7 @@ def getChangeAll(request):
                 'success':False,
             }
 
-        return JsonResponse(rsp)  
+        return JsonResponse(rsp)
 
 
 @require_GET
@@ -269,7 +270,7 @@ def getAll(request):
                 'success':False,
             }
 
-        return JsonResponse(rsp)          
+        return JsonResponse(rsp)
 
 
 @require_GET

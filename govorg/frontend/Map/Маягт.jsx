@@ -25,7 +25,7 @@ export default class Маягт extends Component {
 
     onSubmit(values, { setStatus, setSubmitting }) {
         const gid = this.props.gid
-        if(this.props.roles[4] || this.props.roles[5] || this.props.roles[6]){
+        if(this.props.roles[6]){
 
             if(this.props.null_form_isload){
                 service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
@@ -149,12 +149,8 @@ export default class Маягт extends Component {
                 <hr></hr>
                 <Formik
                     enableReinitialize
-                    initialValues={{ 
+                    initialValues={{
                         form_values: values,
-                        form_values:{
-                            property_definition:values.property_definition || ''
-                        }
-                        
                     }}
                     onSubmit={ this.onSubmit}
                     render={({ values }) => (
@@ -172,7 +168,7 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role}>
+                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role == 1 ? true : false}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
@@ -189,7 +185,7 @@ export default class Маягт extends Component {
                                                 name={`form_values.${index}.data`|| ""}
                                                 as="select"
                                                 className='form-control'
-                                                disabled={friend.role}
+                                                disabled={friend.role == 1 ? true : false}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -198,7 +194,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
-                                                    disabled={friend.role}
+                                                    disabled={friend.role == 1 ? true : false}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                     />
@@ -211,7 +207,7 @@ export default class Маягт extends Component {
                                 ) : ( null
                                 )}
                                 <div>
-                                    {this.props.roles[4] || this.props.roles[5] || this.props.roles[6] ?
+                                    {this.props.roles[6] ?
                                     <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>:
                                     <button type="submit" className="btn btn-block gp-btn-primary">Хадгалах</button>
                                     }

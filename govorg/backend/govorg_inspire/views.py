@@ -442,11 +442,11 @@ def detail(request, pk, fid):
                     'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
                     'data': inspire_prop['data'] if inspire_prop['data'] else '',
                     'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
-                    'role': not org_prop.perm_update
+                    'role': '1' if org_prop.perm_update else '0',
                 })
     rsp = {
         'success': True,
-        'datas': properties
+        'datas': org_propties_front
     }
     return JsonResponse(rsp)
 
@@ -691,7 +691,7 @@ def createUpd(request, payload):
         form_json = ''
     if not geo_json:
         geo_json = ''
-
+    
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
             new_geo_id = None,

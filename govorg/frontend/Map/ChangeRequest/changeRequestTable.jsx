@@ -62,6 +62,7 @@ export class ChangeRequestTable extends Component {
                         <ChangeRequestModal
                             modalClose={this.handleRequestClose}
                             geo_json = {geo_json}
+                            form_json = {form_json}
                             title="Илгээсэн хүсэлт"
                             kind={kind}
                             id = {id}

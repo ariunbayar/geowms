@@ -69,7 +69,6 @@ export default class ChangeRequestModal extends Component {
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
-      
                             <div className="col-md-12">
                                 <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
                                     <div className="col-md-11">
@@ -83,9 +82,9 @@ export default class ChangeRequestModal extends Component {
                                 </div>
 
                                 <div className="row">
+                                    {form_json &&
                                     <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
-                                        {
-                                        form_json ? form_json.form_values.map((prop, idx)=>
+                                        {form_json.form_values.map((prop, idx)=>
                                             <div key={idx} className="row my-3">
                                                 <div className="col-md-3">
                                                     <label className="col-form-label">{prop.property_code}</label>
@@ -102,10 +101,11 @@ export default class ChangeRequestModal extends Component {
                                                 <div  className="col-form-label " >{prop.property_definition}</div>
                                                 </div>
                                             </div>
-                                            ):null
+                                            )
                                         }
                                     </div>
-                                    <div className="col-md-6">
+                                    }
+                                    <div className={form_json ? "col-md-6" : "col-md-12"}>
                                         <RequestMap geoJson ={this.props.geo_json}/>
                                     </div>
                                 </div>
