@@ -238,7 +238,9 @@ export default class Maps extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
-        this.handleSetCenter()
+        if ( this.props.type !== 'ayuul'){
+            this.handleSetCenter()
+        }
     }
 
     handleMapClick(event) {

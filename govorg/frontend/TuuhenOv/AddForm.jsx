@@ -152,6 +152,7 @@ export class AddForm extends Component {
                         coordinatCheck={true}
                         ayuul_geoms = {this.state.ayuul_geoms}
                         geom_points = {this.state.geom_points}
+                        type="ayuul"
                     />
                     <div className="card-body col-md-11 ml-5">
                         {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}

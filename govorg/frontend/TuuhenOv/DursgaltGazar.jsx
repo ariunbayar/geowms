@@ -599,6 +599,7 @@ export class DursgaltGazar extends Component {
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}
+                            type = 'ayuul'
                         />
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
