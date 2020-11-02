@@ -627,8 +627,7 @@ def create(request, payload):
     pid = payload.get('pid')
     fid = payload.get('fid')
     form_json = payload.get('form_json')
-    geo_json = payload.get('geo_json')
-
+    geo_json = payload.get('geo_json')      
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,

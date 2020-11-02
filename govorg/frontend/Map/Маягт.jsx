@@ -28,7 +28,6 @@ export default class Маягт extends Component {
         if(this.props.roles[4] || this.props.roles[5] || this.props.roles[6]){
 
             if(this.props.null_form_isload){
-
                 service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
                     if (success) {
                         this.setState({is_loading:true})
@@ -39,6 +38,7 @@ export default class Маягт extends Component {
             else{
 
                 service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
+                    console.log("createUpd")
                     if (success) {
                         this.setState({is_loading:true})
                         this.addNotif('success', 'Амжилттай', 'check')
@@ -143,14 +143,19 @@ export default class Маягт extends Component {
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
         }
-
         return (
             <div className='overflow-auto card-body'>
                 {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
                 <hr></hr>
                 <Formik
                     enableReinitialize
-                    initialValues={{ form_values: values }}
+                    initialValues={{ 
+                        form_values: values,
+                        form_values:{
+                            property_definition:values.property_definition || ''
+                        }
+                        
+                    }}
                     onSubmit={ this.onSubmit}
                     render={({ values }) => (
                         <Form>
@@ -162,7 +167,7 @@ export default class Маягт extends Component {
                                 values.form_values.map((friend, index) => (
                                     <div key={index} className="row my-3 ">
                                         <div className="col-md-3">
-                                            <label className="col-form-label">{friend.property_code}</label>
+                                            <label className="col-form-label">{friend.property_code ? friend.property_code : ''}</label>
                                         </div>
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
@@ -170,12 +175,12 @@ export default class Маягт extends Component {
                                                     <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
-                                                            <option key = {idy} value={data.code_list_id}>{data.code_list_name}</option>
+                                                            <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
                                                             )
                                                         }
                                                     </Field>
                                                 </Fragment>
-                                                <small>{friend.property_definition}</small>
+                                                <small>{friend.property_definition ? friend.property_definition : ''}</small>
                                             </div>
                                             :
                                             <div className="col-md-9">
@@ -198,7 +203,7 @@ export default class Маягт extends Component {
                                                     type={friend.value_type}
                                                     />
                                                 }
-                                                <small>{friend.property_definition}</small>
+                                                <small>{friend.property_definition ? friend.property_definition : ''}</small>
                                             </div>
                                         }
                                     </div>
