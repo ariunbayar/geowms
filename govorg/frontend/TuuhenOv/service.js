@@ -23,6 +23,9 @@ export const service = {
     ayulUpdate,
     ayulDelete,
     list,
+    rows,
+    ayuul_geoms,
+    geom_points,
 }
 function all() {
     const requestOptions = {
@@ -191,4 +194,28 @@ function ayulAll(id) {
         body: JSON.stringify({id}),
     }
     return fetch(`${prefix}/dursgalt-gazar/ayul-all/`, opts).then(handleResponse)
+}
+
+function rows(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/rows/`, opts).then(handleResponse)
+}
+
+function ayuul_geoms(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/ayuul_geoms/`, opts).then(handleResponse)
+}
+
+function geom_points(id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({id}),
+    }
+    return fetch(`${prefix}/geom_points/`, opts).then(handleResponse)
 }

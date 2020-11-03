@@ -12,6 +12,7 @@ export class List extends Component {
             fields: [],
             check: '',
             fid: null,
+            tid: null,
             id_list: []
         }
         this.getAll = this.getAll.bind(this)
@@ -32,8 +33,8 @@ export class List extends Component {
         })
     }
 
-    getProperties(fid) {
-        this.setState({fid})
+    getProperties(fid, tid) {
+        this.setState({fid, tid})
         service.getPropertyFields(fid).then(({success ,fields, id_list}) => {
             if(success){
                 this.setState({fields, id_list})
@@ -58,7 +59,7 @@ export class List extends Component {
                                             <ul>
                                                 {packages.features.map((feature, idx) =>
                                                     <li key={idx}>
-                                                        <a onClick={() => this.getProperties(feature.id)}>
+                                                        <a onClick={() => this.getProperties(feature.id, theme.id)}>
                                                             <i className="fa fa-table"></i> &nbsp;
                                                             <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
                                                         </a>
@@ -73,7 +74,7 @@ export class List extends Component {
                         </ul>
                     </div>
                 </div>
-                <SideBar fields={this.state.fields} fid={this.state.fid} id_list={this.state.id_list}/>
+                <SideBar fields={this.state.fields} fid={this.state.fid} tid={this.state.tid} id_list={this.state.id_list}/>
             </div>
         )
     }

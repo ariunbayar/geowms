@@ -21,6 +21,15 @@ import re
 from django.conf import settings
 from fpdf import FPDF
 from django.contrib.gis.geos import GEOSGeometry, Point, Polygon, LinearRing
+from main.utils import (
+    gis_delete,
+    gis_fetch_one,
+    gis_fields_by_oid,
+    gis_insert,
+    gis_table_by_oid,
+    gis_tables_by_oids,
+    dict_fetchall
+)
 # Create your models here.
 
 def createPdf(pk):
@@ -1334,7 +1343,7 @@ def hureeCreate(request, payload):
         if not check:
             TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1364,7 +1373,7 @@ def hureeUpdate(request, payload):
         point = (y, x)
         points.append(point)
         geom = Polygon(points)
-        TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl=tuuhen_ov).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1392,9 +1401,9 @@ def hureeDelete(request, payload):
             point = (y, x)
             points.append(point)
             geom = Polygon(points)
-            TuuhSoyolHureePol.objects.using('postgis_db').update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov).delete()
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
@@ -1459,7 +1468,7 @@ def ayulHureeCreate(request, payload):
         if not check:
             TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx, geom = geom)
         else:
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = idx, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx).update(tuuh_soyl = idx, geom = geom)
 
     return JsonResponse({'success': True})
 
@@ -1815,5 +1824,74 @@ def tuuhenOvList(request, payload):
         'items': display_item,
         'page': page,
         'total_page': total_page,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def rows(request, payload):
+    tuuh_soyl = payload.get('id')
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
+        FROM
+            tuuhsoyolhureepol
+        WHERE
+            tuuh_soyl = %s
+        ORDER BY id ASC
+    """
+    cursor.execute(sql,[tuuh_soyl])
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    rsp = {
+        'rows': rows,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def ayuul_geoms(request, payload):
+    tuuh_soyl = payload.get('id')
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
+        FROM
+            tuuhsoyolayuulhureepol
+        WHERE
+            tuuh_soyl = %s
+        ORDER BY id ASC
+    """
+    cursor.execute(sql,[tuuh_soyl])
+    ayuul_geoms = dict_fetchall(cursor)
+    ayuul_geoms = list(ayuul_geoms)
+    rsp = {
+        'ayuul_geoms': ayuul_geoms,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def geom_points(request, payload):
+    tuuh_soyl = payload.get('id')
+    cursor = connections['postgis_db'].cursor()
+    sql = """
+        SELECT
+            id, ST_AsGeoJSON(ST_Transform(geom,4326)) as geom
+        FROM
+            tuuhsoyolpoint
+        WHERE
+            tuuh_soyl = %s
+        ORDER BY id ASC
+    """
+    cursor.execute(sql, [tuuh_soyl])
+    geom_points = dict_fetchall(cursor)
+    geom_points = list(geom_points)
+    rsp = {
+        'geom_points': geom_points,
     }
     return JsonResponse(rsp)

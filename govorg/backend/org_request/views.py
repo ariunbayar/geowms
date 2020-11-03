@@ -9,7 +9,7 @@ from main.decorators import ajax_required
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
 import random
-from backend.org.models import Org, Employee
+from backend.org.models import Org, Employee, OrgInspireRoles
 from govorg.backend.org_request.models import ChangeRequest
 from geoportal_app.models import User
 from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography
@@ -97,76 +97,181 @@ def _get_state_and_kind(type_of, module):
     return data
 
 
-def _get_org_request(ob):
-    geo_json = []
-    collection = []
-    old_geo_data = []
-    form_json = []
-    current_geo_json = []
-    user = get_object_or_404(User,  employee__id=ob.employee_id)
-    org = get_object_or_404(Org, employee__user=user)
+def _get_org_request(ob, org):
+    if org:
+        org_role = OrgInspireRoles.objects.filter(org=org, module=3, module_root_id=ob.package_id, module_id=ob.feature_id, perm_approve=True)
+        if org_role:
+            geo_json = []
+            collection = []
+            old_geo_data = []
+            form_json = []
+            current_geo_json = []
+            user = get_object_or_404(User,  employee__id=ob.employee_id)
+            org = get_object_or_404(Org, employee__user=user)
+            feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
+            package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
+            theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
+            state = _get_state_and_kind(ob.state,ob.STATE_CHOICES )
+            kind = _get_state_and_kind(ob.kind,ob.KIND_CHOICES )
+            if ob.old_geo_id:
+                if ob.geo_json:
+                    geo_json = _convert_text_json(ob.geo_json)
+                    current_geo_json = _get_geoJson(geo_json)
+                    old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
+                    old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+                    old_geo_data = _get_geoJson(old_geo_data)
+                    geo_json = FeatureCollection([geo_json, old_geo_data])
 
-    feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
-    package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
-    theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
-    state = _get_state_and_kind(ob.state,ob.STATE_CHOICES )
-    kind = _get_state_and_kind(ob.kind,ob.KIND_CHOICES )
-    if ob.old_geo_id:
-        if ob.geo_json:
-            geo_json = _convert_text_json(ob.geo_json)
-            current_geo_json = _get_geoJson(geo_json)
-            old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
-            old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
-            old_geo_data = _get_geoJson(old_geo_data)
-            geo_json = FeatureCollection([geo_json, old_geo_data])
+                else:
+                    old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
+                    if old_geo_data:
+                        old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+                        geo_json = _get_geoJson(old_geo_data)
+                        geo_json = FeatureCollection([geo_json])
+
+            else:
+                geo_json = _convert_text_json(ob.geo_json)
+                geo_json = _get_geoJson(geo_json)
+
+            return {
+                'old_geo_id':ob.old_geo_id,
+                'new_geo_id':ob.new_geo_id,
+                'id':ob.id,
+                'feature_id':ob.feature_id,
+                'package_id':ob.package_id,
+                'theme_id':ob.theme_id,
+                'theme_code':theme_name['theme_code'],
+                'theme_name':theme_name['theme_name'],
+                'package_name':package_name,
+                'feature_name':feature_name,
+                'old_geo_json':current_geo_json,
+                'state':state,
+                'kind':kind,
+                'form_json':_convert_text_json(ob.form_json) if ob.form_json else '',
+                'geo_json':geo_json,
+                'created_at':ob.created_at.strftime('%Y-%m-%d'),
+                'employee':user.first_name,
+                'org':org.name,
+            }
 
         else:
-            old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
-            if old_geo_data:
-                old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
-                geo_json = _get_geoJson(old_geo_data)
-                geo_json = FeatureCollection([geo_json])
+            return ''
 
     else:
-        geo_json = _convert_text_json(ob.geo_json)
-        geo_json = _get_geoJson(geo_json)
-        geo_json = FeatureCollection([geo_json])
+
+        geo_json = []
+        collection = []
+        old_geo_data = []
+        form_json = []
+        current_geo_json = []
+        user = get_object_or_404(User,  employee__id=ob.employee_id)
+        org = get_object_or_404(Org, employee__user=user)
+
+        feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
+        package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
+        theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
+        state = _get_state_and_kind(ob.state,ob.STATE_CHOICES )
+        kind = _get_state_and_kind(ob.kind,ob.KIND_CHOICES )
+        if ob.old_geo_id:
+            if ob.geo_json:
+                geo_json = _convert_text_json(ob.geo_json)
+                current_geo_json = _get_geoJson(geo_json)
+                old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
+                old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+                old_geo_data = _get_geoJson(old_geo_data)
+                geo_json = FeatureCollection([geo_json, old_geo_data])
+
+            else:
+                old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
+                if old_geo_data:
+                    old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+                    geo_json = _get_geoJson(old_geo_data)
+                    geo_json = FeatureCollection([geo_json])
+
+        else:
+            geo_json = _convert_text_json(ob.geo_json)
+            geo_json = _get_geoJson(geo_json)
+
+        return {
+            'old_geo_id':ob.old_geo_id,
+            'new_geo_id':ob.new_geo_id,
+            'id':ob.id,
+            'feature_id':ob.feature_id,
+            'package_id':ob.package_id,
+            'theme_id':ob.theme_id,
+            'theme_code':theme_name['theme_code'],
+            'theme_name':theme_name['theme_name'],
+            'package_name':package_name,
+            'feature_name':feature_name,
+            'old_geo_json':current_geo_json,
+            'state':state,
+            'kind':kind,
+            'form_json':_convert_text_json(ob.form_json) if ob.form_json else '',
+            'geo_json':geo_json,
+            'created_at':ob.created_at.strftime('%Y-%m-%d'),
+            'employee':user.first_name,
+            'org':org.name,
+        }
 
 
-    return {
-        'old_geo_id':ob.old_geo_id,
-        'new_geo_id':ob.new_geo_id,
-        'id':ob.id,
-        'feature_id':ob.feature_id,
-        'package_id':ob.package_id,
-        'theme_id':ob.theme_id,
-        'theme_code':theme_name['theme_code'],
-        'theme_name':theme_name['theme_name'],
-        'package_name':package_name,
-        'feature_name':feature_name,
-        'old_geo_json':current_geo_json,
-        'state':state,
-        'kind':kind,
-        'form_json':_convert_text_json(ob.form_json) if ob.form_json else '',
-        'geo_json':geo_json,
-        'created_at':ob.created_at.strftime('%Y-%m-%d'),
-        'employee':user.first_name,
-        'org':org.name,
-    }
+@require_GET
+@ajax_required
+def getChangeAll(request):
+    org_request = []
+    org_request_list = ChangeRequest.objects.all()
+    org= ''
+    if org_request_list:
+        org_request = [_get_org_request(ob, org) for ob in org_request_list]
+        if org_request[0] != '':
+            rsp = {
+                'success':True,
+                'org_request': org_request,
+            }
+
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success':False,
+            }
+
+            return JsonResponse(rsp)
+    else:
+        rsp = {
+                'success':False,
+            }
+
+        return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
 def getAll(request):
-    org_request = []
-    org_request_list = ChangeRequest.objects.filter(state=1)
-    if org_request_list:
-        org_request = [_get_org_request(ob) for ob in org_request_list]
-    rsp = {
-        'org_request': org_request,
-    }
 
-    return JsonResponse(rsp)
+    org_request = []
+    org_request_list = ChangeRequest.objects.all()
+    org = get_object_or_404(Org, employee__user=request.user)
+    if org_request_list:
+        org_request = [_get_org_request(ob, org) for ob in org_request_list]
+        if org_request[0] != '':
+            rsp = {
+                'success':True,
+                'org_request': org_request,
+            }
+
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success':False,
+            }
+
+            return JsonResponse(rsp)
+    else:
+        rsp = {
+                'success':False,
+            }
+
+        return JsonResponse(rsp)
+
 
 @require_GET
 @ajax_required
