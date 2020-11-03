@@ -14,7 +14,6 @@ export class Charts extends Component {
     }
     componentDidMount(){
         this.handleBrowserCount()
-
     }
 
     handleBrowserCount(){
@@ -23,7 +22,6 @@ export class Charts extends Component {
                 this.setState({wms_log_date, wms_log_date_count})
             }
         })
-
     }
 
     render() {

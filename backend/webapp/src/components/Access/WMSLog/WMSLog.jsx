@@ -76,8 +76,8 @@ export default class WMSLog extends Component {
                 </div>
                 <div className="row">
                     <div className="col-lg-12">
-                        <div className="table-responsive">
-                            <table className="table">
+                        <div className="table-responsive table_wrapper">
+                            <table className="table table_wrapper_table">
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>

@@ -5,6 +5,7 @@ export class WMSLogTable extends Component {
     constructor(props) {
         super(props)
     }
+
     componentDidMount(){
     }
 

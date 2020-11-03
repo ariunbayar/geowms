@@ -253,7 +253,6 @@ def crud_date_count(request):
     return JsonResponse(rsp)
 
 
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -262,6 +261,9 @@ def wms_log_list(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
     wms_log_all_display = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     logins = WMSLog.objects.annotate(search=SearchVector(
         'qs_all',
         'qs_request',
@@ -270,7 +272,7 @@ def wms_log_list(request, payload):
         'created_at',
         'system_id',
         'wms_id',
-    )).filter(search__icontains=query)
+    )).filter(search__icontains=query).order_by(sort_name)
 
     total_items = Paginator(logins, per_page)
     items_page = total_items.page(page)
