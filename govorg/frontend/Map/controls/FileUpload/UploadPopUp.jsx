@@ -16,7 +16,6 @@ class UploadCmp extends Component {
     }
 
     render() {
-        console.log(this.props)
         return (
             <div className="modal-dialog modal-dialog-centered">
                 <div role="document" style={{zIndex: 1050}}>
@@ -68,7 +67,6 @@ export class UploadBtn extends Control {
 
     toggleControl(is_visible) {
         if (is_visible) {
-            console.log("dadedfea")
             this.element.classList.add('fade')
             this.element.classList.add('show')
             this.element.classList.add('d-block')

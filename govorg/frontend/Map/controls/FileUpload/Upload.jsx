@@ -70,7 +70,6 @@ export class Upload extends Component {
         this.list = []
         if (files.length > 0){
             for(var i=0; i < files.length; i++){
-                console.log(this.list)
                 this.list.push(<li key={i}>{files[i].name}</li>)
             }
         }
