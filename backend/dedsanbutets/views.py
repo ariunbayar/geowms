@@ -777,6 +777,7 @@ def FileUploadSaveData(request):
     form = request.FILES.getlist('data')
     file_name = ''
     for_delete_name = ''
+    feature_id = 36
     try:
         unique_filename = str(uuid.uuid4())
         for fo in form:
@@ -845,7 +846,7 @@ def FileUploadSaveData(request):
                                 geo = MGeoDatas.objects.create(
                                     geo_id=id_made,
                                     geo_data=geom,
-                                    feature_id=36,
+                                    feature_id=feature_id,
                                     created_by=1,
                                     modified_by=1,
                                 )
