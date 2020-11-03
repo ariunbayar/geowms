@@ -109,8 +109,8 @@ export class Жагсаалт extends Component {
                                         value={this.state.searchQuery}
                                    />
                                 </div>
-                                <div className="table-responsive">
-                                    <table className="table">
+                                <div className="table-responsive table_wrapper">
+                                    <table className="table table_wrapper_table">
                                         <thead>
                                             <tr>
                                                 <th scope="col"> # </th>
