@@ -32,8 +32,11 @@ def systemList(request, payload):
     page = payload.get('page')
     per_page = payload.get('per_page')
     query = payload.get('query')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     system_list = GovOrg.objects.all().annotate(search=SearchVector(
-        'name')).filter(search__contains=query, org_id = org.id)
+        'name')).filter(search__contains=query, org_id = org.id).order_by(sort_name)
 
     total_items = Paginator(system_list, per_page)
     items_page = total_items.page(page)

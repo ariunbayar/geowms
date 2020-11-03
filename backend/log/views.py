@@ -41,12 +41,15 @@ def login_list(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
     login_log_all_display = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     logins = LoginEvent.objects.annotate(search=SearchVector(
         'login_type',
         'user_id',
         'remote_ip',
         'datetime'
-    ) + SearchVector('username'),).filter(search__icontains=query)
+    ) + SearchVector('username'),).filter(search__icontains=query).order_by(sort_name)
 
     total_items = Paginator(logins, per_page)
     items_page = total_items.page(page)
@@ -96,7 +99,9 @@ def page_list(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
-
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     log_display = []
 
     pages = RequestEvent.objects.annotate(search=SearchVector(
@@ -106,7 +111,7 @@ def page_list(request, payload):
         'remote_ip',
         'user_id',
         'url',)
-    ).filter(search__contains=query)
+    ).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(pages, per_page)
     items_page = total_items.page(page)
@@ -176,6 +181,9 @@ def crudList(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     crud_event_display = []
     cruds = CRUDEvent.objects.annotate(search=SearchVector(
         'event_type',
@@ -183,7 +191,7 @@ def crudList(request, payload):
         'content_type_id',
         'user_id',
         'changed_fields'
-    ) + SearchVector('object_repr')).filter(search__icontains=query)
+    ) + SearchVector('object_repr')).filter(search__icontains=query).order_by(sort_name)
     total_items = Paginator(cruds, per_page)
     items_page = total_items.page(page)
 

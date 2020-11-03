@@ -192,8 +192,8 @@ export class WmsList extends Component {
                                         </div>
                                     </div>
                                     <div className="row">
-                                        <div className="table-responsive">
-                                            <table className="table align-items-center table-flush">
+                                        <div className="table-responsive table_wrapper">
+                                            <table className="table align-items-center table-flush table_wrapper_table">
                                                 <thead>
                                                     <tr>
                                                         <th scope="col"> # </th>

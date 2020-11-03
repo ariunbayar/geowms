@@ -126,6 +126,37 @@ class Command(BaseCommand):
         else:
             return True
 
+    def check_and_warn_extension_tablefunc(self):
+
+        with connections['default'].cursor() as cursor:
+            sql = """
+                SELECT
+                    COUNT(*)
+                FROM
+                    pg_catalog.pg_extension e
+                WHERE
+                    e.extname = 'tablefunc'
+            """
+            cursor.execute(sql)
+            num_results, = cursor.fetchone()
+            if num_results == 0:
+                self.warn('Missing extension tablefunc')
+                print('Run following command:')
+                print('===')
+                print(
+                    (
+                        "sudo -u postgres psql "
+                        "-c 'CREATE EXTENSION tablefunc WITH SCHEMA public;' "
+                        "{database}"
+                    ).format(
+                        database=self.db_conf['NAME'],
+                    )
+                )
+                print()
+                return False
+
+        return True
+
     def check_and_warn_extension_plpython3u(self):
 
         with connections['default'].cursor() as cursor:
@@ -145,7 +176,7 @@ class Command(BaseCommand):
                 print('===')
                 print(
                     (
-                        "sudo apt install postgresql-plpython3-12\n"
+                        "sudo apt install -y postgresql-plpython3-12\n"
                         "sudo -u postgres psql "
                         "-c 'CREATE EXTENSION plpython3u WITH SCHEMA pg_catalog;' "
                         "{database}"
@@ -317,6 +348,7 @@ class Command(BaseCommand):
             self.check_and_warn_db_owner(),
             self.check_and_warn_schema_owner(),
             self.check_and_warn_extension_postgis(),
+            self.check_and_warn_extension_tablefunc(),
             self.check_and_warn_extension_plpython3u(),
             self.check_and_warn_trusted_plpython3u(),
             self.check_and_warn_filename(filename_inspire),
@@ -364,15 +396,46 @@ class Command(BaseCommand):
         self.info('Restoring "{}"'.format(filename_geoportal))
         self.db_restore(filename_geoportal)
 
-        self.info('🎉 Inpire restore is READY...')
+        self.info('🎉 Inspire restore is READY...')
         print('Run following command to finish restore:')
         print('===')
         print(
             (
-                "sudo -u postgres pg_restore "
-                "-d {database} -v '{filename}'"
+                """
+                    sudo -u postgres pg_restore -d {database} -v '{filename}';
+                    sudo -u postgres psql -qAt -c "
+                        SELECT
+                            c.relname as \"table\"
+                        FROM pg_catalog.pg_class c
+                        LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE
+                            c.relkind IN ('r', 'p')
+                            AND pg_catalog.pg_table_is_visible(c.oid)
+                            AND n.nspname = 'public'
+                            AND pg_catalog.pg_get_userbyid(c.relowner) = 'postgres';
+                    " {database} | while read t; do
+                        echo -en "\\033[1;32m$t: \\033[0m"
+                        sudo -u postgres psql -c "ALTER TABLE \"$t\" OWNER TO {user}" {database}
+                    done
+
+                    sudo -u postgres psql -qAt -c "
+                        SELECT
+                            c.relname as \\"table\\"
+                        FROM pg_catalog.pg_class c
+                        LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE
+                            c.relkind IN ('v')
+                            AND pg_catalog.pg_table_is_visible(c.oid)
+                            AND n.nspname = 'public'
+                            AND pg_catalog.pg_get_userbyid(c.relowner) = 'postgres';
+                    " {database} | while read t; do
+                        echo -en "\\033[1;32m$t: \\033[0m"
+                        sudo -u postgres psql -c "ALTER VIEW \"$t\" OWNER TO {user}" {database}
+                    done
+                """
             ).format(
                 database=self.db_conf['NAME'],
+                user=self.db_conf['USER'],
                 filename=filename_inspire,
             )
         )
