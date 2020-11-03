@@ -1831,10 +1831,7 @@ def tuuhenOvList(request, payload):
 @require_POST
 @ajax_required
 def rows(request, payload):
-
     tuuh_soyl = payload.get('id')
-
-
     cursor = connections['postgis_db'].cursor()
     sql = """
         SELECT
@@ -1842,10 +1839,10 @@ def rows(request, payload):
         FROM
             tuuhsoyolhureepol
         WHERE
-            tuuh_soyl = '{tuuh_soyl}'
+            tuuh_soyl = %s
         ORDER BY id ASC
-    """.format(tuuh_soyl = tuuh_soyl)
-    cursor.execute(sql)
+    """
+    cursor.execute(sql,[tuuh_soyl])
     rows = dict_fetchall(cursor)
     rows = list(rows)
     rsp = {
@@ -1857,9 +1854,7 @@ def rows(request, payload):
 @require_POST
 @ajax_required
 def ayuul_geoms(request, payload):
-
     tuuh_soyl = payload.get('id')
-
     cursor = connections['postgis_db'].cursor()
     sql = """
         SELECT
@@ -1867,10 +1862,10 @@ def ayuul_geoms(request, payload):
         FROM
             tuuhsoyolayuulhureepol
         WHERE
-            tuuh_soyl = '{tuuh_soyl}'
+            tuuh_soyl = %s
         ORDER BY id ASC
-    """.format(tuuh_soyl = tuuh_soyl)
-    cursor.execute(sql)
+    """
+    cursor.execute(sql,[tuuh_soyl])
     ayuul_geoms = dict_fetchall(cursor)
     ayuul_geoms = list(ayuul_geoms)
     rsp = {
@@ -1882,9 +1877,7 @@ def ayuul_geoms(request, payload):
 @require_POST
 @ajax_required
 def geom_points(request, payload):
-
     tuuh_soyl = payload.get('id')
-
     cursor = connections['postgis_db'].cursor()
     sql = """
         SELECT
@@ -1892,10 +1885,10 @@ def geom_points(request, payload):
         FROM
             tuuhsoyolpoint
         WHERE
-            tuuh_soyl = '{tuuh_soyl}'
+            tuuh_soyl = %s
         ORDER BY id ASC
-    """.format(tuuh_soyl = tuuh_soyl)
-    cursor.execute(sql)
+    """
+    cursor.execute(sql, [tuuh_soyl])
     geom_points = dict_fetchall(cursor)
     geom_points = list(geom_points)
     rsp = {

@@ -73,7 +73,6 @@ export default class Maps extends Component {
     }
 
     componentDidMount() {
-        const geoms = this.props.geoms
         this.loadMapData()
     }
 
