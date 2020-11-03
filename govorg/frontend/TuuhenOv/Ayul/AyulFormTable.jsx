@@ -77,6 +77,7 @@ export default class AyulFormTable extends Component {
                 service.ayulUpdate(tuuhen_ov, x, y, id).then(({success}) => {
                     if (success) {
                         setTimeout(() => {
+                            this.props.loadAyuulRows()
                             this.setState({disable: false, save_is_load: false, save_is_error:false})
                         }, 1000)
                     }

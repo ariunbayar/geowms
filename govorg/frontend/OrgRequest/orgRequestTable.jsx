@@ -61,9 +61,12 @@ export class OrgRequestTable extends Component {
 
                 {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
                 kind==2 ? <td className="text-primary">ЗАССАН</td>:
-                kind==3 ? <td className="text-danger">УСТГАСАН</td>: null
+                kind==3 ? <td className="text-danger">УСТГАСАН</td>:
+                kind==4 ? <td className="text-danger">ШУУД ШИЙДВЭРЛЭСЭН</td>: null
                 }
-                <td>
+                {
+                state ==1 ?
+                    <td>
                     <button className="btn btn-primary" onClick={this.handleRequestOpen}>
                         ШИЙДВЭРЛЭХ
                     </button>
@@ -74,11 +77,13 @@ export class OrgRequestTable extends Component {
                             form_json = {form_json}
                             geo_json = {geo_json}
                             title="Шийдвэрлэх"
+                            kind={kind}
                             id = {id}
                             getAll={this.props.getAll}
                         />
                     }
-                </td>
+                </td>:<td></td>
+                }
             </tr>
         )
 

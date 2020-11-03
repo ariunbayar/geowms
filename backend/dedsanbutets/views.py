@@ -364,11 +364,34 @@ def propertyFields(request, fid):
     return JsonResponse(rsp)
 
 
+def _get_model_name(name):
+
+    if name == 'hg':
+        return 'm_datas_hydrography'
+    elif name == 'au':
+        return 'm_datas_boundary'
+    elif name =='bu':
+        return 'm_datas_building'
+    elif name=='gn':
+        return 'm_datas_geographical'
+    elif name=='cp':
+        return 'm_datas_cadastral'
+
+
 @require_POST
 @ajax_required
 def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
+    tid = payload.get('tid')
+    theme = LThemes.objects.filter(theme_id=tid).first()
+    if not theme:
+        rsp = {
+            'success': False,
+            'info': 'Тухайн хүснэгтийн мэдээлэл алга байна.'
+        }
+        return JsonResponse(rsp)
+
     feature = LFeatures.objects.filter(feature_id=fid).first()
 
     if not feature:
@@ -379,10 +402,20 @@ def propertyFieldsSave(request, payload):
         return JsonResponse(rsp)
 
     check_name = ViewNames.objects.filter(feature_id=fid).first()
+    model_name = _get_model_name(theme.theme_code)
+    if not theme:
+        rsp = {
+            'success': False,
+            'info': 'Тухайн хүснэгт алга байна.'
+        }
+        return JsonResponse(rsp)
+
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+
     if check_name:
         table_name = check_name.view_name
         removeView(table_name)
-        check = createView(id_list, table_name)
+        check = createView(id_list, table_name, model_name)
         if check:
             ViewProperties.objects.filter(view=check_name).delete()
             for idx in id_list:
@@ -391,7 +424,7 @@ def propertyFieldsSave(request, payload):
 
     else:
         table_name = feature.feature_name_eng.split(' ')[0].lower() + '_view'
-        check = createView(id_list, table_name)
+        check = createView(id_list, table_name, model_name)
         if check:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -597,7 +630,7 @@ def erese(request, payload):
 
 
 
-def createView(ids, table_name):
+def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
     fields = [row.property_code for row in data]
     try:
@@ -606,12 +639,13 @@ def createView(ids, table_name):
             CREATE OR REPLACE VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from m_datas_building b where property_id in ({properties}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
 
         '''.format(
                 table_name = table_name,
+                model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))

@@ -21,8 +21,10 @@ export default class OrgRequestForm extends Component {
     getAll(){
         service
         .getAll()
-        .then(({ org_request }) => {
-            this.setState({ org_request})
+        .then(({ success ,org_request }) => {
+           if(success){
+               this.setState({org_request})
+            }
         })
     }
 
@@ -40,7 +42,7 @@ export default class OrgRequestForm extends Component {
                                     <th scope="col">Байгууллага / мэргэжилтэн</th>
                                     <th scope="col">Огноо</th >
                                     <th>Төлөв</th>
-                                    <th>Төлвийн төрөл</th>
+                                    <th>Өөрчлөлт</th>
                                     <th></th>
 
                                 </tr>
@@ -55,7 +57,9 @@ export default class OrgRequestForm extends Component {
                                             getAll = {this.getAll}
                                         />
                                     )
-                                    :null
+                                    :<tr>
+                                    <td className="text-justify">Өөрчлөлт байхгүй байна</td>
+                                    </tr>
                                 }
                             </tbody>
                         </table>

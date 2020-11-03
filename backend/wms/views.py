@@ -149,13 +149,6 @@ def titleUpdate(request, payload):
     return JsonResponse(rsp)
 
 
-def save_image_from_url(model, url, layer_code):
-    r = requests.get(url)
-    img_temp = NamedTemporaryFile(delete=True)
-    img_temp.write(r.content)
-    img_temp.flush()
-    model.legend_url.save(layer_code + ".png", File(img_temp), save=True)
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -170,9 +163,7 @@ def layerAdd(request, payload):
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
-        if wmslayerimage:
-            save_image_from_url(wmslayerimage,legend_url, layer_code)
+        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0, legend_url=legend_url)
         return JsonResponse({'success': True})
 
 
@@ -184,7 +175,7 @@ def layerRemove(request, payload):
     wmsId = payload.get('wmsId')
     layer_name = payload.get('id')
     wms_layer = get_object_or_404(WMSLayer, code=layer_name, wms=wmsId)
-    wms_layer.legend_url.delete(save=False)
+    WMSLayer.objects.filter(code=layer_name, wms=wmsId).update(legend_url=None)
     BundleLayer.objects.filter(layer=wms_layer).delete()
     PaymentLayer.objects.filter(wms_layer=wms_layer).delete()
     wms_layer.delete()
@@ -226,17 +217,11 @@ def update(request, payload):
         wms.is_active=False
     if url_service == wms.url:
         if form.is_valid():
-
             with transaction.atomic():
-
                 form.save()
                 wms = form.instance
                 for layer_choice in layer_choices:
-
-                    WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(
-                            name=layer_choice.get('name'),
-                            code=layer_choice.get('code'),
-                            )
+                    WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(legend_url=layer_choice['legendurl'])
             rsp = { 'success': True }
         else:
             rsp = { 'success': False }
