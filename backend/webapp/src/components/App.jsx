@@ -17,7 +17,6 @@ import MenuItem from "../../../../src/components/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
 import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
-import {Upload} from './DedsanBvtets/FileUpload/Upload'
 
 export default class App extends Component {
 
@@ -92,7 +91,6 @@ export default class App extends Component {
               <Route path={"/back/geoserver/"} component={Geoserver} />
               <Route path={"/back/байгууллага/"} component={Org} />
               <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
-              <Route path={"/back/file-upload/"} component={Upload} />
               <Route path={"/back/inspire-views/"} component={InspireViews} />
               <Route exact path={"/back/log/"} component={Log} />
               <Route path={"/back/access/"} component={Access} />

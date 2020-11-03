@@ -19,6 +19,8 @@ import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
 import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
+import {UploadButton} from './controls/FileUpload/UploadButton'
+import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {Modal} from "../../../src/components/MapModal/Modal"
 
 import "./styles.css"
@@ -55,18 +57,20 @@ export default class BarilgaSuurinGazar extends Component{
           drawed: null,
           togle_islaod: true,
           geojson: {},
-          null_form_isload: false
+          null_form_isload: false,
+          showUpload: false,
       }
 
       this.controls = {
         modal: new Modal(),
+        upload: new UploadBtn(),
       }
 
       this.modifyE = this.Modify()
       this.drawE = this.Draw()
       this.getRole = this.getRole.bind(this)
       this.addNotif = this.props.addNotif
-      
+
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
       this.loadControls = this.loadControls.bind(this)
@@ -87,7 +91,9 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
-      
+      this.showUploadBtn = this.showUploadBtn.bind(this)
+      this.closeUploadBtn = this.closeUploadBtn.bind(this)
+
 
     }
 
@@ -100,7 +106,7 @@ export default class BarilgaSuurinGazar extends Component{
               this.setState({ type })
               this.loadControls()
           })
-      
+
       this.loadRows()
       this.loadMap()
     }
@@ -123,6 +129,7 @@ export default class BarilgaSuurinGazar extends Component{
       const map = this.map
       const { type, roles } = this.state
       map.addControl(this.controls.modal)
+      map.addControl(this.controls.upload)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -130,7 +137,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-      
+      map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       if(roles[3]){
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
@@ -432,7 +439,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     removeModal(){
-      
+
       if(this.state.selectedFeature_ID){
         if(this.state.roles[6]){
           this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
@@ -627,6 +634,16 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+    }
+
+    showUploadBtn(){
+      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn)
+      this.setState({ showUpload: true })
+    }
+
+    closeUploadBtn(){
+      this.controls.upload.showUpload(false)
+      this.setState({ showUpload: false })
     }
 
     render(){

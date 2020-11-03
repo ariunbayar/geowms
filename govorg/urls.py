@@ -72,7 +72,7 @@ urlpatterns = [
             path('<int:oid>/<str:pk>/geom-update/', govorg.backend.teevriin_suljee.views.updateGeom),
             path('<int:oid>/add-geom/', govorg.backend.teevriin_suljee.views.geomAdd),
         ], 'teevriin_suljee'))),
-        
+
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
             path('<int:pid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),
@@ -89,7 +89,7 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
-            
+            path('send-data/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
         ], 'inspire'))),
 
         path('org-request/', include(([

@@ -192,7 +192,6 @@ urlpatterns = [
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
         path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
-        path('send-data/', dedsan_butets.FileUploadSaveData),
     ], 'dedsan-butests'))),
 
     path('geoserver/rest/', include(([

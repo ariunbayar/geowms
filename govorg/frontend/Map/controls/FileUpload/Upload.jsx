@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { service } from '../service'
+import { service } from '../../service'
 
 export class Upload extends Component {
     constructor(props){
@@ -35,13 +35,14 @@ export class Upload extends Component {
 
     handleSubmit(){
         const { files } = this.state
+        const { fid } = this.props
         const formData = new FormData();
         this.setState({ btn_upload_is_laod: true })
         for(var i = 0; i < files.length; i ++) {
             formData.append("data", files[i], files[i].name);
         }
         service
-            .send(formData)
+            .sendFile(formData, fid)
             .then(({success, info, key}) => {
             if (success){
                 alert(info)
@@ -51,6 +52,7 @@ export class Upload extends Component {
                 else{
                     alert(key)
                 }
+                this.props.func()
             }
             else{
                 alert(info)
@@ -73,45 +75,42 @@ export class Upload extends Component {
             }
         }
         return (
-            <div className={`card col-md-6 border border-danger `} style={{height: 'auto'}}>
-                <div className="row">
-                    <div className="col-lg-12">
-                        <div className="card-header text-uppercase">Файлаа оруулна уу.</div>
-                            <div className="card-body">
-                            <div className="custom-file">
-                                <input
-                                    type="file"
-                                    className="custom-file-input"
-                                    id="inputGroupFile01"
-                                    onChange={(e) => this.getFile(e)}
-                                    multiple
-                                ></input>
-                                <label className="custom-file-label" htmlFor="inputGroupFile01">Файл оруулах</label>
-                                {
-                                    this.list.length > 0
-                                    ?
-                                    <ul>
-                                        {this.list}
-                                    </ul>
-                                    :
-                                    null
-                                }
-                            </div>
-                            {this.state.btn_upload_is_laod ?
-                            <div className="spinner-border gp-text-primary" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div>:
-                            <button
-                                className="btn"
-                                onClick={this.handleSubmit}
-                                disabled={this.list.length == 0 ? 'disabled' : ''}
-                            >Файлийг илгээх</button>
+            <div className={`card`} style={{height: 'auto'}}>
+                <div className="col-lg-12">
+                        <div className="card-body">
+                        <div className="custom-file">
+                            <input
+                                type="file"
+                                className="custom-file-input"
+                                id="inputGroupFile01"
+                                onChange={(e) => this.getFile(e)}
+                                multiple
+                            ></input>
+                            <label className="custom-file-label" htmlFor="inputGroupFile01">Файл оруулах</label>
+                            {
+                                this.list.length > 0
+                                ?
+                                <ul>
+                                    {this.list}
+                                </ul>
+                                :
+                                null
                             }
-                            <button
-                                className="btn"
-                                onClick={() => this.cancel()}
-                            >Хоослох</button>
                         </div>
+                        {this.state.btn_upload_is_laod ?
+                        <div className="spinner-border gp-text-primary" role="status">
+                            <span className="sr-only">Loading...</span>
+                        </div>:
+                        <button
+                            className="btn"
+                            onClick={this.handleSubmit}
+                            disabled={this.list.length == 0 ? 'disabled' : ''}
+                        >Файлийг илгээх</button>
+                        }
+                        <button
+                            className="btn"
+                            onClick={() => this.cancel()}
+                        >Хоослох</button>
                     </div>
                 </div>
             </div>

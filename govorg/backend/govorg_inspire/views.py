@@ -1,21 +1,35 @@
+import os
 import json
+import datetime
+import uuid
+import glob
+import random
+from django.conf import settings
+from django.db.utils import InternalError
 from geojson import Feature, FeatureCollection
 
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBuilding, MGeoDatas, LCodeListConfigs, LCodeLists
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography
 from govorg.backend.org_request.models import ChangeRequest
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+
+from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import FileSystemStorage
 
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter
-import random
+from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter, WKBReader, fromstr
 from backend.org.models import Org, Employee, OrgInspireRoles
+
+from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal import OGRGeometry
+from django.contrib.gis.geos.error import GEOSException
+from django.contrib.gis.gdal.error import GDALException
 
 from main.utils import (
     gis_delete,
@@ -117,13 +131,13 @@ def getRoles(request,pid, fid):
     org_roles = OrgInspireRoles.objects.filter(org=org, module=3, module_root_id=pid, module_id=fid, perm_view=True).first()
     if org_roles:
         inspire_roles = [
-            org_roles.perm_view, 
-            org_roles.perm_create, 
-            org_roles.perm_remove, 
-            org_roles.perm_update, 
-            org_roles.perm_revoke, 
-            org_roles.perm_review, 
-            org_roles.perm_approve, 
+            org_roles.perm_view,
+            org_roles.perm_create,
+            org_roles.perm_remove,
+            org_roles.perm_update,
+            org_roles.perm_revoke,
+            org_roles.perm_review,
+            org_roles.perm_approve,
         ]
 
         rsp = {
@@ -709,4 +723,235 @@ def createUpd(request, payload):
         'success': True,
         'info': "Амжилттай",
     }
+    return JsonResponse(rsp)
+
+
+def geoJsonConvertGeom(geojson):
+    with connections['default'].cursor() as cursor:
+
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        return geom
+    return None
+
+
+def _saveToMainData(values, model_name, geo_id, feature_id):
+    keys = ''
+    feature_config_id = None
+    savename = model_name
+    model_name = _MDatasName(model_name)
+    if not isinstance(model_name, str):
+        if values:
+            feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
+            if feature_config:
+                feature_config_id = feature_config.feature_config_id
+            else:
+                feature_config_id = None
+            data_type_id = None
+            for j in values:
+                for key, value in j.items():
+                    properties = LProperties.objects.filter(property_code__icontains=key)
+                    if properties:
+                        for property in properties:
+                            datas = {}
+                            value_types = LValueTypes.objects.filter(value_type_id=property.value_type_id)
+                            if value_types:
+                                for value_type in value_types:
+                                    val_type = value_type.value_type_id
+                                    if val_type != 'boolean':
+                                        for i in model_name._meta.get_fields():
+                                            if 'value' in i.name:
+                                                out = i.name.split('_')
+                                                if out[1] == val_type:
+                                                    datas[i.name] = value
+                                                else:
+                                                    datas[i.name] = None
+                                            else:
+                                                if i.name == 'geo_id':
+                                                    datas[i.name] = geo_id
+                                                if i.name == 'data_type_id':
+                                                    datas[i.name] = data_type_id
+                                                if i.name == 'property_id':
+                                                    datas[i.name] = property.property_id
+                                                if i.name == 'feature_config_id':
+                                                    datas[i.name] = feature_config_id
+                                                if i.name == 'code_list_id':
+                                                    datas[i.name] = None
+                                                if i.name == 'created_by':
+                                                    datas[i.name] = 1
+                                                if i.name == 'modified_by':
+                                                    datas[i.name] = 1
+                                    else:
+                                        rsp = {
+                                            'success': False,
+                                            'info': "Алдаа гарсан байна: " + val_type + ' буруу байна'
+                                        }
+                                        return rsp
+                                sain = model_name.objects.create(**datas)
+                    else:
+                        keys += key + ' ,'
+            rsp = {
+                'success': True,
+                'info': 'Амжилттай хадгалалаа',
+                'key': 'Буруу орсон ' + keys if keys != '' else 'Бүгд зөв'
+            }
+        else:
+            rsp = {
+                'success': False,
+                'info': 'Хоосон ирж байна. ' + savename,
+            }
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Алдаа гарсан байна.' + savename,
+        }
+    return rsp
+
+
+def _MDatasName(model_name):
+    if model_name == 'au':
+        model_name = MDatasBoundary
+    if model_name == 'bu':
+        model_name = MDatasBuilding
+    if model_name == 'hg':
+        model_name = MDatasHydrography
+    return model_name
+
+
+def _deleteFile(file_name, for_delete_name):
+    fileList = glob.glob(os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_name+'.*'))
+    text = ''
+    for filePath in fileList:
+        try:
+            os.remove(filePath)
+        except:
+            text = "(Устгах явцад алдаа гарлаа : " + for_delete_name + ')'
+    return text
+
+
+@require_POST
+@ajax_required
+def FileUploadSaveData(request, fid):
+    form = request.FILES.getlist('data')
+    file_name = ''
+    for_delete_name = ''
+    feature_id = fid
+    try:
+        unique_filename = str(uuid.uuid4())
+        for fo in form:
+            if '.geojson' in fo.name or '.gml' in fo.name or '.gfs' in fo.name or '.shx' in fo.name or '.shp' in fo.name or '.prj' in fo.name or '.dbf' in fo.name or '.cpg' in fo.name:
+                file_name = unique_filename + fo.name
+                for_delete_name = fo.name
+                fs = FileSystemStorage(
+                    location=os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas')
+                )
+                file = fs.save(file_name, fo)
+                fileurl = fs.url(file)
+            else:
+                file_name = fo.name
+        uniq_name = file_name.split('.')[0]
+        if '.shx' in file_name or '.shp' in file_name or '.prj' in file_name or '.dbf' in file_name or '.cpg' in file_name:
+            file_name = uniq_name + '.shp'
+        if '.gml' in file_name or '.gfs' in file_name:
+            file_name = uniq_name + '.gml'
+        if '.geojson' in file_name:
+            file_name = uniq_name + '.geojson'
+        path = os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_name)
+        ds = DataSource(path)
+        if len(ds) <= 0:
+            deleted = _deleteFile(uniq_name, for_delete_name)
+            rsp = {
+                'success': False,
+                'info': 'Source олдсонгүй ' + deleted
+            }
+            return JsonResponse(rsp)
+        layer = ds[0]
+        for val in layer:
+            values = []
+            try:
+                need_id = MGeoDatas.objects.count()
+                for name in layer.fields:
+                    field_name = val[name].name # field name
+                    if field_name == 'id' or field_name == 'gml_id':
+                        geom = ''
+                        geom_type = ''
+                        g_id = val.get(name)
+                        dim = val.geom.coord_dim # dimension
+                        geom = val.geom.json # goemetry json
+                        # layer_type = str(val.geom.geom_type) #layeriin type
+                        srid = GEOSGeometry(geom).srid # geomiin srid
+                        if geom:
+                            if srid != 4326:
+                                geom = GEOSGeometry(geom, srid=4326)
+                            if dim == 3:
+                                geom_type = GEOSGeometry(geom).geom_type #geom iin type
+                                geom = GEOSGeometry(geom).hex
+                                geom = geom.decode("utf-8") #binary hurwuuleh
+                                geom = GEOSGeometry(geom)
+                            if dim == 2:
+                                geom = geoJsonConvertGeom(geom)
+                                geom =  ''.join(geom) # list iig str luu hurwuulj bgaa ni
+                                geom = GEOSGeometry(geom)
+                                geom_type = GEOSGeometry(geom).geom_type # field turul
+                            if geom_type == 'Point':
+                                geom = MultiPoint(geom, srid=4326) # Pointiig MultiPoint bolgoj bna
+                            if geom_type == 'LineString':
+                                geom = MultiLineString(geom, srid=4326) # LineString MultiLineString bolgoj bna
+                            if geom_type == 'Polygon':
+                                geom = MultiPolygon(geom, srid=4326) # Polygon MultiPolygon bolgoj bna
+                            if geom:
+                                id_made = str(need_id) + 'odko' + str(g_id)
+                                geo = MGeoDatas.objects.create(
+                                    geo_id=id_made,
+                                    geo_data=geom,
+                                    feature_id=feature_id,
+                                    created_by=1,
+                                    modified_by=1,
+                                )
+                        else:
+                            deleted = _deleteFile(uniq_name, for_delete_name)
+                            rsp = {
+                                "success": False,
+                                'info': 'geom байхгүй дата' + deleted,
+                            }
+                            return JsonResponse(rsp)
+                    type_name = val[name].type_name
+                    type_name = type_name.decode('utf-8') # type ner
+                    type_code = val[name].type # type code
+                    value = val.get(name) # value ni
+                    values.append({
+                        field_name: value,
+                    })
+            except InternalError as e:
+                deleted = _deleteFile(uniq_name, for_delete_name)
+                rsp = {
+                    'success': False,
+                    'info': file_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй ' + deleted
+                }
+                return JsonResponse(rsp)
+            except GEOSException as e:
+                deleted = _deleteFile(uniq_name, for_delete_name)
+                rsp = {
+                    'success': False,
+                    'info': file_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
+                }
+                return JsonResponse(rsp)
+            code = LFeatures.objects.filter(feature_id=feature_id).first()
+            code = LPackages.objects.filter(package_id=code.package_id).first()
+            code = LThemes.objects.filter(theme_id=code.theme_id).first()
+            model_name = code.theme_code
+            saved = _saveToMainData(values, model_name, geo.geo_id, feature_id)
+            if not saved['success']:
+                deleted = _deleteFile(uniq_name, for_delete_name)
+                rsp = saved
+                return JsonResponse(rsp)
+            else:
+                rsp = saved
+    except GDALException as e:
+        deleted = _deleteFile(uniq_name, for_delete_name)
+        rsp = {
+            'success': False,
+            'info': file_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
+        }
     return JsonResponse(rsp)

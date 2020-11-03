@@ -3,7 +3,6 @@ export const service ={
     getall,
     getprop,
     editName,
-    send,
     getFields,
     save,
     getDatas,
@@ -33,14 +32,6 @@ function editName(id, name){
         body: JSON.stringify({ id, name }),
     }
     return fetch(`${prefix}/editName/`, opts).then(handleResponse)
-}
-
-function send(formData){
-    const opts = {
-        ...getPostOptions(),
-        body: formData,
-    }
-    return fetch(`${prefix}/send-data/`, opts).then(handleResponse)
 }
 
 function getFields(name, id, edit_name){
