@@ -1,10 +1,10 @@
 
 import React, { Component } from "react"
 import {service} from './service'
-import {OrgRequestTable} from './orgRequestTable'
+import {ChangeRequestTable} from './changeRequestTable'
 
 
-export default class OrgRequestForm extends Component {
+export default class ChangeRequestForm extends Component {
 
     constructor(props) {
         super(props)
@@ -50,7 +50,7 @@ export default class OrgRequestForm extends Component {
                             <tbody>
                                 {
                                     org_request.length > 0 ? org_request.map((req, idx) =>
-                                        <OrgRequestTable
+                                        <ChangeRequestTable
                                             key={idx}
                                             idx={idx}
                                             values = {req}

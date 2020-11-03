@@ -549,6 +549,7 @@ export class DursgaltGazar extends Component {
                         setStatus('saved')
                         this.props.history.goBack()
                         this.props.history.push( `/back/froms/tuuhen-ov/${id}/add/`)
+                        this.props.loadGeomPoints()
                     }, 1000)
                 }
             })
@@ -598,6 +599,7 @@ export class DursgaltGazar extends Component {
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}
+                            type = 'ayuul'
                         />
                         <div className="col-md-12 mb-4 my-4">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>

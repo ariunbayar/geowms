@@ -9,6 +9,7 @@ import БайрЗүйнЗураг from './BairZuinZurag'
 import БарилгаСууринГазар from './BarilgaSuurinGazar'
 import Bundles from './Map/index'
 import OrgRequest from './OrgRequest'
+import ChangeRequest from './Map/ChangeRequest/index'
 import { TuuhenOv } from './TuuhenOv'
 import { Forms } from './Form'
 import { ZipCode } from './Zipcode'
@@ -23,7 +24,6 @@ export class App extends Component {
     constructor(props) {
         super(props)
         this.state={
-            perms: props.org.perms,
             org_level: props.org.org_level,
             name: props.org.name,
             tuuhen_ov: {},
@@ -43,8 +43,7 @@ export class App extends Component {
 
     componentDidMount(){
 
-        const { perms } = this.state
-
+        const { perms } = this.props.org
         perms.map((perm) => {
             if(perm.module_id == 1){
                 this.setState({tuuhen_ov: perm})
@@ -350,6 +349,7 @@ export class App extends Component {
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route path="/gov/org-request/" component={OrgRequest}/>
+                            <Route path="/gov/history/" component={ChangeRequest}/>
                             <Route exact path="/gov/employees/" component={ Employee }/>
                             <Route exact path="/gov/bundle/" component={Bundle}/>
                             <Route exact path="/gov/org/help/" component={Help}/>
