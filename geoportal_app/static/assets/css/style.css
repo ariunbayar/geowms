@@ -314,6 +314,7 @@ a.active .list-group-item{
 /* width */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 5px;
 }
 
 /* Track */

@@ -141,13 +141,15 @@ def paginatedList(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('per_page')
-
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     user_list = User.objects.all().annotate(search=SearchVector(
             'last_name',
             'first_name',
             'email',
             'gender')
-    ).filter(search__contains=query)
+    ).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(user_list, per_page)
     items_page = total_items.page(page)

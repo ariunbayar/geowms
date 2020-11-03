@@ -79,8 +79,8 @@ export class PageLog extends Component {
                         />
                     </div>
                 </div>
-                <div className="table-responsive">
-                    <table className="table example" id="example">
+                <div className="table-responsive table_wrapper">
+                    <table className="table example table_wrapper_table" id="example">
                         <thead>
                             <tr>
                                 <th scope="col">№</th>
