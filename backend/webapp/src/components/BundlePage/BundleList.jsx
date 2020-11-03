@@ -86,7 +86,6 @@ export class BundleList extends Component {
                                         <th scope="col"> # </th>
                                         <th scope="col"> Сангийн нэр </th>
                                         <th scope="col"> WMS сервис </th>
-                                        <th scope="col">POSTGIS_DB</th>
                                         <th scope="col"></th>
                                         <th scope="col"></th>
                                         <th scope="col"></th>

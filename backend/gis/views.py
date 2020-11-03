@@ -70,6 +70,7 @@ def table_list(request):
             }
             for table in _named_tuple_fetchall(cursor)
         ]
+    print(tables_display)
 
     rsp = {
         'items': tables_display,

@@ -143,18 +143,11 @@ def _get_module_display(module):
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
-    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
-    cursor = connections['postgis_db'].cursor()
-    table = []
-    if oid_list:
-        table = gis_tables_by_oids(oid_list)
     
     return {
         'id': bundle.id,
         'name': bundle.name,
         'price':modules,
-        'oid_list':oid_list,
-        'oid_table_list':table,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
@@ -272,29 +265,6 @@ def update(request, payload):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def updateGis(request, payload):
-    oid_list = payload.get('oid_list')
-    bundle_id = payload.get('id')
-    diff_oid = None
-    for gis_bundle in BundleGIS.objects.filter(bundle_id=bundle_id):
-
-        for oid in oid_list:
-            if gis_bundle.oid != oid:
-                diff_oid = gis_bundle.oid
-        if diff_oid:
-            saves = BundleGIS.objects.filter(bundle_id = bundle_id, oid=diff_oid)
-            saves.delete()
-
-    for oid in oid_list:
-        bundle_gis = BundleGIS.objects.filter(oid=oid, bundle_id=bundle_id)
-        if not bundle_gis:
-            BundleGIS.objects.create(oid=oid, bundle_id = bundle_id)
-    return JsonResponse({'success': True})
 
 
 @require_POST

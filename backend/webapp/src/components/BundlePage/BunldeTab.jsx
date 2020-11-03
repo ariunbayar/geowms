@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {NavLink, Switch, Route, BrowserRouter} from "react-router-dom"
 import {service} from './service'
 import {BundleForms} from './BundleForms'
-import {BunleGisForms} from './GisForms'
 
 export class BundleTab extends Component {
 
@@ -105,13 +104,9 @@ export class BundleTab extends Component {
                             <li className="nav-item gp-text-primary">
                                 <NavLink to={`/back/дэд-сан/${id}/засах/`} exact className="nav-link"  activeClassName="active">WMS</NavLink>
                             </li>
-                            <li className="nav-item ">
-                                <NavLink to={`/back/дэд-сан/${id}/засах/postgis_db/`}  className="nav-link"  activeClassName="active" >postgis_db</NavLink>
-                            </li>
                         </ul>
                         <div className="tab-content">
                             <Switch>
-                                <Route path="/back/дэд-сан/:id/засах/postgis_db/"   component={BunleGisForms}/>
                                 <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} />
                             </Switch>
                         </div>

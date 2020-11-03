@@ -48,7 +48,6 @@ urlpatterns = [
         path('<int:pk>/updatemore/', bundle_views.updateMore, name='updatemore'),
         path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
         path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
-        path('updateGis/', bundle_views.updateGis, name='updateGis'),
         path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
     ], 'bundle'))),
 
