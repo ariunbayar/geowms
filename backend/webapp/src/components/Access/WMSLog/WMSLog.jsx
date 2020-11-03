@@ -18,13 +18,22 @@ export default class WMSLog extends Component {
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleSort = this.handleSort.bind(this)
     }
-
-    paginate (page, query) {
+    handleSort(sort_name, sort_type) {
+        if(sort_type){
+            this.setState({[sort_name]: false, sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+        }else{
+            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+        }
+    }
+    paginate (page, query, sort_name) {
         const perpage = this.state.wms_log_per_page
         this.setState({ currentPage: page })
             return service
-                .WMSLogList(page, perpage, query)
+                .WMSLogList(page, perpage, query, sort_name)
                 .then(page => {
                     this.setState({ wms_log_display: page.items, wms_log_length: page.items.length })
                     return page
@@ -81,13 +90,13 @@ export default class WMSLog extends Component {
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>
-                                        <th scope="col" className="text-wrap">qs_all</th>
-                                        <th scope="col">qs_request</th>
-                                        <th scope="col">rsp_status</th>
-                                        <th scope="col">rsp_size</th>
-                                        <th scope="col">Нэвтэрсэн огноо</th >
-                                        <th scope="col">Системийн ID</th>
-                                        <th scope="col">WMS  ID</th>
+                                        <th><a onClick={() => this.handleSort('qs_all', this.state.qs_all)}>qs_all <i class={this.state.qs_all ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('qs_request', this.state.qs_request)}>qs_request <i class={this.state.qs_request ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('rsp_status', this.state.rsp_status)}>rsp_status <i class={this.state.rsp_status ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('rsp_size', this.state.rsp_size)}>rsp_size <i class={this.state.rsp_size ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('created_at', this.state.created_at)}>Нэвтэрсэн огноо <i class={this.state.created_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('system_id', this.state.system_id)}>Системийн ID <i class={this.state.system_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('wms_id', this.state.wms_id)}>WMS ID <i class={this.state.wms_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -107,7 +116,8 @@ export default class WMSLog extends Component {
                         <Pagination
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
-                        />
+                            sort_name = {this.state.sort_name}
+                            />
                     </div>
                 </div>
             </div>
