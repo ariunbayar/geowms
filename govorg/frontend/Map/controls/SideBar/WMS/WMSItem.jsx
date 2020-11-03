@@ -20,7 +20,6 @@ export default class WMSItem extends Component {
     }
 
     toggle(is_visible) {
-        console.log('its a big one ', is_visible)
         this.setState({is_visible})
         this.state.layers.map((layer) =>
             layer.tile.setVisible(is_visible)
