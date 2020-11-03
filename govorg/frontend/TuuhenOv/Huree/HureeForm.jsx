@@ -60,6 +60,7 @@ export class HureeForm extends Component {
         service.hureeDelete(ayul_id, tuuhen_ov, tuuh_soyl_huree_id).then(({success}) => {
             if(success){
                 this.setState({text: 'устгалаа', modal_alert_status: 'open'})
+                this.props.loadRows()
                 this.modalCloseTime()
             }
         })
@@ -78,6 +79,7 @@ export class HureeForm extends Component {
             service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
                 if (success) {
                     this.setState({text: 'нэмлээ', modal_alert_status: 'open'})
+                    this.props.loadRows()
                     this.modalCloseTime()
                 }
             })
@@ -95,7 +97,7 @@ export class HureeForm extends Component {
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: 'closed', handle_save_succes_huree:false, save_is_error:false})
         this.hureeData()
-}
+    }
 
     render() {
         const tuuhen_ov = this.props.dursgalt_id
@@ -133,6 +135,7 @@ export class HureeForm extends Component {
                                 tuuhen_ov={tuuhen_ov}
                                 tuuh_soyl_huree_id={tuuh_soyl_huree_id}
                                 handleRemove={() => this.handleRemove(data.id)}
+                                loadRows={() => this.props.loadRows()}
                                 perms = {perms}
                                 is_editable = {is_editable}
                             ></HureeFormTable>

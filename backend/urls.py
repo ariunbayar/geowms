@@ -160,6 +160,9 @@ urlpatterns = [
         path('dursgalt-gazar/ayul-update/', forms_views.ayulHureeUpdate, name='dursgalt-gazar-ayul-update'),
         path('dursgalt-gazar/ayul-delete/', forms_views.ayulHureeDelete, name='dursgalt-gazar-ayul-delete'),
         path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
+        path('rows/', forms_views.rows, name='rows'),
+        path('ayuul_geoms/', forms_views.ayuul_geoms, name='ayuul_geoms'),
+        path('geom_points/', forms_views.geom_points, name='geom_points'),
 
     ], 'tuuhen_ov'))),
 

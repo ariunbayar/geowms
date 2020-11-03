@@ -24,7 +24,6 @@ export class App extends Component {
     constructor(props) {
         super(props)
         this.state={
-            perms: props.org.perms,
             org_level: props.org.org_level,
             name: props.org.name,
             tuuhen_ov: {},
@@ -44,8 +43,7 @@ export class App extends Component {
 
     componentDidMount(){
 
-        const { perms } = this.state
-
+        const { perms } = this.props.org
         perms.map((perm) => {
             if(perm.module_id == 1){
                 this.setState({tuuhen_ov: perm})

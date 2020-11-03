@@ -33,7 +33,7 @@
         "chart.js": "^2.9.3",
         "codemirror": "^5.53.2",
         "formik": "^2.1.4",
-        "ol": "^6.3.1",
+        "ol": "^6.4.3",
         "package.json": "^2.0.1",
         "react": "^16.13.1",
         "react-chartjs-2": "^2.9.0",
