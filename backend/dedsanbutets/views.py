@@ -4,6 +4,7 @@ from main.decorators import ajax_required
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import user_passes_test
+from django.forms.models import model_to_dict
 from django.db import connections
 from .models import ViewNames, ViewProperties
 from django.shortcuts import get_object_or_404
@@ -46,34 +47,43 @@ def bundleButetsAll(request):
 
 def _lfeatureconfig(feature_id):
     feature_configs_name = []
+    datatypes = []
     f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
     for f_config in f_configs:
-            data_type_id = f_config.data_type_id
-            connect_feature_id = f_config.connect_feature_id
-            if data_type_id is not None:
-                feature_configs_name.append({
-                    'data_type_id': data_type_id,
-                    'feature_config_id': f_config.feature_config_id,
-                    'feature_id': f_config.feature_id,
-                    'data_type_display_name': f_config.data_type_display_name,
-                    'data_types': _datatypes(data_type_id)
-                })
-            else:
-                connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
-                for connect_feature in connect_features:
-                    connected_feature_id = connect_feature.connect_feature_id
-                    fc_data_type_id = connect_feature.data_type_id
-                    if fc_data_type_id is not None:
-                        datatypes = _datatypes(fc_data_type_id)
-                    if connect_feature.feature_id == connect_feature_id:
-                        if connected_feature_id is None:
-                            feature_configs_name.append({
-                                'data_type_id': fc_data_type_id,
-                                'feature_config_id': connect_feature.feature_config_id,
-                                'feature_id': connect_feature.feature_id,
-                                'data_type_display_name': connect_feature.data_type_display_name,
-                                'data_types': datatypes
-                            })
+        data_type_id = f_config.data_type_id
+        connect_feature_id = f_config.connect_feature_id
+        if data_type_id is not None:
+            feature_configs_name.append({
+                'data_type_id': data_type_id,
+                'feature_config_id': f_config.feature_config_id,
+                'feature_id': f_config.feature_id,
+                'data_type_display_name': f_config.data_type_display_name,
+                'data_types': _datatypes(data_type_id)
+            })
+        else:
+            connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
+            for connect_feature in connect_features:
+                connected_feature_id = connect_feature.connect_feature_id
+                fc_data_type_id = connect_feature.data_type_id
+                if fc_data_type_id is not None:
+                    datatypes = _datatypes(fc_data_type_id)
+                if connect_feature.feature_id == connect_feature_id:
+                    if connected_feature_id is None:
+                        feature_configs_name.append({
+                            'data_type_id': fc_data_type_id,
+                            'feature_config_id': connect_feature.feature_config_id,
+                            'feature_id': connect_feature.feature_id,
+                            'data_type_display_name': connect_feature.data_type_display_name,
+                            'data_types': datatypes
+                        })
+        if data_type_id is None and connect_feature_id is None:
+            feature_configs_name.append({
+                'data_type_id': data_type_id,
+                'feature_config_id': f_config.feature_config_id,
+                'feature_id': f_config.feature_id,
+                'data_type_display_name': f_config.data_type_display_name,
+                'data_types': _datatypes(data_type_id)
+            })
     return feature_configs_name
 
 
@@ -88,6 +98,7 @@ def _datatypes(data_type_id):
                 'data_type_code': data_type.data_type_code,
                 'data_type_definition': data_type.data_type_definition,
                 'is_active': data_type.is_active,
+                'is_read_only': data_type.is_read_only,
                 'data_type_configs': _data_type_configs(data_type.data_type_id)
             })
     return data_type_names
@@ -103,6 +114,7 @@ def _data_type_configs(data_type_id):
             if properties:
                 for prop in properties:
                     property_names.append({
+                        'data_type_config_id': data_type_config.data_type_config_id,
                         'data_type_id': data_type_config.data_type_id,
                         'property_id': property_id,
                         'property_code': prop.property_code,
@@ -110,6 +122,7 @@ def _data_type_configs(data_type_id):
                         'property_definition': prop.property_definition,
                         'value_type_id': prop.value_type_id,
                         'value_types': _value_types(prop.value_type_id, property_id),
+                        'is_read_only': prop.is_read_only,
                     })
     return property_names
 
@@ -174,7 +187,7 @@ def Property(request, code):
     rsp = {
         'success': True,
         'feature_lists': feature_lists,
-        'check': check
+        'check': check,
     }
     return JsonResponse(rsp)
 
@@ -199,6 +212,90 @@ def Edit_name(request, payload):
         sp = {
             'success': False,
             'info': 'Алдаа гарлаа'
+        }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getFields(request, payload):
+    model_name = payload.get('name')
+    savename = payload.get('name')
+    id = payload.get('id')
+    edit_name = payload.get('edit_name')
+    try:
+        model_name = getModel(model_name)
+        fields = []
+        for i in model_name._meta.get_fields():
+            name = i.name
+            type_name = i.get_internal_type()
+            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
+                if type_name == "CharField":
+                    type_name = 'text'
+                if type_name == "IntegerField" or type_name == "BigIntegerField":
+                    type_name = 'number'
+                if type_name == "BooleanField":
+                    type_name = 'radio'
+                if edit_name == '':
+                    if 'id' in i.name and not 'connect' in i.name:
+                        if '_' in savename:
+                            if savename == 'data_type_config' and i.name == 'data_type_id':
+                                fields.append({
+                                    'field_name': i.name,
+                                    'field_type': type_name,
+                                    'data': id
+                                })
+                            else:
+                                out = savename.split('_')
+                                if not str(out[0]) in i.name:
+                                    fields.append({
+                                        'field_name': i.name,
+                                        'field_type': type_name,
+                                        'data': id
+                                    })
+                                else:
+                                    fields.append({
+                                        'field_name': i.name,
+                                        'field_type': type_name,
+                                        'data': ''
+                                    })
+                        else:
+                            fields.append({
+                                'field_name': i.name,
+                                'field_type': type_name,
+                                'data': id
+                            })
+                    else:
+                        fields.append({
+                            'field_name': i.name,
+                            'field_type': type_name,
+                            'data': ''
+                        })
+                if edit_name != '':
+                    datas = model_name.objects.filter(pk=id)
+                    for data in datas:
+                        data_obj = model_to_dict(data)
+                        dat = data_obj[i.name]
+                        if dat == True and not 1:
+                            dat = 'true'
+                        if dat == False and not 0:
+                            dat = 'false'
+                        else:
+                            dat = dat
+                        fields.append({
+                            'field_name': i.name,
+                            'field_type': type_name,
+                            'data': dat if dat else ""
+                        })
+        rsp = {
+            'success': True,
+            'fields': fields
+        }
+    except Exception as e:
+        rsp = {
+            'success': False,
+            'fields': 'Алдаа гарсан байна' + str(e)
         }
     return JsonResponse(rsp)
 
@@ -245,11 +342,34 @@ def propertyFields(request, fid):
     return JsonResponse(rsp)
 
 
+def _get_model_name(name):
+
+    if name == 'hg':
+        return 'm_datas_hydrography'
+    elif name == 'au':
+        return 'm_datas_boundary'
+    elif name =='bu':
+        return 'm_datas_building'
+    elif name=='gn':
+        return 'm_datas_geographical'
+    elif name=='cp':
+        return 'm_datas_cadastral'
+
+
 @require_POST
 @ajax_required
 def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
+    tid = payload.get('tid')
+    theme = LThemes.objects.filter(theme_id=tid).first()
+    if not theme:
+        rsp = {
+            'success': False,
+            'info': 'Тухайн хүснэгтийн мэдээлэл алга байна.'
+        }
+        return JsonResponse(rsp)
+
     feature = LFeatures.objects.filter(feature_id=fid).first()
 
     if not feature:
@@ -260,10 +380,20 @@ def propertyFieldsSave(request, payload):
         return JsonResponse(rsp)
 
     check_name = ViewNames.objects.filter(feature_id=fid).first()
+    model_name = _get_model_name(theme.theme_code)
+    if not theme:
+        rsp = {
+            'success': False,
+            'info': 'Тухайн хүснэгт алга байна.'
+        }
+        return JsonResponse(rsp)
+
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+
     if check_name:
         table_name = check_name.view_name
         removeView(table_name)
-        check = createView(id_list, table_name)
+        check = createView(id_list, table_name, model_name)
         if check:
             ViewProperties.objects.filter(view=check_name).delete()
             for idx in id_list:
@@ -272,7 +402,7 @@ def propertyFieldsSave(request, payload):
 
     else:
         table_name = feature.feature_name_eng.split(' ')[0].lower() + '_view'
-        check = createView(id_list, table_name)
+        check = createView(id_list, table_name, model_name)
         if check:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -293,7 +423,192 @@ def propertyFieldsSave(request, payload):
     return JsonResponse(rsp)
 
 
-def createView(ids, table_name):
+def getModel(model_name):
+    if model_name == 'theme':
+        model_name = LThemes
+    if model_name == 'package':
+        model_name = LPackages
+    if model_name == 'feature':
+        model_name = LFeatures
+    if model_name == 'property':
+        model_name = LProperties
+    if model_name == 'feature_config':
+        model_name = LFeatureConfigs
+    if model_name == 'data_type_config':
+        model_name = LDataTypeConfigs
+    if model_name == 'code_list_config':
+        model_name = LCodeListConfigs
+    if model_name == 'data_type':
+        model_name = LDataTypes
+    if model_name == 'value_type':
+        model_name = LValueTypes
+    if model_name == 'code_list':
+        model_name = LCodeLists
+    return model_name
+
+
+@require_POST
+@ajax_required
+def save(request, payload):
+    model_name = payload.get("model_name")
+    model_id = payload.get("model_id")
+    edit_name = payload.get("edit_name")
+    json = payload.get("form_values")
+    model_name = getModel(model_name)
+    json = json['form_values']
+    fields = []
+    for i in model_name._meta.get_fields():
+        type_name = i.get_internal_type()
+        if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
+            if type_name == "CharField":
+                type_name = 'text'
+            if type_name == "IntegerField" or type_name == "BigIntegerField":
+                type_name = 'number'
+            if type_name == "BooleanField":
+                type_name = 'radio'
+            fields.append(i.name)
+
+    check = True
+    datas = {}
+    for data in json:
+        if data['field_name'] in fields:
+            if not data['data']:
+               data['data'] = None
+            if data['field_type'] == 'radio':
+                if data['data'] == 'true':
+                    datas[data['field_name']] = True
+                else:
+                    datas[data['field_name']] = False
+            # if data['field_type'] == 'order_no':
+            #     order_no = len(model_name.objects.all()) + 1
+            #     datas[data['field_name']] = order_no
+            else:
+                datas[data['field_name']] = data['data']
+        else:
+            check = False
+    if check:
+        if edit_name == '':
+            sain = model_name.objects.create(**datas)
+        else:
+            sain = model_name.objects.filter(pk=model_id).update(**datas)
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай'
+        }
+    else:
+        rsp = {
+            'success': True,
+            'info': 'Алдаа гарлаа'
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def Get_Datas(request, name):
+    types = []
+    model_name = getModel(name)
+    datas = model_name.objects.all()
+    if name == 'data_type':
+        for data in datas:
+            types.append({
+                'id': data.data_type_id,
+                'name': data.data_type_name,
+            })
+    if name == 'value_type':
+        for data in datas:
+            types.append({
+                'id': data.value_type_id,
+                'name': data.value_type_name,
+            })
+    if name == 'property':
+        for data in datas:
+            types.append({
+                'id': data.property_id,
+                'name': data.property_name,
+            })
+    if name == 'feature':
+        for data in datas:
+            types.append({
+                'id': data.feature_id,
+                'name': data.feature_name,
+            })
+    rsp = {
+        'success': True,
+        'datas': types
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def remove(request, payload):
+    model_name = payload.get('model_name')
+    model_id = payload.get('model_id')
+    model_name = getModel(model_name)
+    try:
+        data = model_name.objects.filter(pk=model_id)
+        if data:
+            data.delete()
+            rsp = {
+                'success': True,
+                'info': 'Амжилттай устгалаа'
+            }
+        else:
+            rsp = {
+                'success': False,
+                'info': 'Хоосон байна'
+            }
+    except Exception as e:
+        rsp = {
+            'success': False,
+            'info': 'Алдаа гарсан байна: ' + str(e)
+        }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def erese(request, payload):
+    model_name = payload.get('model_name')
+    top_id = payload.get('top_id')
+    model_id = payload.get('model_id')
+    if model_name == 'property':
+        field_name = 'property_id'
+        model_name = 'data_type_config'
+    if model_name == 'data_type':
+        field_name = 'data_type_id'
+        model_name = 'feature_config'
+    model_name = getModel(model_name)
+    try:
+        savename = payload.get('model_name')
+        updateData = {}
+        data = model_name.objects.filter(pk=top_id)
+        for i in model_name._meta.get_fields():
+            if str(field_name) == str(i.name):
+                updateData[field_name] = None
+        if updateData != {}:
+            data.update(**updateData)
+            rsp = {
+                'success': True,
+                'info': 'Амжилттай устгалаа'
+            }
+        else:
+            rsp = {
+                'success': False,
+                'info': 'Хоосон байна'
+            }
+    except Exception as e:
+        rsp = {
+            'success': False,
+            'info': 'Алдаа гарсан байна: ' + str(e)
+        }
+    return JsonResponse(rsp)
+
+
+
+def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
     fields = [row.property_code for row in data]
     try:
@@ -302,12 +617,13 @@ def createView(ids, table_name):
             CREATE OR REPLACE VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from m_datas_building b where property_id in ({properties}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
 
         '''.format(
                 table_name = table_name,
+                model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
@@ -317,6 +633,7 @@ def createView(ids, table_name):
 
     except Exception:
         return False
+
 
 def removeView(table_name):
     try:

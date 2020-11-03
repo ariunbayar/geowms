@@ -5,26 +5,26 @@ from backend.org.models import Employee
 
 class ChangeRequest(models.Model):
 
-    STATE_CREATE = 1
-    STATE_REVOKE = 2
-    STATE_REVIEW = 3
-    STATE_APPROVE = 4
+    STATE_NEW = 1
+    STATE_REJECT = 2
+    STATE_APPROVE = 3
 
     STATE_CHOICES = (
-        (STATE_CREATE, 'Шинээр үүссэн'),
-        (STATE_REVOKE, 'Цуцлах'),
-        (STATE_REVIEW, 'Хянах'),
-        (STATE_APPROVE, 'Батлах'),
+        (STATE_NEW, 'ШИНЭ'),
+        (STATE_REJECT, 'ТАТГАЛЗСАН'),
+        (STATE_APPROVE, 'ЗӨВШӨӨРСӨН'),
     )
 
     KIND_CREATE = 1
     KIND_DELETE = 2
     KIND_UPDATE = 3
+    KIND_DIRECT = 4
 
     KIND_CHOICES = (
-        (KIND_CREATE, 'Шинээр үүссэн'),
-        (KIND_DELETE, 'Зассан'),
-        (KIND_UPDATE, 'Устгасан'),
+        (KIND_CREATE, 'ҮҮССЭН'),
+        (KIND_DELETE, 'ЗАССАН'),
+        (KIND_UPDATE, 'УСТГАСАН'),
+        (KIND_DIRECT, 'ШУУД'),
     )
 
     old_geo_id = models.CharField(max_length=100, null=True)

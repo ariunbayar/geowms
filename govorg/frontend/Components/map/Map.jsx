@@ -1,11 +1,14 @@
 import React, { Component, Fragment } from "react"
+import GeoJSON from 'ol/format/GeoJSON'
 import 'ol/ol.css'
 import {Map, View, Feature} from 'ol'
 import {transform as transformCoordinate} from 'ol/proj'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
+import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from 'ol/style'
+import {Draw, Modify, Select, Snap} from 'ol/interaction'
+
 import {Point} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
@@ -20,10 +23,10 @@ export default class Maps extends Component {
 
     constructor(props) {
         super(props)
-        this.map={}
         this.state = {
-            projection: 'EPSG:3857',
-            projection_display: 'EPSG:4326',
+            format: new GeoJSON(),
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857',
             is_sidebar_open: true,
             coordinate_clicked: '',
             vector_layer: null,
@@ -34,6 +37,9 @@ export default class Maps extends Component {
             info:[],
             xy: [],
             map_open:true,
+            geoms: [],
+            ayuul_geoms: [],
+            geom_points: [],
         }
 
         this.controls = {
@@ -46,6 +52,8 @@ export default class Maps extends Component {
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
+        this.loadGeojson = this.loadGeojson.bind(this)
+        this.snap = this.snap.bind(this)
     }
 
     initMarker() {
@@ -72,6 +80,72 @@ export default class Maps extends Component {
             service.loadBaseLayers().then(({base_layer_list}) => {
             this.handleMapDataLoaded(base_layer_list)
         })
+    }
+
+    snap(vector){
+        const snap = new Snap({
+            source: vector.getSource(),
+        });
+        this.map.addInteraction(snap);
+    }
+
+    loadGeojson(rows, color_type){
+
+        const map = this.map
+        const styles = {
+          'Polygon': new Style({
+            stroke: new Stroke({
+              color: color_type,
+              width: 4,
+            }),
+            fill: new Fill({
+              color: 'rgba(255, 255, 0, 0.1)',
+            }),
+          }),
+          'Point': new Style({
+            image: new CircleStyle({
+              radius: 5,
+              fill: new Fill({
+                color: 'blue',
+              }),
+            }),
+          }),
+        };
+
+        const features = []
+        rows.map((row) => {
+            const { id, geom } = row
+            if (geom){
+                const feature = (new GeoJSON().readFeatures(geom, {
+                dataProjection: this.state.dataProjection,
+                featureProjection: this.state.featureProjection,
+                }))[0]
+            feature.setProperties({ id })
+
+            features.push(feature)
+            }
+        })
+        const vectorSource = new VectorSource({
+            features: features,
+        })
+
+        const vectorLayer = new VectorLayer({
+            name: 'vector_layer',
+            source: vectorSource,
+            style: (feature) => styles[feature.getGeometry().getType()],
+        })
+        map.addLayer(vectorLayer)
+        this.snap(vectorLayer)
+        if(color_type == 'orange') {
+            this.vectorLayer = vectorLayer
+        }
+        if(color_type == 'red') {
+            this.ayuul_vectorLayer = vectorLayer
+        }
+        if(color_type == 'blue') {
+            this.geom_point_layer = vectorLayer
+        }
+
     }
 
     handleMapDataLoaded(base_layer_list) {
@@ -141,7 +215,7 @@ export default class Maps extends Component {
             target: 'map',
             controls: defaultControls().extend([
                 new MousePosition({
-                    projection: this.state.projection_display,
+                    projection: this.state.dataProjection,
                     coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                     undefinedHTML: '',
                 }),
@@ -163,13 +237,15 @@ export default class Maps extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
-        this.handleSetCenter()
+        if ( this.props.type !== 'ayuul'){
+            this.handleSetCenter()
+        }
     }
 
     handleMapClick(event) {
             this.marker.point.setCoordinates(event.coordinate)
             const projection = event.map.getView().getProjection()
-            const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+            const map_coord = transformCoordinate(event.coordinate, projection, this.state.dataProjection)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
             this.showFeaturesAt(coordinate_clicked)
@@ -195,6 +271,24 @@ export default class Maps extends Component {
         if(pP.xy !== this.props.xy){
             this.handleSetCenter()
         }
+        if(pP.geoms !== this.props.geoms){
+            if (this.vectorLayer) this.vectorLayer.getSource().clear();
+            const geoms = this.props.geoms
+            this.setState({geoms})
+            this.loadGeojson(geoms, 'orange')
+        }
+        if(pP.ayuul_geoms !== this.props.ayuul_geoms){
+            if (this.ayuul_vectorLayer) this.ayuul_vectorLayer.getSource().clear();
+            const ayuul_geoms = this.props.ayuul_geoms
+            this.setState({ayuul_geoms})
+            this.loadGeojson(ayuul_geoms, 'red')
+        }
+        if(pP.geom_points !== this.props.geom_points){
+            if (this.geom_point_layer) this.geom_point_layer.getSource().clear();
+            const geom_points = this.props.geom_points
+            this.setState({geom_points})
+            this.loadGeojson(geom_points, 'blue')
+        }
     }
 
     handleSetCenter() {
@@ -202,7 +296,7 @@ export default class Maps extends Component {
         if(coord[0]>60){
             const view = this.map.getView()
             const map_projection = view.getProjection()
-            const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
+            const map_coord = transformCoordinate(coord, this.state.dataProjection, map_projection)
             this.marker.point.setCoordinates(map_coord)
             view.setCenter(map_coord)
         }

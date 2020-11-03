@@ -80,6 +80,7 @@ export default class HureeFormTable extends Component {
                 service.hureeUpdate(tuuhen_ov,  x, y, id, tuuh_soyl_huree_id).then(({success}) => {
                     if (success) {
                         this.setState({modal_alert_status: 'open'})
+                        this.props.loadRows()
                         this.modalCloseTime()
                     }
                 })
@@ -183,12 +184,6 @@ export default class HureeFormTable extends Component {
                     :
                     perms.perm_remove && perms.perm_create ? null: <td rowSpan="1"></td>
                 }
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай заслаа"
-                    model_type_icon = "success"
-                />
             </tr>
         )
     }

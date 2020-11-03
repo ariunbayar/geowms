@@ -66,7 +66,6 @@ def _get_package(org_id, theme_id):
 
 
 def _get_roles(org_id, module_id, module, module_root_id):
-
     roles = []
     module = OrgInspireRoles.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
     if module:
@@ -84,13 +83,12 @@ def Inspireroles(request, level, pk):
     roles = []
     data = []
     org = get_object_or_404(Org, pk=pk, level=level)
-
     for themes in LThemes.objects.all():
         data.append({
                 'id': themes.theme_id,
                 'code': themes.theme_code,
                 'name': themes.theme_name,
-                'packages': _get_package(1, themes.theme_id),
+                'packages': _get_package(org.id, themes.theme_id),
                 'roles': _get_roles(org.id, themes.theme_id, 1, None)
             })
 
@@ -262,7 +260,7 @@ def employee_more(request, level, pk, emp):
             'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
-    return JsonResponse({'employee': employees_display})    
+    return JsonResponse({'employee': employees_display})
 
 
 @require_POST
@@ -480,12 +478,12 @@ def employeeList(request,payload, level, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def rolesAdd(request, payload, level, pk):
     form_datas = payload.get("form_values")
-    org = get_object_or_404(Org, pk=pk)
+    org = get_object_or_404(Org, pk=pk, level=level)
     def role_update(roles, table_name, root_id, id):
         if root_id:
-            org_check = OrgInspireRoles.objects.filter(module_root_id=root_id , module_id=id, module=table_name)
+            org_check = OrgInspireRoles.objects.filter(module_root_id=root_id , module_id=id, module=table_name, org=org)
         else:
-            org_check = OrgInspireRoles.objects.filter(module_id=id, module=table_name)
+            org_check = OrgInspireRoles.objects.filter(module_id=id, module=table_name, org=org)
         if org_check:
             org_check.update(
                 perm_view=roles[0],

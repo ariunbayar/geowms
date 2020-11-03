@@ -438,7 +438,14 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     removeModal(){
-      if(this.state.selectedFeature_ID) this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
+      
+      if(this.state.selectedFeature_ID){
+        if(this.state.roles[6]){
+          this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
+        }else{
+          this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
+        }
+      }
       else
       {
         if(this.state.drawed) this.controls.modal.showModal(this.remove, true, "Тийм", `Шинээр үүссэн цэгийг устгах уу`, null, 'danger', "Үгүй")
@@ -456,7 +463,7 @@ export default class BarilgaSuurinGazar extends Component{
       const fid = this.state.fid
       const pid = this.state.pid
       if(selectedFeature_ID){
-          if(this.state.roles[4] || this.state.roles[5] || this.state.roles[6]){
+          if(this.state.roles[6]){
             service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
               if (success) {
                 this.addNotif('success', 'Амжилттай', 'check')
@@ -496,8 +503,14 @@ export default class BarilgaSuurinGazar extends Component{
       if(this.state.modifyend_selected_feature_ID){
           if(this.state.modifyend_selected_feature_check)
           {
-            this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
-            this.setState({modifyend_selected_feature_check: false})
+            if(this.state.roles[6]){
+              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хянуулах уу`, null, null, "Үгүй")
+              this.setState({modifyend_selected_feature_check: false})
+            }
+            else{
+              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
+              this.setState({modifyend_selected_feature_check: false})
+            }
           }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
@@ -515,7 +528,7 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.changedFeature)
       const datas = json.geometry
       this.setState({ is_loading:true })
-      if(this.state.roles[4] || this.state.roles[5] || this.state.roles[6]){
+      if(this.state.roles[6]){
         service.createUpd(tid, pid, fid, null, datas, id).then(({success}) => {
           if(success){
             this.addNotif('success', 'Амжилттай', 'check')
@@ -550,7 +563,7 @@ export default class BarilgaSuurinGazar extends Component{
       const json = JSON.parse(this.state.drawed)
       const datas = json.geometry
       this.setState({ is_loading:true })
-      if(this.state.roles[4] || this.state.roles[5] || this.state.roles[6]){
+      if(this.state.roles[6]){
         this.setState({ is_loading:false, geojson: datas, null_form_isload: true, togle_islaod: false})
       }
       else

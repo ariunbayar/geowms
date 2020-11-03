@@ -97,7 +97,7 @@ export class OrgInspireRole extends Component {
                                     render={arrayHelpers => (
                                     <>
                                         {values.form_values && values.form_values.length > 0 ? (
-                                            <tbody className="col-12 scroll-tbody">
+                                            <tbody className="col-12 scroll-tbody scroll-fixed">
                                             {values.form_values.map(({name, roles, packages}, theme_index) => (
                                                 <>
                                                     <tr className="row">
