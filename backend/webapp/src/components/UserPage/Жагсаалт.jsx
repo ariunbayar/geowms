@@ -15,7 +15,7 @@ export class Жагсаалт extends Component {
             user_list: [],
             user_length:null,
             currentPage:1,
-            usersPerPage:10,
+            usersPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
@@ -55,7 +55,7 @@ export class Жагсаалт extends Component {
                 <div className="col-md-12">
                     <div className="card">
                         <div className="card-body">
-                            <div className="col-md-4 float-right">
+                            <div className="col-md-3 float-right">
                                 <input
                                     type="text"
                                     className="form-control"
@@ -67,8 +67,8 @@ export class Жагсаалт extends Component {
                             </div>
                             <div className="my-4">
                                 <div className="p-3">
-                                    <div className="table-responsive">
-                                        <table className="table">
+                                    <div className="table-responsive table_wrapper">
+                                        <table className="table table_wrapper_table">
                                             <thead>
                                                 <tr>
                                                     <th scope="col">№</th>

@@ -62,3 +62,50 @@
 }
 
 
+
+
+
+
+.table_wrapper{
+    overflow-y: scroll;
+    height: calc( 90vh - 150px - 15px);
+}
+
+.table_wrapper th{
+    position: sticky;
+    top: 0;
+}
+
+.table_wrapper{
+    background: white;
+}
+
+.table_wrapper .table_wrapper_table{
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table_wrapper .table_wrapper_table thead th{
+    background:  #223035;
+    color: #fff;
+}
+
+.table_wrapper::-webkit-scrollbar {
+    width: 3px;
+    height: 5px;
+  }
+
+/* Track */
+.table_wrapper::-webkit-scrollbar-track {
+    background: #ffffff; 
+}
+
+/* Handle */
+.table_wrapper::-webkit-scrollbar-thumb {
+    background: #484848; 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #034ea2; 
+  }
+  
