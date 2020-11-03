@@ -61,11 +61,7 @@
     background: #034ea2; 
 }
 
-
-
-
-
-
+/* scroll data table агуулж буй div class="table_wrapper" table class="table_wrapper_table" */
 .table_wrapper{
     overflow-y: scroll;
     height: calc( 90vh - 150px - 15px);
@@ -95,16 +91,16 @@
     height: 5px;
   }
 
-/* Track */
 .table_wrapper::-webkit-scrollbar-track {
     background: #ffffff; 
+    margin-top: 41px;
 }
 
-/* Handle */
 .table_wrapper::-webkit-scrollbar-thumb {
     background: #484848; 
-    border-radius: 10px;
+    border-radius: 50%px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #034ea2; 
   }
