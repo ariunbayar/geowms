@@ -761,7 +761,6 @@ def _MDatasName(model_name):
 
 
 def _deleteFile(file_name, for_delete_name):
-    print(file_name)
     fileList = glob.glob(os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_name+'.*'))
     text = ''
     for filePath in fileList:
