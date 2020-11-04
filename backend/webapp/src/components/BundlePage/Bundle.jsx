@@ -36,7 +36,7 @@ export default class Bundle extends Component {
 
     
     render() {
-        const {id, name, price, icon_url, wms_list, oid_list, oid_table_list} = this.props.values
+        const {id, name, price, icon_url, wms_list} = this.props.values
         const {is_modal_delete_open}=this.state
         const idx=this.props.idx
         return (
@@ -51,46 +51,28 @@ export default class Bundle extends Component {
                 </td>
 
                 <td>
-                <div className="col-md-12">
                     {wms_list.map((wms, idx) =>
                         (wms.is_active ?
-                            <div key={idx} className="row">
-                                <div className="col-md-1">
+                            <p key={idx}>
+                                <span>
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
-                                </div>
-                                <div className="col-md-10">
+                                </span>
+                                <span >
                                     <a> {wms.name}</a>
-                                </div>
-                            </div> :
+                                </span>
+                            </p> :
 
-                            <div key={idx} className="row">
-                                <div className="col-md-1">
+                            <p key={idx}>
+                                <span>
                                     <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
-                                </div>
-                                <div className="col-md-10 text-muted">
+                                </span>
+                                <span className="text-muted">
                                     <a><del> {wms.name}</del></a>
-                                </div>
-                            </div>
+                                </span>
+                            </p>
                         )
                     )}
-                    </div>
-                   </td>
-                   <td>
-                    <div className="col-md-12">
-                        {oid_table_list ? oid_table_list.map((oid, idx) =>
-                                <div key={idx} className="row">
-                                    <div className="col-md-1">
-                                        <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
-                                     </div>
-                                    <div className="col-md-8">
-                                        <a> {oid.schema}.{oid.table}</a>
-                                    </div>
-                                </div>
-                            ) :
-                            null
-                        }
-                    </div>
-                   </td>
+                </td>
                 <td>
                     <NavLink to={`/back/дэд-сан/${id}/засах/`}>
                             <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>

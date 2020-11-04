@@ -32,13 +32,13 @@ export default class BundleAdminRights extends Component {
                     <div key={idx}>
                         {layer_visible &&
                             (is_active ?
-                                <div key={idx} className="row">
+                                <div key={idx} className="row ml-1">
                                     <a>
                                         <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
                                         <span> {name}</span>
                                     </a>
                                 </div> :
-                                <div key={idx} className="row" >
+                                <div key={idx} className="row ml-1" >
                                     <a>
                                         <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
                                         <del> {name}</del>
@@ -56,7 +56,9 @@ export default class BundleAdminRights extends Component {
                                         {this.props.formOptionsRole.map(({id}, idx) =>
                                             (id == 1 ?
                                             <th key={idx} scope="col">Нээлтэй өгөгдөл</th>:
-                                            <th key={idx} scope="col">Эрх {id}</th>
+                                            id == 2 ?
+                                            <th key={idx} scope="col">Дан нэвтэрсэн</th>:
+                                            null
                                             )
                                         )}
                                     </tr>

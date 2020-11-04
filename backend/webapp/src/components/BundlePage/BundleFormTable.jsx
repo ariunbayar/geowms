@@ -33,6 +33,9 @@ export default class BundleFormTable extends Component {
             roles.push(roleId)
             const data = {"bundleId":bundleId, "roleId":roleId, "layerId":layerId, "check": check}
             service.roleCreate(data).then(({success, item}) => {
+                if (success) {
+                    this.addNotif('success', 'Амжилттай нэмлээ', 'check')
+                }
             })
         }
         else {
@@ -41,6 +44,9 @@ export default class BundleFormTable extends Component {
                 roles = roles.filter((id) => id != roleId)
                 const data = {"bundleId":bundleId, "roleId":roleId, "layerId":layerId}
                 service.roleRemove(data).then(({success, item}) => {
+                    if (success) {
+                        this.addNotif('success', 'Амжилттай устгалаа', 'times')
+                    }
                 })
             }
 
@@ -102,12 +108,16 @@ export default class BundleFormTable extends Component {
                 </td>
                 {this.props.role.map(({id}, idx) =>
                     <td key={idx}>
+                        {
+                            id != 5 &&
                         <input
                             type="checkbox"
                             onChange={this.handleLayerToggle}
                             checked={this.state.roles.indexOf(id) > -1}
                             value={id}
                         />
+                        }
+
                     </td>
                 )}
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
