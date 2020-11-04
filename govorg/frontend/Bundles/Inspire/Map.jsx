@@ -94,7 +94,6 @@ export default class BarilgaSuurinGazar extends Component{
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
-
     }
 
     componentDidMount(){
@@ -128,6 +127,7 @@ export default class BarilgaSuurinGazar extends Component{
     loadControls(){
       const map = this.map
       const { type, roles } = this.state
+      map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       map.addControl(this.controls.sidebar)
       if(roles[1]){
