@@ -70,13 +70,13 @@ export default class WMSCheckFormTable extends Component {
                     <input type="text" name={name} value={title}  onChange={this.handleChange} disabled = {(this.state.titleDisabled)? "" : "disabled"}/>
                 </td>
                 <td>
-                    <a className="btn" onClick={() => this.openGeoData()} data-toggle="tooltip" data-placement="top" title="geo">
+                    <a role="button" onClick={() => this.openGeoData()} data-toggle="tooltip" data-placement="top" title="geo">
                         {
                             toggleButton
                             ?
-                            <i className="fa fa-window-close-o text-success" aria-hidden="true"></i>
+                            <i className="fa fa-window-close-o gp-text-primary" aria-hidden="true"></i>
                             :
-                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                            <i className="fa fa-cog gp-text-primary" aria-hidden="true"></i>
                         }
                     </a>
                         {
@@ -95,21 +95,21 @@ export default class WMSCheckFormTable extends Component {
                 </td>
                 <td >
                     {titleDisabled ?
-                    <a className="btn" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
-                        <i className="fa fa-floppy-o text-success" aria-hidden="true"></i>
+                    <a role="button" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Хадгалах">
+                        <i className="fa fa-floppy-o gp-text-primary" aria-hidden="true"></i>
                     </a>:
-                    <a className="btn" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
-                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                    <a role="button" onClick={() => this.titleSave()} data-toggle="tooltip" data-placement="top" title="Засах">
+                        <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
                     </a>
                     }
                 </td>
                 <td >
-                    <a className="btn" onClick={event => this.props.handleMove(layer.id, 'up', wmsId)}>
+                    <a role="button" onClick={event => this.props.handleMove(layer.id, 'up', wmsId)}>
                         <i className="fa fa-chevron-up gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
                 <td>
-                    <a className="btn" onClick={event => this.props.handleMove(layer.id, 'down', wmsId)}>
+                    <a role="button" onClick={event => this.props.handleMove(layer.id, 'down', wmsId)}>
                         <i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>

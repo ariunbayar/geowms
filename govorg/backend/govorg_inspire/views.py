@@ -15,7 +15,7 @@ from main.decorators import ajax_required, gov_bundle_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter
 import random
-from backend.org.models import Org, Employee, OrgInspireRoles
+from backend.org.models import Org, Employee, InspirePerm
 
 from main.utils import (
     gis_delete,
@@ -114,7 +114,7 @@ def getRoles(request,pid, fid):
 
     inspire_roles = []
     org = get_object_or_404(Org, employee__user=request.user)
-    org_roles = OrgInspireRoles.objects.filter(org=org, module=3, module_root_id=pid, module_id=fid, perm_view=True).first()
+    org_roles = InspirePerm.objects.filter(org=org, module=3, module_root_id=pid, module_id=fid, perm_view=True).first()
     if org_roles:
         inspire_roles = [
             org_roles.perm_view, 
@@ -400,7 +400,7 @@ def _get_type(value_type_id):
 @ajax_required
 def detail(request, pk, fid):
     org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = OrgInspireRoles.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
+    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
     find_cursor = connections['default'].cursor()
     find_cursor.execute('''
     select
@@ -455,7 +455,7 @@ def detail(request, pk, fid):
 @ajax_required
 def detailNone(request, tid, pid, fid):
     org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = OrgInspireRoles.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
+    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
     find_cursor = connections['default'].cursor()
     find_cursor.execute('''
         select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id
