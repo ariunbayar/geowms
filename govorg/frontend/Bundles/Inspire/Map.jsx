@@ -22,7 +22,7 @@ import {SaveBtn} from "./controls/Add/AddButton"
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
-import {Modal} from "../../../src/components/MapModal/Modal"
+import {Modal} from "../../../../src/components/MapModal/Modal"
 
 import "./styles.css"
 import { service } from './service'
@@ -94,6 +94,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
+
     }
 
     componentDidMount(){
@@ -137,7 +138,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-      map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
+      map.addControl(new SideBarBtn({SideBarBtn: this.get}))
 
       if(roles[3]){
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
@@ -275,6 +276,7 @@ export default class BarilgaSuurinGazar extends Component{
         const modify = new Modify({
           features: select.getFeatures(),
         })
+
         modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
 
@@ -634,10 +636,6 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
-    }
-
-    SideBarBtn(){
-        this.get()
     }
 
     get(){
