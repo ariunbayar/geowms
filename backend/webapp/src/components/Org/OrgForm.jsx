@@ -100,7 +100,7 @@ export class OrgForm extends Component {
         const {orgs,currentPage,org_length} = this.state
         return (
             <div className="main-content">
-                <div className="page-container my-4">
+                <div className="page-container">
                     <div className="text-right">
                         <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
                             Нэмэх
@@ -115,8 +115,8 @@ export class OrgForm extends Component {
                         />
                     </div>
                     <div className="mb-3 mt-3">
-                        <table className="table-responsive">
-                            <table className="table example" id="example">
+                        <table className="table-responsive table_wrapper">
+                            <table className="table example table_wrapper_table" id="example">
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>

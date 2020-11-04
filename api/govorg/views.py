@@ -39,12 +39,10 @@ def proxy(request, token, pk):
     allowed_layers = [layer.code for layer in govorg.wms_layers.filter(wms=wms)]
     if request.GET.get('REQUEST') == 'GetCapabilities':
         content = filter_layers(content, allowed_layers)
-
-    content_type = rsp.headers.get('content-type')
-
-    service_url = _get_service_url(request, token, wms)
-    content = replace_src_url(content, wms.url, service_url)
-
+    
+        service_url = _get_service_url(request, token, wms)
+        content = replace_src_url(content, wms.url, service_url)
+    
     qs_request = queryargs.get('REQUEST', 'no request')
 
     WMSLog.objects.create(
@@ -55,6 +53,8 @@ def proxy(request, token, pk):
         system_id= govorg.id,
         wms_id=pk,
     )
+
+    content_type = rsp.headers.get('content-type')
 
     return HttpResponse(content, content_type=content_type)
 

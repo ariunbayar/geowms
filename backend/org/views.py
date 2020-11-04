@@ -390,9 +390,11 @@ def orgList(request, payload, level):
     per_page = payload.get('perpage')
     level = payload.get('org_level')
     orgs_display = []
-
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     orgs = Org.objects.filter(level=level).annotate(search=SearchVector(
-        'name')).filter(search__contains=query).order_by('id')
+        'name')).filter(search__contains=query).order_by(sort_name)
     total_items = Paginator(orgs, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
@@ -441,12 +443,14 @@ def employeeList(request,payload, level, pk):
     page = payload.get('page')
     query = payload.get('query')
     per_page = payload.get('perpage')
-
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'last_name'
     emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
         'last_name', 
         'first_name', 
         'email')
-    ).filter(search__contains=query)
+    ).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(emp_list, per_page)
     items_page = total_items.page(page)

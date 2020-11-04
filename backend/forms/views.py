@@ -490,8 +490,10 @@ def dursgaltGazarAll(request, payload):
     per_page = payload.get('perpage')
     tuuh_soyol = payload.get('id')
     form_data = []
-
-    data = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuuh_soyol).annotate(search=SearchVector('dursgal')).filter(search__contains=query).order_by('id')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
+    data = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuuh_soyol).annotate(search=SearchVector('dursgal')).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(data, per_page)
     items_page = total_items.page(page)
@@ -605,12 +607,15 @@ def tseg_personal_list(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
     tseg_personal = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     mpoint = Mpoint_view.objects.using('postgis_db').annotate(search=SearchVector(
         'point_id',
         'pid',
         't_type',
         'mclass',
-        ) + SearchVector('point_name')).filter(search__contains=query).order_by("id")
+        ) + SearchVector('point_name')).filter(search__contains=query).order_by(sort_name)
     total_items = Paginator(mpoint, per_page)
     items_page = total_items.page(page)
     for mpoint_all in items_page.object_list:
@@ -1264,7 +1269,10 @@ def tsegUstsanList(request, payload):
     per_page = payload.get('perpage')
     query = payload.get('query')
     display_items = []
-    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by('id')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
+    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by(sort_name)
 
     total_items = Paginator(tsegs, per_page)
     items_page = total_items.page(page)
@@ -1801,10 +1809,13 @@ def tuuhenOvList(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
     display_item = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     tuuhs = TuuhSoyol.objects.using('postgis_db').annotate(search=SearchVector(
         'dugaar',
         'burtgegch',
-        )).filter(search__icontains=query).order_by('id')
+        )).filter(search__icontains=query).order_by(sort_name)
     total_items = Paginator(tuuhs, per_page)
     items_page = total_items.page(page)
     for item in items_page.object_list:

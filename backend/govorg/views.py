@@ -157,8 +157,11 @@ def govorgList(request, payload):
     per_page = payload.get('perpage')
     query = payload.get('query')
     org_id = payload.get('org_id')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     govorg_list = GovOrg.objects.all().annotate(search=SearchVector(
-        'name')).filter(search__contains=query, org_id = org_id)
+        'name')).filter(search__contains=query, org_id = org_id).order_by(sort_name)
 
     total_items = Paginator(govorg_list, per_page)
     items_page = total_items.page(page)
