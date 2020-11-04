@@ -89,7 +89,7 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
-            path('send-data/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
+            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
         ], 'inspire'))),
 
         path('org-request/', include(([

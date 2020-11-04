@@ -129,10 +129,10 @@ function createDel(tid, pid, fid, old_geo_id) {
     return fetch(`${prefix}/createDel/`, opts).then(handleResponse)
 }
 
-function sendFile(formData, fid){
+function sendFile(formData, fid, tid){
     const opts = {
         ...getPostOptions(),
         body: formData,
     }
-    return fetch(`${prefix}/send-data/${fid}/`, opts).then(handleResponse)
+    return fetch(`${prefix}/send-data/${tid}/${fid}/`, opts).then(handleResponse)
 }

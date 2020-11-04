@@ -859,7 +859,7 @@ def _deleteDB(id_made, model_name):
 
 @require_POST
 @ajax_required
-def FileUploadSaveData(request, fid):
+def FileUploadSaveData(request, tid, fid):
     form = request.FILES.getlist('data')
     file_name = ''
     for_delete_name = ''
@@ -908,9 +908,7 @@ def FileUploadSaveData(request, fid):
         for val in layer:
             values = []
             try:
-                code = LFeatures.objects.filter(feature_id=feature_id).first()
-                code = LPackages.objects.filter(package_id=code.package_id).first()
-                code = LThemes.objects.filter(theme_id=code.theme_id).first()
+                code = LThemes.objects.filter(theme_id=tid).first()
                 model_name = code.theme_code
                 need_id = MGeoDatas.objects.count()
                 for name in layer.fields:

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { service } from '../../service'
+import filesize from 'filesize'
 
 export class Upload extends Component {
     constructor(props){
@@ -16,6 +17,9 @@ export class Upload extends Component {
         this.getFile = this.getFile.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.setInfo = this.setInfo.bind(this)
+        this.setType = this.setType.bind(this)
+        this.cancel = this.cancel.bind(this)
+        this.removeFromList = this.removeFromList.bind(this)
     }
 
     getFile(event) {
@@ -33,8 +37,9 @@ export class Upload extends Component {
                     else {
                         this.setState({ files: state_files.concat(files[i]) })
                     }
-                    const type = files[i].name.split('.')[1]
-                    if(type == 'shp'){
+                    const type = files[i].name.split('.')
+                    const urt = type.length - 1
+                    if(type[urt] == 'shp'){
                         this.props.notif('warning', `.shx төрлийн файл хамт байх ёстойг анхаарна уу`, 'info')
                     }
                 }
@@ -63,8 +68,9 @@ export class Upload extends Component {
         var check = false
         for (var i=0; i < files.length; i ++){
             const type = files[i].name.split('.')
+            const urt = type.length - 1
             if (name == 'shp'){
-                if (type[1] == 'shp' || type[1] == 'shx' || type[1] == 'prj' || type[1] == 'dbf' || type[1] == 'cpg'){
+                if (type[urt] == 'shp' || type[urt] == 'shx' || type[urt] == 'prj' || type[urt] == 'dbf' || type[urt] == 'cpg'){
                     check = true
                 }
                 else{
@@ -73,7 +79,7 @@ export class Upload extends Component {
                 }
             }
             if (name == 'geojson'){
-                if (type[1] == 'geojson' || type[1] == 'gfs'){
+                if (type[urt] == 'geojson' || type[urt] == 'gfs'){
                     check = true
                 }
                 else{
@@ -82,7 +88,7 @@ export class Upload extends Component {
                 }
             }
             if(name == 'gml') {
-                if (type[1] == 'gml' || type[1] == 'gfs'){
+                if (type[urt] == 'gml' || type[urt] == 'gfs'){
                     check = true
                 }
                 else{
@@ -96,14 +102,14 @@ export class Upload extends Component {
 
     handleSubmit(){
         const { files } = this.state
-        const { fid } = this.props
+        const { fid, tid } = this.props
         const formData = new FormData();
         this.setState({ btn_upload_is_laod: true })
         for(var i = 0; i < files.length; i ++) {
             formData.append("data", files[i], files[i].name);
         }
         service
-            .sendFile(formData, fid)
+            .sendFile(formData, fid, tid)
             .then(({success, info, key}) => {
             if (success){
                 alert(info)
@@ -156,12 +162,29 @@ export class Upload extends Component {
         }
     }
 
+    removeFromList(file_name) {
+        const { files } = this.state
+        const isBelowThreshold = (names) => names = file_name;
+        if (files.length == 1) {
+            this.setState({ files: [] })
+        }
+        else {
+            if(files.every(isBelowThreshold)){
+                var array = files.filter((item) => {
+                    return item.name !== file_name
+                })
+                this.setState({ files: array })
+            }
+        }
+    }
+
     render() {
         const { files, text, type, file_value, name } = this.state
         this.list = []
         if (files.length > 0){
             for(var i=0; i < files.length; i++){
-                this.list.push(<li key={i}>{files[i].name}</li>)
+                const size = filesize(files[i].size)
+                this.list.push(<li key={i}>{files[i].name} - {size} <i role="button" className="float-right fa fa-times text-danger mt-1" aria-hidden='true' onClick={(e) => this.removeFromList(e.target.parentElement.innerHTML.split(' ')[0])}></i></li>)
             }
         }
         return (
@@ -252,20 +275,22 @@ export class Upload extends Component {
                             null
                         }
                     </div>
-                    {this.state.btn_upload_is_laod ?
-                    <div className="spinner-border gp-text-primary" role="status">
-                        <span className="sr-only">Loading...</span>
-                    </div>:
-                    <button
-                        className="btn"
-                        onClick={this.handleSubmit}
-                        disabled={this.list.length == 0 ? 'disabled' : ''}
-                    >Файлийг илгээх</button>
-                    }
-                    <button
-                        className="btn"
-                        onClick={() => this.cancel()}
-                    >Хоослох</button>
+                    <div className="mt-2">
+                        {this.state.btn_upload_is_laod ?
+                        <i className="spinner-border" role="status">
+                            <span className="sr-only gp-text-primary">Loading...</span>
+                        </i>:
+                        <button
+                            className="btn gp-btn-primary"
+                            onClick={this.handleSubmit}
+                            disabled={this.list.length == 0 ? 'disabled' : ''}
+                        >Файлийг илгээх</button>
+                        }
+                        <button
+                            className="btn btn-secondary float-right"
+                            onClick={() => this.cancel()}
+                        >Хоослох</button>
+                    </div>
                 </div>
             </div>
         )

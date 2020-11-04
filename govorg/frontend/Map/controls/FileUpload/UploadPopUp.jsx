@@ -19,16 +19,17 @@ class UploadCmp extends Component {
         return (
             <div className="modal-dialog modal-dialog-centered">
                 <div role="document" style={{zIndex: 1050}}>
-                    <div className="modal-content animated">
+                    <div className="modal-content animated slideInLeft">
                         <div className="modal-header">
                             <h5 className="modal-title" id="exampleModalLongTitle">Файлаа оруулна уу.</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={()=> this.props.func()}>
+                            <button type="button" className="animated close" data-dismiss="modal" aria-label="Close" onClick={()=> this.props.func()}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
                             <Upload
                                 fid={this.props.fid}
+                                tid={this.props.tid}
                                 func={this.props.func}
                                 rows={this.props.rows}
                                 notif={this.props.notif}
@@ -89,9 +90,9 @@ export class UploadBtn extends Control {
         ReactDOM.hydrate(<UploadCmp {...props}/>, this.element)
     }
 
-    showUpload(islaod, fid, func, rows, notif) {
+    showUpload(islaod, fid, func, rows, notif, tid) {
         this.toggleControl(islaod)
-        this.renderComponent({fid, func, rows, notif})
+        this.renderComponent({fid, func, rows, notif, tid})
     }
 
 }

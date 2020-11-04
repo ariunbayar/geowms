@@ -628,7 +628,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     showUploadBtn(){
-      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif)
+      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid)
       this.setState({ showUpload: true })
     }
 
@@ -638,6 +638,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     render(){
+      console.log()
         return (
             <div className="col-md-12">
                 <div className={this.state.togle_islaod ? "toggled" : ""} id="wrapper-map" >
