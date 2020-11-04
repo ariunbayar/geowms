@@ -9,7 +9,7 @@ from main.decorators import ajax_required
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
 import random
-from backend.org.models import Org, Employee, OrgInspireRoles
+from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
 from geoportal_app.models import User
 from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography
@@ -99,7 +99,7 @@ def _get_state_and_kind(type_of, module):
 
 def _get_org_request(ob, org):
     if org:
-        org_role = OrgInspireRoles.objects.filter(org=org, module=3, module_root_id=ob.package_id, module_id=ob.feature_id, perm_approve=True)
+        org_role = InspirePerm.objects.filter(org=org, module=3, module_root_id=ob.package_id, module_id=ob.feature_id, perm_approve=True)
         if org_role:
             geo_json = []
             collection = []
