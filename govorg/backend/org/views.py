@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from backend.org.models import Org, OrgRole, Employee,OrgInspireRoles
+from backend.org.models import Org, OrgRole, Employee,InspirePerm
 from backend.bundle.models import Bundle
 from django.shortcuts import get_object_or_404
 from backend.inspire.models import LThemes, LPackages, LFeatures
@@ -10,7 +10,7 @@ def _get_features(org, package_id):
     inspire_features = LFeatures.objects.filter(package_id=package_id).values('feature_id', 'feature_name')
     if inspire_features:
         for org_feature in inspire_features:
-            org_features = OrgInspireRoles.objects.filter(org=org, perm_view=True, module_root_id = package_id, module_id=org_feature['feature_id'])
+            org_features = InspirePerm.objects.filter(org=org, perm_view=True, module_root_id = package_id, module_id=org_feature['feature_id'])
             if org_features:
                 for feature in org_features:
                     features.append({
@@ -22,7 +22,7 @@ def _get_features(org, package_id):
 
 def _get_packages(org, theme_id):
     packages = []
-    org_packages = OrgInspireRoles.objects.filter(org=org, perm_view=True, module_root_id = theme_id)
+    org_packages = InspirePerm.objects.filter(org=org, perm_view=True, module_root_id = theme_id)
     if org_packages:
         for org_package in org_packages:
             inspire_packages = LPackages.objects.filter(package_id=org_package.module_id).values('package_id', 'package_name')
@@ -40,7 +40,7 @@ def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
     perms = []
     org_inspire = []
-    roles_inspire = OrgInspireRoles.objects.filter(org=org, perm_view=True)
+    roles_inspire = InspirePerm.objects.filter(org=org, perm_view=True)
     if roles_inspire:
         for i in roles_inspire:
             if i.module == 1:

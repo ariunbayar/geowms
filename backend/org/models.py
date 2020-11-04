@@ -38,7 +38,7 @@ class OrgRole(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class OrgInspireRoles(models.Model):
+class InspirePerm(models.Model):
     THEME = 1
     PACKEGE = 2
     FEATURE = 3

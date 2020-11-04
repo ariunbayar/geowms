@@ -7,11 +7,11 @@ from django.core.paginator import Paginator
 import json
 
 from main.decorators import ajax_required
-from .models import Org, OrgRole, Employee, OrgInspireRoles
+from .models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
 from backend.govorg.models import GovOrg
-from .models import OrgInspireRoles
+from .models import InspirePerm
 from django.contrib.postgres.search import SearchVector
 from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
 
@@ -67,7 +67,7 @@ def _get_package(org_id, theme_id):
 
 def _get_roles(org_id, module_id, module, module_root_id):
     roles = []
-    module = OrgInspireRoles.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
+    module = InspirePerm.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
     if module:
         roles = [module.perm_view,module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
     else:
@@ -485,9 +485,9 @@ def rolesAdd(request, payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     def role_update(roles, table_name, root_id, id):
         if root_id:
-            org_check = OrgInspireRoles.objects.filter(module_root_id=root_id , module_id=id, module=table_name, org=org)
+            org_check = InspirePerm.objects.filter(module_root_id=root_id , module_id=id, module=table_name, org=org)
         else:
-            org_check = OrgInspireRoles.objects.filter(module_id=id, module=table_name, org=org)
+            org_check = InspirePerm.objects.filter(module_id=id, module=table_name, org=org)
         if org_check:
             org_check.update(
                 perm_view=roles[0],
@@ -499,7 +499,7 @@ def rolesAdd(request, payload, level, pk):
                 perm_approve=roles[6]
             )
         else:
-            orgRole = OrgInspireRoles.objects.create(
+            orgRole = InspirePerm.objects.create(
                 org=org,
                 module_id=id,
                 module=table_name,
