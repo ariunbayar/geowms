@@ -30,6 +30,8 @@ class UploadCmp extends Component {
                             <Upload
                                 fid={this.props.fid}
                                 func={this.props.func}
+                                rows={this.props.rows}
+                                notif={this.props.notif}
                             />
                         </div>
                     </div>
@@ -52,7 +54,7 @@ export class UploadBtn extends Control {
         })
 
         this.is_component_initialized = false
-        const cssClasses = ` modal `
+        const cssClasses = ` modal col-md-12`
         this.element.className = cssClasses
         this.element.setAttribute('id', '#exampleModalCenter')
         this.element.setAttribute('tabindex', '-1')
@@ -87,9 +89,9 @@ export class UploadBtn extends Control {
         ReactDOM.hydrate(<UploadCmp {...props}/>, this.element)
     }
 
-    showUpload(islaod, fid, func) {
+    showUpload(islaod, fid, func, rows, notif) {
         this.toggleControl(islaod)
-        this.renderComponent({fid, func})
+        this.renderComponent({fid, func, rows, notif})
     }
 
 }

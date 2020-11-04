@@ -20,7 +20,9 @@ export class PointBarButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Цэг зурах')
         elementa.setAttribute('href', '#')
-
+        if (options.null){
+            element.style.right = '63px'
+        }
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
         elementi.className = 'fa fa-circle-o text-white'

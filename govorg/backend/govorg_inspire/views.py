@@ -213,7 +213,7 @@ def geom_type(request, pid, fid):
     else:
         rsp = {
             'success': False,
-            'type': None
+            'type': 'Tөрөл байхгүй байна'
         }
     return JsonResponse(rsp)
 
@@ -574,7 +574,7 @@ def get_rows(fid):
     return rows
 
 
-def geoJsonConvertGeom(geojson):
+def _geoJsonConvertGeom(geojson):
     with connections['default'].cursor() as cursor:
 
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
@@ -602,7 +602,7 @@ def geoJsonConvertGeom(geojson):
 def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
-    geom = geoJsonConvertGeom(geojson)
+    geom = _geoJsonConvertGeom(geojson)
     if not geom:
         rsp = {
             'success': False,
@@ -705,7 +705,7 @@ def createUpd(request, payload):
         form_json = ''
     if not geo_json:
         geo_json = ''
-    
+
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
             new_geo_id = None,
@@ -741,70 +741,76 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     feature_config_id = None
     savename = model_name
     model_name = _MDatasName(model_name)
-    if not isinstance(model_name, str):
-        if values:
-            feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
-            if feature_config:
-                feature_config_id = feature_config.feature_config_id
-            else:
-                feature_config_id = None
-            data_type_id = None
-            for j in values:
-                for key, value in j.items():
-                    properties = LProperties.objects.filter(property_code__icontains=key)
-                    if properties:
-                        for property in properties:
-                            datas = {}
-                            value_types = LValueTypes.objects.filter(value_type_id=property.value_type_id)
-                            if value_types:
-                                for value_type in value_types:
-                                    val_type = value_type.value_type_id
-                                    if val_type != 'boolean':
-                                        for i in model_name._meta.get_fields():
-                                            if 'value' in i.name:
-                                                out = i.name.split('_')
-                                                if out[1] == val_type:
-                                                    datas[i.name] = value
+    try:
+        if not isinstance(model_name, str):
+            if values:
+                feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
+                if feature_config:
+                    feature_config_id = feature_config.feature_config_id
+                else:
+                    feature_config_id = None
+                data_type_id = None
+                for j in values:
+                    for key, value in j.items():
+                        properties = LProperties.objects.filter(property_code__icontains=key)
+                        if properties:
+                            for property in properties:
+                                datas = {}
+                                value_types = LValueTypes.objects.filter(value_type_id=property.value_type_id)
+                                if value_types:
+                                    for value_type in value_types:
+                                        val_type = value_type.value_type_id
+                                        if val_type != 'boolean':
+                                            for i in model_name._meta.get_fields():
+                                                if 'value' in i.name:
+                                                    out = i.name.split('_')
+                                                    if out[1] == val_type:
+                                                        datas[i.name] = value
+                                                    else:
+                                                        datas[i.name] = None
                                                 else:
-                                                    datas[i.name] = None
-                                            else:
-                                                if i.name == 'geo_id':
-                                                    datas[i.name] = geo_id
-                                                if i.name == 'data_type_id':
-                                                    datas[i.name] = data_type_id
-                                                if i.name == 'property_id':
-                                                    datas[i.name] = property.property_id
-                                                if i.name == 'feature_config_id':
-                                                    datas[i.name] = feature_config_id
-                                                if i.name == 'code_list_id':
-                                                    datas[i.name] = None
-                                                if i.name == 'created_by':
-                                                    datas[i.name] = 1
-                                                if i.name == 'modified_by':
-                                                    datas[i.name] = 1
-                                    else:
-                                        rsp = {
-                                            'success': False,
-                                            'info': "Алдаа гарсан байна: " + val_type + ' буруу байна'
-                                        }
-                                        return rsp
-                                sain = model_name.objects.create(**datas)
-                    else:
-                        keys += key + ' ,'
-            rsp = {
-                'success': True,
-                'info': 'Амжилттай хадгалалаа',
-                'key': 'Буруу орсон ' + keys if keys != '' else 'Бүгд зөв'
-            }
+                                                    if i.name == 'geo_id':
+                                                        datas[i.name] = geo_id
+                                                    if i.name == 'data_type_id':
+                                                        datas[i.name] = data_type_id
+                                                    if i.name == 'property_id':
+                                                        datas[i.name] = property.property_id
+                                                    if i.name == 'feature_config_id':
+                                                        datas[i.name] = feature_config_id
+                                                    if i.name == 'code_list_id':
+                                                        datas[i.name] = None
+                                                    if i.name == 'created_by':
+                                                        datas[i.name] = 1
+                                                    if i.name == 'modified_by':
+                                                        datas[i.name] = 1
+                                        else:
+                                            rsp = {
+                                                'success': False,
+                                                'info': "Алдаа гарсан байна: " + val_type + ' буруу байна'
+                                            }
+                                            return rsp
+                                    sain = model_name.objects.create(**datas)
+                        else:
+                            keys += key + ' ,'
+                rsp = {
+                    'success': True,
+                    'info': 'Амжилттай хадгалалаа',
+                    'key': 'Буруу орсон ' + keys if keys != '' else 'Бүгд зөв'
+                }
+            else:
+                rsp = {
+                    'success': False,
+                    'info': 'Хоосон ирж байна. ' + savename,
+                }
         else:
             rsp = {
                 'success': False,
-                'info': 'Хоосон ирж байна. ' + savename,
+                'info': 'Алдаа гарсан байна.' + savename,
             }
-    else:
+    except Exception as e:
         rsp = {
             'success': False,
-            'info': 'Алдаа гарсан байна.' + savename,
+            'info': 'Алдаа ' + str(e)
         }
     return rsp
 
@@ -819,8 +825,8 @@ def _MDatasName(model_name):
     return model_name
 
 
-def _deleteFile(file_name, for_delete_name):
-    fileList = glob.glob(os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_name+'.*'))
+def _deleteFile(file_name, for_delete_name, type_name):
+    fileList = glob.glob(os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', type_name, file_name+'.*'))
     text = ''
     for filePath in fileList:
         try:
@@ -829,6 +835,27 @@ def _deleteFile(file_name, for_delete_name):
             text = "(Устгах явцад алдаа гарлаа : " + for_delete_name + ')'
     return text
 
+
+def _deleteDB(id_made, model_name):
+    try:
+        delete_geos = MGeoDatas.objects.filter(geo_id=id_made)
+        if delete_geos:
+            for geo in delete_geos:
+                geo.delete()
+        delete_main_datas = model_name.objects.filter(geo_id=id_made)
+        if delete_main_datas:
+            for data in delete_main_datas:
+                data.delete()
+        rsp = {
+            'success': True,
+            'info': 'Дутуу датаг устгасан'
+        }
+    except Exception as e:
+        rsp = {
+            'success': False,
+            'info': "Устгах явцад алдаа гарсан" + str(e)
+        }
+    return rsp
 
 @require_POST
 @ajax_required
@@ -840,27 +867,38 @@ def FileUploadSaveData(request, fid):
     try:
         unique_filename = str(uuid.uuid4())
         for fo in form:
-            if '.geojson' in fo.name or '.gml' in fo.name or '.gfs' in fo.name or '.shx' in fo.name or '.shp' in fo.name or '.prj' in fo.name or '.dbf' in fo.name or '.cpg' in fo.name:
+            if '.shx' in fo.name or '.shp' in fo.name or '.prj' in fo.name or '.dbf' in fo.name or '.cpg' in fo.name:
                 file_name = unique_filename + fo.name
                 for_delete_name = fo.name
+                file_type_name = 'shp'
+            elif '.gml' in fo.name or '.gfs' in fo.name:
+                file_type_name = 'gml'
+                file_name = unique_filename + fo.name
+                for_delete_name = fo.name
+            elif '.geojson' in fo.name or '.gfs' in fo.name:
+                file_type_name = 'geojson'
+                file_name = unique_filename + fo.name
+                for_delete_name = fo.name
+            else:
+                file_name = fo.name
+            if file_type_name:
+                path = os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_type_name)
                 fs = FileSystemStorage(
-                    location=os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas')
+                    location=path
                 )
                 file = fs.save(file_name, fo)
                 fileurl = fs.url(file)
-            else:
-                file_name = fo.name
         uniq_name = file_name.split('.')[0]
         if '.shx' in file_name or '.shp' in file_name or '.prj' in file_name or '.dbf' in file_name or '.cpg' in file_name:
-            file_name = uniq_name + '.shp'
+            file_name = uniq_name + '.' + file_type_name
         if '.gml' in file_name or '.gfs' in file_name:
-            file_name = uniq_name + '.gml'
+            file_name = uniq_name + '.' + file_type_name
         if '.geojson' in file_name:
-            file_name = uniq_name + '.geojson'
-        path = os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_name)
-        ds = DataSource(path)
+            file_name = uniq_name + '.' + file_type_name
+        ds_path = os.path.join(path, file_name)
+        ds = DataSource(ds_path)
         if len(ds) <= 0:
-            deleted = _deleteFile(uniq_name, for_delete_name)
+            deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
             rsp = {
                 'success': False,
                 'info': 'Source олдсонгүй ' + deleted
@@ -870,6 +908,10 @@ def FileUploadSaveData(request, fid):
         for val in layer:
             values = []
             try:
+                code = LFeatures.objects.filter(feature_id=feature_id).first()
+                code = LPackages.objects.filter(package_id=code.package_id).first()
+                code = LThemes.objects.filter(theme_id=code.theme_id).first()
+                model_name = code.theme_code
                 need_id = MGeoDatas.objects.count()
                 for name in layer.fields:
                     field_name = val[name].name # field name
@@ -910,7 +952,8 @@ def FileUploadSaveData(request, fid):
                                     modified_by=1,
                                 )
                         else:
-                            deleted = _deleteFile(uniq_name, for_delete_name)
+                            deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
+                            delete_db = _deleteDB(id_made, model_name)
                             rsp = {
                                 "success": False,
                                 'info': 'geom байхгүй дата' + deleted,
@@ -924,32 +967,31 @@ def FileUploadSaveData(request, fid):
                         field_name: value,
                     })
             except InternalError as e:
-                deleted = _deleteFile(uniq_name, for_delete_name)
+                deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
+                delete_db = _deleteDB(id_made, model_name)
                 rsp = {
                     'success': False,
                     'info': file_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй ' + deleted
                 }
                 return JsonResponse(rsp)
             except GEOSException as e:
-                deleted = _deleteFile(uniq_name, for_delete_name)
+                deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
+                delete_db = _deleteDB(id_made, model_name)
                 rsp = {
                     'success': False,
                     'info': file_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
                 }
                 return JsonResponse(rsp)
-            code = LFeatures.objects.filter(feature_id=feature_id).first()
-            code = LPackages.objects.filter(package_id=code.package_id).first()
-            code = LThemes.objects.filter(theme_id=code.theme_id).first()
-            model_name = code.theme_code
             saved = _saveToMainData(values, model_name, geo.geo_id, feature_id)
             if not saved['success']:
-                deleted = _deleteFile(uniq_name, for_delete_name)
+                deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
+                delete_db = _deleteDB(id_made, model_name)
                 rsp = saved
                 return JsonResponse(rsp)
             else:
                 rsp = saved
     except GDALException as e:
-        deleted = _deleteFile(uniq_name, for_delete_name)
+        deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
         rsp = {
             'success': False,
             'info': file_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
