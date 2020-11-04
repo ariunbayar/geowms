@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {NavLink, Switch, Route, BrowserRouter} from "react-router-dom"
 import {service} from './service'
 import {BundleForms} from './BundleForms'
-import {BunleGisForms} from './GisForms'
 
 export class BundleTab extends Component {
 
@@ -17,7 +16,6 @@ export class BundleTab extends Component {
             icon: '',
             icon_url: '',
             layers: [],
-            gis_list:[]
         }
 
         this.state = {
@@ -31,7 +29,6 @@ export class BundleTab extends Component {
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.tablePostgis = this.tablePostgis.bind(this)
     }
 
     componentDidMount() {
@@ -44,7 +41,6 @@ export class BundleTab extends Component {
             const form_values = this.initial_form_values
             this.setState({form_values})
         }
-        this.tablePostgis()
     }
 
     handleListUpdated() {
@@ -58,16 +54,6 @@ export class BundleTab extends Component {
         })
     }
 
-    tablePostgis(){
-        service.table_list_All().then(({items}) => {
-            if(items){
-             this.setState({
-                gis_list:items
-             })
-            }
-        })
-
-    }
     handleSaveSuccess() {
         this.handleListUpdated()
     }
@@ -105,13 +91,9 @@ export class BundleTab extends Component {
                             <li className="nav-item gp-text-primary">
                                 <NavLink to={`/back/дэд-сан/${id}/засах/`} exact className="nav-link"  activeClassName="active">WMS</NavLink>
                             </li>
-                            <li className="nav-item ">
-                                <NavLink to={`/back/дэд-сан/${id}/засах/postgis_db/`}  className="nav-link"  activeClassName="active" >postgis_db</NavLink>
-                            </li>
                         </ul>
                         <div className="tab-content">
                             <Switch>
-                                <Route path="/back/дэд-сан/:id/засах/postgis_db/"   component={BunleGisForms}/>
                                 <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} />
                             </Switch>
                         </div>

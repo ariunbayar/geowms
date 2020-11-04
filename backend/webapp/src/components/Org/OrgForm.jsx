@@ -31,9 +31,18 @@ export class OrgForm extends Component {
         this.handleSearch = this.handleSearch.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleSort = this.handleSort.bind(this)
 
     }
-
+    handleSort(sort_name, sort_type) {
+        if(sort_type){
+            this.setState({[sort_name]: false, sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+        }else{
+            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+        }
+    }
     componentDidUpdate(prevProp){
         if(this.props.match.params.level !== prevProp.match.params.level ){
             this.setState({ level: this.props.match.params.level })
@@ -42,11 +51,11 @@ export class OrgForm extends Component {
         }
     }
 
-    paginate (page, query, level, org_id) {
+    paginate (page, query, level, org_id, sort_name) {
         const perpage = this.state.orgPerPage
         this.setState({ currentPage: page })
             return service
-                .orgList(page, perpage, query, level, org_id)
+                .orgList(page, perpage, query, level, org_id, sort_name)
                 .then(page => {
                     this.setState({ orgs: page.items, org_length: page.items.length })
                     return page
@@ -119,11 +128,10 @@ export class OrgForm extends Component {
                             <table className="table example table_wrapper_table" id="example">
                                 <thead>
                                     <tr>
-                                        <th scope="col">№</th>
-                                        <th scope="col">Байгууллага нэр</th>
-                                        <th scope="col">Түвшин</th>
-                                        <th scope="col"></th >
-                                        <th scope="col"></th >
+                                        <th><a>№</a></th>
+                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Байгууллага нэр <i class={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th scope="col">Засах</th>
+                                        <th scope="col">Устгах</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,6 +156,7 @@ export class OrgForm extends Component {
                         searchQuery = {this.state.searchQuery}
                         org_level = {this.props.match.params.level}
                         load = { this.state.load }
+                        sort_name = {this.state.sort_name}
                     />
                 </div>
                 <ModalAlert
