@@ -949,6 +949,14 @@ def FileUploadSaveData(request, tid, fid):
                                     created_by=1,
                                     modified_by=1,
                                 )
+                                if geo:
+                                    geo_id = geo.geo_id
+                                else:
+                                    rsp = {
+                                        'success': False,
+                                        'info': 'үүсгэх geom байхгүй байна. Файлаа бүтэн оруулсан эсэхийг шалгана уу'
+                                    }
+                                    return JsonResponse(rsp)
                         else:
                             deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
                             delete_db = _deleteDB(id_made, model_name)
@@ -980,7 +988,7 @@ def FileUploadSaveData(request, tid, fid):
                     'info': file_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
                 }
                 return JsonResponse(rsp)
-            saved = _saveToMainData(values, model_name, geo.geo_id, feature_id)
+            saved = _saveToMainData(values, model_name, geo_id, feature_id)
             if not saved['success']:
                 deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
                 delete_db = _deleteDB(id_made, model_name)
