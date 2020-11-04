@@ -87,8 +87,6 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
-
-
     }
 
     componentDidMount(){
@@ -122,6 +120,7 @@ export default class BarilgaSuurinGazar extends Component{
     loadControls(){
       const map = this.map
       const { type, roles } = this.state
+      map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
