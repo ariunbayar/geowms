@@ -15,20 +15,31 @@ export class Жагсаалт extends Component {
             user_list: [],
             user_length:null,
             currentPage:1,
-            usersPerPage:10,
+            usersPerPage:20,
             searchQuery: '',
             query_min: false,
             search_load: false,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleSort = this.handleSort.bind(this)
     }
 
-    paginate (page, query) {
+    handleSort(sort_name, sort_type) {
+        if(sort_type){
+            this.setState({[sort_name]: false, sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+        }else{
+            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+        }
+    }
+
+    paginate (page, query, sort_name) {
         const perpage = this.state.usersPerPage
         this.setState({ currentPage: page })
             return service
-                .paginatedList(page, perpage, query)
+                .paginatedList(page, perpage, query, sort_name)
                 .then(page => {
                     this.setState({user_list: page.items , user_length:page.items.length})
                     return page
@@ -55,7 +66,7 @@ export class Жагсаалт extends Component {
                 <div className="col-md-12">
                     <div className="card">
                         <div className="card-body">
-                            <div className="col-md-4 float-right">
+                            <div className="col-md-3 float-right">
                                 <input
                                     type="text"
                                     className="form-control"
@@ -67,13 +78,13 @@ export class Жагсаалт extends Component {
                             </div>
                             <div className="my-4">
                                 <div className="p-3">
-                                    <div className="table-responsive">
-                                        <table className="table">
+                                    <div className="table-responsive table_wrapper">
+                                        <table className="table table_wrapper_table">
                                             <thead>
                                                 <tr>
                                                     <th scope="col">№</th>
-                                                    <th scope="col">Нэр</th>
-                                                    <th scope="col">Цахим шуудан</th>
+                                                    <th><a onClick={() => this.handleSort('first_name', this.state.first_name)}>Нэр <i class={this.state.first_name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                                    <th><a onClick={() => this.handleSort('email', this.state.email)}>Цахим шуудан <i class={this.state.email ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                                     <th scope="col">Хэрэглэгчийн эрх</th>
                                                     <th scope="col">Идэвхтэй эсэх</th>
                                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
@@ -97,6 +108,7 @@ export class Жагсаалт extends Component {
                             </div>
                             <div className="pl-4">
                                 <Pagination
+                                    sort_name = {this.state.sort_name}
                                     paginate = { this.paginate }
                                     searchQuery = { this.state.searchQuery }
                                 />

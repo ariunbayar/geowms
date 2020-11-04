@@ -31,9 +31,12 @@ def employees(request, payload):
 
     page = payload.get('page')
     per_page = payload.get('per_page')
-
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
+        
     employee = get_object_or_404(Employee, user=request.user)
-    employees = Employee.objects.filter(org=employee.org).order_by('id')
+    employees = Employee.objects.filter(org=employee.org).order_by(sort_name)
     total_items = Paginator(employees, per_page)
     items_page = total_items.page(page)
 

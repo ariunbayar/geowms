@@ -12,6 +12,8 @@ export const service = {
     loginList,
     crudList,
     pageList,
+    WMSLogList,
+    WMSDateCount,
 }
 
 
@@ -39,26 +41,26 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
-function pageList(page, perpage, query){
+function pageList(page, perpage, query, sort_name){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query }),
+        body: JSON.stringify({ page, perpage, query, sort_name }),
     }
     return fetch(`${prefix}/log/page-list/`, requestOptions).then(handleResponse)
 }
 
-function crudList(page, perpage, query){
+function crudList(page, perpage, query, sort_name){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query }),
+        body: JSON.stringify({ page, perpage, query, sort_name }),
     }
     return fetch(`${prefix}/log/crud-list/`, requestOptions).then(handleResponse)
 }
 
-function loginList(page, perpage, query){
+function loginList(page, perpage, query, sort_name){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query }),
+        body: JSON.stringify({ page, perpage, query, sort_name }),
     }
     return fetch(`${prefix}/log/login-list/`, requestOptions).then(handleResponse)
 }
@@ -81,4 +83,17 @@ function crudMethodCount() {
 function crudDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
+}
+
+function WMSLogList(page, perpage, query, sort_name){
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ page, perpage, query, sort_name }),
+    }
+    return fetch(`${prefix}/log/wms_log_list/`, requestOptions).then(handleResponse)
+}
+
+function WMSDateCount(){
+    const requestOptions = {...getPostOptions()}
+    return fetch(`${prefix}/log/wms_date_count/`, requestOptions).then(handleResponse)
 }

@@ -96,7 +96,7 @@ def gov_org_required(module):
                 Org = apps.get_model('backend_org', 'Org')
                 org = get_object_or_404(Org, employee__user=request.user)
 
-                Org_Inspire = apps.get_model('backend_org', 'OrgInspireRoles')
+                Org_Inspire = apps.get_model('backend_org', 'InspirePerm')
                 org_inspire = get_list_or_404(Org_Inspire, module=module, perm_create=True, perm_update=True, perm_remove=True)
                 request.org = org
                 request.org_inspire = org_inspire

@@ -48,7 +48,6 @@ urlpatterns = [
         path('<int:pk>/updatemore/', bundle_views.updateMore, name='updatemore'),
         path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
         path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
-        path('updateGis/', bundle_views.updateGis, name='updateGis'),
         path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
     ], 'bundle'))),
 
@@ -97,6 +96,8 @@ urlpatterns = [
         path('page-date-count/', log_views.page_date_count, name='page-date-count'),
         path('page-user-count/', log_views.page_user_count, name='page-user-count'),
         path('page-list/', log_views.page_list, name='page-list'),
+        path('wms_log_list/', log_views.wms_log_list, name='wms_log_list-list'),
+        path('wms_date_count/', log_views.wms_date_count, name='wms_date_count'),
     ], 'log'))),
 
     path('api/систем/', include(([

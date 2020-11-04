@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 from geoportal_app.models import User
+from backend.wms.models import WMSLog
 
 
 @require_POST
@@ -40,12 +41,15 @@ def login_list(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
     login_log_all_display = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     logins = LoginEvent.objects.annotate(search=SearchVector(
         'login_type',
         'user_id',
         'remote_ip',
         'datetime'
-    ) + SearchVector('username'),).filter(search__icontains=query)
+    ) + SearchVector('username'),).filter(search__icontains=query).order_by(sort_name)
 
     total_items = Paginator(logins, per_page)
     items_page = total_items.page(page)
@@ -95,7 +99,9 @@ def page_list(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
-
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     log_display = []
 
     pages = RequestEvent.objects.annotate(search=SearchVector(
@@ -105,7 +111,7 @@ def page_list(request, payload):
         'remote_ip',
         'user_id',
         'url',)
-    ).filter(search__contains=query)
+    ).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(pages, per_page)
     items_page = total_items.page(page)
@@ -175,6 +181,9 @@ def crudList(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
     crud_event_display = []
     cruds = CRUDEvent.objects.annotate(search=SearchVector(
         'event_type',
@@ -182,7 +191,7 @@ def crudList(request, payload):
         'content_type_id',
         'user_id',
         'changed_fields'
-    ) + SearchVector('object_repr')).filter(search__icontains=query)
+    ) + SearchVector('object_repr')).filter(search__icontains=query).order_by(sort_name)
     total_items = Paginator(cruds, per_page)
     items_page = total_items.page(page)
 
@@ -240,5 +249,68 @@ def crud_date_count(request):
     rsp = {
         'crud_date': crud_date,
         'crud_date_count': crud_date_count,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def wms_log_list(request, payload):
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
+    wms_log_all_display = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
+    logins = WMSLog.objects.annotate(search=SearchVector(
+        'qs_all',
+        'qs_request',
+        'rsp_status',
+        'rsp_size',
+        'created_at',
+        'system_id',
+        'wms_id',
+    )).filter(search__icontains=query).order_by(sort_name)
+
+    total_items = Paginator(logins, per_page)
+    items_page = total_items.page(page)
+
+    for wms_log_all in items_page.object_list:
+        wms_log_all_display.append({
+            'qs_all': wms_log_all.qs_all,
+            'qs_request': wms_log_all.qs_request,
+            'rsp_status': wms_log_all.rsp_status,
+            'rsp_size': wms_log_all.rsp_size,
+            'created_at': wms_log_all.created_at,
+            'system_id': wms_log_all.system_id,
+            'wms_id': wms_log_all.wms_id,
+        })
+
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': wms_log_all_display,
+        'page': page,
+        'total_page': total_page,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def wms_date_count(request):
+    wms_login_date_all = WMSLog.objects.all().order_by('created_at__date').distinct('created_at__date')
+    wms_login_date = []
+    wms_login_date_count = []
+    for login_date in wms_login_date_all:
+        wms_login_date.append(login_date.created_at.strftime('%Y-%m-%d'))
+        wms_login_date_count.append(WMSLog.objects.filter(created_at__date=login_date.created_at).count())
+
+    rsp = {
+        'wms_log_date': wms_login_date,
+        'wms_log_date_count': wms_login_date_count,
     }
     return JsonResponse(rsp)

@@ -66,10 +66,10 @@ export default class WMS extends Component {
         const idx=this.props.idx
         return (
             <tr>
-                <th>
+                <td>
                     {idx}
 
-                </th>
+                </td>
                 <td>
                     {name}
                     <br/>
