@@ -1,4 +1,4 @@
-import { handleResponse, getGetOptions } from './Components/helpers/service'
+import { handleResponse, getGetOptions } from './components/helpers/service'
 
 
 export const service = {
@@ -32,4 +32,3 @@ function tableListDedButets() {
 
     return fetch('/gov/api/ded_butets/table_list/', requestOptions).then(handleResponse)
 }
-

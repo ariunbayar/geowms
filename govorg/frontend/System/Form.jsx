@@ -1,6 +1,6 @@
 
 import React, { Component } from "react";
-import { Pagination } from "../Components/pagination/pagination"
+import { Pagination } from "../components/pagination/pagination"
 import { service } from "./service"
 import System from './System'
 
