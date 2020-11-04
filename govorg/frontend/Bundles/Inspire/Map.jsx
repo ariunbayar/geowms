@@ -94,6 +94,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
+      this.WmsTile = this.WmsTile.bind(this)
 
     }
 
@@ -138,7 +139,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-      map.addControl(new SideBarBtn({SideBarBtn: this.get}))
+      map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
       if(roles[3]){
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
@@ -638,14 +639,14 @@ export default class BarilgaSuurinGazar extends Component{
       this.modifyE.setActive(false);
     }
 
-    get(){
+    SideBarBtn(){
       const bundle_id = 7
       service.loadWMSLayers(bundle_id).then(({wms_list}) => {
-        this.TileWms(wms_list)
+        this.WmsTile(wms_list)
       })
     }
 
-    TileWms(wms_list){
+    WmsTile(wms_list){
       const map = this.map
       const wms_map_list = wms_list.map(({layers, url, name}) => {
         return {
@@ -708,10 +709,10 @@ export default class BarilgaSuurinGazar extends Component{
                       </div>
                   </div>
                   <div className="content-wrapper-map">
-                    <div id="map"></div>
+                    <div id="map" className={(this.state.is_loading ? 'opac' : '')}></div>
                   </div>
                 </div>
-                {this.state.is_loading ? <span className="text-center d-block" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>
         )
     }
