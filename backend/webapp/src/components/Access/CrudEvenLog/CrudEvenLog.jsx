@@ -21,13 +21,22 @@ export class CrudEvenLog extends Component {
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
+        this.handleSort = this.handleSort.bind(this)
     }
-
-    paginate (page, query) {
+    handleSort(sort_name, sort_type) {
+        if(sort_type){
+            this.setState({[sort_name]: false, sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+        }else{
+            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+        }
+    }
+    paginate (page, query, sort_name) {
         const perpage = this.state.crudPerPage
         this.setState({ currentPage: page })
             return service
-                .crudList(page, perpage, query)
+                .crudList(page, perpage, query, sort_name)
                 .then(page => {
                     this.setState({ crud_event_display: page.items, crud_length: page.items.length })
                     return page
@@ -84,31 +93,32 @@ export class CrudEvenLog extends Component {
                         <div className="col-lg-12">
                            <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
-                                    <thead>
-                                        <tr>
+                                <thead>
+                                    <tr>
                                         <th scope="col">№</th>
-                                        <th scope="col">Үйлдэл</th>
-                                        <th scope="col">Хийгдсэн хүснэгт</th>
-                                        <th scope="col">Хэрэглэгчийн нэр</th>
-                                        <th scope="col">Огноо</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        { crud_length === 0 ?
-                                            <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
-                                            crud_event_display.map((logout, idx) =>
-                                                <CrudEvenLogTable
-                                                    key = {idx}
-                                                    idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
-                                                    values={logout}>
-                                                </CrudEvenLogTable>
-                                        )}
-                                    </tbody>
-                                </table>
-                           </div>
-                            <Pagination
-                                paginate = {this.paginate}
-                                searchQuery = {this.state.searchQuery}
+                                        <th><a onClick={() => this.handleSort('event_type', this.state.event_type)}>Үйлдэл <i class={this.state.event_type ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('object_id', this.state.object_id)}>Хийгдсэн хүснэгт <i class={this.state.object_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a >Хэрэглэгчийн нэр</a></th>
+                                        <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Огноо <i class={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { crud_length === 0 ?
+                                        <tr><td>Гаралтын хандалт байхгүй байна </td></tr>:
+                                        crud_event_display.map((logout, idx) =>
+                                            <CrudEvenLogTable
+                                                key = {idx}
+                                                idx = {(currentPage*crudPerPage)-crudPerPage+idx+1}
+                                                values={logout}>
+                                            </CrudEvenLogTable>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        <Pagination
+                            paginate = {this.paginate}
+                            searchQuery = {this.state.searchQuery}
+                            sort_name = {this.state.sort_name}
                             />
                         </div>
                     </div>
