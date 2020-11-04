@@ -19,13 +19,22 @@ export class PageLog extends Component {
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.handleSort = this.handleSort.bind(this)
     }
-
-    paginate (page,query) {
+    handleSort(sort_name, sort_type) {
+        if(sort_type){
+            this.setState({[sort_name]: false, sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+        }else{
+            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+        }
+    }
+    paginate (page,query, sort_name) {
         const perpage = this.state.logPerPage
         this.setState({ currentPage: page })
             return service
-                .pageList(page, perpage, query)
+                .pageList(page, perpage, query, sort_name)
                 .then(page => {
                     this.setState({ page_logs: page.items, log_length: page.items.length })
                     return page
@@ -79,16 +88,16 @@ export class PageLog extends Component {
                         />
                     </div>
                 </div>
-                <div className="table-responsive">
-                    <table className="table example" id="example">
+                <div className="table-responsive table_wrapper">
+                    <table className="table example table_wrapper_table" id="example">
                         <thead>
                             <tr>
                                 <th scope="col">№</th>
-                                <th scope="col">Хаяг</th>
-                                <th scope="col">Method</th>
-                                <th scope="col">IP Хаяг</th >
-                                <th scope="col">Хэрэглэгчийн дугаар</th >
-                                <th scope="col">Огноо</th >
+                                <th><a onClick={() => this.handleSort('url', this.state.url)}>Хаяг <i class={this.state.url ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('method', this.state.method)}>Method <i class={this.state.method ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('remote_ip', this.state.remote_ip)}>IP Хая <i class={this.state.remote_ip ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгчийн дугаар <i class={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Огноо <i class={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,7 +116,8 @@ export class PageLog extends Component {
                 <Pagination
                     paginate = {this.paginate}
                     searchQuery = {this.state.searchQuery}
-                />
+                    sort_name = {this.state.sort_name}
+                    />
             </>
         )
 

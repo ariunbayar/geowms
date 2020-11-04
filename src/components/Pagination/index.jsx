@@ -13,6 +13,7 @@ export class Pagination extends Component {
             total_page: 1,
             is_loading: false,
             searchQuery: this.props.searchQuery,
+            sort_name: this.props.sort_name,
         }
 
         this.loadPage = this.loadPage.bind(this)
@@ -22,7 +23,7 @@ export class Pagination extends Component {
     }
 
     componentDidMount() {
-        this.loadPage(this.state.page, this.state.searchQuery)
+        this.loadPage(this.state.page, this.state.searchQuery,  this.state.sort_name)
     }
 
     componentDidUpdate(prevProps) {
@@ -32,9 +33,16 @@ export class Pagination extends Component {
             this.setState({ searchQuery: query })
             this.loadPage(1, query)
         }
+        if(prevProps.sort_name !== this.props.sort_name)
+        {
+            const sort_name = this.props.sort_name
+            const query = this.props.searchQuery
+            this.setState({ sort_name })
+            this.loadPage(1, query, sort_name)
+        }
         if(prevProps.load !== this.props.load)
         {
-            const query = this.props.searchQuery
+            const query = this.props.d
             this.loadPage(1, query)
         }
         if(this.props.org_level){
@@ -46,24 +54,23 @@ export class Pagination extends Component {
     }
 
     nextPage() {
-        this.loadPage(this.state.page + 1, this.state.searchQuery)
+        this.loadPage(this.state.page + 1, this.state.searchQuery, this.state.sort_name)
     }
 
     prevPage() {
-        this.loadPage(this.state.page - 1, this.state.searchQuery)
+        this.loadPage(this.state.page - 1, this.state.searchQuery, this.state.sort_name)
     }
 
-    loadPage(page, query) {
+    loadPage(page, query, sort_name) {
         if (this.state.is_loading) {
             return
         }
-
         page = Math.max(page, 1)
         page = Math.min(page, this.state.total_page)
         this.setState({is_loading: true})
         if(this.props.org_level){
             const level = this.props.org_level
-            this.props.paginate(page, query, level)
+            this.props.paginate(page, query, level, sort_name)
             .then(({ page, total_page}) => {
                 this.setState({
                     page,
@@ -74,7 +81,7 @@ export class Pagination extends Component {
         }
         else
         {
-            this.props.paginate(page, query)
+            this.props.paginate(page, query, sort_name)
             .then(({ page, total_page }) => {
                 this.setState({
                     page,

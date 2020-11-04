@@ -103,10 +103,10 @@ function employee_update(org_level, org_id, paylaod) {
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-update/`, opts).then(handleResponse)
 }
 
-function orgList(page, perpage, query, org_level) {
+function orgList(page, perpage, query, org_level, sort_name) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({page, perpage, query,org_level}),
+        body: JSON.stringify({page, perpage, query,org_level, sort_name}),
     }
     return fetch(`${prefix}/level-${org_level}/org-list/`, opts).then(handleResponse)
 }

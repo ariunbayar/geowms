@@ -46,13 +46,25 @@ export class WmsList extends Component {
         this.handleSearch=this.handleSearch.bind(this)
         this.handleModalAlert=this.handleModalAlert.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleSort = this.handleSort.bind(this)
+
     }
 
-    paginate (page, query) {
+    handleSort(sort_name, sort_type) {
+        if(sort_type){
+            this.setState({[sort_name]: false, sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+        }else{
+            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+        }
+    }
+
+    paginate (page, query, sort_name) {
         const perpage = this.state.wmsPerPage
         this.setState({ currentPage: page })
             return service
-                .paginatedList(page, perpage, query)
+                .paginatedList(page, perpage, query, sort_name)
                 .then(page => {
                     this.setState({ wms_list: page.items, wms_length: page.items.length })
                     return page
@@ -192,13 +204,13 @@ export class WmsList extends Component {
                                         </div>
                                     </div>
                                     <div className="row">
-                                        <div className="table-responsive">
-                                            <table className="table align-items-center table-flush">
+                                        <div className="table-responsive table_wrapper">
+                                            <table className="table align-items-center table-flush table_wrapper_table">
                                                 <thead>
                                                     <tr>
-                                                        <th scope="col"> # </th>
-                                                        <th scope="col"> Нэр </th>
-                                                        <th scope="col"> Огноо</th>
+                                                        <th><a>№</a></th>
+                                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Нэр <i class={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                                        <th><a onClick={() => this.handleSort('created_at' ,this.state.created_at)}>Огноо <i class={this.state.created_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                                         <th scope="col"> Идэвхтэй эсэх</th>
                                                         <th scope="col"></th>
                                                         <th scope="col"></th>
@@ -222,6 +234,7 @@ export class WmsList extends Component {
                                     </div>
                                     <Pagination paginate={this.paginate}
                                         searchQuery = { this.state.searchQuery }
+                                        sort_name = {this.state.sort_name}
                                     />
                             </div>
                             <ModalAlert

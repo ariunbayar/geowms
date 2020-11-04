@@ -11,11 +11,6 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
 from django.db import connections
-from main.utils import (
-    gis_tables_by_oids,
-    dict_fetchall
-)
-
 
 from .forms import BundleForm
 from .models import Bundle, BundleLayer, BundleGIS
@@ -99,23 +94,18 @@ def defaultCheckUpdate(request, payload):
 
 
 def _get_role_options():
-
     form_options = []
-
     for role in Role.objects.all():
         role_display = {
             'id': role.id,
         }
         form_options.append(role_display)
-
     return form_options
 
 
 
 def _get_form_check_options(bundleId):
-
     bundleLayer = BundleLayer.objects.filter(bundle_id=bundleId).order_by('layer_id')
-
     roleOptions = []
     for name, layers in groupby(bundleLayer, lambda ob: ob.layer_id):
         roles = []
@@ -143,18 +133,10 @@ def _get_module_display(module):
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
-    oid_list = [ob.oid for ob in bundle.bundlegis_set.all()]   
-    cursor = connections['postgis_db'].cursor()
-    table = []
-    if oid_list:
-        table = gis_tables_by_oids(oid_list)
-    
     return {
         'id': bundle.id,
         'name': bundle.name,
         'price':modules,
-        'oid_list':oid_list,
-        'oid_table_list':table,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'icon': '',
@@ -169,7 +151,6 @@ def _get_bundle_display(bundle):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request):
-
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
     rsp = {
         'bundle_list': bundle_list,
@@ -184,7 +165,6 @@ def updateMore(request, pk):
     bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
     form_options = _get_bundle_options()
     form_options_role = _get_role_options()
-
     rsp = {
         'bundle_list': bundle_list,
         'form_options': form_options,
@@ -200,9 +180,7 @@ def updateMore(request, pk):
 def create(request, payload):
 
     сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
-
     icon_data = payload.get('icon')
-
     form = BundleForm(payload)
     if form.is_valid() and icon_data:
         form.instance.created_by = request.user
@@ -261,8 +239,6 @@ def update(request, payload):
 
     icon_data = payload.get('icon')
     form = BundleForm(payload, instance=bundle)
-
-
     if form.is_valid():
         if icon_data:
             form.instance.icon.delete(save=False)
@@ -277,35 +253,10 @@ def update(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def updateGis(request, payload):
-    oid_list = payload.get('oid_list')
-    bundle_id = payload.get('id')
-    diff_oid = None
-    for gis_bundle in BundleGIS.objects.filter(bundle_id=bundle_id):
-
-        for oid in oid_list:
-            if gis_bundle.oid != oid:
-                diff_oid = gis_bundle.oid
-        if diff_oid:
-            saves = BundleGIS.objects.filter(bundle_id = bundle_id, oid=diff_oid)
-            saves.delete()
-
-    for oid in oid_list:
-        bundle_gis = BundleGIS.objects.filter(oid=oid, bundle_id=bundle_id)
-        if not bundle_gis:
-            BundleGIS.objects.create(oid=oid, bundle_id = bundle_id)
-    return JsonResponse({'success': True})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def remove(request, payload):
 
     pk = payload.get('id')
-
     bundle = get_object_or_404(Bundle, pk=pk, is_removeable=True)
-
     bundle.layers.clear()
     bundle.icon.delete(save=False)
     bundle.delete()
@@ -319,16 +270,12 @@ def remove(request, payload):
 def move(request, payload):
 
     bundle1 = get_object_or_404(Bundle, pk=payload.get('id'))
-
     if payload.get('move') == 'down':
         bundle2 = Bundle.objects.filter(sort_order__gt=bundle1.sort_order).order_by('sort_order').first()
-
     else:
         bundle2 = Bundle.objects.filter(sort_order__lt=bundle1.sort_order).order_by('sort_order').last()
-
     if bundle2 is None:
         return JsonResponse({'success': False})
-
     bundle1.sort_order, bundle2.sort_order = bundle2.sort_order, bundle1.sort_order
     Bundle.objects.bulk_update([bundle1, bundle2], ['sort_order'])
 

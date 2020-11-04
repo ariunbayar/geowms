@@ -90,10 +90,10 @@ function roleCreate(payload){
     return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
 }
 
-function paginatedList(page, per_page, query) {
+function paginatedList(page, per_page, query, sort_name) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({ page, per_page, query }),
+        body: JSON.stringify({ page, per_page, query, sort_name }),
     }
 
     return fetch(`${prefix}/paginatedList/`, requestOptions).then(handleResponse)

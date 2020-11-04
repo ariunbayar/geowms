@@ -19,13 +19,16 @@ def paymentList(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
-    payment_all = []
+    sort_name = payload.get('sort_name')
 
+    payment_all = []
+    if not sort_name:
+        sort_name = 'id'
     payments = Payment.objects.all().annotate(search=SearchVector(
         'user__first_name',
         'geo_unique_number'
         )
-    ).filter(search__icontains=query).order_by('-created_at')
+    ).filter(search__icontains=query).order_by(sort_name)
     total_items = Paginator(payments, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
