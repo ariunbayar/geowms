@@ -46,10 +46,9 @@ export default class WMSCheckFormSort extends Component {
                                     <th scope="col">Код</th>
                                     <th scope="col">Нэршил</th>
                                     <th scope="col">ГеоСервер</th>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
-
+                                    <th scope="col">Засах</th>
+                                    <th scope="col">Дээш</th>
+                                    <th scope="col">Доош</th>
                                 </tr>
                             </thead>
                             <tbody>
