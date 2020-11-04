@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from "react"
 import RequestMap from './Map'
 import {service} from './service'
-import Modal from '.././Components/helpers/Modal'
+import Modal from '../components/helpers/Modal'
 
 
 export default class RequestModal extends Component {
@@ -116,7 +116,7 @@ export default class RequestModal extends Component {
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
-      
+
                             <div className="col-md-12">
                                 <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
                                     <div className="col-md-11">
@@ -162,7 +162,7 @@ export default class RequestModal extends Component {
                                     <button type="button mr-2 ml-2" onClick={() => this.handleModalRejectOpen()} className="btn gp-btn-primary waves-effect waves-light">
                                         <i className="fa fa-check-square-o">Татгалзах</i>
                                     </button>
-                                    { 
+                                    {
                                      is_modal_reject_open &&
                                         <Modal
                                             modalAction={() => this.handleClose(id)}
