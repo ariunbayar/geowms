@@ -5,14 +5,10 @@ from django.contrib.auth.models import AbstractUser
 class Role(models.Model):
     ROLE1 = 1
     ROLE2 = 2
-    ROLE3 = 3
-    ROLE4 = 4
     ADMIN = 5
     ROLE_CHOICES = (
         (ROLE1, 'role1'),
         (ROLE2, 'role2'),
-        (ROLE3, 'role3'),
-        (ROLE4, 'role4'),
         (ADMIN, 'admin'),
     )
 

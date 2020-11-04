@@ -16,7 +16,6 @@ export class BundleTab extends Component {
             icon: '',
             icon_url: '',
             layers: [],
-            gis_list:[]
         }
 
         this.state = {
@@ -30,7 +29,6 @@ export class BundleTab extends Component {
         this.handleSaveSuccess = this.handleSaveSuccess.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.tablePostgis = this.tablePostgis.bind(this)
     }
 
     componentDidMount() {
@@ -43,7 +41,6 @@ export class BundleTab extends Component {
             const form_values = this.initial_form_values
             this.setState({form_values})
         }
-        this.tablePostgis()
     }
 
     handleListUpdated() {
@@ -57,16 +54,6 @@ export class BundleTab extends Component {
         })
     }
 
-    tablePostgis(){
-        service.table_list_All().then(({items}) => {
-            if(items){
-             this.setState({
-                gis_list:items
-             })
-            }
-        })
-
-    }
     handleSaveSuccess() {
         this.handleListUpdated()
     }

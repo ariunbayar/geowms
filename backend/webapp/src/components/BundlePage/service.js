@@ -9,7 +9,6 @@ export const service = {
     defaultCheckUpdate,
     detail,
     ModuleCheck,
-    table_list_All,
 }
 
 const prefix = '/back'
@@ -154,11 +153,4 @@ function ModuleCheck(values){
     }
 
     return fetch(`${prefix}/bundle/ModuleCheck/`, opts).then(handleResponse)
-}
-
-function table_list_All() {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
-    return fetch(`${prefix}/gis/table_list/`, requestOptions).then(handleResponse)
 }

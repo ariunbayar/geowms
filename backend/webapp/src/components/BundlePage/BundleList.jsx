@@ -88,7 +88,6 @@ export class BundleList extends Component {
                                         <th scope="col"> WMS сервис </th>
                                         <th scope="col"></th>
                                         <th scope="col"></th>
-                                        <th scope="col"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
