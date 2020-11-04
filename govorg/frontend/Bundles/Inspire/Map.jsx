@@ -8,7 +8,7 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
 import {Draw, Modify, Select, Snap} from 'ol/interaction'
-import {OSM, Vector as VectorSource} from 'ol/source'
+import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import { Feature } from 'ol'
 import { set } from 'ol/transform'
 
@@ -19,6 +19,9 @@ import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
 import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
+
+import {SideBarBtn} from "./controls/SideBar/SideButton"
+import {Sidebar} from "./controls/SideBar/SideBarButton"
 import {Modal} from "../../../../src/components/MapModal/Modal"
 
 import "./styles.css"
@@ -55,11 +58,14 @@ export default class BarilgaSuurinGazar extends Component{
           drawed: null,
           togle_islaod: true,
           geojson: {},
-          null_form_isload: false
+          null_form_isload: false,
+          is_sidebar_open: true,
+          wms_map_list: []
       }
 
       this.controls = {
         modal: new Modal(),
+        sidebar: new Sidebar(),
       }
 
       this.modifyE = this.Modify()
@@ -87,6 +93,9 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
+      this.SideBarBtn = this.SideBarBtn.bind(this)
+      this.WmsTile = this.WmsTile.bind(this)
+
     }
 
     componentDidMount(){
@@ -122,6 +131,7 @@ export default class BarilgaSuurinGazar extends Component{
       const { type, roles } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
+      map.addControl(this.controls.sidebar)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -129,6 +139,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
       if(roles[3]){
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
@@ -250,7 +261,6 @@ export default class BarilgaSuurinGazar extends Component{
           zoom: 5,
         }),
       })
-
       this.map = map
       this.vector = vector
       this.snap(vector)
@@ -267,6 +277,7 @@ export default class BarilgaSuurinGazar extends Component{
         const modify = new Modify({
           features: select.getFeatures(),
         })
+
         modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
 
@@ -628,6 +639,55 @@ export default class BarilgaSuurinGazar extends Component{
       this.modifyE.setActive(false);
     }
 
+    SideBarBtn(){
+      const bundle_id = 7
+      service.loadWMSLayers(bundle_id).then(({wms_list}) => {
+        this.WmsTile(wms_list)
+      })
+    }
+
+    WmsTile(wms_list){
+      const map = this.map
+      const wms_map_list = wms_list.map(({layers, url, name}) => {
+        return {
+            name,
+            layers: layers.map((layer) => {
+              return {
+                ...layer,
+                tile: new TileLayer({
+                  source: new TileWMS({
+                    url: url,
+                      params: {
+                        'LAYERS': layer.code,
+                        //'FORMAT': 'image/svg+xml',
+                        'FORMAT': 'image/png',
+                    },
+                    serverType: 'geoserver',
+                    // Countries have transparency, so do not fade tiles:
+                    transition: 0,
+                  }),
+                })
+              }
+          })
+        }
+      })
+      this.setState({wms_map_list})
+      wms_map_list.map((wms, idx) => {
+        wms_map_list[idx].layers.map((layer,idx) => {
+          map.addLayer(layer.tile)
+          layer.tile.setVisible(false)
+        })
+      })
+      this.setState(prevState => ({
+        is_sidebar_open: !prevState.is_sidebar_open,
+      }))
+      if(this.state.is_sidebar_open){
+        this.controls.sidebar.showSideBar(wms_map_list, true)
+      }else{
+        this.controls.sidebar.showSideBar(wms_map_list, false)
+      }
+    }
+
     render(){
         return (
             <div className="col-md-12">
@@ -649,10 +709,10 @@ export default class BarilgaSuurinGazar extends Component{
                       </div>
                   </div>
                   <div className="content-wrapper-map">
-                    <div id="map"></div>
+                    <div id="map" className={(this.state.is_loading ? 'opac' : '')}></div>
                   </div>
                 </div>
-                {this.state.is_loading ? <span className="text-center d-block" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>
         )
     }

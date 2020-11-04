@@ -15,7 +15,8 @@ export const service = {
     detailNone,
     create,
     createUpd,
-    createDel
+    createDel,
+    loadWMSLayers,
 }
 
 
@@ -125,4 +126,11 @@ function createDel(tid, pid, fid, old_geo_id) {
         body: JSON.stringify({tid, pid, fid, old_geo_id}),
     }
     return fetch(`/gov/api/inspire/createDel/`, opts).then(handleResponse)
+}
+
+function loadWMSLayers(id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
 }
