@@ -726,6 +726,8 @@ export default class BarilgaSuurinGazar extends Component{
           layer.tile.setVisible(false)
         })
       })
+      const vectorLayer = this.vectorLayer
+      vectorLayer.setZIndex(100)
       this.setState(prevState => ({
         is_sidebar_open: !prevState.is_sidebar_open,
       }))
