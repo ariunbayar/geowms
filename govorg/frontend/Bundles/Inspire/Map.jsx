@@ -139,7 +139,6 @@ export default class BarilgaSuurinGazar extends Component{
       const { type, roles } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
-      map.addControl(this.controls.upload)
       map.addControl(this.controls.sidebar)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
@@ -152,7 +151,10 @@ export default class BarilgaSuurinGazar extends Component{
           map.addControl(new PolygonBarButton(({PolygonButton: this.PolygonButton, 'null': true})))
         }
       }
-      if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+      if(roles[1] || roles[3]) {
+        map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+        map.addControl(this.controls.upload)
+      }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
 
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))

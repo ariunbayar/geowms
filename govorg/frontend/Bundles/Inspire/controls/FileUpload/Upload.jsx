@@ -166,8 +166,10 @@ export class Upload extends Component {
     removeFromList(file_name) {
         const { files } = this.state
         const isBelowThreshold = (names) => names = file_name;
+        var file_value = document.getElementById('Upload')
         if (files.length == 1) {
             this.setState({ files: [] })
+            file_value.value = ''
         }
         else {
             if(files.every(isBelowThreshold)){
