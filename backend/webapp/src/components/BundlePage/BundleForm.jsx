@@ -104,14 +104,7 @@ export default class BundleForm extends Component {
     render() {
         return (
             <>
-                <div className="form-group">
-                    <div className="form-group">
-                        <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light m-1"  to={`/back/дэд-сан/`}>
-                                Буцах
-                        </NavLink>
-                    </div>
-                </div>
-                <div className="form-group">
+                <div className="form-group" style={{marginBottom: "8px"}}>
                     <label htmlFor="id_name"> Сангийн нэр: </label>
                     <input
                         type="text"
@@ -120,10 +113,11 @@ export default class BundleForm extends Component {
                         placeholder="сангийн нэр"
                         onChange={(e) => this.handleChange('name', e)}
                         value={this.state.name}
+                        style={{marginBottom: "8px"}}
                     />
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{marginBottom: "10px"}}>
                     <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
 
                     {this.state.price ?
@@ -144,49 +138,65 @@ export default class BundleForm extends Component {
                     }
                 </div>
 
-                {this.props.formOptions.map(({name, layers,is_active}, idx) =>
-                    <div className="form-group" key={idx}>
-                        <div className="col-md-1"></div>
-                        <div className="col-md-11">
-                         {is_active ?
-                            <div key={idx} className="row">
-                                <a>
-                                    <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
-                                    <span> {name}</span>
-                                </a>
-                            </div> :
-                            <div key={idx} className="row">
-                                <a>
-                                    <i className="fa fa-times-circle" style={{color: "#FF4748"}}></i>
-                                    <del> {name}</del>
-                                </a>
+                <div className ="bundle-table-scroll border border-light rounded">
+                    
+                    {this.props.formOptions.map(({name, layers,is_active}, idx) =>
+                        <div className="form-group" style={{marginTop: '10px'}} key={idx}>
+                            <div className="col-md-12">
+                            {is_active ?
+                                <div id={`accordion2`}>
+                                    <div className=" mb-2">
+                                        <div className="card-header" style={{padding: "5px"}}>
+                                            <button key={idx} className="btn btn-link shadow-none text-dark text-left collapsed" style={{padding: "5px"}} data-toggle="collapse" data-target={`#collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
+                                            <a>
+                                                <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="true"></i>
+                                                <span className="ml-2">{name}</span>
+                                            </a>
+                                            </button>
+                                        </div>
+                                        <div id={`collapse-${idx}`} className="collapse" data-parent="#accordion2">
+                                            <div className="card-body">
+                                            <dd>
+                                                {layers.map((layer) =>
+                                                    <div key={layer.id}>
+                                                        <label style={{marginLeft: '25px'}}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={this.state.layers.indexOf(layer.id) > -1}
+                                                                onChange={this.handleLayerToggle}
+                                                                value={layer.id}
+                                                            />
+                                                            <a> {layer.name}</a>
+                                                        </label>
+                                                    </div>
+                                                )}
+                                                </dd>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            :
+                            <div>
+                                <div className=" mb-2">
+                                    <div className="card-header" style={{padding: "5px"}}>
+                                        <button key={idx} className="btn btn-link shadow-none text-dark text-left" style={{padding: "5px"}} data-toggle="collapse" data-target={`#collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
+                                        <a>
+                                            <i className="fa fa-times-circle" style={{color: "#FF4748"}}></i>
+                                            <span className="ml-2">{name}</span>
+                                        </a>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             }
+                            </div>
                         </div>
-                        <dd>
-
-                            {layers.map((layer) =>
-                                <div key={layer.id}>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            checked={this.state.layers.indexOf(layer.id) > -1}
-                                            onChange={this.handleLayerToggle}
-                                            value={layer.id}
-                                        />
-                                        <a> {layer.name}</a>
-                                    </label>
-                                </div>
-                            )}
-
-                        </dd>
-                    </div>
-                )}
-
-                <div className="form-group">
-                    <label htmlFor="id_icon"> Icon: </label>
+                    )}
+                </div>
+                <div className="form-group text-center mt-3">
+                    <label htmlFor="id_icon" className="mr-2" style={{marginBottom: "0px"}}> Icon: </label>
                     {!this.state.icon &&
-                        <img src={this.state.icon_url} style={{width:"100px"}} className="uploadPicture ml-3"/>
+                        <img src={this.state.icon_url} style={{width:"50px"}} className="uploadPicture ml-2"/>
                     }
                     <ImageUploader
                         withPreview={true}
@@ -200,21 +210,16 @@ export default class BundleForm extends Component {
                     />
                 </div>
 
-                <div className="form-group">
-                    <button className="btn gp-btn-primary btn-block waves-effect waves-light m-1" onClick={this.handleSave} >
+                <div className="form-group" style={{marginBottom: '5px'}}>
+                    <button className="btn gp-btn-primary btn-block waves-effect waves-light" onClick={this.handleSave} >
                         Хадгал
                     </button>
                 </div>
-
-                <div className="form-group">
-                    <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light m-1" to={`/back/дэд-сан/`}>
+                <div className="form-group" >
+                    <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light" to={`/back/дэд-сан/`}>
                             Буцах
                     </NavLink>
                 </div>
-
-
-                <dl>
-                </dl>
             </>
         )
     }

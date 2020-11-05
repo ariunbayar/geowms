@@ -85,20 +85,9 @@ export class BundleTab extends Component {
     render() {
         const id = this.props.match.params.id
             return (
-                <div className="card">
-                    <div className="card-body">
-                        <ul className="nav nav-tabs ">
-                            <li className="nav-item gp-text-primary">
-                                <NavLink to={`/back/дэд-сан/${id}/засах/`} exact className="nav-link"  activeClassName="active">WMS</NavLink>
-                            </li>
-                        </ul>
-                        <div className="tab-content">
-                            <Switch>
-                                <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} />
-                            </Switch>
-                        </div>
-                    </div>
-                </div>
+                <Switch>
+                    <Route path="/back/дэд-сан/:id/засах/"  component={BundleForms} />
+                </Switch>
             );
     }
 }
