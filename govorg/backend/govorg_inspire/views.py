@@ -214,12 +214,12 @@ def rows(request, pid, fid):
         FROM
             m_geo_datas
         WHERE
-            feature_id = {fid} and geo_id = '100000Ub'
+            feature_id = {fid}
         order by created_on desc
-        limit {limit} 
+        limit {limit}
     """.format(
         fid=fid,
-        limit=1
+        limit=4000
     )
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
