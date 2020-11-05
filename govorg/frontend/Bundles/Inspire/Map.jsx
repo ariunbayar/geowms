@@ -10,8 +10,12 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
 import {Draw, Modify, Select, Snap} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import { Feature } from 'ol'
+import {unByKey} from 'ol/Observable';
 import { set } from 'ol/transform'
 import {createStringXY} from 'ol/coordinate'
+import {transform as transformCoordinate, toLonLat} from 'ol/proj'
+import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
+import Overlay from 'ol/Overlay'
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -96,6 +100,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.createGeom = this.createGeom.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
       this.WmsTile = this.WmsTile.bind(this)
+      this.mapPointerMove = this.mapPointerMove.bind(this)
+      this.onClickCloser = this.onClickCloser.bind(this)
 
     }
 
@@ -126,21 +132,9 @@ export default class BarilgaSuurinGazar extends Component{
 
     }
 
-
     loadControls(){
       const map = this.map
       const { type, roles } = this.state
-      const mousePositionControl = new MousePosition({
-        coordinateFormat: createStringXY(4),
-        projection: 'EPSG:4326',
-        // comment the following two lines to have the mouse position
-        // be placed within the map.
-        className: 'custom-mouse-position',
-        target: document.getElementById('mouse-position'),
-        undefinedHTML: '&nbsp;',
-      })
-
-      map.addControl(mousePositionControl)
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       map.addControl(this.controls.sidebar)
@@ -265,6 +259,16 @@ export default class BarilgaSuurinGazar extends Component{
         }),
       })
 
+        this.container = document.getElementById('popup')
+
+       const overlay = new Overlay({
+         element: this.container,
+         autoPan: true,
+         autoPanAnimation: {
+           duration: 250,
+         },
+       });
+
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
@@ -272,13 +276,16 @@ export default class BarilgaSuurinGazar extends Component{
           center: this.state.Mongolia,
           zoom: 5,
         }),
+        overlays: [overlay],
       })
       this.map = map
+      this.overlay = overlay
       this.vector = vector
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
     }
+
 
     Modify(){
       const init = () => {
@@ -290,7 +297,7 @@ export default class BarilgaSuurinGazar extends Component{
           features: select.getFeatures(),
         })
 
-        modify.on("mo", event => this.modifiedFeature(event));
+        modify.on("modifystart", event => this.mapPointerMove(event));
         modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
 
@@ -340,6 +347,32 @@ export default class BarilgaSuurinGazar extends Component{
     })
       const changedFeature = JSON.stringify(data)
       this.setState({ changedFeature, modifyend_selected_feature_check: true })
+      this.onClickCloser()
+    }
+
+    mapPointerMove(event) {
+      const map = this.map
+      const overlay = this.overlay
+      const { content } = this.state
+      this.content = document.getElementById('popup-content')
+      this.key = map.on('pointermove', event => {
+        var coordinate = event.coordinate
+        const projection = event.map.getView().getProjection()
+        const map_coord = transformCoordinate(coordinate, projection.code_, this.state.dataProjection)
+        const yChange = coordinateFormat(map_coord, '{y}', 6)
+        const xChange = coordinateFormat(map_coord, '{x}', 6)
+        this.setState({ xChange, yChange})
+        overlay.setPosition(coordinate)
+      })
+    }
+
+    onClickCloser(){
+      const overlay = this.overlay
+      this.closer = document.getElementById('popup-closer')
+      const closer = this.closer
+      overlay.setPosition(undefined);
+      closer.blur();
+      unByKey(this.key);
     }
 
     loadRows() {
@@ -723,7 +756,13 @@ export default class BarilgaSuurinGazar extends Component{
                   </div>
                   <div className="content-wrapper-map">
                     <div id="map" className={(this.state.is_loading ? 'opac' : '')}></div>
-                    <div id="mouse-position"></div>
+                    <div id="popup" className="ol-popup">
+                    <a href="#" id="popup-closer" className="ol-popup-closer"></a>
+                      <div id="popup-content">
+                        <span>{this.state.xChange || ''}</span>
+                        <span>{this.state.yChange || ''}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
