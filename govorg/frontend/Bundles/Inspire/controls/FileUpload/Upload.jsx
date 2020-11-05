@@ -278,9 +278,8 @@ export class Upload extends Component {
                     </div>
                     <div className="mt-2">
                         {this.state.btn_upload_is_laod ?
-                        <i className="spinner-border" role="status">
-                            <span className="sr-only gp-text-primary">Loading...</span>
-                        </i>:
+                        <span className="mt-2 gp-text-primary"><i className="spinner-border" role="status"></i>&nbsp;&nbsp;Уншиж байна ...</span>
+                        :
                         <button
                             className="btn gp-btn-primary"
                             onClick={this.handleSubmit}
