@@ -419,6 +419,7 @@ export default class BarilgaSuurinGazar extends Component{
           draw.setActive(true);
           this.modifyE.setActive(false);
           this.drawE.init(draw)
+          draw.on('drawstart', event => this.mapPointerMove(event))
           draw.on('drawend', event => this.drawed(event))
         }
         if (oid_old != oid) {
@@ -461,6 +462,7 @@ export default class BarilgaSuurinGazar extends Component{
 
       const drawed = JSON.stringify(area)
       this.setState({drawed, selectedFeature_ID: null})
+      this.onClickCloser()
     }
 
     clearMap() {
