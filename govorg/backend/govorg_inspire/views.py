@@ -746,7 +746,8 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
             if values:
                 feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
                 if feature_config:
-                    feature_config_id = feature_config.feature_config_id
+                    # feature_config_id = feature_config.feature_config_id
+                    feature_config_id = None
                 else:
                     feature_config_id = None
                 data_type_id = None
