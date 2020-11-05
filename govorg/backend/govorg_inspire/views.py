@@ -842,12 +842,6 @@ def _deleteFile(file_name, for_delete_name, type_name):
 
 def _deleteDB(id_made, model_name):
     try:
-        print(id_made)
-        print(id_made)
-        print(id_made)
-        print(id_made)
-        print(id_made)
-        print(id_made)
         if id_made != '':
             delete_geos = MGeoDatas.objects.filter(geo_id=id_made)
             if delete_geos:
