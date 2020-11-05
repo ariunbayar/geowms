@@ -209,8 +209,8 @@ export class WmsList extends Component {
                                                 <thead>
                                                     <tr>
                                                         <th><a>№</a></th>
-                                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Нэр <i class={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                                        <th><a onClick={() => this.handleSort('created_at' ,this.state.created_at)}>Огноо <i class={this.state.created_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Нэр <i className={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                                        <th><a onClick={() => this.handleSort('created_at' ,this.state.created_at)}>Огноо <i className={this.state.created_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                                         <th scope="col"> Идэвхтэй эсэх</th>
                                                         <th scope="col"></th>
                                                         <th scope="col"></th>
