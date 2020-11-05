@@ -210,7 +210,7 @@ export default class BundleForm extends Component {
                     />
                 </div>
 
-                <div className="form-group mb-1">
+                <div className="form-group">
                     <button className="btn gp-btn-primary btn-block waves-effect waves-light" onClick={this.handleSave} >
                         Хадгал
                     </button>
