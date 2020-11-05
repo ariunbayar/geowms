@@ -391,7 +391,6 @@ export default class BarilgaSuurinGazar extends Component{
       service
           .rows(this.state.pid, this.state.fid)
           .then(({ rows }) => {
-              console.log("irsen data")
               this.setState({ rows })
               this.loadData()
           })
@@ -760,7 +759,6 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     render(){
-      console.log()
         return (
             <div className="col-md-12">
                 <div className={this.state.togle_islaod ? "toggled" : ""} id="wrapper-map" >

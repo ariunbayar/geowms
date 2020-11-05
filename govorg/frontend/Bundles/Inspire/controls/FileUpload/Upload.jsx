@@ -25,8 +25,8 @@ export class Upload extends Component {
 
     getFile(event) {
         const { name } = this.state
-        var file_value = event.target.value
         const files = event.target.files;
+        var file_value = document.getElementById('Upload')
         const state_files = this.state.files
         if (files.length == 1){
             const check = this.checkName(files)
@@ -46,7 +46,7 @@ export class Upload extends Component {
                 }
                 else
                 {
-                    file_value = null
+                    file_value.value = ''
                     this.setState({ files: [] })
                 }
             }
@@ -58,7 +58,7 @@ export class Upload extends Component {
             }
             else {
                 this.props.notif('danger', `өөр төрлийн файл орсон байна. Зөвхөн ${name == 'gml' ? ' .gml болон .gfs' : name == 'geojson' ? ' .geojson болон .gfs' : name == 'shp' ? ' .shp, .shx, .prj, .dbf болон .cpg' : 'буруу'} байна.`, 'info')
-                file_value = null
+                file_value.value = ''
                 this.setState({ files: [] })
             }
         }
@@ -131,8 +131,8 @@ export class Upload extends Component {
     }
 
     cancel(){
-        var file_value = document.getElementById('Upload').value
-        file_value.reset()
+        var file_value = document.getElementById('Upload')
+        file_value.value = ''
         this.setState({ files: [] })
     }
 
@@ -180,7 +180,7 @@ export class Upload extends Component {
     }
 
     render() {
-        const { files, text, type, file_value, name, not_cancel } = this.state
+        const { files, text, type, name, not_cancel } = this.state
         this.list = []
         if (files.length > 0){
             for(var i=0; i < files.length; i++){
