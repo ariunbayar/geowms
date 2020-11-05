@@ -14,7 +14,9 @@
 
 .bundle-container-bundleForm {
     background-color: white;
-    height: calc(96vh - 50px);
+    height: calc(95vh - 50px);
+    border-radius: 0.5rem;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
 }
 
 .bundle-table-scroll {
