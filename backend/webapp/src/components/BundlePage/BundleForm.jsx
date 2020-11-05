@@ -139,21 +139,22 @@ export default class BundleForm extends Component {
                 </div>
 
                 <div className ="bundle-table-scroll border border-light rounded">
+                    
                     {this.props.formOptions.map(({name, layers,is_active}, idx) =>
                         <div className="form-group" style={{marginTop: '10px'}} key={idx}>
                             <div className="col-md-12">
                             {is_active ?
-                                <div id="accordion2">
-                                    <div className="card mb-2">
+                                <div id={`accordion2`}>
+                                    <div className=" mb-2">
                                         <div className="card-header" style={{padding: "5px"}}>
-                                            <button key={idx} className="btn btn-link shadow-none text-dark text-left" style={{padding: "5px"}} data-toggle="collapse" data-target={`#collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
+                                            <button key={idx} className="btn btn-link shadow-none text-dark text-left collapsed" style={{padding: "5px"}} data-toggle="collapse" data-target={`#collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
                                             <a>
-                                                <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
+                                                <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="true"></i>
                                                 <span className="ml-2">{name}</span>
                                             </a>
                                             </button>
                                         </div>
-                                        <div id={`collapse-${idx}`}className="collapse" data-parent="#accordion2">
+                                        <div id={`collapse-${idx}`} className="collapse" data-parent="#accordion2">
                                             <div className="card-body">
                                             <dd>
                                                 {layers.map((layer) =>
@@ -174,14 +175,20 @@ export default class BundleForm extends Component {
                                         </div>
                                     </div>
                                 </div>
-                                :
-                                <div key={idx} className="row">
-                                    <a>
-                                        <i className="fa fa-times-circle" style={{color: "#FF4748"}}></i>
-                                        <del> {name}</del>
-                                    </a>
+                            :
+                            <div>
+                                <div className=" mb-2">
+                                    <div className="card-header" style={{padding: "5px"}}>
+                                        <button key={idx} className="btn btn-link shadow-none text-dark text-left" style={{padding: "5px"}} data-toggle="collapse" data-target={`#collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
+                                        <a>
+                                            <i className="fa fa-times-circle" style={{color: "#FF4748"}}></i>
+                                            <span className="ml-2">{name}</span>
+                                        </a>
+                                        </button>
+                                    </div>
                                 </div>
-                                }
+                            </div>
+                            }
                             </div>
                         </div>
                     )}

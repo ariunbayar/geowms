@@ -21,7 +21,7 @@
 
 .bundle-table-scroll {
     overflow-y: scroll;
-    height: calc(54vh - 120px);
+    height: calc(48vh - 50px);
 }
 
 ::-webkit-scrollbar {
