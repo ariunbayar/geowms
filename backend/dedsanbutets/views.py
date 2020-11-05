@@ -365,6 +365,12 @@ def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
     tid = payload.get('tid')
+    if not id_list:
+        rsp = {
+            'success': False,
+            'info': 'Утга сонгоно уу.'
+        }
+        return JsonResponse(rsp)
     theme = LThemes.objects.filter(theme_id=tid).first()
     if not theme:
         rsp = {
@@ -394,20 +400,17 @@ def propertyFieldsSave(request, payload):
     feature = LFeatures.objects.filter(feature_id=fid).first()
     feature_config = [data.feature_config_id for data in LFeatureConfigs.objects.filter(feature_id=15)]
     if check_name:
-        table_name = slugifyWord(check_name.view_name)
+        table_name = check_name.view_name
         removeView(table_name)
-        check = createView(id_list, table_name, model_name, feature_config)
-        if check:
-            ViewProperties.objects.filter(view=check_name).delete()
-            for idx in id_list:
-                ViewProperties.objects.create(view=check_name, property_id=idx)
-    else:
-        table_name = slugifyWord(feature.feature_name_eng)
-        check = createView(id_list, table_name, model_name, feature_config)
-        if check:
-            new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
-            for idx in id_list:
-                ViewProperties.objects.create(view=new_view, property_id=idx)
+        ViewProperties.objects.filter(view=check_name).delete()
+        check_name.delete()
+
+    table_name = slugifyWord(feature.feature_name_eng) + '_view'
+    check = createView(id_list, table_name, model_name, feature_config)
+    if check:
+        new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
+        for idx in id_list:
+            ViewProperties.objects.create(view=new_view, property_id=idx)
 
     if check:
         rsp = {
@@ -607,13 +610,12 @@ def erese(request, payload):
     return JsonResponse(rsp)
 
 
-
 def createView(ids, table_name, model_name, feature_config):
     data = LProperties.objects.filter(property_id__in=ids)
     fields = [row.property_code for row in data]
     try:
         query = '''
-            CREATE OR REPLACE VIEW public.{table_name}
+            CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
             FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) and feature_config_id in ({feature_config}) order by 1,2'::text)
@@ -626,8 +628,10 @@ def createView(ids, table_name, model_name, feature_config):
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 feature_config=', '.join(['{}'.format(f) for f in feature_config]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
         with connections['default'].cursor() as cursor:
                 cursor.execute(query)
+                cursor.execute(query_index)
         return True
 
     except Exception:
@@ -637,7 +641,7 @@ def createView(ids, table_name, model_name, feature_config):
 def removeView(table_name):
     try:
         query = '''
-            drop view {table_name};
+            DROP MATERIALIZED VIEW IF EXISTS {table_name};
         '''.format(table_name = table_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(query)
