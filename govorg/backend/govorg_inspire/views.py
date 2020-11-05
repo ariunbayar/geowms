@@ -870,6 +870,7 @@ def FileUploadSaveData(request, tid, fid):
     for_delete_name = ''
     feature_id = fid
     id_made = ''
+    return_name = ''
     try:
         unique_filename = str(uuid.uuid4())
         for fo in form:
@@ -877,14 +878,17 @@ def FileUploadSaveData(request, tid, fid):
                 file_name = unique_filename + fo.name
                 for_delete_name = fo.name
                 file_type_name = 'shp'
+                return_name += fo.name + ','
             elif '.gml' in fo.name or '.gfs' in fo.name:
                 file_type_name = 'gml'
                 file_name = unique_filename + fo.name
                 for_delete_name = fo.name
+                return_name += fo.name + ','
             elif '.geojson' in fo.name or '.gfs' in fo.name:
                 file_type_name = 'geojson'
                 file_name = unique_filename + fo.name
-                for_delete_name = fo.name
+                for_delete_name = fo.name.split('.')[0]
+                return_name += fo.name + ','
             else:
                 file_name = fo.name
             if file_type_name:
@@ -983,7 +987,7 @@ def FileUploadSaveData(request, tid, fid):
                 delete_db = _deleteDB(id_made, model_name)
                 rsp = {
                     'success': False,
-                    'info': file_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй ' + deleted
+                    'info': return_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй ' + deleted
                 }
                 return JsonResponse(rsp)
             except GEOSException as e:
@@ -991,7 +995,7 @@ def FileUploadSaveData(request, tid, fid):
                 delete_db = _deleteDB(id_made, model_name)
                 rsp = {
                     'success': False,
-                    'info': file_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
+                    'info': return_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
                 }
                 return JsonResponse(rsp)
             saved = _saveToMainData(values, model_name, geo_id, feature_id)
@@ -1006,6 +1010,6 @@ def FileUploadSaveData(request, tid, fid):
         deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
         rsp = {
             'success': False,
-            'info': file_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
+            'info': return_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
         }
     return JsonResponse(rsp)
