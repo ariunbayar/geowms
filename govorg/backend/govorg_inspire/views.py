@@ -945,7 +945,7 @@ def FileUploadSaveData(request, tid, fid):
                             if geom_type == 'Polygon':
                                 geom = MultiPolygon(geom, srid=4326) # Polygon MultiPolygon bolgoj bna
                             if geom:
-                                id_made = str(need_id) + 'odko' + str(g_id)
+                                id_made = str(need_id) + str(g_id)
                                 geo = MGeoDatas.objects.create(
                                     geo_id=id_made,
                                     geo_data=geom,
