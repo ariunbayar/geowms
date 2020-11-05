@@ -58,7 +58,7 @@ export class LogForm extends Component {
                     <div className="card-body">
                         <div className="row justify-content-between">
                             <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>
-                            <div className="col-md-4  mb-1">
+                            <div className="mb-1 mr-3 search-bar">
                                 <input
                                     type="text"
                                     className="form-control"
@@ -67,6 +67,8 @@ export class LogForm extends Component {
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
+                                <a><i class="icon-magnifier"></i></a>
+
                             </div>
                         </div>
                         <div className="table-responsive table_wrapper">

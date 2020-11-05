@@ -34,16 +34,15 @@ export default class Bundle extends Component {
         this.setState({modal_status: 'closed'})
     }
 
-    
     render() {
         const {id, name, price, icon_url, wms_list} = this.props.values
         const {is_modal_delete_open}=this.state
         const idx=this.props.idx
         return (
             <tr>
-                <th scope="col">
+                <td scope="col" className="text-dark">
                     {idx + 1}
-                </th>
+                </td>
 
                 <td>
                     <img className="img" src={icon_url}/>
@@ -75,13 +74,13 @@ export default class Bundle extends Component {
                 </td>
                 <td>
                     <NavLink to={`/back/дэд-сан/${id}/засах/`}>
-                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                            <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </td>
 
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                        <i className="fa fa-trash-o gp-text-primary" aria-hidden="true"></i>
                     </a>
                     <Modal
                         modalAction={() => this.modalClose()}

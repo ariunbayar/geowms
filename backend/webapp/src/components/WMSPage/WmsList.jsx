@@ -182,28 +182,28 @@ export class WmsList extends Component {
                         <div className="card">
                             <div className="card-body">
                                     <div className="row">
-                                        <div className="col-sm-12 col-md-6 p-0">
-                                            <div className="float-sm-left">
+                                        <div className="col-md-6">
+                                            <div className="float-sm-left search-bar">
                                                 <input
                                                     type="text"
-                                                    className="form-control m-1"
+                                                    className="form-control"
                                                     id="searchQuery small-input"
                                                     placeholder="Хайх"
                                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                                     value={this.state.searchQuery}
                                                 />
+                                                <a><i class="icon-magnifier"></i></a>
                                             </div>
                                         </div>
-
-                                        <div className="col-sm-12 col-md-6 p-0">
+                                        <div className="col-md-6">
                                             <div className="float-sm-right">
-                                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/back/wms/үүсгэх/`}>
+                                                <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm" to={`/back/wms/үүсгэх/`}>
                                                     Нэмэх
                                                 </NavLink>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="row">
+                                    <div className="row my-2">
                                         <div className="table-responsive table_wrapper">
                                             <table className="table align-items-center table-flush table_wrapper_table">
                                                 <thead>

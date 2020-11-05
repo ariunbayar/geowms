@@ -66,7 +66,7 @@ export class Жагсаалт extends Component {
                 <div className="col-md-12">
                     <div className="card">
                         <div className="card-body">
-                            <div className="col-md-3 float-right">
+                            <div className="float-right search-bar mr-3">
                                 <input
                                     type="text"
                                     className="form-control"
@@ -75,6 +75,7 @@ export class Жагсаалт extends Component {
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
+                                <a><i class="icon-magnifier"></i></a>
                             </div>
                             <div className="my-4">
                                 <div className="p-3">

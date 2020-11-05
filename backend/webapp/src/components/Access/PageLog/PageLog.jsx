@@ -76,19 +76,20 @@ export class PageLog extends Component {
                     </div>
                 </div>
                 <h5 className="mb-3 text-center text-uppercase">Нэвтэрч орсон мэдээлэл</h5>
-                <div className="form-row text-right">
-                    <div className="form-group col-md-6">
+                <div className="row">
+                    <div className="search-bar">
                         <input
                             type="text"
                             className="form-control"
-                            id="searchQuery"
+                            id="searchQuery small-input"
                             placeholder="Хайх"
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
+                        <a><i class="icon-magnifier"></i></a>
                     </div>
                 </div>
-                <div className="table-responsive table_wrapper">
+                <div className="table-responsive table_wrapper my-2">
                     <table className="table example table_wrapper_table" id="example">
                         <thead>
                             <tr>

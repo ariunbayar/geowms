@@ -210,12 +210,12 @@ export default class BundleForm extends Component {
                     />
                 </div>
 
-                <div className="form-group" style={{marginBottom: '5px'}}>
+                <div className="form-group mb-1">
                     <button className="btn gp-btn-primary btn-block waves-effect waves-light" onClick={this.handleSave} >
                         Хадгал
                     </button>
                 </div>
-                <div className="form-group" >
+                <div>
                     <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light" to={`/back/дэд-сан/`}>
                             Буцах
                     </NavLink>
