@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from backend.org.models import Org, OrgRole, Employee,InspirePerm
+from backend.org.models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
 from django.shortcuts import get_object_or_404
 from backend.inspire.models import LThemes, LPackages, LFeatures

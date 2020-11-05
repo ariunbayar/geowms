@@ -9,9 +9,7 @@ import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
 import {Draw, Modify, Select, Snap} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
-import { Feature } from 'ol'
 import {unByKey} from 'ol/Observable';
-import { set } from 'ol/transform'
 import {createStringXY} from 'ol/coordinate'
 import {transform as transformCoordinate, toLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
@@ -24,6 +22,8 @@ import {PolygonBarButton} from './controls/Polygon/PolygonBarButton'
 import {RemoveBarButton} from './controls/Remove/RemoveBarButton'
 import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
+import {UploadButton} from './controls/FileUpload/UploadButton'
+import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -64,18 +64,19 @@ export default class BarilgaSuurinGazar extends Component{
           togle_islaod: true,
           geojson: {},
           null_form_isload: false,
+          showUpload: false,
           is_sidebar_open: true,
           wms_map_list: []
       }
 
       this.controls = {
         modal: new Modal(),
+        upload: new UploadBtn(),
         sidebar: new Sidebar(),
       }
 
       this.modifyE = this.Modify()
       this.drawE = this.Draw()
-      this.getRole = this.getRole.bind(this)
       this.addNotif = this.props.addNotif
 
       this.loadMap = this.loadMap.bind(this)
@@ -98,6 +99,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawed = this.drawed.bind(this)
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
+      this.showUploadBtn = this.showUploadBtn.bind(this)
+      this.closeUploadBtn = this.closeUploadBtn.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
       this.WmsTile = this.WmsTile.bind(this)
       this.mapPointerMove = this.mapPointerMove.bind(this)
@@ -107,14 +110,13 @@ export default class BarilgaSuurinGazar extends Component{
 
     componentDidMount(){
       const {pid, fid} = this.state
-      this.getRole(pid, fid)
-      service
-          .geomType(pid, fid)
-          .then(({ type }) => {
-              this.setState({ type })
-              this.loadControls()
-          })
-
+      Promise.all([
+          service.getRole(pid, fid),
+          service.geomType(pid, fid),
+      ]).then(([{roles}, {type}]) => {
+          this.setState({ type, roles })
+          this.loadControls()
+        })
       this.loadRows()
       this.loadMap()
     }
@@ -140,17 +142,29 @@ export default class BarilgaSuurinGazar extends Component{
       map.addControl(this.controls.sidebar)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
-        if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
-        if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+        else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
+        else if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+        else {
+          this.addNotif('warning', type, 'times')
+          map.addControl(new LineBarButton({LineButton: this.LineButton, 'null': true}))
+          map.addControl(new PointBarButton(({PointButton: this.PointButton, 'null': true})))
+          map.addControl(new PolygonBarButton(({PolygonButton: this.PolygonButton, 'null': true})))
+        }
       }
-      if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+      if(roles[1] || roles[3]) {
+        map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+        map.addControl(this.controls.upload)
+      }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+
+      map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
       if(roles[3]){
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
+      this.setState({ is_loading:false })
     }
 
     loadData(){
@@ -379,7 +393,7 @@ export default class BarilgaSuurinGazar extends Component{
       service
           .rows(this.state.pid, this.state.fid)
           .then(({ rows }) => {
-              this.setState({ rows,  is_loading:false })
+              this.setState({ rows })
               this.loadData()
           })
     }
@@ -685,6 +699,16 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+    }
+
+    showUploadBtn(){
+      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid)
+      this.setState({ showUpload: true })
+    }
+
+    closeUploadBtn(){
+      this.controls.upload.showUpload(false)
+      this.setState({ showUpload: false })
     }
 
     SideBarBtn(){
