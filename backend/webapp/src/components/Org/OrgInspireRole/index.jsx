@@ -72,18 +72,18 @@ export class OrgInspireRole extends Component {
     render() {
         const {form_datas} = this.state
         return (
-            <div className="scroll-fixed">
-                <table className="table table-bordered row">
-                    <thead className="thead-light scroll-thead col-12">
+            <div className="scroll-fixed col-6 text-wrap">
+                <table className="table table-bordered row borderless">
+                    <thead className="thead-dark scroll-thead col-12">
                         <tr className="row">
-                            <th scope="col" className="text-center col-5">Оронзайн суурь өгөгдлийн сан</th>
-                            <th scope="col" className="text-center col-1"><span>харах</span></th>
-                            <th scope="col" className="text-center col-1"><span>нэмэх</span></th>
-                            <th scope="col" className="text-center col-1"><span>хасах</span></th>
-                            <th scope="col" className="text-center col-1"><span>засах</span></th>
-                            <th scope="col" className="text-center col-1"><span>цуцлах</span></th>
-                            <th scope="col" className="text-center col-1"><span>хянах</span></th>
-                            <th scope="col" className="text-center col-1"><span>батлах</span></th>
+                            <th className="vertical col-5">Оронзайн суурь өгөгдлийн сан</th>
+                            <th className="vertical col-1"><span>харах</span></th>
+                            <th className="vertical col-1"><span>нэмэх</span></th>
+                            <th className="vertical col-1"><span>хасах</span></th>
+                            <th className="vertical col-1"><span>засах</span></th>
+                            <th className="vertical col-1"><span>цуцлах</span></th>
+                            <th className="vertical col-1"><span>хянах</span></th>
+                            <th className="vertical col-1"><span>батлах</span></th>
                         </tr>
                     </thead>
                     <Formik

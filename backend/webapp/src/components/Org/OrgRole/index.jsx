@@ -95,8 +95,8 @@ export class OrgRole extends Component {
                     <div className="col-md-12 pt-2 pr-0">
                         <div className="text"></div>
                         <div className="mb-3 mt-3">
-                            <div className="table-responsive">
-                                <table className="table table-bordered w-auto">
+                            <div className="table-responsive table_wrapper">
+                                <table className="table table-bordered w-auto table_wrapper_table">
                                     <thead className="thead-light">
                                         <tr>
                                             <th scope="col">Оронзайн суурь өгөгдлийн сан</th>
