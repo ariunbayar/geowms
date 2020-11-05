@@ -89,7 +89,7 @@ export class BundleForms extends Component {
             <div className="clearfix">
                <div className="row" style={{padding:"0px",}}>
                     <div className="col-lg-4">
-                        <div className="w-auto p-2 shadow-sm mb-3 bg-white rounded card">
+                        <div className="w-auto p-2 shadow-sm mb-2 bg-white rounded card">
                             <div className="card-body">
                                 <BundleForm
                                     handleSave={this.handleSave}
