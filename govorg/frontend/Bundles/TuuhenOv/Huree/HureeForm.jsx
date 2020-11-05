@@ -190,7 +190,7 @@ export class HureeForm extends Component {
                 <ModalAlert
                     modalAction={() => this.modalClose()}
                     status={this.state.modal_alert_status}
-                    title={`Амжилтай ${this.state.text}`}
+                    title={`Амжилттай ${this.state.text}`}
                     model_type_icon = "success"
                 />
             </div>
