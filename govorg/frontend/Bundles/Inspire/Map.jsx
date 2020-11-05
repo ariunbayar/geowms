@@ -11,6 +11,7 @@ import {Draw, Modify, Select, Snap} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import { Feature } from 'ol'
 import { set } from 'ol/transform'
+import {createStringXY} from 'ol/coordinate'
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -129,6 +130,17 @@ export default class BarilgaSuurinGazar extends Component{
     loadControls(){
       const map = this.map
       const { type, roles } = this.state
+      const mousePositionControl = new MousePosition({
+        coordinateFormat: createStringXY(4),
+        projection: 'EPSG:4326',
+        // comment the following two lines to have the mouse position
+        // be placed within the map.
+        className: 'custom-mouse-position',
+        target: document.getElementById('mouse-position'),
+        undefinedHTML: '&nbsp;',
+      })
+
+      map.addControl(mousePositionControl)
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       map.addControl(this.controls.sidebar)
@@ -278,6 +290,7 @@ export default class BarilgaSuurinGazar extends Component{
           features: select.getFeatures(),
         })
 
+        modify.on("mo", event => this.modifiedFeature(event));
         modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
 
@@ -710,6 +723,7 @@ export default class BarilgaSuurinGazar extends Component{
                   </div>
                   <div className="content-wrapper-map">
                     <div id="map" className={(this.state.is_loading ? 'opac' : '')}></div>
+                    <div id="mouse-position"></div>
                   </div>
                 </div>
                 {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}

@@ -193,3 +193,7 @@
     box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
     opacity: 1;
 }
+
+.ol-attribution {
+  display:none;
+}
