@@ -842,14 +842,21 @@ def _deleteFile(file_name, for_delete_name, type_name):
 
 def _deleteDB(id_made, model_name):
     try:
-        delete_geos = MGeoDatas.objects.filter(geo_id=id_made)
-        if delete_geos:
-            for geo in delete_geos:
-                geo.delete()
-        delete_main_datas = model_name.objects.filter(geo_id=id_made)
-        if delete_main_datas:
-            for data in delete_main_datas:
-                data.delete()
+        print(id_made)
+        print(id_made)
+        print(id_made)
+        print(id_made)
+        print(id_made)
+        print(id_made)
+        if id_made != '':
+            delete_geos = MGeoDatas.objects.filter(geo_id=id_made)
+            if delete_geos:
+                for geo in delete_geos:
+                    geo.delete()
+            delete_main_datas = model_name.objects.filter(geo_id=id_made)
+            if delete_main_datas:
+                for data in delete_main_datas:
+                    data.delete()
         rsp = {
             'success': True,
             'info': 'Дутуу датаг устгасан'
@@ -868,6 +875,7 @@ def FileUploadSaveData(request, tid, fid):
     file_name = ''
     for_delete_name = ''
     feature_id = fid
+    id_made = ''
     try:
         unique_filename = str(uuid.uuid4())
         for fo in form:
