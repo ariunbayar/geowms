@@ -198,5 +198,4 @@ def slugifyWord(word):
     word = unicodedata.normalize('NFKD', word).encode('ascii', 'ignore').decode('ascii')
     word = re.sub(r'[^\w\s_]', '', word.lower())
     word = re.sub(r'[_\s]+', '_', word).strip('-_')
-    word = word + '_view'
     return word
