@@ -12,7 +12,7 @@ from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, MDatasGeographical, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography
 from govorg.backend.org_request.models import ChangeRequest
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 
@@ -820,6 +820,10 @@ def _MDatasName(model_name):
         model_name = MDatasBoundary
     if model_name == 'bu':
         model_name = MDatasBuilding
+    if model_name == 'cp':
+        model_name = MDatasCadastral
+    if model_name == 'gn':
+        model_name = MDatasGeographical
     if model_name == 'hg':
         model_name = MDatasHydrography
     return model_name
