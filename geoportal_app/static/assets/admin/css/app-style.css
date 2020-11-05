@@ -231,11 +231,10 @@ hr {
 	padding-top: 70px;
 	padding-left: 15px;
     padding-right: 15px;
-    overflow-x: hidden;
 	-webkit-transition: all 0.3s ease;
-  -moz-transition: all 0.3s ease;
-  -o-transition: all 0.3s ease;
-  transition: all 0.3s ease; 
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease; 
   }
 
 .content-wrapper-map {
@@ -4594,7 +4593,7 @@ table.grid td {
   border-radius: 50%;
   bottom: 20px;
   right: 12px;
-  background-color: #008cff;
+  background-color: #034ea2;
   z-index: 10000;
   box-shadow: 1px 1px 40px 0px rgba(73, 220, 251, 0.32);
 }
@@ -4604,7 +4603,7 @@ table.grid td {
 }
 .back-to-top:hover {
   color: white;
-  background-color: #2f353f;
+  background-color: #034ea2;
   transition: all .5s;
 }
 

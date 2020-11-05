@@ -73,18 +73,19 @@ export class LoginLog extends Component {
             </div>
             <h5 className="mb-3 text-center text-uppercase">Хэрэглэгчийн оролт гаралтын тэмдэглэл</h5>
             <div className="row">
-                <div className="col-sm-6">
-                        <input
-                            type="text"
-                            className="form-control m-1"
-                            id="searchQuery small-input"
-                            placeholder="Хайх"
-                            onChange={(e) => this.handleSearch('searchQuery', e)}
-                            value={this.state.searchQuery}
-                        />
+                <div className="search-bar">
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="searchQuery small-input"
+                        placeholder="Хайх"
+                        onChange={(e) => this.handleSearch('searchQuery', e)}
+                        value={this.state.searchQuery}
+                    />
+                    <a><i class="icon-magnifier"></i></a>
                 </div>
             </div>
-            <div className="row">
+            <div className="row my-2">
                 <div className="col-lg-12">
                     <div className="table-responsive table_wrapper">
                         <table className="table table_wrapper_table">

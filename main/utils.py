@@ -2,7 +2,8 @@ from PIL import Image
 from collections import namedtuple
 from io import BytesIO
 import base64
-
+import re
+import unicodedata
 from django.db import connections
 
 
@@ -192,3 +193,10 @@ def gis_fetch_one(oid, pk):
         rows = list(dict_fetchall(cursor))
 
     return len(rows) and rows[0] or None
+
+def slugifyWord(word):
+    word = unicodedata.normalize('NFKD', word).encode('ascii', 'ignore').decode('ascii')
+    word = re.sub(r'[^\w\s_]', '', word.lower())
+    word = re.sub(r'[_\s]+', '_', word).strip('-_')
+    word = word + '_view'
+    return word

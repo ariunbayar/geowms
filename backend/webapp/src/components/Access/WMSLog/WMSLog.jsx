@@ -72,15 +72,16 @@ export default class WMSLog extends Component {
                 </div>
                 <h5 className="mb-3 text-center text-uppercase">WMS url ашиглан хандалт хийсэн логийн тэмдэглэл</h5>
                 <div className="row">
-                    <div className="col-sm-4">
+                    <div className="search-bar">
                         <input
                             type="text"
-                            className="form-control m-1"
+                            className="form-control"
                             id="searchQuery small-input"
                             placeholder="Хайх"
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
+                        <a><i class="icon-magnifier"></i></a>
                     </div>
                 </div>
                 <div className="row">

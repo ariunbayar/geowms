@@ -29,25 +29,27 @@ export default class BundleAdminRights extends Component {
         return (
             <>
                 {this.props.formOptions.map(({id, name, layers, is_active, layer_visible}, idx) =>
-                    <div key={idx}>
+                    <div key={idx} className="" id={`accordion3`}>
                         {layer_visible &&
-                            (is_active ?
-                                <div key={idx} className="row ml-1">
-                                    <a>
-                                        <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
-                                        <span> {name}</span>
-                                    </a>
-                                </div> :
-                                <div key={idx} className="row ml-1" >
-                                    <a>
-                                        <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
-                                        <del> {name}</del>
-                                    </a>
+                                <div className="row ml-1 card-header">
+                                    {is_active ?
+                                    <button key={idx} className="btn btn-link shadow-none text-dark text-left collapsed" style={{padding: "5px"}} data-toggle="collapse" data-target={`#r-collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
+                                            <a>
+                                                <i className="fa fa-check-circle" style={{color: "green"}} aria-hidden="false"></i>
+                                                <span className="ml-2">{name}</span>
+                                            </a>
+                                    </button>:
+                                    <button key={idx} className="btn btn-link shadow-none text-dark text-left collapsed" style={{padding: "5px"}} data-toggle="collapse" data-target={`#r-collapse-${idx}`} aria-expanded="true" aria-controls={`collapse-${idx}`}>
+                                            <a>
+                                                <i className="fa fa-times-circle" style={{color: "#FF4748"}}  ></i>
+                                                <span className="ml-2">{name}</span>
+                                            </a>
+                                    </button>
+                                    }
                                 </div>
-                            )
                         }
                         {layer_visible ?
-                        <div className="table-responsive">
+                        <div className="table-responsive card-body" id={`r-collapse-${idx}`} className="collapse" data-parent="#accordion3">
                             <table className="table">
                                 <thead>
                                     <tr>

@@ -52,7 +52,6 @@ export default class App extends Component {
               </a>
             </div>
             <ul className="sidebar-menu do-nicescrol">
-
                 <MenuItem icon="fa fa-history" url="/back/access/login/" text="Хандалт"></MenuItem>
                 <MenuItem icon="fa fa-bank" url="/back/log/" text="Банк лог"></MenuItem>
                 <MenuItem icon="fa fa-database" url="/back/дэд-сан/" text="Дэд сан">
@@ -63,7 +62,6 @@ export default class App extends Component {
                     </ul>
                 </MenuItem>
                 <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
-
                 <MenuItem icon="fa fa-users" url="/back/байгууллага/түвшин/" text="Байгууллага">
                     <ul className="sidebar-submenu">
                         <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/1/" text="1-р түвшин"></MenuItem>
@@ -72,17 +70,17 @@ export default class App extends Component {
                         <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин"></MenuItem>
                     </ul>
                 </MenuItem>
-
                 <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
-                <MenuItem icon="fa fa-connectdevelop" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
                 <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч"></MenuItem>
-                <MenuItem icon="icon-map" url="/back/gis/" text="GIS"></MenuItem>
-                <MenuItem icon="fa fa-server" url="/back/geoserver/" text="GeoServer">
+                <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо">
                     <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="layers"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/gis/" text="GIS"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="GeoServer"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/тохиргоо/" text="Сайт параметр"></MenuItem>
+
                     </ul>
                 </MenuItem>
-                <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо"></MenuItem>
             </ul>
           </div>
           <div className="content-wrapper">

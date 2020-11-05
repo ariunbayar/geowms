@@ -110,20 +110,30 @@ export class OrgForm extends Component {
         return (
             <div className="main-content">
                 <div className="page-container">
-                    <div className="text-right">
-                        <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
-                            Нэмэх
-                        </NavLink>
-                        <input
-                            type="text"
-                            className="form-control col-md-4  mb-1 float-left"
-                            id="searchQuery"
-                            placeholder="Хайх"
-                            onChange={(e) => this.handleSearch('searchQuery', e)}
-                            value={this.state.searchQuery}
-                        />
+                    <div className="row">
+                        <div className="col-md-6">
+                            <div className="float-sm-left search-bar">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="searchQuery small-input"
+                                    placeholder="Хайх"
+                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                    value={this.state.searchQuery}
+                                />
+                                <a><i class="icon-magnifier"></i></a>
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <div className="float-sm-right">
+                                <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
+                                    Нэмэх
+                                </NavLink>
+                            </div>
+                        </div>
                     </div>
-                    <div className="mb-3 mt-3">
+
+                    <div className="mb-2 mt-2">
                         <table className="table-responsive table_wrapper">
                             <table className="table example table_wrapper_table" id="example">
                                 <thead>

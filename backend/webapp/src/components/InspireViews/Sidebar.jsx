@@ -12,7 +12,8 @@ export default class SideBar extends Component {
             save_is_load: false,
             modal_alert_check: 'closed',
             title: '',
-            model_type_icon: 'success'
+            model_type_icon: 'success',
+            view_name: ''
 
         }
         this.handleInput = this.handleInput.bind(this)
@@ -49,7 +50,8 @@ export default class SideBar extends Component {
 
     componentDidMount(){
         const id_list = this.props.id_list
-        this.setState({id_list})
+        const view_name = this.props.view_name
+        this.setState({id_list, view_name})
     }
 
     componentDidUpdate(pP){
@@ -60,6 +62,10 @@ export default class SideBar extends Component {
         if(pP.id_list !== this.props.id_list){
             const id_list = this.props.id_list
             this.setState({id_list})
+        }
+        if(pP.view_name !== this.props.view_name){
+            const view_name = this.props.view_name
+            this.setState({view_name})
         }
     }
 
@@ -75,13 +81,14 @@ export default class SideBar extends Component {
     }
     render() {
         const {fields, fid} = this.props
-        const {id_list, save_is_load} = this.state
+        const {id_list, save_is_load, view_name} = this.state
         return (
             <div className={`card col-md-7`} style={{left:"10px"}}>
                 <div className="card-body">
                     {fields.length > 0 ?
                     <div>
                         <h4 className="text-center">Feature id: {fid}</h4>
+                        {view_name && <h4 className="text-center">View name: {view_name}</h4>}
                         {fields.map((property, idx) =>
                             <div key={idx} className='form-group'>
                                 <div class="icheck-primary">

@@ -79,13 +79,15 @@ export class BundleList extends Component {
                                 </NavLink>
                             </div>
 
-                            <div className="table-responsive">
-                            <table className="table">
+                            <div className="table-responsive table_wrapper">
+                            <table className="table table_wrapper_table">
                                 <thead>
                                     <tr>
                                         <th scope="col"> # </th>
                                         <th scope="col"> Сангийн нэр </th>
                                         <th scope="col"> WMS сервис </th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
                                         <th scope="col"></th>
                                         <th scope="col"></th>
                                     </tr>

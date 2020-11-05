@@ -86,35 +86,33 @@ export class BundleForms extends Component {
 
     render() {
         return (
-            <div className="row">
-                <div className="col-lg-12">
-                    <div className="row">
-                        <div className="col-lg-4">
-                            <div className="card">
-                                <div className="card-body">
-                                    <BundleForm
-                                        handleSave={this.handleSave}
-                                        handleCancel={this.handleFormCancel}
-                                        formOptions={this.state.form_options}
-                                        values={this.state.form_values}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-lg-8">
-                            <div className="card">
-                                <div className="card-body">
-                                    <BundleAdminRights
-                                        handleSave={this.handleSave}
-                                        formOptions={this.state.form_options}
-                                        formOptionsRole={this.state.form_options_role}
-                                        values={this.state.form_values}
-                                    />
-                                </div>
+            <div className="clearfix">
+               <div className="row" style={{padding:"0px",}}>
+                    <div className="col-lg-4">
+                        <div className="w-auto p-2 shadow-sm mb-3 bg-white rounded card">
+                            <div className="card-body">
+                                <BundleForm
+                                    handleSave={this.handleSave}
+                                    handleCancel={this.handleFormCancel}
+                                    formOptions={this.state.form_options}
+                                    values={this.state.form_values}
+                                />
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div className="col-lg-8">
+                        <div className="bundle-table-scroll card">
+                            <div className="card-body">
+                                <BundleAdminRights
+                                    handleSave={this.handleSave}
+                                    formOptions={this.state.form_options}
+                                    formOptionsRole={this.state.form_options_role}
+                                    values={this.state.form_values}
+                                />
+                            </div>
+                        </div>
+                    </div>
+               </div>
             </div>
         )
     }

@@ -8,7 +8,12 @@ import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
 import {Draw, Modify, Select, Snap} from 'ol/interaction'
-import {OSM, Vector as VectorSource} from 'ol/source'
+import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
+import {unByKey} from 'ol/Observable';
+import {createStringXY} from 'ol/coordinate'
+import {transform as transformCoordinate, toLonLat} from 'ol/proj'
+import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
+import Overlay from 'ol/Overlay'
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -19,6 +24,9 @@ import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
+
+import {SideBarBtn} from "./controls/SideBar/SideButton"
+import {Sidebar} from "./controls/SideBar/SideBarButton"
 import {Modal} from "../../../../src/components/MapModal/Modal"
 
 import "./styles.css"
@@ -57,11 +65,14 @@ export default class BarilgaSuurinGazar extends Component{
           geojson: {},
           null_form_isload: false,
           showUpload: false,
+          is_sidebar_open: true,
+          wms_map_list: []
       }
 
       this.controls = {
         modal: new Modal(),
         upload: new UploadBtn(),
+        sidebar: new Sidebar(),
       }
 
       this.modifyE = this.Modify()
@@ -90,6 +101,10 @@ export default class BarilgaSuurinGazar extends Component{
       this.createGeom = this.createGeom.bind(this)
       this.showUploadBtn = this.showUploadBtn.bind(this)
       this.closeUploadBtn = this.closeUploadBtn.bind(this)
+      this.SideBarBtn = this.SideBarBtn.bind(this)
+      this.WmsTile = this.WmsTile.bind(this)
+      this.mapPointerMove = this.mapPointerMove.bind(this)
+      this.onClickCloser = this.onClickCloser.bind(this)
 
     }
 
@@ -106,12 +121,26 @@ export default class BarilgaSuurinGazar extends Component{
       this.loadMap()
     }
 
+    getRole(pid, fid){
+      service
+          .getRole(pid, fid)
+          .then(({ success, roles }) => {
+              if(success){
+                this.setState({
+                  roles
+                })
+              }
+          })
+
+    }
+
     loadControls(){
       const map = this.map
       const { type, roles } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       map.addControl(this.controls.upload)
+      map.addControl(this.controls.sidebar)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -125,7 +154,9 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
+      map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
       if(roles[3]){
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
@@ -240,6 +271,16 @@ export default class BarilgaSuurinGazar extends Component{
         }),
       })
 
+        this.container = document.getElementById('popup')
+
+       const overlay = new Overlay({
+         element: this.container,
+         autoPan: true,
+         autoPanAnimation: {
+           duration: 250,
+         },
+       });
+
       const map = new Map({
         layers: [raster, vector],
         target: 'map',
@@ -247,14 +288,16 @@ export default class BarilgaSuurinGazar extends Component{
           center: this.state.Mongolia,
           zoom: 5,
         }),
+        overlays: [overlay],
       })
-
       this.map = map
+      this.overlay = overlay
       this.vector = vector
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
     }
+
 
     Modify(){
       const init = () => {
@@ -265,6 +308,8 @@ export default class BarilgaSuurinGazar extends Component{
         const modify = new Modify({
           features: select.getFeatures(),
         })
+
+        modify.on("modifystart", event => this.mapPointerMove(event));
         modify.on("modifyend", event => this.modifiedFeature(event));
         this.map.addInteraction(modify);
 
@@ -314,12 +359,39 @@ export default class BarilgaSuurinGazar extends Component{
     })
       const changedFeature = JSON.stringify(data)
       this.setState({ changedFeature, modifyend_selected_feature_check: true })
+      this.onClickCloser()
+    }
+
+    mapPointerMove(event) {
+      const map = this.map
+      const overlay = this.overlay
+      const { content } = this.state
+      this.content = document.getElementById('popup-content')
+      this.key = map.on('pointermove', event => {
+        var coordinate = event.coordinate
+        const projection = event.map.getView().getProjection()
+        const map_coord = transformCoordinate(coordinate, projection.code_, this.state.dataProjection)
+        const yChange = coordinateFormat(map_coord, '{y}', 6)
+        const xChange = coordinateFormat(map_coord, '{x}', 6)
+        this.setState({ xChange, yChange})
+        overlay.setPosition(coordinate)
+      })
+    }
+
+    onClickCloser(){
+      const overlay = this.overlay
+      this.closer = document.getElementById('popup-closer')
+      const closer = this.closer
+      overlay.setPosition(undefined);
+      closer.blur();
+      unByKey(this.key);
     }
 
     loadRows() {
       service
           .rows(this.state.pid, this.state.fid)
           .then(({ rows }) => {
+              console.log("irsen data")
               this.setState({ rows })
               this.loadData()
           })
@@ -360,6 +432,7 @@ export default class BarilgaSuurinGazar extends Component{
           draw.setActive(true);
           this.modifyE.setActive(false);
           this.drawE.init(draw)
+          draw.on('drawstart', event => this.mapPointerMove(event))
           draw.on('drawend', event => this.drawed(event))
         }
         if (oid_old != oid) {
@@ -402,6 +475,7 @@ export default class BarilgaSuurinGazar extends Component{
 
       const drawed = JSON.stringify(area)
       this.setState({drawed, selectedFeature_ID: null})
+      this.onClickCloser()
     }
 
     clearMap() {
@@ -636,6 +710,55 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ showUpload: false })
     }
 
+    SideBarBtn(){
+      const bundle_id = 7
+      service.loadWMSLayers(bundle_id).then(({wms_list}) => {
+        this.WmsTile(wms_list)
+      })
+    }
+
+    WmsTile(wms_list){
+      const map = this.map
+      const wms_map_list = wms_list.map(({layers, url, name}) => {
+        return {
+            name,
+            layers: layers.map((layer) => {
+              return {
+                ...layer,
+                tile: new TileLayer({
+                  source: new TileWMS({
+                    url: url,
+                      params: {
+                        'LAYERS': layer.code,
+                        //'FORMAT': 'image/svg+xml',
+                        'FORMAT': 'image/png',
+                    },
+                    serverType: 'geoserver',
+                    // Countries have transparency, so do not fade tiles:
+                    transition: 0,
+                  }),
+                })
+              }
+          })
+        }
+      })
+      this.setState({wms_map_list})
+      wms_map_list.map((wms, idx) => {
+        wms_map_list[idx].layers.map((layer,idx) => {
+          map.addLayer(layer.tile)
+          layer.tile.setVisible(false)
+        })
+      })
+      this.setState(prevState => ({
+        is_sidebar_open: !prevState.is_sidebar_open,
+      }))
+      if(this.state.is_sidebar_open){
+        this.controls.sidebar.showSideBar(wms_map_list, true)
+      }else{
+        this.controls.sidebar.showSideBar(wms_map_list, false)
+      }
+    }
+
     render(){
       console.log()
         return (
@@ -658,10 +781,17 @@ export default class BarilgaSuurinGazar extends Component{
                       </div>
                   </div>
                   <div className="content-wrapper-map">
-                    <div id="map"></div>
+                    <div id="map" className={(this.state.is_loading ? 'opac' : '')}></div>
+                    <div id="popup" className="ol-popup">
+                    <a href="#" id="popup-closer" className="ol-popup-closer"></a>
+                      <div id="popup-content">
+                        <span>{this.state.xChange || ''}</span>
+                        <span>{this.state.yChange || ''}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                {this.state.is_loading ? <span className="text-center d-block" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", left:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>
         )
     }

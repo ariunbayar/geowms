@@ -13,6 +13,7 @@ export class Upload extends Component {
             files: [],
             name: '',
             type: '',
+            not_cancel: false,
         }
         this.getFile = this.getFile.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -104,7 +105,7 @@ export class Upload extends Component {
         const { files } = this.state
         const { fid, tid } = this.props
         const formData = new FormData();
-        this.setState({ btn_upload_is_laod: true })
+        this.setState({ btn_upload_is_laod: true, not_cancel: true })
         for(var i = 0; i < files.length; i ++) {
             formData.append("data", files[i], files[i].name);
         }
@@ -124,7 +125,7 @@ export class Upload extends Component {
             else{
                 alert(info)
             }
-            this.setState({ btn_upload_is_laod: false, files: [] })
+            this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
             this.props.func()
         })
     }
@@ -179,7 +180,7 @@ export class Upload extends Component {
     }
 
     render() {
-        const { files, text, type, file_value, name } = this.state
+        const { files, text, type, file_value, name, not_cancel } = this.state
         this.list = []
         if (files.length > 0){
             for(var i=0; i < files.length; i++){
@@ -289,6 +290,7 @@ export class Upload extends Component {
                         <button
                             className="btn btn-secondary float-right"
                             onClick={() => this.cancel()}
+                            disabled={not_cancel ? 'disabled' : ''}
                         >Хоослох</button>
                     </div>
                 </div>

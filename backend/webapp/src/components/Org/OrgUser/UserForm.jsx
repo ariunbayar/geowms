@@ -95,20 +95,29 @@ export class UserForm extends Component {
                 <div className="row">
 
                     <div className="col-md-12">
-                        <div className="text-right">
-                            <NavLink className="btn gp-btn-primary float-right" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
-                                Нэмэх
-                            </NavLink>
-                               <input
-                                type="text"
-                                className="form-control col-md-4  mb-1 float-left"
-                                id="searchQuery"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="float-sm-left search-bar">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="searchQuery small-input"
+                                        placeholder="Хайх"
+                                        onChange={(e) => this.handleSearch('searchQuery', e)}
+                                        value={this.state.searchQuery}
+                                    />
+                                    <a><i class="icon-magnifier"></i></a>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="float-sm-right">
+                                    <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
+                                        Нэмэх
+                                    </NavLink>
+                                </div>
+                            </div>
                         </div>
-                        <div className="table-responsive table_wrapper">
+                        <div className="table-responsive table_wrapper my-2">
                             <table className="table table_wrapper_table">
                                 <thead>
                                     <tr>

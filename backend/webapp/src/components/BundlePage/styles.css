@@ -4,6 +4,33 @@
 }
 
 .fileContainer {
-	margin: 0;
-	padding: 0;
+    margin-bottom: 0px;
+    margin-top: 0px
 }
+
+* {
+    box-sizing: border-box;
+}
+
+.bundle-container-bundleForm {
+    background-color: white;
+    height: calc(95vh - 50px);
+    border-radius: 0.5rem;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+}
+
+.bundle-table-scroll {
+    overflow-y: scroll;
+    height: calc(46vh - 47px);
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 5px;
+}
+
+.bundle-item_drop-scrol {
+    background-color: white;
+    height: calc(1vh - 2px);
+}
+

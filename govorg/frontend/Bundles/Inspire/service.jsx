@@ -17,6 +17,7 @@ export const service = {
     createUpd,
     createDel,
     sendFile,
+    loadWMSLayers,
 }
 
 const prefix = '/gov/api/inspire'
@@ -135,4 +136,11 @@ function sendFile(formData, fid, tid){
         body: formData,
     }
     return fetch(`${prefix}/send-data/${tid}/${fid}/`, opts).then(handleResponse)
+}
+
+function loadWMSLayers(id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
 }
