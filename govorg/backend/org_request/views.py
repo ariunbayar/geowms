@@ -132,6 +132,7 @@ def _get_org_request(ob, org):
             else:
                 geo_json = _convert_text_json(ob.geo_json)
                 geo_json = _get_geoJson(geo_json)
+                geo_json = FeatureCollection([geo_json])
 
             return {
                 'old_geo_id':ob.old_geo_id,
@@ -191,6 +192,7 @@ def _get_org_request(ob, org):
         else:
             geo_json = _convert_text_json(ob.geo_json)
             geo_json = _get_geoJson(geo_json)
+            geo_json = FeatureCollection([geo_json])
 
         return {
             'old_geo_id':ob.old_geo_id,
@@ -366,7 +368,6 @@ def requestApprove(request, payload, pk):
                     geom = MultiLineString(geom, srid=4326)
                 if geom_type == 'Polygon':
                     geom = MultiPolygon(geom, srid=4326)
-
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
                 ChangeRequest.objects.filter(id = pk).update(state=3)
                 rsp = {

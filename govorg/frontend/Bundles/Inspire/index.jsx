@@ -3,7 +3,7 @@ import {Switch, Route, Link, NavLink} from "react-router-dom"
 
 import Modal from "../../../../src/components/Modal/DeleteModal"
 import {Notif} from '../../../../src/components/Notification/index'
-import Map from "./Map"
+import BarilgaSuurinGazar from "./Map"
 import {service} from './service'
 
 
@@ -49,7 +49,7 @@ export default class Bundles extends Component {
             <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <Switch>
                     <Route path="/gov/org/map/:tid/:pid/:fid/map/" render={(routeProps) =>
-                        <Map { ...routeProps }  addNotif={ this.addNotif } />
+                        <BarilgaSuurinGazar { ...routeProps }  addNotif={ this.addNotif } />
                     }/>
                 </Switch>
            </div>
