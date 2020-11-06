@@ -61,7 +61,7 @@ export class List extends Component {
                                                 {packages.features.map((feature, idx) =>
                                                     <li key={idx}>
                                                         <a onClick={() => this.getProperties(feature.id, theme.id)}>
-                                                            <i className={feature.view ? "fa fa-table text-success": "fa fa-table"}></i> &nbsp;
+                                                            <i className={feature.view ? "fa fa-table text-success": "fa fa-table text-muted"}></i> &nbsp;
                                                             <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
                                                             {feature.view &&
                                                                 <ul>

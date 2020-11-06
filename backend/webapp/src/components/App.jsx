@@ -25,6 +25,7 @@ export default class App extends Component {
 
     this.state = {
       user_count: 0,
+      gov_count: []
     };
     this.handleBoxOver = this.handleBoxOver.bind(this)
   }
@@ -37,6 +38,9 @@ export default class App extends Component {
 
     service.userCount().then(({ user_count }) => {
       this.setState({ user_count: user_count });
+    });
+    service.govCount().then(({ gov_count }) => {
+      this.setState({ gov_count });
     });
   }
 
@@ -64,14 +68,14 @@ export default class App extends Component {
                 <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
                 <MenuItem icon="fa fa-users" url="/back/байгууллага/түвшин/" text="Байгууллага">
                     <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/1/" text="1-р түвшин"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/2/" text="2-р түвшин"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/3/" text="3-р түвшин"></MenuItem>
-                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/1/" text="1-р түвшин" count={this.state.gov_count.level1 != 0 ? this.state.gov_count.level1 : '0'}></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/2/" text="2-р түвшин" count={this.state.gov_count.level2 != 0 ? this.state.gov_count.level2 : '0'}></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/3/" text="3-р түвшин" count={this.state.gov_count.level3 != 0 ? this.state.gov_count.level3 : '0'}></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин" count={this.state.gov_count.level4 != 0 ? this.state.gov_count.level4 : '0'}></MenuItem>
                     </ul>
                 </MenuItem>
                 <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
-                <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч"></MenuItem>
+                <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч" count={this.state.user_count}></MenuItem>
                 <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо">
                     <ul className="sidebar-submenu">
                         <MenuItem icon="fa fa-circle-o" url="/back/gis/" text="GIS"></MenuItem>
