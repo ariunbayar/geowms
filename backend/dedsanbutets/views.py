@@ -36,6 +36,18 @@ from main.utils import (
 )
 
 # Create your views here.
+def _get_features(package_id):
+    feature_data = []
+    for feature in LFeatures.objects.filter(package_id=package_id):
+        feature_data.append({
+                'id': feature.feature_id,
+                'code': feature.feature_code,
+                'name': feature.feature_name,
+                'view':[ViewNames.objects.filter(feature_id=feature.feature_id).values('id', 'view_name', 'feature_id').first()][0]
+            })
+    return feature_data
+
+
 def _get_package(theme_id):
     package_data = []
     for package in LPackages.objects.filter(theme_id=theme_id):
@@ -43,7 +55,7 @@ def _get_package(theme_id):
                 'id': package.package_id,
                 'code': package.package_code,
                 'name': package.package_name,
-                'features': list(LFeatures.objects.filter(package_id=package.package_id).extra(select={'id': 'feature_id', 'code': 'feature_code', 'name': 'feature_name'}).values('id', 'code', 'name'))
+                'features': _get_features(package.package_id)
             })
     return package_data
 

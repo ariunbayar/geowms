@@ -528,3 +528,17 @@ def rolesAdd(request, payload, level, pk):
                     role_update(properties['roles'], 4, features['id'], properties['id'])
 
     return JsonResponse({'success': True})
+
+
+@require_GET
+@ajax_required
+def countOrg(request):
+    rsp = {
+        'gov_count':{
+            'level1': Org.objects.filter(level=1).count(),
+            'level2': Org.objects.filter(level=2).count(),
+            'level3': Org.objects.filter(level=3).count(),
+            'level4': Org.objects.filter(level=4).count(),
+        }
+    }
+    return JsonResponse(rsp)
