@@ -22,7 +22,8 @@ from main.utils import (
     gis_insert,
     gis_table_by_oid,
     gis_tables_by_oids,
-    dict_fetchall
+    dict_fetchall,
+    refreshMaterializedView
 )
 
 
@@ -370,6 +371,7 @@ def requestApprove(request, payload, pk):
                     geom = MultiPolygon(geom, srid=4326)
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
                 ChangeRequest.objects.filter(id = pk).update(state=3)
+                view_check = refreshMaterializedView(feature_id)
                 rsp = {
                     'success': True,
                 }
@@ -380,6 +382,7 @@ def requestApprove(request, payload, pk):
                 geo_data_model = _get_model_name(theme_code).objects.filter(geo_id=old_geo_id)
                 geo_data_model.delete()
                 ChangeRequest.objects.filter(id = pk).update(state=3)
+                view_check = refreshMaterializedView(feature_id)
                 rsp = {
                     'success': True,
                 }
@@ -422,7 +425,7 @@ def requestApprove(request, payload, pk):
                     )
                 elif i['value_type_id'] == 'date':
                     if i['data']:
-                        value_data = i['data']+'06:00:00+0800'
+                        value_data = i['data']+' '+'06:00:00+0800'
                     geo_data_model.objects.create(
                         geo_id = new_geo_id,
                         feature_config_id=fid,
@@ -441,6 +444,7 @@ def requestApprove(request, payload, pk):
                         value_text = value_data
                     )
             ChangeRequest.objects.filter(id = pk).update(state=3)
+            view_check = refreshMaterializedView(feature_id)
             rsp = {
                 'success': True,
             }

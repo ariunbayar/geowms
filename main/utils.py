@@ -5,7 +5,7 @@ import base64
 import re
 import unicodedata
 from django.db import connections
-
+from backend.dedsanbutets.models import ViewNames
 
 def resize_b64_to_sizes(src_b64, sizes):
 
@@ -199,3 +199,17 @@ def slugifyWord(word):
     word = re.sub(r'[^\w\s_]', '', word.lower())
     word = re.sub(r'[_\s]+', '_', word).strip('-_')
     return word
+
+
+def refreshMaterializedView(fid):
+
+    view_data = ViewNames.objects.filter(feature_id=fid).first()
+    if view_data:
+        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_data.view_name )
+        with connections['default'].cursor() as cursor:
+            cursor.execute(sql)
+            return True
+
+        return False
+    else:
+        return True

@@ -38,7 +38,8 @@ from main.utils import (
     gis_insert,
     gis_table_by_oid,
     gis_tables_by_oids,
-    dict_fetchall
+    dict_fetchall,
+    refreshMaterializedView
 )
 
 
@@ -306,6 +307,7 @@ def delete(request, payload, pid, fid):
     if geom and datas:
         geom.delete()
         datas.delete()
+        view_check = refreshMaterializedView(fid)
         rsp = {
         'success': True,
         'info': "Амжилттай",
@@ -537,7 +539,7 @@ def updateGeom(request, payload, fid):
     geo_id = payload.get('id')
 
     get_object_or_404(MGeoDatas, feature_id=fid, geo_id=geo_id)
-    geom = geoJsonConvertGeom(geojson)
+    geom = _geoJsonConvertGeom(geojson)
     if not geom:
         rsp = {
             'success': False,
@@ -545,6 +547,7 @@ def updateGeom(request, payload, fid):
         }
         return JsonResponse(rsp)
     MGeoDatas.objects.filter(geo_id=geo_id).update(geo_data=geom)
+    view_check = refreshMaterializedView(fid)
     rsp = {
         'success': True,
         'info': "Амжилттай",
@@ -624,6 +627,7 @@ def geomAdd(request, payload, fid):
             created_by = 1,
             modified_by = 1
         )
+    view_check = refreshMaterializedView(fid)
     rsp = {
         'success': True,
         'info': "Ажилттай ",
