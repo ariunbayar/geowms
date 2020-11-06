@@ -86,7 +86,6 @@ export class OrgForm extends Component {
                 var a = load
                 a++
                 this.setState({ load: a, msg: "Амжилттай боллоо", style: 'success' })
-                this.addNotif()
                 this.paginate(1, searchQuery, level, org_id)
                 this.setState({ modal_alert_status: 'open'})
             }

@@ -53,7 +53,7 @@ export class OrgFormTable extends Component {
                     </a>
                     <Modal
                         modalAction={() => this.modalClose()}
-                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        text={`Та "${org.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                         title="Байгууллага устгах"
                         model_type_icon = "success"
                         status={this.state.modal_status}

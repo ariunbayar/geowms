@@ -393,6 +393,8 @@ def orgList(request, payload, level):
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'id'
+    if not query:
+        query = ''
     orgs = Org.objects.filter(level=level).annotate(search=SearchVector(
         'name')).filter(search__contains=query).order_by(sort_name)
     total_items = Paginator(orgs, per_page)
