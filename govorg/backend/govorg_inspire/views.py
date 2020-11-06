@@ -539,7 +539,7 @@ def updateGeom(request, payload, fid):
     geo_id = payload.get('id')
 
     get_object_or_404(MGeoDatas, feature_id=fid, geo_id=geo_id)
-    geom = _geoJsonConvertGeom(geojson)
+    geom = GEOSGeometry(str(geojson))
     if not geom:
         rsp = {
             'success': False,

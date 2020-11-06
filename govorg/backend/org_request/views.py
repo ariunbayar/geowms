@@ -359,16 +359,7 @@ def requestApprove(request, payload, pk):
                 geom = []
                 geo_json = old_geo_json['geometry']
                 geo_json = str(geo_json).replace("\'", "\"")
-                geo_data = geoJsonConvertGeom(geo_json)
-                geom =  ''.join(geo_data)
-                geom = GEOSGeometry(geom)
-                geom_type = GEOSGeometry(geom).geom_type
-                if geom_type == 'Point':
-                    geom = MultiPoint(geom, srid=4326)
-                if geom_type == 'LineString':
-                    geom = MultiLineString(geom, srid=4326)
-                if geom_type == 'Polygon':
-                    geom = MultiPolygon(geom, srid=4326)
+                geom = GEOSGeometry(geo_json)
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
                 ChangeRequest.objects.filter(id = pk).update(state=3)
                 view_check = refreshMaterializedView(feature_id)
