@@ -24,6 +24,7 @@ import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
+import {CoordList} from './controls/CoordinateList/CordList'
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -73,6 +74,7 @@ export default class BarilgaSuurinGazar extends Component{
         modal: new Modal(),
         upload: new UploadBtn(),
         sidebar: new Sidebar(),
+        coordList: new CoordList(),
       }
 
       this.modifyE = this.Modify()
@@ -140,6 +142,7 @@ export default class BarilgaSuurinGazar extends Component{
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       map.addControl(this.controls.sidebar)
+      map.addControl(this.controls.coordList)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -341,6 +344,8 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
+        const coordinateList = event.selected[0].getProperties()['geometry'].getCoordinates()
+        this.controls.coordList.showList(true, coordinateList)
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
@@ -354,11 +359,13 @@ export default class BarilgaSuurinGazar extends Component{
     modifiedFeature(event) {
 
       const features = event.features.getArray()
+      const coordinateList = features[0].getProperties()['geometry'].getCoordinates()
+      this.controls.coordList.showList(true, coordinateList)
       const {format} = this.state
       const data = format.writeFeatureObject(features[0],  {
         dataProjection: this.state.dataProjection,
         featureProjection: this.state.featureProjection,
-    })
+      })
       const changedFeature = JSON.stringify(data)
       this.setState({ changedFeature, modifyend_selected_feature_check: true })
       this.onClickCloser()

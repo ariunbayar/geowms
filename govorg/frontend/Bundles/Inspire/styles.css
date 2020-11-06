@@ -253,3 +253,8 @@
 .⚙-toggle-upload:hover{
     background-color: rgba(0,60,136,0.7);
 }
+
+.overflow-group{
+    height: 500px;
+    overflow: scroll;
+}
