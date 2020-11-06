@@ -541,21 +541,60 @@ def countOrg(request):
     return JsonResponse(rsp)
 
 
-# @require_GET
-# @ajax_required
-# def permGetList(request):
-#     GovRole.objects.all()
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def permGetList(request, payload):
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('perpage')
+    list_datas = []
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = 'id'
+    gove_roles = GovRole.objects.annotate(search=SearchVector(
+        'id',
+        'name',
+        'description',
+        'created_by'
+    ) + SearchVector('name'),).filter(search__icontains=query).order_by(sort_name)
+
+    total_items = Paginator(gove_roles, per_page)
+    items_page = total_items.page(page)
+
+    for list_data in items_page.object_list:
+        list_datas.append({
+            'id': list_data.id,
+            'name': list_data.name,
+            'description': list_data.description,
+            'created_by': list_data.created_by.username
+        })
+
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': list_datas,
+        'page': page,
+        'total_page': total_page,
+    }
+
+    return JsonResponse(rsp)
 
 
-#     rsp = {
-#         'gov_count':{
-#             'level1': Org.objects.filter(level=1).count(),
-#             'level2': Org.objects.filter(level=2).count(),
-#             'level3': Org.objects.filter(level=3).count(),
-#             'level4': Org.objects.filter(level=4).count(),
-#         }
-#     }
-#     return JsonResponse(rsp)
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def createPerm(request, payload):
+    values = payload.get('values')
+    name_check = GovRole.objects.filter(name=values['name'])
+    if name_check:
+        rsp = {
+            'success': False,
+        }
+    else:
+        GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
+        rsp = {
+            'success': True,
+        }
 
-
-# print(GovRole.objects.all())
+    return JsonResponse(rsp)

@@ -85,7 +85,8 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/org-list/', org_views.orgList, name='orgList'),
         path('org-count/', org_views.countOrg, name='org-count'),
-
+        path('perm-get-list/', org_views.permGetList, name='perm-get-list'),
+        path('create-perm/', org_views.createPerm, name='create-perm'),
     ], 'org'))),
 
     path('api/log/', include(([
