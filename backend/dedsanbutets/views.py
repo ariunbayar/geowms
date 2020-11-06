@@ -1,13 +1,34 @@
-from django.shortcuts import render
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
-from main.decorators import ajax_required
-from django.views.decorators.http import require_GET, require_POST
-from django.http import JsonResponse, Http404
-from django.contrib.auth.decorators import user_passes_test
-from django.forms.models import model_to_dict
+import os
+import datetime
+import uuid
+import glob
 from django.db import connections
+from django.db.utils import InternalError
+
+from django.conf import settings
+from django.shortcuts import render
+from django.http import JsonResponse, Http404
+
 from .models import ViewNames, ViewProperties
-from django.shortcuts import get_object_or_404
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding
+
+from django.views.decorators.http import require_GET, require_POST
+from main.decorators import ajax_required
+
+from django.core.management import call_command
+from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import FileSystemStorage
+
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import WKBWriter, WKBReader
+from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import fromstr
+from django.contrib.gis.gdal import OGRGeometry
+from django.contrib.gis.geos.error import GEOSException
+from django.contrib.gis.gdal.error import GDALException
+from django.contrib.gis.geos.collections import GeometryCollection
+from django.contrib.auth.decorators import user_passes_test
 
 from main.utils import (
     dict_fetchall,
@@ -15,6 +36,18 @@ from main.utils import (
 )
 
 # Create your views here.
+def _get_features(package_id):
+    feature_data = []
+    for feature in LFeatures.objects.filter(package_id=package_id):
+        feature_data.append({
+                'id': feature.feature_id,
+                'code': feature.feature_code,
+                'name': feature.feature_name,
+                'view':[ViewNames.objects.filter(feature_id=feature.feature_id).values('id', 'view_name', 'feature_id').first()][0]
+            })
+    return feature_data
+
+
 def _get_package(theme_id):
     package_data = []
     for package in LPackages.objects.filter(theme_id=theme_id):
@@ -22,7 +55,7 @@ def _get_package(theme_id):
                 'id': package.package_id,
                 'code': package.package_code,
                 'name': package.package_name,
-                'features': list(LFeatures.objects.filter(package_id=package.package_id).extra(select={'id': 'feature_id', 'code': 'feature_code', 'name': 'feature_name'}).values('id', 'code', 'name'))
+                'features': _get_features(package.package_id)
             })
     return package_data
 
@@ -365,6 +398,12 @@ def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
     tid = payload.get('tid')
+    if not id_list:
+        rsp = {
+            'success': False,
+            'info': 'Утга сонгоно уу.'
+        }
+        return JsonResponse(rsp)
     theme = LThemes.objects.filter(theme_id=tid).first()
     if not theme:
         rsp = {
@@ -392,22 +431,19 @@ def propertyFieldsSave(request, payload):
         return JsonResponse(rsp)
 
     feature = LFeatures.objects.filter(feature_id=fid).first()
-    feature_config = [data.feature_config_id for data in LFeatureConfigs.objects.filter(feature_id=15)]
+
     if check_name:
-        table_name = slugifyWord(check_name.view_name)
+        table_name = check_name.view_name
         removeView(table_name)
-        check = createView(id_list, table_name, model_name, feature_config)
-        if check:
-            ViewProperties.objects.filter(view=check_name).delete()
-            for idx in id_list:
-                ViewProperties.objects.create(view=check_name, property_id=idx)
-    else:
-        table_name = slugifyWord(feature.feature_name_eng)
-        check = createView(id_list, table_name, model_name, feature_config)
-        if check:
-            new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
-            for idx in id_list:
-                ViewProperties.objects.create(view=new_view, property_id=idx)
+        ViewProperties.objects.filter(view=check_name).delete()
+        check_name.delete()
+
+    table_name = slugifyWord(feature.feature_name_eng) + '_view'
+    check = createView(id_list, table_name, model_name)
+    if check:
+        new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
+        for idx in id_list:
+            ViewProperties.objects.create(view=new_view, property_id=idx)
 
     if check:
         rsp = {
@@ -607,16 +643,15 @@ def erese(request, payload):
     return JsonResponse(rsp)
 
 
-
-def createView(ids, table_name, model_name, feature_config):
+def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
     fields = [row.property_code for row in data]
     try:
         query = '''
-            CREATE OR REPLACE VIEW public.{table_name}
+            CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) and feature_config_id in ({feature_config}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -624,10 +659,11 @@ def createView(ids, table_name, model_name, feature_config):
                 model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
-                feature_config=', '.join(['{}'.format(f) for f in feature_config]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
         with connections['default'].cursor() as cursor:
                 cursor.execute(query)
+                cursor.execute(query_index)
         return True
 
     except Exception:
@@ -637,7 +673,7 @@ def createView(ids, table_name, model_name, feature_config):
 def removeView(table_name):
     try:
         query = '''
-            drop view {table_name};
+            DROP MATERIALIZED VIEW IF EXISTS {table_name};
         '''.format(table_name = table_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(query)

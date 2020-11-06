@@ -175,7 +175,7 @@ export default class HureeFormTable extends Component {
                             <Modal
                                 modalClose={this.handleModalDeleteClose}
                                 modalAction={this.props.handleRemove}
-                                text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
+                                text={`Та "${this.state.x}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
                                 title="Тохиргоог устгах"
                                 model_type_icon="success"
                             />

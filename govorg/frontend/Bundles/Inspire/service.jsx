@@ -16,28 +16,30 @@ export const service = {
     create,
     createUpd,
     createDel,
+    sendFile,
     loadWMSLayers,
 }
 
+const prefix = '/gov/api/inspire'
 
 function geom() {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/inspire/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
 function getRole(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/inspire/${pid}/${fid}/getRoles/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${pid}/${fid}/getRoles/`, requestOptions).then(handleResponse)
 }
 
 function rows(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/inspire/${pid}/${fid}/rows/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${pid}/${fid}/rows/`, requestOptions).then(handleResponse)
 }
 
 function geomType(pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`/gov/api/inspire/${pid}/${fid}/geom-type/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${pid}/${fid}/geom-type/`, requestOptions).then(handleResponse)
 }
 
 function remove(pid, fid, gid) {
@@ -45,7 +47,7 @@ function remove(pid, fid, gid) {
         ...getPostOptions(),
         body: JSON.stringify({gid}),
     }
-    return fetch(`/gov/api/inspire/${pid}/${fid}/remove/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${pid}/${fid}/remove/`, opts).then(handleResponse)
 }
 
 function save(oid, values) {
@@ -55,7 +57,7 @@ function save(oid, values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`/gov/api/inspire/${oid}/add/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${oid}/add/`, opts).then(handleResponse)
 }
 
 function update(data, pid, fid) {
@@ -63,19 +65,19 @@ function update(data, pid, fid) {
         ...getPostOptions(),
         body: JSON.stringify(data),
     }
-    return fetch(`/gov/api/inspire/${pid}/${fid}/save/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${pid}/${fid}/save/`, opts).then(handleResponse)
 }
 
 function detail(gid, fid) {
     const opts = getGetOptions()
 
-    return fetch(`/gov/api/inspire/${gid}/${fid}/detail/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${gid}/${fid}/detail/`, opts).then(handleResponse)
 }
 
 function detailNone(tid, pid, fid) {
     const opts = getGetOptions()
 
-    return fetch(`/gov/api/inspire/${tid}/${pid}/${fid}/detail/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${tid}/${pid}/${fid}/detail/`, opts).then(handleResponse)
 }
 
 function sendFeature(data, oid, id) {
@@ -83,7 +85,7 @@ function sendFeature(data, oid, id) {
         ...getPostOptions(),
         body: JSON.stringify({data, id}),
     }
-    return fetch(`/gov/api/inspire/${oid}/save/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${oid}/save/`, opts).then(handleResponse)
 }
 
 function geomUpdate(geojson, fid, id) {
@@ -92,7 +94,7 @@ function geomUpdate(geojson, fid, id) {
         ...getPostOptions(),
         body: JSON.stringify({geojson, fid, id}),
     }
-    return fetch(`/gov/api/inspire/${fid}/geom-update/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${fid}/geom-update/`, opts).then(handleResponse)
 }
 
 function geomAdd(geojson, fid) {
@@ -101,7 +103,7 @@ function geomAdd(geojson, fid) {
         ...getPostOptions(),
         body: JSON.stringify({geojson}),
     }
-    return fetch(`/gov/api/inspire/${fid}/add-geom/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${fid}/add-geom/`, opts).then(handleResponse)
 }
 
 function create(tid, pid, fid, form_json, geo_json) {
@@ -109,7 +111,7 @@ function create(tid, pid, fid, form_json, geo_json) {
         ...getPostOptions(),
         body: JSON.stringify({tid, pid, fid, form_json, geo_json}),
     }
-    return fetch(`/gov/api/inspire/create/`, opts).then(handleResponse)
+    return fetch(`${prefix}/create/`, opts).then(handleResponse)
 }
 
 function createUpd(tid, pid, fid, form_json, geo_json, old_geo_id) {
@@ -117,7 +119,7 @@ function createUpd(tid, pid, fid, form_json, geo_json, old_geo_id) {
         ...getPostOptions(),
         body: JSON.stringify({tid, pid, fid, form_json, geo_json, old_geo_id}),
     }
-    return fetch(`/gov/api/inspire/createUpd/`, opts).then(handleResponse)
+    return fetch(`${prefix}/createUpd/`, opts).then(handleResponse)
 }
 
 function createDel(tid, pid, fid, old_geo_id) {
@@ -125,7 +127,15 @@ function createDel(tid, pid, fid, old_geo_id) {
         ...getPostOptions(),
         body: JSON.stringify({tid, pid, fid, old_geo_id}),
     }
-    return fetch(`/gov/api/inspire/createDel/`, opts).then(handleResponse)
+    return fetch(`${prefix}/createDel/`, opts).then(handleResponse)
+}
+
+function sendFile(formData, fid, tid){
+    const opts = {
+        ...getPostOptions(),
+        body: formData,
+    }
+    return fetch(`${prefix}/send-data/${tid}/${fid}/`, opts).then(handleResponse)
 }
 
 function loadWMSLayers(id) {

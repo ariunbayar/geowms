@@ -1,0 +1,9 @@
+#map{
+    width: auto;
+    height: calc( 100vh - 85px - 15px);
+}
+
+.file-upload{
+    top: 50%;
+    left: 50%;
+}

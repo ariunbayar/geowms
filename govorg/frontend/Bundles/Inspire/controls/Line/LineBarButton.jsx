@@ -20,7 +20,9 @@ export class LineBarButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Зураас зурах')
         elementa.setAttribute('href', '#')
-
+        if (options.null) {
+            element.style.right = '33px'
+        }
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
         elementi.className = 'fa fa-road text-white'
