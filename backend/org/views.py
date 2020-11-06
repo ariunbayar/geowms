@@ -13,8 +13,7 @@ from geoportal_app.models import User
 from backend.govorg.models import GovOrg
 from .models import InspirePerm
 from django.contrib.postgres.search import SearchVector
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
-
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, GovRole, GovPerm, EmpRole, EmpPerm, GovRoleInspire, GovPermInspire, EmpRoleInspire, EmpPermInspire
 
 def _get_property(org_id, feature_id):
     properties_list = []
@@ -540,3 +539,23 @@ def countOrg(request):
         }
     }
     return JsonResponse(rsp)
+
+
+# @require_GET
+# @ajax_required
+# def permGetList(request):
+#     GovRole.objects.all()
+
+
+#     rsp = {
+#         'gov_count':{
+#             'level1': Org.objects.filter(level=1).count(),
+#             'level2': Org.objects.filter(level=2).count(),
+#             'level3': Org.objects.filter(level=3).count(),
+#             'level4': Org.objects.filter(level=4).count(),
+#         }
+#     }
+#     return JsonResponse(rsp)
+
+
+# print(GovRole.objects.all())

@@ -306,6 +306,8 @@ class MGeoDatas(models.Model):
 
 
 class GovRole(models.Model):
+    class Meta:
+        db_table = 'perm_gov_role'
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=1000)
     updated_at = models.DateTimeField(auto_now=True)
@@ -315,6 +317,8 @@ class GovRole(models.Model):
 
 
 class GovPerm(models.Model):
+    class Meta:
+        db_table = 'perm_gov_perm'
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True)
     geo_id = models.CharField(max_length=100)
@@ -325,6 +329,8 @@ class GovPerm(models.Model):
 
 
 class EmpRole(models.Model):
+    class Meta:
+        db_table = 'perm_emp_role'
     gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True)
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=1000)
@@ -335,6 +341,8 @@ class EmpRole(models.Model):
 
 
 class EmpPerm(models.Model):
+    class Meta:
+        db_table = 'perm_emp_perm'
     employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
     emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -344,6 +352,8 @@ class EmpPerm(models.Model):
 
 
 class GovRoleInspire(models.Model):
+    class Meta:
+        db_table = 'perm_gov_role_inspire'
     PERM_VIEW = 1
     PERM_CREATE = 2
     PERM_REMOVE = 3
@@ -373,6 +383,8 @@ class GovRoleInspire(models.Model):
 
 
 class GovPermInspire(models.Model):
+    class Meta:
+        db_table = 'perm_gov_perm_inspire'
     PERM_VIEW = 1
     PERM_CREATE = 2
     PERM_REMOVE = 3
@@ -402,6 +414,8 @@ class GovPermInspire(models.Model):
 
 
 class EmpRoleInspire(models.Model):
+    class Meta:
+        db_table = 'perm_emp_role_inspire'
     PERM_VIEW = 1
     PERM_CREATE = 2
     PERM_REMOVE = 3
@@ -432,6 +446,8 @@ class EmpRoleInspire(models.Model):
 
 
 class EmpPermInspire(models.Model):
+    class Meta:
+        db_table = 'perm_emp_perm_inspire'
     PERM_VIEW = 1
     PERM_CREATE = 2
     PERM_REMOVE = 3
