@@ -1,17 +1,18 @@
 .🌍 {
-    position: relative;
+    position: fixed;
 }
 
 .🌍 > #map{
     width: 18%;
     height: 70%;
-    right: 5px;
+    right: 25px;
     position: fixed;
     z-index: 100;
+    top: 125px;
 }
 .map-open-button{
-    right: 0px;
-    top:63px;
+    right: 20px;
+    top:93px;
     position: fixed;
 }
 .суурь-давхаргууд{
