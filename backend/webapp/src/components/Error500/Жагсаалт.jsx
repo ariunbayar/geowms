@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Pagination } from "../../../../../src/components/Pagination/index"
 import {service} from './service'
-import { Error500 } from './Error'
 
 export class Жагсаалт extends Component {
 
