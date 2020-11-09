@@ -17,6 +17,7 @@ import MenuItem from "../../../../src/components/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
 import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
+import {Error500} from './Error500'
 
 export default class App extends Component {
 
@@ -78,6 +79,7 @@ export default class App extends Component {
                         <MenuItem icon="fa fa-circle-o" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="GeoServer"></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/тохиргоо/" text="Сайт параметр"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/error500/" text="Error500"></MenuItem>
 
                     </ul>
                 </MenuItem>
@@ -101,6 +103,7 @@ export default class App extends Component {
               <Route path={"/back/user/"} component={UserPage} />
               <Route path={"/back/gis/"} component={Gis} />
               <Route path={"/back/тохиргоо/"} component={ConfigPage} />
+              <Route path={"/back/error500/"} component={Error500} />
               <Route path={"/back/дэд-сан/"} component={BundlePage} />
             </Switch>
           </div>

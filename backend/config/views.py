@@ -1,15 +1,22 @@
 import re
 import subprocess
+
 from django.contrib.auth.decorators import user_passes_test
+from django.core.paginator import Paginator
+from django.contrib.postgres.search import SearchVector
+from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
+from django.utils.timezone import localtime, now
 
 from main.decorators import ajax_required
 from .models import Config
-from django.db import connections
 from backend.payment.models import Payment
+from backend.config.models import Error500
+
+
 CACHE_TIMEOUT_DISK_INFO = 5
 
 
@@ -124,3 +131,53 @@ def postresqlVersion(request):
     version_post_gis_data = version_post_gis.fetchone()
 
     return JsonResponse({'postgreVersion': version_postgre_sql_data, 'versionOfPostGis': version_post_gis_data})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def paginatedList(request, payload):
+
+    query = payload.get('query')
+    page = payload.get('page')
+    per_page = payload.get('per_page')
+    sort_name = payload.get('sort_name')
+    if not sort_name:
+        sort_name = '-id'
+
+    error500_list = Error500.objects.all().annotate(search=SearchVector(
+        'request_scheme',
+        'request_url',
+        'request_method',
+        'request_headers',
+        'description',
+        'created_at',)
+    ).filter(search__contains=query).order_by(sort_name)
+
+    total_items = Paginator(error500_list, per_page)
+    items_page = total_items.page(page)
+    items = [
+        _get_error500_display(error500)
+        for error500 in items_page.object_list
+    ]
+    total_page = total_items.num_pages
+
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+    }
+
+    return JsonResponse(rsp)
+
+
+def _get_error500_display(error500):
+    return {
+        'request_scheme': error500.request_scheme,
+        'request_url': error500.request_url,
+        'request_method': error500.request_method,
+        'request_headers': error500.request_headers,
+        'request_data': error500.request_data,
+        'description': error500.description,
+        'created_at': localtime(error500.created_at).strftime('%Y-%m-%d %H:%M:%S.%f'),
+    }
