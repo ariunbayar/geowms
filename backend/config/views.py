@@ -122,6 +122,7 @@ def disk(request):
     return JsonResponse({'success': True, 'disk': disk})
 
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def postresqlVersion(request):
     version_postgre_sql = connections['default'].cursor()
     version_postgre_sql.execute("SELECT version()")

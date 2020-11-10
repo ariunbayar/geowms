@@ -394,6 +394,7 @@ def _get_model_name(name):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
@@ -542,6 +543,7 @@ def save(request, payload):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def Get_Datas(request, name):
     types = []
     model_name = getModel(name)
@@ -579,6 +581,7 @@ def Get_Datas(request, name):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def remove(request, payload):
     model_name = payload.get('model_name')
     model_id = payload.get('model_id')
@@ -606,6 +609,7 @@ def remove(request, payload):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def erese(request, payload):
     model_name = payload.get('model_name')
     top_id = payload.get('top_id')
