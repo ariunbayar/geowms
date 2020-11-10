@@ -101,7 +101,6 @@ export class List extends Component {
     }
 
     remove(model_name, model_id, name, formLorR){
-        alert(formLorR)
         this.setState({ modal_status: "open", model_name, model_id, name, formLorR })
     }
 
