@@ -349,12 +349,17 @@ def org_add(request, payload, level):
 
     org_name = payload.get('org_name')
     upadte_level = payload.get('upadte_level')
+    role_id = payload.get('role_id')
+    org_role_filter = GovRole.objects.filter(pk=role_id).first()
     org_id = payload.get('id')
     if org_id:
-        Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level)
+        org = Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level)
+        lol = GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
         return JsonResponse({'success': True})
     else:
-        Org.objects.create(name=org_name, level=level)
+        org = Org.objects.create(name=org_name, level=level)
+        GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user)
+
         return JsonResponse({'success': True})
 
 
@@ -419,14 +424,16 @@ def orgList(request, payload, level):
 @user_passes_test(lambda u: u.is_superuser)
 def OrgAll(request, level, pk):
     orgs_display = []
+    org = get_object_or_404(Org, pk=pk, level=level)
+    org_roles = GovPerm.objects.filter(org=org).first()
     for org in Org.objects.filter(level=level, pk=pk):
         orgs_display.append({
             'id': org.id,
             'name': org.name,
             'level': org.level,
             'level_display': org.get_level_display(),
+            'org_role': org_roles.gov_role.id
         })
-    org = get_object_or_404(Org, pk=pk, level=level)
     return JsonResponse({
         'orgs': orgs_display,
         'count': User.objects.filter(employee__org=org).count()
@@ -540,6 +547,30 @@ def countOrg(request):
     }
     return JsonResponse(rsp)
 
+# ................................................................................................................................................................
+# ................................................................................................................................................................
+# ................................................................................................................................................................
+# ................................................................................................................................................................
+# ................................................................................................................................................................
+# ................................................................................................................................................................
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getgetRolesNames(request):
+    gov_role_display = []
+    for gov_role in GovRole.objects.all():
+        gov_role_display.append({
+            'id': gov_role.id,
+            'name': gov_role.name,
+        })
+    rsp = {
+        'success': True,
+        'roles': gov_role_display
+    }
+
+    return JsonResponse(rsp)
+
 
 @require_POST
 @ajax_required
@@ -598,3 +629,103 @@ def createPerm(request, payload):
         }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def getInspireRoles(request, pk):
+
+    roles = []
+    data = []
+    roles = []
+    govRole = get_object_or_404(GovRole, pk=pk)
+    for themes in LThemes.objects.all():
+        data.append({
+                'id': themes.theme_id,
+                'code': themes.theme_code,
+                'name': themes.theme_name,
+                'packages': _get_theme_packages(themes.theme_id),
+            })
+
+    for datas in GovRoleInspire.objects.filter(gov_role=govRole):
+        roles.append({
+                'perm_kind': datas.perm_kind,
+                'feature_id': datas.feature_id,
+                'property_id': datas.property_id,
+                'geom': datas.geom,
+            })
+
+    return JsonResponse({
+        'data': data,
+        'roles': roles,
+        'success': True
+    })
+
+def _get_theme_packages(theme_id):
+
+    package_data = []
+    for package in LPackages.objects.filter(theme_id=theme_id):
+        package_data.append({
+                'id': package.package_id,
+                'code': package.package_code,
+                'name': package.package_name,
+                'features': _get_package_features(package.package_id)
+            })
+
+    return package_data
+
+
+def _get_package_features(package_id):
+    feat_values = []
+
+    for feat in LFeatures.objects.filter(package_id=package_id):
+        feat_values.append({
+            'id':feat.feature_id,
+            'code':feat.feature_code,
+            'name':feat.feature_name,
+            'properties': _get_feature_property(feat.feature_id)
+        })
+
+    return feat_values
+
+
+def _get_feature_property(feature_id):
+    properties_list = []
+    data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
+    property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values("property_id")
+    properties = LProperties.objects.filter(property_id__in=[property_ids]).values('property_id', "property_code", "property_name")
+    for prop in properties:
+        properties_list.append({
+            'id':prop['property_id'],
+            'code':prop['property_code'],
+            'name':prop['property_name'],
+        })
+
+    return properties_list
+
+
+@require_POST
+@ajax_required
+def saveInspireRoles(request, payload, pk):
+
+    values = payload.get('values')
+    govRole = get_object_or_404(GovRole, pk=pk)
+    objs = [
+        GovRoleInspire(
+            gov_role=govRole,
+            perm_kind=data['perm_kind'],
+            feature_id=data['feature_id'],
+            property_id=data['property_id'],
+            geom=data['geom'],
+            created_by=request.user,
+            updated_by=request.user,
+        )
+        for data in values
+    ]
+    GovRoleInspire.objects.bulk_create(objs)
+    rsp = {
+        'success': False,
+    }
+
+    return JsonResponse(rsp)
+

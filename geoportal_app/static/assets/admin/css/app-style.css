@@ -379,6 +379,24 @@ hr {
    transition: all 0.3s ease; 
 }
 
+.toggled .geo-back-btn-toggled {
+   left: 60px;
+   transition: all 0.3s ease; 
+ }
+
+.geo-back-btn {
+    position: fixed;
+    left: 345px;
+    color: black;
+    top: 12px;
+    font-size: 23px;
+    z-index: 1001;
+    transition: all 0.3s ease; 
+}
+.geo-back-btn i:hover{
+    color: #034ea2;
+    box-shadow: 13px 13px 40px 0px rgba(73, 220, 251, 0.32);
+}
 .toggle-menu-map i {
     margin-left: 280px;
     font-size: 14px;
@@ -3948,6 +3966,74 @@ table.grid td {
     content:"\f105";
 }
 
+#accordion1 .arrow-tree a:before,
+#accordion2 .arrow-tree a:before,
+#accordion3 .arrow-tree a:before,
+#accordion4 .arrow-tree a:before,
+#accordion5 .arrow-tree a:before,
+#accordion6 .arrow-tree a:before,
+#accordion7 .arrow-tree a:before,
+#accordion8 .arrow-tree a:before,
+#accordion9 .arrow-tree a:before,
+#accordion10 .arrow-tree a:before,
+#accordion11 .arrow-tree a:before,
+#accordion12 .arrow-tree a:before,
+#accordion13 .arrow-tree a:before,
+#accordion14 .arrow-tree a:before,
+#accordion15 .arrow-tree a:before,
+#accordion16 .arrow-tree a:before,
+#accordion17 .arrow-tree a:before,
+#accordion18 .arrow-tree a:before,
+#accordion19 .arrow-tree a:before,
+#accordion20 .arrow-tree a:before,
+#accordion21 .arrow-tree a:before,
+#accordion22 .arrow-tree a:before,
+#accordion23 .arrow-tree a:before,
+#accordion24 .arrow-tree a:before,
+#accordion26 .arrow-tree a:before,
+#accordion27 .arrow-tree a:before,
+#accordion28 .arrow-tree a:before,
+#accordion29 .arrow-tree a:before,
+#accordion30 .arrow-tree a:before
+{
+    float: left !important;
+    font-family: FontAwesome;
+    content:"\f107";
+    padding-right: 15px;
+}
+
+#accordion1 .arrow-tree a.collapsed:before,
+#accordion2 .arrow-tree a.collapsed:before,
+#accordion3 .arrow-tree a.collapsed:before,
+#accordion4 .arrow-tree a.collapsed:before,
+#accordion5 .arrow-tree a.collapsed:before,
+#accordion6 .arrow-tree a.collapsed:before,
+#accordion7 .arrow-tree a.collapsed:before,
+#accordion8 .arrow-tree a.collapsed:before,
+#accordion9 .arrow-tree a.collapsed:before,
+#accordion10 .arrow-tree a.collapsed:before,
+#accordion11 .arrow-tree a.collapsed:before,
+#accordion12 .arrow-tree a.collapsed:before,
+#accordion13 .arrow-tree a.collapsed:before,
+#accordion14 .arrow-tree a.collapsed:before,
+#accordion15 .arrow-tree a.collapsed:before,
+#accordion16 .arrow-tree a.collapsed:before,
+#accordion17 .arrow-tree a.collapsed:before,
+#accordion18 .arrow-tree a.collapsed:before,
+#accordion19 .arrow-tree a.collapsed:before,
+#accordion20 .arrow-tree a.collapsed:before,
+#accordion21 .arrow-tree a.collapsed:before,
+#accordion22 .arrow-tree a.collapsed:before,
+#accordion23 .arrow-tree a.collapsed:before,
+#accordion24 .arrow-tree a.collapsed:before,
+#accordion26 .arrow-tree a.collapsed:before,
+#accordion27 .arrow-tree a.collapsed:before,
+#accordion28 .arrow-tree a.collapsed:before,
+#accordion29 .arrow-tree a.collapsed:before,
+#accordion30 .arrow-tree a.collapsed:before
+{
+    content:"\f105";
+}
 .progress-bar {
     display: -ms-flexbox;
     display: flex;

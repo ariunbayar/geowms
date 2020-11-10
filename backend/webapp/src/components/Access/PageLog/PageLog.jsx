@@ -86,7 +86,7 @@ export class PageLog extends Component {
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
-                        <a><i class="icon-magnifier"></i></a>
+                        <a><i className="icon-magnifier"></i></a>
                     </div>
                 </div>
                 <div className="table-responsive table_wrapper my-2">
@@ -94,11 +94,11 @@ export class PageLog extends Component {
                         <thead>
                             <tr>
                                 <th scope="col">№</th>
-                                <th><a onClick={() => this.handleSort('url', this.state.url)}>Хаяг <i class={this.state.url ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                <th><a onClick={() => this.handleSort('method', this.state.method)}>Method <i class={this.state.method ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                <th><a onClick={() => this.handleSort('remote_ip', this.state.remote_ip)}>IP Хая <i class={this.state.remote_ip ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгчийн дугаар <i class={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Огноо <i class={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('url', this.state.url)}>Хаяг <i className={this.state.url ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('method', this.state.method)}>Method <i className={this.state.method ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('remote_ip', this.state.remote_ip)}>IP Хая <i className={this.state.remote_ip ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгчийн дугаар <i className={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Огноо <i className={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                             </tr>
                         </thead>
                         <tbody>

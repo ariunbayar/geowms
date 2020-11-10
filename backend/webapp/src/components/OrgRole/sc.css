@@ -1,0 +1,4 @@
+.fixed-height{
+    overflow-y: scroll;
+    height: calc(91vh - 88px);
+}

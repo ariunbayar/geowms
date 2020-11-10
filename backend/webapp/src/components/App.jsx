@@ -56,7 +56,7 @@ export default class App extends Component {
                 <h5 className="logo-text">ГЕОПОРТАЛ</h5>
               </a>
             </div>
-            <ul className="sidebar-menu do-nicescrol">
+            <ul className="sidebar-menu ">
                 <MenuItem icon="fa fa-history" url="/back/access/login/" text="Хандалт"></MenuItem>
                 <MenuItem icon="fa fa-bank" url="/back/log/" text="Банк лог"></MenuItem>
                 <MenuItem icon="fa fa-database" url="/back/дэд-сан/" text="Дэд сан">

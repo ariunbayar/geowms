@@ -87,6 +87,9 @@ urlpatterns = [
         path('org-count/', org_views.countOrg, name='org-count'),
         path('perm-get-list/', org_views.permGetList, name='perm-get-list'),
         path('create-perm/', org_views.createPerm, name='create-perm'),
+        path('get-role-name/', org_views.getgetRolesNames, name='get-role-name'),
+        path('inspire-roles/<int:pk>/', org_views.getInspireRoles, name='inspire-roles'),
+        path('inspire-roles/<int:pk>/save/', org_views.saveInspireRoles, name='inspire-roles-save'),
     ], 'org'))),
 
     path('api/log/', include(([

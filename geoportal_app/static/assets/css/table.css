@@ -103,4 +103,51 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #034ea2; 
   }
-  
+
+
+/* scroll data table агуулж буй div class="table_wrapper" table class="table_wrapper_table" */
+.table_wrapper-100{
+    overflow-y: scroll;
+    height: calc( 102vh - 144px - 15px);
+}
+
+.table_wrapper-100 th{
+    position: sticky;
+    top: 0;
+}
+
+.table_wrapper-100{
+    background: white;
+}
+
+.table_wrapper-100 .table_wrapper_table{
+    border-collapse: collapse;
+}
+
+.table_wrapper-100 .table_wrapper_table thead th{
+    background:  #223035;
+    color: #fff;
+}
+.table_wrapper-100 .table_wrapper_table_saaral thead th{
+    background:  #e9eaea;
+    color: #000000;
+}
+.table_wrapper_table_saaral{
+    border: 1px solid #e9eaea;
+    border-radius: 25px;
+}
+
+.table_wrapper-100::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+.table_wrapper-100::-webkit-scrollbar-track {
+    background: #ffffff; 
+    margin-top: 41px;
+}
+
+.table_wrapper-100::-webkit-scrollbar-thumb {
+    background: #484848; 
+    border-radius: 50%px;
+}

@@ -121,7 +121,7 @@ export class OrgForm extends Component {
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
-                                <a><i class="icon-magnifier"></i></a>
+                                <a><i className="icon-magnifier"></i></a>
                             </div>
                         </div>
                         <div className="col-md-6">
@@ -139,7 +139,7 @@ export class OrgForm extends Component {
                                 <thead>
                                     <tr>
                                         <th><a>№</a></th>
-                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Байгууллага нэр <i class={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Байгууллага нэр <i className={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                         <th scope="col">Засах</th>
                                         <th scope="col">Устгах</th>
                                     </tr>

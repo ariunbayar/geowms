@@ -106,7 +106,7 @@ export class UserForm extends Component {
                                         onChange={(e) => this.handleSearch('searchQuery', e)}
                                         value={this.state.searchQuery}
                                     />
-                                    <a><i class="icon-magnifier"></i></a>
+                                    <a><i className="icon-magnifier"></i></a>
                                 </div>
                             </div>
                             <div className="col-md-6">

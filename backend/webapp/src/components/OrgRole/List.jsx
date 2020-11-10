@@ -73,7 +73,7 @@ export class List extends Component {
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
-                                <a><i class="icon-magnifier"></i></a>
+                                <a><i className="icon-magnifier"></i></a>
                             </div>
                         </div>
                         <div className="col-md-6">
@@ -90,10 +90,10 @@ export class List extends Component {
                                 <table className="table table_wrapper_table">
                                     <thead>
                                         <tr>
-                                            <th><a onClick={() => this.handleSort('id', this.state.id)}>№ <i class={this.state.id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                            <th><a onClick={() => this.handleSort('name', this.state.name)}>Эрхийн нэр <i class={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                            <th><a onClick={() => this.handleSort('description', this.state.description)}>Тайлбар <i class={this.state.description ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                            <th><a onClick={() => this.handleSort('created_by', this.state.created_by)}>Үүсгэсэн <i class={this.state.created_by ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                            <th><a onClick={() => this.handleSort('id', this.state.id)}>№ <i className={this.state.id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                            <th><a onClick={() => this.handleSort('name', this.state.name)}>Эрхийн нэр <i className={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                            <th><a onClick={() => this.handleSort('description', this.state.description)}>Тайлбар <i className={this.state.description ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                            <th><a onClick={() => this.handleSort('created_by', this.state.created_by)}>Үүсгэсэн <i className={this.state.created_by ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                         </tr>
                                     </thead>
                                     <tbody>

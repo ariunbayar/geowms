@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import {NavLink} from 'react-router-dom'
 
 
 
@@ -15,7 +16,11 @@ export class ListTable extends Component {
         return (
             <tr>
                 <td>{idx}</td>
-                <td>{name}</td>
+                <td>
+                <NavLink to={`/back/org-role/update/${id}/`}>
+                    {name}
+                </NavLink>
+                </td>
                 <td>{description}</td>
                 <td>{created_by}</td>
             </tr>
