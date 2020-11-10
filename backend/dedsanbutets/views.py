@@ -493,21 +493,6 @@ def save(request, payload):
     model_name = getModel(model_name)
     json = json['form_values']
     fields = []
-
-    print(request.user.id)
-    print(request.user.id)
-    print(request.user.id)
-    print(request.user.id)
-    print(request.user.id)
-    print(request.user.id)
-    print(edit_name)
-    print(edit_name)
-    print(edit_name)
-    print(edit_name)
-    print(edit_name)
-    print(model_name)
-    print(model_name)
-    print(model_name)
     for i in model_name._meta.get_fields():
         type_name = i.get_internal_type()
         if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
