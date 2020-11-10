@@ -34,7 +34,7 @@ class MenuItem extends Component {
                     { this.props.children &&
                         <i className="fa fa-angle-left pull-right"></i>
                     }
-                    {this.props.count && <small class="badge float-right badge-info">{this.props.count}</small>}
+                    {this.props.count > -1 && <small className="badge float-right badge-info">{this.props.count}</small>}
                 </NavLink>
 
                 { this.props.children }
