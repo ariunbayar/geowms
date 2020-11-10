@@ -344,7 +344,9 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-        const coordinateList = event.selected[0].getProperties()['geometry'].getCoordinates()
+        const coordinateList = event.selected[0].getProperties()['geometry'].getCoordinates()[0]
+        const geom = this.transformToLatLong(coordinateList)
+        this.controls.coordList.showList(true, geom)
         this.controls.coordList.showList(true, coordinateList)
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
         featureID_list.push(selectedFeature_ID)
@@ -356,11 +358,20 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
+    transformToLatLong(coordinateList) {
+      const geom = coordinateList.map((coord, idx) => {
+        const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
+        return map_coord
+      })
+      return geom
+    }
+
     modifiedFeature(event) {
 
       const features = event.features.getArray()
-      const coordinateList = features[0].getProperties()['geometry'].getCoordinates()
-      this.controls.coordList.showList(true, coordinateList)
+      const coordinateList = features[0].getProperties()['geometry'].getCoordinates()[0]
+      const geom = this.transformToLatLong(coordinateList)
+      this.controls.coordList.showList(true, geom)
       const {format} = this.state
       const data = format.writeFeatureObject(features[0],  {
         dataProjection: this.state.dataProjection,

@@ -7,22 +7,26 @@ class CoordInputs extends Component{
     constructor(props){
         super(props)
         this.state = {
-            coordinate: '',
+            coord: '',
         }
     }
 
     handleChange(e) {
-        this.setState({ coordinate: e.target.value })
+        this.setState({ coord: e.target.value })
+    }
+
+    componentDidMount() {
+        const { coord } = this.props
+        this.setState({ coord })
     }
 
     render() {
-        const { coords } = this.props
+        const { coord } = this.state
+        const { idx, ix } = this.props
         return (
-            <Fragment>
-                {coords.map((coord, idx) =>
-                    <input key={idx} className="form-control m-1" type="number" value={coord} onChange={(e) => this.handleChange(e)}/>
-                )}
-            </Fragment>
+            <div>
+                <input key={idx} className="form-control m-1" type="number" value={coord} onChange={(e) => this.handleChange(e)}/>
+            </div>
         )
     }
 }
@@ -40,7 +44,7 @@ class ListComponent extends Component {
     render() {
         const { coords_list } = this.props
         return (
-            <div className="overflow-auto">
+            <div className="overflow-group overflow-auto">
                 <div className="custom-control custom-switch">
                     <input type="radio" className="custom-control-input" id="customSwitch1" name="type" defaultChecked/>
                     <label className="custom-control-label" htmlFor="customSwitch1">Муухай</label>
@@ -49,14 +53,16 @@ class ListComponent extends Component {
                     <input type="radio" className="custom-control-input" name="type" id="customSwitch2"/>
                     <label className="custom-control-label" htmlFor="customSwitch2">Гоё</label>
                 </div>
-                {coords_list.map((coord_list, i) =>
-                    coord_list.map((coords, ix) =>
-                        <a key={ix} className="list-group-item">
-                            <CoordInputs
-                                coords={coords}
+                {coords_list.map((coord_list, ix) =>
+                    <a key={ix} className="list-group-item">
+                        {coord_list.map((coord, idx) =>
+                            <CoordInputs key={idx}
+                                coord={coord}
+                                idx={idx}
+                                ix={ix}
                             />
-                        </a>
-                    )
+                        )}
+                    </a>
                 )}
             </div>
         )
