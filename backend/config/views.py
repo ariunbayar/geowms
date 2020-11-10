@@ -143,7 +143,7 @@ def paginatedList(request, payload):
     per_page = payload.get('per_page')
     sort_name = payload.get('sort_name')
     if not sort_name:
-        sort_name = '-id'
+        sort_name = '-created_at'
 
     error500_list = Error500.objects.all().annotate(search=SearchVector(
         'request_scheme',
