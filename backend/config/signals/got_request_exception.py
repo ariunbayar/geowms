@@ -8,8 +8,6 @@ import traceback
 from django.utils.timezone import localtime, now
 
 
-#------------------------ code ------------------------
-
 @receiver(got_request_exception)
 def save_error500(sender, request, **kwargs):
     try:
