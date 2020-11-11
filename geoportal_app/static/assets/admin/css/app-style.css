@@ -2516,7 +2516,10 @@ table.grid td {
 
 .table-primary {
     color: #fff;
-    background-color: #008cff;
+    background-color: #034ea2;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-color: #034ea2;
 }
 
 .table-primary td, .table-primary th, .table-primary thead th {
@@ -4443,7 +4446,7 @@ table.grid td {
     }
 
 [class*="icheck-"] > label {
-    padding-left: 29px !important;
+    padding-left: 22px !important;
     min-height: 22px;
     line-height: 22px;
     display: inline-block;
@@ -4473,7 +4476,7 @@ table.grid td {
         height: 22px;
         border: 1px solid #D3CFC8;
         border-radius: 0px;
-        margin-left: -29px;
+        margin-left: -23px;
     }
 
     [class*="icheck-"] > input:first-child:checked + label::after,
@@ -5129,7 +5132,6 @@ table.grid td {
 
 
 }
-
 
 
 

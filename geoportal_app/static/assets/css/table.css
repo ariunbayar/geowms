@@ -118,6 +118,8 @@
 
 .table_wrapper-100{
     background: white;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
 }
 
 .table_wrapper-100 .table_wrapper_table{
@@ -125,12 +127,14 @@
 }
 
 .table_wrapper-100 .table_wrapper_table thead th{
-    background:  #223035;
+    background:  #034ea2;
     color: #fff;
+    z-index: 100;
 }
 .table_wrapper-100 .table_wrapper_table_saaral thead th{
-    background:  #e9eaea;
-    color: #000000;
+    background:  #034ea2;
+    color: #fff;
+    z-index: 100;
 }
 .table_wrapper_table_saaral{
     border: 1px solid #e9eaea;
