@@ -422,7 +422,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.map.addInteraction(dragBox);
       dragBox.setActive(true)
       dragBox.on('boxstart', () => this.BoxStart())
-      dragBox.on('boxend', () => this.BoxEnd(dragBox) )
+      dragBox.on('boxend', () => this.BoxEnd(dragBox))
       this.dragBox = dragBox
 
       const sendGeom = {
@@ -443,7 +443,6 @@ export default class BarilgaSuurinGazar extends Component{
       const extent = dragBox.getGeometry().getExtent();
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
         const coordinates = this.getTurningPoints(dragBox, feature)
-        console.log(coordinates)
         if (coordinates.length > 0) {
           coordinates.map((coordinate, idx) => {
             this.addMarker(coordinate)
@@ -904,48 +903,42 @@ export default class BarilgaSuurinGazar extends Component{
         const check = bound.containsXY(coordinates[i][0], coordinates[i][1])
         // const check = bound.intersectsExtent(feature.getGeometry().getExtent()) // ogtloltsdog eseh
         if (check) {
-          insideCoordinates.push(coordinates[i])
+          var coord_info = {
+            'coordinate': coordinates[i],
+            'turning': i
+          }
+          insideCoordinates.push(coord_info)
         }
       }
       return insideCoordinates
     }
 
     addMarker(coord) {
-      const coordinate = [coord[0], coord[1]]
-      const vectorSource = this.vectorSource
-      const test= fromLonLat([103, 48])
+      const point_geom = coord.coordinate
+      const point_turning = coord.turning.toString()
+      console.log(point_geom, point_turning);
+      const coordinate = [point_geom[0], point_geom[1]]
+      const source = this.vectorSource
+
+      const point = new Point(coordinate)
       const feature = new Feature({
-        geometry: Point([0, 0]),
+        geometry: point,
+        id: "tetst"
       });
 
-      const text = new Text({
-        scale: 1.2,
-        fill: new Fill({
-          color: "#fff"
+      const style = new Style({
+        text: new Text({
+          text: point_turning,
+          font: '30px Calibri,sans-serif',
+          stroke: new Stroke({
+            color: 'white',
+            width: 3,
+          }),
         }),
-        stroke: new Stroke({
-          color: "0",
-          width: 3
-        })
-      })
-
-      feature.setStyle((feature, resolution) => {
-        text.getText().setText("haha")
-      })
-
-      console.log(feature)
-
-      const iconBlue = new Style({
-        image: new Icon({
-          anchor: [12, 40],
-          anchorXUnits: 'pixels',
-          anchorYUnits: 'pixels',
-          opacity: 1,
-          src: '/static/assets/image/marker.png'
-        })
       });
-      feature.setStyle(iconBlue);
-      vectorSource.addFeature(feature);
+
+      feature.setStyle(style)
+      source.addFeature(feature)
     }
 
     render(){
