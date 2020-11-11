@@ -254,6 +254,13 @@
     background-color: rgba(0,60,136,0.7);
 }
 
-.overflow-group{
-    height: calc( 80vh - 70px - 15px);
+.height-full{
+    height: calc( 91vh - 70px - 15px);
+}
+
+.list-group{
+    max-height: calc( 80vh - 70px - 15px);
+    margin-bottom: 10px;
+    overflow:scroll;
+    -webkit-overflow-scrolling: touch;
 }

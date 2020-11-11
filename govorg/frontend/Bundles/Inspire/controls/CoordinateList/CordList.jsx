@@ -24,8 +24,11 @@ class CoordInputs extends Component{
         const { coord } = this.state
         const { idx, ix } = this.props
         return (
-            <div>
-                <input key={idx} className="form-control m-1" type="number" value={coord} onChange={(e) => this.handleChange(e)}/>
+            <div className="input-group input-group-sm mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id={idx}>{idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}</span>
+                </div>
+                <input key={idx} className="form-control" type="number" value={coord} aria-describedby={idx} onChange={(e) => this.handleChange(e)}/>
             </div>
         )
     }
@@ -39,31 +42,79 @@ class ListComponent extends Component {
 
         this.state = {
         }
+        this.handleOnChange = this.handleOnChange.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
+    }
+
+    handleOnChange(e) {
+        const query = e.target.value
+        this.setState({ query })
+    }
+
+    handleSearch() {
+        const { query } = this.state
+        const { coords_list } = this.props
+        coords_list.geom.map((coord, idx) => {
+            if (idx == query) {
+                const coordinate = [coord[0], coord[1]]
+                this.props.fly(coordinate)
+            }
+        })
     }
 
     render() {
         const { coords_list } = this.props
+        const { query } = this.state
         return (
-            <div className="overflow-group overflow-auto">
-                <div className="custom-control custom-switch">
-                    <input type="radio" className="custom-control-input" id="customSwitch1" name="type" defaultChecked/>
-                    <label className="custom-control-label" htmlFor="customSwitch1">Муухай</label>
+            <div className="height-full">
+                <div className="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+                    <div className="btn-group" role="group" aria-label="First group">
+                        <button type="button" className="btn btn-secondary" onClick={() => this.props.hide()}>1</button>
+                        <button type="button" className="btn btn-primary" onClick={() => this.props.hide()}>SAVE</button>
+                    </div>
+                    <div className="input-group input-group-sm m-3">
+                        <div className="input-group-prepend">
+                            <div
+                                className="input-group-text"
+                                id="search"
+                                role="button"
+                                onClick={() => this.handleSearch()}
+                            >
+                                <i
+                                    className="fa fa-search"
+                                    aria-hidden="true"
+                                >
+                                </i>
+                            </div>
+                        </div>
+                        <input
+                            type="number"
+                            className="form-control"
+                            placeholder="Эргэлтийн цэгийн дугаар"
+                            value={query}
+                            aria-describedby="search"
+                            onChange={(e) => this.handleOnChange(e)}
+                        />
+                    </div>
                 </div>
-                <div className="custom-control custom-switch">
-                    <input type="radio" className="custom-control-input" name="type" id="customSwitch2"/>
-                    <label className="custom-control-label" htmlFor="customSwitch2">Гоё</label>
-                </div>
-                {coords_list.map((coord_list, ix) =>
-                    <a key={ix} className="list-group-item">
-                        {coord_list.map((coord, idx) =>
-                            <CoordInputs key={idx}
-                                coord={coord}
-                                idx={idx}
-                                ix={ix}
-                            />
+                <center><label className="h5">{coords_list && coords_list.id}</label></center>
+                {
+                    coords_list &&
+                    <div className="list-group overflow-auto">
+                        {coords_list.geom.map((coords, ix) =>
+                            <div key={ix} className="list-group-item">
+                                <b>Эргэлтийн цэгийн дугаар: {ix}</b>
+                                    {coords.map((coord, idx) =>
+                                        <CoordInputs key={idx}
+                                            coord={coord}
+                                            idx={idx}
+                                            ix={ix}
+                                        />
+                                    )}
+                            </div>
                         )}
-                    </a>
-                )}
+                    </div>
+                }
             </div>
         )
     }
@@ -81,7 +132,7 @@ export class CoordList extends Control {
         })
 
         this.is_component_initialized = false
-        const cssClasses = `list-group col-md-5 rounded bg-light overflow-auto `
+        const cssClasses = `col-md-4 rounded bg-light`
 
         this.element.className = cssClasses
         this.element.style.display = 'none'
@@ -109,9 +160,9 @@ export class CoordList extends Control {
         ReactDOM.hydrate(<ListComponent {...props}/>, this.element)
     }
 
-    showList(islaod, coords_list) {
+    showList(islaod, coords_list, fly, hide) {
         this.toggleControl(islaod)
-        this.renderComponent({coords_list})
+        this.renderComponent({coords_list, fly, hide})
     }
 
 }

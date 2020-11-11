@@ -5,15 +5,16 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import GeoJSON from 'ol/format/GeoJSON'
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import {Circle as CircleStyle, Fill, Stroke, Style, Text} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
-import {Draw, Modify, Select, Snap} from 'ol/interaction'
+import {Draw, Modify, Select, Snap, DragBox} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import {unByKey} from 'ol/Observable';
 import {createStringXY} from 'ol/coordinate'
-import {transform as transformCoordinate, toLonLat} from 'ol/proj'
+import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
 import Overlay from 'ol/Overlay'
+import {platformModifierKeyOnly} from 'ol/events/condition';
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -107,42 +108,36 @@ export default class BarilgaSuurinGazar extends Component{
       this.WmsTile = this.WmsTile.bind(this)
       this.mapPointerMove = this.mapPointerMove.bind(this)
       this.onClickCloser = this.onClickCloser.bind(this)
+      this.getRole = this.getRole.bind(this)
+      this.flyTo =  this.flyTo.bind(this)
 
     }
 
     componentDidMount(){
       const {pid, fid} = this.state
-      Promise.all([
-          service.getRole(pid, fid),
-          service.geomType(pid, fid),
-      ]).then(([{roles}, {type}]) => {
-          this.setState({ type, roles })
-          this.loadControls()
+      service.geomType(pid, fid).then(({type}) => {
+          this.setState({ type })
         })
       this.loadRows()
       this.loadMap()
     }
 
-    getRole(pid, fid){
+    getRole(){
+      const {pid, fid} = this.state
       service
           .getRole(pid, fid)
           .then(({ success, roles }) => {
               if(success){
-                this.setState({
-                  roles
-                })
+                this.loadControls(roles)
               }
           })
-
     }
 
-    loadControls(){
+    loadControls(roles){
       const map = this.map
-      const { type, roles } = this.state
+      const { type } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
-      map.addControl(this.controls.sidebar)
-      map.addControl(this.controls.coordList)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -157,6 +152,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(roles[1] || roles[3]) {
         map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
         map.addControl(this.controls.upload)
+        map.addControl(this.controls.sidebar)
       }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
 
@@ -164,10 +160,11 @@ export default class BarilgaSuurinGazar extends Component{
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
       if(roles[3]){
+        map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
-      this.setState({ is_loading:false })
+      this.setState({ is_loading:false, roles })
     }
 
     loadData(){
@@ -183,6 +180,14 @@ export default class BarilgaSuurinGazar extends Component{
             fill: new Fill({
               color: 'rgba(255, 255, 0, 0.1)',
             }),
+            text: new Text({
+              font: '15px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+              textAlign: 'center'
+            }),
           }),
           'Polygon': new Style({
             stroke: new Stroke({
@@ -192,6 +197,14 @@ export default class BarilgaSuurinGazar extends Component{
             fill: new Fill({
               color: 'rgba(255, 255, 0, 0.1)',
             }),
+            text: new Text({
+              font: '15px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+              textAlign: 'center'
+            }),
           }),
           'Point': new Style({
             image: new CircleStyle({
@@ -200,11 +213,25 @@ export default class BarilgaSuurinGazar extends Component{
                 color: 'blue',
               }),
             }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+            }),
           }),
           'LineString': new Style({
             stroke: new Stroke({
               color: 'green',
               width: 2,
+            }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
             }),
           }),
           'MultiLineString': new Style({
@@ -212,12 +239,26 @@ export default class BarilgaSuurinGazar extends Component{
               color: 'green',
               width: 2,
             }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+            }),
           }),
           'MultiPoint': new Style({
             image: new CircleStyle({
               radius: 5,
               fill: new Fill({
                 color: 'orange',
+              }),
+            }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
               }),
             }),
           }),
@@ -243,12 +284,26 @@ export default class BarilgaSuurinGazar extends Component{
       const vectorLayer = new VectorLayer({
             name: 'vector_layer',
             source: vectorSource,
-            style: (feature) => styles[feature.getGeometry().getType()],
         })
+
+      vectorLayer.setStyle((feature, resolution) => {
+        let text = ''
+        const type = feature.getGeometry().getType()
+        if (type.includes('Point') || type.includes('Line')) {
+          text = resolution < 400 ? feature.get('id') : ''
+        } else {
+          text = feature.get('id')
+        }
+        const styleWithType = styles[type]
+        styleWithType.getText().setText(text)
+        return styleWithType
+      })
 
       map.addLayer(vectorLayer)
       this.snap(vectorLayer)
       this.vectorLayer = vectorLayer
+      this.vectorSource = vectorSource
+      this.getRole()
   }
 
     loadMap(){
@@ -344,10 +399,7 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-        const coordinateList = event.selected[0].getProperties()['geometry'].getCoordinates()[0]
-        const geom = this.transformToLatLong(coordinateList)
-        this.controls.coordList.showList(true, geom)
-        this.controls.coordList.showList(true, coordinateList)
+        this.sendToShowList(event.selected[0].getProperties())
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
@@ -358,6 +410,47 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
+
+
+    sendToShowList(data) {
+      const coordinateList = data['geometry'].getCoordinates()[0]
+      const geom = this.transformToLatLong(coordinateList)
+
+      const dragBox = new DragBox({
+        condition: platformModifierKeyOnly,
+      });
+      this.map.addInteraction(dragBox);
+      dragBox.setActive(true)
+      dragBox.on('boxstart', () => this.BoxStart())
+      dragBox.on('boxend', () => this.BoxEnd(dragBox) )
+      this.dragBox = dragBox
+
+      const sendGeom = {
+        "geom": geom,
+        'id': data['id']
+      }
+      this.controls.coordList.showList(true, sendGeom, this.flyTo, this.hideShowList)
+    }
+
+    BoxStart() {
+      const selectedFeatures = this.select.getFeatures();
+      selectedFeatures.clear();
+    }
+
+    BoxEnd(dragBox) {
+      const source = this.vectorSource
+      const selectedFeatures = this.select.getFeatures();
+      const extent = dragBox.getGeometry().getExtent();
+      console.log(dragBox.getGeometry().getCoordinates())
+      source.forEachFeatureIntersectingExtent(extent, (feature) => {
+        selectedFeatures.push(feature);
+      });
+    }
+
+    hideShowList() {
+      this.controls.coordList.showList(false)
+    }
+
     transformToLatLong(coordinateList) {
       const geom = coordinateList.map((coord, idx) => {
         const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
@@ -366,14 +459,28 @@ export default class BarilgaSuurinGazar extends Component{
       return geom
     }
 
+    flyTo(point) {
+      const map = this.map
+      const duration = 2000;
+      const view = map.getView()
+      // const zoom = view.getZoom()
+      const zoom = 25
+      const setPoint = fromLonLat(point)
+      view.animate(
+        {
+          center: setPoint,
+          duration: duration,
+          zoom: zoom,
+        },
+      );
+    }
+
     modifiedFeature(event) {
 
       const features = event.features.getArray()
-      const coordinateList = features[0].getProperties()['geometry'].getCoordinates()[0]
-      const geom = this.transformToLatLong(coordinateList)
-      this.controls.coordList.showList(true, geom)
+      this.sendToShowList(features[0].getProperties())
       const {format} = this.state
-      const data = format.writeFeatureObject(features[0],  {
+      const data = format.writeFeatureObject(features[0], {
         dataProjection: this.state.dataProjection,
         featureProjection: this.state.featureProjection,
       })
