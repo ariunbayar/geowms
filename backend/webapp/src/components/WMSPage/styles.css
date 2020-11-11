@@ -12,7 +12,7 @@
 @media (min-width: 1200px){
     .wms-floor-scroll {
         overflow-y: scroll;
-        height: calc(62vh - 36px);
+        height: calc(59vh - 36px);
     }
     /* wms-iin baruun gar taliin heseg */
     .wms-right-scroll {

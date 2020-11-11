@@ -262,9 +262,8 @@ export class WMSForm extends Component {
                                 />
                             </div>
 
-
+                            <a className="border-bottom row ml-2 mr-2"> Давхаргууд  </a>
                             <ul className="list-group wms-floor-scroll">
-                                <a> Давхаргууд  </a>
                                     {this.state.id && this.state.layer_choices.map((layer, idx) =>
                                         <li className="list-group-item align-items-left" key={idx}>
                                             <input
