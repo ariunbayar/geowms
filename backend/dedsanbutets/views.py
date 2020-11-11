@@ -486,6 +486,7 @@ def getModel(model_name):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def save(request, payload):
     model_name = payload.get("model_name")
     model_id = payload.get("model_id")
