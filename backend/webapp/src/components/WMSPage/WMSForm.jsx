@@ -276,7 +276,7 @@ export class WMSForm extends Component {
                                             />
                                             <label htmlFor={idx}>&nbsp; {layer.name} ({layer.code})</label>
                                         </li>
-                                        )}
+                                    )}
                                     {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'}
                             </ul>
                         </div>
