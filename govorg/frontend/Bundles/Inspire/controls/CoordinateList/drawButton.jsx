@@ -26,7 +26,7 @@ export class DrawButton extends Control {
 
         element.addEventListener('click', (event) => {
             event.preventDefault()
-            options.drawShape()
+            options.DrawButton()
         })
         element.appendChild(elementa)
 

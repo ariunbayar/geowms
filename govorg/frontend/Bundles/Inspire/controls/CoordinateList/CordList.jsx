@@ -20,6 +20,13 @@ class CoordInputs extends Component{
         this.setState({ coord })
     }
 
+    // componentDidUpdate(pP) {
+    //     const { coord } = this.props
+    //     if (pP.coord !== coord) {
+    //         this.setState({ coord })
+    //     }
+    // }
+
     render() {
         const { coord } = this.state
         const { idx, ix } = this.props
@@ -39,8 +46,9 @@ class ListComponent extends Component {
     constructor(props) {
 
         super(props)
-
+        this.list = []
         this.state = {
+            coords_list: []
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
@@ -62,9 +70,22 @@ class ListComponent extends Component {
         })
     }
 
-    render() {
+    componentDidMount() {
         const { coords_list } = this.props
+        this.list = [coords_list]
+    }
+
+    componentDidUpdate(pP) {
+        const { coords_list } = this.props
+        if (pP.coords_list !== coords_list) {
+            this.list.push(coords_list)
+        }
+    }
+
+    render() {
         const { query } = this.state
+        const coords_list = this.list
+        console.log(coords_list);
         return (
             <div className="height-full">
                 <div className="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
@@ -97,23 +118,26 @@ class ListComponent extends Component {
                         />
                     </div>
                 </div>
-                <center><label className="h5">{coords_list && coords_list.id}</label></center>
+                <center><label className="h5">{coords_list.length > 0 ? coords_list[0].id : 'NoName'}</label></center>
                 {
-                    coords_list &&
+                    coords_list.length > 0 ?
                     <div className="list-group overflow-auto">
-                        {coords_list.geom.map((coords, ix) =>
+                        {coords_list.map((coords, ix) =>
                             <div key={ix} className="list-group-item">
-                                <b>Эргэлтийн цэгийн дугаар: {ix}</b>
-                                    {coords.map((coord, idx) =>
-                                        <CoordInputs key={idx}
-                                            coord={coord}
-                                            idx={idx}
-                                            ix={ix}
-                                        />
+                                <b>Эргэлтийн цэгийн дугаар: {coords.turning !== null ? coords.turning : ix}</b>
+                                    {coords.geom.map((coords, idx) =>
+                                        coords.map((coord, i) =>
+                                            <CoordInputs key={i}
+                                                coord={coord}
+                                                idx={i}
+                                                ix={ix}
+                                            />
+                                        )
                                     )}
                             </div>
                         )}
                     </div>
+                    : null
                 }
             </div>
         )

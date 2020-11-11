@@ -25,6 +25,7 @@ import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
+import {DrawButton} from './controls/CoordinateList/drawButton'
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -110,6 +111,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.getRole = this.getRole.bind(this)
       this.flyTo =  this.flyTo.bind(this)
       this.getTurningPoints = this.getTurningPoints.bind(this)
+      this.DrawButton = this.DrawButton.bind(this)
 
     }
 
@@ -162,6 +164,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(roles[3]){
         map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
+        map.addControl(new DrawButton({DrawButton: this.DrawButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
       this.setState({ is_loading:false, roles })
@@ -408,76 +411,6 @@ export default class BarilgaSuurinGazar extends Component{
       {
         this.setState({ send: false })
       }
-    }
-
-
-
-    sendToShowList(data) {
-      const coordinateList = data['geometry'].getCoordinates()[0]
-      const geom = this.transformToLatLong(coordinateList)
-
-      const dragBox = new DragBox({
-        condition: platformModifierKeyOnly,
-      });
-      this.map.addInteraction(dragBox);
-      dragBox.setActive(true)
-      dragBox.on('boxstart', () => this.BoxStart())
-      dragBox.on('boxend', () => this.BoxEnd(dragBox))
-      this.dragBox = dragBox
-
-      const sendGeom = {
-        "geom": geom,
-        'id': data['id']
-      }
-      this.controls.coordList.showList(true, sendGeom, this.flyTo, this.hideShowList)
-    }
-
-    BoxStart() {
-      const selectedFeatures = this.select.getFeatures();
-      selectedFeatures.clear();
-    }
-
-    BoxEnd(dragBox) {
-      const source = this.vectorSource
-      const selectedFeatures = this.select.getFeatures();
-      const extent = dragBox.getGeometry().getExtent();
-      source.forEachFeatureIntersectingExtent(extent, (feature) => {
-        const coordinates = this.getTurningPoints(dragBox, feature)
-        if (coordinates.length > 0) {
-          coordinates.map((coordinate, idx) => {
-            this.addMarker(coordinate)
-          })
-          selectedFeatures.push(feature);
-        }
-      });
-    }
-
-    hideShowList() {
-      this.controls.coordList.showList(false)
-    }
-
-    transformToLatLong(coordinateList) {
-      const geom = coordinateList.map((coord, idx) => {
-        const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
-        return map_coord
-      })
-      return geom
-    }
-
-    flyTo(point) {
-      const map = this.map
-      const duration = 2000;
-      const view = map.getView()
-      // const zoom = view.getZoom()
-      const zoom = 25
-      const setPoint = fromLonLat(point)
-      view.animate(
-        {
-          center: setPoint,
-          duration: duration,
-          zoom: zoom,
-        },
-      );
     }
 
     modifiedFeature(event) {
@@ -916,7 +849,6 @@ export default class BarilgaSuurinGazar extends Component{
     addMarker(coord) {
       const point_geom = coord.coordinate
       const point_turning = coord.turning.toString()
-      console.log(point_geom, point_turning);
       const coordinate = [point_geom[0], point_geom[1]]
       const source = this.vectorSource
 
@@ -939,6 +871,96 @@ export default class BarilgaSuurinGazar extends Component{
 
       feature.setStyle(style)
       source.addFeature(feature)
+      const data = {
+        'geom': point_geom,
+        'turning': point_turning
+      }
+      this.sendToShowList(data)
+    }
+
+    sendToShowList(data) {
+      var coordinateList = null
+      var name = null
+      if (data['geometry']) {
+        coordinateList = data['geometry'].getCoordinates()[0]
+      } else {
+        coordinateList = [data['geom']]
+      }
+      console.log(coordinateList, 'list');
+      const geom = this.transformToLatLong(coordinateList)
+      console.log(data['id'], this.state.build_name);
+      if (data['id']) {
+        name = data['id']
+      } else {
+        name = this.state.build_name
+      }
+      const sendGeom = {
+        "geom": geom,
+        'id': name,
+        'turning': data['turning'] ? data['turning'] : null
+      }
+      this.controls.coordList.showList(true, sendGeom, this.flyTo, this.hideShowList)
+    }
+
+    DrawButton() {
+      const dragBox = new DragBox({
+        condition: platformModifierKeyOnly,
+      });
+      this.map.addInteraction(dragBox);
+      dragBox.setActive(true)
+      dragBox.on('boxstart', () => this.BoxStart())
+      dragBox.on('boxend', () => this.BoxEnd(dragBox))
+      this.dragBox = dragBox
+    }
+
+    BoxStart() {
+      const selectedFeatures = this.select.getFeatures();
+      selectedFeatures.clear();
+    }
+
+    BoxEnd(dragBox) {
+      const source = this.vectorSource
+      const selectedFeatures = this.select.getFeatures();
+      const extent = dragBox.getGeometry().getExtent();
+      source.forEachFeatureIntersectingExtent(extent, (feature) => {
+        const coordinates = this.getTurningPoints(dragBox, feature)
+        if (coordinates.length > 0) {
+          this.setState({ build_name: feature.get('id') })
+          coordinates.map((coordinate, idx) => {
+            console.log(coordinate);
+            this.addMarker(coordinate)
+          })
+          selectedFeatures.push(feature);
+        }
+      });
+    }
+
+    hideShowList() {
+      this.controls.coordList.showList(false)
+    }
+
+    transformToLatLong(coordinateList) {
+      const geom = coordinateList.map((coord, idx) => {
+        const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
+        return map_coord
+      })
+      return geom
+    }
+
+    flyTo(point) {
+      const map = this.map
+      const duration = 2000;
+      const view = map.getView()
+      // const zoom = view.getZoom()
+      const zoom = 25
+      const setPoint = fromLonLat(point)
+      view.animate(
+        {
+          center: setPoint,
+          duration: duration,
+          zoom: zoom,
+        },
+      );
     }
 
     render(){
