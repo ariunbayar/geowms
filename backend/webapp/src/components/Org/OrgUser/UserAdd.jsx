@@ -298,10 +298,15 @@ export class UserAdd extends Component {
 
                                     </div>
                                 </div>
-                                <div className="form-row">
-                                    <div className="form-check">
-                                        <input type="checkbox" class="form-check-input" id="is_admin" checked={this.state.is_admin} onChange={(e) => this.setState({is_admin: e.target.checked})}/>
-                                        <label className="form-check-label" for="is_admin">Байгууллагын админ</label>
+                                <div className='form-group'>
+                                    <div class="icheck-primary">
+                                        <input
+                                            id='is_admin'
+                                            type="checkbox"
+                                            checked={this.state.is_admin}
+                                            onChange={(e) => this.setState({is_admin: e.target.checked})}
+                                        />
+                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
                                     </div>
                                 </div>
                                 <div className="form-row">
