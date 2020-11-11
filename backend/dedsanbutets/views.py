@@ -526,8 +526,11 @@ def save(request, payload):
             check = False
     if check:
         if edit_name == '':
+            datas['created_by'] = request.user.id
+            datas['modified_by'] = request.user.id
             sain = model_name.objects.create(**datas)
         else:
+            datas['modified_by'] = request.user.id
             sain = model_name.objects.filter(pk=model_id).update(**datas)
         rsp = {
             'success': True,
