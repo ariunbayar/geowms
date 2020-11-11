@@ -5,6 +5,7 @@ import { service } from "./service"
 import WMSCheckFormSort from './WMSCheckFormSort'
 import ModalAlert from '../ModalAlert'
 import {Notif} from '../../../../../src/components/Notification/index'
+import './styles.css'
 
 export class WMSForm extends Component {
 
@@ -206,7 +207,7 @@ export class WMSForm extends Component {
     render() {
         const { layers_all, id,is_active } = this.state
         return (
-            <div className="row h-100">
+            <div className="row">
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <div className="col-lg-4">
                     <div className="card">
@@ -262,21 +263,9 @@ export class WMSForm extends Component {
                             </div>
 
 
-                            <ul className="list-group">
+                            <ul className="list-group wms-floor-scroll">
                                 <a> Давхаргууд  </a>
-                                    {/* {this.state.id && this.state.layer_choices.map((layer, idx) =>
-                                        <li className="list-group-item align-items-left" key={idx}>
-                                            <input
-                                                id={idx}
-                                                type="checkbox"
-                                                checked={this.state.layers.indexOf(layer.code) > -1}
-                                                onChange={(e) => this.handleLayerToggle(e, layer)}
-                                                value={layer.code}
-                                            />
-                                            <label htmlFor={idx}>&nbsp; {layer.name} ({layer.code})</label>
-                                        </li>
-                                        )} */}
-                                    {/* {this.state.id && this.state.layer_choices.map((layer, idx) =>
+                                    {this.state.id && this.state.layer_choices.map((layer, idx) =>
                                         <li className="list-group-item align-items-left" key={idx}>
                                             <input
                                                 id={idx}
@@ -288,18 +277,18 @@ export class WMSForm extends Component {
                                             <label htmlFor={idx}>&nbsp; {layer.name} ({layer.code})</label>
                                         </li>
                                         )}
-                                    {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'} */}
+                                    {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'}
                             </ul>
                         </div>
                     </div>
                 </div>
-                {/* <div className="col-lg-8">
+                <div className="col-lg-8">
                     <WMSCheckFormSort
                         wmslayers={layers_all}
                         wmsId={id}
                         handleWmsLayerRefresh={this.handleWmsLayerRefresh}>
                     </WMSCheckFormSort>
-                </div> */}
+                </div>
             </div>
         )
     }
