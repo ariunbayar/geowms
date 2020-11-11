@@ -1,20 +1,19 @@
 import React, { Component } from 'react'
 
 import 'ol/ol.css';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import GeoJSON from 'ol/format/GeoJSON'
+import {Map, Feature, View, Overlay} from 'ol';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-import {Circle as CircleStyle, Fill, Stroke, Style, Text} from 'ol/style'
+import {Circle as CircleStyle, Fill, Stroke, Style, Text, Icon} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
 import {Draw, Modify, Select, Snap, DragBox} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import {unByKey} from 'ol/Observable';
-import {createStringXY} from 'ol/coordinate'
+import {GeoJSON} from 'ol/format'
 import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
-import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
-import Overlay from 'ol/Overlay'
+import {format as coordinateFormat, toStringHDMS, createStringXY} from 'ol/coordinate'
 import {platformModifierKeyOnly} from 'ol/events/condition';
+import {containsXY} from 'ol/extent'
+import {Point} from 'ol/geom'
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -110,6 +109,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.onClickCloser = this.onClickCloser.bind(this)
       this.getRole = this.getRole.bind(this)
       this.flyTo =  this.flyTo.bind(this)
+      this.getTurningPoints = this.getTurningPoints.bind(this)
 
     }
 
@@ -441,9 +441,15 @@ export default class BarilgaSuurinGazar extends Component{
       const source = this.vectorSource
       const selectedFeatures = this.select.getFeatures();
       const extent = dragBox.getGeometry().getExtent();
-      console.log(dragBox.getGeometry().getCoordinates())
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
-        selectedFeatures.push(feature);
+        const coordinates = this.getTurningPoints(dragBox, feature)
+        console.log(coordinates)
+        if (coordinates.length > 0) {
+          coordinates.map((coordinate, idx) => {
+            this.addMarker(coordinate)
+          })
+          selectedFeatures.push(feature);
+        }
       });
     }
 
@@ -885,6 +891,61 @@ export default class BarilgaSuurinGazar extends Component{
       }else{
         this.controls.sidebar.showSideBar(wms_map_list, false)
       }
+    }
+
+    getTurningPoints(extent, feature) {
+      var insideCoordinates = []
+      const coordinates = feature.getGeometry().getCoordinates()[0]
+      var bound = ''
+      if (extent) {
+        bound = extent.getGeometry()
+      }
+      for (let i = 0; i < coordinates.length; i ++){
+        const check = bound.containsXY(coordinates[i][0], coordinates[i][1])
+        // const check = bound.intersectsExtent(feature.getGeometry().getExtent()) // ogtloltsdog eseh
+        if (check) {
+          insideCoordinates.push(coordinates[i])
+        }
+      }
+      return insideCoordinates
+    }
+
+    addMarker(coord) {
+      const coordinate = [coord[0], coord[1]]
+      const vectorSource = this.vectorSource
+      const test= fromLonLat([103, 48])
+      const feature = new Feature({
+        geometry: Point([0, 0]),
+      });
+
+      const text = new Text({
+        scale: 1.2,
+        fill: new Fill({
+          color: "#fff"
+        }),
+        stroke: new Stroke({
+          color: "0",
+          width: 3
+        })
+      })
+
+      feature.setStyle((feature, resolution) => {
+        text.getText().setText("haha")
+      })
+
+      console.log(feature)
+
+      const iconBlue = new Style({
+        image: new Icon({
+          anchor: [12, 40],
+          anchorXUnits: 'pixels',
+          anchorYUnits: 'pixels',
+          opacity: 1,
+          src: '/static/assets/image/marker.png'
+        })
+      });
+      feature.setStyle(iconBlue);
+      vectorSource.addFeature(feature);
     }
 
     render(){
