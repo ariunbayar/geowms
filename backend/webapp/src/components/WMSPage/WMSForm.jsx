@@ -206,7 +206,7 @@ export class WMSForm extends Component {
     render() {
         const { layers_all, id,is_active } = this.state
         return (
-            <div className="row">
+            <div className="row h-100">
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <div className="col-lg-4">
                     <div className="card">
@@ -263,9 +263,9 @@ export class WMSForm extends Component {
 
 
                             <ul className="list-group">
-                                <a> Давхаргууд </a>
-                                    {this.state.id && this.state.layer_choices.map((layer, idx) =>
-                                <li className="list-group-item align-items-left" key={idx}>
+                                <a> Давхаргууд  </a>
+                                    {/* {this.state.id && this.state.layer_choices.map((layer, idx) =>
+                                        <li className="list-group-item align-items-left" key={idx}>
                                             <input
                                                 id={idx}
                                                 type="checkbox"
@@ -274,20 +274,32 @@ export class WMSForm extends Component {
                                                 value={layer.code}
                                             />
                                             <label htmlFor={idx}>&nbsp; {layer.name} ({layer.code})</label>
-                                    </li>
-                                            )}
-                                    {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'}
+                                        </li>
+                                        )} */}
+                                    {/* {this.state.id && this.state.layer_choices.map((layer, idx) =>
+                                        <li className="list-group-item align-items-left" key={idx}>
+                                            <input
+                                                id={idx}
+                                                type="checkbox"
+                                                checked={this.state.layers.indexOf(layer.code) > -1}
+                                                onChange={(e) => this.handleLayerToggle(e, layer)}
+                                                value={layer.code}
+                                            />
+                                            <label htmlFor={idx}>&nbsp; {layer.name} ({layer.code})</label>
+                                        </li>
+                                        )}
+                                    {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'} */}
                             </ul>
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-8">
+                {/* <div className="col-lg-8">
                     <WMSCheckFormSort
                         wmslayers={layers_all}
                         wmsId={id}
                         handleWmsLayerRefresh={this.handleWmsLayerRefresh}>
                     </WMSCheckFormSort>
-                </div>
+                </div> */}
             </div>
         )
     }
