@@ -87,7 +87,7 @@ export class CrudEvenLog extends Component {
                                 onChange={(e) => this.handleSearch('searchQuery', e)}
                                 value={this.state.searchQuery}
                             />
-                            <a><i class="icon-magnifier"></i></a>
+                            <a><i className="icon-magnifier"></i></a>
                         </div>
                     </div>
                     <div className="row my-2">
@@ -97,10 +97,10 @@ export class CrudEvenLog extends Component {
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>
-                                        <th><a onClick={() => this.handleSort('event_type', this.state.event_type)}>Үйлдэл <i class={this.state.event_type ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('object_id', this.state.object_id)}>Хийгдсэн хүснэгт <i class={this.state.object_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('event_type', this.state.event_type)}>Үйлдэл <i className={this.state.event_type ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('object_id', this.state.object_id)}>Хийгдсэн хүснэгт <i className={this.state.object_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                         <th><a >Хэрэглэгчийн нэр</a></th>
-                                        <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Огноо <i class={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Огноо <i className={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                     </tr>
                                 </thead>
                                 <tbody>

@@ -121,6 +121,10 @@ urlpatterns = [
         path('postresqlVersion/', config_views.postresqlVersion, name='postresqlVersion'),
     ], 'config'))),
 
+    path('api/error500/', include(([
+        path('paginatedList/', config_views.paginatedList, name='paginatedList'),
+    ], 'error500'))),
+
     path('payment/', include(([
         path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
         path('payment-list/', payment_views.paymentList, name='paymentList'),

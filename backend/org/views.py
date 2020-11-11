@@ -470,7 +470,7 @@ def employeeList(request,payload, level, pk):
             'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
         })
     total_page = total_items.num_pages
-    
+
     rsp = {
         'items': employees_display,
         'page': page,
@@ -532,6 +532,7 @@ def rolesAdd(request, payload, level, pk):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def countOrg(request):
     rsp = {
         'gov_count':{

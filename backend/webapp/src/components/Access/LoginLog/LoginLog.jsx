@@ -82,7 +82,7 @@ export class LoginLog extends Component {
                         onChange={(e) => this.handleSearch('searchQuery', e)}
                         value={this.state.searchQuery}
                     />
-                    <a><i class="icon-magnifier"></i></a>
+                    <a><i className="icon-magnifier"></i></a>
                 </div>
             </div>
             <div className="row my-2">
@@ -92,11 +92,11 @@ export class LoginLog extends Component {
                             <thead>
                                 <tr>
                                     <th scope="col">№</th>
-                                    <th><a onClick={() => this.handleSort('username', this.state.username)}>Хэрэглэгчийн нэр <i class={this.state.username ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                    <th><a onClick={() => this.handleSort('login_type', this.state.login_type)}>Хэрэглэгчийн үйлдэл <i class={this.state.login_type ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                    <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгчийн дугаар <i class={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                    <th><a onClick={() => this.handleSort('remote_ip', this.state.remote_ip)}>IP Хаяг <i class={this.state.remote_ip ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                    <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Нэвтэрсэн огноо <i class={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                    <th><a onClick={() => this.handleSort('username', this.state.username)}>Хэрэглэгчийн нэр <i className={this.state.username ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                    <th><a onClick={() => this.handleSort('login_type', this.state.login_type)}>Хэрэглэгчийн үйлдэл <i className={this.state.login_type ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                    <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгчийн дугаар <i className={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                    <th><a onClick={() => this.handleSort('remote_ip', this.state.remote_ip)}>IP Хаяг <i className={this.state.remote_ip ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                    <th><a onClick={() => this.handleSort('datetime', this.state.datetime)}>Нэвтэрсэн огноо <i className={this.state.datetime ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                 </tr>
                             </thead>
                             <tbody>
