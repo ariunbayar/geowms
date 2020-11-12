@@ -49,3 +49,53 @@ def replace_src_url(content, old_url, new_url):
         content = content.decode()
     content = content.replace(old_url, new_url)
     return content.encode()
+
+
+import requests
+
+
+#file_store = open(settings.MEDIA_ROOT + '/layer.xml', 'r')
+BASE_URL = 'http://localhost:8080/geoserver/'
+
+url = 'rest/workspaces/acme/datastores/acme_store04/featuretypes'
+
+payload = '''
+    <featureType>
+    <name>deegi_layer04</name>
+    <nativeName>geoserver_view</nativeName>
+    <title>deegi_layer03</title>
+    <srs>EPSG:2908</srs>
+    <nativeBoundingBox>
+        <minx>983797.5</minx>
+        <maxx>991899.0625</maxx>
+        <miny>207443</miny>
+        <maxy>218850.828125</maxy>
+        <crs>EPSG:2908</crs>
+    </nativeBoundingBox>
+    <latLonBoundingBox>
+        <minx>-74.00163357035443</minx>
+        <maxx>40.73605641629197</maxx>
+        <miny>-73.97238611861502</miny>
+        <maxy>40.76737131396996</maxy>
+        <crs>EPSG:2908</crs>
+    </latLonBoundingBox>
+    <attributes>
+        <attribute>
+            <name>the_geom</name>
+                <nillable>true</nillable>
+            <binding>org.locationtech.jts.geom.MultiPolygon</binding>
+        </attribute>
+    </attributes>
+</featureType>
+        '''
+
+HEADERS = {
+        'Content-type': 'text/xml',
+        'Accept':'text/xml'
+        }
+
+
+AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
+rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
+
+print(rsp.status_code)
