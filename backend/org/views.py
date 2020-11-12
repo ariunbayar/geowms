@@ -1,19 +1,30 @@
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.postgres.search import SearchVector
+from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
-from django.core.paginator import Paginator
-import json
 
-from main.decorators import ajax_required
-from .models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
-from geoportal_app.models import User
 from backend.govorg.models import GovOrg
+from backend.inspire.models import LCodeListConfigs
+from backend.inspire.models import LCodeLists
+from backend.inspire.models import LDataTypeConfigs
+from backend.inspire.models import LDataTypes
+from backend.inspire.models import LFeatureConfigs
+from backend.inspire.models import LFeatures
+from backend.inspire.models import LPackages
+from backend.inspire.models import LProperties
+from backend.inspire.models import LThemes
+from backend.inspire.models import LValueTypes
+from backend.inspire.models import MDatasBoundary
+from geoportal_app.models import User
+from main.decorators import ajax_required
+
 from .models import InspirePerm
-from django.contrib.postgres.search import SearchVector
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
+from .models import Org, OrgRole, Employee, InspirePerm
 
 
 def _get_property(org_id, feature_id):
@@ -387,7 +398,7 @@ def org_remove(request, payload, level):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def orgList(request, payload, level):
+def org_list(request, payload, level):
 
     page = payload.get('page')
     query = payload.get('query')
@@ -395,22 +406,33 @@ def orgList(request, payload, level):
     level = payload.get('org_level')
     orgs_display = []
     sort_name = payload.get('sort_name')
+
     if not sort_name:
         sort_name = 'id'
     if not query:
         query = ''
-    orgs = Org.objects.filter(level=level).annotate(search=SearchVector(
-        'name')).filter(search__contains=query).order_by(sort_name)
-    total_items = Paginator(orgs, per_page)
+
+    qs = Org.objects.filter(level=level)
+    qs = qs.annotate(num_employees=Count('employee'))
+    qs = qs.annotate(num_systems=Count('govorg'))
+    qs = qs.annotate(search=SearchVector('name'))
+    qs = qs.filter(search__contains=query)
+    qs = qs.order_by(sort_name)
+
+    total_items = Paginator(qs, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
+
     for org in page_items:
         orgs_display.append({
             'id': org.id,
             'name': org.name,
             'level': org.level,
             'level_display': org.get_level_display(),
+            'num_employees': org.num_employees,
+            'num_systems': org.num_systems,
         })
+
     total_page = total_items.num_pages
 
     rsp = {

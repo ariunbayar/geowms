@@ -139,6 +139,8 @@ export class OrgForm extends Component {
                                     <tr>
                                         <th><a>№</a></th>
                                         <th><a onClick={() => this.handleSort('name', this.state.name)}>Байгууллага нэр <i className={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th scope="col">Албан хаагчид</th>
+                                        <th scope="col">Систем</th>
                                         <th scope="col">Засах</th>
                                         <th scope="col">Устгах</th>
                                     </tr>
