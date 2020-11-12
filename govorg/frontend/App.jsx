@@ -45,7 +45,14 @@ export class App extends Component {
     }
 
     handleMapComponens(){
-        service.component
+        // service.component
+        service.getCount().then(({success, count, info}) => {
+            if (success) {
+                this.setState({ request_count: count })
+            } else {
+                console.log(info);
+            }
+        })
     }
 
     render() {
@@ -72,7 +79,13 @@ export class App extends Component {
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/org-request/" text="Хүсэлт"></MenuItem>
+                        <MenuItem
+                            icon="gp-text-primary fa fa-plug"
+                            url="/gov/org-request/"
+                            text="Хүсэлт"
+                            count={this.state.request_count}
+                        >
+                        </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
                                 {tuuhen_ov.perm_view &&
@@ -145,7 +158,7 @@ export class App extends Component {
                             <Route path="/gov/system/" component={System}/>
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
-                            <Route path="/gov/org-request/" component={OrgRequest}/>
+                            <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()}/>}/>
                             <Route path="/gov/history/" component={ChangeRequest}/>
                             <Route exact path="/gov/role/employees/" component={ Employee }/>
                             <Route exact path="/gov/role/" component={GovRole}/>

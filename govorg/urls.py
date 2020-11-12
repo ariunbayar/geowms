@@ -11,7 +11,9 @@ from  govorg.backend.meta_data import views as meta_data_views
 urlpatterns = [
     path('api/', include(([
 
-        path('employee/', employee_views.employees, name='employees'),
+        path('employee/', include(([
+            path('', employee_views.employees, name='employees'),
+        ], 'employee'))),
         path('system/', system_views.systemList, name='system'),
         path('bundle/', bundle_views.bundle, name='bundle'),
         path('inspire/', include(([
@@ -34,10 +36,11 @@ urlpatterns = [
         ], 'inspire'))),
 
         path('org-request/', include(([
-            path('', org_request_views.getAll),
-            path('change-request/', org_request_views.getChangeAll),
-            path('<int:pk>/delete/', org_request_views.requestDelete),
-            path('<int:pk>/approve/', org_request_views.requestApprove),
+            path('', org_request_views.getAll, name="all"),
+            path('change-request/', org_request_views.getChangeAll, name="change-request"),
+            path('<int:pk>/delete/', org_request_views.requestDelete, name="delete"),
+            path('<int:pk>/approve/', org_request_views.requestApprove, name="approve"),
+            path('getCount/', org_request_views.getCount, name='getCount'),
         ], 'org-request'))),
 
         path('meta-data/', include(([
