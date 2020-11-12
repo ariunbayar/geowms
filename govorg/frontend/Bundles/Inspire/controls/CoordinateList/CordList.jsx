@@ -55,6 +55,7 @@ class ListComponent extends Component {
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.sendCoordinate = this.sendCoordinate.bind(this)
+        this.setUpdate = this.setUpdate.bind(this)
     }
 
     handleOnChange(e) {
@@ -66,6 +67,11 @@ class ListComponent extends Component {
         const { coords_list } = this.state
         const parsed = parseFloat(coord)
         coords_list.data[first].geom[second] = parsed
+        this.setState({ coords_list })
+    }
+
+    setUpdate() {
+        const { coords_list } = this.state
         this.props.update(coords_list);
     }
 
@@ -99,8 +105,8 @@ class ListComponent extends Component {
             <div className="height-full">
                 <div className="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
                     <div className="btn-group" role="group" aria-label="First group">
-                        <button type="button" className="btn btn-secondary" onClick={() => this.props.hide()}>1</button>
-                        <button type="button" className="btn btn-primary" onClick={() => this.props.update()}>SAVE</button>
+                        <button type="button" className="btn btn-secondary" onClick={this.props.hide()}>1</button>
+                        <button type="button" className="btn btn-primary" onClick={() => this.setUpdate()}>SAVE</button>
                     </div>
                     <div className="input-group input-group-sm m-3">
                         <div className="input-group-prepend">

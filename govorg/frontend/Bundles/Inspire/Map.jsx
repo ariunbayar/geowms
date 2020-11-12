@@ -14,7 +14,8 @@ import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS, createStringXY} from 'ol/coordinate'
 import {platformModifierKeyOnly} from 'ol/events/condition';
 import {containsXY} from 'ol/extent'
-import {Point} from 'ol/geom'
+import * as geom_type from 'ol/geom'
+
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -114,6 +115,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.getTurningPoints = this.getTurningPoints.bind(this)
       this.DrawButton = this.DrawButton.bind(this)
       this.updateFromList = this.updateFromList.bind(this)
+      this.transformToMapCoordinate = this.transformToMapCoordinate.bind(this)
+      this.transformToLatLong = this.transformToLatLong.bind(this)
 
     }
 
@@ -405,7 +408,7 @@ export default class BarilgaSuurinGazar extends Component{
         const selectedFeature_ID = event.selected[0].getProperties()['id']
         this.DrawButton()
         // this.sendToShowList(event.selected[0].getProperties())
-        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
+        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
       }
@@ -509,6 +512,9 @@ export default class BarilgaSuurinGazar extends Component{
           this.setState({
             roles
           })
+        }
+        if (prevState.changedFeature !== this.state.changedFeature) {
+          this.setState({ changedFeature: this.state.changedFeature })
         }
     }
 
@@ -652,10 +658,17 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    updateGeom(){
+    updateGeom(changedJson){
       const {tid, fid, pid} = this.state
       const id = this.state.selectedFeature_ID
-      const json = JSON.parse(this.state.changedFeature)
+      const { changedFeature } = this.state
+      this.feature = ''
+      if (changedJson) {
+        this.feature = changedJson
+      } else {
+        this.feature = changedFeature
+      }
+      const json = JSON.parse(this.feature)
       const datas = json.geometry
       this.setState({ is_loading:true })
       if(this.state.roles[6]){
@@ -853,7 +866,7 @@ export default class BarilgaSuurinGazar extends Component{
       const coordinate = [point_geom[0], point_geom[1]]
       const source = this.vectorSource
 
-      const point = new Point(coordinate)
+      const point = new geom_type.Point(coordinate)
       const feature = new Feature({
         geometry: point,
         id: "TurningPoint"
@@ -966,6 +979,14 @@ export default class BarilgaSuurinGazar extends Component{
       return geom
     }
 
+    transformToMapCoordinate(coordinateList) {
+      const geom = coordinateList.map((coord, idx) => {
+        const map_coord = transformCoordinate(coord, this.state.dataProjection, this.state.featureProjection)
+          return map_coord
+      })
+      return geom
+    }
+
     flyTo(point) {
       const map = this.map
       const duration = 2000;
@@ -983,7 +1004,41 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     updateFromList(coord_list) {
-      console.log('in update', coord_list);
+      const source = this.vectorSource
+      const id = coord_list.id
+      const coords = coord_list.data.map(({geom, turning}) => {
+        const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
+        return {conv_geom, turning}
+      })
+      const {selected_feature} = this.state
+      const feature_id = selected_feature.get('id')
+      if (feature_id == id) {
+        const getType = selected_feature.getGeometry().getType()
+        const geom_coordinate = selected_feature.getGeometry().getCoordinates()[0]
+        coords.map(({conv_geom, turning}) => {
+          geom_coordinate[turning] = conv_geom
+        })
+        const geom = new geom_type[getType]([geom_coordinate])
+        source.removeFeature(selected_feature)
+        const new_feature = new Feature({
+          geometry: geom,
+          id: feature_id
+        })
+        source.addFeature(new_feature)
+        const changedFeature = this.writeFeat(new_feature)
+        this.updateGeom(changedFeature)
+        this.hideShowList()
+      }
+    }
+
+    writeFeat(features) {
+      const {format} = this.state
+      const data = format.writeFeatureObject(features, {
+        dataProjection: this.state.dataProjection,
+        featureProjection: this.state.featureProjection,
+      })
+      const changedFeature = JSON.stringify(data)
+      return changedFeature
     }
 
     render(){

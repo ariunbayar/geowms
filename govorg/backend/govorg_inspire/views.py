@@ -229,7 +229,7 @@ def rows(request, pid, fid):
         FROM
             m_geo_datas
         WHERE
-            feature_id = {fid}
+            feature_id = {fid} and geo_id = '6335Build'
         order by created_on desc
         limit {limit}
     """.format(
