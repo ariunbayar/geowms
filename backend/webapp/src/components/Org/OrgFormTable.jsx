@@ -29,9 +29,11 @@ export class OrgFormTable extends Component {
     }
 
     render() {
+
         const org = this.props.org
         const idx = this.props.idx
         const org_level = this.props.org_level
+
         return (
             <tr>
                 <td>
@@ -42,6 +44,8 @@ export class OrgFormTable extends Component {
                         {org.name}
                     </NavLink>
                 </td>
+                <td>{ org.num_employees }</td>
+                <td>{ org.num_systems }</td>
                 <td>
                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org.id}/засах`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>

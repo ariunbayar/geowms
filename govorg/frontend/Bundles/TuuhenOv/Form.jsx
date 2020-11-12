@@ -222,17 +222,30 @@ export class Forms extends Component {
                                                 />
                                             </td>
                                         </tr>
-
-                                        <tr>
-                                            <th scope="row">Хамрах хүруу тоо ширхэг</th>
-                                            {tuuh_id ?
-                                            <td>
-                                                    <button type="button" className="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1"  onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
-                                                    <br></br>
-                                                    <hr className="my-2"></hr>
-                                                    {huree_components}
-                                            </td>:
-                                            <td>
+                                            <tr>
+                                                <th scope="row">Хамрах хүрээ тоо ширхэг</th>
+                                                {tuuh_id ?
+                                                <td>
+                                                        <button type="button" className="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1"  onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
+                                                        <br></br>
+                                                        <hr className="my-2"></hr>
+                                                        {huree_components}
+                                                </td>:
+                                                <td>
+                                                        <Field
+                                                            className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
+                                                            name='too_shirheg'
+                                                            id="id_too_shirheg"
+                                                            type="number"
+                                                        />
+                                                        <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
+                                                </td>
+                                                }
+                                                <th>Тоо ширхэг.</th>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Бүртгэгч</th>
+                                                <td>
                                                     <Field
                                                         className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
                                                         name='too_shirheg'

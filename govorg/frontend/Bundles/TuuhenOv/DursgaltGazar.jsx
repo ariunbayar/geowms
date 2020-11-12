@@ -656,7 +656,7 @@ export class DursgaltGazar extends Component {
                             </tr>
                             <tr>
                                 <td scope="row" className="align-middle">
-                                    Чулуулгын төрөл
+                                    Чулуулгийн төрөл
                                     <div
                                         type="button"
                                         onMouseOver={(e) => this.handleBoxOver('showBox1', e)}
@@ -1265,7 +1265,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
                                 <tr>
                                     <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>
-                                        Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага<br></br> судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ.<br></br> Хэрэв хууль бусаар ухаж тоносон бол <br></br>"Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
+                                        Тухайн дурсгалт газрыг мэргэжлийн судалгааны байгууллага<br></br> судлан шинжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ.<br></br> Хэрэв хууль бусаар ухаж тоносон бол <br></br>"Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
                                         <div
                                             type="button"
                                             onMouseOver={(e) => this.handleBoxOver('showBox15', e)}
@@ -1554,7 +1554,7 @@ export class DursgaltGazar extends Component {
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_salhi', e, 'Салхиний нөлөөлөл')}
                                                 value={this.state.dgh_baigaliin_huchin_zuil_salhi}
                                                 ></input>
-                                            <label htmlFor="id_dgh_baigaliin_huchin_zuil_salhi"> Салхиний нөлөөлөл</label>
+                                            <label htmlFor="id_dgh_baigaliin_huchin_zuil_salhi"> Салхины нөлөөлөл</label>
                                         </div>
                                     </td>
                                 </tr>

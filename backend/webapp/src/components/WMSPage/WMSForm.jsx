@@ -5,6 +5,7 @@ import { service } from "./service"
 import WMSCheckFormSort from './WMSCheckFormSort'
 import ModalAlert from '../ModalAlert'
 import {Notif} from '../../../../../src/components/Notification/index'
+import './styles.css'
 
 export class WMSForm extends Component {
 
@@ -261,11 +262,10 @@ export class WMSForm extends Component {
                                 />
                             </div>
 
-
-                            <ul className="list-group">
-                                <a> Давхаргууд </a>
+                            <a className="border-bottom row ml-2 mr-2"> Давхаргууд  </a>
+                            <ul className="list-group wms-floor-scroll">
                                     {this.state.id && this.state.layer_choices.map((layer, idx) =>
-                                <li className="list-group-item align-items-left" key={idx}>
+                                        <li className="list-group-item align-items-left" key={idx}>
                                             <input
                                                 id={idx}
                                                 type="checkbox"
@@ -274,8 +274,8 @@ export class WMSForm extends Component {
                                                 value={layer.code}
                                             />
                                             <label htmlFor={idx}>&nbsp; {layer.name} ({layer.code})</label>
-                                    </li>
-                                            )}
+                                        </li>
+                                    )}
                                     {!this.state.id && 'Хадгалсаны дараагаар давхаргуудыг үзэх боломжтой болно'}
                             </ul>
                         </div>

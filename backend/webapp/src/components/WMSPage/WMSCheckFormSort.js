@@ -37,7 +37,7 @@ export default class WMSCheckFormSort extends Component {
     render() {
         const {wmslayers, wmsId} = this.state
         return (
-            <div className="card">
+            <div className="card wms-right-scroll">
                 <div className="card-body">
                     <div className="table-responsive">
                         <table className="table">

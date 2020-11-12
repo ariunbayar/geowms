@@ -70,14 +70,14 @@ export class OrgMenu extends Component {
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
                         <i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span>
-                        <small class="badge float-right badge-dark-primary">{this.state.employee_count}</small>
+                        <small className="badge float-right badge-dark-primary">{this.state.employee_count}</small>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} className="nav-link"
                                 activeClassName="active"  data-toggle="tab"><i className="icon-envelope-open">
                         </i> <span className="hidden-xs">Систем</span>
-                        <small class="badge float-right badge-dark-primary">{this.state.sistem_count}</small>
+                        <small className="badge float-right badge-dark-primary">{this.state.sistem_count}</small>
 
                         </NavLink>
                     </li>

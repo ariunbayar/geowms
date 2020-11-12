@@ -144,21 +144,91 @@ export class AddForm extends Component {
             }
         }
         return (
-            <div className='col-md-9 card'>
-                <Maps
-                    geoms={this.state.rows}
-                    handleXY={this.handleXY}
-                    coordinatCheck={true}
-                    ayuul_geoms = {this.state.ayuul_geoms}
-                    geom_points = {this.state.geom_points}
-                    type="ayuul"
-                />
-                <div className="card-body col-md-11 ml-5">
-                    {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
-                    <div className="text-right my-3">
-                        <a href="#" className="btn gp-outline-primary" onClick={this.props.id.history.goBack}>
-                            <i className="fa fa-angle-double-left"></i> Буцах
-                        </a>
+            <div  className="card">
+                <div className="row">
+                    <Maps
+                        geoms={this.state.rows}
+                        handleXY={this.handleXY}
+                        coordinatCheck={true}
+                        ayuul_geoms = {this.state.ayuul_geoms}
+                        geom_points = {this.state.geom_points}
+                        type="ayuul"
+                    />
+                    <div className="card-body col-md-11 ml-5">
+                        {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
+                        <div className="text-right my-3">
+                            <a href="#" className="btn gp-outline-primary" onClick={this.props.id.history.goBack}>
+                                <i className="fa fa-angle-double-left"></i> Буцах
+                            </a>
+                            {
+                                perms.perm_create &&
+                                <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
+                                    Нэмэх
+                                </NavLink>
+                            }
+                            <input
+                                type="text"
+                                className="form-control col-md-4  mb-1 float-left"
+                                id="searchQuery"
+                                placeholder="Хайх"
+                                onChange={(e) => this.handleSearch('searchQuery', e)}
+                                value={this.state.searchQuery}
+                            />
+                        </div>
+                        <div className="table-responsive">
+                            <table className="table">
+                                <thead>
+                                    {
+                                        perms.perm_view
+                                        ?
+                                        <tr>
+                                            <th scope="col">№</th>
+                                            <th scope="col">Дурсгалт газрын нэр</th>
+                                            <th scope="col">Чулуулгийн төрөл</th>
+                                            <th scope="col">X</th>
+                                            <th scope="col">Y</th>
+                                            <th scope="col">Хамрах хүрээнд багтсан</th>
+                                            <th scope="col">Үүссэн</th>
+                                            {is_editable ? <th scope="col">Засах</th> : null}
+                                            {perms.perm_remove ? <th scope="col">Устгах</th> : null}
+                                        </tr>
+                                        :
+                                        null
+                                    }
+                                </thead>
+                                <tfoot>
+                                    {
+                                        perms.perm_view
+                                        ?
+                                        this.state.form_data.map((values, idx) =>
+                                            <DursgaltGazarTable
+                                                key={idx}
+                                                idx={(currentPage*1)-1+idx+1}
+                                                // idx = {idx}
+                                                dursgalt_id = {dursgalt_id}
+                                                values={values}
+                                                handleRemove={() => this.handleRemove(values.id)}
+                                                handleMove={this.handleMove}
+                                                perms = {perms}
+                                                is_editable = {is_editable}
+                                                loadGeomPoints = {() => loadGeomPoints()}
+                                            />
+                                        )
+                                        :
+                                        null
+                                    }
+                                </tfoot>
+                            </table>
+                        </div>
+                        <Pagination
+                            paginate = {this.paginate}
+                            searchQuery = {this.state.searchQuery}
+                            load = { this.state.load }
+                        />
+                    </div>
+                    <div className="col-md-7 card-body ml-3">
+                        {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
+                        {huree_components}
                         {
                             perms.perm_create &&
                             <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>

@@ -75,7 +75,7 @@ export class Жагсаалт extends Component {
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
-                                <a><i class="icon-magnifier"></i></a>
+                                <a><i className="icon-magnifier"></i></a>
                             </div>
                             <div className="my-4">
                                 <div className="p-3">
@@ -84,8 +84,8 @@ export class Жагсаалт extends Component {
                                             <thead>
                                                 <tr>
                                                     <th scope="col">№</th>
-                                                    <th><a onClick={() => this.handleSort('first_name', this.state.first_name)}>Нэр <i class={this.state.first_name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                                    <th><a onClick={() => this.handleSort('email', this.state.email)}>Цахим шуудан <i class={this.state.email ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                                    <th><a onClick={() => this.handleSort('first_name', this.state.first_name)}>Нэр <i className={this.state.first_name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                                    <th><a onClick={() => this.handleSort('email', this.state.email)}>Цахим шуудан <i className={this.state.email ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                                     <th scope="col">Хэрэглэгчийн эрх</th>
                                                     <th scope="col">Идэвхтэй эсэх</th>
                                                     <th scope="col">ДАН системээр баталгаажсан эсэх</th>
