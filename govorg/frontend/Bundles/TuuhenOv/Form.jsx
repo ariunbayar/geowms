@@ -160,7 +160,6 @@ export class Forms extends Component {
                 <Form>
                     <div className='col-md-9 card'>
                         <Maps handleXY={this.handleXY} coordinatCheck={false} />
-                            {/* <div className='col-md-9 my-4'> */}
                                 <div className="col-md-12 mb-4 my-4">
                                     <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                         <i className="fa fa-angle-double-left"></i> Буцах
@@ -282,7 +281,6 @@ export class Forms extends Component {
                                         model_type_icon = "success"
                                     />
                                 </div>
-                            {/* </div> */}
                         </div>
                     </Form>
                     )
