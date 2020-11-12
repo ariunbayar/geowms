@@ -5,8 +5,9 @@ import {Map, Feature, View, Overlay} from 'ol';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 import {Circle as CircleStyle, Fill, Stroke, Style, Text, Icon} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
-import {Draw, Modify, Select, Snap, DragBox} from 'ol/interaction'
+import {Draw, Modify, Select, Snap, DragBox, MouseWheelZoom} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
+import * as inter from 'ol/interaction'
 import {unByKey} from 'ol/Observable';
 import {GeoJSON} from 'ol/format'
 import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
@@ -25,7 +26,6 @@ import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
-import {DrawButton} from './controls/CoordinateList/drawButton'
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -68,7 +68,8 @@ export default class BarilgaSuurinGazar extends Component{
           null_form_isload: false,
           showUpload: false,
           is_sidebar_open: true,
-          wms_map_list: []
+          wms_map_list: [],
+          pointFeature: null,
       }
 
       this.controls = {
@@ -112,6 +113,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.flyTo =  this.flyTo.bind(this)
       this.getTurningPoints = this.getTurningPoints.bind(this)
       this.DrawButton = this.DrawButton.bind(this)
+      this.updateFromList = this.updateFromList.bind(this)
 
     }
 
@@ -164,7 +166,6 @@ export default class BarilgaSuurinGazar extends Component{
       if(roles[3]){
         map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
-        map.addControl(new DrawButton({DrawButton: this.DrawButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
       this.setState({ is_loading:false, roles })
@@ -402,7 +403,8 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
-        this.sendToShowList(event.selected[0].getProperties())
+        this.DrawButton()
+        // this.sendToShowList(event.selected[0].getProperties())
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
@@ -416,7 +418,6 @@ export default class BarilgaSuurinGazar extends Component{
     modifiedFeature(event) {
 
       const features = event.features.getArray()
-      this.sendToShowList(features[0].getProperties())
       const {format} = this.state
       const data = format.writeFeatureObject(features[0], {
         dataProjection: this.state.dataProjection,
@@ -855,7 +856,7 @@ export default class BarilgaSuurinGazar extends Component{
       const point = new Point(coordinate)
       const feature = new Feature({
         geometry: point,
-        id: "tetst"
+        id: "TurningPoint"
       });
 
       const style = new Style({
@@ -870,36 +871,40 @@ export default class BarilgaSuurinGazar extends Component{
       });
 
       feature.setStyle(style)
+      this.setState({ pointFeature: feature })
       source.addFeature(feature)
-      const data = {
-        'geom': point_geom,
-        'turning': point_turning
-      }
-      this.sendToShowList(data)
     }
 
     sendToShowList(data) {
       var coordinateList = null
       var name = null
+
       if (data['geometry']) {
         coordinateList = data['geometry'].getCoordinates()[0]
       } else {
         coordinateList = [data['geom']]
       }
-      console.log(coordinateList, 'list');
+
+      this.list = []
       const geom = this.transformToLatLong(coordinateList)
-      console.log(data['id'], this.state.build_name);
+      geom.map((coordinate, idx) => {
+        const rsp = {
+          'geom': coordinate,
+          'turning': data['turning'] ? data['turning'][idx] : null
+        }
+        this.list.push(rsp)
+      })
+
       if (data['id']) {
         name = data['id']
       } else {
         name = this.state.build_name
       }
       const sendGeom = {
-        "geom": geom,
+        "data": this.list,
         'id': name,
-        'turning': data['turning'] ? data['turning'] : null
       }
-      this.controls.coordList.showList(true, sendGeom, this.flyTo, this.hideShowList)
+      this.controls.coordList.showList(true, sendGeom, this.flyTo, this.hideShowList, this.updateFromList)
     }
 
     DrawButton() {
@@ -914,6 +919,12 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     BoxStart() {
+      const { pointFeature } = this.state
+      if ( pointFeature !== null ) {
+        const source = this.vectorSource
+        source.removeFeature(pointFeature);
+        this.setState({ pointFeature: null })
+      }
       const selectedFeatures = this.select.getFeatures();
       selectedFeatures.clear();
     }
@@ -922,17 +933,25 @@ export default class BarilgaSuurinGazar extends Component{
       const source = this.vectorSource
       const selectedFeatures = this.select.getFeatures();
       const extent = dragBox.getGeometry().getExtent();
+      this.sendCoordinateList = []
+      this.turningPoint = []
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
         const coordinates = this.getTurningPoints(dragBox, feature)
         if (coordinates.length > 0) {
           this.setState({ build_name: feature.get('id') })
           coordinates.map((coordinate, idx) => {
-            console.log(coordinate);
+            this.sendCoordinateList.push(coordinate.coordinate)
+            this.turningPoint.push(coordinate.turning)
             this.addMarker(coordinate)
           })
           selectedFeatures.push(feature);
         }
       });
+      const data = {
+        'geom': this.sendCoordinateList,
+        'turning': this.turningPoint,
+      }
+      this.sendToShowList(data)
     }
 
     hideShowList() {
@@ -940,9 +959,9 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     transformToLatLong(coordinateList) {
-      const geom = coordinateList.map((coord, idx) => {
-        const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
-        return map_coord
+      const geom = coordinateList[0].map((coord, idx) => {
+          const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
+            return map_coord
       })
       return geom
     }
@@ -961,6 +980,10 @@ export default class BarilgaSuurinGazar extends Component{
           zoom: zoom,
         },
       );
+    }
+
+    updateFromList(coord_list) {
+      console.log('in update', coord_list);
     }
 
     render(){
