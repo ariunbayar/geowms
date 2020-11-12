@@ -111,15 +111,19 @@ def delete(request, pk):
 @cache_page(60 * CACHE_TIMEOUT_DISK_INFO)
 @user_passes_test(lambda u: u.is_superuser)
 def disk(request):
+
     disk_info = _get_disk_info()
-    for name, info in disk_info.items():
-        disk = {
-                'name': name,
-                'size_used': info['used'],
-                'size_total': info['used'] + info['avail'],
-                'mount_point': info['target'],
+
+    disks = [
+        {
+            'name': name,
+            'size_used': info['used'],
+            'size_total': info['used'] + info['avail'],
+            'mount_point': info['target'],
         }
-    return JsonResponse({'success': True, 'disk': disk})
+        for name, info in disk_info.items()
+    ]
+    return JsonResponse({'success': True, 'disks': disks})
 
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
