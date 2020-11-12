@@ -1,6 +1,6 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
-const prefix = '/back/tuuhen_ov'
+const prefix = '/gov/api'
 
 export const service = {
     getAimags,
@@ -17,14 +17,14 @@ function zipSearch(query, search_table) {
         ...getPostOptions(),
         body: JSON.stringify({query, search_table})
     }
-    return fetch('/back/zip-code/search/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/search/`, requestOptions).then(handleResponse)
 }
 
 function getAimags() {
     const requestOptions = {
         ...getPostOptions(),
     }
-    return fetch('/back/zip-code/aimag/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/aimag/`, requestOptions).then(handleResponse)
 }
 
 function getSum(code) {
@@ -32,7 +32,7 @@ function getSum(code) {
         ...getPostOptions(),
         body: JSON.stringify({code})
     }
-    return fetch('/back/zip-code/sum/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/sum/`, requestOptions).then(handleResponse)
 }
 
 function getBaga(code) {
@@ -41,7 +41,7 @@ function getBaga(code) {
         ...getPostOptions(),
         body: JSON.stringify({code})
     }
-    return fetch('/back/zip-code/bag-horoo/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/bag-horoo/`, requestOptions).then(handleResponse)
 }
 
 function getZip(code) {
@@ -49,14 +49,15 @@ function getZip(code) {
         ...getPostOptions(),
         body: JSON.stringify({code})
     }
-    return fetch('/back/zip-code/zip/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/zip/`, requestOptions).then(handleResponse)
 }
 
 function getWmsLayer() {
+    console.log('getWmsLayer')
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch('/back/zip-code/wms-layer/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/wms-layer/`, requestOptions).then(handleResponse)
 }
 
 function zipUpdate(aimag_id, sum_id, baga_id, zip_id, zip_code, zip_code_before) {
@@ -64,5 +65,5 @@ function zipUpdate(aimag_id, sum_id, baga_id, zip_id, zip_code, zip_code_before)
         ...getPostOptions(),
         body: JSON.stringify({aimag_id, sum_id, baga_id, zip_id, zip_code, zip_code_before})
     }
-    return fetch('/back/zip-code/zip-update/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/zip-code/zip-update/`, requestOptions).then(handleResponse)
 }
