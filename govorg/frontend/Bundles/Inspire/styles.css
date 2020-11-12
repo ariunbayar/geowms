@@ -272,3 +272,15 @@
 .⚙-toggle-meta:hover{
     background-color: rgba(0,60,136,0.7);
 }
+
+.height-full{
+    max-height: calc( 95vh - 70px - 15px);
+}
+
+.list-group{
+    max-height: calc( 80vh - 70px - 15px);
+    margin-bottom: 10px;
+    overflow:scroll;
+    -webkit-overflow-scrolling: touch;
+}
+

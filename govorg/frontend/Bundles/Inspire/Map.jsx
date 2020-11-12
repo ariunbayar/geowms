@@ -14,6 +14,7 @@ import {createStringXY} from 'ol/coordinate'
 import {transform as transformCoordinate, toLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
 import Overlay from 'ol/Overlay'
+import { click } from 'ol/events/condition';
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -25,7 +26,8 @@ import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {MetaBarButton} from './controls/MetaData/MetaBarButton'
-import { click } from 'ol/events/condition';
+import {MetaList} from './controls/MetaData/MetaList'
+
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -78,6 +80,7 @@ export default class BarilgaSuurinGazar extends Component{
         modal: new Modal(),
         upload: new UploadBtn(),
         sidebar: new Sidebar(),
+        metaList: new MetaList(),
       }
 
       this.modifyE = this.Modify()
@@ -161,6 +164,7 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
+        map.addControl(this.controls.metaList)
       }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
 
@@ -348,14 +352,12 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const { isMeta } = this.state
         if (!isMeta) {
-          console.log("is MEta", isMeta);
           const featureID_list = this.state.featureID_list
           const selectedFeature_ID = event.selected[0].getProperties()['id']
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
         } else {
-          console.log("is MEta", isMeta);
           const feature = event.selected[0]
           this.collectFeatures(feature)
         }
@@ -373,6 +375,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.featuresForCollection.map((feat, idx) => {
         collection.push(feat)
       })
+      this.controls.metaList.showMetaList(true, this.featureNames)
     }
 
     modifiedFeature(event) {

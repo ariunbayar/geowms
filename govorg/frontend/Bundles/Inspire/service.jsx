@@ -18,6 +18,8 @@ export const service = {
     createDel,
     sendFile,
     loadWMSLayers,
+    searchMeta,
+    getMetaData,
 }
 
 const prefix = '/gov/api/inspire'
@@ -143,4 +145,19 @@ function loadWMSLayers(id) {
         ...getGetOptions(),
     }
     return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
+}
+
+function searchMeta(query, pk) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({query}),
+    }
+    return fetch(`/gov/api/meta-data/${pk}/detail/`, requestOptions).then(handleResponse)
+}
+
+function getMetaData() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/gov/api/meta-data/`, requestOptions).then(handleResponse)
 }
