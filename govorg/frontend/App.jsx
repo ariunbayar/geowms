@@ -48,7 +48,6 @@ export class App extends Component {
         // service.component
         service.getCount().then(({success, count, info}) => {
             if (success) {
-                console.log(count);
                 this.setState({ request_count: count })
             } else {
                 console.log(info);
