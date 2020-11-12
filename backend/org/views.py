@@ -246,6 +246,7 @@ def employee_more(request, level, pk, emp):
     employees_display = []
 
     for employe in User.objects.filter(employee__org=org, pk=emp):
+        emp_oj = Employee.objects.filter(user=employe).first()
         employees_display.append({
             'id': employe.id,
             'last_name': employe.last_name,
@@ -256,9 +257,10 @@ def employee_more(request, level, pk, emp):
             'gender': employe.gender,
             'is_active': employe.is_active,
             'is_sso': employe.is_sso,
-            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
-            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
-            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
+            'position': emp_oj.position,
+            'is_admin': emp_oj.is_admin,
+            'created_at': emp_oj.created_at.strftime('%Y-%m-%d'),
+            'updated_at': emp_oj.updated_at.strftime('%Y-%m-%d'),
         })
     return JsonResponse({'employee': employees_display})
 
@@ -274,6 +276,7 @@ def employee_update(request, payload, level, pk):
     email = payload.get('email')
     gender = payload.get('gender')
     register = payload.get('register')
+    is_admin = payload.get('is_admin')
 
     get_object_or_404(User, pk=user_id)
 
@@ -285,7 +288,7 @@ def employee_update(request, payload, level, pk):
                             register=register
                         )
 
-    Employee.objects.filter(user_id=user_id).update(position=position)
+    Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
 
     return JsonResponse({'success': True})
 
@@ -303,6 +306,7 @@ def employee_add(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     password = payload.get('password')
+    is_admin = payload.get('is_admin')
 
     user = User.objects.filter(username=username).first()
     if user:
@@ -323,7 +327,7 @@ def employee_add(request, payload, level, pk):
         user.set_password(password)
         user.save()
 
-        Employee.objects.create(position=position, org_id=pk, user_id=user.id)
+        Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
 
         return JsonResponse({'success': True})
 
