@@ -387,7 +387,7 @@ export default class BarilgaSuurinGazar extends Component{
 
       const setEvents = () => {
         var selectedFeatures = this.select.getFeatures();
-        this.select.on('change:active', function () {
+        this.select.on('change:active', () => {
           selectedFeatures.forEach(function (each) {
             selectedFeatures.remove(each);
           });
@@ -404,10 +404,10 @@ export default class BarilgaSuurinGazar extends Component{
     featureSelected(event){
       if(event.selected[0])
       {
+        this.removeTurning()
         const featureID_list = this.state.featureID_list
         const selectedFeature_ID = event.selected[0].getProperties()['id']
         this.DrawButton()
-        // this.sendToShowList(event.selected[0].getProperties())
         this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
         featureID_list.push(selectedFeature_ID)
         if(this.state.remove_button_active) this.removeModal()
@@ -873,6 +873,12 @@ export default class BarilgaSuurinGazar extends Component{
       });
 
       const style = new Style({
+        image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({
+            color: '#2F9A00',
+          }),
+        }),
         text: new Text({
           text: point_turning,
           font: '30px Calibri,sans-serif',
@@ -880,6 +886,7 @@ export default class BarilgaSuurinGazar extends Component{
             color: 'white',
             width: 3,
           }),
+          offsetY: -18
         }),
       });
 
@@ -917,7 +924,7 @@ export default class BarilgaSuurinGazar extends Component{
         "data": this.list,
         'id': name,
       }
-      this.controls.coordList.showList(true, sendGeom, this.flyTo, this.hideShowList, this.updateFromList)
+      this.controls.coordList.showList(true, sendGeom, this.flyTo, () => this.listToModal(), this.updateFromList)
     }
 
     DrawButton() {
@@ -931,13 +938,23 @@ export default class BarilgaSuurinGazar extends Component{
       this.dragBox = dragBox
     }
 
-    BoxStart() {
+    removeTurning() {
       const { pointFeature } = this.state
       if ( pointFeature !== null ) {
         const source = this.vectorSource
-        source.removeFeature(pointFeature);
+        const features = source.getFeatures()
+        if (features != null && features.length > 0) {
+          features.map((x) => {
+            const id = x.getProperties()['id']
+            id == pointFeature.get('id') && source.removeFeature(x)
+          })
+        }
         this.setState({ pointFeature: null })
       }
+    }
+
+    BoxStart() {
+      this.removeTurning()
       const selectedFeatures = this.select.getFeatures();
       selectedFeatures.clear();
     }
@@ -945,19 +962,26 @@ export default class BarilgaSuurinGazar extends Component{
     BoxEnd(dragBox) {
       const source = this.vectorSource
       const selectedFeatures = this.select.getFeatures();
+      const {selected_feature} = this.state
       const extent = dragBox.getGeometry().getExtent();
       this.sendCoordinateList = []
       this.turningPoint = []
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
-        const coordinates = this.getTurningPoints(dragBox, feature)
-        if (coordinates.length > 0) {
-          this.setState({ build_name: feature.get('id') })
-          coordinates.map((coordinate, idx) => {
-            this.sendCoordinateList.push(coordinate.coordinate)
-            this.turningPoint.push(coordinate.turning)
-            this.addMarker(coordinate)
-          })
-          selectedFeatures.push(feature);
+          const checkBound = feature.getGeometry().getCoordinates()[0]
+          for (let i = 0; i < checkBound.length; i ++){
+          const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
+          if (check) {
+            const coordinates = this.getTurningPoints(dragBox, feature)
+            if (coordinates.length > 0) {
+            selectedFeatures.push(feature);
+            this.setState({ build_name: feature.get('id') })
+            coordinates.map((coordinate, idx) => {
+              this.sendCoordinateList.push(coordinate.coordinate)
+              this.turningPoint.push(coordinate.turning)
+              this.addMarker(coordinate)
+            })
+          }
+        }
         }
       });
       const data = {
@@ -967,8 +991,13 @@ export default class BarilgaSuurinGazar extends Component{
       this.sendToShowList(data)
     }
 
+    listToModal() {
+      this.controls.modal.showModal(() => this.hideShowList(), true, "Тийм", `Буцахдаа итгэлтэй байна уу`, null, 'danger', "Үгүй")
+    }
+
     hideShowList() {
       this.controls.coordList.showList(false)
+      this.removeTurning()
     }
 
     transformToLatLong(coordinateList) {

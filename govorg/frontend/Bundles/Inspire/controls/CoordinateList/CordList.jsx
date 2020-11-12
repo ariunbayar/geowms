@@ -99,42 +99,12 @@ class ListComponent extends Component {
     }
 
     render() {
-        const { query } = this.state
         const { coords_list } = this.props
         return (
             <div className="height-full">
-                <div className="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
-                    <div className="btn-group" role="group" aria-label="First group">
-                        <button type="button" className="btn btn-secondary" onClick={this.props.hide()}>1</button>
-                        <button type="button" className="btn btn-primary" onClick={() => this.setUpdate()}>SAVE</button>
-                    </div>
-                    <div className="input-group input-group-sm m-3">
-                        <div className="input-group-prepend">
-                            <div
-                                className="input-group-text"
-                                id="search"
-                                role="button"
-                                onClick={() => this.handleSearch()}
-                            >
-                                <i
-                                    className="fa fa-search"
-                                    aria-hidden="true"
-                                >
-                                </i>
-                            </div>
-                        </div>
-                        <input
-                            type="number"
-                            className="form-control"
-                            placeholder="Эргэлтийн цэгийн дугаар"
-                            value={query}
-                            aria-describedby="search"
-                            onChange={(e) => this.handleOnChange(e)}
-                        />
-                    </div>
-                </div>
-                <center><label className="h5">{coords_list !== {} ? coords_list.id : 'NoName'}</label></center>
+                <center><label className="my-2 h5">{coords_list ? coords_list !== {} ? coords_list.id : 'NoName' : null}</label></center>
                 {
+                    coords_list ?
                     coords_list !== {} ?
                         coords_list.data.length > 0
                         ?
@@ -153,9 +123,18 @@ class ListComponent extends Component {
                                 </div>
                             )}
                         </div>
-                        : null
+                        : "Буруу газар зурсан байна. Дахин шалгана уу"
+                    : null
                     : null
                 }
+                <div className="row" role="toolbar">
+                    <div className="col-md-6" role="group">
+                        <button type="button" className="btn btn-secondary btn-block h-1" onClick={() => this.props.hide()}>Буцах</button>
+                    </div>
+                    <div className="col-md-6">
+                        <button type="button" className="btn btn-primary btn-block h-1" onClick={() => this.setUpdate()}>Хадгалах</button>
+                    </div>
+                </div>
             </div>
         )
     }

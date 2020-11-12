@@ -275,7 +275,7 @@
 }
 
 .height-full{
-    height: calc( 91vh - 70px - 15px);
+    max-height: calc( 95vh - 70px - 15px);
 }
 
 .list-group{
