@@ -53,7 +53,6 @@ function getZip(code) {
 }
 
 function getWmsLayer() {
-    console.log('getWmsLayer')
     const requestOptions = {
         ...getGetOptions(),
     }
