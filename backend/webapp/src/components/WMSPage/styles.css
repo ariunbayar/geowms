@@ -1,0 +1,22 @@
+
+
+@media (min-width: 576px) and (max-width: 1200px){
+    .wms-floor-scroll {
+        height: auto;
+    }
+    .wms-right-scroll {
+        height: auto;
+    }
+}
+
+@media (min-width: 1200px){
+    .wms-floor-scroll {
+        overflow-y: scroll;
+        height: calc(59vh - 36px);
+    }
+    /* wms-iin baruun gar taliin heseg */
+    .wms-right-scroll {
+        overflow-y: scroll;
+        height: calc(93vh - 47px);
+    }
+}

@@ -43,6 +43,8 @@ export class UserAdd extends Component {
             handleSaveIsLoad:false,
             modal_alert_status: "closed",
             timer: null,
+
+            is_admin: false,
         }
 
         this.handleSave = this.handleSave.bind(this)
@@ -70,7 +72,19 @@ export class UserAdd extends Component {
         service.employeeMore(org_level, org_id, org_emp).then(({ employee }) => {
             if (employee) {
                 {employee.map((employee) =>
-                this.setState({id:employee.id , username: employee.username, first_name: employee.first_name, last_name: employee.last_name, email: employee.email, gender: employee.gender, register:employee.register, password:employee.password, re_password:employee.re_password, position: employee.position })
+                    this.setState({
+                        id:employee.id,
+                        username: employee.username,
+                        first_name: employee.first_name,
+                        last_name: employee.last_name,
+                        email: employee.email,
+                        gender: employee.gender,
+                        register:employee.register,
+                        password:employee.password,
+                        re_password:employee.re_password,
+                        position: employee.position,
+                        is_admin: employee.is_admin
+                    })
                 )}
 
             }
@@ -213,6 +227,7 @@ export class UserAdd extends Component {
         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
     }
 
+
     render() {
         const org_emp = this.props.match.params.emp
         const org_level = this.props.match.params.level
@@ -281,6 +296,17 @@ export class UserAdd extends Component {
                                         />
                                         {this.state.positionError && <a className="text-danger">Хоосон байна.</a>}
 
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div class="icheck-primary">
+                                        <input
+                                            id='is_admin'
+                                            type="checkbox"
+                                            checked={this.state.is_admin}
+                                            onChange={(e) => this.setState({is_admin: e.target.checked})}
+                                        />
+                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
                                     </div>
                                 </div>
                                 <div className="form-row">

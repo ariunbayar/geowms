@@ -67,7 +67,7 @@ export class LogForm extends Component {
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
-                                <a><i class="icon-magnifier"></i></a>
+                                <a><i className="icon-magnifier"></i></a>
 
                             </div>
                         </div>
@@ -76,16 +76,16 @@ export class LogForm extends Component {
                                 <thead>
                                     <tr>
                                         <th><a>№</a></th>
-                                        <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгч <i class={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгч <i className={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                         <th><a>Төлөв</a></th>
-                                        <th><a onClick={() => this.handleSort('total_amount' ,this.state.total_amount)}>Нийт дүн <i class={this.state.total_amount ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('description' ,this.state.description)}>Тодорхойлолт <i class={this.state.description ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('code' ,this.state.code)}>Код <i class={this.state.code ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('message' ,this.state.message)}>Мэдэгдэл <i class={this.state.message ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('data_id' ,this.state.data_id)}>Дата ID <i class={this.state.data_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('bank_unique_number' ,this.state.bank_unique_number)}>Банкны дугаар <i class={this.state.bank_unique_number ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('geo_unique_number' ,this.state.geo_unique_number)}>Гео дугаар <i class={this.state.geo_unique_number ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('success_at' ,this.state.success_at)}>Огноо <i class={this.state.success_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('total_amount' ,this.state.total_amount)}>Нийт дүн <i className={this.state.total_amount ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('description' ,this.state.description)}>Тодорхойлолт <i className={this.state.description ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('code' ,this.state.code)}>Код <i className={this.state.code ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('message' ,this.state.message)}>Мэдэгдэл <i className={this.state.message ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('data_id' ,this.state.data_id)}>Дата ID <i className={this.state.data_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('bank_unique_number' ,this.state.bank_unique_number)}>Банкны дугаар <i className={this.state.bank_unique_number ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('geo_unique_number' ,this.state.geo_unique_number)}>Гео дугаар <i className={this.state.geo_unique_number ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('success_at' ,this.state.success_at)}>Огноо <i className={this.state.success_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                     </tr>
                                 </thead>
                                 <tbody>

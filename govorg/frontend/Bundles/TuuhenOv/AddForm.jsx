@@ -184,11 +184,11 @@ export class AddForm extends Component {
                                         <tr>
                                             <th scope="col">№</th>
                                             <th scope="col">Дурсгалт газрын нэр</th>
-                                            <th scope="col">Чулуулгын төрөл</th>
+                                            <th scope="col">Чулуулгийн төрөл</th>
                                             <th scope="col">X</th>
                                             <th scope="col">Y</th>
                                             <th scope="col">Хамрах хүрээнд багтсан</th>
-                                            <th scope="col">created_at</th>
+                                            <th scope="col">Үүссэн</th>
                                             {is_editable ? <th scope="col">Засах</th> : null}
                                             {perms.perm_remove ? <th scope="col">Устгах</th> : null}
                                         </tr>
