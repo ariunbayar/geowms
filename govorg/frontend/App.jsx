@@ -128,6 +128,7 @@ export class App extends Component {
                                                                 icon="fa fa-circle-o gp-text-primary"
                                                                 url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
                                                                 text={feat.name}
+                                                                count={feat.count}
                                                             >
                                                             </MenuItem>
                                                         ): null
