@@ -4,7 +4,7 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
@@ -435,3 +435,18 @@ def requestApprove(request, payload, pk):
     return JsonResponse(rsp)
 
 
+@require_GET
+@ajax_required
+def getCount(request):
+    try:
+        count = ChangeRequest.objects.count()
+        rsp = {
+            'success': True,
+            'count': count
+        }
+    except Exception as e:
+        rsp = {
+            'success': False,
+            'info': str(e)
+        }
+    return JsonResponse(rsp)

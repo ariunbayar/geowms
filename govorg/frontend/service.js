@@ -1,4 +1,4 @@
-import { handleResponse, getGetOptions } from './components/helpers/service'
+import { handleResponse, getGetOptions, getPostOptions } from './components/helpers/service'
 
 
 export const service = {
@@ -6,6 +6,7 @@ export const service = {
     tableListBairZuinZurag,
     tableListBarilgaSuurinGazar,
     tableListDedButets,
+    getCount,
 }
 
 function tableListTeevriinSuljee() {
@@ -31,4 +32,12 @@ function tableListDedButets() {
     const requestOptions = getGetOptions()
 
     return fetch('/gov/api/ded_butets/table_list/', requestOptions).then(handleResponse)
+}
+
+function getCount() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`/gov/api/org-request/getCount/`, requestOptions).then(handleResponse)
 }
