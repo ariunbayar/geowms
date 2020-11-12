@@ -2,7 +2,18 @@ from django.shortcuts import render
 from backend.org.models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
 from django.shortcuts import get_object_or_404
-from backend.inspire.models import LThemes, LPackages, LFeatures
+from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas
+
+
+def _countFeature(org, feature_id):
+    org_features = InspirePerm.objects.filter(org=org, perm_view=True, module_id=feature_id, module=3)
+    if org_features:
+        for feature in org_features:
+            count = MGeoDatas.objects.filter(feature_id=feature.module_id).count()
+    else:
+        count = 0
+        return count
+    return count
 
 
 def _get_features(org, package_id):
@@ -14,8 +25,9 @@ def _get_features(org, package_id):
             if org_features:
                 for feature in org_features:
                     features.append({
-                        'id':org_feature['feature_id'],
-                        'name':org_feature['feature_name'],
+                        'id': org_feature['feature_id'],
+                        'name': org_feature['feature_name'],
+                        'count': _countFeature(org, org_feature['feature_id'])
                     })
     return features
 

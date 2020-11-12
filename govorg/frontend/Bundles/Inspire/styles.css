@@ -264,22 +264,31 @@
     width: 25px;
     height: 25px;
     top: 243px;
-
 }
+
 .⚙-toggle-meta:active{
     background-color: rgba(0,60,136,0.7);
 }
 .⚙-toggle-meta:hover{
-    background-color: rgba(0,60,136,0.7);
+    top: 242px;
+    color: white;
+
 }
 
 .height-full{
     max-height: calc( 95vh - 70px - 15px);
 }
 
-.list-in-meta{
-    list-style: none;
+.list-group{
     max-height: calc( 80vh - 70px - 15px);
+    margin-bottom: 10px;
+    overflow:scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.list-in-meta {
+    list-style: none;
+    max-height: calc( 50vh - 70px - 15px);
     margin-bottom: 10px;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
