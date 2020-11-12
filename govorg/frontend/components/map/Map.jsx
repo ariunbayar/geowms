@@ -313,7 +313,7 @@ export default class Maps extends Component {
                         </div>
                     </div>
                 </div>
-                <button
+                <button type="button"
                     className="btn btn-info btn-sm waves-effect waves-light m-1 map-open-button"
                     onClick={() => this.setState(prevState => ({map_open: !prevState.map_open}))}
                 >

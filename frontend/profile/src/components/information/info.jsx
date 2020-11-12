@@ -9,14 +9,46 @@ export  class Info extends Component {
   render() {
 
     return (
-            <div className="container">
-                <div className="row">
-                    <div className="col-md-12 py-0 my-4">
-                        <a>Хувийн мэдээлэл ......</a>
-                    </div>
-                </div>
+      <div className="container">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="form-row">
+              <div className="form-group col-md-8">
+                <label htmlFor="password">Хуучин нууц үг:</label>
+                  <input
+                      type="password"
+                      className="form-control"
+                      id="password"
+                      placeholder="Одоогийн нууц үг оруулах"
+                  />
+              </div>
             </div>
-
+            <div className="form-row">
+              <div className="form-group col-md-8">
+                <label htmlFor="re_password">Шинэ нууц үг:</label>
+                  <input
+                      type="password"
+                      className="form-control"
+                      id="new_password"
+                      placeholder="Шинэ нууц үг оруулах"
+                  />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-md-8">
+                <label htmlFor="re_password">Шинэ нууц үг дахин оруулах:</label>
+                  <input
+                      type="password"
+                      className="form-control"
+                      id="re_new_password"
+                      placeholder="Шинэ нууц үг дахин оруулах"
+                  />
+              </div>
+            </div>
+            <button className="btn gp-btn-primary">Хадгалах</button>
+          </div>
+        </div>
+      </div>
     );
   }
 }
