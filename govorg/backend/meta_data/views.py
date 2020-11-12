@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_GET, require_POST
+from main.decorators import ajax_required
 from govorg.backend.meta_data.models import MetaData
 
 def _get_meta_data_display(metadata):
@@ -51,7 +53,7 @@ def all(request):
     ]
 
     rsp = {
-        'success': True
+        'success': True,
         'meta_data_list': meta_data_list,
     }
 
@@ -67,7 +69,7 @@ def create(request, payload):
     geoms = MGeoDatas.objects.filter(id__in = payload.get("geom_ids"))
 
     try:
-        if is not meta:
+        if not meta:
             meta = _update_or_create(None, data)
 
         for geom in geoms:
@@ -96,7 +98,7 @@ def detail(request, pk):
     meta_data = get_object_or_404(MetaData, pk=pk)
 
     rsp = {
-        'success': True
+        'success': True,
         'meta_data': _get_meta_data_detail(metadata),
     }
 

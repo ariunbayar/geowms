@@ -6,6 +6,7 @@ from govorg.backend.employee import views as employee_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from  govorg.backend.govorg_inspire import views as govorg_inspire_views
+from  govorg.backend.meta_data import views as meta_data_views
 
 urlpatterns = [
     path('api/', include(([
@@ -41,10 +42,10 @@ urlpatterns = [
 
         path('meta-data/', include(([
             path('', meta_data_views.all),
-            path('<int:pk>/detail', meta_data_views.detail),
+            path('<int:pk>/detail/', meta_data_views.detail),
             path('<int:pk>/delete/', meta_data_views.delete),
             path('<int:pk>/edit/', meta_data_views.edit),
-            path('<int:pk>/create/', meta_data_views.create),
+            path('create/', meta_data_views.create),
         ], 'meta-data'))),
 
     ], 'back_org'))),
