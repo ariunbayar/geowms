@@ -24,6 +24,8 @@ import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
+import {MetaBarButton} from './controls/MetaData/MetaBarButton'
+import { click } from 'ol/events/condition';
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -38,6 +40,8 @@ export default class BarilgaSuurinGazar extends Component{
     constructor(props){
       super(props)
 
+      this.featureNames = []
+      this.featuresForCollection = []
       this.state = {
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
@@ -66,7 +70,8 @@ export default class BarilgaSuurinGazar extends Component{
           null_form_isload: false,
           showUpload: false,
           is_sidebar_open: true,
-          wms_map_list: []
+          wms_map_list: [],
+          isMeta: false,
       }
 
       this.controls = {
@@ -105,6 +110,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.WmsTile = this.WmsTile.bind(this)
       this.mapPointerMove = this.mapPointerMove.bind(this)
       this.onClickCloser = this.onClickCloser.bind(this)
+      this.MetaButton = this.MetaButton.bind(this)
 
     }
 
@@ -153,6 +159,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) {
         map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+        map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
       }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
@@ -339,16 +346,33 @@ export default class BarilgaSuurinGazar extends Component{
     featureSelected(event){
       if(event.selected[0])
       {
-        const featureID_list = this.state.featureID_list
-        const selectedFeature_ID = event.selected[0].getProperties()['id']
-        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
-        featureID_list.push(selectedFeature_ID)
-        if(this.state.remove_button_active) this.removeModal()
+        const { isMeta } = this.state
+        if (!isMeta) {
+          console.log("is MEta", isMeta);
+          const featureID_list = this.state.featureID_list
+          const selectedFeature_ID = event.selected[0].getProperties()['id']
+          this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
+          featureID_list.push(selectedFeature_ID)
+          if(this.state.remove_button_active) this.removeModal()
+        } else {
+          console.log("is MEta", isMeta);
+          const feature = event.selected[0]
+          this.collectFeatures(feature)
+        }
       }
       else
       {
         this.setState({ send: false })
       }
+    }
+
+    collectFeatures(feature) {
+      const collection = this.select.getFeatures()
+      this.featureNames.push(feature.get('id'))
+      this.featuresForCollection.push(feature)
+      this.featuresForCollection.map((feat, idx) => {
+        collection.push(feat)
+      })
     }
 
     modifiedFeature(event) {
@@ -699,6 +723,16 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+    }
+
+    MetaButton() {
+      const map = this.map
+      this.select.setActive(true)
+      this.setState({ isMeta: true })
+      // map.on('click', (evt) => {
+        // const collection = this.select.getFeatures()
+        // console.log(evt);
+      // })
     }
 
     showUploadBtn(){
