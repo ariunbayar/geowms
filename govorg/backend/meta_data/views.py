@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from govorg.backend.meta_data.models import MetaData
+from django.http import JsonResponse
 
 def _get_meta_data_display(metadata):
     return {
@@ -48,7 +49,7 @@ def _update_or_create(pk, data):
 def all(request):
 
     meta_data_list = [
-        _get_meta_data_detail(matedata)
+        _get_meta_data_display(metadata)
         for metadata in MetaData.objects.all()
     ]
 
@@ -99,7 +100,7 @@ def detail(request, pk):
 
     rsp = {
         'success': True,
-        'meta_data': _get_meta_data_detail(metadata),
+        'meta_data': _get_meta_data_display(meta_data),
     }
 
     return JsonResponse(rsp)

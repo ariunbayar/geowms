@@ -147,10 +147,9 @@ function loadWMSLayers(id) {
     return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
 }
 
-function searchMeta(query, pk) {
+function searchMeta(pk) {
     const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({query}),
+        ...getGetOptions(),
     }
     return fetch(`/gov/api/meta-data/${pk}/detail/`, requestOptions).then(handleResponse)
 }

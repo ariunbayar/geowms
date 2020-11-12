@@ -277,10 +277,10 @@
     max-height: calc( 95vh - 70px - 15px);
 }
 
-.list-group{
+.list-in-meta{
+    list-style: none;
     max-height: calc( 80vh - 70px - 15px);
     margin-bottom: 10px;
-    overflow:scroll;
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
 }
-

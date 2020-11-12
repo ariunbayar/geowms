@@ -24,40 +24,24 @@ class MetaHead extends Component{
     }
 }
 
-class MetaBody extends Component{
-    constructor(props){
-        super(props)
-        this.state = {
-            coord: '',
-        }
-    }
-
-    render() {
-        const { idx, ix, data } = this.props
-        console.log(data);
-        return (
-            <tr>
-                <td>
-                    {data}
-                </td>
-            </tr>
-        )
-    }
-}
-
 class ListComponent extends Component {
 
     constructor(props) {
 
         super(props)
-        this.list = {}
+        this.list = []
         this.state = {
             name_list: {},
-            meta_data: [],
-            query: ''
+            meta_data_list: [],
+            query: '',
+            foundIt: '',
+            isSearched: false,
+            isLoading: false,
+            geoms: [],
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.collectGeom = this.collectGeom.bind(this)
     }
 
     handleOnChange(query) {
@@ -66,78 +50,127 @@ class ListComponent extends Component {
 
     handleSearch() {
         const { query } = this.state
-        service.searchMeta(query).then(rsp => {
-            console.log(rsp);
+        this.setState({ isLoading: false })
+        service.searchMeta(query).then(({success, meta_data}) => {
+            if (success) {
+                this.setState({ foundIt: query, isSearched: true, isLoading: true })
+                // this.setState({ meta_data_list: meta_data })
+            }
         })
     }
 
+    collectGeom(e) {
+        const value = e.target.value
+        const check = e.target.checked
+        const { geoms } = this.state
+        if ( this.list.length == 0 || check ) {
+            this.list.push(value)
+        }
+        else if ( this.list.length > 0 || check ) {
+            this.list.push(value)
+        }
+        if (!check) {
+            const isBelowThreshold = (coordinateFromArray) => coordinateFromArray = value;
+            if(this.list.every(isBelowThreshold)){
+                var array = this.list.filter((item) => {
+                    return item !== value
+                })
+                this.list = array
+            }
+        }
+        this.setState({ geoms: this.list })
+
+    }
+
+    saveGeom() {
+        const { geoms } = this.state
+        console.log(geoms)
+    }
+
     componentDidMount() {
-        // service
-        //     .getMetaData()
-        //     .then(({succes, data}) => {
-        //         if (succes) {
-                    const meta_data = [{
-                        'id': '1',
-                        'org_name': 'ODko',
-                        'odko': 'hah'
-                    }]
-                    this.setState({ meta_data })
-                // }
-            // })
+        service
+            .getMetaData()
+            .then(({success, meta_data_list}) => {
+                if (success) {
+                    // this.setState({ meta: meta_data_list })
+                    // meta_data_list.map((data, idx) => {
+                    //     this.setState({ meta_data_list: data })
+                    // })
+                }
+            })
     }
 
     componentDidUpdate(pP) {
     }
 
     render() {
-        const { query, meta_data } = this.state
+        const { query, meta_data_list, meta, foundIt } = this.state
         const { name_list } = this.props
-        // const count = Object.keys(meta_data[0]).length
-        if (meta_data !== []) {
-            var json = {}
-            meta_data.map((data, idx) => {
-                json = data
-            })
-            for (const [key, value] of Object.entries(json)) {
-                console.log(`${key}: ${value}`);
-              }
-        }
         return (
-            <div className="height-full">
+            <div className="height-full animated slideInLeft">
                 <div className="input-group mb-3">
-                    <div className="input-group-prepend">
+                    <div className="input-group-prepend my-3">
                         <span className="input-group-text" id="search">
                             <i
                                 className="fa fa-search"
                                 role="button"
+                                title="хайх"
                                 onClick={() => this.handleSearch()}
                             ></i>
                         </span>
                     </div>
                     <input
                         type="text"
-                        className="form-control"
-                        aria-label="Default"
+                        className="form-control my-3"
                         aria-describedby="search"
+                        placeholder="Мета дугаараар хайх"
                         value={query}
                         onChange={(e) => this.handleOnChange(e.target.value)}
                     />
                 </div>
-                <select>
+                {
+                    foundIt
+                    ?
+                        <div>
+                            <label>Олдсон мета: {foundIt}</label>
+                        </div>
+                    :
+                        <div>
+                            <label>Мета байхгүй байна</label>
+                        </div>
+                }
+                <hr />
+                <div>
+                    <label>Геомын дугаарууд:</label>
+                </div>
+                <ul className="list-in-meta">
                     {name_list.map((name, idx) =>
-                        <option key={idx}>{name}</option>
+                        <li className="animated slideInLeft float-left mr-2 pl-2 pr-2" key={idx}>
+                            <div className="icheck-primary">
+                                <input type="checkbox" value={name} id={idx} onChange={(e) => this.collectGeom(e)}/>
+                                <label htmlFor={idx}>{name}</label>
+                            </div>
+                        </li>
                     )}
-                </select>
-                <table className="table table-bordered">
-                        <tbody>
-                            {meta_data.map((data, idx) =>
-                                <tr key={idx}>
-                                    <td><i className="fa fa-map mr-2" aria-hidden="true"></i>{Object.keys(data).length}</td>
-                                    <td>{data[Object.keys(data)[idx]]}</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                </ul>
+                {/* <table className="table table-bordered col-8">
+                    <tbody>
+                        {Object.entries(meta_data_list).map(([key, value], idx) =>
+                            <tr key={idx}>
+                                <td>{key}</td>
+                                <td>{value}</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table> */}
+                <div className="row">
+                    <div className="col-md-6 mb-3">
+                        <button className="btn btn-primary" onClick={() => this.saveGeom()}>Хадгалах</button>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                        <button className="btn btn-secondary">Цэвэрлэх</button>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -155,7 +188,7 @@ export class MetaList extends Control {
         })
 
         this.is_component_initialized = false
-        const cssClasses = `col-md-auto rounded bg-light`
+        const cssClasses = `col-md-3 rounded bg-light`
 
         this.element.className = cssClasses
         this.element.style.display = 'none'
