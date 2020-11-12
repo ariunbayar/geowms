@@ -152,7 +152,7 @@ def тоо(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def govorgList(request, payload):
-   
+
     page = payload.get('page')
     per_page = payload.get('perpage')
     query = payload.get('query')

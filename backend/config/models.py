@@ -14,3 +14,17 @@ class Config(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Error500(models.Model):
+
+    class Meta:
+        db_table = "error500"
+
+    request_scheme = models.CharField(max_length=20, null=True) # htto, https
+    request_url = models.CharField(max_length=500, null=True)
+    request_method = models.CharField(max_length=50, null=True) # GET, POST
+    request_headers = models.TextField(null=True) # {"name": "sdfsdfsdfsd", "asdfasdf": ""}
+    request_data = models.TextField(null=True) # {"name": "sdfsdfsdfsd", "asdfasdf": ""}
+    description = models.TextField(null=True) # traceback buyu terminal deer garah aldaa
+    created_at = models.DateTimeField(auto_now_add=True)
