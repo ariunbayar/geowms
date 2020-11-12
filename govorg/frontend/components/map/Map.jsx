@@ -293,14 +293,15 @@ export default class Maps extends Component {
 
     handleSetCenter() {
         const coord = this.props.xy
-        if(coord[0]>60){
-            const view = this.map.getView()
-            const map_projection = view.getProjection()
-            const map_coord = transformCoordinate(coord, this.state.dataProjection, map_projection)
-            this.marker.point.setCoordinates(map_coord)
-            view.setCenter(map_coord)
+        if(coord){
+            if(coord[0]>60){
+                const view = this.map.getView()
+                const map_projection = view.getProjection()
+                const map_coord = transformCoordinate(coord, this.state.dataProjection, map_projection)
+                this.marker.point.setCoordinates(map_coord)
+                view.setCenter(map_coord)
+            }
         }
-
     }
 
     render() {
