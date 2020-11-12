@@ -1,8 +1,11 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
+from django.db import transaction
 from govorg.backend.meta_data.models import MetaData
+from backend.inspire.models import MGeoDatas
+
 
 def _get_meta_data_display(metadata):
     return {
@@ -20,12 +23,12 @@ def _get_meta_data_display(metadata):
         }
 
 
-def _update_or_create(pk, data):
-
+def _update_or_create(pk, data, user):
     if pk:
         meta_data = get_object_or_404(MetaData, pk=pk)
     else:
         meta_data = MetaData()
+        meta_data.created_by = user
 
     meta_data.org_name = data.get('org_name')
     meta_data.customer_org = data.get('customer_org')
@@ -38,6 +41,7 @@ def _update_or_create(pk, data):
     meta_data.abstract = data.get('abstract')
     meta_data.title = data.get('title')
     meta_data.schema = data.get('schema')
+    meta_data.updated_by = user
     meta_data.save()
 
     return meta_data
@@ -48,7 +52,7 @@ def _update_or_create(pk, data):
 def all(request):
 
     meta_data_list = [
-        _get_meta_data_detail(matedata)
+        _get_meta_data_display(metadata)
         for metadata in MetaData.objects.all()
     ]
 
@@ -65,27 +69,26 @@ def all(request):
 def create(request, payload):
 
     data = payload.get("meta_data")
-    meta = MetaData.objects.get(pk=data.get("id"))
-    geoms = MGeoDatas.objects.filter(id__in = payload.get("geom_ids"))
-
+    geoms = MGeoDatas.objects.filter(geo_id__in = payload.get("geom_ids"))
     try:
-        if not meta:
-            meta = _update_or_create(None, data)
+        if data.get("id"):
+            meta = MetaData.objects.get(pk=data.get("id"))
+        else:
+            meta = _update_or_create(None, data, request.user)
 
         for geom in geoms:
             meta.geo_datas.add(geom)
 
         return JsonResponse({'success': True})
-
     except Exception as e:
         return JsonResponse({'success': False})
 
 
 @require_POST
 @ajax_required
-def edit(request, pk, payload):
+def edit(request, payload, pk):
 
-    if _update_or_create(pk, payload):
+    if _update_or_create(pk, payload.get("meta_data"), request.user):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False})
@@ -99,7 +102,7 @@ def detail(request, pk):
 
     rsp = {
         'success': True,
-        'meta_data': _get_meta_data_detail(metadata),
+        'meta_data': _get_meta_data_display(meta_data),
     }
 
     return JsonResponse(rsp)
@@ -111,7 +114,7 @@ def delete(request, pk):
 
     with transaction.atomic():
         meta_data = get_object_or_404(MetaData, pk=pk)
-        metadata.geo_datas_set.clear()
+        meta_data.geo_datas.clear()
         meta_data.delete()
 
         return JsonResponse({'success': True})
