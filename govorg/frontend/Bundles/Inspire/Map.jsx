@@ -420,7 +420,7 @@ export default class BarilgaSuurinGazar extends Component{
           const featureID_list = this.state.featureID_list
           const selectedFeature_ID = event.selected[0].getProperties()['id']
           this.DrawButton()
-          this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
+          this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
         } else {
@@ -940,7 +940,6 @@ export default class BarilgaSuurinGazar extends Component{
       } else {
         coordinateList = [data['geom']]
       }
-
       this.list = []
       const geom = this.transformToLatLong(coordinateList)
       geom.map((coordinate, idx) => {
@@ -1008,16 +1007,31 @@ export default class BarilgaSuurinGazar extends Component{
           const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
           if (check) {
             const coordinates = this.getTurningPoints(dragBox, feature)
+            this.dupl = true
             if (coordinates.length > 0) {
-            selectedFeatures.push(feature);
-            this.setState({ build_name: feature.get('id') })
-            coordinates.map((coordinate, idx) => {
-              this.sendCoordinateList.push(coordinate.coordinate)
-              this.turningPoint.push(coordinate.turning)
-              this.addMarker(coordinate)
-            })
+              if (this.turningPoint.length > 0) {
+                const duplicate = this.turningPoint.every((item) => {
+                  const item_check = coordinates.map((coord, idx) => {
+                    return coord.turning
+                  })
+                  console.log(item_check[0], item);
+                  if (item == item_check[0]) {
+                    this.dupl = false
+                  }
+                })
+              }
+              console.log(this.dupl);
+              if (this.dupl) {
+                selectedFeatures.push(feature);
+                this.setState({ build_name: feature.get('id') })
+                coordinates.map((coordinate, idx) => {
+                  this.sendCoordinateList.push(coordinate.coordinate)
+                  this.turningPoint.push(coordinate.turning)
+                  this.addMarker(coordinate)
+                })
+              }
+            }
           }
-        }
         }
       });
       const data = {
