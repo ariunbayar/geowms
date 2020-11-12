@@ -1020,7 +1020,6 @@ export default class BarilgaSuurinGazar extends Component{
       const map = this.map
       const duration = 2000;
       const view = map.getView()
-      // const zoom = view.getZoom()
       const zoom = 25
       const setPoint = fromLonLat(point)
       view.animate(
