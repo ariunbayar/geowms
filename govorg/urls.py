@@ -39,6 +39,14 @@ urlpatterns = [
             path('<int:pk>/approve/', org_request_views.requestApprove),
         ], 'org-request'))),
 
+        path('meta-data/', include(([
+            path('', meta_data_views.all),
+            path('<int:pk>/detail', meta_data_views.detail),
+            path('<int:pk>/delete/', meta_data_views.delete),
+            path('<int:pk>/edit/', meta_data_views.edit),
+            path('<int:pk>/create/', meta_data_views.create),
+        ], 'meta-data'))),
+
     ], 'back_org'))),
 
 
