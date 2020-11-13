@@ -16,6 +16,7 @@ export const service = {
     orgAll,
     rolesAdd,
     inspireRoles,
+    getInspireRoles
 }
 
 
@@ -130,4 +131,11 @@ function rolesAdd(level, org_id, values) {
            body: JSON.stringify(values),
     }
     return fetch(`${prefix}/level-${level}/${org_id}/roles-add/`, opts).then(handleResponse)
+}
+
+function getInspireRoles() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`/back/api/org/get-role-name/`, opts).then(handleResponse)
 }
