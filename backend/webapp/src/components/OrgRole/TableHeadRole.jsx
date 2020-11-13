@@ -77,7 +77,7 @@ export class TableHeadRole extends Component {
                                         }
                                         ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_view}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_view}</small> */}
                                 </div>
                                 <div className="col-2">
                                     <small className="smaller text-center ml-2">нэмэх</small>
