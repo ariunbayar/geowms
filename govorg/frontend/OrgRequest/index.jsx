@@ -16,7 +16,7 @@ export default class OrgRequest extends Component {
             <div className="card">
               <div className="card-body">
                     <Switch>
-                        <Route path="/gov/org-request/" component={OrgRequestForm}/>
+                        <Route path="/gov/org-request/" component={(props) => <OrgRequestForm {...props} refreshCount={this.props.refreshCount}/>}/>
                     </Switch>
               </div>
            </div>

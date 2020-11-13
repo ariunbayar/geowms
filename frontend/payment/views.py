@@ -14,10 +14,9 @@ from django.views.decorators.http import require_POST, require_GET
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
-from backend.forms.models import Mpoint_view
+from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
 from geoportal_app.models import User
-from backend.forms.models import Mpoint_view
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required

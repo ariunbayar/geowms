@@ -379,6 +379,24 @@ hr {
    transition: all 0.3s ease; 
 }
 
+.toggled .geo-back-btn-toggled {
+   left: 60px;
+   transition: all 0.3s ease; 
+ }
+
+.geo-back-btn {
+    position: fixed;
+    left: 345px;
+    color: black;
+    top: 12px;
+    font-size: 23px;
+    z-index: 1001;
+    transition: all 0.3s ease; 
+}
+.geo-back-btn i:hover{
+    color: #034ea2;
+    box-shadow: 13px 13px 40px 0px rgba(73, 220, 251, 0.32);
+}
 .toggle-menu-map i {
     margin-left: 280px;
     font-size: 14px;
@@ -2498,7 +2516,10 @@ table.grid td {
 
 .table-primary {
     color: #fff;
-    background-color: #008cff;
+    background-color: #034ea2;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-color: #034ea2;
 }
 
 .table-primary td, .table-primary th, .table-primary thead th {
@@ -3948,6 +3969,74 @@ table.grid td {
     content:"\f105";
 }
 
+#accordion1 .arrow-tree a:before,
+#accordion2 .arrow-tree a:before,
+#accordion3 .arrow-tree a:before,
+#accordion4 .arrow-tree a:before,
+#accordion5 .arrow-tree a:before,
+#accordion6 .arrow-tree a:before,
+#accordion7 .arrow-tree a:before,
+#accordion8 .arrow-tree a:before,
+#accordion9 .arrow-tree a:before,
+#accordion10 .arrow-tree a:before,
+#accordion11 .arrow-tree a:before,
+#accordion12 .arrow-tree a:before,
+#accordion13 .arrow-tree a:before,
+#accordion14 .arrow-tree a:before,
+#accordion15 .arrow-tree a:before,
+#accordion16 .arrow-tree a:before,
+#accordion17 .arrow-tree a:before,
+#accordion18 .arrow-tree a:before,
+#accordion19 .arrow-tree a:before,
+#accordion20 .arrow-tree a:before,
+#accordion21 .arrow-tree a:before,
+#accordion22 .arrow-tree a:before,
+#accordion23 .arrow-tree a:before,
+#accordion24 .arrow-tree a:before,
+#accordion26 .arrow-tree a:before,
+#accordion27 .arrow-tree a:before,
+#accordion28 .arrow-tree a:before,
+#accordion29 .arrow-tree a:before,
+#accordion30 .arrow-tree a:before
+{
+    float: left !important;
+    font-family: FontAwesome;
+    content:"\f107";
+    padding-right: 15px;
+}
+
+#accordion1 .arrow-tree a.collapsed:before,
+#accordion2 .arrow-tree a.collapsed:before,
+#accordion3 .arrow-tree a.collapsed:before,
+#accordion4 .arrow-tree a.collapsed:before,
+#accordion5 .arrow-tree a.collapsed:before,
+#accordion6 .arrow-tree a.collapsed:before,
+#accordion7 .arrow-tree a.collapsed:before,
+#accordion8 .arrow-tree a.collapsed:before,
+#accordion9 .arrow-tree a.collapsed:before,
+#accordion10 .arrow-tree a.collapsed:before,
+#accordion11 .arrow-tree a.collapsed:before,
+#accordion12 .arrow-tree a.collapsed:before,
+#accordion13 .arrow-tree a.collapsed:before,
+#accordion14 .arrow-tree a.collapsed:before,
+#accordion15 .arrow-tree a.collapsed:before,
+#accordion16 .arrow-tree a.collapsed:before,
+#accordion17 .arrow-tree a.collapsed:before,
+#accordion18 .arrow-tree a.collapsed:before,
+#accordion19 .arrow-tree a.collapsed:before,
+#accordion20 .arrow-tree a.collapsed:before,
+#accordion21 .arrow-tree a.collapsed:before,
+#accordion22 .arrow-tree a.collapsed:before,
+#accordion23 .arrow-tree a.collapsed:before,
+#accordion24 .arrow-tree a.collapsed:before,
+#accordion26 .arrow-tree a.collapsed:before,
+#accordion27 .arrow-tree a.collapsed:before,
+#accordion28 .arrow-tree a.collapsed:before,
+#accordion29 .arrow-tree a.collapsed:before,
+#accordion30 .arrow-tree a.collapsed:before
+{
+    content:"\f105";
+}
 .progress-bar {
     display: -ms-flexbox;
     display: flex;
@@ -4357,7 +4446,7 @@ table.grid td {
     }
 
 [class*="icheck-"] > label {
-    padding-left: 29px !important;
+    padding-left: 22px !important;
     min-height: 22px;
     line-height: 22px;
     display: inline-block;
@@ -4387,7 +4476,7 @@ table.grid td {
         height: 22px;
         border: 1px solid #D3CFC8;
         border-radius: 0px;
-        margin-left: -29px;
+        margin-left: -23px;
     }
 
     [class*="icheck-"] > input:first-child:checked + label::after,
@@ -5043,7 +5132,6 @@ table.grid td {
 
 
 }
-
 
 
 

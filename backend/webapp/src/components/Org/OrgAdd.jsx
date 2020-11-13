@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
 import ModalAlert from "../ModalAlert";
+import { set } from "ol/transform";
 
 
 export class OrgAdd extends Component {
@@ -13,45 +14,65 @@ export class OrgAdd extends Component {
             org_name: '',
             edit: false,
             upadte_level: 1,
+            org_role: -1,
+            org_role_error: null,
             handleSaveIsLoad: false,
             modal_alert_status: "closed",
             timer: null,
+            roles: []
         }
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleGetAll=this.handleGetAll.bind(this)
         this.modalClose=this.modalClose.bind(this)
+        this.modalInspireRoles=this.modalInspireRoles.bind(this)
     }
 
     componentDidMount(){
         const org_level=this.props.match.params.level
         const id=this.props.match.params.id
+        this.setState({upadte_level: org_level})
         this.handleGetAll(org_level,id)
+        this.modalInspireRoles()
     }
 
     handleUserSearch(field, e){
         this.setState({[field]: e.target.value})
     }
 
-    handleSave(){
-        this.setState({handleSaveIsLoad:true})
-        const org_level = this.props.match.params.level
-        const org_id=this.props.match.params.id
-        const org_name = this.state.org_name
-        const upadte_level = this.state.upadte_level
-        const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level}
-        service.org_add(org_level,values).then(({ success }) => {
-            success && this.setState({modal_alert_status: "open"})
+    modalInspireRoles(){
+        service.getInspireRoles().then(({success, roles}) => {
+            if(success) this.setState({roles})
         })
-        this.modalCloseTime()
+    }
+
+    handleSave(){
+        if(this.state.org_role != -1){
+            this.setState({org_role_error: null})
+            this.setState({handleSaveIsLoad:true})
+            const org_level = this.props.match.params.level
+            const org_id=this.props.match.params.id
+            const org_name = this.state.org_name
+            const upadte_level = this.state.upadte_level
+            const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level, "role_id":  this.state.org_role}
+            service.org_add(org_level,values).then(({ success }) => {
+                success && this.setState({modal_alert_status: "open"})
+            })
+            this.modalCloseTime()
+        }
+        else{
+            this.setState({org_role_error: "Байгууллагын эрх хоосон байна."})
+        }
     }
 
     handleGetAll(org_level,id){
         if(id){
             service.orgAll(org_level,id).then(({ orgs }) => {
                 if (orgs) {
+                    console.log(orgs)
                     orgs.map(org=>this.setState({
-                        org_name:org.name
+                        org_name:org.name,
+                        org_role:org.org_role
                     }))
                 }
                 this.setState({
@@ -79,7 +100,7 @@ export class OrgAdd extends Component {
     }
 
     render() {
-        const {org_name,upadte_level} = this.state
+        const {org_name, upadte_level, roles} = this.state
         const org_id=this.props.match.params.id
         const org_level=this.props.match.params.level
         return (
@@ -108,7 +129,7 @@ export class OrgAdd extends Component {
                             {org_id &&
                             <div className="form-group">
                                     <h5 className="mb-3">Түвшин</h5>
-                                    <select className="form-control" id="upadte_level" value={this.state.gender} onChange={(e) => this.handleUserSearch('upadte_level', e)}>
+                                    <select className="form-control" id="upadte_level" value={this.state.upadte_level} onChange={(e) => this.handleUserSearch('upadte_level', e)}>
                                         <option>1</option>
                                         <option>2</option>
                                         <option>3</option>
@@ -116,6 +137,16 @@ export class OrgAdd extends Component {
                                     </select>
                                 </div>
                             }
+                            <div className="form-group">
+                                <h5 className="mb-3">Байгуулгын эрх</h5>
+                                <select className="form-control" id="org_role" value={this.state.org_role} onChange={(e) => this.setState({org_role: e.target.value})}>
+                                    <option value={-1}>....</option>
+                                    {roles.map((role, idx) =>
+                                        <option key={idx} value={role.id}>{role.name}</option>
+                                    )}
+                                </select>
+                                {this.state.org_role_error && <p className="text-danger">{this.state.org_role_error}</p>}
+                            </div>
 
                         </div>
                     </div>

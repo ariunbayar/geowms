@@ -24,5 +24,5 @@ function findSum(coordinate) {
         ...getPostOptions(),
         body: JSON.stringify({"x":coordinate[0], "y":coordinate[1]})
     }
-    return fetch(`/back/tuuhen_ov/tseg-personal/findSum/`, requestOptions).then(handleResponse)
+    return fetch(`/gov/api/tuuhen_ov/tseg-personal/findSum/`, requestOptions).then(handleResponse)
 }

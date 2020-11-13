@@ -20,16 +20,16 @@ export class DursgaltGazar extends Component {
                 tuuhin_ov_sum_duureg: '',
                 torol_zuiltorol_zuil_name: '',
                 torol_zuil_dursgalt_gazriin_ner: '',
-                torol_zuil_dursgalt_gazriin_coordinatalt: null,
+                torol_zuil_dursgalt_gazriin_coordinatalt: '',
                 torol_zuil_todorhoilolt: '',
-                hemjee_talbai: null,
-                hemjee_urt: null,
-                hemjee_orgon: null,
-                hemjee_ondor: null,
-                hemjee_zuzaan: null,
-                hemjee_golch: null,
+                hemjee_talbai: '',
+                hemjee_urt: '',
+                hemjee_orgon: '',
+                hemjee_ondor: '',
+                hemjee_zuzaan: '',
+                hemjee_golch: '',
                 hemjee_busad_hemjee: '',
-                hemjee_too_shirheg: null,
+                hemjee_too_shirheg: '',
                 hemjee_temdeglel: ' ',
                 dg_ezen_dursgalt_gazar_ezen: '',
                 dg_ezen_temdeglel: ' ',
@@ -314,7 +314,7 @@ export class DursgaltGazar extends Component {
                                 dgh_sergeen_zasvarlah_eseh_nenshaardlaga: tuuh['recover1'],
                                 dgh_sergeen_zasvarlasan_eseh_hamgaalalt: tuuh['recover'],
                                 dgh_maltan_sudaltan_hamgaalalt: tuuh['malts'],
-                                dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: tuuh['length'],
+                                dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt: tuuh['omchlol'],
                                 dgh_yaaraltai_hamgaalalt: tuuh['yaral'],
                                 dgh_tusgai_hamgaalalt: tuuh['tus'],
                                 dgh_bus_togtooh_shaardlaga: tuuh['protecti_1'],
@@ -595,7 +595,7 @@ export class DursgaltGazar extends Component {
             const has_error = Object.keys(errors).length > 0
             return (
                 <Form>
-                    <div className='col-md-8 card'>
+                    <div className='col-md-9 card'>
                         <Maps
                             handleXY={this.handleXY}
                             coordinatCheck={true}
@@ -656,7 +656,7 @@ export class DursgaltGazar extends Component {
                             </tr>
                             <tr>
                                 <td scope="row" className="align-middle">
-                                    Чулуулгын төрөл
+                                    Чулуулгийн төрөл
                                     <div
                                         type="button"
                                         onMouseOver={(e) => this.handleBoxOver('showBox1', e)}
@@ -1265,7 +1265,7 @@ export class DursgaltGazar extends Component {
                                 </tr>
                                 <tr>
                                     <td rowSpan="2" scope="rowgroup" scope="row" style={{width: "30%"}}>
-                                        Тухайн дурсгалт газрыг мэргэжлийн судалганы байгууллага<br></br> судлан шигжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ.<br></br> Хэрэв хууль бусаар ухаж тоносон бол <br></br>"Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
+                                        Тухайн дурсгалт газрыг мэргэжлийн судалгааны байгууллага<br></br> судлан шинжлэх зорилгоор малтсан бол түүнийг тэмдэглэнэ.<br></br> Хэрэв хууль бусаар ухаж тоносон бол <br></br>"Гэмтлийн тухай мэдээлэл" хэсгээс хэд хэдэн сонголт хийж болно.
                                         <div
                                             type="button"
                                             onMouseOver={(e) => this.handleBoxOver('showBox15', e)}
@@ -1554,7 +1554,7 @@ export class DursgaltGazar extends Component {
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_salhi', e, 'Салхиний нөлөөлөл')}
                                                 value={this.state.dgh_baigaliin_huchin_zuil_salhi}
                                                 ></input>
-                                            <label htmlFor="id_dgh_baigaliin_huchin_zuil_salhi"> Салхиний нөлөөлөл</label>
+                                            <label htmlFor="id_dgh_baigaliin_huchin_zuil_salhi"> Салхины нөлөөлөл</label>
                                         </div>
                                     </td>
                                 </tr>
@@ -1564,6 +1564,7 @@ export class DursgaltGazar extends Component {
                                             <input
                                                 type="checkbox"
                                                 id='id_dgh_baigaliin_huchin_zuil_erdes_shohoin'
+                                                checked={this.state.dgh_baigaliin_huchin_zuil_erdes_shohoin}
                                                 onChange={(e) => this.handleCheckSelect('dgh_baigaliin_huchin_zuil_erdes_shohoin', e, 'Эрдэс шохойн нөлөөлөл')}
                                                 value={this.state.dgh_baigaliin_huchin_zuil_erdes_shohoin}
                                             ></input>

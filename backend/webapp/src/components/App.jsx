@@ -17,6 +17,7 @@ import MenuItem from "../../../../src/components/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
 import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
+import {OrgRole} from './OrgRole'
 import {Error500} from './Error500'
 
 export default class App extends Component {
@@ -56,7 +57,7 @@ export default class App extends Component {
                 <h5 className="logo-text">ГЕОПОРТАЛ</h5>
               </a>
             </div>
-            <ul className="sidebar-menu do-nicescrol">
+            <ul className="sidebar-menu ">
                 <MenuItem icon="fa fa-history" url="/back/access/login/" text="Хандалт"></MenuItem>
                 <MenuItem icon="fa fa-bank" url="/back/log/" text="Банк лог"></MenuItem>
                 <MenuItem icon="fa fa-database" url="/back/дэд-сан/" text="Дэд сан">
@@ -73,6 +74,7 @@ export default class App extends Component {
                         <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/2/" text="2-р түвшин" count={this.state.gov_count.level2 != 0 ? this.state.gov_count.level2 : '0'}></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/3/" text="3-р түвшин" count={this.state.gov_count.level3 != 0 ? this.state.gov_count.level3 : '0'}></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин" count={this.state.gov_count.level4 != 0 ? this.state.gov_count.level4 : '0'}></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/org-role/" text="Байгууллага эрх"></MenuItem>
                     </ul>
                 </MenuItem>
                 <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
@@ -93,6 +95,7 @@ export default class App extends Component {
             <Switch>
               <Route path={"/back/wms/"} component={WMSPage} />
               <Route path={"/back/geoserver/"} component={Geoserver} />
+              <Route path={"/back/org-role/"} component={OrgRole} />
               <Route path={"/back/байгууллага/"} component={Org} />
               <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
               <Route path={"/back/inspire-views/"} component={InspireViews} />

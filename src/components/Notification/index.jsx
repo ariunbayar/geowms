@@ -25,6 +25,7 @@ export class Notif extends Component {
     loadNotif(){
         const length = this.total.length
         const {too, style, msg} = this.props
+        const style_list = 'list-group-item rounded animated slideInLeft'
         if(this.props.show){
             this.key++
             if(length > too && length !=  1){
@@ -33,7 +34,7 @@ export class Notif extends Component {
             }
             if(too > length && length > 0){
                 this.total = this.total.concat([
-                    <li key={this.key} className={`list-group-item list-group-item-${style} my-1`}>
+                    <li key={this.key} className={`${style_list} list-group-item-${style} my-1`}>
                         <a><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn my-1`}></i> {msg}</a>
                     </li>
                 ])
@@ -41,7 +42,7 @@ export class Notif extends Component {
             }
             if(length == 0){
                 this.total.push(
-                    <li key={this.key} className={`list-group-item list-group-item-${style} my-1`}>
+                    <li key={this.key} className={`${style_list} list-group-item-${style} my-1`}>
                         <a><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn my-1`}></i> {msg}</a>
                     </li>
                 )
@@ -57,8 +58,8 @@ export class Notif extends Component {
     render() {
         const {arr} = this.state
         return (
-            <div className="position-fixed col-md-2" style={{zIndex: 1030, top:0, right:0}}>
-                <ul className="list-group">
+            <div className="position-fixed bg-transparent col-md-2" style={{zIndex: 1030, top:0, right:0}}>
+                <ul className="bg-transparent">
                     {this.total}
                 </ul>
             </div>

@@ -1,19 +1,21 @@
 import React, { Component } from 'react'
 
 import 'ol/ol.css';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import GeoJSON from 'ol/format/GeoJSON'
+import {Map, Feature, View, Overlay} from 'ol';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import {Circle as CircleStyle, Fill, Stroke, Style, Text, Icon} from 'ol/style'
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
-import {Draw, Modify, Select, Snap} from 'ol/interaction'
+import {Draw, Modify, Select, Snap, DragBox, MouseWheelZoom} from 'ol/interaction'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import {unByKey} from 'ol/Observable';
-import {createStringXY} from 'ol/coordinate'
-import {transform as transformCoordinate, toLonLat} from 'ol/proj'
-import {format as coordinateFormat, toStringHDMS} from 'ol/coordinate'
-import Overlay from 'ol/Overlay'
+import {GeoJSON} from 'ol/format'
+import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
+import {format as coordinateFormat, toStringHDMS, createStringXY} from 'ol/coordinate'
+import {platformModifierKeyOnly} from 'ol/events/condition';
+import {containsXY} from 'ol/extent'
+import { click } from 'ol/events/condition';
+import * as geom_type from 'ol/geom'
+
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
@@ -24,6 +26,10 @@ import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
+import {MetaBarButton} from './controls/MetaData/MetaBarButton'
+import {MetaList} from './controls/MetaData/MetaList'
+
+import {CoordList} from './controls/CoordinateList/CordList'
 
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -38,6 +44,8 @@ export default class BarilgaSuurinGazar extends Component{
     constructor(props){
       super(props)
 
+      this.featureNames = []
+      this.featuresForCollection = []
       this.state = {
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
@@ -66,13 +74,17 @@ export default class BarilgaSuurinGazar extends Component{
           null_form_isload: false,
           showUpload: false,
           is_sidebar_open: true,
-          wms_map_list: []
+          wms_map_list: [],
+          isMeta: false,
+          pointFeature: null,
       }
 
       this.controls = {
         modal: new Modal(),
         upload: new UploadBtn(),
         sidebar: new Sidebar(),
+        metaList: new MetaList(),
+        coordList: new CoordList(),
       }
 
       this.modifyE = this.Modify()
@@ -105,41 +117,45 @@ export default class BarilgaSuurinGazar extends Component{
       this.WmsTile = this.WmsTile.bind(this)
       this.mapPointerMove = this.mapPointerMove.bind(this)
       this.onClickCloser = this.onClickCloser.bind(this)
+      this.MetaButton = this.MetaButton.bind(this)
+      this.getRole = this.getRole.bind(this)
+      this.flyTo = this.flyTo.bind(this)
+      this.getTurningPoints = this.getTurningPoints.bind(this)
+      this.DrawButton = this.DrawButton.bind(this)
+      this.updateFromList = this.updateFromList.bind(this)
+      this.transformToMapCoordinate = this.transformToMapCoordinate.bind(this)
+      this.transformToLatLong = this.transformToLatLong.bind(this)
+      this.callModalWithMeta = this.callModalWithMeta.bind(this)
+      this.hideMetaList = this.hideMetaList.bind(this)
+      this.hideShowList = this.hideShowList.bind(this)
 
     }
 
     componentDidMount(){
       const {pid, fid} = this.state
-      Promise.all([
-          service.getRole(pid, fid),
-          service.geomType(pid, fid),
-      ]).then(([{roles}, {type}]) => {
-          this.setState({ type, roles })
-          this.loadControls()
+      service.geomType(pid, fid).then(({type}) => {
+          this.setState({ type })
         })
       this.loadRows()
       this.loadMap()
     }
 
-    getRole(pid, fid){
+    getRole(){
+      const {pid, fid} = this.state
       service
           .getRole(pid, fid)
           .then(({ success, roles }) => {
               if(success){
-                this.setState({
-                  roles
-                })
+                this.loadControls(roles)
               }
           })
-
     }
 
-    loadControls(){
+    loadControls(roles){
       const map = this.map
-      const { type, roles } = this.state
+      const { type } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
-      map.addControl(this.controls.sidebar)
       if(roles[1]){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -153,7 +169,10 @@ export default class BarilgaSuurinGazar extends Component{
       }
       if(roles[1] || roles[3]) {
         map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+        map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
+        map.addControl(this.controls.metaList)
+        map.addControl(this.controls.sidebar)
       }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
 
@@ -161,10 +180,11 @@ export default class BarilgaSuurinGazar extends Component{
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
       if(roles[3]){
+        map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
-      this.setState({ is_loading:false })
+      this.setState({ is_loading:false, roles })
     }
 
     loadData(){
@@ -180,6 +200,14 @@ export default class BarilgaSuurinGazar extends Component{
             fill: new Fill({
               color: 'rgba(255, 255, 0, 0.1)',
             }),
+            text: new Text({
+              font: '15px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+              textAlign: 'center'
+            }),
           }),
           'Polygon': new Style({
             stroke: new Stroke({
@@ -189,6 +217,14 @@ export default class BarilgaSuurinGazar extends Component{
             fill: new Fill({
               color: 'rgba(255, 255, 0, 0.1)',
             }),
+            text: new Text({
+              font: '15px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+              textAlign: 'center'
+            }),
           }),
           'Point': new Style({
             image: new CircleStyle({
@@ -197,11 +233,25 @@ export default class BarilgaSuurinGazar extends Component{
                 color: 'blue',
               }),
             }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+            }),
           }),
           'LineString': new Style({
             stroke: new Stroke({
               color: 'green',
               width: 2,
+            }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
             }),
           }),
           'MultiLineString': new Style({
@@ -209,12 +259,26 @@ export default class BarilgaSuurinGazar extends Component{
               color: 'green',
               width: 2,
             }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+            }),
           }),
           'MultiPoint': new Style({
             image: new CircleStyle({
               radius: 5,
               fill: new Fill({
                 color: 'orange',
+              }),
+            }),
+            text: new Text({
+              font: '8px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
               }),
             }),
           }),
@@ -240,12 +304,26 @@ export default class BarilgaSuurinGazar extends Component{
       const vectorLayer = new VectorLayer({
             name: 'vector_layer',
             source: vectorSource,
-            style: (feature) => styles[feature.getGeometry().getType()],
         })
+
+      vectorLayer.setStyle((feature, resolution) => {
+        let text = ''
+        const type = feature.getGeometry().getType()
+        if (type.includes('Point') || type.includes('Line')) {
+          text = resolution < 400 ? feature.get('id') : ''
+        } else {
+          text = feature.get('id')
+        }
+        const styleWithType = styles[type]
+        styleWithType.getText().setText(text)
+        return styleWithType
+      })
 
       map.addLayer(vectorLayer)
       this.snap(vectorLayer)
       this.vectorLayer = vectorLayer
+      this.vectorSource = vectorSource
+      this.getRole()
   }
 
     loadMap(){
@@ -322,7 +400,7 @@ export default class BarilgaSuurinGazar extends Component{
 
       const setEvents = () => {
         var selectedFeatures = this.select.getFeatures();
-        this.select.on('change:active', function () {
+        this.select.on('change:active', () => {
           selectedFeatures.forEach(function (each) {
             selectedFeatures.remove(each);
           });
@@ -339,11 +417,19 @@ export default class BarilgaSuurinGazar extends Component{
     featureSelected(event){
       if(event.selected[0])
       {
-        const featureID_list = this.state.featureID_list
-        const selectedFeature_ID = event.selected[0].getProperties()['id']
-        this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false })
-        featureID_list.push(selectedFeature_ID)
-        if(this.state.remove_button_active) this.removeModal()
+        const { isMeta } = this.state
+        if (!isMeta) {
+          this.removeTurning()
+          const featureID_list = this.state.featureID_list
+          const selectedFeature_ID = event.selected[0].getProperties()['id']
+          this.DrawButton()
+          this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
+          featureID_list.push(selectedFeature_ID)
+          if(this.state.remove_button_active) this.removeModal()
+        } else {
+          const feature = event.selected[0]
+          this.collectFeatures(feature)
+        }
       }
       else
       {
@@ -351,14 +437,24 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
+    collectFeatures(feature) {
+      const collection = this.select.getFeatures()
+      this.featureNames.push(feature.get('id'))
+      this.featuresForCollection.push(feature)
+      this.featuresForCollection.map((feat, idx) => {
+        collection.push(feat)
+      })
+      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta,  this.addNotif)
+    }
+
     modifiedFeature(event) {
 
       const features = event.features.getArray()
       const {format} = this.state
-      const data = format.writeFeatureObject(features[0],  {
+      const data = format.writeFeatureObject(features[0], {
         dataProjection: this.state.dataProjection,
         featureProjection: this.state.featureProjection,
-    })
+      })
       const changedFeature = JSON.stringify(data)
       this.setState({ changedFeature, modifyend_selected_feature_check: true })
       this.onClickCloser()
@@ -446,6 +542,9 @@ export default class BarilgaSuurinGazar extends Component{
             roles
           })
         }
+        if (prevState.changedFeature !== this.state.changedFeature) {
+          this.setState({ changedFeature: this.state.changedFeature })
+        }
     }
 
     snap(vector){
@@ -485,6 +584,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     RemoveButton() {
+      this.hideMetaList()
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
       if(this.state.remove_button_active)
@@ -566,6 +666,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(){
+      this.hideMetaList()
       if(this.state.modifyend_selected_feature_ID){
           if(this.state.modifyend_selected_feature_check)
           {
@@ -588,10 +689,17 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    updateGeom(){
+    updateGeom(changedJson){
       const {tid, fid, pid} = this.state
       const id = this.state.selectedFeature_ID
-      const json = JSON.parse(this.state.changedFeature)
+      const { changedFeature } = this.state
+      this.feature = ''
+      if (changedJson) {
+        this.feature = changedJson
+      } else {
+        this.feature = changedFeature
+      }
+      const json = JSON.parse(this.feature)
       const datas = json.geometry
       this.setState({ is_loading:true })
       if(this.state.roles[6]){
@@ -669,6 +777,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
+      this.hideMetaList()
     }
 
     LineButton(){
@@ -679,6 +788,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+      this.hideMetaList()
     }
 
     PointButton(){
@@ -689,6 +799,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+      this.hideMetaList()
     }
 
     PolygonButton(){
@@ -699,6 +810,16 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+      this.hideMetaList()
+    }
+
+    MetaButton() {
+      this.drawE.getActive()
+      this.drawE.setActive(false);
+      this.modifyE.setActive(false);
+      const map = this.map
+      this.select.setActive(true)
+      this.setState({ isMeta: true })
     }
 
     showUploadBtn(){
@@ -759,6 +880,269 @@ export default class BarilgaSuurinGazar extends Component{
         this.controls.sidebar.showSideBar(wms_map_list, true)
       }else{
         this.controls.sidebar.showSideBar(wms_map_list, false)
+      }
+    }
+
+    getTurningPoints(extent, feature) {
+      var insideCoordinates = []
+      const coordinates = feature.getGeometry().getCoordinates()[0]
+      var bound = ''
+      if (extent) {
+        bound = extent.getGeometry()
+      }
+      for (let i = 0; i < coordinates.length; i ++){
+        const check = bound.containsXY(coordinates[i][0], coordinates[i][1])
+        // const check = bound.intersectsExtent(feature.getGeometry().getExtent()) // ogtloltsdog eseh
+        if (check) {
+          var coord_info = {
+            'coordinate': coordinates[i],
+            'turning': i
+          }
+          insideCoordinates.push(coord_info)
+        }
+      }
+      return insideCoordinates
+    }
+
+    addMarker(coord) {
+      const point_geom = coord.coordinate
+      const point_turning = coord.turning.toString()
+      const coordinate = [point_geom[0], point_geom[1]]
+      const source = this.vectorSource
+
+      const point = new geom_type.Point(coordinate)
+      const feature = new Feature({
+        geometry: point,
+        id: "TurningPoint"
+      });
+
+      const style = new Style({
+        image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({
+            color: '#2F9A00',
+          }),
+        }),
+        text: new Text({
+          text: point_turning,
+          font: '30px Calibri,sans-serif',
+          stroke: new Stroke({
+            color: 'white',
+            width: 3,
+          }),
+          offsetY: -18
+        }),
+      });
+
+      feature.setStyle(style)
+      this.setState({ pointFeature: feature })
+      source.addFeature(feature)
+    }
+
+    sendToShowList(data) {
+      var coordinateList = null
+      var name = null
+
+      if (data['geometry']) {
+        coordinateList = data['geometry'].getCoordinates()[0]
+      } else {
+        coordinateList = [data['geom']]
+      }
+      this.list = []
+      const geom = this.transformToLatLong(coordinateList)
+      geom.map((coordinate, idx) => {
+        const rsp = {
+          'geom': coordinate,
+          'turning': data['turning'] ? data['turning'][idx] : null
+        }
+        this.list.push(rsp)
+      })
+
+      if (data['id']) {
+        name = data['id']
+      } else {
+        name = this.state.build_name
+      }
+      const sendGeom = {
+        "data": this.list,
+        'id': name,
+      }
+      this.controls.coordList.showList(true, sendGeom, this.flyTo, () => this.listToModal(), this.updateFromList)
+    }
+
+    DrawButton() {
+      const dragBox = new DragBox({
+        condition: platformModifierKeyOnly,
+      });
+      this.map.addInteraction(dragBox);
+      dragBox.setActive(true)
+      dragBox.on('boxstart', () => this.BoxStart())
+      dragBox.on('boxend', () => this.BoxEnd(dragBox))
+      this.dragBox = dragBox
+    }
+
+    removeTurning() {
+      const { pointFeature } = this.state
+      if ( pointFeature !== null ) {
+        const source = this.vectorSource
+        const features = source.getFeatures()
+        if (features != null && features.length > 0) {
+          features.map((x) => {
+            const id = x.getProperties()['id']
+            id == pointFeature.get('id') && source.removeFeature(x)
+          })
+        }
+        this.setState({ pointFeature: null })
+      }
+    }
+
+    BoxStart() {
+      this.removeTurning()
+      const selectedFeatures = this.select.getFeatures();
+      selectedFeatures.clear();
+    }
+
+    BoxEnd(dragBox) {
+      const source = this.vectorSource
+      const selectedFeatures = this.select.getFeatures();
+      const {selected_feature} = this.state
+      const extent = dragBox.getGeometry().getExtent();
+      this.sendCoordinateList = []
+      this.turningPoint = []
+      source.forEachFeatureIntersectingExtent(extent, (feature) => {
+          const checkBound = feature.getGeometry().getCoordinates()[0]
+          for (let i = 0; i < checkBound.length; i ++){
+          const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
+          if (check) {
+            const coordinates = this.getTurningPoints(dragBox, feature)
+            this.dupl = true
+            if (coordinates.length > 0) {
+              if (this.turningPoint.length > 0) {
+                const duplicate = this.turningPoint.every((item) => {
+                  const item_check = coordinates.map((coord, idx) => {
+                    return coord.turning
+                  })
+                  console.log(item_check[0], item);
+                  if (item == item_check[0]) {
+                    this.dupl = false
+                  }
+                })
+              }
+              console.log(this.dupl);
+              if (this.dupl) {
+                selectedFeatures.push(feature);
+                this.setState({ build_name: feature.get('id') })
+                coordinates.map((coordinate, idx) => {
+                  this.sendCoordinateList.push(coordinate.coordinate)
+                  this.turningPoint.push(coordinate.turning)
+                  this.addMarker(coordinate)
+                })
+              }
+            }
+          }
+        }
+      });
+      const data = {
+        'geom': this.sendCoordinateList,
+        'turning': this.turningPoint,
+      }
+      this.sendToShowList(data)
+    }
+
+    listToModal() {
+      this.controls.modal.showModal(() => this.hideShowList(), true, "Тийм", `Буцахдаа итгэлтэй байна уу`, null, 'danger', "Үгүй")
+    }
+
+    hideShowList() {
+      this.controls.coordList.showList(false)
+      this.removeTurning()
+    }
+
+    transformToLatLong(coordinateList) {
+      const geom = coordinateList[0].map((coord, idx) => {
+          const map_coord = transformCoordinate(coord, this.state.featureProjection, this.state.dataProjection)
+            return map_coord
+      })
+      return geom
+    }
+
+    transformToMapCoordinate(coordinateList) {
+      const geom = coordinateList.map((coord, idx) => {
+        const map_coord = transformCoordinate(coord, this.state.dataProjection, this.state.featureProjection)
+          return map_coord
+      })
+      return geom
+    }
+
+    flyTo(point) {
+      const map = this.map
+      const duration = 2000;
+      const view = map.getView()
+      const zoom = 25
+      const setPoint = fromLonLat(point)
+      view.animate(
+        {
+          center: setPoint,
+          duration: duration,
+          zoom: zoom,
+        },
+      );
+    }
+
+    updateFromList(coord_list) {
+      const source = this.vectorSource
+      const id = coord_list.id
+      const coords = coord_list.data.map(({geom, turning}) => {
+        const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
+        return {conv_geom, turning}
+      })
+      const {selected_feature} = this.state
+      const feature_id = selected_feature.get('id')
+      if (feature_id == id) {
+        const getType = selected_feature.getGeometry().getType()
+        const geom_coordinate = selected_feature.getGeometry().getCoordinates()[0]
+        coords.map(({conv_geom, turning}) => {
+          geom_coordinate[turning] = conv_geom
+        })
+        const geom = new geom_type[getType]([geom_coordinate])
+        source.removeFeature(selected_feature)
+        const new_feature = new Feature({
+          geometry: geom,
+          id: feature_id
+        })
+        source.addFeature(new_feature)
+        const changedFeature = this.writeFeat(new_feature)
+        this.updateGeom(changedFeature)
+        this.hideShowList()
+      }
+    }
+
+    writeFeat(features) {
+      const {format} = this.state
+      const data = format.writeFeatureObject(features, {
+        dataProjection: this.state.dataProjection,
+        featureProjection: this.state.featureProjection,
+      })
+      const changedFeature = JSON.stringify(data)
+      return changedFeature
+    }
+
+    callModalWithMeta(info, func) {
+      let elemFunc = null
+      if (func) elemFunc = func
+      else elemFunc = this.hideMetaList
+      this.controls.modal.showModal(elemFunc, true, "Тийм", info, null, 'danger', "Үгүй")
+    }
+
+    hideMetaList() {
+      this.featureNames = []
+      this.featuresForCollection = []
+      if (this.state.isMeta) {
+        this.controls.metaList.showMetaList(false)
+      }
+      this.setState({ isMeta: false })
+      if (!this.state.modify_button_active) {
+        this.select.setActive(false)
       }
     }
 
