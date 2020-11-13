@@ -13,8 +13,6 @@ export class TableHeadRole extends Component {
         }
     }
 
-
-
     render() {
         const {fid, properties, name, index,
                 tree, inspire, root_1, root_2,
@@ -26,139 +24,205 @@ export class TableHeadRole extends Component {
             <div className={(inspire == "theme" ? "role-card" : "role-table-card") + (mtop ? ' mt-3' : '')}>
                 <div className={inspire == "theme" ? "role-card-body" : "role-table-card-body"}>
                     <div className="row">
-                        <div className="col-6 arrow-tree collapsed" style={{width:'100px', paddingLeft:tree}}>
+                        <div className="col-4 arrow-tree collapsed" style={{width:'100px', paddingLeft:tree}}>
+                            {inspire == 'feature' ?
                             <a className="collapsed" 
-                            data-toggle="collapse" 
-                            aria-expanded="true" 
-                            data-target={`#collapse${index}`} 
-                            aria-controls={`collapse${index}`} 
-                            scope="col text-wrap"
-                            onClick={inspire == 'feature' ? this.props.handleFeature : false}
-                            > 
-                            {name}
+                                data-toggle="collapse" 
+                                aria-expanded="true" 
+                                data-target={`#collapse${index}`} 
+                                aria-controls={`collapse${index}`} 
+                                onClick={this.props.handleFeature}
+                                scope="col text-wrap"
+                            >
+                                {name}
                             </a>
+                            :
+                            <a className="collapsed" 
+                                data-toggle="collapse" 
+                                aria-expanded="true" 
+                                data-target={`#collapse${index}`} 
+                                aria-controls={`collapse${index}`} 
+                                scope="col text-wrap"
+                            >
+                                {name}
+                            </a>
+                            }
                         </div>
-                        <div className="col-6">
+                        <div className="col-8">
                             <div className="row">
                                 <div className="col-2">
-                                    <small className="smaller text-center">харах</small>
-                                    <div className="custom-control custom-switch col-lg-12">
-                                        <input
-                                            type="checkbox" className="custom-control-input" id={"perm_view_all"+name+tree}
-                                            checked={perm_all == perm_view ? true : 0 < perm_view < perm_all ? console.log("tsentsu ym bna ho haha") : false}
-                                            onChange={(e) =>
-                                                inspire == 'theme' ?
-                                                this.props.handleCheckedTheme(e.target.checked, 1, root_1, root_1_index):
-                                                inspire == 'package' ?
-                                                this.props.handleCheckedPackage(e.target.checked, 1, root_1, root_1_index, root_2, root_2_index):
-                                                inspire == 'feature' ?
-                                                this.props.handleCheckedFeature(e.target.checked, 1, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                                null
-                                            }
-                                        />
-                                        <label className="custom-control-label" htmlFor={"perm_view_all"+name+tree}></label>
+                                    <small className="smaller text-center ml-2">харах</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_view == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(true, 1, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(true, 1, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(true, 1, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
+                                        <div className={0 < perm_view && perm_view < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_view == 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(false, 1, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(false, 1, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(false, 1, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
                                     </div>
                                     <small className="smaller text-center">{perm_all}-{perm_view}</small>
                                 </div>
                                 <div className="col-2">
-                                    <small className="smaller text-center">нэмэх</small>
-                                    <div className="custom-control custom-switch col-lg-12">
-                                        <input
-                                            type="checkbox" className="custom-control-input" id={"perm_create_all"+name+tree}
-                                            checked={perm_all == perm_create ? true : 0 < perm_create < perm_all ? console.log("tsentsu ym bna ho haha") : false}
-                                            onChange={(e) =>
-                                                inspire == 'theme' ?
-                                                this.props.handleCheckedTheme(e.target.checked, 2, root_1, root_1_index):
-                                                inspire == 'package' ?
-                                                this.props.handleCheckedPackage(e.target.checked, 2, root_1, root_1_index, root_2, root_2_index):
-                                                inspire == 'feature' ?
-                                                this.props.handleCheckedFeature(e.target.checked, 2, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                                null
-                                            }
-                                        />
-                                        <label className="custom-control-label" htmlFor={"perm_create_all"+name+tree}></label>
+                                    <small className="smaller text-center ml-2">нэмэх</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_create == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(true, 2, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(true, 2, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(true, 2, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
+                                        <div className={0 < perm_create && perm_create < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_create == 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(false, 2, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(false, 2, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(false, 2, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_create}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_create}</small> */}
                                 </div>
                                 <div className="col-2">
-                                    <small className="smaller text-center">хасах</small>
-                                    <div className="custom-control custom-switch col-lg-12">
-                                        <input
-                                            type="checkbox" className="custom-control-input" id={"perm_remove_all"+name+tree}
-                                            checked={perm_all == perm_remove ? true : 0 < perm_remove < perm_all ? console.log("tsentsu ym bna ho haha") : false}
-                                            onChange={(e) =>
-                                                inspire == 'theme' ?
-                                                this.props.handleCheckedTheme(e.target.checked, 3, root_1, root_1_index):
-                                                inspire == 'package' ?
-                                                this.props.handleCheckedPackage(e.target.checked, 3, root_1, root_1_index, root_2, root_2_index):
-                                                inspire == 'feature' ?
-                                                this.props.handleCheckedFeature(e.target.checked, 3, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                                null
-                                            }
-                                        />
-                                        <label className="custom-control-label" htmlFor={"perm_remove_all"+name+tree}></label>
+                                    <small className="smaller text-center ml-2">хасах</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_remove == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(true, 3, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(true, 3, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(true, 3, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
+                                        <div className={0 < perm_remove && perm_remove < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_remove == 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(false, 3, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(false, 3, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(false, 3, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_remove}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_remove}</small> */}
                                 </div>
                                 <div className="col-2">
-                                    <small className="smaller text-center">цуцлах</small>
-                                    <div className="custom-control custom-switch col-lg-12">
-                                        <input
-                                            type="checkbox" className="custom-control-input" id={"perm_update_all"+name+tree}
-                                            checked={perm_all == perm_update ? true : 0 < perm_update < perm_all ? console.log("tsentsu ym bna ho haha") : false}
-                                            onChange={(e) =>
-                                                inspire == 'theme' ?
-                                                this.props.handleCheckedTheme(e.target.checked, 4, root_1, root_1_index):
-                                                inspire == 'package' ?
-                                                this.props.handleCheckedPackage(e.target.checked, 4, root_1, root_1_index, root_2, root_2_index):
-                                                inspire == 'feature' ?
-                                                this.props.handleCheckedFeature(e.target.checked, 4, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                                null
-                                            }
-                                        />
-                                        <label className="custom-control-label" htmlFor={"perm_update_all"+name+tree}></label>
+                                    <small className="smaller text-center ml-2">цуцлах</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_update == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(true, 4, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(true, 4, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(true, 4, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
+                                        <div className={0 < perm_update && perm_update < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_update == 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(false, 4, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(false, 4, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(false, 4, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_update}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_update}</small> */}
                                 </div>
                                 <div className="col-2">
-                                    <small className="smaller text-center">хянах</small>
-                                    <div className="custom-control custom-switch col-lg-12">
-                                        <input
-                                            type="checkbox" className="custom-control-input" id={"perm_approve_all"+name+tree}
-                                            checked={perm_all == perm_approve ? true : 0 < perm_approve < perm_all ? console.log("tsentsu ym bna ho haha") : false}
-                                            onChange={(e) =>
-                                                inspire == 'theme' ?
-                                                this.props.handleCheckedTheme(e.target.checked, 5, root_1, root_1_index):
-                                                inspire == 'package' ?
-                                                this.props.handleCheckedPackage(e.target.checked, 5, root_1, root_1_index, root_2, root_2_index):
-                                                inspire == 'feature' ?
-                                                this.props.handleCheckedFeature(e.target.checked, 5, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                                null
-                                            }
-                                        />
-                                        <label className="custom-control-label" htmlFor={"perm_approve_all"+name+tree}></label>
+                                    <small className="smaller text-center ml-2">хянах</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_approve == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(true, 5, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(true, 5, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(true, 5, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
+                                        <div className={0 < perm_approve && perm_approve < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_approve == 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(false, 5, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(false, 5, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(false, 5, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_approve}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_approve}</small> */}
                                 </div>
                                 <div className="col-2">
-                                    <small className="smaller text-center">батлах</small>
-                                    <div className="custom-control custom-switch col-lg-12">
-                                        <input
-                                            type="checkbox" className="custom-control-input" id={"perm_revoce_all"+name+tree}
-                                            checked={perm_all == perm_revoce ? true : 0 < perm_revoce < perm_all ? console.log("tsentsu ym bna ho haha") : false}
-                                            onChange={(e) =>
-                                                inspire == 'theme' ?
-                                                this.props.handleCheckedTheme(e.target.checked, 6, root_1, root_1_index):
-                                                inspire == 'package' ?
-                                                this.props.handleCheckedPackage(e.target.checked, 6, root_1, root_1_index, root_2, root_2_index):
-                                                inspire == 'feature' ?
-                                                this.props.handleCheckedFeature(e.target.checked, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                                null
-                                            }
-                                        />
-                                        <label className="custom-control-label" htmlFor={"perm_revoce_all"+name+tree}></label>
+                                    <small className="smaller text-center ml-2">батлах</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_revoce == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(true, 6, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(true, 6, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(true, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
+                                        <div className={0 < perm_revoce && perm_revoce < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_revoce == 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        onClick={(e) =>
+                                            inspire == 'theme' ?
+                                            this.props.handleCheckedTheme(false, 6, root_1, root_1_index):
+                                            inspire == 'package' ?
+                                            this.props.handleCheckedPackage(false, 6, root_1, root_1_index, root_2, root_2_index):
+                                            inspire == 'feature' ?
+                                            this.props.handleCheckedFeature(false, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                            null
+                                        }
+                                        ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_revoce}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_revoce}</small> */}
                                 </div>
                             </div>
                         </div>

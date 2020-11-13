@@ -91,3 +91,63 @@
     min-height: 1px;
     padding: 1.25rem;
 }
+
+/* switch */
+
+.switch-tree-state{
+
+    width: 46px;
+    height: 18px;
+    background-color: #fff;
+    border-radius: 50px;
+    padding: 1px;
+    display: flex;
+    flex-wrap: wrap;
+    border: #adb5bd solid 1px;
+}
+.switch-tree-state:hover {
+    -webkit-box-shadow: 0px 0px 11px 0px rgba(0,123,255,1);
+-moz-box-shadow: 0px 0px 11px 0px rgba(0,123,255,1);
+box-shadow: 0px 0px 11px 0px rgba(0,123,255,1);
+}
+.switch-tree-state:active {
+    -webkit-box-shadow: 0px 0px 11px 0px rgba(0,123,255,1);
+    -moz-box-shadow: 0px 0px 11px 0px rgba(0,123,255,1);
+    box-shadow: 0px 0px 11px 0px rgba(0,123,255,1);
+}
+.switch-all{
+    width: 14px;
+    height: 14px;
+    border-radius: 50px;
+    max-width: 33.333%;
+}
+
+.switch-one{
+    position: relative;
+    background-color: #28a745;
+    left: 0px;
+    animation: switch-one 0.7s 1;
+}
+@keyframes switch-one {
+    0% {left: 30px}
+}
+
+.switch-two{
+    position: relative;
+    background-color: #007bff;
+    border-radius: 50px;
+    animation: switch-two 1s 1;
+
+}
+@keyframes switch-two {
+    0% {background-color: white}
+}
+.switch-tree{
+    position: relative;
+    background-color: #dc3545;
+    right: 0px;
+    animation: switch-tree 0.7s 1;
+}
+@keyframes switch-tree {
+    0% {right: 30px;}
+}

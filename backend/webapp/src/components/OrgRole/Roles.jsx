@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 import {service} from "./service"
+import ModalAlert from "../ModalAlert"
 import {TableHeadRole} from './TableHeadRole'
 export class Roles extends Component {
 
@@ -9,10 +10,15 @@ export class Roles extends Component {
         this.state = {
             data: [],
             tid: 0,
+            tid_index: 0,
             pid: 0,
+            pid_index: 0,
             fid: 0,
+            fid_index: 0,
             properties: [],
-            properties_perms: []
+            properties_perms: [],
+            handle_save_is_laod: false,
+            modal_alert_status: "closed",
         }
         this.handleRoles = this.handleRoles.bind(this)
         this.handleFeature = this.handleFeature.bind(this)
@@ -25,6 +31,7 @@ export class Roles extends Component {
         this.handleStateAll = this.handleStateAll.bind(this)
         this.handleStateOne = this.handleStateOne.bind(this)
         this.handleStateTwo = this.handleStateTwo.bind(this)
+        this.handleStateSole = this.handleStateSole.bind(this)
     }
 
     componentDidMount(){
@@ -38,8 +45,8 @@ export class Roles extends Component {
         })
     }
 
-    handleFeature(tid, pid, fid, properties){
-        this.setState({tid, pid, fid, properties})
+    handleFeature(tid, tid_index, pid, pid_index, fid, fid_index, properties){
+        this.setState({tid,tid_index, pid, pid_index, fid, fid_index, properties})
     }
 
     handleStateAll(check, json, perm){
@@ -58,6 +65,26 @@ export class Roles extends Component {
             if(perm == 4) json.perm_update = 0
             if(perm == 5) json.perm_approve = 0
             if(perm == 6) json.perm_revoce = 0
+        }
+        return json
+    }
+
+    handleStateSole(check, json, perm){
+        if(check){
+            if(perm == 1) json.perm_view = json.perm_view + 1
+            if(perm == 2) json.perm_create = json.perm_create + 1
+            if(perm == 3) json.perm_remove = json.perm_remove + 1
+            if(perm == 4) json.perm_update = json.perm_update + 1
+            if(perm == 5) json.perm_approve = json.perm_approve + 1
+            if(perm == 6) json.perm_revoce = json.perm_revoce + 1
+        }
+        else{
+            if(perm == 1) json.perm_view = json.perm_view - 1
+            if(perm == 2) json.perm_create = json.perm_create - 1
+            if(perm == 3) json.perm_remove = json.perm_remove - 1
+            if(perm == 4) json.perm_update = json.perm_update - 1
+            if(perm == 5) json.perm_approve = json.perm_approve - 1
+            if(perm == 6) json.perm_revoce = json.perm_revoce - 1
         }
         return json
     }
@@ -86,20 +113,104 @@ export class Roles extends Component {
 
     handleStateTwo(check, json, perm, child, name){
         if(check){
-            if(perm == 1 && json[name][child].perm_view + 1 == json[name][child].perm_all) json.perm_view = json.perm_view + 1
-            if(perm == 2 && json[name][child].perm_create + 1 == json[name][child].perm_all) json.perm_create = json.perm_create + 1
-            if(perm == 3 && json[name][child].perm_remove + 1 == json[name][child].perm_all) json.perm_remove = json.perm_remove + 1
-            if(perm == 4 && json[name][child].perm_update + 1 == json[name][child].perm_all) json.perm_update = json.perm_update + 1
-            if(perm == 5 && json[name][child].perm_approve + 1 == json[name][child].perm_all) json.perm_approve = json.perm_approve + 1
-            if(perm == 6 && json[name][child].perm_revoce + 1 == json[name][child].perm_all) json.perm_revoce = json.perm_revoce + 1
+            if(perm == 1){
+                if(json[name][child].perm_view + 1 == json[name][child].perm_all){
+                    json.perm_view = json.perm_view + 0.5
+                }
+                if(json[name][child].perm_view == 0){
+                    json.perm_view = json.perm_view + 0.5
+                }
+            }
+            if(perm == 2){
+                if(json[name][child].perm_create + 1 == json[name][child].perm_all){
+                    json.perm_create = json.perm_create + 0.5
+                }
+                if(json[name][child].perm_create == 0){
+                    json.perm_create = json.perm_create + 0.5
+                }
+            }
+            if(perm == 3){
+                if(json[name][child].perm_remove + 1 == json[name][child].perm_all){
+                    json.perm_remove = json.perm_remove + 0.5
+                }
+                if(json[name][child].perm_remove == 0){
+                    json.perm_remove = json.perm_remove + 0.5
+                }
+            }
+            if(perm == 4){
+                if(json[name][child].perm_update + 1 == json[name][child].perm_all){
+                    json.perm_update = json.perm_update + 0.5
+                }
+                if(json[name][child].perm_update == 0){
+                    json.perm_update = json.perm_update + 0.5
+                }
+            }
+            if(perm == 5){
+                if(json[name][child].perm_approve + 1 == json[name][child].perm_all){
+                    json.perm_approve = json.perm_approve + 0.5
+                }
+                if(json[name][child].perm_approve == 0){
+                    json.perm_approve = json.perm_approve + 0.5
+                }
+            }
+            if(perm == 6){
+                if(json[name][child].perm_revoce + 1 == json[name][child].perm_all){
+                    json.perm_revoce = json.perm_revoce + 0.5
+                }
+                if(json[name][child].perm_revoce == 0){
+                    json.perm_revoce = json.perm_revoce + 0.5
+                }
+            }
         }
         else{
-            if(perm == 1 && json[name][child].perm_view - 1 ==0 ) json.perm_view = json.perm_view - 1
-            if(perm == 2 && json[name][child].perm_create - 1 ==0 ) json.perm_create = json.perm_create - 1
-            if(perm == 3 && json[name][child].perm_remove - 1 ==0 ) json.perm_remove = json.perm_remove - 1
-            if(perm == 4 && json[name][child].perm_update - 1 ==0 ) json.perm_update = json.perm_update - 1
-            if(perm == 5 && json[name][child].perm_approve - 1 ==0 ) json.perm_approve = json.perm_approve - 1
-            if(perm == 6 && json[name][child].perm_revoce - 1 ==0 ) json.perm_revoce = json.perm_revoce - 1
+            if(perm == 1){
+                if(json[name][child].perm_view - 1 == 0){
+                    json.perm_view = json.perm_view - 0.5
+                }
+                if(json[name][child].perm_view == json[name][child].perm_all){
+                    json.perm_view = json.perm_view - 0.5
+                }
+            }
+            if(perm == 2){
+                if(json[name][child].perm_create - 1 == 0){
+                    json.perm_create = json.perm_create - 0.5
+                }
+                if(json[name][child].perm_create == json[name][child].perm_all){
+                    json.perm_create = json.perm_create - 0.5
+                }
+            }
+            if(perm == 3){
+                if(json[name][child].perm_remove - 1 == 0){
+                    json.perm_remove = json.perm_remove - 0.5
+                }
+                if(json[name][child].perm_remove == json[name][child].perm_all){
+                    json.perm_remove = json.perm_remove - 0.5
+                }
+            }
+            if(perm == 4){
+                if(json[name][child].perm_update - 1 == 0){
+                    json.perm_update = json.perm_update - 0.5
+                }
+                if(json[name][child].perm_update == json[name][child].perm_all){
+                    json.perm_update = json.perm_update - 0.5
+                }
+            }
+            if(perm == 5){
+                if(json[name][child].perm_approve - 1 == 0){
+                    json.perm_approve = json.perm_approve - 0.5
+                }
+                if(json[name][child].perm_approve == json[name][child].perm_all){
+                    json.perm_approve = json.perm_approve - 0.5
+                }
+            }
+            if(perm == 6){
+                if(json[name][child].perm_revoce - 1 == 0){
+                    json.perm_revoce = json.perm_revoce - 0.5
+                }
+                if(json[name][child].perm_revoce == json[name][child].perm_all){
+                    json.perm_revoce = json.perm_revoce - 0.5
+                }
+            }
         }
         return json
     }
@@ -117,8 +228,6 @@ export class Roles extends Component {
                 this.handleCheckedPackage(check, perm, tid, tid_index, pack.id, package_index)
             })
         }
-        // data[tid_index] = this.handleStateAll(check, data[tid_index], perm)
-        // this.setState({data})
     }
 
     handleCheckedPackage(check, perm, tid, tid_index, pid, pid_index){
@@ -134,9 +243,6 @@ export class Roles extends Component {
                 this.handleCheckedFeature(check, perm, tid, tid_index, pid, pid_index, feature.id, feature_index)
             })
         }
-        // data[tid_index]['packages'][pid_index] = this.handleStateAll(check, data[tid_index]['packages'][pid_index], perm)
-        // this.setState({data})
-
     }
 
     handleCheckedFeature(check, perm, tid, tid_index, pid, pid_index, fid, fid_index){
@@ -185,7 +291,9 @@ export class Roles extends Component {
         }
     }
 
-    handleChecked(json, check){
+    handleChecked(json, check, perm){
+        const { tid_index, pid_index, fid_index, data} = this.state
+
         const properties_perms = this.state.properties_perms
         if(check){
             var check_perm = properties_perms.filter((item) => {
@@ -204,27 +312,52 @@ export class Roles extends Component {
             }
             this.setState({properties_perms})
         }
+        data[tid_index] = this.handleStateTwo(check, data[tid_index], perm, pid_index, 'packages')
+        data[tid_index]['packages'][pid_index] = this.handleStateTwo(check, data[tid_index]['packages'][pid_index], perm, fid_index, 'features')
+        data[tid_index]['packages'][pid_index]['features'][fid_index] = this.handleStateSole(check, data[tid_index]['packages'][pid_index]['features'][fid_index], perm)
+        this.setState({data})
     }
 
     handleSubmit(){
+        this.setState({handle_save_is_laod: true})
         const id = this.props.match.params.id
 
         const {properties_perms} = this.state
         service.saveInspireRoles(id, properties_perms).then(({success}) =>{
-            if(success) alert(success)
+            if(success){
+                this.handleRoles()
+                setTimeout(() => {
+                    this.setState({modal_alert_status: 'open'})
+                    this.setState({handle_save_is_laod: false})
+                }, 1000);
+            }
 
         })
     }
-
+    modalClose(){
+        this.setState({modal_alert_status: 'closed'})
+        this.setState({handleSaveIsLoad:false})
+        this.handleRoles()
+    }
     render() {
         const {data, tid, pid, fid, properties, properties_perms} = this.state
         return (
             <div className="row">
-                <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" onClick={this.handleSubmit}>Хадгалах</a>
+                
                 <div className="col-md-6">
+                    {this.state.handle_save_is_laod ?
+                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white">
+                            <div className="spinner-border text-light" role="status">
+                                <span className="sr-only">Loading...</span>
+                            </div>
+                            <a className="text-light"> Шалгаж байна.</a>
+                        </a>
+                        :
+                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" onClick={this.handleSubmit}>Хадгалах</a>
+                    }
                     <div className="fixed-height">
                     {data.map((theme, theme_index) => (
-                        (theme.packages.length > 0 &&
+                        (theme.packages.length > 0 && theme.perm_all > 0 &&
                         <div className="bc-white" key={theme_index}>
                             
                             <div className="">
@@ -294,7 +427,7 @@ export class Roles extends Component {
                                                                                     <div className="collapsed">
                                                                                         <div className="text-primary collapsed">
                                                                                             <TableHeadRole
-                                                                                                handleFeature={() =>this.handleFeature(theme.id, package_data.id, feature_data.id, feature_data.properties)}
+                                                                                                handleFeature={() =>this.handleFeature(theme.id, theme_index, package_data.id, package_index, feature_data.id, feature_index, feature_data.properties)}
                                                                                                 root_1={theme.id}
                                                                                                 root_1_index={theme_index}
                                                                                                 root_2={package_data.id}
@@ -371,22 +504,22 @@ export class Roles extends Component {
                                     <tbody>
                                         <tr>
                                             <td>Geom</td>
-                                            <td className="icheck-primary"><input type="checkbox" id="perm_view" name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked)}/><label htmlFor="perm_view"></label></td>
-                                            <td className="icheck-primary"><input type="checkbox" id="perm_create" name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked)}/><label htmlFor="perm_create"></label></td>
-                                            <td className="icheck-primary"><input type="checkbox" id="perm_remove" name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked)}/><label htmlFor="perm_remove"></label></td>
-                                            <td className="icheck-primary"><input type="checkbox" id="perm_revoke" name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked)}/><label htmlFor="perm_revoke"></label></td>
-                                            <td className="icheck-primary"><input type="checkbox" id="perm_review" name="perm_review" checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked)}/><label htmlFor="perm_review"></label></td>
-                                            <td className="icheck-primary"><input type="checkbox" id="perm_approve" name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked)}/><label htmlFor="perm_approve"></label></td>
+                                            <td className="icheck-primary"><input type="checkbox" id="perm_view" name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked, 1)}/><label htmlFor="perm_view"></label></td>
+                                            <td className="icheck-primary"><input type="checkbox" id="perm_create" name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked, 2)}/><label htmlFor="perm_create"></label></td>
+                                            <td className="icheck-primary"><input type="checkbox" id="perm_remove" name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked, 3)}/><label htmlFor="perm_remove"></label></td>
+                                            <td className="icheck-primary"><input type="checkbox" id="perm_revoke" name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked, 4)}/><label htmlFor="perm_revoke"></label></td>
+                                            <td className="icheck-primary"><input type="checkbox" id="perm_review" name="perm_review" checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked, 5)}/><label htmlFor="perm_review"></label></td>
+                                            <td className="icheck-primary"><input type="checkbox" id="perm_approve" name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "property_id": null, "geom": true}, e.target.checked, 6)}/><label htmlFor="perm_approve"></label></td>
                                         </tr>
                                         {properties.map((property, index) =>
                                             <tr key={index}>
                                                 <td>{property.name}</td>
-                                                <td className="icheck-primary"><input type="checkbox" id={"perm_view"+property.id} name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked)}/><label htmlFor={"perm_view"+property.id}></label></td>
-                                                <td className="icheck-primary"><input type="checkbox" id={"perm_create"+property.id} name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked)}/><label htmlFor={"perm_create"+property.id}></label></td>
-                                                <td className="icheck-primary"><input type="checkbox" id={"perm_remove"+property.id} name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked)}/><label htmlFor={"perm_remove"+property.id}></label></td>
-                                                <td className="icheck-primary"><input type="checkbox" id={"perm_revoke"+property.id} name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked)}/><label htmlFor={"perm_revoke"+property.id}></label></td>
-                                                <td className="icheck-primary"><input type="checkbox" id={"perm_review"+property.id} name="perm_review" checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked)}/><label htmlFor={"perm_review"+property.id}></label></td>
-                                                <td className="icheck-primary"><input type="checkbox" id={"perm_approve"+property.id} name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked)}/><label htmlFor={"perm_approve"+property.id}></label></td>
+                                                <td className="icheck-primary"><input type="checkbox" id={"perm_view"+property.id} name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked, 1)}/><label htmlFor={"perm_view"+property.id}></label></td>
+                                                <td className="icheck-primary"><input type="checkbox" id={"perm_create"+property.id} name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked, 2)}/><label htmlFor={"perm_create"+property.id}></label></td>
+                                                <td className="icheck-primary"><input type="checkbox" id={"perm_remove"+property.id} name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked, 3)}/><label htmlFor={"perm_remove"+property.id}></label></td>
+                                                <td className="icheck-primary"><input type="checkbox" id={"perm_revoke"+property.id} name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked, 4)}/><label htmlFor={"perm_revoke"+property.id}></label></td>
+                                                <td className="icheck-primary"><input type="checkbox" id={"perm_review"+property.id} name="perm_review" checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked, 5)}/><label htmlFor={"perm_review"+property.id}></label></td>
+                                                <td className="icheck-primary"><input type="checkbox" id={"perm_approve"+property.id} name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "property_id": property.id, "geom": false}, e.target.checked, 6)}/><label htmlFor={"perm_approve"+property.id}></label></td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -398,6 +531,12 @@ export class Roles extends Component {
                 </div>
                 </div>
             <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}><i className="fa fa-chevron-left" aria-hidden="true"></i></a>
+            <ModalAlert
+                modalAction={() => this.modalClose()}
+                status={this.state.modal_alert_status}
+                title="Амжилттай хадгаллаа"
+                model_type_icon = "success"
+            />
            </div>
         )
 
