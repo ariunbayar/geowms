@@ -444,7 +444,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.featuresForCollection.map((feat, idx) => {
         collection.push(feat)
       })
-      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta)
+      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta,  this.addNotif)
     }
 
     modifiedFeature(event) {
@@ -820,10 +820,6 @@ export default class BarilgaSuurinGazar extends Component{
       const map = this.map
       this.select.setActive(true)
       this.setState({ isMeta: true })
-      // map.on('click', (evt) => {
-        // const collection = this.select.getFeatures()
-        // console.log(evt);
-      // })
     }
 
     showUploadBtn(){
@@ -1145,7 +1141,9 @@ export default class BarilgaSuurinGazar extends Component{
         this.controls.metaList.showMetaList(false)
       }
       this.setState({ isMeta: false })
-      this.select.setActive(false)
+      if (!this.state.modify_button_active) {
+        this.select.setActive(false)
+      }
     }
 
     render(){

@@ -16,7 +16,7 @@ class NewMetaInput extends Component{
     handleOnChange(value) {
         const { idx, ix, field, type, origin_name } = this.props
         this.setState({ value })
-        this.props.getValues(value, idx)
+        this.props.getValues(value, idx, origin_name)
     }
 
     render() {
@@ -68,7 +68,6 @@ class ListComponent extends Component {
 
         super(props)
         this.list = []
-        this.values = []
         this.state = {
             name_list: {},
             meta_data_list: [],
@@ -97,7 +96,7 @@ class ListComponent extends Component {
         this.setState({ is_loading: false })
         service.searchMeta(query).then(({success, meta_data}) => {
             if (success) {
-                this.values = []
+                this.values = {}
                 this.setState({ found_it: query, is_searched: true, is_loading: true })
                 // this.setState({ meta_data_list: meta_data })
             } else {
@@ -131,22 +130,25 @@ class ListComponent extends Component {
 
     saveGeom() {
         const { geom_ids, found_it, is_create_meta } = this.state
-        let meta_data = []
+        var meta_data = {}
         if (found_it && !is_create_meta) {
             const rsp = {
-                'meta_id' : found_it
+                'id' : found_it
             }
-            meta_data.push(rsp)
+            meta_data = rsp
         }
-        else if (is_create_meta && this.values.length > 0) {
+        else if (is_create_meta && this.values !== {}) {
             meta_data = this.values
         }
         service
             .createMeta(meta_data, geom_ids)
-            .then(rsp => {
-                console.log(rsp);
+            .then(({success}) => {
+                if (success) {
+                    this.props.notif('success', "Амжилттай нэмлээ", 'check')
+                } else {
+                    this.props.notif('danger', "Амжилтгүй болсон", 'times')
+                }
             })
-        console.log(geom_ids)
     }
 
     componentDidMount() {
@@ -173,9 +175,9 @@ class ListComponent extends Component {
                 .deleteMeta(found_it)
                 .then(({success}) => {
                     if (success) {
-                        console.log("Амжилттай устгасан")
+                        this.props.notif('success', "Амжилттай устгасан", 'check')
                     } else {
-                        console.log("Устгах явцад алдаа гарсан")
+                        this.props.notif('danger', "Устгах явцад алдаа гарсан", 'times')
                     }
                 })
         }
@@ -183,13 +185,10 @@ class ListComponent extends Component {
             .getMetaFields()
             .then(({success, fields}) => {
                 if (success) {
-                    this.values = []
+                    this.values = new Object();
+                    this.z = []
                     fields.map((field, idx) => {
-                        const json = {
-                            'field_name': field.origin_name,
-                            'value': ''
-                        }
-                        this.values.push(json)
+                        this.values[field.origin_name] = ''
                     })
                     this.setState({ fields, is_new_meta: true, is_searched: false, found_it: '' })
                 }
@@ -197,8 +196,9 @@ class ListComponent extends Component {
         this.setState({ is_loading: false })
     }
 
-    getValues(input_datas, idx) {
-        this.values[idx].values = input_datas
+    getValues(input_datas, idx, name) {
+        this.values[name] = input_datas
+        console.log(this.values);
         this.setState({ is_create_meta: true })
     }
 
@@ -231,7 +231,7 @@ class ListComponent extends Component {
                     found_it
                     ?
                         <div>
-                            <label>Олдсон мета: {found_it}</label>
+                            <label>Олдсон метагийн дугаар: {found_it}</label>
                         </div>
                     :
                     !is_new_meta && found_it == ''
@@ -341,9 +341,9 @@ export class MetaList extends Control {
         ReactDOM.hydrate(<ListComponent {...props}/>, this.element)
     }
 
-    showMetaList(islaod, name_list, modal) {
+    showMetaList(islaod, name_list, modal, notif) {
         this.toggleControl(islaod)
-        this.renderComponent({name_list, modal})
+        this.renderComponent({name_list, modal, notif})
     }
 
 }
