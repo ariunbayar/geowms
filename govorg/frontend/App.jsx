@@ -1,8 +1,9 @@
-import React, {Component} from 'react'
-import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
+import React, { Component } from 'react'
+import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
 import GovRole from './GovRole/'
 import { System } from "./System";
+import { Meta } from "./Meta"
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -11,7 +12,7 @@ import { ZipCode } from './Bundles/Zipcode'
 import OrgRequest from './OrgRequest'
 import ChangeRequest from './Bundles/Inspire/ChangeRequest'
 
-import {Help} from './Help'
+import { Help } from './Help'
 import { service } from "./service"
 import MenuItem from "../../src/components/MenuItem"
 
@@ -19,34 +20,34 @@ export class App extends Component {
 
     constructor(props) {
         super(props)
-        this.state={
+        this.state = {
             org_level: props.org.org_level,
             name: props.org.name,
             tuuhen_ov: {},
             tseg_burtgel: {},
-            map_list:[],
+            map_list: [],
         }
         this.handleMapComponens = this.handleMapComponens.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
 
         const { perms } = this.props.org
         perms.map((perm) => {
-            if(perm.module_id == 1){
-                this.setState({tuuhen_ov: perm})
+            if (perm.module_id == 1) {
+                this.setState({ tuuhen_ov: perm })
             }
-            else if(perm.module_id == 2){
-                this.setState({tseg_burtgel: perm})
+            else if (perm.module_id == 2) {
+                this.setState({ tseg_burtgel: perm })
             }
         })
 
         this.handleMapComponens()
     }
 
-    handleMapComponens(){
+    handleMapComponens() {
         // service.component
-        service.getCount().then(({success, count, info}) => {
+        service.getCount().then(({ success, count, info }) => {
             if (success) {
                 this.setState({ request_count: count })
             } else {
@@ -79,6 +80,7 @@ export class App extends Component {
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
                         <MenuItem
                             icon="gp-text-primary fa fa-plug"
                             url="/gov/org-request/"
@@ -104,42 +106,42 @@ export class App extends Component {
                                     </MenuItem>
                                 }
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
-                                { org_inspire.length >0  ? org_inspire.map((theme, idx) =>
+                                {org_inspire.length > 0 ? org_inspire.map((theme, idx) =>
                                     <MenuItem
-                                        key={ idx }
+                                        key={idx}
                                         icon="gp-text-primary fa fa-circle-o"
                                         url={`/gov/org/map/${theme.id}`}
                                         text={theme.name}
                                     >
                                         <ul className="sidebar-submenu">
                                             {
-                                                theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
-                                                <MenuItem
-                                                    key={ idy }
-                                                    icon="fa fa-circle-o gp-text-primary"
-                                                    url={`/gov/org/map/${theme.id}/${pack.id}`}
-                                                    text={pack.name}
-                                                >
-                                                <ul className="sidebar-submenu">
-                                                    {
-                                                        pack.features.length>0 ? pack.features.map((feat, idz)=>
-                                                            <MenuItem
-                                                                key={idz}
-                                                                icon="fa fa-circle-o gp-text-primary"
-                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
-                                                                text={feat.name}
-                                                                count={feat.count}
-                                                            >
-                                                            </MenuItem>
-                                                        ): null
-                                                    }
-                                                </ul>
-                                                </MenuItem>
-                                                ):null
+                                                theme.packages.length > 0 ? theme.packages.map((pack, idy) =>
+                                                    <MenuItem
+                                                        key={idy}
+                                                        icon="fa fa-circle-o gp-text-primary"
+                                                        url={`/gov/org/map/${theme.id}/${pack.id}`}
+                                                        text={pack.name}
+                                                    >
+                                                        <ul className="sidebar-submenu">
+                                                            {
+                                                                pack.features.length > 0 ? pack.features.map((feat, idz) =>
+                                                                    <MenuItem
+                                                                        key={idz}
+                                                                        icon="fa fa-circle-o gp-text-primary"
+                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                        text={feat.name}
+                                                                        count={feat.count}
+                                                                    >
+                                                                    </MenuItem>
+                                                                ) : null
+                                                            }
+                                                        </ul>
+                                                    </MenuItem>
+                                                ) : null
                                             }
                                         </ul>
                                     </MenuItem>
-                                ):null}
+                                ) : null}
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>
@@ -151,19 +153,20 @@ export class App extends Component {
                     <div className="content-wrapper">
                         <Switch>
                             {tseg_burtgel.perm_view ?
-                                <Route path={"/gov/froms/"} component={()=><Forms perms={this.state.tseg_burtgel}/>}/> : null
+                                <Route path={"/gov/froms/"} component={() => <Forms perms={this.state.tseg_burtgel} />} /> : null
                             }
                             {tuuhen_ov.perm_view ?
-                                <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
+                                <Route path="/gov/tuuhen-ov/" component={() => <TuuhenOv perms={this.state.tuuhen_ov} />} /> : null
                             }
-                            <Route path="/gov/system/" component={System}/>
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
-                            <Route path="/gov/zip-code/" component={ZipCode}/>
-                            <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()}/>}/>
-                            <Route path="/gov/history/" component={ChangeRequest}/>
-                            <Route exact path="/gov/role/employees/" component={ Employee }/>
-                            <Route exact path="/gov/role/" component={GovRole}/>
-                            <Route exact path="/gov/help/" component={Help}/>
+                            <Route path="/gov/system/" component={System} />
+                            <Route path="/gov/meta/" component={Meta} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
+                            <Route path="/gov/zip-code/" component={ZipCode} />
+                            <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
+                            <Route path="/gov/history/" component={ChangeRequest} />
+                            <Route exact path="/gov/role/employees/" component={Employee} />
+                            <Route exact path="/gov/role/" component={GovRole} />
+                            <Route exact path="/gov/help/" component={Help} />
                         </Switch>
                     </div>
                 </div>
