@@ -1,5 +1,5 @@
 import requests
-AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
+
 
 
 def getWorkspace(BASE_URL, AUTH, space_name):
