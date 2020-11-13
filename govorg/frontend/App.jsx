@@ -3,7 +3,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
 import GovRole from './GovRole/'
 import { System } from "./System";
-
+import { Profile } from './Profile'
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
 import { Forms } from './Bundles/Form'
@@ -114,27 +114,27 @@ export class App extends Component {
                                         <ul className="sidebar-submenu">
                                             {
                                                 theme.packages.length > 0 ? theme.packages.map((pack, idy)=>
-                                                <MenuItem
-                                                    key={ idy }
-                                                    icon="fa fa-circle-o gp-text-primary"
-                                                    url={`/gov/org/map/${theme.id}/${pack.id}`}
-                                                    text={pack.name}
-                                                >
-                                                <ul className="sidebar-submenu">
-                                                    {
-                                                        pack.features.length>0 ? pack.features.map((feat, idz)=>
-                                                            <MenuItem
-                                                                key={idz}
-                                                                icon="fa fa-circle-o gp-text-primary"
-                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
-                                                                text={feat.name}
-                                                                count={feat.count}
-                                                            >
-                                                            </MenuItem>
-                                                        ): null
-                                                    }
-                                                </ul>
-                                                </MenuItem>
+                                                    <MenuItem
+                                                        key={ idy }
+                                                        icon="fa fa-circle-o gp-text-primary"
+                                                        url={`/gov/org/map/${theme.id}/${pack.id}`}
+                                                        text={pack.name}
+                                                    >
+                                                        <ul className="sidebar-submenu">
+                                                            {
+                                                                pack.features.length>0 ? pack.features.map((feat, idz)=>
+                                                                    <MenuItem
+                                                                        key={idz}
+                                                                        icon="fa fa-circle-o gp-text-primary"
+                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                        text={feat.name}
+                                                                        count={feat.count}
+                                                                    >
+                                                                    </MenuItem>
+                                                                ): null
+                                                            }
+                                                        </ul>
+                                                    </MenuItem>
                                                 ):null
                                             }
                                         </ul>
@@ -157,6 +157,7 @@ export class App extends Component {
                                 <Route path="/gov/tuuhen-ov/" component={()=><TuuhenOv perms={this.state.tuuhen_ov}/>}/> : null
                             }
                             <Route path="/gov/system/" component={System}/>
+                            <Route path="/gov/profile/" component={Profile} />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles}/>
                             <Route path="/gov/zip-code/" component={ZipCode}/>
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()}/>}/>
