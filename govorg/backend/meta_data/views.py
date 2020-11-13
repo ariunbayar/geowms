@@ -70,6 +70,20 @@ def all(request):
 def create(request, payload):
 
     data = payload.get("meta_data")
+    print('data')
+    print('data')
+    print('data')
+    print('data')
+    print('data')
+    print('data')
+    print(data)
+    print("geom")
+    print("geom")
+    print("geom")
+    print("geom")
+    print("geom")
+    print("geom")
+    print(payload.get("geom_ids"))
     geoms = MGeoDatas.objects.filter(geo_id__in = payload.get("geom_ids"))
     try:
         if data.get("id"):
@@ -121,3 +135,23 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False})
+
+
+@require_GET
+@ajax_required
+def getFields(request):
+    send_fields = []
+    for f in MetaData._meta.get_fields():
+        if f.name != 'id' and f.name != 'geo_datas' and not 'create' in f.name and not 'update' in f.name:
+            if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                send_fields.append({
+                    'origin_name': f.name,
+                    'name': f.verbose_name,
+                    'length': f.max_length,
+                    'choices': f.choices
+                })
+    rsp = {
+        'success': True,
+        'fields': send_fields
+    }
+    return JsonResponse(rsp)

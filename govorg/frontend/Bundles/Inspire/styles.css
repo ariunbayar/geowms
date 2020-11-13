@@ -293,3 +293,10 @@
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
 }
+
+.new-meta-form {
+    max-height: calc( 50vh - 70px - 15px);
+    margin-bottom: 10px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+}

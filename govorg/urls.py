@@ -49,6 +49,7 @@ urlpatterns = [
             path('<int:pk>/delete/', meta_data_views.delete),
             path('<int:pk>/edit/', meta_data_views.edit),
             path('create/', meta_data_views.create),
+            path('get-fields/', meta_data_views.getFields),
         ], 'meta-data'))),
 
     ], 'back_org'))),

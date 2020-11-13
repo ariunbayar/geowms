@@ -125,6 +125,9 @@ export default class BarilgaSuurinGazar extends Component{
       this.updateFromList = this.updateFromList.bind(this)
       this.transformToMapCoordinate = this.transformToMapCoordinate.bind(this)
       this.transformToLatLong = this.transformToLatLong.bind(this)
+      this.callModalWithMeta = this.callModalWithMeta.bind(this)
+      this.hideMetaList = this.hideMetaList.bind(this)
+      this.hideShowList = this.hideShowList.bind(this)
 
     }
 
@@ -441,7 +444,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.featuresForCollection.map((feat, idx) => {
         collection.push(feat)
       })
-      this.controls.metaList.showMetaList(true, this.featureNames)
+      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta)
     }
 
     modifiedFeature(event) {
@@ -581,6 +584,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     RemoveButton() {
+      this.hideMetaList()
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
       if(this.state.remove_button_active)
@@ -662,6 +666,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(){
+      this.hideMetaList()
       if(this.state.modifyend_selected_feature_ID){
           if(this.state.modifyend_selected_feature_check)
           {
@@ -772,6 +777,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
+      this.hideMetaList()
     }
 
     LineButton(){
@@ -782,6 +788,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+      this.hideMetaList()
     }
 
     PointButton(){
@@ -792,6 +799,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+      this.hideMetaList()
     }
 
     PolygonButton(){
@@ -802,9 +810,13 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(true);
       this.modifyE.setActive(false);
+      this.hideMetaList()
     }
 
     MetaButton() {
+      this.drawE.getActive()
+      this.drawE.setActive(false);
+      this.modifyE.setActive(false);
       const map = this.map
       this.select.setActive(true)
       this.setState({ isMeta: true })
@@ -1117,6 +1129,23 @@ export default class BarilgaSuurinGazar extends Component{
       })
       const changedFeature = JSON.stringify(data)
       return changedFeature
+    }
+
+    callModalWithMeta(info, func) {
+      let elemFunc = null
+      if (func) elemFunc = func
+      else elemFunc = this.hideMetaList
+      this.controls.modal.showModal(elemFunc, true, "Тийм", info, null, 'danger', "Үгүй")
+    }
+
+    hideMetaList() {
+      this.featureNames = []
+      this.featuresForCollection = []
+      if (this.state.isMeta) {
+        this.controls.metaList.showMetaList(false)
+      }
+      this.setState({ isMeta: false })
+      this.select.setActive(false)
     }
 
     render(){

@@ -20,7 +20,7 @@ export class MetaBarButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Мета дата нэмэх')
         elementa.setAttribute('href', '#')
-        element.setAttribute('id', '⚙-toggle-form-id')
+        element.setAttribute('id', '⚙-toggle-meta-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
