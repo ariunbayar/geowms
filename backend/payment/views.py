@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import user_passes_test
 from main.decorators import ajax_required
 from geoportal_app.models import User
 from .models import Payment, PaymentPoint
-from backend.forms.models import Mpoint_view
+from govorg.backend.forms.models import Mpoint_view
 
 from django.contrib.postgres.search import SearchVector
 

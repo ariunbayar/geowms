@@ -1,6 +1,6 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
-const prefix = '/back/tuuhen_ov'
+const prefix = '/gov/api/tuuhen_ov'
 
 export const service = {
     tsegPersonal,
