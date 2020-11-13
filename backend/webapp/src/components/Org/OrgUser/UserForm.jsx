@@ -126,6 +126,7 @@ export class UserForm extends Component {
                                         <th scope="col"> Цахим шуудан </th>
                                         <th scope="col"> ДАН систем </th>
                                         <th scope="col"> Албан тушаал</th>
+                                        <th scope="col"> Админ </th>
                                         <th scope="col"> Үүссэн </th>
                                         <th scope="col"> Зассан </th>
                                         <th scope="col"> </th>

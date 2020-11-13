@@ -81,7 +81,7 @@ urlpatterns = [
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
         path('level-<int:level>/<int:pk>/employeeList/', org_views.employeeList, name='employeeList'),
         path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
-        path('level-<int:level>/org-list/', org_views.orgList, name='orgList'),
+        path('level-<int:level>/org-list/', org_views.org_list, name='orgList'),
         path('org-count/', org_views.countOrg, name='org-count'),
 
     ], 'org'))),
@@ -117,6 +117,8 @@ urlpatterns = [
         path('create/', config_views.create, name='create'),
         path('disk/', config_views.disk, name='disk'),
         path('postresqlVersion/', config_views.postresqlVersion, name='postresqlVersion'),
+        path('geoserver/', config_views.geoserver_configs),
+        path('geoserver/save/', config_views.geoserver_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([

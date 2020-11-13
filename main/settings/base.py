@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'govorg.backend.org_request.apps.OrgRequestConfig',
     'govorg.backend.zipcode.apps.ZipcodeConfig',
     'govorg.backend.forms.apps.FormsConfig',
+    'govorg.backend.meta_data.apps.MetaDataConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'

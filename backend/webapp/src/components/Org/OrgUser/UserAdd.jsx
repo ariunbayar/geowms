@@ -299,7 +299,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                                 <div className='form-group'>
-                                    <div class="icheck-primary">
+                                    <div className="icheck-primary">
                                         <input
                                             id='is_admin'
                                             type="checkbox"

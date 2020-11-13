@@ -111,15 +111,20 @@ def delete(request, pk):
 @cache_page(60 * CACHE_TIMEOUT_DISK_INFO)
 @user_passes_test(lambda u: u.is_superuser)
 def disk(request):
+
     disk_info = _get_disk_info()
-    for name, info in disk_info.items():
-        disk = {
-                'name': name,
-                'size_used': info['used'],
-                'size_total': info['used'] + info['avail'],
-                'mount_point': info['target'],
+
+    disks = [
+        {
+            'name': name,
+            'size_used': info['used'],
+            'size_total': info['used'] + info['avail'],
+            'mount_point': info['target'],
         }
-    return JsonResponse({'success': True, 'disk': disk})
+        for name, info in disk_info.items()
+    ]
+    return JsonResponse({'success': True, 'disks': disks})
+
 
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -182,3 +187,46 @@ def _get_error500_display(error500):
         'description': error500.description,
         'created_at': localtime(error500.created_at).strftime('%Y-%m-%d %H:%M:%S.%f'),
     }
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def geoserver_configs(request):
+
+    default_values = {
+        'geoserver_host': '',
+        'geoserver_user': '',
+        'geoserver_pass': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def geoserver_configs_save(request, payload):
+
+    config_names = (
+        'geoserver_host',
+        'geoserver_user',
+        'geoserver_pass',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
