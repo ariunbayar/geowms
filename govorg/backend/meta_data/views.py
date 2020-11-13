@@ -70,20 +70,6 @@ def all(request):
 def create(request, payload):
 
     data = payload.get("meta_data")
-    print('data')
-    print('data')
-    print('data')
-    print('data')
-    print('data')
-    print('data')
-    print(data)
-    print("geom")
-    print("geom")
-    print("geom")
-    print("geom")
-    print("geom")
-    print("geom")
-    print(payload.get("geom_ids"))
     geoms = MGeoDatas.objects.filter(geo_id__in = payload.get("geom_ids"))
     try:
         if data.get("id"):
