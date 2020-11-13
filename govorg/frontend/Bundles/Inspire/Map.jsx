@@ -12,10 +12,7 @@ import {GeoJSON} from 'ol/format'
 import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS, createStringXY} from 'ol/coordinate'
 import {platformModifierKeyOnly} from 'ol/events/condition';
-import {containsXY} from 'ol/extent'
-import { click } from 'ol/events/condition';
 import * as geom_type from 'ol/geom'
-import {Polygon} from 'ol/geom'
 
 
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
@@ -40,7 +37,6 @@ import "./styles.css"
 import { service } from './service'
 import Маягт from "./Маягт"
 import {Mongolia_boundary} from './MongoliaBorder'
-import { Bar } from 'react-chartjs-2';
 
 export default class BarilgaSuurinGazar extends Component{
 
