@@ -388,7 +388,7 @@ export class Roles extends Component {
                                                     ></TableHeadRole>
                                                 </div>
                                             </div>
-                                            <div id={`collapse${theme_index+1}`} className="collapse show" data-parent={`#accordion${theme_index+1}`}>
+                                            <div id={`collapse${theme_index+1}`} className="collapse" data-parent={`#accordion${theme_index+1}`}>
                                                 <div className="">
                                                     {theme.packages.map((package_data, package_index) => (
                                                         (package_data.features.length > 0 &&
@@ -418,7 +418,7 @@ export class Roles extends Component {
                                                                         ></TableHeadRole>
                                                                         </div>
                                                                     </div>
-                                                                    <div id={`collapse-p-${package_index+1+package_data.id}`} className="collapse show" data-parent={`#accordion-p-${package_index+1+package_data.id}`}>
+                                                                    <div id={`collapse-p-${package_index+1+package_data.id}`} className="collapse" data-parent={`#accordion-p-${package_index+1+package_data.id}`}>
                                                                         <div className="">
                                                                         {package_data.features.map((feature_data, feature_index) => (
                                                                             (feature_data.properties.length > 0 &&
