@@ -84,7 +84,7 @@ export class TableHeadRole extends Component {
                                     <small className="smaller text-center">хасах</small>
                                     <div className="custom-control custom-switch col-lg-12">
                                         <input
-                                            type="checkbox" className="custom-control-input" id={"perm_delete_all"+name+tree}
+                                            type="checkbox" className="custom-control-input" id={"perm_remove_all"+name+tree}
                                             checked={perm_all == perm_remove ? true : 0 < perm_remove < perm_all ? console.log("tsentsu ym bna ho haha") : false}
                                             onChange={(e) =>
                                                 inspire == 'theme' ?
@@ -96,7 +96,7 @@ export class TableHeadRole extends Component {
                                                 null
                                             }
                                         />
-                                        <label className="custom-control-label" htmlFor={"perm_delete_all"+name+tree}></label>
+                                        <label className="custom-control-label" htmlFor={"perm_remove_all"+name+tree}></label>
                                     </div>
                                     <small className="smaller text-center">{perm_all}-{perm_remove}</small>
                                 </div>
@@ -118,13 +118,13 @@ export class TableHeadRole extends Component {
                                         />
                                         <label className="custom-control-label" htmlFor={"perm_update_all"+name+tree}></label>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_approve}</small>
+                                    <small className="smaller text-center">{perm_all}-{perm_update}</small>
                                 </div>
                                 <div className="col-2">
                                     <small className="smaller text-center">хянах</small>
                                     <div className="custom-control custom-switch col-lg-12">
                                         <input
-                                            type="checkbox" className="custom-control-input" id={"perm_review_all"+name+tree}
+                                            type="checkbox" className="custom-control-input" id={"perm_approve_all"+name+tree}
                                             checked={perm_all == perm_approve ? true : 0 < perm_approve < perm_all ? console.log("tsentsu ym bna ho haha") : false}
                                             onChange={(e) =>
                                                 inspire == 'theme' ?
@@ -136,7 +136,7 @@ export class TableHeadRole extends Component {
                                                 null
                                             }
                                         />
-                                        <label className="custom-control-label" htmlFor={"perm_review_all"+name+tree}></label>
+                                        <label className="custom-control-label" htmlFor={"perm_approve_all"+name+tree}></label>
                                     </div>
                                     <small className="smaller text-center">{perm_all}-{perm_approve}</small>
                                 </div>
@@ -144,7 +144,7 @@ export class TableHeadRole extends Component {
                                     <small className="smaller text-center">батлах</small>
                                     <div className="custom-control custom-switch col-lg-12">
                                         <input
-                                            type="checkbox" className="custom-control-input" id={"perm_approve_all"+name+tree}
+                                            type="checkbox" className="custom-control-input" id={"perm_revoce_all"+name+tree}
                                             checked={perm_all == perm_revoce ? true : 0 < perm_revoce < perm_all ? console.log("tsentsu ym bna ho haha") : false}
                                             onChange={(e) =>
                                                 inspire == 'theme' ?
@@ -156,7 +156,7 @@ export class TableHeadRole extends Component {
                                                 null
                                             }
                                         />
-                                        <label className="custom-control-label" htmlFor={"perm_approve_all"+name+tree}></label>
+                                        <label className="custom-control-label" htmlFor={"perm_revoce_all"+name+tree}></label>
                                     </div>
                                     <small className="smaller text-center">{perm_all}-{perm_revoce}</small>
                                 </div>

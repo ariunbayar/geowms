@@ -698,19 +698,38 @@ def _get_theme_packages(theme_id, govRole):
                 'perm_approve': p_perm_approve,
                 'perm_revoce': p_perm_revoce,
             })
-        if p_perm_all == p_perm_view:
+        if p_perm_all == p_perm_view and p_perm_all != 0:
             t_perm_view = t_perm_view + 1
-        if p_perm_all == p_perm_create:
-            t_perm_create = t_perm_create + 1
-        if p_perm_all == p_perm_remove:
-            t_perm_remove = t_perm_remove + 1
-        if p_perm_all == p_perm_update:
-            t_perm_update = t_perm_update + 1
-        if p_perm_all == p_perm_approve:
-            t_perm_approve = t_perm_approve + 1
-        if p_perm_all == p_perm_revoce:
-            t_perm_revoce = t_perm_revoce + 1
+        elif 0 < p_perm_view and p_perm_all != 0:
+            t_perm_view = t_perm_view + 0.5
 
+        if p_perm_all == p_perm_create  and p_perm_all != 0:
+            t_perm_create = t_perm_create + 1
+        elif 0 < p_perm_create and p_perm_all != 0:
+            t_perm_create = t_perm_create + 0.5
+
+        if p_perm_all == p_perm_remove  and p_perm_all != 0:
+            t_perm_remove = t_perm_remove + 1
+        elif 0 < p_perm_remove and p_perm_all != 0:
+            t_perm_remove = t_perm_remove + 0.5
+
+        if p_perm_all == p_perm_update  and p_perm_all != 0:
+            t_perm_update = t_perm_update + 1
+        elif 0 < p_perm_update and p_perm_all != 0:
+            t_perm_update = t_perm_update + 0.5
+
+        if p_perm_all == p_perm_approve  and p_perm_all != 0:
+            t_perm_approve = t_perm_approve + 1
+        elif 0 < p_perm_approve and p_perm_all != 0:
+            t_perm_approve = t_perm_approve + 0.5
+
+        if p_perm_all == p_perm_revoce  and p_perm_all != 0:
+            t_perm_revoce = t_perm_revoce + 1
+        elif 0 < p_perm_revoce and p_perm_all != 0:
+            t_perm_revoce = t_perm_revoce + 0.5
+
+        if p_perm_all == 0:
+            t_perm_all = t_perm_all - 1
     return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce
 
 
@@ -739,18 +758,33 @@ def _get_package_features(package_id, govRole):
             'perm_approve': perm_approve,
             'perm_revoce': perm_revoce,
         })
-        if perm_all == perm_view:
+        if perm_all == perm_view and perm_all != 0:
             p_perm_view = p_perm_view + 1
-        if perm_all == perm_create:
+        elif 0 < perm_view and perm_all != 0:
+            p_perm_view = p_perm_view + 0.5
+        if perm_all == perm_create and perm_all != 0:
             p_perm_create = p_perm_create + 1
-        if perm_all == perm_remove:
+        elif 0 < perm_create and perm_all != 0:
+            p_perm_create = p_perm_create + 0.5
+        if perm_all == perm_remove and perm_all != 0:
             p_perm_remove = p_perm_remove + 1
-        if perm_all == perm_update:
+        elif 0 < perm_remove and perm_all != 0:
+            p_perm_remove = p_perm_remove + 0.5
+        if perm_all == perm_update and perm_all != 0:
             p_perm_update = p_perm_update + 1
-        if perm_all == perm_approve:
+        elif 0 < perm_update and perm_all != 0:
+            p_perm_update = p_perm_update + 0.5
+        if perm_all == perm_approve and perm_all != 0:
             p_perm_approve = p_perm_approve + 1
-        if perm_all == perm_revoce:
+        elif 0 < perm_approve and perm_all != 0:
+            p_perm_remove = p_perm_remove + 0.5
+        if perm_all == perm_revoce and perm_all != 0:
             p_perm_revoce = p_perm_revoce + 1
+        elif 0 < perm_revoce and perm_all != 0:
+            p_perm_revoce = p_perm_revoce + 0.5
+        if perm_all == 0:
+            p_perm_all = p_perm_all - 1
+        
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce
 
 
