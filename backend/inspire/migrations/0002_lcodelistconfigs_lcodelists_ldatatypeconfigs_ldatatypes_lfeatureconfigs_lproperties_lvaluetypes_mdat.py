@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('inspire', '0001_initial'),
+        ('backend_inspire', '0001_initial'),
     ]
 
     operations = [

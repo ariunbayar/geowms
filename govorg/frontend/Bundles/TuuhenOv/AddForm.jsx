@@ -184,11 +184,11 @@ export class AddForm extends Component {
                                         <tr>
                                             <th scope="col">№</th>
                                             <th scope="col">Дурсгалт газрын нэр</th>
-                                            <th scope="col">Чулуулгын төрөл</th>
+                                            <th scope="col">Чулуулгийн төрөл</th>
                                             <th scope="col">X</th>
                                             <th scope="col">Y</th>
                                             <th scope="col">Хамрах хүрээнд багтсан</th>
-                                            <th scope="col">created_at</th>
+                                            <th scope="col">Үүссэн</th>
                                             {is_editable ? <th scope="col">Засах</th> : null}
                                             {perms.perm_remove ? <th scope="col">Устгах</th> : null}
                                         </tr>
@@ -230,21 +230,89 @@ export class AddForm extends Component {
                         {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
                         {huree_components}
                         {
-                            perms.perm_create || perms.perm_view
-                            ?
-                            <AyulForm
-                                dursgalt_id={dursgalt_id}
-                                x={this.state.x}
-                                y={this.state.y}
-                                perms = {perms}
-                                is_editable = {is_editable}
-                                loadAyuulRows={() => this.loadAyuulRows()}
-                            >
-                            </AyulForm>
-                            :
-                            null
+                            perms.perm_create &&
+                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
+                                Нэмэх
+                            </NavLink>
                         }
+                        <input
+                            type="text"
+                            className="form-control col-md-4  mb-1 float-left"
+                            id="searchQuery"
+                            placeholder="Хайх"
+                            onChange={(e) => this.handleSearch('searchQuery', e)}
+                            value={this.state.searchQuery}
+                        />
                     </div>
+                    <div className="table-responsive">
+                        <table className="table">
+                            <thead>
+                                {
+                                    perms.perm_view
+                                    ?
+                                    <tr>
+                                        <th scope="col">№</th>
+                                        <th scope="col">Дурсгалт газрын нэр</th>
+                                        <th scope="col">Чулуулгын төрөл</th>
+                                        <th scope="col">X</th>
+                                        <th scope="col">Y</th>
+                                        <th scope="col">Хамрах хүрээнд багтсан</th>
+                                        <th scope="col">created_at</th>
+                                        {is_editable ? <th scope="col">Засах</th> : null}
+                                        {perms.perm_remove ? <th scope="col">Устгах</th> : null}
+                                    </tr>
+                                    :
+                                    null
+                                }
+                            </thead>
+                            <tfoot>
+                                {
+                                    perms.perm_view
+                                    ?
+                                    this.state.form_data.map((values, idx) =>
+                                        <DursgaltGazarTable
+                                            key={idx}
+                                            idx={(currentPage*1)-1+idx+1}
+                                            // idx = {idx}
+                                            dursgalt_id = {dursgalt_id}
+                                            values={values}
+                                            handleRemove={() => this.handleRemove(values.id)}
+                                            handleMove={this.handleMove}
+                                            perms = {perms}
+                                            is_editable = {is_editable}
+                                            loadGeomPoints = {() => loadGeomPoints()}
+                                        />
+                                    )
+                                    :
+                                    null
+                                }
+                            </tfoot>
+                        </table>
+                    </div>
+                    <Pagination
+                        paginate = {this.paginate}
+                        searchQuery = {this.state.searchQuery}
+                        load = { this.state.load }
+                    />
+                </div>
+                <div className="col-md-7 card-body ml-3">
+                    {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
+                    {huree_components}
+                    {
+                        perms.perm_create || perms.perm_view
+                        ?
+                        <AyulForm
+                            dursgalt_id={dursgalt_id}
+                            x={this.state.x}
+                            y={this.state.y}
+                            perms = {perms}
+                            is_editable = {is_editable}
+                            loadAyuulRows={() => this.loadAyuulRows()}
+                        >
+                        </AyulForm>
+                        :
+                        null
+                    }
                 </div>
             </div>
         )

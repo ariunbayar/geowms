@@ -76,7 +76,8 @@ INSTALLED_APPS = [
     'govorg.backend.employee.apps.EmployeeConfig',
     'govorg.backend.system.apps.SystemConfig',
     'govorg.backend.govorg_inspire.apps.InspireConfig',
-    'govorg.backend.org_request.apps.OrgRequestConfig'
+    'govorg.backend.org_request.apps.OrgRequestConfig',
+    'govorg.backend.meta_data.apps.MetaDataConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
