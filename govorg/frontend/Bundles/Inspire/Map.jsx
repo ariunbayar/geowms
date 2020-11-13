@@ -38,6 +38,7 @@ import {Modal} from "../../../../src/components/MapModal/Modal"
 import "./styles.css"
 import { service } from './service'
 import Маягт from "./Маягт"
+import {Mongolia_boundary} from './MongoliaBorder'
 
 export default class BarilgaSuurinGazar extends Component{
 
@@ -297,7 +298,12 @@ export default class BarilgaSuurinGazar extends Component{
             features.push(feature)
           }
         })
-
+      const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
+          dataProjection: this.state.dataProjection,
+          featureProjection: this.state.featureProjection,
+      }))[0]
+      Mongolia_feaure.setProperties({ id: 'Mongolia' })
+      this.setState({ Mongolia_feaure })
       const vectorSource = new VectorSource({
         features: features,
       })
@@ -449,7 +455,15 @@ export default class BarilgaSuurinGazar extends Component{
 
     modifiedFeature(event) {
 
+      const { Mongolia_feaure } = this.state
       const features = event.features.getArray()
+      const feature_coordinates = features[0].getGeometry().getCoordinates()[0]
+      console.log(Mongolia_feaure.getGeometry());
+      console.log(features[0].getGeometry());
+      for (let i = 0; i < feature_coordinates.length; i ++){
+        const check = Mongolia_feaure.getGeometry().containsXY(feature_coordinates[i][0], feature_coordinates[i][1])
+        console.log(check);
+      }
       const {format} = this.state
       const data = format.writeFeatureObject(features[0], {
         dataProjection: this.state.dataProjection,
