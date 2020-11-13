@@ -254,8 +254,8 @@
     background-color: rgba(0,60,136,0.7);
 }
 
-.⚙-toggle-shapeDraw {
-    padding: 2px 4px;
+.⚙-toggle-meta {
+    padding: 2px 7px;
     font-size: 15px;
     right: 7px;
     background-color: rgba(0,60,136,0.5);
@@ -263,15 +263,16 @@
     border-radius: 3px;
     width: 25px;
     height: 25px;
+    top: 243px;
+}
+
+.⚙-toggle-meta:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-meta:hover{
     top: 242px;
     color: white;
 
-}
-.⚙-toggle-shapeDraw:active{
-    background-color: rgba(0,60,136,0.7);
-}
-.⚙-toggle-shapeDraw:hover{
-    background-color: rgba(0,60,136,0.7);
 }
 
 .height-full{
@@ -282,5 +283,20 @@
     max-height: calc( 80vh - 70px - 15px);
     margin-bottom: 10px;
     overflow:scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.list-in-meta {
+    list-style: none;
+    max-height: calc( 50vh - 70px - 15px);
+    margin-bottom: 10px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.new-meta-form {
+    max-height: calc( 50vh - 70px - 15px);
+    margin-bottom: 10px;
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
 }

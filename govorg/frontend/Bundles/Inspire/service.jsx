@@ -18,9 +18,15 @@ export const service = {
     createDel,
     sendFile,
     loadWMSLayers,
+    searchMeta,
+    getMetaData,
+    getMetaFields,
+    createMeta,
+    deleteMeta,
 }
 
 const prefix = '/gov/api/inspire'
+const meta_prefix = '/gov/api/meta-data'
 
 function geom() {
     const requestOptions = getGetOptions()
@@ -143,4 +149,40 @@ function loadWMSLayers(id) {
         ...getGetOptions(),
     }
     return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
+}
+
+function searchMeta(pk) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${meta_prefix}/${pk}/detail/`, requestOptions).then(handleResponse)
+}
+
+function getMetaData() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${meta_prefix}/`, requestOptions).then(handleResponse)
+}
+
+function getMetaFields() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${meta_prefix}/get-fields/`, requestOptions).then(handleResponse)
+}
+
+function createMeta(meta_data, geom_ids) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ meta_data, geom_ids })
+    }
+    return fetch(`${meta_prefix}/create/`, requestOptions).then(handleResponse)
+}
+
+function deleteMeta(pk) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${meta_prefix}/${pk}/delete/`, requestOptions).then(handleResponse)
 }
