@@ -819,7 +819,7 @@ def _get_feature_property(feature_id, govRole):
     data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
     property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values("property_id")
     properties = LProperties.objects.filter(property_id__in=[property_ids]).values('property_id', "property_code", "property_name")
-    perm_all = 0
+    perm_all = 1
     perm_view = 0
     perm_create = 0
     perm_remove = 0
@@ -861,6 +861,12 @@ def _get_feature_property(feature_id, govRole):
                     perm_revoce = perm_revoce + 1
                     property_obj['perm_revoce'] = property_obj['perm_revoce'] + 1
         properties_list.append(property_obj)
+    perm_view = perm_view + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=1).count()
+    perm_create = perm_create + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=2).count()
+    perm_remove = perm_remove + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=3).count()
+    perm_update = perm_update + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=4).count()
+    perm_approve = perm_approve + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=5).count()
+    perm_revoce = perm_revoce + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=6).count()
     return properties_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoce
 
 
@@ -913,6 +919,6 @@ def saveInspireRoles(request, payload, pk):
 
     GovRoleInspire.objects.bulk_create(objs)
     rsp = {
-        'success': False,
+        'success': True,
     }
     return JsonResponse(rsp)
