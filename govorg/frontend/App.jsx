@@ -3,7 +3,7 @@ import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
 import GovRole from './GovRole/'
 import { System } from "./System";
-import { MetaForm } from "./Meta/MetaForm"
+import { Meta } from "./Meta"
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -159,7 +159,7 @@ export class App extends Component {
                                 <Route path="/gov/tuuhen-ov/" component={() => <TuuhenOv perms={this.state.tuuhen_ov} />} /> : null
                             }
                             <Route path="/gov/system/" component={System} />
-                            <Route path="/gov/meta/" component={MetaForm} />
+                            <Route path="/gov/meta/" component={Meta} />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />

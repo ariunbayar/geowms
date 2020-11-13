@@ -24,11 +24,11 @@ export default class MetaTable extends Component {
     handleModalDeleteClose() {
         this.setState({ is_modal_delete_open: false })
     }
+
     componentDidUpdate(prevProps) {
         if (prevProps.values !== this.props.values) this.setState({ is_modal_delete_open: false })
 
     }
-
 
     render() {
         const { idx, title, category, keywords, org_name, status } = this.props.values
@@ -38,7 +38,9 @@ export default class MetaTable extends Component {
                     {idx}
                 </th>
                 <th>
+                <NavLink to={`/gov/meta/detail/`}>
                     {title}
+                </NavLink>
                 </th>
                 <th>
                     {category}

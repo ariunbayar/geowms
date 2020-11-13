@@ -11,9 +11,7 @@ export class MetaDetail extends Component {
         this.state = {
             user_detail: []
         }
-
     }
-
 
     render() {
         return (

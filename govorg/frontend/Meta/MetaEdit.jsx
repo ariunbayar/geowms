@@ -27,15 +27,8 @@ export class MetaEdit extends Component {
             timer: null,
         }
         this.handleSave = this.handleSave.bind(this)
-        // this.handleGetAll=this.handleGetAll.bind(this)
         this.modalClose = this.modalClose.bind(this)
     }
-
-    // componentDidMount(){
-    //     const org_level=this.props.match.params.level
-    //     const id=this.props.match.params.id
-    //     this.handleGetAll(org_level,id)
-    // }
 
     handleSave() {
         this.setState({ handleSaveIsLoad: true })
@@ -56,21 +49,6 @@ export class MetaEdit extends Component {
             'category': category, "status": status, "language": language, 'summary': summary, 'title': title, "uuid": uuid, "schema": schema
         }
     }
-
-    // handleGetAll(org_level,id){
-    //     if(id){
-    //         service.orgAll(org_level,id).then(({ orgs }) => {
-    //             if (orgs) {
-    //                 orgs.map(org=>this.setState({
-    //                     org_name:org.name
-    //                 }))
-    //             }
-    //             this.setState({
-    //                 edit:true
-    //             })
-    //         })
-    //     }
-    // }
 
     modalClose() {
         const org_level = this.props.match.params.level
