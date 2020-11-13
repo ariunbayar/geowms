@@ -432,7 +432,6 @@ export default class BarilgaSuurinGazar extends Component{
           this.removeTurning()
           const featureID_list = this.state.featureID_list
           const selectedFeature_ID = event.selected[0].getProperties()['id']
-          console.log(selectedFeature_ID);
           this.DrawButton()
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
@@ -744,7 +743,6 @@ export default class BarilgaSuurinGazar extends Component{
           }
       }
       else{
-        console.log(this.state.drawed);
         if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
         else this.addNotif('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
       }
