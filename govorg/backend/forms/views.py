@@ -601,7 +601,6 @@ def dursgaltGazarRemove(request, payload):
 
 @require_POST
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def tseg_personal_list(request, payload):
     query = payload.get('query')
     page = payload.get('page')

@@ -35,6 +35,16 @@ export class UserFormTable extends Component {
                 <td>{employee.email}</td>
                 <td>{employee.is_sso}</td>
                 <td>{employee.position}</td>
+                <td>
+                    {
+                        employee.is_admin ?
+                        <div className="text-center">
+                            <i className="fa fa-check-circle-o text-success fa-lg" aria-hidden="true"></i>
+                        </div>
+                        :
+                        null
+                    }
+                </td>
                 <td>{employee.created_at}</td>
                 <td>{employee.updated_at}</td>
                 <td>

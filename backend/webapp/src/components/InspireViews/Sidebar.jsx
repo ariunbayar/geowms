@@ -91,7 +91,7 @@ export default class SideBar extends Component {
                         {view_name && <h4 className="text-center">View name: {view_name}</h4>}
                         {fields.map((property, idx) =>
                             <div key={idx} className='form-group'>
-                                <div class="icheck-primary">
+                                <div className="icheck-primary">
                                     <input
                                         id={property['property_code']}
                                         type="checkbox"

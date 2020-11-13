@@ -11,6 +11,7 @@ $.sidebarMenu($('.sidebar-menu'));
 $(".toggle-menu").on("click", function(e) {
         e.preventDefault();
         $("#wrapper").toggleClass("toggled");
+        $("#geo-back-btn").addClass("geo-back-btn-toggled");
     });
 
 $(".toggle-menu-map").on("click", function(e) {
