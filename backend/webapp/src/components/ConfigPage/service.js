@@ -1,24 +1,32 @@
 import {getGetOptions, getPostOptions, handleResponse} from '../../helpers/service'
 
 
-export const service = {
-    getAll,
-    getDisk,
-    getDetail,
-    update,
-    create,
-    remove,
-    getPostgeVersion
-}
-
-
 const prefix = '/back/api/config'
+
+
+const geoserver = {
+
+    get: function() {
+        const requestOptions = {...getGetOptions()}
+        return fetch(`${prefix}/geoserver/`, requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify(values),
+        }
+        return fetch(`${prefix}/geoserver/save/`, opts).then(handleResponse)
+    },
+
+}
 
 
 function getAll() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/all/`, requestOptions).then(handleResponse)
 }
+
 
 function getDisk() {
     const requestOptions = {...getGetOptions()}
@@ -55,7 +63,24 @@ function remove(id) {
     return fetch(`${prefix}/${id}/delete/`, opts).then(handleResponse)
 }
 
+
 function getPostgeVersion() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/postresqlVersion/`, requestOptions).then(handleResponse)
 }
+
+
+export const service = {
+    config: {
+        geoserver: geoserver,
+    },
+    getAll,
+    getDisk,
+    getDetail,
+    update,
+    create,
+    remove,
+    getPostgeVersion
+}
+
+

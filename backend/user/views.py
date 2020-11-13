@@ -24,7 +24,7 @@ def _get_user_display(user):
         'roles': roles
     }
 
-    
+
 def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
@@ -164,5 +164,5 @@ def paginatedList(request, payload):
         'page': page,
         'total_page': total_page,
     }
-    
+
     return JsonResponse(rsp)

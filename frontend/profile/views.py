@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from backend.payment.models import Payment, PaymentPoint
 from geoportal_app.models import User
-from backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view
+from govorg.backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 

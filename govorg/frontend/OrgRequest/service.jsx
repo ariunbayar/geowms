@@ -5,14 +5,16 @@ export const service = {
     requestApprove
 }
 
+const prefix = '/gov/api/org-request'
+
 function getAll() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`/gov/api/org-request/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
 function requestDelete(id) {
     const requestOptions = {...getGetOptions()}
-    return fetch(`/gov/api/org-request/${id}/delete/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${id}/delete/`, requestOptions).then(handleResponse)
 }
 
 function requestApprove(id, values) {
@@ -20,5 +22,5 @@ function requestApprove(id, values) {
         ...getPostOptions(),
         body: JSON.stringify({values}),
     }
-    return fetch(`/gov/api/org-request/${id}/approve/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${id}/approve/`, requestOptions).then(handleResponse)
 }
