@@ -475,8 +475,8 @@ def employeeList(request,payload, level, pk):
     if not sort_name:
         sort_name = 'last_name'
     emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
-        'last_name', 
-        'first_name', 
+        'last_name',
+        'first_name',
         'email')
     ).filter(search__contains=query).order_by(sort_name)
 
@@ -484,6 +484,7 @@ def employeeList(request,payload, level, pk):
     items_page = total_items.page(page)
     page_items = items_page.object_list
     for employe in page_items:
+        emp_obj = Employee.objects.filter(user=employe).first()
         employees_display.append({
             'id': employe.id,
             'last_name': employe.last_name,
@@ -491,9 +492,10 @@ def employeeList(request,payload, level, pk):
             'email': employe.email,
             'is_active': employe.is_active,
             'is_sso': employe.is_sso,
-            'position': Employee.objects.filter(user=employe).values('position')[0]['position'],
-            'created_at': Employee.objects.filter(user=employe).values('created_at')[0]['created_at'].strftime('%Y-%m-%d'),
-            'updated_at': Employee.objects.filter(user=employe).values('updated_at')[0]['updated_at'].strftime('%Y-%m-%d'),
+            'is_admin': emp_obj.is_admin,
+            'position': emp_obj.position,
+            'created_at': emp_obj.created_at.strftime('%Y-%m-%d'),
+            'updated_at': emp_obj.updated_at.strftime('%Y-%m-%d'),
         })
     total_page = total_items.num_pages
 
