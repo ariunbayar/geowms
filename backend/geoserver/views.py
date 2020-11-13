@@ -21,7 +21,7 @@ def layers(request):
     BASE_HEADERS = {
         'Content-Type': 'application/json',
     }
-    base_url = settings.GEOSERVER['SERVER'] + 'layers'
+    base_url = 'http://192.168.10.92:8080/geoserver' + 'layers'
 
     rsp = requests.get(
         base_url,

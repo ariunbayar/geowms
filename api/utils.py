@@ -51,51 +51,76 @@ def replace_src_url(content, old_url, new_url):
     return content.encode()
 
 
-import requests
+# import requests
 
 
-#file_store = open(settings.MEDIA_ROOT + '/layer.xml', 'r')
-BASE_URL = 'http://localhost:8080/geoserver/'
+# # # file_store = open(settings.MEDIA_ROOT + '/layer.xml', 'r')
+# BASE_URL = 'http://localhost:8080/geoserver/'
 
-url = 'rest/workspaces/acme/datastores/acme_store04/featuretypes'
+# url = 'rest/workspaces/acme/datastores/acme_store04/featuretypes'
 
-payload = '''
-    <featureType>
-    <name>deegi_layer04</name>
-    <nativeName>geoserver_view</nativeName>
-    <title>deegi_layer03</title>
-    <srs>EPSG:2908</srs>
-    <nativeBoundingBox>
-        <minx>983797.5</minx>
-        <maxx>991899.0625</maxx>
-        <miny>207443</miny>
-        <maxy>218850.828125</maxy>
-        <crs>EPSG:2908</crs>
-    </nativeBoundingBox>
-    <latLonBoundingBox>
-        <minx>-74.00163357035443</minx>
-        <maxx>40.73605641629197</maxx>
-        <miny>-73.97238611861502</miny>
-        <maxy>40.76737131396996</maxy>
-        <crs>EPSG:2908</crs>
-    </latLonBoundingBox>
-    <attributes>
-        <attribute>
-            <name>the_geom</name>
-                <nillable>true</nillable>
-            <binding>org.locationtech.jts.geom.MultiPolygon</binding>
-        </attribute>
-    </attributes>
-</featureType>
-        '''
+# payload = '''
+#     <featureType>
+#     <name>deegi_layer</name>
+#     <nativeName>administrative_unit_view</nativeName>
+#     <title>deegi_layer</title>
+#     <srs>EPSG:32648</srs>
+#     <nativeBoundingBox>
+#         <minx>-775021.5</minx>
+#         <maxx>1652101.875</maxx>
+#         <miny>4597390.5</miny>
+#         <maxy>5800999.5</maxy>
+#         <crs>EPSG:32648</crs>
+#     </nativeBoundingBox>
+#     <latLonBoundingBox>
+#         <minx>86.79183671813367</minx>
+#         <maxx>121.53460495691678</maxx>
+#         <miny>40.536698947344</miny>
+#         <maxy>52.35583356992716</maxy>
+#         <crs>EPSG:32648</crs>
+#     </latLonBoundingBox>
+#     <attributes>
+#         <attribute>
+#             <name>feature_id</name>
+#                 <nillable>true</nillable>
+#                 <binding>java.lang.Integer</binding>
+#         </attribute>
+#         <attribute>
+#             <name>geo_data</name>
+#                 <nillable>true</nillable>
+#                 <binding>org.locationtech.jts.geom.Polygon</binding>
+#         </attribute>
+#     </attributes>
+# </featureType>
+#         '''
 
-HEADERS = {
-        'Content-type': 'text/xml',
-        'Accept':'text/xml'
-        }
+# HEADERS = {
+#         'Content-type': 'text/xml',
+#         'Accept':'text/xml'
+#         }
 
 
-AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
-rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
+# AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
+# rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
 
-print(rsp.status_code)
+# print(rsp.text)
+# print(rsp.status_code)
+
+# attribute_name = ['geo_data', 'feature_id']
+# binding=['org.locationtech.jts.geom.Polygon','java.lang.String']
+# attributes = []
+# for i in range(len(attribute_name)):
+#         attributes.append( '''
+
+#             <attribute>
+#                 <name>{attribute_name}</name>
+#                     <nillable>true</nillable>
+#                     <binding>{binding}</binding>
+#             </attribute>
+
+#             '''.format(
+#                 attribute_name=attribute_name[i],
+#                 binding=binding[i]
+#             )
+#             )
+# print(attributes) 

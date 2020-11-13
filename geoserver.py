@@ -1,23 +1,77 @@
 import requests
+AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
 
 
-BASE_URL = 'http://localhost:8080/geoserver/rest/'
-AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
+def getWorkspace(BASE_URL, AUTH, space_name):
+    url = 'workspaces/{space_name}'.format(space_name=space_name)
+
+    HEADERS = {
+        'Content-type': 'text/xml'
+        }
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp
+
+def getDataStore(BASE_URL, AUTH, space_name, store_name):
+    url = 'workspaces/{space_name}/datastores/{store_name}'.format(space_name=space_name, store_name=store_name)
+
+    HEADERS = {
+        'Content-type': 'text/xml'
+        }
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+
+    return rsp
+
+def getDataStoreLayer(BASE_URL, AUTH, space_name, store_name, layer_name):
+    url = 'workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}'.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
+
+    HEADERS = {
+        'Content-type': 'text/xml'
+        }
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+
+    return rsp
+
+def deleteWorkSpace(BASE_URL, AUTH, space_name):
+    
+
+    url = 'workspaces/{space_name}?recurse=true'.format(space_name=space_name)
+
+    HEADERS = {
+        'Content-type': 'text/xml'
+        }
 
 
-def create_space(BASE_URL, space_name, AUTH):
+    rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp
+
+
+def deleteLayerName(BASE_URL, AUTH, space_name, store_name, layer_name):
+    
+
+    url = 'workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}?recurse=true'.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
+
+    HEADERS = {
+        'Content-type': 'text/xml'
+        }
+
+
+    rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp
+
+
+def create_space(BASE_URL, AUTH, space_name):
     url = 'workspaces'
     payload = '''<workspace><name>{thema_name}</name></workspace> '''.format(thema_name=space_name)
 
     HEADERS = {
         'Content-type': 'text/xml'}
-    AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
-def create_store(BASE_URL, AUTH):
 
-    url = 'workspaces/acme_ex/datastores'
+def create_store(BASE_URL, AUTH, space_name, ds_name, ds_desc, host, db, password):
+
+    url = 'workspaces/{space_name}/datastores'.format(space_name=space_name)
     
 
     payload = '''
@@ -46,11 +100,11 @@ def create_store(BASE_URL, AUTH):
             <__default>false</__default>
         </dataStore>
         '''.format(
-            ds_name='asme_store', 
-            ds_desc='asme store example',
-            host='localhost',
-            db='geo',
-            password='Aguero16'
+            ds_name=ds_name, 
+            ds_desc=ds_desc,
+            host=host,
+            db=db,
+            password=password
         )
 
     HEADERS = {
@@ -61,101 +115,78 @@ def create_store(BASE_URL, AUTH):
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
-def create_layer(BASE_URL, AUTH):
-    url = 'workspaces/ubspace/datastores/ub_store/featuretypes'
-    
+def create_layer(BASE_URL, AUTH, space_name, store_name, layer_name, layer_title, view_name, srs, attribute_name, binding):
+    url = 'workspaces/{space_name}/datastores/{store_name}/featuretypes'.format(space_name=space_name, store_name = store_name)
+    attributes_hoho = []
+    for i in range(len(attribute_name)):
+            attributes =  '''
+
+                <attribute>
+                    <name>{attribute_name}</name>
+                        <nillable>true</nillable>
+                        <binding>{binding}</binding>
+                </attribute>
+
+                '''.format(
+                    attribute_name=attribute_name[i],
+                    binding=binding[i]
+                )
+            attributes_hoho.insert(i, attributes)
+
     payload = '''
-        <featureType>
-            <name>ub_layer1</name>
-            <nativeName>administrative_unit_view</nativeName>
-            <title>ub_layer1</title>
-            <srs>EPSG:32648</srs>
+            <featureType>
+            <name>{layer_name}</name>
+            <nativeName>{view_name}</nativeName>
+            <title>{layer_title}</title>
+            <srs>{srs}</srs>
             <nativeBoundingBox>
                 <minx>-775021.5</minx>
-                <maxx>-1652101.875</maxx>
+                <maxx>1652101.875</maxx>
                 <miny>4597390.5</miny>
                 <maxy>5800999.5</maxy>
-                <crs>EPSG:32648</crs>
+                <crs>{srs}</crs>
             </nativeBoundingBox>
             <latLonBoundingBox>
                 <minx>86.79183671813367</minx>
                 <maxx>121.53460495691678</maxx>
                 <miny>40.536698947344</miny>
                 <maxy>52.35583356992716</maxy>
-                <crs>EPSG:32648</crs>
+                <crs>{srs}</crs>
             </latLonBoundingBox>
             <attributes>
-                <attribute>
-                    <name>geo_data</name>
-                     <nillable>false</nillable>
-                    <binding>org.locationtech.jts.geom.LineString</binding>
-                </attribute>
-                <attribute>
-                    <name>geo_id</name>
-                     <nillable>false</nillable>
-                    <binding>java.lang.String</binding>
-                </attribute>
+            {attributes}
             </attributes>
         </featureType>
+        '''.format(
+                layer_name=layer_name,
+                view_name=view_name,
+                layer_title=layer_title,
+                srs=srs,
+                attributes=''.join(attributes_hoho),
+            )
+    
 
-        '''
-
-    # payload = '''
-    #   <featureType>
-    #     <name>{layer_name}</name>
-    #     <nativeName>{view_name}</nativeName>
-    #     <title>{layer_title}</title>
-    #     <srs>EPSG:32648</srs>
-    #     <nativeBoundingBox>
-    #         <minx>-775,021.5</minx>
-    #         <maxx>-1,652,101.875</maxx>
-    #         <miny>4,597,390.5</miny>
-    #         <maxy>5,800,999.5</maxy>
-    #         <crs>EPSG:32648</crs>
-    #     </nativeBoundingBox>
-    #     <latLonBoundingBox>
-    #         <minx>86.79183671813367</minx>
-    #         <maxx>121.53460495691678</maxx>
-    #         <miny>40.536698947344</miny>
-    #         <maxy>52.35583356992716</maxy>
-    #         <crs>EPSG:32648</crs>
-    #     </latLonBoundingBox>
-    #     <attributes>
-    #         <attribute>
-    #             <name>{geom}</name>
-    #             <binding>org.locationtech.jts.geom.{shape}</binding>
-    #         </attribute>
-    #         <attribute>
-    #             <name>{feature_id}</name>
-    #             <binding>java.lang.{p1_type}</binding>
-    #         </attribute>
-    #         <attribute>
-    #             <name>{geom_id}</name>
-    #             <binding>java.lang.{p2_type}</binding>
-    #         </attribute>
-    #     </attributes>
-    # </featureType>
-
-    #     '''.format(
-    #         layer_name='ub_layer1', 
-    #         view_name='administrative_unit_view',
-    #         layer_title='layer_veiw_1',
-    #         geom='geo_data',
-    #         shape='LineString',
-    #         feature_id='feature_id',
-    #         p1_type='String',
-    #         geom_id='geo_id',
-    #         p2_type='String'
-    #     )
-    print(payload)
     HEADERS = {
         'Content-type': 'application/xml',
     }
     print(BASE_URL, url)
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
-    
 
 
-code = create_store(BASE_URL, AUTH)
-print(code.status_code)
+    # import requests
+    # BASE_URL = 'http://localhost:8080/geoserver/rest/'
+        
+    # AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
+    # ws_name='acme'
+    # ds_name='acme_store04'
+    # layer_name='deegi_layer05'
+    # layer_title='deegi_layer05'
+    # view_name='administrative_unit_view'
+    # srs='EPSG:32648'
+    # attribute_name = ['geo_data', 'feature_id']
+    # binding=['org.locationtech.jts.geom.Polygon','java.lang.String']
+    # code =create_layer(BASE_URL, AUTH, ws_name, ds_name, layer_name, layer_title, view_name, srs, attribute_name, binding)
+
+
+    # print(code.text, code.status_code)

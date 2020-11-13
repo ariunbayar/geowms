@@ -2,6 +2,7 @@ import os
 import datetime
 import uuid
 import glob
+import requests
 from django.db import connections
 from django.db.utils import InternalError
 
@@ -34,7 +35,7 @@ from main.utils import (
     dict_fetchall,
     slugifyWord
 )
-
+import geoserver
 # Create your views here.
 def _get_features(package_id):
     feature_data = []
@@ -446,7 +447,7 @@ def propertyFieldsSave(request, payload):
         for idx in id_list:
             ViewProperties.objects.create(view=new_view, property_id=idx)
 
-    if check:
+        create_geoserver_detail(table_name, model_name, theme.theme_code)
         rsp = {
             'success': True,
             'info': 'Амжилттай хадгаллаа'
@@ -650,6 +651,26 @@ def erese(request, payload):
         }
     return JsonResponse(rsp)
 
+def create_geoserver_detail(table_name, model_name, theme_code):
+    print(table_name, theme_code)
+    BASE_URL = 'http://localhost:8080/geoserver/rest/'    
+    AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
+    # srs = 'EPSG:32648'
+    check_workspace = geoserver.getWorkspace(BASE_URL, AUTH, theme_code)
+
+    if check_workspace.status_code != 201:
+        create_workspace = geoserver.create_store(BASE_URL, AUTH, theme_code)
+        if create_workspace.status_code == 201:
+            ds_name = 'gp_' + theme_code
+            check_ds_name = geoserver.getDataStore(BASE_URL, AUTH, theme_code, ds_name)
+            if check_ds_name.status_code != 201:
+                # host = 'localhost'
+                # db = 'geo'
+                # password = 'Aguero16'
+                 create_ds = geoserver.create_store(BASE_URL, AUTH, theme_code, ds_name, )
+    
+    
+    
 
 def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
@@ -669,6 +690,7 @@ def createView(ids, table_name, model_name):
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
+
         with connections['default'].cursor() as cursor:
                 cursor.execute(query)
                 cursor.execute(query_index)
