@@ -37,7 +37,7 @@ class CoordInputs extends Component{
                 <div className="input-group-prepend">
                     <span className="input-group-text" id={idx}>{idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}</span>
                 </div>
-                <input key={idx} className="form-control" type="number" value={coord} aria-describedby={idx} onChange={(e) => this.handleChange(e, ix, idx)}/>
+                <input key={idx} className="form-control" type="number" minLength="0" value={coord} aria-describedby={idx} onChange={(e) => this.handleChange(e, ix, idx)}/>
             </div>
         )
     }
@@ -65,7 +65,9 @@ class ListComponent extends Component {
 
     sendCoordinate(coord, first, second) {
         const { coords_list } = this.state
-        const parsed = parseFloat(coord)
+        var parsed = null
+        if (coord) parsed = parseFloat(coord)
+        else parsed = coord
         coords_list.data[first].geom[second] = parsed
         this.setState({ coords_list })
     }

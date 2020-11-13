@@ -1,7 +1,4 @@
 export const Mongolia_boundary = {
-    "type":"Feature","id":"tm_world_borders_0_3.354",
-    "geometry":
-        {
             "type":"MultiPolygon",
             "coordinates":[
                 [
@@ -18,6 +15,4 @@ export const Mongolia_boundary = {
                     ]
                 ]
             ]
-        },
-        "geometry_name":"the_geom",
-        "properties":{"FID":110,"FIPS":"MG","ISO2":"MN","ISO3":"MNG","UN":496,"NAME":"Mongolia","AREA":156650,"POP2005":2580704,"REGION":142,"SUBREGION":30,"LON":102.876,"LAT":46.056}}
+        }
