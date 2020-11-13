@@ -119,6 +119,8 @@ urlpatterns = [
         path('create/', config_views.create, name='create'),
         path('disk/', config_views.disk, name='disk'),
         path('postresqlVersion/', config_views.postresqlVersion, name='postresqlVersion'),
+        path('geoserver/', config_views.geoserver_configs),
+        path('geoserver/save/', config_views.geoserver_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([

@@ -1,9 +1,15 @@
 import React, { Component, Fragment } from "react"
+import { Formik, Form, Field} from 'formik'
+import * as Yup from 'yup'
 
 import {service} from './service'
-import {ConfigForm} from './ConfigForm'
-import Config from './Config'
-import ModalAlert from "../ModalAlert"
+
+
+const validationSchema = Yup.object().shape({
+    geoserver_host: Yup.string(),
+    geoserver_user: Yup.string(),
+    geoserver_pass: Yup.string(),
+})
 
 
 export default class ConfigGeoserver extends Component {
@@ -12,54 +18,69 @@ export default class ConfigGeoserver extends Component {
 
         super(props)
         this.state = {
-            is_loading: false,
             is_editing: false,
-            config_list: [],
-            modal_alert_check: "closed",
-            timer: null,
+            initial_values: {
+                geoserver_host: '',
+                geoserver_user: '',
+                geoserver_pass: '',
+            },
+            values: {},
         }
 
-        this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleEdit = this.handleEdit.bind(this)
-        this.handleSave = this.handleSave.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     componentDidMount() {
-        this.handleListUpdated()
-    }
-
-    handleListUpdated() {
-        service.getAll().then(({config_list}) => {
-            this.setState({config_list})
+        service.config.geoserver.get().then((values) => {
+            this.setState({
+                initial_values: values,
+                values,
+            })
         })
     }
 
     handleEdit(e) {
         e.preventDefault()
+
+        const { is_editing } = this.state
+
         this.setState({
-            is_editing: true,
+            is_editing: !is_editing,
         })
     }
 
-    handleSave(e) {
-        e.preventDefault()
-        this.setState({
-            is_loading: true,
-        })
-        setTimeout(() => {
-            this.setState({
-                is_loading: false,
-                is_editing: false,
+    handleSubmit(values, { setStatus, setValues }) {
+
+        setStatus('saving')
+
+        service.config.geoserver
+            .save(values)
+            .then(({ success }) => {
+
+                if (success) {
+                    setStatus('save_success')
+                    this.setState({ values })
+                } else {
+                    return Promise.reject()
+                }
+
             })
-        }, 700)
+            .catch(() => {
+                setValues(this.state.values)
+                setStatus('save_error')
+            })
+            .finally(() => {
+                this.setState({ is_editing: false })
+            })
 
     }
 
     render() {
 
         const {
-            is_loading,
             is_editing,
+            initial_values,
         } = this.state
 
         return (
@@ -75,37 +96,104 @@ export default class ConfigGeoserver extends Component {
                 </div>
 
                 <div className="card-body">
-                    <fieldset disabled={ !is_editing }>
-                        <div className="form-group">
-                            <label htmlFor="inputEmail4">IP Address / Domain name</label>
-                            <input type="text" className="form-control" id="inputEmail4"/>
-                        </div>
-                        <div className="form-row">
-                            <div className="form-group col-md-6">
-                                <label htmlFor="inputPassword4">Username</label>
-                                <input type="text" className="form-control" id="inputPassword4"/>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="inputPassword4">Password</label>
-                                <input type="password" className="form-control" id="inputPassword4"/>
-                            </div>
-                        </div>
-                        { is_editing &&
-                            <button
-                                className="btn gp-btn-primary"
-                                disabled={ is_loading }
-                                onClick={ this.handleSave }
-                            >
-                                {is_loading &&
-                                    <Fragment>
-                                        <i className="fa fa-circle-o-notch fa-spin"></i> {}
-                                        Түр хүлээнэ үү...
-                                    </Fragment>
-                                }
-                                {!is_loading && 'Хадгалах' }
-                            </button>
-                        }
-                    </fieldset>
+                    <Formik
+                        initialValues={ initial_values }
+                        initialStatus={ 'initial' }
+                        enableReinitialize
+                        validationSchema={ validationSchema }
+                        onSubmit={ this.handleSubmit }
+                    >
+                        {({
+                            errors,
+                            status,
+                            touched,
+                            isSubmitting,
+                            setFieldValue,
+                            setStatus,
+                            setValues,
+                            handleBlur,
+                            values,
+                            isValid,
+                            dirty,
+                        }) => {
+                            return (
+                                <Form>
+                                    <fieldset disabled={ !is_editing }>
+                                        <div className="form-group">
+                                            <label htmlFor="id_geoserver_host">IP Address / Domain name</label>
+                                            <Field
+                                                name="geoserver_host"
+                                                id="id_geoserver_host"
+                                                type="text"
+                                                className="form-control"
+                                            />
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_geoserver_user">Username</label>
+                                                <Field
+                                                    name="geoserver_user"
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="id_geoserver_user"
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_geoserver_pass">Password</label>
+                                                <Field
+                                                    name="geoserver_pass"
+                                                    type="password"
+                                                    className="form-control"
+                                                    id="id_geoserver_pass"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        { is_editing &&
+                                            <button
+                                                type="submit"
+                                                className="btn gp-btn-primary"
+                                                disabled={ status == 'saving' }
+                                            >
+                                                {status == 'saving' &&
+                                                    <Fragment>
+                                                        <i className="fa fa-circle-o-notch fa-spin"></i> {}
+                                                        Түр хүлээнэ үү...
+                                                    </Fragment>
+                                                }
+                                                {status != 'saving' && 'Хадгалах' }
+                                            </button>
+                                        }
+
+                                    </fieldset>
+
+                                    { !is_editing && status == 'save_success' &&
+                                        <div className="alert alert-icon-success alert-dismissible" role="alert">
+                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
+                                            <div className="alert-icon icon-part-success">
+                                                <i className="icon-check"></i>
+                                            </div>
+                                            <div className="alert-message">
+                                                <span>Амжилттай хадгаллаа!</span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    { !is_editing && status == 'save_error' &&
+                                        <div className="alert alert-icon-warning alert-dismissible" role="alert">
+                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
+                                            <div className="alert-icon icon-part-warning">
+                                                <i className="icon-check"></i>
+                                            </div>
+                                            <div className="alert-message">
+                                                <span>Хадгалахад алдаа гарлаа!</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </Form>
+                            )
+                        }}
+                    </Formik>
                 </div>
 
             </div>
