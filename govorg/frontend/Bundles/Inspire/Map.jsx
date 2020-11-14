@@ -128,6 +128,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.callModalWithMeta = this.callModalWithMeta.bind(this)
       this.hideMetaList = this.hideMetaList.bind(this)
       this.hideShowList = this.hideShowList.bind(this)
+      this.getTypeFunction = this.getTypeFunction.bind(this)
 
     }
 
@@ -453,29 +454,55 @@ export default class BarilgaSuurinGazar extends Component{
       this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta,  this.addNotif)
     }
 
+    getTypeFunction(feature) {
+      var features_multi = null
+      if(feature.getType().includes("Polygon")) {
+        features_multi = feature.getPolygons()
+      }
+      if(feature.getType().includes("Line")) {
+        features_multi = feature.getLineStrings()
+      }
+      if(feature.getType().includes("Point")) {
+        features_multi = feature.getPoints()
+      }
+      return features_multi
+    }
+
     checkInMongolia(features) {
       var checkInMGL = true
       const { Mongolia_feaure } = this.state
       this.feature_coordinates = []
+      const feature_type = features[0].getGeometry().getType()
       features.map((feature, idx) => {
-        if (feature.getGeometry().getType().includes('Multi')){
-          const features_multi = feature.getGeometry().getPolygons()
+        if (feature_type.includes('Multi')){
+          const features_multi = this.getTypeFunction(feature.getGeometry())
+          console.log(features_multi);
           features_multi.map((feature_multi, idx) => {
-            this.feature_coordinates.push(feature_multi.getCoordinates()[0])
+            feature_multi.getCoordinates().map((coordiates, ix) => {
+              this.feature_coordinates.push(coordiates)
+            })
           })
         } else {
-          this.feature_coordinates.push(feature.getGeometry().getCoordinates()[0])
+          feature.getGeometry().getCoordinates().map((coords, ix) => {
+            this.feature_coordinates.push(coords)
+          })
         }
       })
-      this.feature_coordinates.map((feature_coord, idx) => {
-        for(let i=0; i < feature_coord.length; i++) {
-          const check = Mongolia_feaure.getGeometry().containsXY(feature_coord[i][0], feature_coord[i][1])
+      if (feature_type.includes('Polygon'))  this.feature_coordinates =  this.feature_coordinates[0]
+      if (!feature_type.includes("Point")) {
+        for(let i=0; i < this.feature_coordinates.length; i++) {
+          const check = Mongolia_feaure.getGeometry().containsXY(this.feature_coordinates[i][0], this.feature_coordinates[i][1])
           if (!check) {
             checkInMGL = false
             break
           }
         }
-      })
+      } else {
+        const check = Mongolia_feaure.getGeometry().containsXY(this.feature_coordinates[0], this.feature_coordinates[1])
+        if (!check) {
+          checkInMGL = false
+        }
+      }
       return checkInMGL
     }
 
@@ -492,12 +519,13 @@ export default class BarilgaSuurinGazar extends Component{
         })
         const changedFeature = JSON.stringify(data)
         this.setState({ changedFeature, modifyend_selected_feature_check: true })
-        this.onClickCloser()
       }
       else {
+        this.setState({ xChange: null, yChange: null})
         this.setState({ is_not_mongolia: true })
         this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
       }
+      this.onClickCloser()
     }
 
     mapPointerMove(event) {
@@ -626,11 +654,11 @@ export default class BarilgaSuurinGazar extends Component{
 
         const drawed = JSON.stringify(area)
         this.setState({drawed, selectedFeature_ID: null})
-        this.onClickCloser()
       } else {
         this.setState({ is_not_mongolia: true })
         this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
       }
+      this.onClickCloser()
     }
 
     clearMap() {
@@ -949,17 +977,16 @@ export default class BarilgaSuurinGazar extends Component{
 
     getTurningPoints(extent, feature) {
       var insideCoordinates = []
-      const coordinates = feature.getGeometry().getCoordinates()[0]
       var bound = ''
       if (extent) {
         bound = extent.getGeometry()
       }
-      for (let i = 0; i < coordinates.length; i ++){
-        const check = bound.containsXY(coordinates[i][0], coordinates[i][1])
+      for (let i = 0; i < feature.length; i ++){
+        const check = bound.containsXY(feature[i][0], feature[i][1])
         // const check = bound.intersectsExtent(feature.getGeometry().getExtent()) // ogtloltsdog eseh
         if (check) {
           var coord_info = {
-            'coordinate': coordinates[i],
+            'coordinate': feature[i],
             'turning': i
           }
           insideCoordinates.push(coord_info)
@@ -1074,35 +1101,60 @@ export default class BarilgaSuurinGazar extends Component{
       this.sendCoordinateList = []
       this.turningPoint = []
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
-        const checkBound = feature.getGeometry().getCoordinates()[0]
-        for (let i = 0; i < checkBound.length; i ++){
-          const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
-          if (check) {
-            const coordinates = this.getTurningPoints(dragBox, feature)
-            this.dupl = true
-            if (coordinates.length > 0) {
-              if (this.turningPoint.length > 0) {
-                const duplicate = this.turningPoint.every((item) => {
-                  const item_check = coordinates.map((coord, idx) => {
-                    return coord.turning
+        var feats = []
+        const feat_type = feature.getGeometry().getType()
+        if (feat_type.includes('MultiPolygons')) {
+          const feat_multi = this.getTypeFunction(feature.getGeometry())
+          feat_multi.map((feature_multi, idx) => {
+            feats.push(feature_multi)
+          })
+        } else {
+          feats.push(feature)
+        }
+        feats.map((feat_mutli, idx) => {
+          var checkBound = null
+          console.log(feat_type);
+          if (feat_type.includes('MultiPolygons')) {
+            checkBound = feat_mutli.getCoordinates()[0]
+          }
+          else if (feat_type.includes('MultiPoint')){
+            checkBound = feat_mutli.getGeometry().getCoordinates()
+          }
+          else if (feat_type == 'Point'){
+            checkBound = [feat_mutli.getGeometry().getCoordinates()]
+          }
+          else {
+            checkBound = feat_mutli.getGeometry().getCoordinates()[0]
+          }
+          for (let i = 0; i < checkBound.length; i ++){
+            const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
+            if (check) {
+              const coordinates = this.getTurningPoints(dragBox, checkBound)
+              this.dupl = true
+              if (coordinates.length > 0) {
+                if (this.turningPoint.length > 0) {
+                  const duplicate = this.turningPoint.every((item) => {
+                    const item_check = coordinates.map((coord, idx) => {
+                      return coord.turning
+                    })
+                    if (item == item_check[0]) {
+                      this.dupl = false
+                    }
                   })
-                  if (item == item_check[0]) {
-                    this.dupl = false
-                  }
-                })
-              }
-              if (this.dupl) {
-                selectedFeatures.push(feature);
-                this.setState({ build_name: feature.get('id') })
-                coordinates.map((coordinate, idx) => {
-                  this.sendCoordinateList.push(coordinate.coordinate)
-                  this.turningPoint.push(coordinate.turning)
-                  this.addMarker(coordinate)
-                })
+                }
+                if (this.dupl) {
+                  selectedFeatures.push(feature);
+                  this.setState({ build_name: feature.get('id') })
+                  coordinates.map((coordinate, idx) => {
+                    this.sendCoordinateList.push(coordinate.coordinate)
+                    this.turningPoint.push(coordinate.turning)
+                    this.addMarker(coordinate)
+                  })
+                }
               }
             }
           }
-        }
+        })
       });
       const data = {
         'geom': this.sendCoordinateList,
@@ -1117,6 +1169,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     hideShowList() {
       this.controls.coordList.showList(false)
+      this.select.setActive(false)
       this.removeTurning()
     }
 

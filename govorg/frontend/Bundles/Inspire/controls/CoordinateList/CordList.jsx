@@ -33,12 +33,23 @@ class CoordInputs extends Component{
         const { coord } = this.state
         const { idx, ix } = this.props
         return (
-            <div className="input-group input-group-sm mb-3">
-                <div className="input-group-prepend">
-                    <span className="input-group-text" id={idx}>{idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}</span>
-                </div>
-                <input key={idx} className="form-control" type="number" minLength="0" value={coord} aria-describedby={idx} onChange={(e) => this.handleChange(e, ix, idx)}/>
-            </div>
+            <li className="float-left col-4 m-0 p-0" key={idx}>
+                {/* <div className="input-group input-group-sm m-0 p-0">
+                    <div className="input-group-prepend">
+                        <span className="input-group-text" id={idx}>{idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}</span>
+                    </div> */}
+                <input
+                    key={idx}
+                    className="form-control"
+                    type="number"
+                    placeholder={idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}
+                    minLength="0"
+                    value={coord}
+                    aria-describedby={idx}
+                    onChange={(e) => this.handleChange(e, ix, idx)}
+                />
+                {/* </div> */}
+            </li>
         )
     }
 }
@@ -114,14 +125,16 @@ class ListComponent extends Component {
                             {coords_list.data.map((datas, ix) =>
                                 <div key={ix} className="list-group-item">
                                     <b>Эргэлтийн цэгийн дугаар: {datas.turning !== null ? datas.turning : ix}</b>
+                                    <ul className="m-0 p-0" style={{listStyle:'none'}}>
                                         {datas.geom.map((coords, idx) =>
-                                                <CoordInputs key={idx}
-                                                    coord={coords}
-                                                    idx={idx}
-                                                    ix={ix}
-                                                    send={this.sendCoordinate}
-                                                />
+                                            <CoordInputs key={idx}
+                                                coord={coords}
+                                                idx={idx}
+                                                ix={ix}
+                                                send={this.sendCoordinate}
+                                            />
                                         )}
+                                    </ul>
                                 </div>
                             )}
                         </div>
