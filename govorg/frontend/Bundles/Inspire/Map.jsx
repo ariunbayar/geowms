@@ -476,7 +476,6 @@ export default class BarilgaSuurinGazar extends Component{
       features.map((feature, idx) => {
         if (feature_type.includes('Multi')){
           const features_multi = this.getTypeFunction(feature.getGeometry())
-          console.log(features_multi);
           features_multi.map((feature_multi, idx) => {
             feature_multi.getCoordinates().map((coordiates, ix) => {
               this.feature_coordinates.push(coordiates)
@@ -1113,7 +1112,6 @@ export default class BarilgaSuurinGazar extends Component{
         }
         feats.map((feat_mutli, idx) => {
           var checkBound = null
-          console.log(feat_type);
           if (feat_type.includes('MultiPolygons')) {
             checkBound = feat_mutli.getCoordinates()[0]
           }
