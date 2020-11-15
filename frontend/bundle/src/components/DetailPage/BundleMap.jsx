@@ -290,7 +290,8 @@ export default class BundleMap extends Component {
 
         this.setState({coordinate_clicked})
 
-        this.showFeaturesAt(event.coordinate)
+        // Nov-15: commented for UX
+        //this.showFeaturesAt(event.coordinate)
 
     }
 
