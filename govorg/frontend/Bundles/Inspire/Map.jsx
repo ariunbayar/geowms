@@ -45,6 +45,10 @@ export default class BarilgaSuurinGazar extends Component{
 
       this.featureNames = []
       this.featuresForCollection = []
+
+      this.sendCoordinateList = [] //boxEnd
+      this.turningPoint = [] //boxEnd
+
       this.state = {
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
@@ -426,6 +430,7 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const { isMeta } = this.state
         if (!isMeta) {
+          this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
           const selectedFeature_ID = event.selected[0].getProperties()['id']
@@ -1102,7 +1107,7 @@ export default class BarilgaSuurinGazar extends Component{
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
         var feats = []
         const feat_type = feature.getGeometry().getType()
-        if (feat_type.includes('MultiPolygons')) {
+        if (feat_type.includes('MultiPolygon')) {
           const feat_multi = this.getTypeFunction(feature.getGeometry())
           feat_multi.map((feature_multi, idx) => {
             feats.push(feature_multi)
@@ -1111,47 +1116,52 @@ export default class BarilgaSuurinGazar extends Component{
           feats.push(feature)
         }
         feats.map((feat_mutli, idx) => {
-          var checkBound = null
-          if (feat_type.includes('MultiPolygons')) {
-            checkBound = feat_mutli.getCoordinates()[0]
+          var checkBounds = null
+          console.log(feat_type);
+          if (feat_type.includes('MultiPolygon')) {
+            checkBounds = feat_mutli.getCoordinates()
           }
           else if (feat_type.includes('MultiPoint')){
-            checkBound = feat_mutli.getGeometry().getCoordinates()
+            checkBounds = [feat_mutli.getGeometry().getCoordinates()]
           }
           else if (feat_type == 'Point'){
-            checkBound = [feat_mutli.getGeometry().getCoordinates()]
+            checkBounds = [feat_mutli.getGeometry().getCoordinates()]
           }
           else {
-            checkBound = feat_mutli.getGeometry().getCoordinates()[0]
+            checkBounds = feat_mutli.getGeometry().getCoordinates()
           }
-          for (let i = 0; i < checkBound.length; i ++){
-            const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
-            if (check) {
-              const coordinates = this.getTurningPoints(dragBox, checkBound)
-              this.dupl = true
-              if (coordinates.length > 0) {
-                if (this.turningPoint.length > 0) {
-                  const duplicate = this.turningPoint.every((item) => {
-                    const item_check = coordinates.map((coord, idx) => {
-                      return coord.turning
+          checkBounds.map((checkBound, idx) => {
+            for (let i = 0; i < checkBound.length; i ++){
+              const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
+              console.log(check);
+              if (check) {
+                const coordinates = this.getTurningPoints(dragBox, checkBound)
+                console.log(coordinates);
+                this.dupl = true
+                if (coordinates.length > 0) {
+                  if (this.turningPoint.length > 0) {
+                    const duplicate = this.turningPoint.every((item) => {
+                      const item_check = coordinates.map((coord, idx) => {
+                        return coord.turning
+                      })
+                      if (item == item_check[0]) {
+                        this.dupl = false
+                      }
                     })
-                    if (item == item_check[0]) {
-                      this.dupl = false
-                    }
-                  })
-                }
-                if (this.dupl) {
-                  selectedFeatures.push(feature);
-                  this.setState({ build_name: feature.get('id') })
-                  coordinates.map((coordinate, idx) => {
-                    this.sendCoordinateList.push(coordinate.coordinate)
-                    this.turningPoint.push(coordinate.turning)
-                    this.addMarker(coordinate)
-                  })
+                  }
+                  if (this.dupl) {
+                    selectedFeatures.push(feature);
+                    this.setState({ build_name: feature.get('id') })
+                    coordinates.map((coordinate, idx) => {
+                      this.sendCoordinateList.push(coordinate.coordinate)
+                      this.turningPoint.push(coordinate.turning)
+                      this.addMarker(coordinate)
+                    })
+                  }
                 }
               }
             }
-          }
+          })
         })
       });
       const data = {

@@ -645,7 +645,7 @@ def create(request, payload):
     pid = payload.get('pid')
     fid = payload.get('fid')
     form_json = payload.get('form_json')
-    geo_json = payload.get('geo_json')      
+    geo_json = payload.get('geo_json')
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -745,6 +745,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     feature_config_id = None
     savename = model_name
     model_name = _MDatasName(model_name)
+    code_value = None
     try:
         if not isinstance(model_name, str):
             if values:
@@ -765,10 +766,19 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
                                 if value_types:
                                     for value_type in value_types:
                                         val_type = value_type.value_type_id
+                                        if val_type == 'single-select':
+                                           code_list_values = LCodeLists.objects.filter(property_id=property.property_id, code_list_code=value)
+                                           for code_list_value in code_list_values:
+                                                if code_list_value.code_list_code.lower() == value.lower():
+                                                    code_value = code_list_value.code_list_id
                                         if val_type != 'boolean':
                                             for i in model_name._meta.get_fields():
                                                 if 'value' in i.name:
                                                     out = i.name.split('_')
+                                                    if out[1] == 'date' and val_type == 'date':
+                                                        if '/' in value:
+                                                            dt = value.split('/')
+                                                            value = dt[0] + "-" + dt[1] + '-' + dt[2]
                                                     if out[1] == val_type:
                                                         datas[i.name] = value
                                                     else:
@@ -783,7 +793,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
                                                     if i.name == 'feature_config_id':
                                                         datas[i.name] = feature_config_id
                                                     if i.name == 'code_list_id':
-                                                        datas[i.name] = None
+                                                        datas[i.name] = code_value
                                                     if i.name == 'created_by':
                                                         datas[i.name] = 1
                                                     if i.name == 'modified_by':
@@ -926,9 +936,9 @@ def FileUploadSaveData(request, tid, fid):
                 code = LThemes.objects.filter(theme_id=tid).first()
                 model_name = code.theme_code
                 need_id = MGeoDatas.objects.count()
-                for name in layer.fields:
+                for name in range(0, len(layer.fields)):
                     field_name = val[name].name # field name
-                    if field_name == 'id' or field_name == 'gml_id':
+                    if name == 0:
                         geom = ''
                         geom_type = ''
                         g_id = val.get(name)
