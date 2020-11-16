@@ -401,7 +401,7 @@ class GovPermInspire(models.Model):
         (PERM_APPROVE, 'БАТЛАХ'),
     )
 
-    gov_role_inspire = models.ForeignKey(GovRoleInspire, on_delete=models.CASCADE, db_index=True)
+    gov_role_inspire = models.ForeignKey(GovRoleInspire, on_delete=models.CASCADE, db_index=True, null=True)
     gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True)
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
     feature_id = models.IntegerField()
@@ -432,7 +432,7 @@ class EmpRoleInspire(models.Model):
         (PERM_APPROVE, 'БАТЛАХ'),
     )
 
-    gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True)
+    gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True, null=True)
     emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True)
 
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
@@ -464,8 +464,8 @@ class EmpPermInspire(models.Model):
         (PERM_APPROVE, 'БАТЛАХ'),
     )
 
-    gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True)
-    emp_role_inspire = models.ForeignKey(EmpRoleInspire, on_delete=models.CASCADE, db_index=True)
+    gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True, null=True)
+    emp_role_inspire = models.ForeignKey(EmpRoleInspire, on_delete=models.CASCADE, db_index=True, null=True)
     emp_perm = models.ForeignKey(EmpPerm, on_delete=models.CASCADE, db_index=True)
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
     feature_id = models.IntegerField()
