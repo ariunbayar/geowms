@@ -366,8 +366,8 @@ class GovRoleInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True)
@@ -397,8 +397,8 @@ class GovPermInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_role_inspire = models.ForeignKey(GovRoleInspire, on_delete=models.CASCADE, db_index=True)
@@ -428,8 +428,8 @@ class EmpRoleInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True)
@@ -460,8 +460,8 @@ class EmpPermInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True)
