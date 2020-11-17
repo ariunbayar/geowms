@@ -162,15 +162,20 @@ def all(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def updateMore(request, pk):
-    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
+    if pk < 9999:
+        bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
+        form_options_role = _get_role_options()
     form_options = _get_bundle_options()
-    form_options_role = _get_role_options()
-    rsp = {
-        'bundle_list': bundle_list,
-        'form_options': form_options,
-        'form_options_role': form_options_role,
-
-    }
+    if pk < 9999:
+        rsp = {
+            'bundle_list': bundle_list,
+            'form_options': form_options,
+            'form_options_role': form_options_role,
+        }
+    else:
+        rsp = {
+            'form_options': form_options,
+        }
     return JsonResponse(rsp)
 
 
@@ -178,7 +183,6 @@ def updateMore(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def create(request, payload):
-
     сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
     icon_data = payload.get('icon')
     form = BundleForm(payload)

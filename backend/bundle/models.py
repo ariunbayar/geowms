@@ -27,7 +27,6 @@ class Bundle(models.Model):
 
     layers = models.ManyToManyField(WMSLayer, through='BundleLayer')
     name = models.CharField(max_length=200)
-    price = models.PositiveIntegerField()
     module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
 
     is_removeable = models.BooleanField()

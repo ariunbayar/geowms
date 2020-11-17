@@ -32,27 +32,24 @@ export class BundleForms extends Component {
     }
 
     componentDidMount() {
-        const id = this.props.match.params.id
-        if(id)
-        {
-            this.handleListUpdated()
-        }
-        else{
-            const form_values = this.initial_form_values
-            this.setState({form_values})
-        }
+        this.handleListUpdated()
     }
 
     handleListUpdated() {
         const id = this.props.match.params.id
-
-        service.detail(id).then(({bundle_list, form_options, form_options_role}) => {
-            {bundle_list.map((bundle_list) =>
-                this.setState({form_values: bundle_list})
-            )}
-            this.setState({form_options, form_options_role})
-
-        })
+        if(id){
+            service.detail(id).then(({bundle_list, form_options, form_options_role}) => {
+                {bundle_list.map((bundle_list) =>
+                    this.setState({form_values: bundle_list})
+                )}
+                this.setState({form_options, form_options_role})
+    
+            }) 
+        }else{
+            service.detail(9999).then(({form_options}) => {
+                this.setState({form_options})
+            }) 
+        }
 
     }
 
@@ -69,9 +66,10 @@ export class BundleForms extends Component {
             })
 
         } else {
-
             service.create(values).then(({success, item}) => {
-                if (success) this.handleSaveSuccess()
+                if (success) {
+                    this.props.history.push( `/back/дэд-сан/`)
+                }
             })
 
         }
@@ -100,6 +98,7 @@ export class BundleForms extends Component {
                             </div>
                         </div>
                     </div>
+                    {this.props.match.params.id &&
                     <div className="col-lg-8">
                         <div className="bundle-table-scroll card">
                             <div className="card-body">
@@ -111,7 +110,7 @@ export class BundleForms extends Component {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </div>}
                </div>
             </div>
         )
