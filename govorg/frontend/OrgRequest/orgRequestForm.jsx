@@ -153,7 +153,7 @@ export default class OrgRequestForm extends Component {
                     <br/>
                     <label htmlFor="">Орон зайн өгөгдөл</label>
                         <div className="row">
-                            <div className="col-md-3">
+                            <div className="col-md-4">
                                 <select className="form-control form-control-sm"
                                     onChange={(e) => this.onChangeTheme(e.target.value, 'theme')}
                                 >
@@ -169,7 +169,7 @@ export default class OrgRequestForm extends Component {
                                 }
                                 </select>
                             </div>
-                            <div className="col-md-3">
+                            <div className="col-md-4">
                                 <select className="form-control form-control-sm"
                                     onChange={(e) => this.onChangePackage(e.target.value, 'package')}
                                 >
@@ -185,7 +185,7 @@ export default class OrgRequestForm extends Component {
                                 }
                                 </select>
                             </div>
-                            <div className="col-md-3">
+                            <div className="col-md-4">
                                 <select className="form-control form-control-sm"
                                     onChange={(e) => this.setState({ search_feature: e.target.value })}
                                 >
