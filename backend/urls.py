@@ -114,11 +114,6 @@ urlpatterns = [
     ], 'govorg'))),
 
     path('api/config/', include(([
-        path('all/', config_views.all, name='all'),
-        path('<int:pk>/detail/', config_views.detail, name='detail'),
-        path('<int:pk>/update/', config_views.update, name='update'),
-        path('<int:pk>/delete/', config_views.delete, name='delete'),
-        path('create/', config_views.create, name='create'),
         path('disk/', config_views.disk, name='disk'),
         path('postresqlVersion/', config_views.postresqlVersion, name='postresqlVersion'),
         path('geoserver/', config_views.geoserver_configs),
