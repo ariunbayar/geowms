@@ -93,8 +93,8 @@ export default class Bundle extends Component {
                 </td>
                 <Modal
                         modalAction={() => this.modalClose()}
-                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                        title="Байгууллага устгах"
+                        text={`Та "${name}" нэртэй дэд санг устгахдаа итгэлтэй байна уу?`}
+                        title="Дэд сан устгах"
                         model_type_icon = "success"
                         status={this.state.modal_status}
                         modalClose={() => this.handleModalDeleteClose()}
