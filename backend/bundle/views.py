@@ -161,7 +161,7 @@ def all(request):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def updateDetail(request, pk):
+def detail(request, pk):
     bundle = get_object_or_404(Bundle, pk=pk)
     bundle_list = _get_bundle_display(bundle)
     rsp = {
@@ -175,7 +175,7 @@ def updateDetail(request, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def getLayer(request):
+def get_form_options(request):
     rsp = {
         'form_options': _get_bundle_options(),
     }
