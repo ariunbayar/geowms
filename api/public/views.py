@@ -39,7 +39,7 @@ def proxy(request, bundle_id, wms_id):
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
-    rsp = requests.get(wms.url, queryargs, headers=headers)
+    rsp = requests.get(wms.url, queryargs, headers=headers, timeout=5)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':

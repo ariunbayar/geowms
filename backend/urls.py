@@ -88,6 +88,11 @@ urlpatterns = [
         path('get-role-name/', org_views.getgetRolesNames, name='get-role-name'),
         path('inspire-roles/<int:pk>/', org_views.getInspireRoles, name='inspire-roles'),
         path('inspire-roles/<int:pk>/save/', org_views.saveInspireRoles, name='inspire-roles-save'),
+
+        path('level-<int:level>/<int:pk>/gov-perm/', org_views.getGovRoles, name='get-gov-roles'),
+        path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.saveGovRoles, name='save-gov-roles'),
+
+
     ], 'org'))),
 
     path('api/log/', include(([

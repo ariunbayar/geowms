@@ -369,13 +369,43 @@ def org_add(request, payload, level):
     role_id = payload.get('role_id')
     org_role_filter = GovRole.objects.filter(pk=role_id).first()
     org_id = payload.get('id')
+    objs = []
+    gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
+
     if org_id:
         org = Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level)
-        lol = GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
+        GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
+        gov_perm = GovPerm.objects.filter(org_id=org_id).first()
+        GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
+        for gov_role_inspire in gov_role_inspire_all:
+            objs.append(GovPermInspire(
+                gov_role_inspire=gov_role_inspire,
+                gov_perm=gov_perm,
+                perm_kind=gov_role_inspire.perm_kind,
+                feature_id=gov_role_inspire.feature_id,
+                property_id=gov_role_inspire.property_id,
+                geom=gov_role_inspire.geom,
+                created_by=gov_role_inspire.created_by,
+                updated_by=gov_role_inspire.updated_by,
+            ))
+        GovPermInspire.objects.bulk_create(objs)
         return JsonResponse({'success': True})
     else:
         org = Org.objects.create(name=org_name, level=level)
-        GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user)
+        gov_perm = GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user)
+        for gov_role_inspire in gov_role_inspire_all:
+            objs.append(GovPermInspire(
+                gov_role_inspire=gov_role_inspire,
+                gov_perm=gov_perm,
+                perm_kind=gov_role_inspire.perm_kind,
+                feature_id=gov_role_inspire.feature_id,
+                property_id=gov_role_inspire.property_id,
+                geom=gov_role_inspire.geom,
+                created_by=gov_role_inspire.created_by,
+                updated_by=gov_role_inspire.updated_by,
+            ))
+
+        GovPermInspire.objects.bulk_create(objs)
 
         return JsonResponse({'success': True})
 
@@ -661,13 +691,12 @@ def createPerm(request, payload):
 @require_GET
 @ajax_required
 def getInspireRoles(request, pk):
-
     roles = []
     data = []
     roles = []
     govRole = get_object_or_404(GovRole, pk=pk)
     for themes in LThemes.objects.all():
-        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce = _get_theme_packages(themes.theme_id, govRole)
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce = _get_theme_packages_gov(themes.theme_id, govRole)
         data.append({
                 'id': themes.theme_id,
                 'code': themes.theme_code,
@@ -696,7 +725,7 @@ def getInspireRoles(request, pk):
         'success': True
     })
 
-def _get_theme_packages(theme_id, govRole):
+def _get_theme_packages_gov(theme_id, govRole):
 
     package_data = []
     t_perm_all = 0
@@ -708,7 +737,7 @@ def _get_theme_packages(theme_id, govRole):
     t_perm_revoce = 0
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
-        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce = _get_package_features(package.package_id, govRole)
+        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce = _get_package_features_gove(package.package_id, govRole)
         
         package_data.append({
                 'id': package.package_id,
@@ -758,7 +787,7 @@ def _get_theme_packages(theme_id, govRole):
     return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce
 
 
-def _get_package_features(package_id, govRole):
+def _get_package_features_gove(package_id, govRole):
     feat_values = []
     p_perm_all = 0
     p_perm_view = 0
@@ -769,7 +798,7 @@ def _get_package_features(package_id, govRole):
     p_perm_revoce = 0
     for feat in LFeatures.objects.filter(package_id=package_id):
         p_perm_all = p_perm_all + 1
-        properties_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoce = _get_feature_property(feat.feature_id, govRole)
+        properties_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoce = _get_feature_property_gov(feat.feature_id, govRole)
         feat_values.append({
             'id':feat.feature_id,
             'code':feat.feature_code,
@@ -814,7 +843,7 @@ def _get_package_features(package_id, govRole):
 
 
 
-def _get_feature_property(feature_id, govRole):
+def _get_feature_property_gov(feature_id, govRole):
     properties_list = []
     data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
     property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values("property_id")
@@ -878,6 +907,7 @@ def saveInspireRoles(request, payload, pk):
     govRole = get_object_or_404(GovRole, pk=pk)
     objs = []
     gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=govRole)
+    govPerm = GovPerm.objects.filter(gov_role=govRole)
 
     if gov_role_inspire_all:
         for gov_role_inspire in gov_role_inspire_all:
@@ -895,7 +925,7 @@ def saveInspireRoles(request, payload, pk):
                 if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.property_id == data['property_id']:
                     check = False
             if check:
-                objs.append(GovRoleInspire(
+                govRoleInspire = GovRoleInspire.objects.create(
                     gov_role=govRole,
                     perm_kind=data['perm_kind'],
                     feature_id=data['feature_id'],
@@ -903,7 +933,19 @@ def saveInspireRoles(request, payload, pk):
                     geom=data['geom'],
                     created_by=request.user,
                     updated_by=request.user,
-                ))
+                )
+                if govPerm:
+                    for gov_perm in govPerm:
+                        GovPermInspire.objects.create(
+                            gov_role_inspire=govRoleInspire,
+                            gov_perm=gov_perm,
+                            perm_kind=data['perm_kind'],
+                            feature_id=data['feature_id'],
+                            property_id=data['property_id'],
+                            geom=data['geom'],
+                            created_by=request.user,
+                            updated_by=request.user,
+                        )
         else:
             objs.append(GovRoleInspire(
                 gov_role=govRole,
@@ -914,10 +956,276 @@ def saveInspireRoles(request, payload, pk):
                 created_by=request.user,
                 updated_by=request.user,
             ))
-
-
-
     GovRoleInspire.objects.bulk_create(objs)
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
+# baiguulgaa govperm
+
+
+@require_GET
+@ajax_required
+def getGovRoles(request, level, pk):
+    roles = []
+    data = []
+    roles = []
+    org = get_object_or_404(Org, pk=pk, level=level)
+    gov_perm = get_object_or_404(GovPerm, org=org)
+    for themes in LThemes.objects.all():
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce = _get_theme_packages(themes.theme_id, gov_perm)
+        data.append({
+                'id': themes.theme_id,
+                'code': themes.theme_code,
+                'name': themes.theme_name,
+                'packages': package_data,
+                'perm_all': t_perm_all,
+                'perm_view': t_perm_view,
+                'perm_create': t_perm_create,
+                'perm_remove': t_perm_remove,
+                'perm_update': t_perm_update,
+                'perm_approve': t_perm_approve,
+                'perm_revoce': t_perm_revoce,
+            })
+
+    for datas in GovPermInspire.objects.filter(gov_perm=gov_perm):
+        disable = False
+        if datas.gov_role_inspire:
+            disable = True
+        roles.append({
+                'perm_kind': datas.perm_kind,
+                'feature_id': datas.feature_id,
+                'property_id': datas.property_id,
+                'geom': datas.geom,
+                'disable': disable,
+            })
+    return JsonResponse({
+        'data': data,
+        'roles': roles,
+        'success': True
+    })
+
+def _get_theme_packages(theme_id, gov_perm):
+
+    package_data = []
+    t_perm_all = 0
+    t_perm_view = 0
+    t_perm_create = 0
+    t_perm_remove = 0
+    t_perm_update = 0
+    t_perm_approve = 0
+    t_perm_revoce = 0
+    for package in LPackages.objects.filter(theme_id=theme_id):
+        t_perm_all = t_perm_all + 1
+        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce = _get_package_features(package.package_id, gov_perm)
+        
+        package_data.append({
+                'id': package.package_id,
+                'code': package.package_code,
+                'name': package.package_name,
+                'features': features_all,
+                'perm_all': p_perm_all,
+                'perm_view': p_perm_view,
+                'perm_create': p_perm_create,
+                'perm_remove': p_perm_remove,
+                'perm_update': p_perm_update,
+                'perm_approve': p_perm_approve,
+                'perm_revoce': p_perm_revoce,
+            })
+        if p_perm_all == p_perm_view and p_perm_all != 0:
+            t_perm_view = t_perm_view + 1
+        elif 0 < p_perm_view and p_perm_all != 0:
+            t_perm_view = t_perm_view + 0.5
+
+        if p_perm_all == p_perm_create  and p_perm_all != 0:
+            t_perm_create = t_perm_create + 1
+        elif 0 < p_perm_create and p_perm_all != 0:
+            t_perm_create = t_perm_create + 0.5
+
+        if p_perm_all == p_perm_remove  and p_perm_all != 0:
+            t_perm_remove = t_perm_remove + 1
+        elif 0 < p_perm_remove and p_perm_all != 0:
+            t_perm_remove = t_perm_remove + 0.5
+
+        if p_perm_all == p_perm_update  and p_perm_all != 0:
+            t_perm_update = t_perm_update + 1
+        elif 0 < p_perm_update and p_perm_all != 0:
+            t_perm_update = t_perm_update + 0.5
+
+        if p_perm_all == p_perm_approve  and p_perm_all != 0:
+            t_perm_approve = t_perm_approve + 1
+        elif 0 < p_perm_approve and p_perm_all != 0:
+            t_perm_approve = t_perm_approve + 0.5
+
+        if p_perm_all == p_perm_revoce  and p_perm_all != 0:
+            t_perm_revoce = t_perm_revoce + 1
+        elif 0 < p_perm_revoce and p_perm_all != 0:
+            t_perm_revoce = t_perm_revoce + 0.5
+
+        if p_perm_all == 0:
+            t_perm_all = t_perm_all - 1
+    return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce
+
+
+def _get_package_features(package_id, gov_perm):
+    feat_values = []
+    p_perm_all = 0
+    p_perm_view = 0
+    p_perm_create = 0
+    p_perm_remove = 0
+    p_perm_update = 0
+    p_perm_approve = 0
+    p_perm_revoce = 0
+    for feat in LFeatures.objects.filter(package_id=package_id):
+        p_perm_all = p_perm_all + 1
+        properties_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoce = _get_feature_property(feat.feature_id, gov_perm)
+        feat_values.append({
+            'id':feat.feature_id,
+            'code':feat.feature_code,
+            'name':feat.feature_name,
+            'properties': properties_list,
+            'perm_all': perm_all,
+            'perm_view': perm_view,
+            'perm_create': perm_create,
+            'perm_remove': perm_remove,
+            'perm_update': perm_update,
+            'perm_approve': perm_approve,
+            'perm_revoce': perm_revoce,
+        })
+        if perm_all == perm_view and perm_all != 0:
+            p_perm_view = p_perm_view + 1
+        elif 0 < perm_view and perm_all != 0:
+            p_perm_view = p_perm_view + 0.5
+        if perm_all == perm_create and perm_all != 0:
+            p_perm_create = p_perm_create + 1
+        elif 0 < perm_create and perm_all != 0:
+            p_perm_create = p_perm_create + 0.5
+        if perm_all == perm_remove and perm_all != 0:
+            p_perm_remove = p_perm_remove + 1
+        elif 0 < perm_remove and perm_all != 0:
+            p_perm_remove = p_perm_remove + 0.5
+        if perm_all == perm_update and perm_all != 0:
+            p_perm_update = p_perm_update + 1
+        elif 0 < perm_update and perm_all != 0:
+            p_perm_update = p_perm_update + 0.5
+        if perm_all == perm_approve and perm_all != 0:
+            p_perm_approve = p_perm_approve + 1
+        elif 0 < perm_approve and perm_all != 0:
+            p_perm_remove = p_perm_remove + 0.5
+        if perm_all == perm_revoce and perm_all != 0:
+            p_perm_revoce = p_perm_revoce + 1
+        elif 0 < perm_revoce and perm_all != 0:
+            p_perm_revoce = p_perm_revoce + 0.5
+        if perm_all == 0:
+            p_perm_all = p_perm_all - 1
+        
+    return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce
+
+
+
+def _get_feature_property(feature_id, gov_perm):
+
+    properties_list = []
+    data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
+    property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values("property_id")
+    properties = LProperties.objects.filter(property_id__in=[property_ids]).values('property_id', "property_code", "property_name")
+    perm_all = 1
+    perm_view = 0
+    perm_create = 0
+    perm_remove = 0
+    perm_update = 0
+    perm_approve = 0
+    perm_revoce = 0
+    for prop in properties:
+        perm_all = perm_all + 1
+        property_obj = {
+            'id':prop['property_id'],
+            'code':prop['property_code'],
+            'name':prop['property_name'],
+            'perm_all': 6,
+            'perm_view': 0,
+            'perm_create': 0,
+            'perm_remove': 0,
+            'perm_update': 0,
+            'perm_approve': 0,
+            'perm_revoce': 0,
+        }
+
+        for gov_role_inspire in GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id):
+            if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
+                if gov_role_inspire.perm_kind == 1:
+                    perm_view = perm_view + 1
+                    property_obj['perm_view'] = property_obj['perm_view'] + 1
+                if gov_role_inspire.perm_kind == 2:
+                    perm_create = perm_create + 1
+                    property_obj['perm_create'] = property_obj['perm_create'] + 1
+                if gov_role_inspire.perm_kind == 3:
+                    perm_remove = perm_remove + 1
+                    property_obj['perm_remove'] = property_obj['perm_remove'] + 1
+                if gov_role_inspire.perm_kind == 4:
+                    perm_update = perm_update + 1
+                    property_obj['perm_update'] = property_obj['perm_update'] + 1
+                if gov_role_inspire.perm_kind == 5:
+                    perm_approve = perm_approve + 1
+                    property_obj['perm_approve'] = property_obj['perm_approve'] + 1
+                if gov_role_inspire.perm_kind == 6:
+                    perm_revoce = perm_revoce + 1
+                    property_obj['perm_revoce'] = property_obj['perm_revoce'] + 1
+        properties_list.append(property_obj)
+    perm_view = perm_view + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=1).count()
+    perm_create = perm_create + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=2).count()
+    perm_remove = perm_remove + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=3).count()
+    perm_update = perm_update + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=4).count()
+    perm_approve = perm_approve + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=5).count()
+    perm_revoce = perm_revoce + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=6).count()
+    return properties_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoce
+
+
+@require_POST
+@ajax_required
+def saveGovRoles(request, payload, level, pk):
+    values = payload.get('values')
+    org = get_object_or_404(Org, pk=pk, level=level)
+    gov_perm = get_object_or_404(GovPerm, org=org)
+    objs = []
+    gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
+
+    if gov_perm_inspire_all:
+        for gov_role_inspire in gov_perm_inspire_all:
+            check = True
+            for data in values:
+                if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.property_id == data['property_id']:
+                    check = False
+            if check:
+                GovPermInspire.objects.filter(perm_kind=gov_role_inspire.perm_kind, feature_id=gov_role_inspire.feature_id, property_id=gov_role_inspire.property_id).delete()
+    for data in values:
+        if gov_perm_inspire_all:
+            check = True
+            for gov_role_inspire in gov_perm_inspire_all:
+                if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.property_id == data['property_id']:
+                    check = False
+            if check:
+                objs.append(GovPermInspire(
+                    gov_perm=gov_perm,
+                    perm_kind=data['perm_kind'],
+                    feature_id=data['feature_id'],
+                    property_id=data['property_id'],
+                    geom=data['geom'],
+                    created_by=request.user,
+                    updated_by=request.user,
+                ))
+        else:
+            objs.append(GovPermInspire(
+                gov_perm=gov_perm,
+                perm_kind=data['perm_kind'],
+                feature_id=data['feature_id'],
+                property_id=data['property_id'],
+                geom=data['geom'],
+                created_by=request.user,
+                updated_by=request.user,
+            ))
+
+    GovPermInspire.objects.bulk_create(objs)
     rsp = {
         'success': True,
     }
