@@ -206,6 +206,30 @@ export default class Маягт extends Component {
                                 ))
                                 ) : ( null
                                 )}
+                                <div className="row my-3 ">
+                                    <div className="col-md-3">
+                                        <label className="col-form-label">Тушаалын дугаар</label>
+                                    </div>
+                                    <div className="col-md-9">
+                                      <Field
+                                          name="order_no"
+                                          className='form-control'
+                                          placeholder="Тушаалын дугаар"
+                                      />
+                                    </div>
+                                </div>
+                                <div className="row my-3 ">
+                                    <div className="col-md-3">
+                                        <label className="col-form-label">Тушаал гарсан огноо </label>
+                                    </div>
+                                    <div className="col-md-9">
+                                      <Field
+                                          name="order_at"
+                                          className='form-control'
+                                          placeholder="Тушаал гарсан огноо"
+                                      />
+                                    </div>
+                                </div>
                                 <div>
                                     {this.props.roles[6] ?
                                     <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>:
