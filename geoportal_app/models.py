@@ -28,3 +28,5 @@ class User(AbstractUser):
     register = models.CharField(max_length=10, null=True)
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
+    is_approve = models.BooleanField(default=False)
+    token = models.CharField(max_length=100, null=True)

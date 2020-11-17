@@ -1,3 +1,4 @@
+import uuid
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
@@ -6,6 +7,12 @@ import re
 import unicodedata
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
+from django.conf import settings
+import os
+import smtplib
+import imghdr
+from email.message import EmailMessage
+from django.http import JsonResponse
 
 def resize_b64_to_sizes(src_b64, sizes):
 
@@ -213,3 +220,39 @@ def refreshMaterializedView(fid):
         return False
     else:
         return True
+
+def _generate_user_token():
+    return uuid.uuid4().hex[:32]
+
+def approve_email(user):
+
+    if not user.email:
+        return JsonResponse({'success': False, 'error': 'Хэрэглэгчийн mail хаягийг оруулна уу?'})
+
+    if user.is_approve and user.token:
+        return JsonResponse({'success': False, 'error': 'Баталгаажсан хэрэглэгч байна.'})
+
+    if user.is_approve:
+        return JsonResponse({'success': False, 'error': 'Баталгаажсан хэрэглэгч байна.'})
+
+    if user.token == '':
+        user.token = _generate_user_token()
+        user.save()
+
+
+    EMAIL_HOST = settings.EMAIL_HOST
+    EMAIL_HOST_USER = settings.EMAIL_HOST_USER
+    EMAIL_HOST_PASSWORD = settings.EMAIL_HOST_PASSWORD
+    EMAIL_PORT = settings.EMAIL_PORT
+
+    msg = EmailMessage()
+    msg['Subject'] = 'Геопортал хэрэглэгч баталгаажуулах'
+    msg['From'] = EMAIL_HOST_USER
+    msg['To'] = user.email
+    msg.set_content('Дараах холбоос дээр дарж баталгаажуулна уу! 192.168.10.92:8000/gov/user/approve/{token}/'.format(token=user.token))
+
+    with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT) as smtp:
+        smtp.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
+        smtp.send_message(msg)
+
+    return JsonResponse({'success': True, 'msg': 'Амжилттай илгээлээ'})
