@@ -127,7 +127,7 @@ export default class BundleForm extends Component {
                         style={{marginBottom: "8px"}}
                     />
                 </div>
-                {this.props.values.length > 0 &&
+                {this.props.values.id &&
                 <div className="form-group" style={{marginBottom: "10px"}}>
                     <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
 
