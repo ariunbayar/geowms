@@ -2,9 +2,11 @@ import requests
 from backend.config.models import Config
 
 config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_port']).values('value')
-host = config[0]['value']
-port = config[1]['value']
-BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(host=host, port=port) 
+if config:
+        
+    host = config[0]['value']
+    port = config[1]['value']
+    BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(host=host, port=port) 
 
 AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
 
