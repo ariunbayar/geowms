@@ -19,6 +19,7 @@ export default class OrgRequestForm extends Component {
             is_loading: false,
         }
         this.getAll = this.getAll.bind(this)
+        this.onChangeTheme = this.onChangeTheme.bind(this)
     }
 
     componentDidMount(){
@@ -30,7 +31,6 @@ export default class OrgRequestForm extends Component {
         service
         .getAll()
         .then(({ success ,org_request, choices, modules }) => {
-            console.log(modules);
            if(success){
                 this.themes = []
                 this.packages = []
@@ -63,7 +63,7 @@ export default class OrgRequestForm extends Component {
             })
     }
 
-    onChangeOronZai(value, type) {
+    onChangeTheme(value, type) {
         const { modules } = this.state
         this.themes = []
         this.packages = []
@@ -72,33 +72,47 @@ export default class OrgRequestForm extends Component {
             if (type == 'theme' && module.id == value){
                 this.setState({ search_theme: value })
                 this.themes.push(module)
-            } else {
+            } else if (type !== 'theme') {
                 this.themes.push(module)
             }
         })
-        this.themes.packages.map((mods, idx) => {
-            if (type == 'package', mods.id == value) {
+        this.themes.map((mods, idx) => {
+            mods.packages.map((pack, idx) => {
+                if (type == 'package', pack.id == value) {
+                    this.setState({ search_package: value })
+                    this.packages.push(pack)
+                } else if (type !== 'package'){
+                    this.packages.push(pack)
+                }
+            })
+        })
+        this.packages.map((mod, idx) => {
+            mod.features.map((feat, idx) => {
+                this.features.push(feat)
+            })
+        })
+        this.setState({packages: this.packages, features: this.features})
+    }
+
+    onChangePackage(value, type) {
+        const { packages } = this.state
+        this.themes = []
+        this.packages = []
+        this.features = []
+        packages.map((mod, idx) => {
+            if (type == 'package', mod.id == value) {
                 this.setState({ search_package: value })
-                this.packages.push(mods)
-            } else {
-                this.packages.push(mods)
+                mod.features.map((feat, idx) => {
+                    this.features.push(feat)
+                })
             }
         })
-        this.packages.features.map((mod, idx) => {
-            if (type == 'feature', mod.id == value) {
-                this.setState({ search_feature: value })
-                this.features.push(mod)
-            } else {
-                this.features.push(mod)
-            }
-        })
-        this.setState({packages: this.packages, features: this.features, })
+        this.setState({features: this.features})
     }
 
     render() {
         const org_request = this.state.org_request
-        const {search_state, search_kind, is_loading, choices, modules, packages, features, themes} = this.state
-        console.log(packages);
+        const {is_loading, choices, packages, features, themes} = this.state
         return (
             <div className="row">
                 <div className="col-md-12 row">
@@ -141,7 +155,7 @@ export default class OrgRequestForm extends Component {
                         <div className="row">
                             <div className="col-md-3">
                                 <select className="form-control form-control-sm"
-                                    onChange={(e) => this.onChangeOronZai(e.target.value, 'theme')}
+                                    onChange={(e) => this.onChangeTheme(e.target.value, 'theme')}
                                 >
                                 <option value="">--- Дэд сангаар хайх ---</option>
                                 {
@@ -157,7 +171,7 @@ export default class OrgRequestForm extends Component {
                             </div>
                             <div className="col-md-3">
                                 <select className="form-control form-control-sm"
-                                    onChange={(e) => this.onChangeOronZai(e.target.value, 'package')}
+                                    onChange={(e) => this.onChangePackage(e.target.value, 'package')}
                                 >
                                 <option value="">--- Багцаас хайх ---</option>
                                 {
@@ -173,7 +187,7 @@ export default class OrgRequestForm extends Component {
                             </div>
                             <div className="col-md-3">
                                 <select className="form-control form-control-sm"
-                                    onChange={(e) => this.onChangeOronZai(e.target.value, 'feature')}
+                                    onChange={(e) => this.setState({ search_feature: e.target.value })}
                                 >
                                 <option value="">--- Давхаргаас хайх ---</option>
                                 {
