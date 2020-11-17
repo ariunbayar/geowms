@@ -29,6 +29,8 @@ class ChangeRequest(models.Model):
 
     old_geo_id = models.CharField(max_length=100, null=True)
     new_geo_id = models.CharField(max_length=100, null=True)
+    order_no = models.CharField(max_length=50, null=True)
+    order_at = models.CharField(max_length=50, null=True)
     theme_id = models.IntegerField()
     package_id = models.IntegerField()
     feature_id = models.IntegerField()
