@@ -9,6 +9,7 @@ export const service = {
     defaultCheckUpdate,
     detail,
     ModuleCheck,
+    getLayer
 }
 
 const prefix = '/back'
@@ -85,9 +86,14 @@ function create(values) {
 function detail(id) {
     const requestOptions = {..._getGetOptions()}
 
-    return fetch(`${prefix}/bundle/${id}/updatemore/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/bundle/${id}/update-detail/`, requestOptions).then(handleResponse)
 }
 
+function getLayer(id) {
+    const requestOptions = {..._getGetOptions()}
+
+    return fetch(`${prefix}/bundle/get-layer/`, requestOptions).then(handleResponse)
+}
 
 function update(values) {
 
@@ -125,7 +131,7 @@ function roleCreate(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/bundle/roleCreate/`, opts).then(handleResponse)
+    return fetch(`${prefix}/bundle/role-create/`, opts).then(handleResponse)
 }
 
 function roleRemove(values) {
@@ -134,7 +140,7 @@ function roleRemove(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/bundle/roleRemove/`, opts).then(handleResponse)
+    return fetch(`${prefix}/bundle/role-remove/`, opts).then(handleResponse)
 }
 
 function defaultCheckUpdate(values) {
@@ -143,7 +149,7 @@ function defaultCheckUpdate(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/bundle/defaultCheckUpdate/`, opts).then(handleResponse)
+    return fetch(`${prefix}/bundle/default-check-update/`, opts).then(handleResponse)
 }
 
 function ModuleCheck(values){
@@ -152,5 +158,5 @@ function ModuleCheck(values){
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/bundle/ModuleCheck/`, opts).then(handleResponse)
+    return fetch(`${prefix}/bundle/module-check/`, opts).then(handleResponse)
 }

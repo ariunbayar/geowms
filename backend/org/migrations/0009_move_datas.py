@@ -70,6 +70,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('backend_org', '0008_employee_is_admin'),
+        ('backend_inspire', '0005_auto_20201117_1056')
     ]
 
     operations = [

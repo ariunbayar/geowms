@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import "./styles.css";
 import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
-import { service } from "./service";
 
 
 export default class Bundle extends Component {
@@ -35,8 +34,7 @@ export default class Bundle extends Component {
     }
 
     render() {
-        const {id, name, price, icon_url, wms_list} = this.props.values
-        const {is_modal_delete_open}=this.state
+        const {id, name, icon_url, wms_list} = this.props.values
         const idx=this.props.idx
         return (
             <tr>
@@ -82,14 +80,6 @@ export default class Bundle extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o gp-text-primary" aria-hidden="true"></i>
                     </a>
-                    <Modal
-                        modalAction={() => this.modalClose()}
-                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                        title="Байгууллага устгах"
-                        model_type_icon = "success"
-                        status={this.state.modal_status}
-                        modalClose={() => this.handleModalDeleteClose()}
-                    />
                 </td>
                 <td>
                     <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
@@ -101,6 +91,14 @@ export default class Bundle extends Component {
                         <i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
+                <Modal
+                        modalAction={() => this.modalClose()}
+                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        title="Байгууллага устгах"
+                        model_type_icon = "success"
+                        status={this.state.modal_status}
+                        modalClose={() => this.handleModalDeleteClose()}
+                    />
             </tr>
         )
     }

@@ -25,7 +25,7 @@ class Bundle(models.Model):
         (MODULE_BARILGA_SUURIN_GAZAR, 'Барилга, суурин газар'),
     )
 
-    layers = models.ManyToManyField(WMSLayer, through='BundleLayer')
+    layers = models.ManyToManyField(WMSLayer, through='BundleLayer', blank=True)
     name = models.CharField(max_length=200)
     module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
 

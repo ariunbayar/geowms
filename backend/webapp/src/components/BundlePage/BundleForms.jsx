@@ -39,16 +39,12 @@ export class BundleForms extends Component {
         const id = this.props.match.params.id
         if(id){
             service.detail(id).then(({bundle_list, form_options, form_options_role}) => {
-                {bundle_list.map((bundle_list) =>
-                    this.setState({form_values: bundle_list})
-                )}
-                this.setState({form_options, form_options_role})
-    
-            }) 
+                this.setState({form_values: bundle_list, form_options, form_options_role})
+            })
         }else{
-            service.detail(9999).then(({form_options}) => {
+            service.getLayer().then(({form_options}) => {
                 this.setState({form_options})
-            }) 
+            })
         }
 
     }
@@ -61,19 +57,16 @@ export class BundleForms extends Component {
 
         if (values.id) {
 
-            service.update(values).then(({success, item}) => {
+            service.update(values).then(({success}) => {
                 if (success) this.handleSaveSuccess()
             })
-
         } else {
-            service.create(values).then(({success, item}) => {
+            service.create(values).then(({success}) => {
                 if (success) {
                     this.props.history.push( `/back/дэд-сан/`)
                 }
             })
-
         }
-
     }
 
     handleRemove(id) {

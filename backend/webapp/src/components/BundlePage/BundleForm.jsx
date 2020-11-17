@@ -150,7 +150,6 @@ export default class BundleForm extends Component {
                 </div>}
 
                 <div className ="bundle-table-scroll border border-light rounded">
-                    
                     {this.props.formOptions.map(({name, layers,is_active}, idx) =>
                         <div className="form-group" style={{marginTop: '10px'}} key={idx}>
                             <div className="col-md-12">
