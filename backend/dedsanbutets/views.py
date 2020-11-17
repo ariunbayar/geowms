@@ -30,12 +30,19 @@ from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.auth.decorators import user_passes_test
+from backend.config.models import Config
 
+from backend.bundle.models import BundleLayer, Bundle
+from backend.wmslayer.models import WMSLayer
+from backend.wms.models import WMS
+from geoportal_app.models import User
+from main.settings import dev
 from main.utils import (
     dict_fetchall,
     slugifyWord
 )
-import geoserver
+import main.geoserver as geoserver
+
 # Create your views here.
 def _get_features(package_id):
     feature_data = []
@@ -400,6 +407,7 @@ def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
     tid = payload.get('tid')
+    user = User.objects.filter(username=request.user).first()
     if not id_list:
         rsp = {
             'success': False,
@@ -447,7 +455,7 @@ def propertyFieldsSave(request, payload):
         for idx in id_list:
             ViewProperties.objects.create(view=new_view, property_id=idx)
 
-        create_geoserver_detail(table_name, model_name, theme.theme_code)
+        create_geoserver_detail(table_name, model_name, theme, user.id)
         rsp = {
             'success': True,
             'info': 'Амжилттай хадгаллаа'
@@ -651,26 +659,300 @@ def erese(request, payload):
         }
     return JsonResponse(rsp)
 
-def create_geoserver_detail(table_name, model_name, theme_code):
-    print(table_name, theme_code)
+def get_colName_type(view_name, data):
+    cursor = connections['default'].cursor() 
+    query_index = ''' 
+
+        select 
+            ST_GeometryType(geo_data),
+            Find_SRID('public', '{view_name}', '{data}'),
+            ST_Extent(geo_data)
+        from 
+            {view_name} group by geo_data limit 1  
+                
+            '''.format(
+                view_name=view_name,
+                data=data
+                )
+
+    sql = '''
+
+        SELECT 
+        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
+        FROM   
+        pg_attribute
+        WHERE  
+        attrelid = 'public.{view_name}'::regclass AND    attnum > 0
+        ORDER  BY attnum
+
+        '''.format(view_name=view_name)
+
+    cursor.execute(sql)
+    geom_att = dict_fetchall(cursor)
+    geom_att = list(geom_att)
+            
+    cursor.execute(query_index)
+    some_attributes = dict_fetchall(cursor)
+    some_attributes = list(some_attributes)
+    
+    return geom_att, some_attributes
+def check_them_name(theme_name):
+
+    if theme_name == 'Хил зааг':
+        theme_name = 'Хил, зааг'
+        return theme_name
+    elif theme_name == 'Газарзүйн нэр':
+        theme_name = 'Газар зүйн нэр'
+        return theme_name
+    else:
+        return theme_name
+    
+
+def create_geoserver_detail(table_name, model_name, theme, user_id):
+    theme_code = theme.theme_code
     BASE_URL = 'http://localhost:8080/geoserver/rest/'    
     AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
-    # srs = 'EPSG:32648'
+    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_user' , 'geoserver_pass']).values('value')
+    host = config[0]['value']
+    dbName = dev.DATABASES['default']['NAME']
+    password = config[2]['value']
+    wms_url = 'http://{host}:8080/geoserver/{ws_name}/ows'.format(ws_name=theme_code, host=host)
     check_workspace = geoserver.getWorkspace(BASE_URL, AUTH, theme_code)
+    wms = WMS.objects.filter(name=theme.theme_name).first()
+    theme_name = theme.theme_name
+    if not wms:
+        WMS.objects.create(
+            name=theme.theme_name,
+            url = wms_url,
+            created_by_id=user_id
+        )
+        wms = WMS.objects.filter(name=theme.theme_name).first()
+    if check_workspace.status_code == 404:
 
-    if check_workspace.status_code != 201:
-        create_workspace = geoserver.create_store(BASE_URL, AUTH, theme_code)
-        if create_workspace.status_code == 201:
-            ds_name = 'gp_' + theme_code
-            check_ds_name = geoserver.getDataStore(BASE_URL, AUTH, theme_code, ds_name)
-            if check_ds_name.status_code != 201:
-                # host = 'localhost'
-                # db = 'geo'
-                # password = 'Aguero16'
-                 create_ds = geoserver.create_store(BASE_URL, AUTH, theme_code, ds_name, )
-    
-    
-    
+        geoserver.create_space(BASE_URL, AUTH, theme_code)
+        ds_name = 'gp_' + theme_code
+        check_ds_name = geoserver.getDataStore(BASE_URL, AUTH, theme_code, ds_name)
+        if check_ds_name.status_code == 404:
+            create_ds = geoserver.create_store(
+                BASE_URL,
+                AUTH, 
+                theme_code, 
+                ds_name, 
+                ds_name, 
+                host, 
+                dbName,
+                password
+                )
+            if create_ds.status_code == 201:
+
+                layer_name = 'gp_layer_' + table_name
+
+                check_layer = geoserver.getDataStoreLayer(
+                    BASE_URL,
+                    AUTH,
+                    theme_code,
+                    ds_name,
+                    layer_name
+                )
+
+                geom_att, extends = get_colName_type(table_name, 'geo_data')
+                if extends:
+                    srs = extends[0]['find_srid']
+                else:
+                    srs = 4326
+                layer_check = geoserver.getDataStoreLayer(BASE_URL, AUTH, theme_code, ds_name, layer_name)
+                if layer_check.status_code == 404:
+                        
+                    layer_create = geoserver.create_layer(
+                                        BASE_URL,
+                                        AUTH,
+                                        theme_code,
+                                        ds_name,
+                                        layer_name,
+                                        layer_name,
+                                        table_name,
+                                        srs, 
+                                        geom_att,
+                                        extends
+                                    )    
+
+                else:
+                    update_layer = geoserver.deleteLayerName(BASE_URL, AUTH, theme_code, ds_name, layer_name)
+                    if update_layer.status_code == 200:
+                        geom_att, extends = get_colName_type(table_name, 'geo_data')
+                    
+                        if extends:
+                            srs = extends[0]['find_srid']
+                        else:
+                            srs = 4326
+
+                        layer_create = geoserver.create_layer(
+                                        BASE_URL,
+                                        AUTH,
+                                        theme_code,
+                                        ds_name,
+                                        layerf_name,
+                                        layer_name,
+                                        table_name,
+                                        srs, 
+                                        geom_att,
+                                        extends
+                                    )
+                        if layer_create.status_code == 500:
+                            return {
+                                'error': 'layer_create'
+                            }
+
+                    else:
+                        return {'error': 'layer_remove'}
+
+    else:
+        ds_name = 'gp_' + theme_code
+        check_ds_name = geoserver.getDataStore(BASE_URL, AUTH, theme_code, ds_name)
+        if check_ds_name.status_code == 404:
+            create_ds = geoserver.create_store(
+                BASE_URL,
+                AUTH, 
+                theme_code, 
+                ds_name, 
+                ds_name, 
+                host, 
+                'geo',
+                password
+                )
+            if create_ds.status_code == 201:
+
+                layer_name = 'gp_layer_' + table_name
+
+                check_layer = geoserver.getDataStoreLayer(
+                    BASE_URL,
+                    AUTH,
+                    theme_code,
+                    ds_name,
+                    layer_name
+                )
+
+                geom_att, extends = get_colName_type(table_name, 'geo_data')
+                
+                if extends:
+                    srs = extends[0]['find_srid']
+                else:
+                    srs = 4326
+
+                layer_check = geoserver.getDataStoreLayer(BASE_URL, AUTH, theme_code, ds_name, layer_name)
+                if layer_check.status_code == 404:
+                        
+                    layer_create = geoserver.create_layer(
+                                        BASE_URL,
+                                        AUTH,
+                                        theme_code,
+                                        ds_name,
+                                        layer_name,
+                                        layer_name,
+                                        table_name,
+                                        srs, 
+                                        geom_att,
+                                        extends
+                                    )
+
+                else:
+                    update_layer = geoserver.deleteLayerName(BASE_URL, AUTH, theme_code, ds_name, layer_name)
+                    if update_layer.status_code == 200:
+                        geom_att, extends = get_colName_type(table_name, 'geo_data')
+                        srs = extends[0]['find_srid']
+                        layer_create = geoserver.create_layer(
+                                        BASE_URL,
+                                        AUTH,
+                                        theme_code,
+                                        ds_name,
+                                        layer_name,
+                                        layer_name,
+                                        table_name,
+                                        srs, 
+                                        geom_att,
+                                        extends
+                                    )
+                        if layer_create.status_code == 500:
+                            return {
+                                'error': 'layer_create'
+                            }
+
+                    else:
+                        return {'error': 'layer_remove'}
+
+        else:
+            layer_name = 'gp_layer_' + table_name
+
+            geom_att, extends = get_colName_type(table_name, 'geo_data')
+            if extends:
+                srs = extends[0]['find_srid']
+            else:
+                srs = 4326
+            layer_check = geoserver.getDataStoreLayer(BASE_URL, AUTH, theme_code, ds_name, layer_name)
+            if layer_check.status_code == 404:
+                    
+                layer_create = geoserver.create_layer(
+                                    BASE_URL,
+                                    AUTH,
+                                    theme_code,
+                                    ds_name,
+                                    layer_name,
+                                    layer_name,
+                                    table_name,
+                                    srs, 
+                                    geom_att,
+                                    extends
+                                )
+            else:
+                update_layer = geoserver.deleteLayerName(BASE_URL, AUTH, theme_code, ds_name, layer_name)
+                if update_layer.status_code == 200:
+                    geom_att, extends = get_colName_type(table_name, 'geo_data')
+                    
+                    if extends:
+                        srs = extends[0]['find_srid']
+                    else:
+                        srs = 4326
+                    layer_create = geoserver.create_layer(
+                                    BASE_URL,
+                                    AUTH,
+                                    theme_code,
+                                    ds_name,
+                                    layer_name,
+                                    layer_name,
+                                    table_name,
+                                    srs, 
+                                    geom_att,
+                                    extends
+                                )
+                    if layer_create.status_code == 500:
+                        return {
+                            'error': 'layer_create'
+                        }
+
+                else:
+                    return {'error': 'layer_remove'}
+
+        wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
+        if not wms_layer:
+            legend_url = '''http://{host}:8080/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'''.format(host=host, ws_name=theme_code, layer=layer_name)
+            WMSLayer.objects.create(
+                name=layer_name, 
+                code=layer_name, 
+                wms=wms, 
+                title=layer_name, 
+                feature_price=0, 
+                legend_url=legend_url
+            )
+            bundle_name = check_them_name(theme_name)
+            bunde_id = Bundle.objects.filter(name=bundle_name).first().id
+            
+            wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
+            BundleLayer.objects.create(
+                bundle_id=bunde_id,
+                layer_id=wms_layer_id,
+                defaultCheck=1,
+                role_id=2
+            )
 
 def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
