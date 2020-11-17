@@ -43,6 +43,7 @@ urlpatterns = [
             path('<int:pk>/delete/', org_request_views.requestDelete, name="delete"),
             path('<int:pk>/approve/', org_request_views.requestApprove, name="approve"),
             path('getCount/', org_request_views.getCount, name='getCount'),
+            path('search/', org_request_views.search, name='request-search'),
         ], 'org-request'))),
         path('zip-code/', include(([
             path('aimag/', zipcode_views.aimag, name='aimag'),

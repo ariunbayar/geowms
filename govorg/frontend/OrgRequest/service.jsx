@@ -2,7 +2,8 @@ import {handleResponse, getPostOptions, getGetOptions} from '../components/helpe
 export const service = {
     getAll,
     requestDelete,
-    requestApprove
+    requestApprove,
+    requestSearch,
 }
 
 const prefix = '/gov/api/org-request'
@@ -23,4 +24,12 @@ function requestApprove(id, values) {
         body: JSON.stringify({values}),
     }
     return fetch(`${prefix}/${id}/approve/`, requestOptions).then(handleResponse)
+}
+
+function requestSearch(state, kind, theme, packag, feature) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({state, kind, theme, packag, feature}),
+    }
+    return fetch(`${prefix}/search/`, requestOptions).then(handleResponse)
 }
