@@ -1,65 +1,56 @@
 import requests
+from backend.config.models import Config
 
+config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_port']).values('value')
+host = config[0]['value']
+port = config[1]['value']
+BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(host=host, port=port) 
 
+AUTH =requests.auth.HTTPBasicAuth('admin', 'geoserver')
 
-def getWorkspace(BASE_URL, AUTH, space_name):
+HEADERS = {
+        'Content-type': 'application/xml',
+    }
+    
+
+def getWorkspace(space_name):
     url = '''workspaces/{space_name}'''.format(space_name=space_name)
-
-    HEADERS = {
-        'Content-type': 'text/xml'
-        }
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
-def getDataStore(BASE_URL, AUTH, space_name, store_name):
+def getDataStore(space_name, store_name):
     url = '''workspaces/{space_name}/datastores/{store_name}'''.format(space_name=space_name, store_name=store_name)
-
-    HEADERS = {
-        'Content-type': 'text/xml'
-        }
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
 
     return rsp
 
-def getDataStoreLayer(BASE_URL, AUTH, space_name, store_name, layer_name):
+def getDataStoreLayer(space_name, store_name, layer_name):
     url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}'''.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
-
-    HEADERS = {
-        'Content-type': 'text/xml'
-        }
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
 
     return rsp
 
-def deleteWorkSpace(BASE_URL, AUTH, space_name):
+def deleteWorkSpace(space_name):
     
 
     url = '''workspaces/{space_name}?recurse=true'''.format(space_name=space_name)
 
-    HEADERS = {
-        'Content-type': 'text/xml'
-        }
-
 
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 
-def deleteLayerName(BASE_URL, AUTH, space_name, store_name, layer_name):
+def deleteLayerName(space_name, store_name, layer_name):
     
 
     url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}?recurse=true'''.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
 
-    HEADERS = {
-        'Content-type': 'text/xml'
-        }
-
 
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 
-def create_space(BASE_URL, AUTH, space_name):
+def create_space(space_name):
     url = '''workspaces'''
     payload = '''<workspace><name>{thema_name}</name></workspace> '''.format(thema_name=space_name)
 
@@ -70,7 +61,7 @@ def create_space(BASE_URL, AUTH, space_name):
     return rsp
 
 
-def create_store(BASE_URL, AUTH, space_name, ds_name, ds_desc, host, db, password):
+def create_store(space_name, ds_name, ds_desc, host, db, password):
 
     url = '''workspaces/{space_name}/datastores'''.format(space_name=space_name)
     payload = '''
@@ -115,7 +106,7 @@ def create_store(BASE_URL, AUTH, space_name, ds_name, ds_desc, host, db, passwor
 
     return rsp
 
-def create_layer(BASE_URL, AUTH, space_name, store_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
+def create_layer(space_name, store_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
     url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes'''.format(space_name=space_name, store_name = store_name)
     attributes_hoho = []
     geom_type = ''
@@ -260,10 +251,12 @@ def create_layer(BASE_URL, AUTH, space_name, store_name, layer_name, layer_title
                 attributes=''.join(attributes_hoho),
             )
     
-    HEADERS = {
-        'Content-type': 'application/xml',
-    }
     
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     print('layer_status_code', rsp.status_code)
+    return rsp
+
+def getGeoserverVersion():
+    url = BASE_URL + 'about/version.json'
+    rsp = requests.get(url, auth=AUTH)
     return rsp

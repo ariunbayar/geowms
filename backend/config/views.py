@@ -15,7 +15,7 @@ from main.decorators import ajax_required
 from .models import Config
 from backend.payment.models import Payment
 from backend.config.models import Error500
-
+from main.geoserver import getGeoserverVersion
 
 CACHE_TIMEOUT_DISK_INFO = 5
 
@@ -129,14 +129,19 @@ def disk(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def postresqlVersion(request):
+    geosever_version = []
     version_postgre_sql = connections['default'].cursor()
     version_postgre_sql.execute("SELECT version()")
     version_postgre_sql_data = version_postgre_sql.fetchone()
     version_post_gis = connections['default'].cursor()
     version_post_gis.execute("SELECT postgis_full_version()")
     version_post_gis_data = version_post_gis.fetchone()
-
-    return JsonResponse({'postgreVersion': version_postgre_sql_data, 'versionOfPostGis': version_post_gis_data})
+    geosever_version = getGeoserverVersion().json()
+    return JsonResponse({
+        'postgreVersion': version_postgre_sql_data,
+        'versionOfPostGis': version_post_gis_data,
+        'geoserverVersion': geosever_version
+        })
 
 
 @require_POST
@@ -198,6 +203,8 @@ def geoserver_configs(request):
         'geoserver_host': '',
         'geoserver_user': '',
         'geoserver_pass': '',
+        'geoserver_port': '',
+        'geoserver_db': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -219,6 +226,8 @@ def geoserver_configs_save(request, payload):
         'geoserver_host',
         'geoserver_user',
         'geoserver_pass',
+        'geoserver_port',
+        'geoserver_db',
     )
 
     for config_name in config_names:
