@@ -10,6 +10,7 @@ from backend.inspire.models import MGeoDatas, LFeatures, LPackages, LThemes
 
 def _get_meta_data_display(metadata):
     return {
+            'id': metadata.id,
             'org_name': metadata.org_name,
             'customer_org': metadata.customer_org,
             'distributor_org': metadata.distributor_org,
@@ -21,6 +22,7 @@ def _get_meta_data_display(metadata):
             'abstract': metadata.abstract,
             'title': metadata.title,
             'schema': metadata.schema,
+            'uuid': metadata.uuid,
         }
 
 
