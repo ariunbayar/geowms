@@ -3,7 +3,7 @@ import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
 import GovRole from './GovRole/'
 import { System } from "./System";
-import { Meta } from "./Meta"
+import { Profile } from './Profile'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
