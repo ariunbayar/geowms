@@ -120,7 +120,6 @@ export default class BundleFormTable extends Component {
 
                     </td>
                 )}
-                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
             </tr>
         )
     }

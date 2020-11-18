@@ -101,7 +101,7 @@ export class BundleForms extends Component {
                         </div>
                     </div>
                     <div className="col-lg-8">
-                        <div className="bundle-table-scroll card">
+                        <div className="bundle-BundleAdminRights-scroll card mb-2 table-responsive ">
                             <div className="card-body">
                                 <BundleAdminRights
                                     handleSave={this.handleSave}
