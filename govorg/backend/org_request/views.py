@@ -158,6 +158,8 @@ def _get_org_request(ob):
             'created_at':ob.created_at.strftime('%Y-%m-%d'),
             'employee':user.first_name,
             'org':org.name,
+            'order_no': ob.order_no,
+            'order_at': ob.order_at,
         }
 
     else:
@@ -168,7 +170,7 @@ def _get_org_request(ob):
 
                     geo_json = _convert_text_json(ob.geo_json)
                     current_geo_json = _get_geoJson(geo_json)
-                    
+
                     old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
                     old_geo_data = _get_geoJson(old_geo_data)
                     geo_json = FeatureCollection([geo_json, old_geo_data])
@@ -203,6 +205,8 @@ def _get_org_request(ob):
             'created_at':ob.created_at.strftime('%Y-%m-%d'),
             'employee':user.first_name,
             'org':org.name,
+            'order_no': ob.order_no,
+            'order_at': ob.order_at,
         }
 
 
