@@ -161,15 +161,23 @@ def all(request):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def updateMore(request, pk):
-    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.filter(pk=pk)]
-    form_options = _get_bundle_options()
-    form_options_role = _get_role_options()
+def detail(request, pk):
+    bundle = get_object_or_404(Bundle, pk=pk)
+    bundle_list = _get_bundle_display(bundle)
     rsp = {
         'bundle_list': bundle_list,
-        'form_options': form_options,
-        'form_options_role': form_options_role,
+        'form_options': _get_bundle_options(),
+        'form_options_role': _get_role_options(),
+    }
+    return JsonResponse(rsp)
 
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_form_options(request):
+    rsp = {
+        'form_options': _get_bundle_options(),
     }
     return JsonResponse(rsp)
 
@@ -178,7 +186,6 @@ def updateMore(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def create(request, payload):
-
     сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
     icon_data = payload.get('icon')
     form = BundleForm(payload)
@@ -197,7 +204,7 @@ def create(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def ModuleCheck(request, payload):
+def moduleCheck(request, payload):
     module = payload.get('module')
     bundle = get_object_or_404(Bundle, pk=payload.get('id'))
     if(bundle.module):

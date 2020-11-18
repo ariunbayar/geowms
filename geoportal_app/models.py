@@ -28,5 +28,11 @@ class User(AbstractUser):
     register = models.CharField(max_length=10, null=True)
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
+
+
+class UserValidationEmail(models.Model):
+    user  = models.ForeignKey(User, on_delete=models.CASCADE)
     is_approve = models.BooleanField(default=False)
-    token = models.CharField(max_length=100, null=True)
+    token = models.CharField(max_length=100, null=True, db_index=True)
+    valid_before = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)

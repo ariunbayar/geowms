@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {Switch, Route, NavLink} from "react-router-dom"
 import {BundleList} from './BundleList'
-import {BundleTab} from './BunldeTab'
+import {BundleForms} from './BundleForms'
 
 export class BundlePage extends Component {
 
@@ -11,14 +11,12 @@ export class BundlePage extends Component {
     }
 
     render() {
-            return (
-                <div>
-                    <Switch>
-                        <Route path={"/back/дэд-сан/:id/засах/"} component={BundleTab}/>
-                        <Route exact path={"/back/дэд-сан/"} component={BundleList}/>
-                        <Route exact path={"/back/дэд-сан/үүсгэх"} component={BundleTab}/>
-                    </Switch>
-                </div>
-            )
-        }
+        return (
+            <Switch>
+                <Route path={"/back/дэд-сан/:id/засах/"} component={BundleForms}/>
+                <Route path={"/back/дэд-сан/үүсгэх/"} component={BundleForms}/>
+                <Route exact path={"/back/дэд-сан/"} component={BundleList}/>
+            </Switch>
+        )
     }
+}
