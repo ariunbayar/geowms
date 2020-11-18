@@ -95,7 +95,7 @@ export default class BundleFormTable extends Component {
         return (
             <tr>
                 <td >
-                   {name}
+                {name}
                 </td>
 
                 <td>

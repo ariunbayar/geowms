@@ -65,23 +65,23 @@ export default class BundleAdminRights extends Component {
                                         )}
                                     </tr>
                                 </thead>
-                                    <tbody>
-                                        {layers.map((layer) =>
-                                            (this.state.layers.indexOf(layer.id) > -1) &&
-                                                this.props.values.roles.map((roleChecks) =>
-                                                    (roleChecks.layer_id == layer.id &&
-                                                        <BundleFormTable
-                                                            key={layer.id}
-                                                            values = {layer}
-                                                            wmsId = {this.state.id}
-                                                            role={this.props.formOptionsRole}
-                                                            roleChecks = {roleChecks}
-                                                        />
-                                                    )
+                                <tbody>
+                                    {layers.map((layer) =>
+                                        (this.state.layers.indexOf(layer.id) > -1) &&
+                                            this.props.values.roles.map((roleChecks) =>
+                                                (roleChecks.layer_id == layer.id &&
+                                                    <BundleFormTable
+                                                        key={layer.id}
+                                                        values = {layer}
+                                                        wmsId = {this.state.id}
+                                                        role={this.props.formOptionsRole}
+                                                        roleChecks = {roleChecks}
+                                                    />
                                                 )
                                             )
-                                        }
-                                    </tbody>
+                                        )
+                                    }
+                                </tbody>
                             </table>
                         </div>
                         :null}
