@@ -1,7 +1,5 @@
 import React, { Component } from "react"
 import BundleFormTable from "./BundleFormTable"
-import {NavLink} from "react-router-dom"
-
 
 export default class BundleAdminRights extends Component {
 

@@ -15,7 +15,6 @@ export class OrgAdd extends Component {
             edit: false,
             upadte_level: 1,
             org_role: -1,
-            org_role_error: null,
             handleSaveIsLoad: false,
             modal_alert_status: "closed",
             timer: null,
@@ -47,22 +46,16 @@ export class OrgAdd extends Component {
     }
 
     handleSave(){
-        if(this.state.org_role != -1){
-            this.setState({org_role_error: null})
-            this.setState({handleSaveIsLoad:true})
-            const org_level = this.props.match.params.level
-            const org_id=this.props.match.params.id
-            const org_name = this.state.org_name
-            const upadte_level = this.state.upadte_level
-            const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level, "role_id":  this.state.org_role}
-            service.org_add(org_level,values).then(({ success }) => {
-                success && this.setState({modal_alert_status: "open"})
-            })
-            this.modalCloseTime()
-        }
-        else{
-            this.setState({org_role_error: "Байгууллагын эрх хоосон байна."})
-        }
+        this.setState({handleSaveIsLoad:true})
+        const org_level = this.props.match.params.level
+        const org_id=this.props.match.params.id
+        const org_name = this.state.org_name
+        const upadte_level = this.state.upadte_level
+        const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level, "role_id":  this.state.org_role}
+        service.org_add(org_level,values).then(({ success }) => {
+            success && this.setState({modal_alert_status: "open"})
+        })
+        this.modalCloseTime()
     }
 
     handleGetAll(org_level,id){
@@ -145,7 +138,6 @@ export class OrgAdd extends Component {
                                         <option key={idx} value={role.id}>{role.name}</option>
                                     )}
                                 </select>
-                                {this.state.org_role_error && <p className="text-danger">{this.state.org_role_error}</p>}
                             </div>
 
                         </div>

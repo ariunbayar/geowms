@@ -1,5 +1,5 @@
 
-import React, { Component } from "react"
+import React, { Component, version } from "react"
 import {NavLink} from "react-router-dom"
 
 import {service} from './service'
@@ -11,20 +11,21 @@ export default class VersionInfo extends Component {
         super(props)
         this.state = {
             postgreVersion: '',
-            postGis: ''
+            versionOfPostGis: '',
+            geoserverVersion: []
         }
     }
 
     componentDidMount() {
-        service.getPostgeVersion().then(({postgreVersion, versionOfPostGis}) => {
-            this.setState({postgreVersion, versionOfPostGis})
+        service.getPostgeVersion().then(({postgreVersion, versionOfPostGis, geoserverVersion}) => {
+            this.setState({postgreVersion, versionOfPostGis, geoserverVersion:geoserverVersion['about']['resource']})
         })
     }
 
     render() {
 
-        const {postgreVersion, versionOfPostGis} = this.state
-
+        const {postgreVersion, versionOfPostGis, geoserverVersion} = this.state
+        console.log()
         return (
             <div className="card flex-grow-1">
 
@@ -39,6 +40,17 @@ export default class VersionInfo extends Component {
 
                     <h4>PostGIS хувилбар</h4>
                     <p>{versionOfPostGis}</p>
+
+                    <h4>Geoserver хувилбар</h4>
+                    <ul>
+                        {geoserverVersion.length > 0 ? 
+                        <p>
+                            Version:{geoserverVersion[0]['Version']} &nbsp;
+                            Build-Timestamp:{geoserverVersion[0]['Build-Timestamp']}
+                           
+                        </p>                        
+                        :''}
+                    </ul>
 
                 </div>
 
