@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from "react"
 
 import 'ol/ol.css'
-import {Map, View, Feature} from 'ol'
+import {Map, View, Feature, Overlay, Observable } from 'ol'
+import {unByKey} from 'ol/Observable'
 import {transform as transformCoordinate} from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 
@@ -29,6 +30,7 @@ import {Sidebar} from './Sidebar'
 import {SearchBar} from './searchControl/SearchBar'
 import {SearchBarButton} from './searchControl/SearchBarButton'
 import {DrawButton} from './controls/Draw'
+import {PopUp} from './popUp/PopUp'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 
@@ -36,7 +38,7 @@ export default class BundleMap extends Component {
 
     constructor(props) {
         super(props)
-
+        this.sendFeatureInfo = []
         this.state = {
             projection: 'EPSG:3857',
             projection_display: 'EPSG:4326',
@@ -64,6 +66,7 @@ export default class BundleMap extends Component {
             sidebar: new Sidebar(),
             searchbar: new SearchBar(),
             alertBox: new AlertRoot(),
+            popup: new PopUp(),
         }
 
         this.marker = this.initMarker()
@@ -80,6 +83,10 @@ export default class BundleMap extends Component {
         this.toggleDrawed = this.toggleDrawed.bind(this)
         this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
         this.cartButton = this.cartButton.bind(this)
+        this.mapPointerMove = this.mapPointerMove.bind(this)
+        this.onClickCloser = this.onClickCloser.bind(this)
+        this.getElement = this.getElement.bind(this)
+        this.listToJson = this.listToJson.bind(this)
     }
 
     initMarker() {
@@ -234,6 +241,21 @@ export default class BundleMap extends Component {
             })
         })
 
+        // const element = document.createElement('div')
+        // element.className = 'ol-popup'
+        // element.setAttribute('id', 'popup')
+
+        // const element_closer = document.createElement('div')
+        // element_closer.className = 'ol-popup-closer'
+        // element_closer.setAttribute('id', 'popup-closer')
+        // element_closer.setAttribute('role', 'button')
+        // element_closer.addEventListener('click', this.onClickCloser)
+        // element.appendChild(element_closer)
+
+        // const element_content = document.createElement('div')
+        // element_content.setAttribute('id', 'popup-content')
+        // element.appendChild(element_content)
+
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -256,6 +278,7 @@ export default class BundleMap extends Component {
                 this.controls.searchbar,
                 this.controls.cart,
                 this.controls.alertBox,
+                this.controls.popup,
             ]),
             layers: [
                 ...base_layers,
@@ -267,6 +290,7 @@ export default class BundleMap extends Component {
                 vector_layer,
                 marker_layer,
             ],
+            // overlays: [overlay],
             view: new View({
                 projection: this.state.projection,
                 center: [11461613.630815497, 5878656.0228370065],
@@ -275,9 +299,51 @@ export default class BundleMap extends Component {
         })
 
         map.on('click', this.handleMapClick)
-
+        // this.overlay = overlay
         this.map = map
+        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
+    }
 
+    mapPointerMove(event) {
+        const map = this.map
+        const overlay = this.overlay
+        this.key = map.on('singleclick', event => {
+            const coordinate = event.coordinate
+            // const projection = event.map.getView().getProjection()
+            // const map_coord = transformCoordinate(coordinate, projection.code_, this.state.projection_display)
+            // const yChange = coordinateFormat(map_coord, '{y}', 6)
+            // const xChange = coordinateFormat(map_coord, '{x}', 6)
+            // this.element_content.innerHTML = xChange
+            // this.setState({ xChange, yChange })
+            this.showFeaturesAt(coordinate)
+            overlay.setPosition(coordinate)
+        })
+    }
+
+    onClickCloser(){
+        const overlay = this.overlay
+        const closer = this.element_closer
+        overlay.setPosition(undefined);
+        closer.blur();
+        if (this.key) unByKey(this.key);
+    }
+
+    getElement(element) {
+        const map = this.map
+        const overlay = new Overlay({
+            element: element,
+            autoPan: true,
+            autoPanAnimation: {
+                duration: 250,
+            },
+        });
+
+        map.addOverlay(overlay)
+        this.element = element
+        this.overlay = overlay
+        const elementa = element.children[0]
+        this.element_content = elementa.children[1]
+        this.element_closer = elementa.children[0]
     }
 
     handleMapClick(event) {
@@ -289,20 +355,38 @@ export default class BundleMap extends Component {
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
         this.setState({coordinate_clicked})
-
+        this.mapPointerMove(event)
         // Nov-15: commented for UX
         //this.showFeaturesAt(event.coordinate)
 
     }
 
-    showFeaturesAt(coordinate) {
+    listToJson(feature_info){
+        feature_info.map((info, ix) => {
+            this.object = new Array()
+            const rsp = {
+                'field_name': info[0]
+            }
+            this.object.push(rsp)
+            info[1].map((info_data, i) => {
+                const rsp = {
+                    'field_name': info_data[0],
+                    'value': info_data[1],
+                }
+                this.object.push(rsp)
+            })
+        })
+        return this.object
+    }
 
+    showFeaturesAt(coordinate) {
+        this.sendFeatureInfo = []
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
         this.setState({pay_modal_check: false})
-        this.state.map_wms_list.forEach(({layers}) => {
-            layers.forEach(({tile, feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+        this.state.map_wms_list.map(({layers}) => {
+            layers.map(({tile, feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
                 if (tile.getVisible() != true) {
                     return
                 }
@@ -339,22 +423,36 @@ export default class BundleMap extends Component {
                                 return [feature.getId(), values]
                             })
                             if(!this.state.is_draw_open){
-                                if(geodb_table == 'mpoint_view'){
-                                    if(feature_info.length > 0){
-                                        this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
-                                        this.setState({pay_modal_check: true})
-                                        this.state.vector_layer.setSource(null)
+                                if(feature_info.length > 0) {
+                                    if(this.sendFeatureInfo.length > 0) {
+                                        this.sendFeatureInfo.map((feat, idx) => {
+                                            if (feat[0].field_name !== feature_info[0][0]) {
+                                                const object = this.listToJson(feature_info)
+                                                this.sendFeatureInfo.push(object)
+                                            }
+                                        })
+                                    } if (this.sendFeatureInfo.length == 0) {
+                                        const object = this.listToJson(feature_info)
+                                        this.sendFeatureInfo.push(object)
                                     }
-                                    else{
-                                        this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
-                                    }
-                                }
-                                else{
-                                    if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                        this.state.vector_layer.setSource(source)
-                                        this.controls.modal.showModal(feature_info, true)
-                                    }
-                                }
+                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser)
+                            }
+                                // if(geodb_table == 'mpoint_view'){
+                                //     if(feature_info.length > 0){
+                                //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
+                                //         this.setState({pay_modal_check: true})
+                                //         this.state.vector_layer.setSource(null)
+                                //     }
+                                //     // else{
+                                //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
+                                //     // }
+                                // }
+                                // else{
+                                //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
+                                //         this.state.vector_layer.setSource(source)
+                                //         // this.controls.modal.showModal(feature_info, true)
+                                //     }
+                                // }
                             }
                         })
                 } else {
@@ -363,7 +461,7 @@ export default class BundleMap extends Component {
                 }
             })
         })
-
+        this.sendFeatureInfo = []
     }
 
     handleToggle(idx) {
