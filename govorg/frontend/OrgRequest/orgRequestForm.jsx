@@ -70,20 +70,14 @@ export default class OrgRequestForm extends Component {
         this.features = []
         modules.map((module, idx) => {
             if (type == 'theme' && module.id == value){
-                this.setState({ search_theme: value })
                 this.themes.push(module)
-            } else if (type !== 'theme') {
+            } else if (value === '') {
                 this.themes.push(module)
             }
         })
         this.themes.map((mods, idx) => {
             mods.packages.map((pack, idx) => {
-                if (type == 'package', pack.id == value) {
-                    this.setState({ search_package: value })
                     this.packages.push(pack)
-                } else if (type !== 'package'){
-                    this.packages.push(pack)
-                }
             })
         })
         this.packages.map((mod, idx) => {
@@ -91,7 +85,7 @@ export default class OrgRequestForm extends Component {
                 this.features.push(feat)
             })
         })
-        this.setState({packages: this.packages, features: this.features})
+        this.setState({ packages: this.packages, features: this.features, search_theme: value })
     }
 
     onChangePackage(value, type) {
@@ -102,6 +96,10 @@ export default class OrgRequestForm extends Component {
         packages.map((mod, idx) => {
             if (type == 'package', mod.id == value) {
                 this.setState({ search_package: value })
+                mod.features.map((feat, idx) => {
+                    this.features.push(feat)
+                })
+            } else if (value == '') {
                 mod.features.map((feat, idx) => {
                     this.features.push(feat)
                 })
@@ -157,7 +155,7 @@ export default class OrgRequestForm extends Component {
                                 <select className="form-control form-control-sm"
                                     onChange={(e) => this.onChangeTheme(e.target.value, 'theme')}
                                 >
-                                <option value="">--- Дэд сангаар хайх ---</option>
+                                <option value=''>--- Дэд сангаар хайх ---</option>
                                 {
                                     themes && themes.length > 0
                                     ?
