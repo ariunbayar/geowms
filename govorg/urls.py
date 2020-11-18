@@ -9,13 +9,12 @@ from govorg.backend.govorg_inspire import views as govorg_inspire_views
 from govorg.backend.zipcode import views as zipcode_views
 from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
-from govorg.backend.profile import views as user_profile_views
 
 urlpatterns = [
     path('api/', include(([
 
         path('employee/', include(([
-            path('', employee_views.employees, name='employees'),
+        path('', employee_views.employees, name='employees'),
         ], 'employee'))),
         path('system/', system_views.systemList, name='system'),
         path('bundle/', bundle_views.bundle, name='bundle'),
@@ -104,11 +103,6 @@ urlpatterns = [
             path('create/', meta_data_views.create),
             path('get-fields/', meta_data_views.get_fields),
         ], 'meta-data'))),
-
-        path('user/profile/', include(([
-            path('', user_profile_views.detail),
-            path('update-password/', user_profile_views.update_password),
-        ], 'user-profile'))),
 
     ], 'back_org'))),
 
