@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-import Employee from './Employee/EmployeeForm'
+import GovEmp from './Employee';
 import GovRole from './GovRole/'
 import { System } from "./System";
 import { Meta } from "./Meta"
@@ -15,6 +15,7 @@ import ChangeRequest from './Bundles/Inspire/ChangeRequest'
 import { Help } from './Help'
 import { service } from "./service"
 import MenuItem from "../../src/components/MenuItem"
+import { Role } from './Role';
 
 export class App extends Component {
 
@@ -77,6 +78,7 @@ export class App extends Component {
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/" text="Байгууллага"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/employees/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/role/" text="Role"></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
@@ -160,11 +162,12 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
+                            <Route path="/gov/role/role/" component={Role} />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/role/employees/" component={Employee} />
+                            <Route path="/gov/role/employees/" component={GovEmp} />
                             <Route exact path="/gov/role/" component={GovRole} />
                             <Route exact path="/gov/help/" component={Help} />
                         </Switch>
