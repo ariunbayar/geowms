@@ -4,7 +4,7 @@ import uuid
 import glob
 from django.db import connections
 from django.db.utils import InternalError
-
+from django.forms.models import model_to_dict
 from django.conf import settings
 from django.shortcuts import render
 from django.http import JsonResponse, Http404

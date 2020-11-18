@@ -4,6 +4,7 @@ from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.db import transaction
 from govorg.backend.meta_data.models import MetaData
+from django.http import JsonResponse
 from backend.inspire.models import MGeoDatas
 
 
@@ -120,3 +121,23 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False})
+
+
+@require_GET
+@ajax_required
+def getFields(request):
+    send_fields = []
+    for f in MetaData._meta.get_fields():
+        if f.name != 'id' and f.name != 'geo_datas' and not 'create' in f.name and not 'update' in f.name:
+            if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                send_fields.append({
+                    'origin_name': f.name,
+                    'name': f.verbose_name,
+                    'length': f.max_length,
+                    'choices': f.choices
+                })
+    rsp = {
+        'success': True,
+        'fields': send_fields
+    }
+    return JsonResponse(rsp)

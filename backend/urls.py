@@ -10,8 +10,6 @@ from backend.config import views as config_views
 from backend.org import views as org_views
 from backend.log import views as log_views
 from backend.payment import views as payment_views
-from backend.forms import views as forms_views
-from backend.zipcode import views as zipcode_views
 from backend.dedsanbutets import views as dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
@@ -41,14 +39,15 @@ urlpatterns = [
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
         path('create/', bundle_views.create, name='create'),
-        path('ModuleCheck/', bundle_views.ModuleCheck, name='ModuleCheck'),
+        path('module-check/', bundle_views.moduleCheck, name='module-check'),
         path('update/', bundle_views.update, name='update'),
         path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
-        path('<int:pk>/updatemore/', bundle_views.updateMore, name='updatemore'),
-        path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
-        path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
-        path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
+        path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
+        path('get-layer/', bundle_views.get_form_options, name='get-layer'),
+        path('role-create/', bundle_views.roleCreate, name='role-create'),
+        path('role-remove/', bundle_views.roleRemove, name='role-remove'),
+        path('default-check-update/', bundle_views.defaultCheckUpdate, name='default-check-update'),
     ], 'bundle'))),
 
     path('api/user/', include(([
@@ -85,6 +84,15 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/org-list/', org_views.org_list, name='orgList'),
         path('org-count/', org_views.countOrg, name='org-count'),
+        path('perm-get-list/', org_views.permGetList, name='perm-get-list'),
+        path('create-perm/', org_views.createPerm, name='create-perm'),
+        path('get-role-name/', org_views.getgetRolesNames, name='get-role-name'),
+        path('inspire-roles/<int:pk>/', org_views.getInspireRoles, name='inspire-roles'),
+        path('inspire-roles/<int:pk>/save/', org_views.saveInspireRoles, name='inspire-roles-save'),
+
+        path('level-<int:level>/<int:pk>/gov-perm/', org_views.getGovRoles, name='get-gov-roles'),
+        path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.saveGovRoles, name='save-gov-roles'),
+
 
     ], 'org'))),
 
@@ -132,57 +140,6 @@ urlpatterns = [
         path('payment-list/', payment_views.paymentList, name='paymentList'),
         path('purchase-awah/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
-
-    path('tuuhen_ov/', include(([
-        path('', forms_views.all, name='all'),
-        path('list/', forms_views.tuuhenOvList, name='list'),
-        path('about/', forms_views.about, name='about'),
-        path('update/', forms_views.update, name='update'),
-        path('remove/', forms_views.remove, name='remove'),
-        path('create/', forms_views.create, name='create'),
-        path('huree-count/', forms_views.hureeCountEdit, name='huree-count'),
-        path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
-        path('tseg-personal/findSum/', forms_views.findSum, name='findSum'),
-        path('tseg-personal/find-point/', forms_views.findPoints, name='find-point'),
-        path('tseg-personal/batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
-        path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
-        path('tseg-personal/search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
-        path('tseg-personal/searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
-        path('tseg-personal/list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
-        path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
-        path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
-        path('tseg-ustsan-success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
-        path('tseg-ustsan-list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
-        path('tseg-ustsan-remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
-        path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
-        path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
-        path('dursgalt-gazar/update/', forms_views.dursgaltGazarUpdate, name='dursgalt-gazar-update'),
-        path('dursgalt-gazar/all/', forms_views.dursgaltGazarAll, name='dursgalt-gazar-all'),
-        path('dursgalt-gazar/remove/', forms_views.dursgaltGazarRemove, name='dursgalt-gazar-remove'),
-        path('dursgalt-gazar/about/', forms_views.dursgaltGazarAbout, name='dursgalt-gazar-about'),
-        path('dursgalt-gazar/huree-create/', forms_views.hureeCreate, name='dursgalt-gazar-huree-create'),
-        path('dursgalt-gazar/huree-update/', forms_views.hureeUpdate, name='dursgalt-gazar-huree-update'),
-        path('dursgalt-gazar/huree-delete/', forms_views.hureeDelete, name='dursgalt-gazar-huree-delete'),
-        path('dursgalt-gazar/huree-all/', forms_views.hureeAll, name='dursgalt-gazar-huree-all'),
-        path('dursgalt-gazar/ayul-create/', forms_views.ayulHureeCreate, name='dursgalt-gazar-ayul-create'),
-        path('dursgalt-gazar/ayul-update/', forms_views.ayulHureeUpdate, name='dursgalt-gazar-ayul-update'),
-        path('dursgalt-gazar/ayul-delete/', forms_views.ayulHureeDelete, name='dursgalt-gazar-ayul-delete'),
-        path('dursgalt-gazar/ayul-all/', forms_views.ayulAll, name='dursgalt-gazar-ayul-all'),
-        path('rows/', forms_views.rows, name='rows'),
-        path('ayuul_geoms/', forms_views.ayuul_geoms, name='ayuul_geoms'),
-        path('geom_points/', forms_views.geom_points, name='geom_points'),
-
-    ], 'tuuhen_ov'))),
-
-    path('zip-code/', include(([
-        path('aimag/', zipcode_views.aimag, name='aimag'),
-        path('sum/', zipcode_views.sum, name='sum'),
-        path('bag-horoo/', zipcode_views.bagaHoroo, name='bag-horoo'),
-        path('zip/', zipcode_views.zip, name='zip'),
-        path('zip-update/', zipcode_views.zipUpdate, name='zip-update'),
-        path('wms-layer/', zipcode_views.wmsLayer, name='wms-layer'),
-        path('search/', zipcode_views.search, name='search'),
-    ], 'zip_code'))),
 
     path('gis/', include(([
         path('table_list/', backend.gis.views.table_list),

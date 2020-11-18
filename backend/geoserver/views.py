@@ -1,33 +1,58 @@
-from main.decorators import ajax_required
-from django.views.decorators.http import require_GET, require_POST
-from django.http import JsonResponse, Http404
-from django.shortcuts import get_object_or_404, reverse
-from django.views.decorators.csrf import csrf_exempt
-from api.utils import filter_layers, replace_src_url
-from django.contrib.auth.decorators import user_passes_test
 import requests
-import json
 from requests.auth import HTTPBasicAuth
-from django.conf import settings
 
-# Create your views here.
-# https://docs.geoserver.org/stable/en/user/rest/index.html  -> learning
+from django.contrib.auth.decorators import user_passes_test
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+from backend.config.models import Config
+from main.decorators import ajax_required
+
+
+def _get_geoserver_config():
+
+    default_values = {
+        'geoserver_host': '',
+        'geoserver_user': '',
+        'geoserver_pass': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    geoserver_config = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return geoserver_config
+
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def layers(request):
 
-    BASE_HEADERS = {
+    config = _get_geoserver_config()
+
+    HEADERS = {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
     }
-    base_url = settings.GEOSERVER['SERVER'] + 'layers'
+
+    AUTH = HTTPBasicAuth(
+        config['geoserver_user'],
+        config['geoserver_pass'],
+    )
+
+    base_url = 'http://{host}:19002/geoserver/rest/layers'.format(
+        host=config['geoserver_host'],
+    )
 
     rsp = requests.get(
         base_url,
         request.GET,
-        headers={**BASE_HEADERS},
-        auth=HTTPBasicAuth(settings.GEOSERVER['USERNAME'], settings.GEOSERVER['PASSWORD'])
+        headers=HEADERS,
+        auth=AUTH,
     )
 
     if rsp.status_code == 200:

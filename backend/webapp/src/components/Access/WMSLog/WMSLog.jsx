@@ -81,7 +81,7 @@ export default class WMSLog extends Component {
                             onChange={(e) => this.handleSearch('searchQuery', e)}
                             value={this.state.searchQuery}
                         />
-                        <a><i class="icon-magnifier"></i></a>
+                        <a><i className="icon-magnifier"></i></a>
                     </div>
                 </div>
                 <div className="row">
@@ -91,13 +91,13 @@ export default class WMSLog extends Component {
                                 <thead>
                                     <tr>
                                         <th scope="col">№</th>
-                                        <th><a onClick={() => this.handleSort('qs_all', this.state.qs_all)}>qs_all <i class={this.state.qs_all ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('qs_request', this.state.qs_request)}>qs_request <i class={this.state.qs_request ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('rsp_status', this.state.rsp_status)}>rsp_status <i class={this.state.rsp_status ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('rsp_size', this.state.rsp_size)}>rsp_size <i class={this.state.rsp_size ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('created_at', this.state.created_at)}>Нэвтэрсэн огноо <i class={this.state.created_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('system_id', this.state.system_id)}>Системийн ID <i class={this.state.system_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('wms_id', this.state.wms_id)}>WMS ID <i class={this.state.wms_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('qs_all', this.state.qs_all)}>qs_all <i className={this.state.qs_all ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('qs_request', this.state.qs_request)}>qs_request <i className={this.state.qs_request ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('rsp_status', this.state.rsp_status)}>rsp_status <i className={this.state.rsp_status ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('rsp_size', this.state.rsp_size)}>rsp_size <i className={this.state.rsp_size ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('created_at', this.state.created_at)}>Нэвтэрсэн огноо <i className={this.state.created_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('system_id', this.state.system_id)}>Системийн ID <i className={this.state.system_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
+                                        <th><a onClick={() => this.handleSort('wms_id', this.state.wms_id)}>WMS ID <i className={this.state.wms_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                     </tr>
                                 </thead>
                                 <tbody>

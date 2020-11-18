@@ -56,8 +56,6 @@ INSTALLED_APPS = [
     'backend.org.apps.OrgConfig',
     'backend.log.apps.LogConfig',
     'backend.payment.apps.PaymentConfig',
-    'backend.forms.apps.FormsConfig',
-    'backend.zipcode.apps.ZipcodeConfig',
     'backend.changeset.apps.ChangesetConfig',
     'backend.gis.apps.GisConfig',
     'backend.dedsanbutets.apps.DedsanbutetsConfig',
@@ -77,6 +75,8 @@ INSTALLED_APPS = [
     'govorg.backend.system.apps.SystemConfig',
     'govorg.backend.govorg_inspire.apps.InspireConfig',
     'govorg.backend.org_request.apps.OrgRequestConfig',
+    'govorg.backend.zipcode.apps.ZipcodeConfig',
+    'govorg.backend.forms.apps.FormsConfig',
     'govorg.backend.meta_data.apps.MetaDataConfig',
 ]
 

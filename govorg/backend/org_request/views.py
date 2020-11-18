@@ -439,7 +439,7 @@ def requestApprove(request, payload, pk):
 @ajax_required
 def getCount(request):
     try:
-        count = ChangeRequest.objects.count()
+        count = ChangeRequest.objects.filter(state=1).count()
         rsp = {
             'success': True,
             'count': count

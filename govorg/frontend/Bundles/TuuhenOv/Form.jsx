@@ -1,8 +1,8 @@
 import React, { Component } from "react"
-import {service} from './service'
-import {validationSchema} from './validationSchema'
-import {HureeEdit} from './HureeEdit'
-import {Formik, Field, Form, ErrorMessage} from 'formik'
+import { service } from './service'
+import { validationSchema } from './validationSchema'
+import { HureeEdit } from './HureeEdit'
+import { Formik, Field, Form, ErrorMessage } from 'formik'
 import Maps from '../../components/map/Map'
 import ModalAlert from '../../components/helpers/ModalAlert'
 
@@ -33,9 +33,9 @@ export class Forms extends Component {
         this.modalCloseTime = this.modalCloseTime.bind(this)
     }
 
-    hureeRemove(id){
+    hureeRemove(id) {
         const tuuh_id = this.props.match.params.id
-        service.hureeCount(id, 'remove', tuuh_id).then(({success}) => {
+        service.hureeCount(id, 'remove', tuuh_id).then(({ success }) => {
             if (success) {
                 setTimeout(() => {
                     this.handleRefresh()
@@ -45,13 +45,13 @@ export class Forms extends Component {
 
     }
 
-    handleXY(values, info){
-        info.map(e=>this.setState({aimagname:e.aimag, sumname:e.sum}))
+    handleXY(values, info) {
+        info.map(e => this.setState({ aimagname: e.aimag, sumname: e.sum }))
     }
 
-    hureeAdd(){
+    hureeAdd() {
         const tuuh_id = this.props.match.params.id
-        service.hureeCount(1, 'add', tuuh_id).then(({success}) => {
+        service.hureeCount(1, 'add', tuuh_id).then(({ success }) => {
             if (success) {
                 setTimeout(() => {
                     this.handleRefresh()
@@ -59,22 +59,22 @@ export class Forms extends Component {
             }
         })
     }
-    componentDidMount(){
+    componentDidMount() {
         const id = this.props.match.params.id
-        if(id) this.handleRefresh()
+        if (id) this.handleRefresh()
 
     }
-    handleRefresh(){
+    handleRefresh() {
         const id = this.props.match.params.id
-        service.about(id).then(({tuuh_soyl}) => {
-            if(tuuh_soyl){
+        service.about(id).then(({ tuuh_soyl }) => {
+            if (tuuh_soyl) {
                 tuuh_soyl.map((tuuh) =>
                     this.setState({
-                        values:{
-                            dugaar: tuuh['dugaar'],date: tuuh['date'],
+                        values: {
+                            dugaar: tuuh['dugaar'], date: tuuh['date'],
                             too_shirheg: tuuh['too_shirheg'],
                             burtgegch: tuuh['burtgegch'],
-                            id :id
+                            id: id
                         },
                         aimagname: tuuh['aimagname'],
                         sumname: tuuh['sumname'],
@@ -90,25 +90,25 @@ export class Forms extends Component {
     handleSubmit(values, { setStatus, setSubmitting }) {
         setStatus('checking')
         setSubmitting(true)
-        this.setState({values})
+        this.setState({ values })
         const id = this.props.match.params.id
 
-        if(id){
+        if (id) {
             const form_datas = this.state.values
-            service.update(form_datas, this.state.aimagname, this.state.sumname).then(({success}) => {
+            service.update(form_datas, this.state.aimagname, this.state.sumname).then(({ success }) => {
                 if (success) {
                     setStatus('saved')
-                    this.setState({modal_alert_status: "open"})
+                    this.setState({ modal_alert_status: "open" })
                     this.modalCloseTime()
                 }
             })
         }
-        else{
+        else {
             const form_datas = this.state.values
-            service.create(form_datas,  this.state.aimagname, this.state.sumname).then(({success}) => {
+            service.create(form_datas, this.state.aimagname, this.state.sumname).then(({ success }) => {
                 if (success) {
                     setStatus('saved')
-                    this.setState({modal_alert_status: "open"})
+                    this.setState({ modal_alert_status: "open" })
                     this.modalCloseTime()
                 }
             })
@@ -117,14 +117,14 @@ export class Forms extends Component {
 
     modalClose() {
         clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
-        this.props.history.push( `/gov/tuuhen-ov/`)
+        this.setState({ modal_alert_status: "closed" })
+        this.props.history.push(`/gov/tuuhen-ov/`)
     }
 
     modalCloseTime() {
         this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-            this.props.history.push( `/gov/tuuhen-ov/`)
+            this.setState({ modal_alert_status: "closed" })
+            this.props.history.push(`/gov/tuuhen-ov/`)
         }, 2000)
     }
 
@@ -133,8 +133,7 @@ export class Forms extends Component {
         const huree_len = this.state.values.too_shirheg
         const tuuh_id = this.props.match.params.id
 
-        for(var i=1; i<=huree_len; i++)
-        {
+        for (var i = 1; i <= huree_len; i++) {
             huree_components.push(<a><HureeEdit huree_id={i} hureeRemove={this.hureeRemove} ></HureeEdit><br></br></a>)
         }
         return (
@@ -144,22 +143,22 @@ export class Forms extends Component {
                 validationSchema={validationSchema}
                 onSubmit={this.handleSubmit}
             >
-            {({
-                errors,
-                status,
-                touched,
-                isSubmitting,
-                setFieldValue,
-                handleBlur,
-                values,
-                isValid,
-                dirty,
-            }) => {
-            const has_error = Object.keys(errors).length > 0
-            return (
-                <Form>
-                    <div className='col-md-9 card'>
-                        <Maps handleXY={this.handleXY} coordinatCheck={false} />
+                {({
+                    errors,
+                    status,
+                    touched,
+                    isSubmitting,
+                    setFieldValue,
+                    handleBlur,
+                    values,
+                    isValid,
+                    dirty,
+                }) => {
+                    const has_error = Object.keys(errors).length > 0
+                    return (
+                        <Form>
+                            <div className='col-md-9 card'>
+                                <Maps handleXY={this.handleXY} coordinatCheck={false} />
                                 <div className="col-md-12 mb-4 my-4">
                                     <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
                                         <i className="fa fa-angle-double-left"></i> Буцах
@@ -171,7 +170,7 @@ export class Forms extends Component {
                                 <table className="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <th style={{width: "20%"}} scope="row">Дурсгалт газрын бүртгэлийн дугаар</th>
+                                            <th style={{ width: "20%" }} scope="row">Дурсгалт газрын бүртгэлийн дугаар</th>
                                             <td colSpan="2" scope="rowgroup"  >
                                                 <Field
                                                     className={'form-control ' + (errors.dugaar ? 'is-invalid' : '')}
@@ -179,11 +178,11 @@ export class Forms extends Component {
                                                     id="id_dugaar"
                                                     type="text"
                                                 />
-                                                <ErrorMessage name="dugaar" component="div" className="invalid-feedback"/>
+                                                <ErrorMessage name="dugaar" component="div" className="invalid-feedback" />
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th style={{width: "20%"}} scope="row">Он,сар,өдөр</th>
+                                            <th style={{ width: "20%" }} scope="row">Он,сар,өдөр</th>
                                             <td>
                                                 <Field
                                                     className={'form-control ' + (errors.date ? 'is-invalid' : '')}
@@ -191,9 +190,9 @@ export class Forms extends Component {
                                                     id="id_date"
                                                     type="date"
                                                 />
-                                                <ErrorMessage name="date" component="div" className="invalid-feedback"/>
+                                                <ErrorMessage name="date" component="div" className="invalid-feedback" />
                                             </td>
-                                            <th style={{width: "20%"}}>Бүртгэл хийсэн он сар, өдрийг бичнэ.</th>
+                                            <th style={{ width: "20%" }}>Бүртгэл хийсэн он сар, өдрийг бичнэ.</th>
                                         </tr>
                                         <tr>
                                             <th scope="row">Аймаг, Нийслэл</th>
@@ -222,29 +221,15 @@ export class Forms extends Component {
                                                 />
                                             </td>
                                         </tr>
-                                            <tr>
-                                                <th scope="row">Хамрах хүрээ тоо ширхэг</th>
-                                                {tuuh_id ?
+                                        <tr>
+                                            <th scope="row">Хамрах хүрээ тоо ширхэг</th>
+                                            {tuuh_id ?
                                                 <td>
-                                                        <button type="button" className="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1"  onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
-                                                        <br></br>
-                                                        <hr className="my-2"></hr>
-                                                        {huree_components}
-                                                </td>:
-                                                <td>
-                                                        <Field
-                                                            className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
-                                                            name='too_shirheg'
-                                                            id="id_too_shirheg"
-                                                            type="number"
-                                                        />
-                                                        <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
-                                                </td>
-                                                }
-                                                <th>Тоо ширхэг.</th>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">Бүртгэгч</th>
+                                                    <button type="button" className="btn btn-outline-success btn-sm btn-round btn-block waves-effect waves-light m-1" onClick={this.hureeAdd}>Хамрах хүрээ нэмэх</button>
+                                                    <br></br>
+                                                    <hr className="my-2"></hr>
+                                                    {huree_components}
+                                                </td> :
                                                 <td>
                                                     <Field
                                                         className={'form-control ' + (errors.too_shirheg ? 'is-invalid' : '')}
@@ -252,8 +237,8 @@ export class Forms extends Component {
                                                         id="id_too_shirheg"
                                                         type="number"
                                                     />
-                                                    <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback"/>
-                                            </td>
+                                                    <ErrorMessage name="too_shirheg" component="div" className="invalid-feedback" />
+                                                </td>
                                             }
                                             <th>Тоо ширхэг.</th>
                                         </tr>
@@ -266,7 +251,7 @@ export class Forms extends Component {
                                                     id="id_burtgegch"
                                                     type="text"
                                                 />
-                                                <ErrorMessage name="burtgegch" component="div" className="invalid-feedback"/>
+                                                <ErrorMessage name="burtgegch" component="div" className="invalid-feedback" />
                                             </td>
                                             <th>Бүргэлийг оруулсан хүн.</th>
                                         </tr>
@@ -275,27 +260,27 @@ export class Forms extends Component {
                                 <div className="span3 my-3">
                                     {has_error
                                         ?
-                                            <p></p>
+                                        <p></p>
                                         :
                                         status == 'saved' && !dirty &&
-                                            <p>Амжилттай нэмэгдлээ</p>
+                                        <p>Амжилттай нэмэгдлээ</p>
                                     }
                                     <div>
                                         <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
                                             {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                             {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                            {!isSubmitting && 'Нэмэх' }
+                                            {!isSubmitting && 'Нэмэх'}
                                         </button>
                                     </div>
                                     <ModalAlert
                                         modalAction={() => this.modalClose()}
                                         status={this.state.modal_alert_status}
                                         title="Амжилттай нэмлээ"
-                                        model_type_icon = "success"
+                                        model_type_icon="success"
                                     />
                                 </div>
-                        </div>
-                    </Form>
+                            </div>
+                        </Form>
                     )
                 }}
             </Formik>

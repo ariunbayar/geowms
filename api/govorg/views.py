@@ -33,7 +33,7 @@ def proxy(request, token, pk):
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
-    rsp = requests.get(base_url, queryargs, headers=headers)
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
 
     allowed_layers = [layer.code for layer in govorg.wms_layers.filter(wms=wms)]

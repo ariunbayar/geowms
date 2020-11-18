@@ -1,4 +1,6 @@
 from django.contrib.gis.db import models
+from backend.org.models import Org, Employee
+from django.conf import settings
 
 # Create your models here.
 class LCodeListConfigs(models.Model):
@@ -301,3 +303,175 @@ class MGeoDatas(models.Model):
     created_by = models.IntegerField()
     modified_on = models.DateTimeField(auto_now=True)
     modified_by = models.IntegerField()
+
+
+class GovRole(models.Model):
+    class Meta:
+        db_table = 'perm_gov_role'
+    name = models.CharField(max_length=250)
+    description = models.CharField(max_length=1000)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+class GovPerm(models.Model):
+    class Meta:
+        db_table = 'perm_gov_perm'
+    org = models.ForeignKey(Org, on_delete=models.PROTECT)
+    gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True, null=True)
+    geo_id = models.CharField(max_length=100)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+class EmpRole(models.Model):
+    class Meta:
+        db_table = 'perm_emp_role'
+    gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True)
+    name = models.CharField(max_length=250)
+    description = models.CharField(max_length=1000)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+class EmpPerm(models.Model):
+    class Meta:
+        db_table = 'perm_emp_perm'
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
+    emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+class GovRoleInspire(models.Model):
+    class Meta:
+        db_table = 'perm_gov_role_inspire'
+    PERM_VIEW = 1
+    PERM_CREATE = 2
+    PERM_REMOVE = 3
+    PERM_UPDATE = 4
+    PERM_APPROVE = 5
+    PERM_REVOKE = 6
+
+    PERM_KIND_CHOICES = (
+        (PERM_VIEW, 'ХАРАХ'),
+        (PERM_CREATE, 'НЭМЭХ'),
+        (PERM_REMOVE, 'ХАСАХ'),
+        (PERM_UPDATE, 'ЗАСАХ'),
+        (PERM_APPROVE, 'ЦУЦЛАХ'),
+        (PERM_REVOKE, 'БАТЛАХ'),
+    )
+
+    gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True)
+    perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
+    feature_id = models.IntegerField()
+    property_id = models.IntegerField(null=True)
+    geom = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+
+class GovPermInspire(models.Model):
+    class Meta:
+        db_table = 'perm_gov_perm_inspire'
+    PERM_VIEW = 1
+    PERM_CREATE = 2
+    PERM_REMOVE = 3
+    PERM_UPDATE = 4
+    PERM_APPROVE = 5
+    PERM_REVOKE = 6
+
+    PERM_KIND_CHOICES = (
+        (PERM_VIEW, 'ХАРАХ'),
+        (PERM_CREATE, 'НЭМЭХ'),
+        (PERM_REMOVE, 'ХАСАХ'),
+        (PERM_UPDATE, 'ЗАСАХ'),
+        (PERM_APPROVE, 'ЦУЦЛАХ'),
+        (PERM_REVOKE, 'БАТЛАХ'),
+    )
+
+    gov_role_inspire = models.ForeignKey(GovRoleInspire, on_delete=models.CASCADE, db_index=True, null=True)
+    gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True)
+    perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
+    feature_id = models.IntegerField()
+    property_id = models.IntegerField(null=True)
+    geom = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+class EmpRoleInspire(models.Model):
+    class Meta:
+        db_table = 'perm_emp_role_inspire'
+    PERM_VIEW = 1
+    PERM_CREATE = 2
+    PERM_REMOVE = 3
+    PERM_UPDATE = 4
+    PERM_APPROVE = 5
+    PERM_REVOKE = 6
+
+    PERM_KIND_CHOICES = (
+        (PERM_VIEW, 'ХАРАХ'),
+        (PERM_CREATE, 'НЭМЭХ'),
+        (PERM_REMOVE, 'ХАСАХ'),
+        (PERM_UPDATE, 'ЗАСАХ'),
+        (PERM_APPROVE, 'ЦУЦЛАХ'),
+        (PERM_REVOKE, 'БАТЛАХ'),
+    )
+
+    gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True, null=True)
+    emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True)
+
+    perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
+    feature_id = models.IntegerField()
+    property_id = models.IntegerField(null=True)
+    geom = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+
+
+class EmpPermInspire(models.Model):
+    class Meta:
+        db_table = 'perm_emp_perm_inspire'
+    PERM_VIEW = 1
+    PERM_CREATE = 2
+    PERM_REMOVE = 3
+    PERM_UPDATE = 4
+    PERM_APPROVE = 5
+    PERM_REVOKE = 6
+
+    PERM_KIND_CHOICES = (
+        (PERM_VIEW, 'ХАРАХ'),
+        (PERM_CREATE, 'НЭМЭХ'),
+        (PERM_REMOVE, 'ХАСАХ'),
+        (PERM_UPDATE, 'ЗАСАХ'),
+        (PERM_APPROVE, 'ЦУЦЛАХ'),
+        (PERM_REVOKE, 'БАТЛАХ'),
+    )
+
+    gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True, null=True)
+    emp_role_inspire = models.ForeignKey(EmpRoleInspire, on_delete=models.CASCADE, db_index=True, null=True)
+    emp_perm = models.ForeignKey(EmpPerm, on_delete=models.CASCADE, db_index=True)
+    perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
+    feature_id = models.IntegerField()
+    property_id = models.IntegerField(null=True)
+    geom = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
