@@ -53,6 +53,7 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.locationSet = this.locationSet.bind(this)
     }
 
     initMarker() {
@@ -63,7 +64,7 @@ export default class BundleMap extends Component {
                 anchorXUnits: 'fraction',
                 anchorYUnits: 'pixels',
                 scale: 0.4,
-                src: '/static/assets/images/bundle/marker.png'
+                src: '/static/assets/image/marker.png'
             })
         })
 
@@ -112,24 +113,30 @@ export default class BundleMap extends Component {
 
             return {
                 name,
-                layers,
-                tile: new Tile({
-                    source: new TileWMS({
-                        projection: this.state.projection,
-                        url: url,
-                        params: {
-                            'LAYERS': layers[0].code,
-                            //'FORMAT': 'image/svg+xml',
-                            'FORMAT': 'image/png',
-                        }
-                    }),
+                layers: layers.map((layer) => {
+                    return {
+                        ...layer,
+                        tile: new Tile({
+                            source: new TileWMS({
+                                projection: this.state.projection,
+                                url: url,
+                                params: {
+                                    'LAYERS': layer.code,
+                                    //'FORMAT': 'image/svg+xml',
+                                    'FORMAT': 'image/png',
+                                }
+                            }),
+                        })
+                    }
                 }),
             }
-
         })
-
         this.setState({map_wms_list})
-
+        map_wms_list.map((wms, idx) =>
+            wms.layers.map((layer, idx) =>
+                layer.defaultCheck == 0 && layer.tile.setVisible(false)
+            )
+        )
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
@@ -209,7 +216,11 @@ export default class BundleMap extends Component {
             ]),
             layers: [
                 ...base_layers,
-                ...map_wms_list.map((wms) => wms.tile),
+                ...map_wms_list.reduce((acc_main, wms) =>
+                {
+                        const tiles = wms.layers.map((layer) => layer.tile)
+                        return [...acc_main, ...tiles]
+                }, []),
                 vector_layer,
                 marker_layer,
             ],
@@ -227,17 +238,20 @@ export default class BundleMap extends Component {
     }
 
     handleMapClick(event) {
-
-        this.marker.point.setCoordinates(event.coordinate)
-
-        const projection = event.map.getView().getProjection()
-        const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
-        const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
-
-        this.setState({coordinate_clicked})
-
-        this.showFeaturesAt(event.coordinate)
-
+        if(this.state.is_sidebar_open){
+            this.setState({is_sidebar_open:false})
+        }
+        else if(this.props.wmsLayerScreenIsload){
+            this.props.wmsLayerName()
+        }
+        else{
+            this.marker.point.setCoordinates(event.coordinate)
+            const projection = event.map.getView().getProjection()
+            const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+            const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
+            this.setState({coordinate_clicked})
+            this.showFeaturesAt(event.coordinate)
+        }
     }
 
     showFeaturesAt(coordinate) {
@@ -245,50 +259,60 @@ export default class BundleMap extends Component {
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
-
-        this.state.map_wms_list.forEach(({tile}) => {
-
-            const wms_source = tile.getSource()
-
-            const url = wms_source.getFeatureInfoUrl(
-                coordinate,
-                resolution,
-                projection,
-                {
-                    //'INFO_FORMAT': 'text/xml'
-                    //'INFO_FORMAT': 'text/html'
-                    'INFO_FORMAT': 'application/vnd.ogc.gml',
+        this.setState({pay_modal_check: false})
+        this.state.map_wms_list.forEach(({layers}) => {
+            layers.forEach(({tile, feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                if (tile.getVisible() != true) {
+                    return
                 }
-            )
 
-            if (url) {
+                const wms_source = tile.getSource()
+                const url = wms_source.getFeatureInfoUrl(
+                    coordinate,
+                    resolution,
+                    projection,
+                    {
+                        //'INFO_FORMAT': 'text/xml'
+                        //'INFO_FORMAT': 'text/html'
+                        'INFO_FORMAT': 'application/vnd.ogc.gml',
+                    }
+                )
 
-                this.controls.modal.showModal(null, false)
-
-                fetch(url)
-                    .then((response) => response.text())
-                    .then((text) => {
-                        const parser = new WMSGetFeatureInfo()
-                        const features = parser.readFeatures(text)
-                        const source = new VectorSource({
-                            features: features
-                        });
-                        this.state.vector_layer.setSource(source)
-
-                        const feature_info = features.map((feature) => {
-                            const geometry_name = feature.getGeometryName()
-                            const values =
-                                feature.getKeys()
-                                .filter((key) => key != geometry_name)
-                                .map((key) => [key, feature.get(key)])
-                            return [feature.getId(), values]
+                if (url) {
+                    if(!this.state.is_draw_open){
+                    }
+                    fetch(url)
+                        .then((response) => response.text())
+                        .then((text) => {
+                            const parser = new WMSGetFeatureInfo()
+                            const features = parser.readFeatures(text)
+                            const source = new VectorSource({
+                                features: features
+                            });
+                            const feature_info = features.map((feature) => {
+                                const geometry_name = feature.getGeometryName()
+                                const values =
+                                    feature.getKeys()
+                                    .filter((key) => key != geometry_name)
+                                    .map((key) => [key, feature.get(key)])
+                                return [feature.getId(), values]
+                            })
+                            if(!this.state.is_draw_open){
+                                if(geodb_table == 'mpoint_view'){
+                                }
+                                else{
+                                    if(!this.state.pay_modal_check && geodb_table != 'privite') {
+                                        this.state.vector_layer.setSource(source)
+                                        if(feature_info.length > 0) this.controls.modal.showModal(feature_info, true)
+                                    }
+                                }
+                            }
                         })
-                        this.controls.modal.showModal(feature_info, true)
-                    })
-            } else {
-                /* TODO */
-                console.log('no feature url', wms_source);
-            }
+                } else {
+                    /* TODO */
+                    console.log('no feature url', wms_source);
+                }
+            })
         })
 
     }
@@ -299,16 +323,23 @@ export default class BundleMap extends Component {
     }
 
 
-    handleSetCenter(coord) {
+    handleSetCenter(coord, zoom) {
         const view = this.map.getView()
         const map_projection = view.getProjection()
-        const zoom = 4
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
-        view.setCenter(map_coord)
+        view.animate({zoom: zoom, duration: 4000}, {center: view.setCenter(map_coord), duration: 2000});
     }
+
     toggleSidebar(event) {
         this.setState({is_sidebar_open: event})
+    }
+
+    locationSet(){
+        navigator.geolocation.getCurrentPosition((position) => {
+            var location = [position.coords.longitude, position.coords.latitude]
+            this.handleSetCenter(location, 16)
+        });
     }
 
     render() {
@@ -320,17 +351,19 @@ export default class BundleMap extends Component {
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
-
-                            <div className={'col-md-12 ⚙' + (this.state.is_sidebar_open ? '' : ' d-none')}>
-                                <Sidebar map_wms_list={this.state.map_wms_list}
-                                    toggleSidebar={this.toggleSidebar}
-                                    handleSetCenter={this.handleSetCenter}
-                                />
-                            </div>
-
+                            <Sidebar map_wms_list={this.state.map_wms_list}
+                                toggleSidebar={this.toggleSidebar}
+                                is_sidebar_open={this.state.is_sidebar_open}
+                                handleSetCenter={this.handleSetCenter}
+                            />
                             <div className={'⚙-toggle'}>
                                 <a href="#" onClick={() =>this.toggleSidebar(true)}>
                                     <i className="fa fa-bars fa-lg" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                            <div className={'⚙-location'}>
+                                <a href="#" onClick={() =>this.locationSet(true)}>
+                                <i className="fa fa-location-arrow fa-lg" aria-hidden="true"></i>
                                 </a>
                             </div>
                         </div>

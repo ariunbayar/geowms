@@ -31,7 +31,6 @@ urlpatterns = [
     path('m/', include(([
         path('', mobile_views.all, name='all'),
         path('дэд-сан/<int:pk>/', mobile_views.detail, name='detail'),
-        path('дэд-сан/<int:pk>/давхаргууд/', mobile_views.wms_layers, name='wms-layers'),
     ], 'mobile'))),
 
     path('суурь-давхарга/', include(([
