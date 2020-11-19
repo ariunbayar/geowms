@@ -19,7 +19,6 @@ class PopUpCmp extends Component {
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
-        // this.listToJson = this.listToJson.bind(this)
     }
 
     componentDidMount() {
@@ -31,7 +30,7 @@ class PopUpCmp extends Component {
         const { datas } = this.props
         if(pP.datas !== datas) {
             const startNumber = 1
-            this.setState({ datas, fields: this.allfields, startNumber })
+            this.setState({ datas, fields: this.allfields, startNumber, is_plus: true, is_prev: false })
         }
     }
 
@@ -39,26 +38,32 @@ class PopUpCmp extends Component {
         const { startNumber, datas } = this.state
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
+        if (plus == datas.length) {
+            this.setState({ is_plus: false, is_prev: true })
+        } else {
+            this.setState({ is_plus: true, is_prev: true })
+        }
         this.checkMode(plus)
-        this.setState({ startNumber: plus, is_prev: true })
+        this.setState({ startNumber: plus })
     }
 
     prevTab() {
         const { startNumber } = this.state
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
-        if ( minus == 1) {
-            this.setState({ is_prev: false })
+        if (minus == 1) {
+            this.setState({ is_prev: false, is_plus: true })
+        }else {
+            this.setState({ is_plus: true, is_prev: true })
         }
         this.checkMode(minus)
-        this.setState({ startNumber: minus, is_prev: true })
+        this.setState({ startNumber: minus })
     }
 
     checkMode(number) {
         const { datas } = this.state
         const last = datas[number - 1].length - 1
         const mode = datas[number - 1][last]['mode']
-        console.log(mode);
         this.props.setSource(mode)
     }
 
@@ -70,18 +75,18 @@ class PopUpCmp extends Component {
                         <div className="ol-popup-header-content">
                             {datas
                                 ?
-                                <div>
+                                <div className="ol-header-cont" role="group">
                                     {startNumber}
                                     &nbsp; - &nbsp;
                                     {datas.length}
                                     &nbsp;
-                                    {is_prev && <span onClick={this.prevTab} className="" role="button">
+                                    {is_prev ? <span onClick={this.prevTab} className="span-left" role="button">
                                         <i className="fa fa-caret-left gp-text-primary fa-1x" aria-hidden="true" ></i>
-                                    </span>}
+                                    </span> : null}
                                     &nbsp;&nbsp;&nbsp;
-                                    {is_plus && <span onClick={this.plusTab} role="button">
+                                    {!(datas.length == startNumber) && is_plus ? <span className="span-right" onClick={this.plusTab} role="button">
                                         <i className="fa fa-caret-right gp-text-primary fa-1x"  aria-hidden="true" ></i>
-                                    </span>}
+                                    </span> : null}
                                     <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
                                         <i className="fa fa-times" aria-hidden="true"></i>
                                     </div>
@@ -95,25 +100,37 @@ class PopUpCmp extends Component {
                         </div>
                     </div>
                     <div className="ol-popup-contet">
-                        {datas && <b>{datas[startNumber - 1][0].field_name}</b>}
+                        {datas && datas.map((data, idx) =>
+                                    data.map((info, ix) =>
+                                        idx + 1 == startNumber &&
+                                        (info.field_name == 'name' ?
+                                        <b key={ix}>
+                                            {info.value}
+                                        </b> : null)
+                        ))}
+                        {datas && datas.map((data, idx) =>
+                                    data.map((info, ix) =>
+                                        idx + 1 == startNumber &&
+                                        (info.field_name == 'point_name' ?
+                                        <b key={ix}>
+                                            {info.value}
+                                        </b> : null)
+                        ))}
                         <hr className="m-1 border border-secondary rounded"/>
-                        <table>
+                        <table className="table borderless no-padding">
                             <tbody>
                                 {
                                     datas
                                     ?
                                         datas.map((data, idx) =>
                                             data.map((info, ix) =>
-                                                idx + 1 == startNumber &&
-                                                <tr key={ix}>
-                                                    <th>
-                                                        {ix != 0 && info.field_name}
-                                                    </th>
-                                                    <td>
-                                                        {info.value}
-                                                    </td>
+                                                (idx + 1 == startNumber &&
+                                                    ix != 0 &&
+                                                <tr style={{fontSize: '12px'}} key={ix}>
+                                                    <th>{info.mn_name}</th>
+                                                    <td>{info.value}</td>
                                                 </tr>
-                                            )
+                                            ))
                                         )
                                     :
                                     <tr><th>Мэдээлэл байхгүй байна</th></tr>

@@ -322,6 +322,7 @@ element.style {
     bottom: 30px;
     left: -50px;
     min-width: 200px;
+    max-width: 400px;
     z-index: 1030;
 }
 .ol-popup:after, .ol-popup:before {
@@ -375,4 +376,19 @@ element.style {
 
 .ol-popup-closer:hover {
     color: red
+}
+
+.ol-popup-table .table td, .ol-popup-table .table td{
+    padding:0px !important;
+}
+
+.borderless td, .borderless th {
+    border: none;
+}
+
+.no-padding td, .no-padding th {
+    padding-left: 10px !important;
+    padding-right: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 5px !important;
 }

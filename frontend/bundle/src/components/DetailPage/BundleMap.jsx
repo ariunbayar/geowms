@@ -83,7 +83,6 @@ export default class BundleMap extends Component {
         this.toggleDrawed = this.toggleDrawed.bind(this)
         this.toggleDrawRemove = this.toggleDrawRemove.bind(this)
         this.cartButton = this.cartButton.bind(this)
-        this.mapPointerMove = this.mapPointerMove.bind(this)
         this.onClickCloser = this.onClickCloser.bind(this)
         this.getElement = this.getElement.bind(this)
         this.listToJson = this.listToJson.bind(this)
@@ -242,21 +241,6 @@ export default class BundleMap extends Component {
             })
         })
 
-        // const element = document.createElement('div')
-        // element.className = 'ol-popup'
-        // element.setAttribute('id', 'popup')
-
-        // const element_closer = document.createElement('div')
-        // element_closer.className = 'ol-popup-closer'
-        // element_closer.setAttribute('id', 'popup-closer')
-        // element_closer.setAttribute('role', 'button')
-        // element_closer.addEventListener('click', this.onClickCloser)
-        // element.appendChild(element_closer)
-
-        // const element_content = document.createElement('div')
-        // element_content.setAttribute('id', 'popup-content')
-        // element.appendChild(element_content)
-
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -291,7 +275,6 @@ export default class BundleMap extends Component {
                 vector_layer,
                 marker_layer,
             ],
-            // overlays: [overlay],
             view: new View({
                 projection: this.state.projection,
                 center: [11461613.630815497, 5878656.0228370065],
@@ -299,26 +282,9 @@ export default class BundleMap extends Component {
             })
         })
 
-        map.on('click', this.handleMapClick)
-        // this.overlay = overlay
+        this.key = map.on('click', this.handleMapClick)
         this.map = map
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
-    }
-
-    mapPointerMove(event) {
-        const map = this.map
-        const overlay = this.overlay
-        this.key = map.on('singleclick', event => {
-            const coordinate = event.coordinate
-            // const projection = event.map.getView().getProjection()
-            // const map_coord = transformCoordinate(coordinate, projection.code_, this.state.projection_display)
-            // const yChange = coordinateFormat(map_coord, '{y}', 6)
-            // const xChange = coordinateFormat(map_coord, '{x}', 6)
-            // this.element_content.innerHTML = xChange
-            // this.setState({ xChange, yChange })
-            this.showFeaturesAt(coordinate)
-            overlay.setPosition(coordinate)
-        })
     }
 
     onClickCloser(){
@@ -349,14 +315,19 @@ export default class BundleMap extends Component {
 
     handleMapClick(event) {
 
-        this.marker.point.setCoordinates(event.coordinate)
+        const coordinate = event.coordinate
+        this.marker.point.setCoordinates(coordinate)
+        const overlay = this.overlay
 
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
         this.setState({coordinate_clicked})
-        this.mapPointerMove(event)
+
+        overlay.setPosition(coordinate)
+        this.showFeaturesAt(coordinate)
+
         // Nov-15: commented for UX
         //this.showFeaturesAt(event.coordinate)
 
@@ -370,9 +341,19 @@ export default class BundleMap extends Component {
             }
             this.object.push(rsp)
             info[1].map((info_data, i) => {
+                var field_name = ''
+                if(info_data[0] == 'point_name') field_name = 'Цэгийн Нэр'
+                else if(info_data[0] == 'point_id') field_name = 'Цэгийн дугаар'
+                else if(info_data[0] == 'point_class_name') field_name = 'Сүлжээний төрөл'
+                else if(info_data[0] == 'aimag') field_name = 'Аймаг'
+                else if(info_data[0] == 'sum') field_name = 'Сум'
+                else if(info_data[0] == 'mclass') field_name = 'Сүлжээний зэрэг'
+                else if(info_data[0] == 'name') field_name = 'нэр'
+                else field_name = info_data[0]
                 const rsp = {
                     'field_name': info_data[0],
                     'value': info_data[1],
+                    'mn_name': field_name,
                 }
                 this.object.push(rsp)
             })
@@ -443,7 +424,7 @@ export default class BundleMap extends Component {
                                         const object = this.listToJson(feature_info, geodb_table)
                                         this.sendFeatureInfo.push(object)
                                     }
-                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSource)
+                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSource, feature_price)
                                 this.selectSource = source
                                 if(geodb_table == 'mpoint_view'){
                                     this.setState({pay_modal_check: true})
