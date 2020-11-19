@@ -495,7 +495,6 @@ export default class BarilgaSuurinGazar extends Component{
       if (feature_type.includes('Poly')) {
           this.feature_coordinates = this.feature_coordinates[0]
       }
-      console.log(this.feature_coordinates);
       if (!feature_type.includes("Point")) {
         for(let i=0; i < this.feature_coordinates.length; i++) {
           const check = Mongolia_feaure.getGeometry().containsXY(this.feature_coordinates[i][0], this.feature_coordinates[i][1])
@@ -1228,7 +1227,6 @@ export default class BarilgaSuurinGazar extends Component{
         const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
         return {conv_geom, turning}
       })
-      console.log(coords);
       const {selected_feature} = this.state
       const feature_id = selected_feature.get('id')
       if (feature_id == id) {
@@ -1277,13 +1275,11 @@ export default class BarilgaSuurinGazar extends Component{
           id: feature_id
         })
         const check = this.checkInMongolia([new_feature])
-        console.log(check);
         if (check) {
           source.removeFeature(selected_feature)
           this.setState({ is_not_mongolia: false })
           source.addFeature(new_feature)
           const changedFeature = this.writeFeat(new_feature)
-          console.log(changedFeature);
           this.updateGeom(changedFeature)
           this.hideShowList()
         } else {

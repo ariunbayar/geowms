@@ -85,7 +85,6 @@ class ListComponent extends Component {
             }
         }
         coords_list.data[first].geom[second] = parsed
-        console.log(coords_list);
         this.setState({ coords_list })
     }
 
