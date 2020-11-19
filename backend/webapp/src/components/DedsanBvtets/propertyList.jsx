@@ -11,6 +11,7 @@ export default class Propterties extends Component {
         this.state = {
             disabled: true,
             property_name: this.props.property_name,
+            property_definition: this.props.property_definition,
             toggleButton: false,
         }
         this.handleChange = this.handleChange.bind(this)
@@ -49,10 +50,10 @@ export default class Propterties extends Component {
 
 
     render() {
-        const {property_name, disabled, toggleButton} = this.state
+        const {property_name, property_definition, disabled, toggleButton} = this.state
         const { property_id, is_read_only, top_id } = this.props
         return (
-            <div className="float-left">
+            <div className="float-left" data-toggle="tooltip" data-placement="right" title={property_definition}>
                 {
                     is_read_only
                     ?

@@ -4,3 +4,9 @@
     top:5%;
     list-style-type: disc;
 }
+.right-scroll-sticky{
+    position: sticky;
+    height: calc(96vh - 42px);
+    overflow-y: scroll;
+    top: 70px;
+}
