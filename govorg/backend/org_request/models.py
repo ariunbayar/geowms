@@ -40,5 +40,4 @@ class ChangeRequest(models.Model):
     form_json = models.TextField(null=True)
     geo_json = models.TextField(null=True)
 
-    created_on = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
