@@ -15,6 +15,7 @@ class PopUpCmp extends Component {
             startNumber: null,
             totalNumner: null,
             is_prev: false,
+            is_plus: true,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -29,51 +30,40 @@ class PopUpCmp extends Component {
     componentDidUpdate(pP) {
         const { datas } = this.props
         if(pP.datas !== datas) {
-            // this.data_list = []
-            // console.log(datas['list'][0]);
-            // datas['list'].map((data, idx) => {
-            //     const c_data = this.listToJson(data)
-            //     this.data_list.push(c_data)
-            // })
             const startNumber = 1
             this.setState({ datas, fields: this.allfields, startNumber })
         }
     }
 
-    // listToJson(feature_info){
-    //     feature_info.map((info, ix) => {
-    //         this.object = new Array()
-    //         const rsp = {
-    //             'field_name': info[0]
-    //         }
-    //         this.object.push(rsp)
-    //         info[1].map((info_data, i) => {
-    //             const rsp = {
-    //                 'field_name': info_data[0],
-    //                 'value': info_data[1],
-    //             }
-    //             this.object.push(rsp)
-    //         })
-    //     })
-    //     return this.object
-    // }
-
     plusTab() {
         const { startNumber, datas } = this.state
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
+        this.checkMode(plus)
         this.setState({ startNumber: plus, is_prev: true })
     }
 
     prevTab() {
         const { startNumber } = this.state
-        var plus = startNumber - 1
-        plus = Math.max(plus, 1)
-        this.setState({ startNumber: plus, is_prev: true })
+        var minus = startNumber - 1
+        minus = Math.max(minus, 1)
+        if ( minus == 1) {
+            this.setState({ is_prev: false })
+        }
+        this.checkMode(minus)
+        this.setState({ startNumber: minus, is_prev: true })
+    }
+
+    checkMode(number) {
+        const { datas } = this.state
+        const last = datas[number - 1].length - 1
+        const mode = datas[number - 1][last]['mode']
+        console.log(mode);
+        this.props.setSource(mode)
     }
 
     render() {
-        const { datas, startNumber, is_prev } = this.state
+        const { datas, startNumber, is_prev, is_plus } = this.state
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -85,11 +75,13 @@ class PopUpCmp extends Component {
                                     &nbsp; - &nbsp;
                                     {datas.length}
                                     &nbsp;
-                                    <span onClick={this.plusTab} className="" role="button">
+                                    {is_prev && <span onClick={this.prevTab} className="" role="button">
                                         <i className="fa fa-caret-left gp-text-primary fa-1x" aria-hidden="true" ></i>
-                                    </span>
+                                    </span>}
                                     &nbsp;&nbsp;&nbsp;
-                                    {is_prev && <span onClick={this.prevTab} role="button"><i className="fa fa-caret-right gp-text-primary fa-1x"  aria-hidden="true" ></i></span>}
+                                    {is_plus && <span onClick={this.plusTab} role="button">
+                                        <i className="fa fa-caret-right gp-text-primary fa-1x"  aria-hidden="true" ></i>
+                                    </span>}
                                     <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
                                         <i className="fa fa-times" aria-hidden="true"></i>
                                     </div>
@@ -103,8 +95,8 @@ class PopUpCmp extends Component {
                         </div>
                     </div>
                     <div className="ol-popup-contet">
-                        <b>ITS TEST</b>
-                        {/* <hr /> */}
+                        {datas && <b>{datas[startNumber - 1][0].field_name}</b>}
+                        <hr className="m-1 border border-secondary rounded"/>
                         <table>
                             <tbody>
                                 {
@@ -180,9 +172,9 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close) {
+    getData(isload, datas, close, setSource) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close})
+        this.renderComponent({datas, close, setSource})
     }
 
 }
