@@ -312,20 +312,20 @@ class GovRole(models.Model):
     description = models.CharField(max_length=1000)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class GovPerm(models.Model):
     class Meta:
         db_table = 'perm_gov_perm'
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
-    gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True)
+    gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True, null=True)
     geo_id = models.CharField(max_length=100)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class EmpRole(models.Model):
@@ -336,8 +336,8 @@ class EmpRole(models.Model):
     description = models.CharField(max_length=1000)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class EmpPerm(models.Model):
@@ -347,8 +347,8 @@ class EmpPerm(models.Model):
     emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class GovRoleInspire(models.Model):
@@ -366,8 +366,8 @@ class GovRoleInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True)
@@ -377,8 +377,8 @@ class GovRoleInspire(models.Model):
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 
@@ -397,8 +397,8 @@ class GovPermInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_role_inspire = models.ForeignKey(GovRoleInspire, on_delete=models.CASCADE, db_index=True, null=True)
@@ -409,8 +409,8 @@ class GovPermInspire(models.Model):
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class EmpRoleInspire(models.Model):
@@ -428,8 +428,8 @@ class EmpRoleInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True, null=True)
@@ -441,8 +441,8 @@ class EmpRoleInspire(models.Model):
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class EmpPermInspire(models.Model):
@@ -460,8 +460,8 @@ class EmpPermInspire(models.Model):
         (PERM_CREATE, 'НЭМЭХ'),
         (PERM_REMOVE, 'ХАСАХ'),
         (PERM_UPDATE, 'ЗАСАХ'),
-        (PERM_APPROVE, 'ЦУЦЛАХ'),
-        (PERM_REVOKE, 'БАТЛАХ'),
+        (PERM_REVOKE, 'ЦУЦЛАХ'),
+        (PERM_APPROVE, 'БАТЛАХ'),
     )
 
     gov_perm_inspire = models.ForeignKey(GovPermInspire, on_delete=models.CASCADE, db_index=True, null=True)
@@ -473,5 +473,5 @@ class EmpPermInspire(models.Model):
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)

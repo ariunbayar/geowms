@@ -2,8 +2,9 @@ import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
 import GovRole from './GovRole/'
-import { System } from "./System";
-import { Meta } from "./Meta"
+import { System } from "./System"
+import { Meta } from './Meta'
+import { Profile } from './Profile'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -167,6 +168,7 @@ export class App extends Component {
                             <Route exact path="/gov/role/employees/" component={Employee} />
                             <Route exact path="/gov/role/" component={GovRole} />
                             <Route exact path="/gov/help/" component={Help} />
+                            <Route exact path="/gov/profile/" component={Profile} />
                         </Switch>
                     </div>
                 </div>

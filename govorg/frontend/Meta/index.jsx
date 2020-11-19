@@ -10,10 +10,9 @@ export class Meta extends Component {
         return (
             <Switch>
                 <Route exact path="/gov/meta/" component={List} />
-                <Route exact path="/gov/meta/edit/" component={MetaEdit} />
-                <Route exact path="/gov/meta/detail/" component={MetaDetail} />
+                <Route exact path="/gov/meta/:id/edit/" component={MetaEdit} />
+                <Route exact path="/gov/meta/:id/detail/" component={MetaDetail} />
             </Switch>
         )
     }
-
 }

@@ -36,9 +36,9 @@ export class Form extends Component {
         return service
             .paginatedList(page, perpage, query)
             .then(page => {
-            this.setState({ systems: page.items, govorg_length: page.items.length });
-            return page
-        })
+                this.setState({ systems: page.items, govorg_length: page.items.length });
+                return page
+            })
     }
 
     handleSearch(field, e) {
@@ -81,12 +81,12 @@ export class Form extends Component {
                                 { govorg_length === 0 ?
                                     <tr><td>Систем бүртгэлгүй байна </td></tr>:
                                     systems.map((values,index) =>
-                                    <System
-                                        key={values.id}
-                                        idx={(currentPage*systemPerPage)-systemPerPage+index+1}
-                                        values={values}
-                                    />
-                                )}
+                                        <System
+                                            key={values.id}
+                                            idx={(currentPage*systemPerPage)-systemPerPage+index+1}
+                                            values={values}
+                                        />
+                                    )}
                             </tbody>
                         </table>
                     </div>

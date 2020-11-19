@@ -560,9 +560,9 @@ def get_rows(fid):
 
     cursor = connections['default'].cursor()
     sql = """
-        select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id  
+        select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id
         from l_properties l
-        inner join (select l_feature_configs.feature_id, l_feature_configs.feature_config_id, l_feature_configs.data_type_id,l_data_type_configs.property_id 
+        inner join (select l_feature_configs.feature_id, l_feature_configs.feature_config_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
         from l_feature_configs
         inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
         where l_feature_configs.feature_id = {fid}
@@ -646,6 +646,9 @@ def create(request, payload):
     fid = payload.get('fid')
     form_json = payload.get('form_json')
     geo_json = payload.get('geo_json')
+    order_no = form_json.get('order_no')
+    order_at = form_json.get('order_at')
+
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -656,7 +659,9 @@ def create(request, payload):
             state = 1,
             kind = 1,
             form_json = form_json,
-            geo_json = geo_json
+            geo_json = geo_json,
+            order_at=order_at,
+            order_no=order_no,
     )
 
     rsp = {
@@ -685,7 +690,7 @@ def createDel(request, payload):
             state = 1,
             kind = 3,
             form_json = None,
-            geo_json = None
+            geo_json = None,
     )
     rsp = {
         'success': True,
@@ -704,6 +709,8 @@ def createUpd(request, payload):
     old_geo_id = payload.get('old_geo_id')
     form_json = payload.get('form_json')
     geo_json = payload.get('geo_json')
+    order_no = form_json.get('order_no')
+    order_at = form_json.get('order_at')
 
     if not form_json:
         form_json = ''
@@ -720,7 +727,9 @@ def createUpd(request, payload):
             state = 1,
             kind = 2,
             form_json = form_json,
-            geo_json = geo_json
+            geo_json = geo_json,
+            order_at=order_at,
+            order_no=order_no,
     )
 
     rsp = {

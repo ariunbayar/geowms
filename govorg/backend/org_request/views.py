@@ -158,6 +158,8 @@ def _get_org_request(ob):
             'created_at':ob.created_at.strftime('%Y-%m-%d'),
             'employee':user.first_name,
             'org':org.name,
+            'order_no': ob.order_no,
+            'order_at': ob.order_at,
         }
 
     else:
@@ -168,7 +170,7 @@ def _get_org_request(ob):
 
                     geo_json = _convert_text_json(ob.geo_json)
                     current_geo_json = _get_geoJson(geo_json)
-                    
+
                     old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
                     old_geo_data = _get_geoJson(old_geo_data)
                     geo_json = FeatureCollection([geo_json, old_geo_data])
@@ -203,6 +205,8 @@ def _get_org_request(ob):
             'created_at':ob.created_at.strftime('%Y-%m-%d'),
             'employee':user.first_name,
             'org':org.name,
+            'order_no': ob.order_no,
+            'order_at': ob.order_at,
         }
 
 
@@ -234,6 +238,59 @@ def getChangeAll(request):
         return JsonResponse(rsp)
 
 
+def _get_features(org, package_id):
+    features = []
+    inspire_features = LFeatures.objects.filter(package_id=package_id).values('feature_id', 'feature_name')
+    if inspire_features:
+        for org_feature in inspire_features:
+            org_features = InspirePerm.objects.filter(org=org, perm_view=True, module_root_id = package_id, module_id=org_feature['feature_id'])
+            if org_features:
+                for feature in org_features:
+                    features.append({
+                        'id': org_feature['feature_id'],
+                        'name': org_feature['feature_name'],
+                    })
+    return features
+
+
+def _get_packages(org, theme_id):
+    packages = []
+    org_packages = InspirePerm.objects.filter(org=org, perm_view=True, module_root_id = theme_id)
+    if org_packages:
+        for org_package in org_packages:
+            inspire_packages = LPackages.objects.filter(package_id=org_package.module_id).values('package_id', 'package_name')
+            if inspire_packages:
+                for package in inspire_packages:
+                    packages.append({
+                        'id':package['package_id'],
+                        'name':package['package_name'],
+                        'features':_get_features(org, package['package_id'])
+                    })
+    return packages
+
+
+def _getChoices(user):
+    choices = []
+    modules = []
+    for f in ChangeRequest._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == 'state':
+                choices.append(f.choices)
+            if f.name == 'kind':
+                choices.append(f.choices)
+    org = get_object_or_404(Org, employee__user=user)
+    roles_inspire = InspirePerm.objects.filter(org=org, perm_view=True, module=1)
+    for role in roles_inspire:
+        themes = LThemes.objects.filter(theme_id=role.module_id)
+        for theme in themes:
+            modules.append({
+                'id': theme.theme_id,
+                'name': theme.theme_name,
+                'packages': _get_packages(org, theme.theme_id)
+            })
+
+    return {'choices': choices, 'modules': modules}
+
 @require_GET
 @ajax_required
 def getAll(request):
@@ -242,10 +299,13 @@ def getAll(request):
     org_request_list = ChangeRequest.objects.all()
     if org_request_list:
         org_request = [_get_org_request(ob) for ob in org_request_list]
+        choices = _getChoices(request.user)
         if org_request:
             rsp = {
                 'success':True,
                 'org_request': org_request,
+                'choices': choices['choices'],
+                'modules': choices['modules'],
             }
 
             return JsonResponse(rsp)
@@ -443,6 +503,41 @@ def getCount(request):
         rsp = {
             'success': True,
             'count': count
+        }
+    except Exception as e:
+        rsp = {
+            'success': False,
+            'info': str(e)
+        }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def search(request, payload):
+    data_list = []
+    search = {}
+    state = payload.get('state')
+    kind = payload.get('kind')
+    theme = payload.get('theme')
+    package = payload.get('packag')
+    feature = payload.get('feature')
+    if state:
+        search['state'] = state
+    if kind:
+        search['kind'] = kind
+    if theme:
+        search['theme_id'] = theme
+    if package:
+        search['package_id'] = package
+    if feature:
+        search['feature_id'] = feature
+    try:
+        datas = ChangeRequest.objects.filter(**search)
+        data_list = [_get_org_request(data) for data in datas]
+        rsp = {
+            'success': True,
+            'org_request': data_list
         }
     except Exception as e:
         rsp = {

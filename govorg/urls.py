@@ -8,13 +8,13 @@ from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
 from govorg.backend.zipcode import views as zipcode_views
 from govorg.backend.forms import views as forms_views
-from  govorg.backend.meta_data import views as meta_data_views
+from govorg.backend.meta_data import views as meta_data_views
 
 urlpatterns = [
     path('api/', include(([
 
         path('employee/', include(([
-            path('', employee_views.employees, name='employees'),
+        path('', employee_views.employees, name='employees'),
         ], 'employee'))),
         path('system/', system_views.systemList, name='system'),
         path('bundle/', bundle_views.bundle, name='bundle'),
@@ -43,6 +43,7 @@ urlpatterns = [
             path('<int:pk>/delete/', org_request_views.requestDelete, name="delete"),
             path('<int:pk>/approve/', org_request_views.requestApprove, name="approve"),
             path('getCount/', org_request_views.getCount, name='getCount'),
+            path('search/', org_request_views.search, name='request-search'),
         ], 'org-request'))),
         path('zip-code/', include(([
             path('aimag/', zipcode_views.aimag, name='aimag'),
@@ -100,7 +101,7 @@ urlpatterns = [
             path('<int:pk>/delete/', meta_data_views.delete),
             path('<int:pk>/edit/', meta_data_views.edit),
             path('create/', meta_data_views.create),
-            path('get-fields/', meta_data_views.getFields),
+            path('get-fields/', meta_data_views.get_fields),
         ], 'meta-data'))),
 
     ], 'back_org'))),
