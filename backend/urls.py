@@ -39,14 +39,15 @@ urlpatterns = [
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
         path('create/', bundle_views.create, name='create'),
-        path('ModuleCheck/', bundle_views.ModuleCheck, name='ModuleCheck'),
+        path('module-check/', bundle_views.moduleCheck, name='module-check'),
         path('update/', bundle_views.update, name='update'),
         path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
-        path('<int:pk>/updatemore/', bundle_views.updateMore, name='updatemore'),
-        path('roleCreate/', bundle_views.roleCreate, name='roleCreate'),
-        path('roleRemove/', bundle_views.roleRemove, name='roleRemove'),
-        path('defaultCheckUpdate/', bundle_views.defaultCheckUpdate, name='defaultCheckUpdate'),
+        path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
+        path('get-layer/', bundle_views.get_form_options, name='get-layer'),
+        path('role-create/', bundle_views.roleCreate, name='role-create'),
+        path('role-remove/', bundle_views.roleRemove, name='role-remove'),
+        path('default-check-update/', bundle_views.defaultCheckUpdate, name='default-check-update'),
     ], 'bundle'))),
 
     path('api/user/', include(([
@@ -88,6 +89,11 @@ urlpatterns = [
         path('get-role-name/', org_views.getgetRolesNames, name='get-role-name'),
         path('inspire-roles/<int:pk>/', org_views.getInspireRoles, name='inspire-roles'),
         path('inspire-roles/<int:pk>/save/', org_views.saveInspireRoles, name='inspire-roles-save'),
+
+        path('level-<int:level>/<int:pk>/gov-perm/', org_views.getGovRoles, name='get-gov-roles'),
+        path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.saveGovRoles, name='save-gov-roles'),
+
+
     ], 'org'))),
 
     path('api/log/', include(([
@@ -114,11 +120,6 @@ urlpatterns = [
     ], 'govorg'))),
 
     path('api/config/', include(([
-        path('all/', config_views.all, name='all'),
-        path('<int:pk>/detail/', config_views.detail, name='detail'),
-        path('<int:pk>/update/', config_views.update, name='update'),
-        path('<int:pk>/delete/', config_views.delete, name='delete'),
-        path('create/', config_views.create, name='create'),
         path('disk/', config_views.disk, name='disk'),
         path('postresqlVersion/', config_views.postresqlVersion, name='postresqlVersion'),
         path('geoserver/', config_views.geoserver_configs),

@@ -1,20 +1,21 @@
 import React, { Component, Fragment } from "react"
+
+import {service} from './service'
 import { Formik, Form, Field} from 'formik'
 import * as Yup from 'yup'
 
-import {service} from './service'
-
 
 const validationSchema = Yup.object().shape({
-    geoserver_host: Yup.string(),
-    geoserver_user: Yup.string(),
-    geoserver_pass: Yup.string(),
-    geoserver_port: Yup.string(),
-    geoserver_db: Yup.string(),
+    site_title: Yup.string(),
+    site_footer_text: Yup.string(),
+    agency_name: Yup.string(),
+    agency_contact_address: Yup.string(),
+    agency_contact_email: Yup.string(),
+    agency_contact_phone: Yup.string(),
 })
 
 
-export default class ConfigGeoserver extends Component {
+export class ConfigSite extends Component {
 
     constructor(props) {
 
@@ -22,11 +23,12 @@ export default class ConfigGeoserver extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                geoserver_host: '',
-                geoserver_user: '',
-                geoserver_pass: '',
-                geoserver_port: '',
-                geoserver_db: '',
+                site_title: '',
+                site_footer_text: '',
+                agency_name: '',
+                agency_contact_address: '',
+                agency_contact_email: '',
+                agency_contact_phone: '',
             },
             values: {},
         }
@@ -77,7 +79,6 @@ export default class ConfigGeoserver extends Component {
             .finally(() => {
                 this.setState({ is_editing: false })
             })
-
     }
 
     render() {
@@ -88,10 +89,10 @@ export default class ConfigGeoserver extends Component {
         } = this.state
 
         return (
-            <div className="card">
+            <div>
 
                 <div className="card-header">
-                    GeoServer API тохиргоо
+                    Сайтын тохиргоо
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
                             <i className="fa fa-edit"></i>
@@ -124,51 +125,58 @@ export default class ConfigGeoserver extends Component {
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-group">
-                                            <label htmlFor="id_geoserver_host">IP Address / Domain name</label>
+                                            <label htmlFor="id_site_title">Сайтын гарчиг</label>
                                             <Field
-                                                name="geoserver_host"
-                                                id="id_geoserver_host"
+                                                name="site_title"
                                                 type="text"
                                                 className="form-control"
+                                                id="id_site_title"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="id_site_footer_text">Footer текст</label>
+                                            <Field
+                                                name="site_footer_text"
+                                                type="text"
+                                                className="form-control"
+                                                id="id_site_footer_text"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="id_agency_name">Агентлагийн нэр</label>
+                                            <Field
+                                                name="agency_name"
+                                                type="text"
+                                                className="form-control"
+                                                id="id_agency_name"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="id_agency_contact_address">Хаяг</label>
+                                            <Field
+                                                name="agency_contact_address"
+                                                type="text"
+                                                className="form-control"
+                                                id="id_agency_contact_address"
                                             />
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_user">Port</label>
+                                                <label htmlFor="id_agency_contact_email">Мэйл</label>
                                                 <Field
-                                                    name="geoserver_port"
+                                                    name="agency_contact_email"
                                                     type="text"
                                                     className="form-control"
-                                                    id="id_geoserver_port"
+                                                    id="agency_contact_email"
                                                 />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_pass">Database</label>
+                                                <label htmlFor="id_agency_contact_phone">Утас</label>
                                                 <Field
-                                                    name="geoserver_db"
-                                                    type="text"
+                                                    name="agency_contact_phone"
+                                                    type=""
                                                     className="form-control"
-                                                    id="id_geoserver_db"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_user">Username</label>
-                                                <Field
-                                                    name="geoserver_user"
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="id_geoserver_user"
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_pass">Password</label>
-                                                <Field
-                                                    name="geoserver_pass"
-                                                    type="password"
-                                                    className="form-control"
-                                                    id="id_geoserver_pass"
+                                                    id="id_agency_contact_phone"
                                                 />
                                             </div>
                                         </div>
@@ -219,7 +227,6 @@ export default class ConfigGeoserver extends Component {
                         }}
                     </Formik>
                 </div>
-
             </div>
         )
     }

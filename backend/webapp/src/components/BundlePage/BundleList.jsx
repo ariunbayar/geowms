@@ -52,7 +52,7 @@ export class BundleList extends Component {
     modalClose(){
         const org_level = this.props.match.params.level
         this.setState({handleSaveIsLoad:false})
-        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+        this.props.history.push( `/back/дэд-сан/`)
         this.setState({modal_alert_status: "closed"})
         clearTimeout(this.state.timer)
     }
@@ -61,7 +61,7 @@ export class BundleList extends Component {
         const org_level = this.props.match.params.level
         this.state.timer = setTimeout(() => {
             this.setState({handleSaveIsLoad:false})
-            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+            this.props.history.push( `/back/дэд-сан/`)
             this.setState({modal_alert_status: "closed"})
         }, 2000)
     }
@@ -74,7 +74,7 @@ export class BundleList extends Component {
 
                         <div className="col-md-12">
                             <div className="text-right">
-                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/back/үүсгэх/`}>
+                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/back/дэд-сан/үүсгэх/`}>
                                     Нэмэх
                                 </NavLink>
                             </div>

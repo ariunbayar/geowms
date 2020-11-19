@@ -19,6 +19,7 @@ export default class BundleForm extends Component {
             self_module:'',
             module:props.values.self_module,
             check_module:false,
+            icon_url_err: ''
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -47,8 +48,18 @@ export default class BundleForm extends Component {
 
     handleSave() {
         const {id, name, layers,icon, icon_url, module}=this.state
+        if(id){
             const values ={'id':id, 'name':name, "layers":layers, 'icon':icon, 'icon_url':icon_url, 'module':module}
             this.props.handleSave(values)
+        }else{
+            if(icon){
+                this.setState({icon_url_err: ''})
+                const values ={'id':id, 'name':name, "layers":layers, 'icon':icon}
+                this.props.handleSave(values)
+            }else{
+                this.setState({icon_url_err: 'Зураг алга байна'})
+            }
+        }
 
     }
 
@@ -116,7 +127,7 @@ export default class BundleForm extends Component {
                         style={{marginBottom: "8px"}}
                     />
                 </div>
-
+                {this.props.values.id &&
                 <div className="form-group" style={{marginBottom: "10px"}}>
                     <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
 
@@ -136,7 +147,7 @@ export default class BundleForm extends Component {
                         <option value=''></option>
                     </select>
                     }
-                </div>
+                </div>}
 
                 <div className ="bundle-table-scroll border border-light rounded">
                     {this.props.formOptions.map(({name, layers,is_active}, idx) =>
@@ -207,6 +218,7 @@ export default class BundleForm extends Component {
                         singleImage={true}
                         label=''
                     />
+                    {this.state.icon_url_err && <p className="text-danger">{this.state.icon_url_err}</p>}
                 </div>
 
                 <div className="form-group">
