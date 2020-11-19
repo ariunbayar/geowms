@@ -232,19 +232,20 @@ def send_approve_email(user):
     if not user.email:
         return False
 
-    user.token = _generate_user_token()
-    user.save()
+    token = _generate_user_token()
+
+    UserValidationEmail.objects.create(
+        user=user,
+        token=token,
+        valid_before=timezone.now() + timedelta(days=90)
+    )
 
     subject = 'Геопортал хэрэглэгч баталгаажуулах'
-    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! 192.168.10.92:8000/gov/user/approve/{token}/'.format(token=user.token)
+    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://192.168.10.92/gov/user/approve/{token}/'.format(token=token)
     from_email = settings.EMAIL_HOST_USER
     to_email = [user.email]
 
     send_mail(subject, msg, from_email, to_email, fail_silently=False)
 
-    UserValidationEmail.objects.create(
-        user=user,
-        token=user.token,
-        valid_before=timezone.now() + timedelta(days=90)
-    )
+
     return True
