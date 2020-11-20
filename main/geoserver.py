@@ -266,8 +266,32 @@ def create_layer(space_name, store_name, layer_name, layer_title, view_name, srs
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
-def getGeoserverVersion():
+
+def get_version():
+
     BASE_URL, AUTH = getHeader()
+
     url = BASE_URL + 'about/version.json'
     rsp = requests.get(url, auth=AUTH)
-    return rsp
+
+    try:
+        assert rsp.status_code == 200
+        resources = {
+            res['@name']: res
+            for res in rsp.json()['about']['resource']
+        }
+    except:
+        resources = {}
+
+    version_info = {
+        'version': '',
+        'build_timestamp': '',
+        'git_revision': '',
+    }
+    if 'GeoServer' in resources:
+        resource = resources['GeoServer']
+        version_info['version'] = resource['Version']
+        version_info['build_timestamp'] = resource['Build-Timestamp']
+        version_info['git_revision'] = resource['Git-Revision']
+
+    return version_info

@@ -11,11 +11,12 @@ from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime, now
 
-from main.decorators import ajax_required
 from .models import Config
-from backend.payment.models import Payment
+
 from backend.config.models import Error500
-from main.geoserver import getGeoserverVersion
+from backend.payment.models import Payment
+from main.decorators import ajax_required
+from main import geoserver
 
 CACHE_TIMEOUT_DISK_INFO = 5
 
@@ -61,22 +62,34 @@ def disk(request):
     return JsonResponse({'success': True, 'disks': disks})
 
 
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def postresqlVersion(request):
-    geosever_version = []
+
     version_postgre_sql = connections['default'].cursor()
     version_postgre_sql.execute("SELECT version()")
     version_postgre_sql_data = version_postgre_sql.fetchone()
+
     version_post_gis = connections['default'].cursor()
     version_post_gis.execute("SELECT postgis_full_version()")
     version_post_gis_data = version_post_gis.fetchone()
-    geosever_version = getGeoserverVersion().json()
+
+
     return JsonResponse({
         'postgreVersion': version_postgre_sql_data,
         'versionOfPostGis': version_post_gis_data,
-        'geoserverVersion': geosever_version
-        })
+    })
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def geoserver_version(request):
+
+    return JsonResponse({
+        'geoserverVersion': geoserver.get_version(),
+    })
 
 
 @require_POST
