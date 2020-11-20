@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import { service } from "./service"
 import { validationSchema } from './validationSchema'
+import { validations } from './validations'
 
 export default class Маягт extends Component {
 
@@ -152,6 +153,7 @@ export default class Маягт extends Component {
                     initialValues={{
                         form_values: values,
                     }}
+                    validationSchema={validations}
                     onSubmit={ this.onSubmit}
                     render={({ values }) => (
                         <Form>
@@ -206,6 +208,32 @@ export default class Маягт extends Component {
                                 ))
                                 ) : ( null
                                 )}
+                                <div className="row my-3 ">
+                                    <div className="col-md-3">
+                                        <label className="col-form-label">Тушаалын дугаар</label>
+                                    </div>
+                                    <div className="col-md-9">
+                                      <Field
+                                          name="order_no"
+                                          className='form-control'
+                                          placeholder="Тушаалын дугаар"
+                                      />
+                                      <ErrorMessage name="order_no" component="span"/>
+                                    </div>
+                                </div>
+                                <div className="row my-3 ">
+                                    <div className="col-md-3">
+                                        <label className="col-form-label">Тушаал гарсан огноо </label>
+                                    </div>
+                                    <div className="col-md-9">
+                                      <Field
+                                          name="order_at"
+                                          className='form-control'
+                                          placeholder="Тушаал гарсан огноо"
+                                      />
+                                      <ErrorMessage name="order_at" component="span"/>
+                                    </div>
+                                </div>
                                 <div>
                                     {this.props.roles[6] ?
                                     <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>:

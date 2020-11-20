@@ -28,7 +28,21 @@ export class ChangeRequestTable extends Component {
     render() {
         const is_model_request_open = this.state.is_model_request_open
         const idx = this.props.idx
-        const {id, theme_name, package_name, feature_name, state, form_json, geo_json, employee, org, created_at, kind} = this.props.values
+        const {
+          id,
+          theme_name,
+          package_name,
+          feature_name,
+          state,
+          form_json,
+          geo_json,
+          employee,
+          org,
+          created_at,
+          kind,
+          order_at,
+          order_no
+        } = this.props.values
         return (
             <tr>
                 <td>
@@ -39,6 +53,12 @@ export class ChangeRequestTable extends Component {
                 </td>
                 <td>
                     {org+'/'+employee}
+                </td>
+                <td>
+                    {order_no}
+                </td>
+                <td>
+                    {order_at}
                 </td>
                 <td>
                     {created_at}

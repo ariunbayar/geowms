@@ -15,7 +15,6 @@ export default class MetaTable extends Component {
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
 
-
     handleModalDeleteOpen(event) {
         event.preventDefault()
         this.setState({ is_modal_delete_open: true })
@@ -31,14 +30,15 @@ export default class MetaTable extends Component {
     }
 
     render() {
-        const { idx, title, category, keywords, org_name, status } = this.props.values
+        const { id, title, category, keywords, org_name, status } = this.props.values
+        const { idx } = this.props
         return (
             <tr>
                 <th>
                     {idx}
                 </th>
                 <th>
-                <NavLink to={`/gov/meta/detail/`}>
+                <NavLink to={`/gov/meta/${id}/detail/`}>
                     {title}
                 </NavLink>
                 </th>
@@ -55,7 +55,7 @@ export default class MetaTable extends Component {
                     {status}
                 </th>
                 <th>
-                    <NavLink to={`/gov/meta/edit/`}>
+                    <NavLink to={`/gov/meta/${id}/edit/`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </th>
@@ -75,7 +75,5 @@ export default class MetaTable extends Component {
                 </th>
             </tr>
         )
-
     }
-
 }
