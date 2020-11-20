@@ -1,0 +1,118 @@
+.fixed-height-right{
+    overflow-y: scroll;
+    height: calc(52vh - 88px);
+}
+.fixed-height-left{
+    overflow-y: scroll;
+    height: calc(52vh - 88px);
+}
+
+.box {
+color: #fff;
+padding: 20px;
+display: none;
+margin-top: 20px;
+}
+
+.red {
+    background: #ff0000;
+    display: none
+}
+
+.green {
+    background: #228B22;
+    display: none
+}
+
+.blue {
+    background: #0000ff;
+    display: block;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+
+
+
+.smaller{
+    font-size: 54%;
+    font-weight: 400;
+    text-align: center;
+    font-weight: bold;
+}
+
+
+.role-card {
+    min-height: 100%;
+    margin-bottom: 15px;
+    background-color: rgb(247, 249, 250, 1);
+    border-radius: 1px rgb(235, 242, 245, 1);
+    /* box-shadow: 0 2px 6px 0 rgba(218, 218, 253, 0.65), 0 2px 6px 0 rgba(206, 206, 238, 0.54); */
+    border: none;
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
+.role-card-body {
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-height: 1px;
+    padding: 1.25rem;
+}
+
+.role-table-card {
+    min-height: 100%;
+    margin-bottom: 15px;
+    background-color: white;
+    border-radius: 1px rgb(235, 242, 245, 1);
+    border: none;
+    margin-top: -16px;
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
+.role-table-card-body {
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-height: 1px;
+    padding: 1.25rem;
+}

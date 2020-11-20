@@ -2,6 +2,8 @@ import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 // import {service} from "./service"
 import {TableHeadRole} from './TableHeadRole'
+import './ins.css'
+
 export default class InsRoles extends Component {
 
     constructor(props) {
