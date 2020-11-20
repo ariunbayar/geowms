@@ -8,9 +8,7 @@ HEADERS = {
     'Content-type': 'application/xml',
 }
 
-
-def getHeader():
-
+def get_connection_conf():
     conf_names = [
         'geoserver_host',
         'geoserver_port',
@@ -24,6 +22,13 @@ def getHeader():
         name: value
         for name, value in configs
     }
+    
+    return conf_geoserver
+
+
+def getHeader():
+
+    conf_geoserver =get_connection_conf()
 
     AUTH = requests.auth.HTTPBasicAuth(
         conf_geoserver['geoserver_user'],
@@ -31,63 +36,62 @@ def getHeader():
     )
 
     BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
-        host=conf_geoserver['geoserver_host'],
+        host=conf_geoserver['geoserver_pass'],
         port=conf_geoserver['geoserver_port'],
     )
 
     return BASE_URL, AUTH
 
 
-def getWorkspace(space_name):
+def getWorkspace(workspace_name):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}'''.format(space_name=space_name)
+    url = 'workspaces/{workspace_name}'.format(workspace_name=workspace_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
-def getDataStore(space_name, store_name):
+def getDataStore(workspace_name, datastore_name):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}/datastores/{store_name}'''.format(space_name=space_name, store_name=store_name)
+    url = 'workspaces/{workspace_name}/datastores/{datastore_name}'.format(workspace_name=workspace_name, datastore_name=datastore_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
-def getDataStoreLayer(space_name, store_name, layer_name):
+def getDataStoreLayer(workspace_name, datastore_name, layer_name):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}'''.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
+    url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name=datastore_name, layer_name=layer_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
-def deleteWorkSpace(space_name):
+def deleteWorkSpace(workspace_name):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}?recurse=true'''.format(space_name=space_name)
+    url = 'workspaces/{workspace_name}?recurse=true'.format(workspace_name=workspace_name)
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 
-def deleteLayerName(space_name, store_name, layer_name):
+def deleteLayerName(workspace_name, datastore_name, layer_name):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}?recurse=true'''.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
+    url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}?recurse=true'.format(workspace_name=workspace_name, datastore_name=datastore_name, layer_name=layer_name)
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 
-def create_space(space_name):
+def create_space(workspace_name):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces'''
-    payload = '''<workspace><name>{thema_name}</name></workspace> '''.format(thema_name=space_name)
-    HEADERS = {
-        'Content-type': 'text/xml'}
+    url = 'workspaces'
+    payload = '<workspace><name>{thema_name}</name></workspace>'.format(thema_name=workspace_name)
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
 
-def create_store(space_name, ds_name, ds_desc):
+def create_store(workspace_name, ds_name, ds_desc):
 
     db = settings.DATABASES['default']['NAME']
     password = settings.DATABASES['default']['PASSWORD']
     host = settings.DATABASES['default']['HOST']
     port = settings.DATABASES['default']['PORT']
+    user = settings.DATABASES['default']['USER']
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}/datastores'''.format(space_name=space_name)
+    url = '''workspaces/{workspace_name}/datastores'''.format(workspace_name=workspace_name)
     payload = '''
         <dataStore>
             <name>{ds_name}</name>
@@ -99,7 +103,7 @@ def create_store(space_name, ds_name, ds_desc):
             <entry key="port">{port}</entry>
             <entry key="database">{db}</entry>
             <entry key="schema">public</entry>
-            <entry key="user">postgres</entry>
+            <entry key="user">{user}</entry>
             <entry key="passwd">{password}</entry>
             <entry key="dbtype">postgis</entry>
             <entry key="validate connections">true</entry>
@@ -119,17 +123,15 @@ def create_store(space_name, ds_name, ds_desc):
             host=host,
             port=port,
             db=db,
-            password=password
+            password=password,
+            user=user
         )
-    HEADERS = {
-        'Content-type': 'text/xml'
-    }
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
-def create_layer(space_name, store_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
+def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
     BASE_URL, AUTH = getHeader()
-    url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes'''.format(space_name=space_name, store_name = store_name)
+    url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
     attributes_hoho = []
     geom_type = ''
     for i in range(len(attribute_name)):
@@ -303,3 +305,26 @@ def get_version():
         version_info['git_revision'] = resource['Git-Revision']
 
     return version_info
+
+def get_wms_url(wms_name):
+
+    conf_geoserver = get_connection_conf()
+
+    wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(
+        ws_name=wms_name, 
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port']
+        )
+    return wms_url
+
+def get_legend_url(ws_name, layer_name):
+
+    conf_geoserver = get_connection_conf()
+    
+    legend_url =  'http://{host}:{port}/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'.format(
+       host=conf_geoserver['geoserver_host'],
+       port=conf_geoserver['geoserver_port'],
+       ws_name=ws_name, 
+       layer=layer_name
+       )
+    return legend_url
