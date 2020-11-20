@@ -89,7 +89,7 @@ export default class ConfigSite extends Component {
         } = this.state
 
         return (
-            <div className="card">
+            <div className="card flex-grow-1">
                 <div className="card-body">
 
                     <div className="card-header">

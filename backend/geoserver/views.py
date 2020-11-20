@@ -7,24 +7,7 @@ from django.views.decorators.http import require_GET
 
 from backend.config.models import Config
 from main.decorators import ajax_required
-
-
-def _get_geoserver_config():
-
-    default_values = {
-        'geoserver_host': '',
-        'geoserver_user': '',
-        'geoserver_pass': '',
-    }
-
-    configs = Config.objects.filter(name__in=default_values.keys())
-
-    geoserver_config = {
-        **default_values,
-        **{conf.name: conf.value for conf in configs},
-    }
-
-    return geoserver_config
+from main import geoserver
 
 
 @require_GET
@@ -32,7 +15,7 @@ def _get_geoserver_config():
 @user_passes_test(lambda u: u.is_superuser)
 def layers(request):
 
-    config = _get_geoserver_config()
+    config = geoserver.get_connection_conf()
 
     HEADERS = {
         'Content-Type': 'application/json',
@@ -44,8 +27,9 @@ def layers(request):
         config['geoserver_pass'],
     )
 
-    base_url = 'http://{host}:19002/geoserver/rest/layers'.format(
+    base_url = 'http://{host}:{port}/geoserver/rest/layers'.format(
         host=config['geoserver_host'],
+        port=config['geoserver_port'],
     )
 
     rsp = requests.get(
@@ -65,4 +49,5 @@ def layers(request):
             'success': False,
             'data': None
         }
+
     return JsonResponse(rsp)
