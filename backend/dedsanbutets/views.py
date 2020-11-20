@@ -703,15 +703,8 @@ def check_them_name(theme_name):
 
 
 def _create_geoserver_detail(table_name, model_name, theme, user_id):
+    
     theme_code = theme.theme_code
-    config = Config.objects.filter(name__in = ['geoserver_host','geoserver_port']).values('value')
-    if not len(config) == 2:
-        removeView(table_name)
-        return {'success': False, 'info': 'config error'}
-        
-    host = config[0]['value']
-    port = config[1]['value']
-
     ws_name = 'gp_'+theme_code
 
     wms_url = geoserver.get_wms_url(wms_name)
