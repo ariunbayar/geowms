@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
-import GovRole from './GovRole/old'
-import { GovRoles } from './GovRole/inspireRole'
+// import GovRole from './GovRole/old'
+import InsRoles from './GovRole/inspireRole'
 import { System } from "./System"
 import { Meta } from './Meta'
 import { Profile } from './Profile'
@@ -167,8 +167,8 @@ export class App extends Component {
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
                             <Route exact path="/gov/role/employees/" component={Employee} />
-                            <Route exact path="/gov/role/" component={GovRole} />
-                            <Route exact path="/gov/inspire-role/" component={GovRoles} />
+                            {/* <Route exact path="/gov/role/" component={GovRole} /> */}
+                            <Route exact path="/gov/inspire-role/" component={InsRoles} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                         </Switch>

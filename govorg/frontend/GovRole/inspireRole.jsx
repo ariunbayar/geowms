@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 // import {service} from "./service"
 import {TableHeadRole} from './TableHeadRole'
-export class GovRoles extends Component {
+export default class InsRoles extends Component {
 
     constructor(props) {
         super(props)
@@ -15,7 +15,136 @@ export class GovRoles extends Component {
             properties: [],
             features: [],
             properties_perms: [],
-            data:[],
+            themes:
+            [
+                {
+                    'themes': [
+                        {
+                            'id': '1',
+                            'name': "utility",
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                        {
+                            'id': '2',
+                            'name': "portal",
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                        {
+                            'id': '3',
+                            'name': "worker",
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                    ]
+                }
+            ],
+            packages: [
+                {
+                    'packages': [
+                        {
+                            'id': '1',
+                            'name': "zahiral",
+                            'parent_id': '1',
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                        {
+                            'id': '2',
+                            'name': "ahlah",
+                            'parent_id': '2',
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                        {
+                            'id': '3',
+                            'name': "coder",
+                            'parent_id': '3',
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                    ]
+                }
+            ],
+            features: [
+                {
+                    'features': [
+                        {
+                            'id': '1',
+                            'name': "tuvshuu",
+                            'parent_id': '1',
+                            'roles': [
+                                {'harah': true},
+                                {'nemeh': false},
+                                {'hasah': true},
+                                {'tsutslah': false},
+                                {'hynah': true},
+                                {'batlah': false},
+                            ],
+                            'all_child': 25
+                        },
+                        {
+                            'id': '2',
+                            'name': "Bymbaa",
+                            'parent_id': '2',
+                            'roles': [
+                                {'harah': true},
+                                {'nemeh': false},
+                                {'hasah': true},
+                                {'tsutslah': false},
+                                {'hynah': true},
+                                {'batlah': false},
+                            ],
+                            'all_child': 25
+                        },
+                        {
+                            'id': '3',
+                            'name': "odko",
+                            'parent_id': '3',
+                            'roles': [
+                                {'harah': true},
+                                {'nemeh': false},
+                                {'hasah': true},
+                                {'tsutslah': false},
+                                {'hynah': true},
+                                {'batlah': false},
+                            ],
+                            'all_child': 25
+                        },
+                    ]
+                }
+            ]
         }
         // this.handleRoles = this.handleRoles.bind(this)
         // this.handleFeature = this.handleFeature.bind(this)
@@ -27,7 +156,7 @@ export class GovRoles extends Component {
     }
 
     componentDidMount(){
-        // this.handleRoles()
+        console.log('themes');
     }
 
     // handleRoles(){
@@ -83,7 +212,9 @@ export class GovRoles extends Component {
     // }
 
     render() {
-        const {data, tid, pid, fid, properties, packages, features, properties_perms} = this.state
+        const {themes, tid, pid, fid, properties, packages, features, properties_perms} = this.state
+        console.log("hahahaha");
+        console.log(themes);
         return (
             <div className="row">
                 <div className="col-md-6">
@@ -91,28 +222,28 @@ export class GovRoles extends Component {
                         <div className="card fixed-height-left col-md-12">
                             <div className="card-body">
                                 <div className="my-0">
-                                    {data.map((theme, theme_index) => (
-                                        (theme.packages.length > 0 &&
-                                            <div key={theme_index} className="" onClick={() => this.setState({tid: theme.id, packages: theme.packages})}>
+                                    {themes[0].themes.map((theme, theme_index) => (
+                                        (themes[0].themes.length > 0 &&
+                                            <div key={theme_index} className="" onClick={() => this.setState({ tid: theme.id })}>
                                                 <div className="">
                                                     <div className="">
                                                         <div className="">
                                                             <TableHeadRole
                                                                 name={theme.name}
                                                                 index={theme_index+1}
-                                                                tree={10}
-                                                                root_1={theme.id}
-                                                                inspire="theme"
-                                                                perm_all={theme.perm_all}
-                                                                perm_view={theme.perm_view}
-                                                                perm_create={theme.perm_create}
-                                                                perm_remove={theme.perm_remove}
-                                                                perm_update={theme.perm_update}
-                                                                perm_approve={theme.perm_approve}
-                                                                perm_revoce={theme.perm_revoce}
-                                                                handleCheckedTheme={this.handleCheckedTheme}
-                                                                handleCheckedPackage={this.handleCheckedPackage}
-                                                                handleCheckedFeature={this.handleCheckedFeature}
+                                                                // tree={10}
+                                                                // root_1={theme.id}
+                                                                // inspire="theme"
+                                                                // perm_all={theme.perm_all}
+                                                                // perm_view={theme.perm_view}
+                                                                // perm_create={theme.perm_create}
+                                                                // perm_remove={theme.perm_remove}
+                                                                // perm_update={theme.perm_update}
+                                                                // perm_approve={theme.perm_approve}
+                                                                // perm_revoce={theme.perm_revoce}
+                                                                // handleCheckedTheme={this.handleCheckedTheme}
+                                                                // handleCheckedPackage={this.handleCheckedPackage}
+                                                                // handleCheckedFeature={this.handleCheckedFeature}
                                                             ></TableHeadRole>
                                                         </div>
                                                     </div>
@@ -130,7 +261,7 @@ export class GovRoles extends Component {
                             <div className="card-body">
                             <div className="my-0">
                                 {packages.map((package_data, package_index) => (
-                                    (package_data.features.length > 0 &&
+                                    (package_data.packages.length > 0 &&
                                         <div id={`accordion-p-${package_index+1+package_data.id}`} key={package_index}>
                                             <div className="">
                                                 <div className="">
@@ -154,7 +285,7 @@ export class GovRoles extends Component {
                                                     ></TableHeadRole>
                                                     </div>
                                                 </div>
-                                                <div>
+                                                {/* <div>
                                                     <div className="role-table-card">
                                                         <div className="role-table-card-body">
                                                         {package_data.features.map((feature_data, feature_index) => (
@@ -196,15 +327,14 @@ export class GovRoles extends Component {
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
-                                                                                
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>)
                                                         ))}
                                                         </div>
-                                                    </div>
-                                                </div>
+                                                    </div> */}
+                                                {/* </div> */}
                                             </div>
                                         </div>
                                     )

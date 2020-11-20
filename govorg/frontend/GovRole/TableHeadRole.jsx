@@ -21,6 +21,7 @@ export class TableHeadRole extends Component {
                 root_3, perm_all, perm_view, perm_create,
                 perm_remove, perm_update, perm_approve, perm_revoce
         } = this.props
+        console.log('themes');
         return (
             <div className="role-card">
                 <div className="role-card-body">
