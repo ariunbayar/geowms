@@ -201,6 +201,7 @@ def geoserver_configs(request):
         'geoserver_user': '',
         'geoserver_pass': '',
         'geoserver_port': '',
+        'geoserver_db_host': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -223,6 +224,7 @@ def geoserver_configs_save(request, payload):
         'geoserver_user',
         'geoserver_pass',
         'geoserver_port',
+        'geoserver_db_host',
     )
 
     for config_name in config_names:

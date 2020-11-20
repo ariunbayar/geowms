@@ -8,12 +8,15 @@ HEADERS = {
     'Content-type': 'application/xml',
 }
 
+
 def get_connection_conf():
+
     conf_names = [
         'geoserver_host',
         'geoserver_port',
         'geoserver_user',
         'geoserver_pass',
+        'geoserver_db_host',
     ]
 
     configs = Config.objects.filter(name__in=conf_names).values_list('name', 'value')
@@ -22,7 +25,7 @@ def get_connection_conf():
         name: value
         for name, value in configs
     }
-    
+
     return conf_geoserver
 
 
@@ -85,11 +88,12 @@ def create_space(workspace_name):
 
 def create_store(workspace_name, ds_name, ds_desc):
 
+    db_host = get_connection_conf()['geoserver_db_host']
     db = settings.DATABASES['default']['NAME']
-    password = settings.DATABASES['default']['PASSWORD']
-    host = settings.DATABASES['default']['HOST']
     port = settings.DATABASES['default']['PORT']
     user = settings.DATABASES['default']['USER']
+    password = settings.DATABASES['default']['PASSWORD']
+
     BASE_URL, AUTH = getHeader()
     url = '''workspaces/{workspace_name}/datastores'''.format(workspace_name=workspace_name)
     payload = '''
@@ -99,28 +103,28 @@ def create_store(workspace_name, ds_name, ds_desc):
             <type>PostGIS</type>
             <enabled>true</enabled>
             <connectionParameters>
-            <entry key="host">{host}</entry>
-            <entry key="port">{port}</entry>
-            <entry key="database">{db}</entry>
-            <entry key="schema">public</entry>
-            <entry key="user">{user}</entry>
-            <entry key="passwd">{password}</entry>
-            <entry key="dbtype">postgis</entry>
-            <entry key="validate connections">true</entry>
-            <entry key="Connection timeout">20</entry>
-            <entry key="min connections">1</entry>
-            <entry key="max connections">10</entry>
-            <entry key="Loose bbox">true</entry>
-            <entry key="fetch size">1000</entry>
-            <entry key="Max open prepared statements">50</entry>
-            <entry key="Estimated extends">true</entry>
+                <entry key="host">{db_host}</entry>
+                <entry key="port">{port}</entry>
+                <entry key="database">{db}</entry>
+                <entry key="schema">public</entry>
+                <entry key="user">{user}</entry>
+                <entry key="passwd">{password}</entry>
+                <entry key="dbtype">postgis</entry>
+                <entry key="validate connections">true</entry>
+                <entry key="Connection timeout">20</entry>
+                <entry key="min connections">1</entry>
+                <entry key="max connections">10</entry>
+                <entry key="Loose bbox">true</entry>
+                <entry key="fetch size">1000</entry>
+                <entry key="Max open prepared statements">50</entry>
+                <entry key="Estimated extends">true</entry>
             </connectionParameters>
             <__default>false</__default>
         </dataStore>
         '''.format(
             ds_name=ds_name,
             ds_desc=ds_desc,
-            host=host,
+            db_host=db_host,
             port=port,
             db=db,
             password=password,
@@ -311,25 +315,26 @@ def get_wms_url(wms_name):
 
     conf_geoserver = get_connection_conf()
 
-    wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(
-        ws_name=wms_name,
+    wms_url = 'http://{host}:{port}/geoserver/{wms_name}/ows'.format(
+        wms_name=wms_name,
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port']
-        )
+    )
+
     return wms_url
 
 
-def get_legend_url(ws_name, layer_name):
+def get_legend_url(wms_name, layer_name):
 
     conf_geoserver = get_connection_conf()
-
-    legend_url = (
-        'http://{host}:{port}/geoserver/{ws_name}/ows?'
+    legend_url =  (
+        'https://nsdi.gov.mn/geoserver/{wms_name}/ows?'
         'service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'
     ).format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
-        ws_name=ws_name,
-        layer=layer_name
+        wms_name=wms_name,
+        layer=layer_name,
     )
     return legend_url
+

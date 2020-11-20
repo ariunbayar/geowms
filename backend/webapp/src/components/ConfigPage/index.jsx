@@ -13,10 +13,10 @@ export class ConfigPage extends Component {
         return (
             <div>
                 <div className="row">
-                    <div className="col-lg-8">
+                    <div className="col-lg-8 d-flex">
                         <ConfigSite/>
                     </div>
-                    <div className="col-lg-4">
+                    <div className="col-lg-4 d-flex flex-column">
                         <DiskSize/>
                         <VersionInfo/>
                     </div>
