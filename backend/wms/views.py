@@ -157,6 +157,7 @@ def layerAdd(request, payload):
     wmsId = payload.get('wmsId')
     layer_name = payload.get('id')
     layer_code = payload.get('code')
+
     legend_url = payload.get('legendURL')
     wms = get_object_or_404(WMS, pk=wmsId)
     wms_layer = WMSLayer.objects.filter(code=layer_code, wms_id=wms.id)
@@ -189,7 +190,6 @@ def layerRemove(request, payload):
 def create(request, payload):
 
     form = WMSForm(payload)
-
     if form.is_valid():
         form.instance.created_by = request.user
         form.save()

@@ -199,10 +199,10 @@ export default class Forms extends Component {
                                     {values.form_values && values.form_values.length > 0 ? (
                                     values.form_values.map((friend, index) => (
                                         <div key={index} className="row my-3">
-                                            <div className="col-md-3 overflow-hidden">
+                                            <div className="col-md-4 overflow-hidden test-wrap">
                                                 <label className="col-form-label">{friend.field_name}</label>
                                             </div>
-                                                <div className="col-md-9">
+                                                <div className="col-md-8">
                                                     {friend.field_type == 'radio' ?
                                                     <div role="group" className="form-check" aria-labelledby="my-radio-group">
                                                         <label>

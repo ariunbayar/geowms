@@ -28,8 +28,6 @@ export class Roles extends Component {
         this.handleCheckedFeature = this.handleCheckedFeature.bind(this)
         this.handleCheckedPerm = this.handleCheckedPerm.bind(this)
         this.handleStateAll = this.handleStateAll.bind(this)
-        this.handleStateOne = this.handleStateOne.bind(this)
-        this.handleStateTwo = this.handleStateTwo.bind(this)
         this.handleStateSole = this.handleStateSole.bind(this)
     }
 
@@ -48,170 +46,136 @@ export class Roles extends Component {
         this.setState({tid,tid_index, pid, pid_index, fid, fid_index, properties})
     }
 
-    handleStateAll(check, json, perm){
-        if(check){
-            if(perm == 1) json.perm_view = json.perm_all
-            if(perm == 2) json.perm_create = json.perm_all
-            if(perm == 3) json.perm_remove = json.perm_all
-            if(perm == 4) json.perm_update = json.perm_all
-            if(perm == 5) json.perm_approve = json.perm_all
-            if(perm == 6) json.perm_revoce = json.perm_all
-        }
-        else{
-            if(perm == 1) json.perm_view = 0
-            if(perm == 2) json.perm_create = 0
-            if(perm == 3) json.perm_remove = 0
-            if(perm == 4) json.perm_update = 0
-            if(perm == 5) json.perm_approve = 0
-            if(perm == 6) json.perm_revoce = 0
-        }
-        return json
+    getPermName(perm){
+        if(perm == 1) return 'perm_view'
+        if(perm == 2) return 'perm_create'
+        if(perm == 3) return 'perm_remove'
+        if(perm == 4) return 'perm_update'
+        if(perm == 5) return 'perm_approve'
+        if(perm == 6) return 'perm_revoce'
     }
 
-    handleStateSole(check, json, perm){
+    handleStateAll(data, check, tid_index, packages, pid_index, features, fid_index, perm){
+        var perm_name = this.getPermName(perm)
         if(check){
-            if(perm == 1) json.perm_view = json.perm_view + 1
-            if(perm == 2) json.perm_create = json.perm_create + 1
-            if(perm == 3) json.perm_remove = json.perm_remove + 1
-            if(perm == 4) json.perm_update = json.perm_update + 1
-            if(perm == 5) json.perm_approve = json.perm_approve + 1
-            if(perm == 6) json.perm_revoce = json.perm_revoce + 1
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] > 0 && data[tid_index][packages][pid_index][features][fid_index][perm_name] < data[tid_index][packages][pid_index][features][fid_index].perm_all)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] + 0.5
+
+                if(data[tid_index][packages][pid_index][perm_name] == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
+                }
+                if(data[tid_index][packages][pid_index][perm_name] - 0.5 == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
+                }
+            }
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] == 0)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] + 1
+
+                if(data[tid_index][packages][pid_index][perm_name] == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
+                }
+                if(data[tid_index][packages][pid_index][perm_name] - 1 == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
+                }
+            }
+            data[tid_index][packages][pid_index][features][fid_index][perm_name] = data[tid_index][packages][pid_index][features][fid_index]['perm_all']
         }
         else{
-            if(perm == 1) json.perm_view = json.perm_view - 1
-            if(perm == 2) json.perm_create = json.perm_create - 1
-            if(perm == 3) json.perm_remove = json.perm_remove - 1
-            if(perm == 4) json.perm_update = json.perm_update - 1
-            if(perm == 5) json.perm_approve = json.perm_approve - 1
-            if(perm == 6) json.perm_revoce = json.perm_revoce - 1
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] > 0 && data[tid_index][packages][pid_index][features][fid_index][perm_name] < data[tid_index][packages][pid_index][features][fid_index].perm_all)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] - 0.5
+
+                if(data[tid_index][packages][pid_index][perm_name] == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
+                }
+                if(data[tid_index][packages][pid_index][perm_name] + 0.5 == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
+                }
+            }
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] == data[tid_index][packages][pid_index][features][fid_index].perm_all)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] - 1
+                if(data[tid_index][packages][pid_index][perm_name] == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
+                }
+                if(data[tid_index][packages][pid_index][perm_name] + 1 == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
+                }
+            }
+            data[tid_index][packages][pid_index][features][fid_index][perm_name] = 0
         }
-        return json
+        return data
     }
 
-    handleStateOne(check, json, perm, child, name){
+    handleStateSole(data, check, tid_index, packages, pid_index, features, fid_index, perm){
+        var perm_name = this.getPermName(perm)
         if(check){
-            if(perm == 1 && json[name][child].perm_view != json[name][child].perm_all) json.perm_view = json.perm_view + 1
-            if(perm == 2 && json[name][child].perm_create != json[name][child].perm_all) json.perm_create = json.perm_create + 1
-            if(perm == 3 && json[name][child].perm_remove != json[name][child].perm_all) json.perm_remove = json.perm_remove + 1
-            if(perm == 4 && json[name][child].perm_update != json[name][child].perm_all) json.perm_update = json.perm_update + 1
-            if(perm == 5 && json[name][child].perm_approve != json[name][child].perm_all) json.perm_approve = json.perm_approve + 1
-            if(perm == 6 && json[name][child].perm_revoce != json[name][child].perm_all) json.perm_revoce = json.perm_revoce + 1
-        }
-        else{
-            if(perm == 1 && json[name][child].perm_view !=0 ) json.perm_view = json.perm_view - 1
-            if(perm == 2 && json[name][child].perm_create !=0 ) json.perm_create = json.perm_create - 1
-            if(perm == 3 && json[name][child].perm_remove !=0 ) json.perm_remove = json.perm_remove - 1
-            if(perm == 4 && json[name][child].perm_update !=0 ) json.perm_update = json.perm_update - 1
-            if(perm == 5 && json[name][child].perm_approve !=0 ) json.perm_approve = json.perm_approve - 1
-            if(perm == 6 && json[name][child].perm_revoce !=0 ) json.perm_revoce = json.perm_revoce - 1
-        }
-        return json
-    }
-
-
-
-    handleStateTwo(check, json, perm, child, name){
-        if(check){
-            if(perm == 1){
-                if(json[name][child].perm_view + 1 == json[name][child].perm_all){
-                    json.perm_view = json.perm_view + 0.5
+            data[tid_index][packages][pid_index][features][fid_index][perm_name] = data[tid_index][packages][pid_index][features][fid_index][perm_name] + 1
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] == data[tid_index][packages][pid_index][features][fid_index].perm_all)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] + 0.5
+                if(data[tid_index][packages][pid_index][perm_name] == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
                 }
-                if(json[name][child].perm_view == 0){
-                    json.perm_view = json.perm_view + 0.5
+                if(data[tid_index][packages][pid_index][perm_name] - 0.5 == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
                 }
             }
-            if(perm == 2){
-                if(json[name][child].perm_create + 1 == json[name][child].perm_all){
-                    json.perm_create = json.perm_create + 0.5
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] - 1 == 0)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] + 0.5
+                if(data[tid_index][packages][pid_index][perm_name] == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
                 }
-                if(json[name][child].perm_create == 0){
-                    json.perm_create = json.perm_create + 0.5
-                }
-            }
-            if(perm == 3){
-                if(json[name][child].perm_remove + 1 == json[name][child].perm_all){
-                    json.perm_remove = json.perm_remove + 0.5
-                }
-                if(json[name][child].perm_remove == 0){
-                    json.perm_remove = json.perm_remove + 0.5
-                }
-            }
-            if(perm == 4){
-                if(json[name][child].perm_update + 1 == json[name][child].perm_all){
-                    json.perm_update = json.perm_update + 0.5
-                }
-                if(json[name][child].perm_update == 0){
-                    json.perm_update = json.perm_update + 0.5
-                }
-            }
-            if(perm == 5){
-                if(json[name][child].perm_approve + 1 == json[name][child].perm_all){
-                    json.perm_approve = json.perm_approve + 0.5
-                }
-                if(json[name][child].perm_approve == 0){
-                    json.perm_approve = json.perm_approve + 0.5
-                }
-            }
-            if(perm == 6){
-                if(json[name][child].perm_revoce + 1 == json[name][child].perm_all){
-                    json.perm_revoce = json.perm_revoce + 0.5
-                }
-                if(json[name][child].perm_revoce == 0){
-                    json.perm_revoce = json.perm_revoce + 0.5
+                if(data[tid_index][packages][pid_index][perm_name] - 0.5 == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] + 0.5
                 }
             }
         }
         else{
-            if(perm == 1){
-                if(json[name][child].perm_view - 1 == 0){
-                    json.perm_view = json.perm_view - 0.5
+            data[tid_index][packages][pid_index][features][fid_index][perm_name] = data[tid_index][packages][pid_index][features][fid_index][perm_name] - 1
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] == 0)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] - 0.5
+
+
+                if(data[tid_index][packages][pid_index][perm_name] == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
                 }
-                if(json[name][child].perm_view == json[name][child].perm_all){
-                    json.perm_view = json.perm_view - 0.5
-                }
-            }
-            if(perm == 2){
-                if(json[name][child].perm_create - 1 == 0){
-                    json.perm_create = json.perm_create - 0.5
-                }
-                if(json[name][child].perm_create == json[name][child].perm_all){
-                    json.perm_create = json.perm_create - 0.5
-                }
-            }
-            if(perm == 3){
-                if(json[name][child].perm_remove - 1 == 0){
-                    json.perm_remove = json.perm_remove - 0.5
-                }
-                if(json[name][child].perm_remove == json[name][child].perm_all){
-                    json.perm_remove = json.perm_remove - 0.5
+                if(data[tid_index][packages][pid_index][perm_name] + 0.5 == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
                 }
             }
-            if(perm == 4){
-                if(json[name][child].perm_update - 1 == 0){
-                    json.perm_update = json.perm_update - 0.5
+            if(data[tid_index][packages][pid_index][features][fid_index][perm_name] + 1 == data[tid_index][packages][pid_index][features][fid_index].perm_all)
+            {
+                data[tid_index][packages][pid_index][perm_name] = data[tid_index][packages][pid_index][perm_name] - 0.5
+                if(data[tid_index][packages][pid_index][perm_name] == 0)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
                 }
-                if(json[name][child].perm_update == json[name][child].perm_all){
-                    json.perm_update = json.perm_update - 0.5
-                }
-            }
-            if(perm == 5){
-                if(json[name][child].perm_approve - 1 == 0){
-                    json.perm_approve = json.perm_approve - 0.5
-                }
-                if(json[name][child].perm_approve == json[name][child].perm_all){
-                    json.perm_approve = json.perm_approve - 0.5
-                }
-            }
-            if(perm == 6){
-                if(json[name][child].perm_revoce - 1 == 0){
-                    json.perm_revoce = json.perm_revoce - 0.5
-                }
-                if(json[name][child].perm_revoce == json[name][child].perm_all){
-                    json.perm_revoce = json.perm_revoce - 0.5
+                if(data[tid_index][packages][pid_index][perm_name] + 0.5 == data[tid_index][packages][pid_index].perm_all)
+                {
+                    data[tid_index][perm_name] = data[tid_index][perm_name] - 0.5
                 }
             }
         }
-        return json
+        return data
     }
 
     handleCheckedTheme(check, perm, tid, tid_index){
@@ -246,11 +210,11 @@ export class Roles extends Component {
 
     handleCheckedFeature(check, perm, tid, tid_index, pid, pid_index, fid, fid_index){
         const {data} = this.state
+        var datas = data
         var properties = data[tid_index]['packages'][pid_index]['features'][fid_index]['properties']
         if(check){
             properties.map((property) => {
                 this.handleCheckedPerm({"perm_kind": perm, "feature_id":fid, "property_id": property.id, "geom": false, "disable": false}, true)
-                
             })
             this.handleCheckedPerm({"perm_kind": perm, "feature_id":fid, "property_id":null, "geom": true, "disable": false}, true)
 
@@ -263,10 +227,8 @@ export class Roles extends Component {
 
         }
 
-        data[tid_index] = this.handleStateTwo(check, data[tid_index], perm, pid_index, 'packages')
-        data[tid_index]['packages'][pid_index] = this.handleStateOne(check, data[tid_index]['packages'][pid_index], perm, fid_index, 'features')
-        data[tid_index]['packages'][pid_index]['features'][fid_index] = this.handleStateAll(check, data[tid_index]['packages'][pid_index]['features'][fid_index], perm)
-        this.setState({data})
+        datas = this.handleStateAll(datas, check, tid_index, 'packages', pid_index, 'features', fid_index, perm)
+        this.setState({data: datas})
     }
 
     handleCheckedPerm(json, check){
@@ -292,7 +254,7 @@ export class Roles extends Component {
 
     handleChecked(json, check, perm){
         const { tid_index, pid_index, fid_index, data} = this.state
-
+        var datas = data
         const properties_perms = this.state.properties_perms
         if(check){
             var check_perm = properties_perms.filter((item) => {
@@ -311,10 +273,8 @@ export class Roles extends Component {
             }
             this.setState({properties_perms})
         }
-        data[tid_index] = this.handleStateTwo(check, data[tid_index], perm, pid_index, 'packages')
-        data[tid_index]['packages'][pid_index] = this.handleStateTwo(check, data[tid_index]['packages'][pid_index], perm, fid_index, 'features')
-        data[tid_index]['packages'][pid_index]['features'][fid_index] = this.handleStateSole(check, data[tid_index]['packages'][pid_index]['features'][fid_index], perm)
-        this.setState({data})
+        datas = this.handleStateSole(datas, check, tid_index, 'packages', pid_index, 'features', fid_index, perm)
+        this.setState({data: datas})
     }
 
     handleSubmit(){
@@ -333,16 +293,17 @@ export class Roles extends Component {
 
         })
     }
+
     modalClose(){
         this.setState({modal_alert_status: 'closed'})
         this.setState({handleSaveIsLoad:false})
         this.handleRoles()
     }
+
     render() {
         const {data, tid, pid, fid, properties, properties_perms} = this.state
         return (
             <div className="row">
-                
                 <div className="col-md-6">
                     {this.state.handle_save_is_laod ?
                         <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white">
@@ -358,10 +319,8 @@ export class Roles extends Component {
                     {data.map((theme, theme_index) => (
                         (theme.packages.length > 0 && theme.perm_all > 0 &&
                         <div className="bc-white" key={theme_index}>
-                            
                             <div className="">
                                 <div className="my-0">
-                            
                                     <div id={`accordion${theme_index+1}`} className="" key={theme_index}>
                                         <div className="">
                                             <div className="">

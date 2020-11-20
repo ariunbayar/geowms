@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 
 from django.core.paginator import Paginator
@@ -254,10 +254,10 @@ def user_update_password(request, payload):
     new_password = payload.get("new_password")
     user = request.user
 
-    if old_password is None:
+    if not old_password:
         return JsonResponse({'success': False, 'error': 'Хуучин нууц хоосон байна.'})
 
-    if new_password is None:
+    if not new_password:
             return JsonResponse({'success': False, 'error': 'Шинэ нууц хоосон байна.'})
 
     if not user.check_password(old_password):

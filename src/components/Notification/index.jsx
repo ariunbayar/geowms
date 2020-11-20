@@ -34,7 +34,7 @@ export class Notif extends Component {
             }
             if(too > length && length > 0){
                 this.total = this.total.concat([
-                    <li key={this.key} className={`${style_list} list-group-item-${style} my-1`}>
+                    <li key={this.key} className={`${style_list} list-group-item-${style} my-1 text-wrap`}>
                         <a><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn my-1`}></i> {msg}</a>
                     </li>
                 ])
@@ -42,7 +42,7 @@ export class Notif extends Component {
             }
             if(length == 0){
                 this.total.push(
-                    <li key={this.key} className={`${style_list} list-group-item-${style} my-1`}>
+                    <li key={this.key} className={`${style_list} list-group-item-${style} my-1 text-wrap`}>
                         <a><i className={`fa fa-${this.props.icon}-circle fa-1x my-3 animated bounceIn my-1`}></i> {msg}</a>
                     </li>
                 )
