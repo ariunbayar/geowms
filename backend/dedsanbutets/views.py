@@ -706,7 +706,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
     
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
-
+    ds_name = ws_name
     wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
@@ -722,7 +722,6 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
     if check_workspace.status_code == 404:
 
         geoserver.create_space(ws_name)
-        ds_name = 'gp_' + ws_name
         check_ds_name = geoserver.getDataStore(ws_name, ds_name)
         if check_ds_name.status_code == 404:
             create_ds = geoserver.create_store(
@@ -789,7 +788,6 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                         return {"success": False, 'info': 'layer_remove'}
 
     else:
-        ds_name = 'gp_' + ws_name
         check_ds_name = geoserver.getDataStore(ws_name, ds_name)
         if check_ds_name.status_code == 404:
             create_ds = geoserver.create_store(
