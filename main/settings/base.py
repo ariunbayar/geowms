@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 AUTH_USER_MODEL = 'geoportal_app.User'
 
-INTERNAL_IPS = ['127.0.0.1','55198']
+INTERNAL_IPS = ['127.0.0.1','192.168.1.21']
 
 # Application definition
 
@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_user_agents',
     'django.contrib.gis',
+    'pwa',
 
     # Dependencies
 
@@ -172,3 +173,40 @@ MEDIA_URL = '/media/'
 
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.
 DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/', r'^/api/service/']
+
+
+
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/assets/pwa', 'serviceworker.js')
+
+
+
+
+PWA_APP_NAME = 'geoPortal'
+PWA_APP_DESCRIPTION = "geoPortal"
+PWA_APP_THEME_COLOR = '#0A0302'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/m'
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/m'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '160x160'
+    }
+]
+PWA_APP_ICONS_APPLE = [
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '160x160'
+    }
+]
+PWA_APP_SPLASH_SCREEN = [
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'media': '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'
+    }
+]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'en-US'
