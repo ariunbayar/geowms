@@ -7,46 +7,54 @@ HEADERS = {
 AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
 
 def getHeader():
-    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_port']).values('value')
-    host = config[0]['value']
-    port = config[1]['value']
+    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_port', 'geoserver_user', 'geoserver_pass']).values('name','value')
+    for con in config:
+        if con['name'] == 'geoserver_host':
+            host = con['value']
+        if con['name'] == 'geoserver_port':
+            port = con['value']
+        if con['name'] == 'geoserver_user':
+            admin = con['value']
+        if con['name'] == 'geoserver_pass':
+            geoserver = con['value']
+    AUTH = requests.auth.HTTPBasicAuth(admin, geoserver)
     BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(host=host, port=port)
-    return BASE_URL
+    return BASE_URL, AUTH
 
 def getWorkspace(space_name):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}'''.format(space_name=space_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 def getDataStore(space_name, store_name):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores/{store_name}'''.format(space_name=space_name, store_name=store_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 def getDataStoreLayer(space_name, store_name, layer_name):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}'''.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 def deleteWorkSpace(space_name):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}?recurse=true'''.format(space_name=space_name)
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 
 def deleteLayerName(space_name, store_name, layer_name):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes/{layer_name}?recurse=true'''.format(space_name=space_name, store_name=store_name, layer_name=layer_name)
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
 
 def create_space(space_name):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces'''
     payload = '''<workspace><name>{thema_name}</name></workspace> '''.format(thema_name=space_name)
     HEADERS = {
@@ -56,7 +64,7 @@ def create_space(space_name):
 
 
 def create_store(space_name, ds_name, ds_desc, host, db, password):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores'''.format(space_name=space_name)
     payload = '''
         <dataStore>
@@ -97,7 +105,7 @@ def create_store(space_name, ds_name, ds_desc, host, db, password):
     return rsp
 
 def create_layer(space_name, store_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores/{store_name}/featuretypes'''.format(space_name=space_name, store_name = store_name)
     attributes_hoho = []
     geom_type = ''
@@ -244,7 +252,7 @@ def create_layer(space_name, store_name, layer_name, layer_title, view_name, srs
     return rsp
 
 def getGeoserverVersion():
-    BASE_URL = getHeader()
+    BASE_URL, AUTH = getHeader()
     url = BASE_URL + 'about/version.json'
     rsp = requests.get(url, auth=AUTH)
     return rsp
