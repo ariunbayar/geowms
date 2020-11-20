@@ -29,6 +29,8 @@ from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.auth.decorators import user_passes_test
+from backend.bundle.models import Bundle
+from geoportal_app.models import User
 
 from main.utils import (
     dict_fetchall,
@@ -492,6 +494,7 @@ def save(request, payload):
     model_id = payload.get("model_id")
     edit_name = payload.get("edit_name")
     json = payload.get("form_values")
+    model_name_old = model_name
     model_name = getModel(model_name)
     json = json['form_values']
     fields = []
@@ -528,7 +531,43 @@ def save(request, payload):
         if edit_name == '':
             datas['created_by'] = request.user.id
             datas['modified_by'] = request.user.id
-            sain = model_name.objects.create(**datas)
+            if model_name_old == 'theme':
+
+                theme_code = datas['theme_code']
+                theme_name = datas['theme_name']
+                theme_name_eng = datas['theme_name_eng']
+                top_theme_id = datas['top_theme_id']
+                order_no = datas['order_no']
+                is_active = datas['is_active']
+                modified_by = datas['modified_by']
+                created_by = datas['created_by']
+                cb_bundle = User.objects.filter(id=created_by).first()
+
+                last_order_n = Bundle.objects.all().order_by('sort_order').last().sort_order
+                order_no = order_no if order_no else last_order_n+1
+                is_active = is_active if is_active else False
+                icon = '/дэд-сан/icon.png'
+
+                theme_model = model_name.objects.create(
+                                    theme_code=theme_code,
+                                    theme_name=theme_name,
+                                    theme_name_eng=theme_name_eng,
+                                    top_theme_id=top_theme_id,
+                                    order_no=order_no,
+                                    is_active=is_active,
+                                    created_by=created_by,
+                                    modified_by=modified_by,
+                                )
+
+                Bundle.objects.create(
+                    is_removeable=is_active,
+                    created_by=cb_bundle,
+                    sort_order=order_no,
+                    ltheme=theme_model,
+                    icon=icon
+                )
+            else:
+                sain = model_name.objects.create(**datas)
         else:
             datas['modified_by'] = request.user.id
             sain = model_name.objects.filter(pk=model_id).update(**datas)

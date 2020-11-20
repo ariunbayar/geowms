@@ -14,6 +14,7 @@ from django.db import connections
 
 from .forms import BundleForm
 from .models import Bundle, BundleLayer, BundleGIS
+from backend.inspire.models import LThemes
 
 def _layer_visible(layers):
     check = False
@@ -133,9 +134,10 @@ def _get_module_display(module):
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
     return {
         'id': bundle.id,
-        'name': bundle.name,
+        'name': theme.theme_name if theme else '',
         'price':modules,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),

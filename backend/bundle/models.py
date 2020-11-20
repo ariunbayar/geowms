@@ -3,6 +3,7 @@ from django.conf import settings
 
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
+from backend.inspire.models import LThemes
 
 
 class Bundle(models.Model):
@@ -26,9 +27,9 @@ class Bundle(models.Model):
     )
 
     layers = models.ManyToManyField(WMSLayer, through='BundleLayer', blank=True)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=250)
     module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
-
+    ltheme = models.OneToOneField(LThemes, on_delete=models.CASCADE, null=True)
     is_removeable = models.BooleanField()
     icon = models.ImageField(upload_to='дэд-сан/')
 
