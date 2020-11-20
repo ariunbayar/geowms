@@ -1,7 +1,7 @@
 from django.urls import re_path, path, include
 
 from govorg.backend.org import views as org_views
-from govorg.backend.bundle import views as bundle_views
+from govorg.backend.role_org import views as role_org_views
 from govorg.backend.employee import views as employee_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
@@ -13,11 +13,11 @@ from govorg.backend.meta_data import views as meta_data_views
 urlpatterns = [
     path('api/', include(([
 
-        path('employee/', include(([
-        path('', employee_views.employees, name='employees'),
-        ], 'employee'))),
+        path('role/', include(([
+            path('org/', role_org_views.views),
+            path('employee', employee_views.employees),
+        ], 'role'))),
         path('system/', system_views.systemList, name='system'),
-        path('bundle/', bundle_views.bundle, name='bundle'),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
             path('<int:pid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),
