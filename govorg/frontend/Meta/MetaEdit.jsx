@@ -1,53 +1,107 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
-// import ModalAlert from "../ModalAlert";
+import ModalAlert from '../components/helpers/ModalAlert'
+import { service } from "./service"
 
+class HandleInput extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            value: this.props.meta_data[this.props.meta]
+        }
+        this.handleOnChange = this.handleOnChange.bind(this)
+    }
 
+    handleOnChange(value) {
+        const { meta } = this.props
+        this.setState({ value })
+        this.props.getValues(value, meta)
+    }
+
+    render(){
+        const { meta, meta_data, field, type, choices } = this.props
+        const { value } = this.state
+        this.default = false
+        if(choices) {
+            choices.map((choice, idx) => {
+                if (value == choice[0]) this.default = true
+            })
+        }
+        return(
+            <div className="form-group animated slideInLeft">
+                <label>{field}</label>
+                {
+                    type > 1900 && choices == null
+                    ?
+                        <textarea
+                            className="form-control"
+                            rows="3"
+                            onChange={(e) => this.handleOnChange(e.target.value)}
+                            maxLength={type}
+                            placeholder={value}
+                            value={value}
+                        >
+                        </textarea>
+                    : type < 1900 && choices == null ?
+                        <input
+                            type="text"
+                            className="form-control"
+                            maxLength={type}
+                            id={meta}
+                            onChange={(e) => this.handleOnChange(e.target.value)}
+                            value={value || ''}
+                            placeholder={field + ` оруулна уу`}
+                        />
+                    : choices !== null ?
+                        <select
+                            defaultValue={this.default ? value : ''}
+                            className="form-control"
+                            onChange={(e) => this.handleOnChange(e.target.value)}>
+                            <option value=''>--- Сонгоно уу ---</option>
+                            {choices.map((choice, idx) =>
+                                <option key={idx} value={choice[0]}>{choice[1]}</option>
+                            )}
+                        </select>
+                    : null
+                }
+                <small className="text-muted float-right">урт нь: {type}</small>
+            </div>
+        )
+    }
+}
 export class MetaEdit extends Component {
 
     constructor(props) {
         super(props)
 
+        this.list = []
         this.state = {
-            org_name: '',
-            customer_org: '',
-            distributor_org: '',
-            owner_org: '',
-            keywords: '',
-            category: '',
-            status: '',
-            language: '',
-            summary: '',
-            title: '',
-            uuid: '',
-            schema: '',
             edit: false,
             handleSaveIsLoad: false,
+            is_loading: false,
             modal_alert_status: "closed",
             timer: null,
+            text: '',
+            id: this.props.match.params.id,
+            modal_open: false,
+            geom_ids: [],
         }
         this.handleSave = this.handleSave.bind(this)
+        this.getValues = this.getValues.bind(this)
         this.modalClose = this.modalClose.bind(this)
     }
 
     handleSave() {
+        const { geom_ids, id } = this.state
         this.setState({ handleSaveIsLoad: true })
-        const org_name = this.props.match.org_name
-        const customer_org = this.props.match.customer_org
-        const distributor_org = this.state.distributor_org
-        const owner_org = this.state.owner_org
-        const keywords = this.props.match.keywords
-        const category = this.props.match.category
-        const status = this.props.match.status
-        const language = this.state.language
-        const summary = this.state.summary
-        const title = this.props.match.title
-        const uuid = this.state.uuid
-        const schema = this.props.match.schema
-        const values = {
-            "org_name": org_name, "customer_org": customer_org, 'distributor_org': distributor_org, "owner_org": owner_org, "keywords": keywords,
-            'category': category, "status": status, "language": language, 'summary': summary, 'title': title, "uuid": uuid, "schema": schema
-        }
+        service
+            .setEdit(id, this.values, geom_ids)
+            .then(({success}) => {
+                if (success) {
+                    this.setState({ handleSaveIsLoad: false, modal_open: true })
+                    this.setState({ modal_alert_status: 'open'})
+                }
+            })
     }
 
     modalClose() {
@@ -67,142 +121,142 @@ export class MetaEdit extends Component {
         }, 2000)
     }
 
+    componentDidMount() {
+        const { id } = this.state
+        service
+            .getDetail(id)
+            .then(({success, meta_data, geo_data_list}) => {
+                if (success) {
+                    const data_field = Object.keys(meta_data)
+                    if (geo_data_list.length > 0) {
+                        this.geo_data_field = Object.keys(geo_data_list[0])
+                    }
+                    this.setState({ data_field, geo_data_field: this.geo_data_field, meta_data, geo_data_list })
+                    this.getMetaFields(meta_data)
+            }
+        })
+    }
+
+    getMetaFields(meta_data) {
+        service
+            .getMetaFields()
+            .then(({success, fields}) => {
+                if (success) {
+                    this.values = new Object();
+                    fields.map((field, idx) => {
+                        this.values[field.origin_name] = meta_data[field.origin_name]
+                    })
+                    this.setState({ fields, is_loading: true })
+                }
+            })
+    }
+
+    getValues(input_datas, meta) {
+        this.values[meta] = input_datas
+    }
+
+    collectGeom(e) {
+        const value = e.target.value
+        const check = e.target.checked
+        if ( this.list.length == 0 || check ) {
+            this.list.push(value)
+        }
+        else if ( this.list.length > 0 || check ) {
+            this.list.push(value)
+        }
+        if (!check) {
+            const isBelowThreshold = (coordinateFromArray) => coordinateFromArray = value;
+            if(this.list.every(isBelowThreshold)){
+                var array = this.list.filter((item) => {
+                    return item !== value
+                })
+                this.list = array
+            }
+        }
+        this.setState({ geom_ids: this.list })
+
+    }
+
     render() {
-        const { org_name, customer_org, distributor_org, owner_org, keywords, category, status, language, summary, title, uuid, schema } = this.state
+        const {  is_loading, data_field, fields, geo_data_field, meta_data, geo_data_list, text, modal_open } = this.state
         return (
             <div className="card">
                 <div className="card-body">
+                    <div className="text-left">
+                        <NavLink to={`/gov/meta/`}>
+                            <p className="btn gp-outline-primary">
+                                <i className="fa fa-angle-double-left"></i> Буцах
+                            </p>
+                        </NavLink>
+                    </div>
+                    <br />
                     <div className="row">
-                        <div className="col-md-3">
-                            <div className="text-left">
-                                <NavLink to={`/gov/meta/`}>
-                                    <p className="btn gp-outline-primary">
-                                        <i className="fa fa-angle-double-left"></i> Буцах
-                                    </p>
-                                </NavLink>
-                            </div>
-                            <br />
-                            <div className="form-group">
-                                <label htmlFor="id_name" >org_name:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="org_name"
-                                    onChange={(e) => this.handleUserSearch('org_name', e)}
-                                    value={org_name}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >customer_org:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="customer_org"
-                                    onChange={(e) => this.handleUserSearch('customer_org', e)}
-                                    value={customer_org}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >distributor_org:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="distributor_org"
-                                    onChange={(e) => this.handleUserSearch('distributor_org', e)}
-                                    value={distributor_org}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >owner_org:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="owner_org"
-                                    onChange={(e) => this.handleUserSearch('owner_org', e)}
-                                    value={owner_org}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >keywords:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="keywords"
-                                    onChange={(e) => this.handleUserSearch('keywords', e)}
-                                    value={keywords}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >category:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="category"
-                                    onChange={(e) => this.handleUserSearch('category', e)}
-                                    value={category}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >status:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="status"
-                                    onChange={(e) => this.handleUserSearch('status', e)}
-                                    value={status}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >language:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="language"
-                                    onChange={(e) => this.handleUserSearch('language', e)}
-                                    value={language}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >summary:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="summary"
-                                    onChange={(e) => this.handleUserSearch('summary', e)}
-                                    value={summary}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >title:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="title"
-                                    onChange={(e) => this.handleUserSearch('title', e)}
-                                    value={title}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >uuid:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="uuid"
-                                    onChange={(e) => this.handleUserSearch('uuid', e)}
-                                    value={uuid}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="id_name" >schema:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="schema"
-                                    onChange={(e) => this.handleUserSearch('schema', e)}
-                                    value={schema}
-                                />
-                            </div>
-
+                        <div className="col-md-5 ml-4">
+                            {
+                                !is_loading
+                                ?
+                                <div className="d-flex justify-content-center">
+                                    <div className="spinner-border gp-text-primary" role="status"></div>
+                                </div>
+                                :
+                                data_field ?
+                                    data_field.map((meta, idx) =>
+                                        (
+                                            meta != 'id'
+                                            ?
+                                            fields && fields.map((field, idx) =>
+                                                field.origin_name == meta
+                                                ?
+                                                    <HandleInput key={idx}
+                                                        meta={meta}
+                                                        meta_data={meta_data}
+                                                        getValues={this.getValues}
+                                                        field={field.name}
+                                                        type={field.length}
+                                                        idx={idx}
+                                                        origin_name={field.origin_name}
+                                                        choices={field.choices}
+                                                    />
+                                                :
+                                                    null
+                                            )
+                                            : null
+                                        )
+                                    )
+                                    : null
+                            }
+                        </div>
+                        <div className="col-md-6">
+                            <label>Геомын дугаарууд: &nbsp;
+                            <i role="button" className="fa fa-info-circle" onMouseOver={() => {
+                                const text = 'Устгах геомын дугаарыг сонгоно'
+                                this.setState({ text })
+                            }} onMouseOut={() => this.setState({ text: '' })}>
+                                    {
+                                        text !== ''
+                                        ? <b className="position-absolute card card-body" style={{zIndex: '1050'}}>{text}</b>
+                                        : null
+                                    }
+                            </i>
+                            </label>
+                            <ul style={{listStyle: 'none'}}>
+                                {
+                                geo_data_list && geo_data_list.length > 0
+                                ?
+                                    geo_data_list.map((name, idx) =>
+                                    <li className="animated slideInLeft float-left mr-2 pl-2 pr-2" key={idx}>
+                                        <div className="icheck-primary">
+                                            <input type="checkbox" value={name.geom_id} id={idx} onChange={(e) => this.collectGeom(e)}/>
+                                            <label htmlFor={idx}>{name.geom_id}</label>
+                                        </div>
+                                    </li>
+                                    )
+                                :
+                                    <li className="animated slideInLeft float-left mr-2 pl-2 pr-2">
+                                        Бүртгэлтэй геом байхгүй байна
+                                    </li>
+                                }
+                            </ul>
                         </div>
                     </div>
 
@@ -217,17 +271,23 @@ export class MetaEdit extends Component {
                                             </a>
                                             <span> Шалгаж байна. </span>
                                         </button>
-                                        <ModalAlert
-                                            modalAction={() => this.modalClose()}
-                                            status={this.state.modal_alert_status}
-                                            title="Амжилттай хадгаллаа"
-                                            model_type_icon="success"
-                                        />
                                     </>
                                     :
                                     <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
                                         Хадгалах
                                 </button>
+                                }
+                                {
+                                    modal_open
+                                    ?
+                                    <ModalAlert
+                                        modalAction={() => this.modalClose()}
+                                        status={this.state.modal_alert_status}
+                                        title="Амжилттай хадгаллаа"
+                                        model_type_icon="success"
+                                    />
+                                    :
+                                    null
                                 }
                             </div>
                         </div>
@@ -236,5 +296,4 @@ export class MetaEdit extends Component {
             </div>
         )
     }
-
 }

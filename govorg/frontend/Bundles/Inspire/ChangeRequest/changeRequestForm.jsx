@@ -40,6 +40,8 @@ export default class ChangeRequestForm extends Component {
                                     <th scope="col">№</th>
                                     <th scope="col">Орон зайн өгөгдөл</th>
                                     <th scope="col">Байгууллага / мэргэжилтэн</th>
+                                    <th scope="col">Тушаалын дугаар</th >
+                                    <th scope="col">Тушаал гарсан огноо</th >
                                     <th scope="col">Огноо</th >
                                     <th>Төлөв</th>
                                     <th>Өөрчлөлт</th>

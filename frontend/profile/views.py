@@ -221,3 +221,54 @@ def tseg_details(requist, payload):
             return JsonResponse(rsp)
     else:
         return JsonResponse({'success': False})
+
+
+def _get_user_display(user):
+    return {
+            'username': user.username,
+            'last_name': user.last_name,
+            'first_name': user.first_name,
+            'email': user.email,
+            'gender': user.gender,
+            'register': user.register,
+        }
+
+
+@require_GET
+@ajax_required
+def user_info(request):
+
+    rsp = {
+        'success': True,
+        'user_detail': _get_user_display(request.user),
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def user_update_password(request, payload):
+
+    old_password = payload.get("old_password")
+    new_password = payload.get("new_password")
+    user = request.user
+
+    if not old_password:
+        return JsonResponse({'success': False, 'error': 'Хуучин нууц хоосон байна.'})
+
+    if not new_password:
+            return JsonResponse({'success': False, 'error': 'Шинэ нууц хоосон байна.'})
+
+    if not user.check_password(old_password):
+        return JsonResponse({'success': False, 'error': 'Хуучин нууц үг буруу байна.'})
+
+    if old_password == new_password:
+        return JsonResponse({'success': False, 'error': 'Хуучин нууц үг болон шинэ нууц үг ижил байна.'})
+
+    try:
+        user.set_password(new_password)
+        user.save()
+        return JsonResponse({'success': True, 'msg': 'Нууц үг амжилттай хадгалаа.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Нууц үг солиход алдаа гарлаа.'})

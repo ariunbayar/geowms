@@ -5,11 +5,12 @@ from main.decorators import ajax_required
 from django.db import transaction
 from govorg.backend.meta_data.models import MetaData
 from django.http import JsonResponse
-from backend.inspire.models import MGeoDatas
+from backend.inspire.models import MGeoDatas, LFeatures, LPackages, LThemes
 
 
 def _get_meta_data_display(metadata):
     return {
+            'id': metadata.id,
             'org_name': metadata.org_name,
             'customer_org': metadata.customer_org,
             'distributor_org': metadata.distributor_org,
@@ -21,10 +22,26 @@ def _get_meta_data_display(metadata):
             'abstract': metadata.abstract,
             'title': metadata.title,
             'schema': metadata.schema,
+            'uuid': metadata.uuid,
         }
 
 
+def _get_geom_data_display(geom):
+
+    feature = LFeatures.objects.get(feature_id=geom.feature_id)
+    package = LPackages.objects.get(package_id=feature.package_id)
+    theme = LThemes.objects.get(theme_id=package.theme_id)
+
+    return {
+        'theme_name': theme.theme_name,
+        'package_name': package.package_name,
+        'feature_name': feature.feature_name,
+        'geom_id': geom.geo_id,
+    }
+
+
 def _update_or_create(pk, data, user):
+
     if pk:
         meta_data = get_object_or_404(MetaData, pk=pk)
     else:
@@ -71,6 +88,7 @@ def create(request, payload):
 
     data = payload.get("meta_data")
     geoms = MGeoDatas.objects.filter(geo_id__in = payload.get("geom_ids"))
+
     try:
         if data.get("id"):
             meta = MetaData.objects.get(pk=data.get("id"))
@@ -81,6 +99,7 @@ def create(request, payload):
             meta.geo_datas.add(geom)
 
         return JsonResponse({'success': True})
+
     except Exception as e:
         return JsonResponse({'success': False})
 
@@ -89,10 +108,17 @@ def create(request, payload):
 @ajax_required
 def edit(request, payload, pk):
 
-    if _update_or_create(pk, payload.get("meta_data"), request.user):
-        return JsonResponse({'success': True})
+    data = payload.get("meta_data")
+    geoms = MGeoDatas.objects.filter(geo_id__in = payload.get("geom_ids"))
 
-    return JsonResponse({'success': False})
+    try:
+         meta_data = _update_or_create(pk, data, request.user)
+         for geom in geoms:
+             meta_data.geo_datas.remove(geom)
+         return JsonResponse({'success': True})
+
+    except Exception as e:
+         return JsonResponse({'success': False})
 
 
 @require_GET
@@ -100,10 +126,15 @@ def edit(request, payload, pk):
 def detail(request, pk):
 
     meta_data = get_object_or_404(MetaData, pk=pk)
+    geo_data_list = [
+        _get_geom_data_display(geom)
+        for geom in meta_data.geo_datas.all()
+    ]
 
     rsp = {
         'success': True,
         'meta_data': _get_meta_data_display(meta_data),
+        'geo_data_list': geo_data_list,
     }
 
     return JsonResponse(rsp)
@@ -125,7 +156,7 @@ def delete(request, pk):
 
 @require_GET
 @ajax_required
-def getFields(request):
+def get_fields(request):
     send_fields = []
     for f in MetaData._meta.get_fields():
         if f.name != 'id' and f.name != 'geo_datas' and not 'create' in f.name and not 'update' in f.name:
