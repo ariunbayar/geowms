@@ -266,6 +266,7 @@ export default class Маягт extends Component {
                                           name="order_at"
                                           className='form-control'
                                           placeholder="Тушаал гарсан огноо"
+                                          type="date"
                                       />
                                       <ErrorMessage name="order_at" component="span"/>
                                     </div>
