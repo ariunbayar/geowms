@@ -9,8 +9,6 @@ const validationSchema = Yup.object().shape({
     geoserver_host: Yup.string(),
     geoserver_user: Yup.string(),
     geoserver_pass: Yup.string(),
-    geoserver_port: Yup.string(),
-    geoserver_db: Yup.string(),
 })
 
 
@@ -25,8 +23,6 @@ export default class ConfigGeoserver extends Component {
                 geoserver_host: '',
                 geoserver_user: '',
                 geoserver_pass: '',
-                geoserver_port: '',
-                geoserver_db: '',
             },
             values: {},
         }

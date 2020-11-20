@@ -321,7 +321,7 @@ def get_legend_url(ws_name, layer_name):
 
     conf_geoserver = get_connection_conf()
     
-    legend_url =  'http://{host}:{port}/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'.format(
+    legend_url =  'https://nsdi.gov.mn/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'.format(
        host=conf_geoserver['geoserver_host'],
        port=conf_geoserver['geoserver_port'],
        ws_name=ws_name, 
