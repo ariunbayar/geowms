@@ -12,20 +12,35 @@ export default class VersionInfo extends Component {
         this.state = {
             postgreVersion: '',
             versionOfPostGis: '',
-            geoserverVersion: []
+            geoserverVersion: {},
         }
     }
 
     componentDidMount() {
-        service.getPostgeVersion().then(({postgreVersion, versionOfPostGis, geoserverVersion}) => {
-            this.setState({postgreVersion, versionOfPostGis, geoserverVersion:geoserverVersion['about']['resource']})
+
+        service.getPostgeVersion().then(({ postgreVersion, versionOfPostGis }) => {
+            this.setState({
+                postgreVersion,
+                versionOfPostGis,
+            })
         })
+
+        service.getGeoServerVersion().then(({ geoserverVersion }) => {
+            this.setState({
+                geoserverVersion,
+            })
+        })
+
     }
 
     render() {
 
-        const {postgreVersion, versionOfPostGis, geoserverVersion} = this.state
-        console.log()
+        const {
+            postgreVersion,
+            versionOfPostGis,
+            geoserverVersion,
+        } = this.state
+
         return (
             <div className="card flex-grow-1">
 
@@ -36,21 +51,17 @@ export default class VersionInfo extends Component {
                 <div className="card-body">
 
                     <h4>PostgreSQL хувилбар</h4>
-                    <p>{postgreVersion}</p>
+                    <p>{ postgreVersion }</p>
 
                     <h4>PostGIS хувилбар</h4>
-                    <p>{versionOfPostGis}</p>
+                    <p>{ versionOfPostGis }</p>
 
                     <h4>Geoserver хувилбар</h4>
-                    <ul>
-                        {geoserverVersion.length > 0 ? 
-                        <p>
-                            Version:{geoserverVersion[0]['Version']} &nbsp;
-                            Build-Timestamp:{geoserverVersion[0]['Build-Timestamp']}
-                           
-                        </p>                        
-                        :''}
-                    </ul>
+                    <p>
+                        Version: { geoserverVersion.version }<br/>
+                        Build Timestamp: { geoserverVersion.build_timestamp }<br/>
+                        Git Revisioin: { geoserverVersion.git_revision }
+                    </p>
 
                 </div>
 

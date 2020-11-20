@@ -1,14 +1,11 @@
 import {getGetOptions, getPostOptions, handleResponse} from '../../helpers/service'
 
 
-const prefix = '/back/api/config'
-
-
 const geoserver = {
 
     get: function() {
         const requestOptions = {...getGetOptions()}
-        return fetch(`${prefix}/geoserver/`, requestOptions).then(handleResponse)
+        return fetch('/back/api/config/geoserver/', requestOptions).then(handleResponse)
     },
 
     save: function(values) {
@@ -16,7 +13,7 @@ const geoserver = {
             ...getPostOptions(),
             body: JSON.stringify(values),
         }
-        return fetch(`${prefix}/geoserver/save/`, opts).then(handleResponse)
+        return fetch('/back/api/config/geoserver/save/', opts).then(handleResponse)
     },
 
 }
@@ -24,13 +21,19 @@ const geoserver = {
 
 function getDisk() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/disk/`, requestOptions).then(handleResponse)
+    return fetch('/back/api/config/disk/', requestOptions).then(handleResponse)
 }
 
 
 function getPostgeVersion() {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/postresqlVersion/`, requestOptions).then(handleResponse)
+    return fetch('/back/api/config/postresqlVersion/', requestOptions).then(handleResponse)
+}
+
+
+function getGeoServerVersion() {
+    const requestOptions = getGetOptions()
+    return fetch('/back/api/config/geoserver-version/', requestOptions).then(handleResponse)
 }
 
 
@@ -39,7 +42,7 @@ export const service = {
         geoserver: geoserver,
     },
     getDisk,
-    getPostgeVersion
+    getPostgeVersion,
+    getGeoServerVersion,
 }
-
 
