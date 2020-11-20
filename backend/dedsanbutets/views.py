@@ -707,7 +707,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
 
-    wms_url = geoserver.get_wms_url(wms_name)
+    wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
     wms = WMS.objects.filter(name=theme.theme_name).first()
