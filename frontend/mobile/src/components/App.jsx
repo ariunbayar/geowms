@@ -76,7 +76,10 @@ export class App extends Component {
                                     <div className="col-4 text-center sub" key={i}>
                                         <a onClick={() => this.wmsLayerId(bundle.id, bundle.name)}>
                                             <img src={bundle.icon} />
+                                            {this.state.bundleId == bundle.id ?
+                                            <p className="text-primary">{ bundle.name }</p>:
                                             <p>{ bundle.name }</p>
+                                            }
                                         </a>
                                     </div>
                                 )}
