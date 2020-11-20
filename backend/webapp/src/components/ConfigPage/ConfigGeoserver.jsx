@@ -123,7 +123,8 @@ export default class ConfigGeoserver extends Component {
                             return (
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
-                                        <div className="form-group">
+                                        <div className="form-row">
+                                        <div className="form-group col-md-6">
                                             <label htmlFor="id_geoserver_host">IP Address / Domain name</label>
                                             <Field
                                                 name="geoserver_host"
@@ -132,7 +133,6 @@ export default class ConfigGeoserver extends Component {
                                                 className="form-control"
                                             />
                                         </div>
-                                        <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_geoserver_user">Port</label>
                                                 <Field
@@ -140,15 +140,6 @@ export default class ConfigGeoserver extends Component {
                                                     type="text"
                                                     className="form-control"
                                                     id="id_geoserver_port"
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_pass">Database</label>
-                                                <Field
-                                                    name="geoserver_db"
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="id_geoserver_db"
                                                 />
                                             </div>
                                         </div>

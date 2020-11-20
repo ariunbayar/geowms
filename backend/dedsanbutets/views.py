@@ -705,15 +705,16 @@ def check_them_name(theme_name):
 
 def create_geoserver_detail(table_name, model_name, theme, user_id):
     theme_code = theme.theme_code
-    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_pass', 'geoserver_port', 'geoserver_db']).values('value')
-    if not len(config) == 4:
+    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_pass', 'geoserver_port']).values('value')
+    if not len(config) == 3:
         removeView(table_name)
         return {'success': False, 'info': 'config error'}
+        
+    
     host = config[0]['value']
-    password = config[1]['value']
     port = config[2]['value']
-    dbName = config[3]['value']
-
+    dbName = dev.DATABASES['default']['USER']
+    password = dev.DATABASES['default']['PASSWORD']
     ws_name = 'gp_'+theme_code
 
     wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(ws_name=ws_name, host=host, port=port)

@@ -145,7 +145,6 @@ def geoserver_configs(request):
         'agency_contact_email': '',
         'agency_contact_phone': '',
         'geoserver_port': '',
-        'geoserver_db': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -174,7 +173,6 @@ def geoserver_configs_save(request, payload):
         'agency_contact_email',
         'agency_contact_phone',
         'geoserver_port',
-        'geoserver_db',
     )
 
     for config_name in config_names:
