@@ -10,7 +10,7 @@ from django.http import JsonResponse
 def _get_org_role_display(org_role):
 
     bundle = org_role.bundle
-    theme = LThemes.objects.filter(theme_id=bundle.ltheme)
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
     return {
         'org_id': org_role.org_id,
         'bundle': {

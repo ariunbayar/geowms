@@ -38,10 +38,8 @@ urlpatterns = [
 
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
-        path('create/', bundle_views.create, name='create'),
         path('module-check/', bundle_views.moduleCheck, name='module-check'),
         path('update/', bundle_views.update, name='update'),
-        path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
         path('get-layer/', bundle_views.get_form_options, name='get-layer'),

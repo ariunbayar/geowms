@@ -67,13 +67,17 @@ def _get_package(theme_id):
 @user_passes_test(lambda u: u.is_superuser)
 def bundleButetsAll(request):
     data = []
-    for themes in LThemes.objects.all():
-        data.append({
-                'id': themes.theme_id,
-                'code': themes.theme_code,
-                'name': themes.theme_name,
-                'package': _get_package(themes.theme_id),
-            })
+    for themes in LThemes.objects.all(): 
+        bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
+        if bundle:
+            data.append({
+                    'id': themes.theme_id,
+                    'code': themes.theme_code,
+                    'name': themes.theme_name,
+                    'package': _get_package(themes.theme_id),
+                })
+        else:
+            themes.delete()
     rsp = {
         'success': True,
         'data': data,
@@ -546,8 +550,6 @@ def save(request, payload):
                 last_order_n = Bundle.objects.all().order_by('sort_order').last().sort_order
                 order_no = order_no if order_no else last_order_n+1
                 is_active = is_active if is_active else False
-                icon = '/дэд-сан/icon.png'
-
                 theme_model = model_name.objects.create(
                                     theme_code=theme_code,
                                     theme_name=theme_name,
@@ -564,7 +566,6 @@ def save(request, payload):
                     created_by=cb_bundle,
                     sort_order=order_no,
                     ltheme=theme_model,
-                    icon=icon
                 )
             else:
                 sain = model_name.objects.create(**datas)

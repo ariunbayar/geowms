@@ -27,7 +27,6 @@ class Bundle(models.Model):
     )
 
     layers = models.ManyToManyField(WMSLayer, through='BundleLayer', blank=True)
-    name = models.CharField(max_length=250)
     module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
     ltheme = models.OneToOneField(LThemes, on_delete=models.CASCADE, null=True)
     is_removeable = models.BooleanField()

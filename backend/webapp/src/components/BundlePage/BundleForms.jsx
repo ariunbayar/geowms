@@ -60,20 +60,9 @@ export class BundleForms extends Component {
             service.update(values).then(({success}) => {
                 if (success) this.handleSaveSuccess()
             })
-        } else {
-            service.create(values).then(({success}) => {
-                if (success) {
-                    this.props.history.push( `/back/дэд-сан/`)
-                }
-            })
         }
     }
 
-    handleRemove(id) {
-        service.remove(id).then(({success}) => {
-            if (success) this.handleSaveSuccess()
-        })
-    }
 
     render() {
         return (

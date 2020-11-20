@@ -187,25 +187,6 @@ def get_form_options(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def create(request, payload):
-    сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
-    icon_data = payload.get('icon')
-    form = BundleForm(payload)
-    if form.is_valid() and icon_data:
-        form.instance.created_by = request.user
-        form.instance.sort_order = сүүлийн_дэд_сан.sort_order + 1
-        form.instance.is_removeable = True
-        [image_x2] = resize_b64_to_sizes(icon_data, [(200, 200)])
-        form.instance.icon = SimpleUploadedFile('icon.png', image_x2)
-        form.save()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def moduleCheck(request, payload):
     module = payload.get('module')
     bundle = get_object_or_404(Bundle, pk=payload.get('id'))
@@ -257,20 +238,6 @@ def update(request, payload):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def remove(request, payload):
-
-    pk = payload.get('id')
-    bundle = get_object_or_404(Bundle, pk=pk, is_removeable=True)
-    bundle.layers.clear()
-    bundle.icon.delete(save=False)
-    bundle.delete()
-
-    return JsonResponse({'success': True})
 
 
 @require_POST
