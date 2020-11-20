@@ -36,7 +36,7 @@ def getHeader():
     )
 
     BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
-        host=conf_geoserver['geoserver_pass'],
+        host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
     )
 

@@ -78,7 +78,7 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
-        this.loadMapData(this.state.bundle.id)
+        if(this.state.bundle.id) this.loadMapData(this.state.bundle.id)
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -338,7 +338,7 @@ export default class BundleMap extends Component {
     locationSet(){
         navigator.geolocation.getCurrentPosition((position) => {
             var location = [position.coords.longitude, position.coords.latitude]
-            this.handleSetCenter(location, 16)
+            this.handleSetCenter(location, 14)
         });
     }
 
@@ -362,7 +362,7 @@ export default class BundleMap extends Component {
                                 </a>
                             </div>
                             <div className={'⚙-location'}>
-                                <a href="#" onClick={() =>this.locationSet(true)}>
+                                <a href="#" onClick={() => this.locationSet()}>
                                 <i className="fa fa-location-arrow fa-lg" aria-hidden="true"></i>
                                 </a>
                             </div>
