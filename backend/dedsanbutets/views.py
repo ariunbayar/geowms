@@ -36,7 +36,6 @@ from backend.bundle.models import BundleLayer, Bundle
 from backend.wmslayer.models import WMSLayer
 from backend.wms.models import WMS
 from geoportal_app.models import User
-from main.settings import dev
 from main.utils import (
     dict_fetchall,
     slugifyWord
@@ -451,7 +450,7 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     check = createView(id_list, table_name, model_name)
     if check:
-        rsp = create_geoserver_detail(table_name, model_name, theme, user.id)
+        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -703,20 +702,12 @@ def check_them_name(theme_name):
         return theme_name
 
 
-def create_geoserver_detail(table_name, model_name, theme, user_id):
+def _create_geoserver_detail(table_name, model_name, theme, user_id):
+    
     theme_code = theme.theme_code
-    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_pass', 'geoserver_port', 'geoserver_db']).values('value')
-    if not len(config) == 4:
-        removeView(table_name)
-        return {'success': False, 'info': 'config error'}
-    host = config[0]['value']
-    password = config[1]['value']
-    port = config[2]['value']
-    dbName = config[3]['value']
-
     ws_name = 'gp_'+theme_code
 
-    wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(ws_name=ws_name, host=host, port=port)
+    wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
     wms = WMS.objects.filter(name=theme.theme_name).first()
@@ -738,9 +729,6 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
                 ws_name,
                 ds_name,
                 ds_name,
-                host,
-                dbName,
-                password
                 )
             if create_ds.status_code == 201:
 
@@ -808,9 +796,6 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
                 ws_name,
                 ds_name,
                 ds_name,
-                host,
-                'geo',
-                password
                 )
             if create_ds.status_code == 201:
 
@@ -918,7 +903,7 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
 
         wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
         if not wms_layer:
-            legend_url = '''http://{host}:8080/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'''.format(host=host, ws_name=ws_name, layer=layer_name)
+            legend_url = geoserver.get_legend_url(ws_name, layer_name)
             WMSLayer.objects.create(
                 name=layer_name,
                 code=layer_name,

@@ -4,28 +4,7 @@ import {Switch, Route,  NavLink} from 'react-router-dom'
 import DiskSize from './DiskSize'
 import VersionInfo from './VersionInfo'
 import ConfigGeoserver from './ConfigGeoserver'
-import {ConfigSite} from './ConfigSite'
-
-
-class CardConfig extends Component {
-
-    render() {
-
-        return (
-            <div className="card">
-
-                <div className="card-body">
-                    <Switch>
-                        <Route exact path={"/back/тохиргоо/"} component={ConfigSite}/>
-                    </Switch>
-                </div>
-
-            </div>
-        )
-
-    }
-
-}
+import ConfigSite from './ConfigSite'
 
 
 export class ConfigPage extends Component {
@@ -35,7 +14,7 @@ export class ConfigPage extends Component {
             <div>
                 <div className="row">
                     <div className="col-lg-8">
-                        <CardConfig/>
+                        <ConfigSite/>
                     </div>
                     <div className="col-lg-4">
                         <DiskSize/>
