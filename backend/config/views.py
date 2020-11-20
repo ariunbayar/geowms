@@ -11,11 +11,12 @@ from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime, now
 
-from main.decorators import ajax_required
 from .models import Config
-from backend.payment.models import Payment
-from backend.config.models import Error500
 
+from backend.config.models import Error500
+from backend.payment.models import Payment
+from main.decorators import ajax_required
+from main import geoserver
 
 CACHE_TIMEOUT_DISK_INFO = 5
 
@@ -42,71 +43,6 @@ def _get_disk_info():
     return disk_info
 
 
-def _get_config_display(config):
-    return {
-        'id': config.id,
-        'name': config.name,
-        'value': config.value,
-        'updated_at': config.updated_at.strftime('%Y-%m-%d'),
-    }
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def all(request):
-
-    config_list = [_get_config_display(ob) for ob in Config.objects.all()]
-
-    return JsonResponse({'config_list': config_list})
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def detail(request, pk):
-
-    config = get_object_or_404(Config, pk=pk)
-    rsp = {
-        'config': _get_config_display(config),
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def update(request, payload, pk):
-
-    config = get_object_or_404(Config, pk=pk)
-    config.name = payload.get('name')
-    config.value = payload.get('value')
-    config.save()
-
-    return JsonResponse({'success': True})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def create(request, payload):
-
-    name = payload.get('name')
-    value = payload.get('value')
-    Config.objects.create(name=name, value=value)
-
-    return JsonResponse({'success': True})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def delete(request, pk):
-    config = get_object_or_404(Config, pk=pk)
-    config.delete()
-    return JsonResponse({'success': True})
-
-
 @ajax_required
 @cache_page(60 * CACHE_TIMEOUT_DISK_INFO)
 @user_passes_test(lambda u: u.is_superuser)
@@ -126,17 +62,34 @@ def disk(request):
     return JsonResponse({'success': True, 'disks': disks})
 
 
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def postresqlVersion(request):
+
     version_postgre_sql = connections['default'].cursor()
     version_postgre_sql.execute("SELECT version()")
     version_postgre_sql_data = version_postgre_sql.fetchone()
+
     version_post_gis = connections['default'].cursor()
     version_post_gis.execute("SELECT postgis_full_version()")
     version_post_gis_data = version_post_gis.fetchone()
 
-    return JsonResponse({'postgreVersion': version_postgre_sql_data, 'versionOfPostGis': version_post_gis_data})
+
+    return JsonResponse({
+        'postgreVersion': version_postgre_sql_data,
+        'versionOfPostGis': version_post_gis_data,
+    })
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def geoserver_version(request):
+
+    return JsonResponse({
+        'geoserverVersion': geoserver.get_version(),
+    })
 
 
 @require_POST
@@ -192,12 +145,62 @@ def _get_error500_display(error500):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
+def site_configs(request):
+
+    default_values = {
+        'site_title': '',
+        'site_footer_text': '',
+        'agency_name': '',
+        'agency_contact_address': '',
+        'agency_contact_email': '',
+        'agency_contact_phone': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def site_configs_save(request, payload):
+
+    config_names = (
+        'site_title',
+        'site_footer_text',
+        'agency_name',
+        'agency_contact_address',
+        'agency_contact_email',
+        'agency_contact_phone',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def geoserver_configs(request):
 
     default_values = {
         'geoserver_host': '',
         'geoserver_user': '',
         'geoserver_pass': '',
+        'geoserver_port': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -219,6 +222,7 @@ def geoserver_configs_save(request, payload):
         'geoserver_host',
         'geoserver_user',
         'geoserver_pass',
+        'geoserver_port',
     )
 
     for config_name in config_names:

@@ -21,7 +21,7 @@
 
 .bundle-table-scroll {
     overflow-y: scroll;
-    height: calc(53vh - 47px);
+    height: calc(44vh - 47px);
 }
 
 ::-webkit-scrollbar {
@@ -34,3 +34,15 @@
     height: calc(1vh - 2px);
 }
 
+@media (min-width: 576px) and (max-width: 1200px){
+    .bundle-BundleAdminRights-scroll {
+        height: auto;
+    }
+}
+
+@media (min-width: 1200px){
+    .bundle-BundleAdminRights-scroll {
+        overflow-y: scroll;
+        height: calc(96vh - 56px);;
+    }
+}

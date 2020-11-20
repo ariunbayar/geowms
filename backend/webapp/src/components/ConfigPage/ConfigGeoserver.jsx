@@ -9,6 +9,8 @@ const validationSchema = Yup.object().shape({
     geoserver_host: Yup.string(),
     geoserver_user: Yup.string(),
     geoserver_pass: Yup.string(),
+    geoserver_port: Yup.string(),
+    geoserver_db: Yup.string(),
 })
 
 
@@ -23,6 +25,8 @@ export default class ConfigGeoserver extends Component {
                 geoserver_host: '',
                 geoserver_user: '',
                 geoserver_pass: '',
+                geoserver_port: '',
+                geoserver_db: '',
             },
             values: {},
         }
@@ -119,7 +123,8 @@ export default class ConfigGeoserver extends Component {
                             return (
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
-                                        <div className="form-group">
+                                        <div className="form-row">
+                                        <div className="form-group col-md-6">
                                             <label htmlFor="id_geoserver_host">IP Address / Domain name</label>
                                             <Field
                                                 name="geoserver_host"
@@ -127,6 +132,16 @@ export default class ConfigGeoserver extends Component {
                                                 type="text"
                                                 className="form-control"
                                             />
+                                        </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_geoserver_user">Port</label>
+                                                <Field
+                                                    name="geoserver_port"
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="id_geoserver_port"
+                                                />
+                                            </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">

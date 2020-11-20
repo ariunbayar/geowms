@@ -18,12 +18,13 @@ export class Sidebar extends Component {
     handleSubmitCoordinate(event) {
         event.preventDefault()
         const coord = helpers.parseCoordinateString(this.state.coordinate)
-        this.props.handleSetCenter(coord)
+        this.props.handleSetCenter(coord, 3)
         this.props.toggleSidebar(false)
     }
 
     render() {
         return (
+            <div className={ this.props.is_sidebar_open ? 'col-md-12 ⚙ ⚙-hide' : 'col-md-12 ⚙'}>
             <div className="row">
                 <div className="row sidebarHeader">
                     <div className="row">
@@ -44,14 +45,15 @@ export class Sidebar extends Component {
                         </form>
                     </div>
                     <div className="row xButtonLayer">
-                        <a onClick={() => this.props.toggleSidebar(false)}>X</a>
+                        <a onClick={() => this.props.toggleSidebar(false)}><i className="fa fa-times" aria-hidden="true"></i></a>
                     </div>
                 </div>
                 <div className="row sidebarFooter">
                     {this.props.map_wms_list.map((wms, idx) =>
-                        <WMSItem wms={wms} key={idx}/>
-                    )}
+                    <WMSItem wms={wms} key={idx}/>
+                )}
                 </div>
+            </div>
             </div>
         )
     }
