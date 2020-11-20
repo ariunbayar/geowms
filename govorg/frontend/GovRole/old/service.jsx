@@ -1,4 +1,4 @@
-import {handleResponse, getPostOptions, getGetOptions} from '../components/helpers/service'
+import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
 export const service = {
     roles

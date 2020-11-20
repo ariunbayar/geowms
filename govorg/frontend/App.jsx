@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
-import GovRole from './GovRole/'
+import GovRole from './GovRole/old'
+import { GovRoles } from './GovRole/inspireRole'
 import { System } from "./System"
 import { Meta } from './Meta'
 import { Profile } from './Profile'
@@ -76,7 +77,7 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Эрх">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/" text="Байгууллага"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/inspire-role/" text="Байгууллага"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/employees/" text="Хэрэглэгч"></MenuItem>
                             </ul>
                         </MenuItem>
@@ -167,6 +168,7 @@ export class App extends Component {
                             <Route path="/gov/history/" component={ChangeRequest} />
                             <Route exact path="/gov/role/employees/" component={Employee} />
                             <Route exact path="/gov/role/" component={GovRole} />
+                            <Route exact path="/gov/inspire-role/" component={GovRoles} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                         </Switch>
