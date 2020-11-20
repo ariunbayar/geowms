@@ -1,5 +1,6 @@
 import requests
 from backend.config.models import Config
+from main.settings import dev
 
 
 HEADERS = {
@@ -77,7 +78,12 @@ def create_space(space_name):
     return rsp
 
 
-def create_store(space_name, ds_name, ds_desc, host, db, password):
+def create_store(space_name, ds_name, ds_desc, host):
+
+    db = dev.DATABASES['default']['NAME']
+    password = dev.DATABASES['default']['PASSWORD']
+    host = dev.DATABASES['default']['HOST']
+    port = dev.DATABASES['default']['PORT']
     BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores'''.format(space_name=space_name)
     payload = '''
@@ -88,7 +94,7 @@ def create_store(space_name, ds_name, ds_desc, host, db, password):
             <enabled>true</enabled>
             <connectionParameters>
             <entry key="host">{host}</entry>
-            <entry key="port">5432</entry>
+            <entry key="port">{port}</entry>
             <entry key="database">{db}</entry>
             <entry key="schema">public</entry>
             <entry key="user">postgres</entry>
@@ -109,6 +115,7 @@ def create_store(space_name, ds_name, ds_desc, host, db, password):
             ds_name=ds_name,
             ds_desc=ds_desc,
             host=host,
+            port=port,
             db=db,
             password=password
         )
