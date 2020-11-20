@@ -714,7 +714,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
 
     ws_name = 'gp_'+theme_code
 
-    wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(ws_name=ws_name, host=host, port=port)
+    wms_url = geoserver.get_wms_url(wms_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
     wms = WMS.objects.filter(name=theme.theme_name).first()
@@ -910,7 +910,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
 
         wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
         if not wms_layer:
-            legend_url = '''http://{host}:8080/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'''.format(host=host, ws_name=ws_name, layer=layer_name)
+            legend_url = geoserver.get_legend_url(ws_name, layer_name)
             WMSLayer.objects.create(
                 name=layer_name,
                 code=layer_name,
