@@ -1,6 +1,7 @@
 import requests
 from backend.config.models import Config
-from main.settings import dev
+from django.conf import settings
+
 
 
 HEADERS = {
@@ -80,11 +81,11 @@ def create_space(space_name):
 
 
 def create_store(space_name, ds_name, ds_desc):
-    
-    db = dev.DATABASES['default']['NAME']
-    password = dev.DATABASES['default']['PASSWORD']
-    host = dev.DATABASES['default']['HOST']
-    port = dev.DATABASES['default']['PORT']
+
+    db = settings.DATABASES['default']['NAME']
+    password = settings.DATABASES['default']['PASSWORD']
+    host = settings.DATABASES['default']['HOST']
+    port = settings.DATABASES['default']['PORT']
     BASE_URL, AUTH = getHeader()
     url = '''workspaces/{space_name}/datastores'''.format(space_name=space_name)
     payload = '''
