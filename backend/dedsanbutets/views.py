@@ -924,6 +924,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
 
 def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
+    removeView(table_name)
     fields = [row.property_code for row in data]
     try:
         query = '''
