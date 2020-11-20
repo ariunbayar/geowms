@@ -290,7 +290,7 @@ def get_version():
             res['@name']: res
             for res in rsp.json()['about']['resource']
         }
-    except:
+    except Exception:
         resources = {}
 
     version_info = {
@@ -306,25 +306,27 @@ def get_version():
 
     return version_info
 
+
 def get_wms_url(wms_name):
 
     conf_geoserver = get_connection_conf()
 
     wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(
-        ws_name=wms_name, 
+        ws_name=wms_name,
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port']
         )
     return wms_url
 
+
 def get_legend_url(ws_name, layer_name):
 
     conf_geoserver = get_connection_conf()
-    
-    legend_url =  'http://{host}:{port}/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'.format(
+    legend_url =  'https://nsdi.gov.mn/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'.format(
        host=conf_geoserver['geoserver_host'],
        port=conf_geoserver['geoserver_port'],
        ws_name=ws_name, 
        layer=layer_name
        )
     return legend_url
+
