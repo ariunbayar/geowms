@@ -705,7 +705,7 @@ def check_them_name(theme_name):
 def create_geoserver_detail(table_name, model_name, theme, user_id):
     theme_code = theme.theme_code
     config = Config.objects.filter(name__in = ['geoserver_host','geoserver_port']).values('value')
-    if not len(config) == 3:
+    if not len(config) == 2:
         removeView(table_name)
         return {'success': False, 'info': 'config error'}
         
