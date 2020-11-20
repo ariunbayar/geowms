@@ -736,7 +736,6 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
                 ws_name,
                 ds_name,
                 ds_name,
-                host,
                 )
             if create_ds.status_code == 201:
 
@@ -804,7 +803,6 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
                 ws_name,
                 ds_name,
                 ds_name,
-                host,
                 )
             if create_ds.status_code == 201:
 

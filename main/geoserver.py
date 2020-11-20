@@ -79,8 +79,8 @@ def create_space(space_name):
     return rsp
 
 
-def create_store(space_name, ds_name, ds_desc, host):
-
+def create_store(space_name, ds_name, ds_desc):
+    
     db = dev.DATABASES['default']['NAME']
     password = dev.DATABASES['default']['PASSWORD']
     host = dev.DATABASES['default']['HOST']
