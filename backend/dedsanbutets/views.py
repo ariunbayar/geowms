@@ -450,7 +450,7 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     check = createView(id_list, table_name, model_name)
     if check:
-        rsp = create_geoserver_detail(table_name, model_name, theme, user.id)
+        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -702,7 +702,7 @@ def check_them_name(theme_name):
         return theme_name
 
 
-def create_geoserver_detail(table_name, model_name, theme, user_id):
+def _create_geoserver_detail(table_name, model_name, theme, user_id):
     theme_code = theme.theme_code
     config = Config.objects.filter(name__in = ['geoserver_host','geoserver_port']).values('value')
     if not len(config) == 2:
