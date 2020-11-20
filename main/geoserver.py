@@ -15,7 +15,8 @@ def getHeader():
         'geoserver_user',
         'geoserver_pass',
     ]
-    config = Config.objects.filter(name__in=conf_names).values('name', 'value')
+
+    configs = Config.objects.filter(name__in=conf_names).values_list('name', 'value')
 
     conf_geoserver = {
         name: value
@@ -29,7 +30,7 @@ def getHeader():
 
     BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
         host=conf_geoserver['geoserver_host'],
-        post=conf_geoserver['geoserver_port'],
+        port=conf_geoserver['geoserver_port'],
     )
 
     return BASE_URL, AUTH
