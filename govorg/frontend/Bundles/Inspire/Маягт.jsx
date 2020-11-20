@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
 import { service } from "./service"
 import { validationSchema } from './validationSchema'
+import { validations } from './validations'
 
 export default class Маягт extends Component {
 
@@ -174,6 +175,7 @@ export default class Маягт extends Component {
                         order_at: this.state.order_at,
                         order_no: this.state.order_no,
                     }}
+                    validationSchema={validations}
                     onSubmit={ this.onSubmit}
                 >
                     {({
@@ -252,6 +254,7 @@ export default class Маягт extends Component {
                                           className='form-control'
                                           placeholder="Тушаалын дугаар"
                                       />
+                                      <ErrorMessage name="order_no" component="span"/>
                                     </div>
                                 </div>
                                 <div className="row my-3 ">
@@ -264,6 +267,7 @@ export default class Маягт extends Component {
                                           className='form-control'
                                           placeholder="Тушаал гарсан огноо"
                                       />
+                                      <ErrorMessage name="order_at" component="span"/>
                                     </div>
                                 </div>
                                 <div>
