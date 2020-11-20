@@ -123,6 +123,8 @@ urlpatterns = [
         path('disk/', config_views.disk, name='disk'),
         path('postresqlVersion/', config_views.postresqlVersion, name='postresqlVersion'),
         path('geoserver-version/', config_views.geoserver_version),
+        path('site/', config_views.site_configs),
+        path('site/save/', config_views.site_configs_save),
         path('geoserver/', config_views.geoserver_configs),
         path('geoserver/save/', config_views.geoserver_configs_save),
     ], 'config'))),

@@ -4,7 +4,7 @@ import {getGetOptions, getPostOptions, handleResponse} from '../../helpers/servi
 const geoserver = {
 
     get: function() {
-        const requestOptions = {...getGetOptions()}
+        const requestOptions = getGetOptions()
         return fetch('/back/api/config/geoserver/', requestOptions).then(handleResponse)
     },
 
@@ -14,6 +14,24 @@ const geoserver = {
             body: JSON.stringify(values),
         }
         return fetch('/back/api/config/geoserver/save/', opts).then(handleResponse)
+    },
+
+}
+
+
+const site = {
+
+    get: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/site/', requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify(values),
+        }
+        return fetch('/back/api/config/site/save/', opts).then(handleResponse)
     },
 
 }
@@ -40,6 +58,7 @@ function getGeoServerVersion() {
 export const service = {
     config: {
         geoserver: geoserver,
+        site: site,
     },
     getDisk,
     getPostgeVersion,

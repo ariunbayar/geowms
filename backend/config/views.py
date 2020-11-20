@@ -145,18 +145,61 @@ def _get_error500_display(error500):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def geoserver_configs(request):
+def site_configs(request):
 
     default_values = {
-        'geoserver_host': '',
-        'geoserver_user': '',
-        'geoserver_pass': '',
         'site_title': '',
         'site_footer_text': '',
         'agency_name': '',
         'agency_contact_address': '',
         'agency_contact_email': '',
         'agency_contact_phone': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def site_configs_save(request, payload):
+
+    config_names = (
+        'site_title',
+        'site_footer_text',
+        'agency_name',
+        'agency_contact_address',
+        'agency_contact_email',
+        'agency_contact_phone',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def geoserver_configs(request):
+
+    default_values = {
+        'geoserver_host': '',
+        'geoserver_user': '',
+        'geoserver_pass': '',
         'geoserver_port': '',
     }
 
@@ -179,12 +222,6 @@ def geoserver_configs_save(request, payload):
         'geoserver_host',
         'geoserver_user',
         'geoserver_pass',
-        'site_title',
-        'site_footer_text',
-        'agency_name',
-        'agency_contact_address',
-        'agency_contact_email',
-        'agency_contact_phone',
         'geoserver_port',
     )
 
