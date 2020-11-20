@@ -14,7 +14,9 @@ export default class Маягт extends Component {
             pid: props.pid,
             fid: props.fid,
             values: {},
-            geojson: {}
+            geojson: {},
+            order_at: '',
+            order_no: '',
         }
 
         this.onSubmit = this.onSubmit.bind(this)
@@ -24,36 +26,50 @@ export default class Маягт extends Component {
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        const gid = this.props.gid
+        const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list } = this.props
         if(this.props.roles[6]){
-
-            if(this.props.null_form_isload){
+            if(null_form_isload){
                 service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
                     if (success) {
-                        this.setState({is_loading:true})
-                        this.addNotif('success', 'Амжилттай', 'check')
+                        this.setState({is_loading: true})
+                        this.props.requestRefreshCount()
+                        this.addNotif('success', 'Property хадгалалаа', 'check')
                     }
                 })
             }
-            else{
-
+            else if (modifyend_selected_feature_check || update_geom_from_list) {
+                this.props.SaveBtn(values)
+            }
+            else if (remove_button_active) {
+                this.props.requestRemove(values)
+            }
+            else {
                 service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
-                    console.log("createUpd")
                     if (success) {
-                        this.setState({is_loading:true})
-                        this.addNotif('success', 'Амжилттай', 'check')
+                        this.setState({is_loading: true})
+                        this.props.requestRefreshCount()
+                        this.addNotif('success', 'Property хадгалалаа', 'check')
                     }
                 })
             }
         }
         else{
-            service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
-                if (success) {
-                    this.setState({is_loading:true})
-                    this.handleUpdate(gid)
-
-                }
-            })
+            if(null_form_isload){
+                service.save(this.state.fid, values).then(({ success }) => {
+                    if (success) {
+                        this.setState({is_loading: true})
+                        this.handleUpdate(gid)
+                    }
+                })
+            }
+            else{
+                service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
+                    if (success) {
+                        this.setState({is_loading: true})
+                        this.handleUpdate(gid)
+                    }
+                })
+            }
         }
     }
 
@@ -68,6 +84,7 @@ export default class Маягт extends Component {
             }
         })
     }
+
     handleCreate(){
 
         service.detailNone(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
@@ -89,6 +106,7 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
+                    if(this.props.roles[6]) this.props.SaveBtn()
                     this.handleCreate()
                     this.setState({is_loading:true})
                 }
@@ -104,6 +122,7 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
+                    if(this.props.roles[6]) this.props.SaveBtn()
                     this.handleCreate()
                     this.setState({is_loading:true})
                 }
@@ -115,6 +134,7 @@ export default class Маягт extends Component {
         }
         if(pP.null_form_isload !== this.props.null_form_isload)
         {
+            this.props.SaveBtn()
             this.handleCreate()
             this.setState({is_loading:true})
         }
@@ -151,9 +171,25 @@ export default class Маягт extends Component {
                     enableReinitialize
                     initialValues={{
                         form_values: values,
+                        order_at: this.state.order_at,
+                        order_no: this.state.order_no,
                     }}
                     onSubmit={ this.onSubmit}
-                    render={({ values }) => (
+                >
+                    {({
+                        errors,
+                        status,
+                        touched,
+                        isSubmitting,
+                        setFieldValue,
+                        handleBlur,
+                        handleChange,
+                        setValues,
+                        values,
+                        isValid,
+                        dirty,
+                    }) => {
+                    return(
                         <Form>
                         <FieldArray
                             name="form_values"
@@ -240,8 +276,8 @@ export default class Маягт extends Component {
                             )}
                         />
                         </Form>
-                    )}
-                    />
+                    )}}
+                </Formik>
             </div>
         )
     }
