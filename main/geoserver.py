@@ -1,25 +1,39 @@
 import requests
 from backend.config.models import Config
 
+
 HEADERS = {
     'Content-type': 'application/xml',
 }
-AUTH = requests.auth.HTTPBasicAuth('admin', 'geoserver')
+
 
 def getHeader():
-    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_port', 'geoserver_user', 'geoserver_pass']).values('name','value')
-    for con in config:
-        if con['name'] == 'geoserver_host':
-            host = con['value']
-        if con['name'] == 'geoserver_port':
-            port = con['value']
-        if con['name'] == 'geoserver_user':
-            admin = con['value']
-        if con['name'] == 'geoserver_pass':
-            geoserver = con['value']
-    AUTH = requests.auth.HTTPBasicAuth(admin, geoserver)
-    BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(host=host, port=port)
+
+    conf_names = [
+        'geoserver_host',
+        'geoserver_port',
+        'geoserver_user',
+        'geoserver_pass',
+    ]
+    config = Config.objects.filter(name__in=conf_names).values('name', 'value')
+
+    conf_geoserver = {
+        name: value
+        for name, value in configs
+    }
+
+    AUTH = requests.auth.HTTPBasicAuth(
+        conf_geoserver['geoserver_user'],
+        conf_geoserver['geoserver_pass'],
+    )
+
+    BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
+        host=conf_geoserver['geoserver_host'],
+        post=conf_geoserver['geoserver_port'],
+    )
+
     return BASE_URL, AUTH
+
 
 def getWorkspace(space_name):
     BASE_URL, AUTH = getHeader()
