@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import Employee from './Employee/EmployeeForm'
 // import GovRole from './GovRole/old'
 import InsRoles from './GovRole/inspireRole'
+import ItsTest from './GovRole/test'
 import { System } from "./System"
 import { Meta } from './Meta'
 import { Profile } from './Profile'
@@ -171,6 +172,7 @@ export class App extends Component {
                             <Route exact path="/gov/inspire-role/" component={InsRoles} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
+                            <Route exact path="/gov/test/" component={ItsTest} />
                         </Switch>
                     </div>
                 </div>

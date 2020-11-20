@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 // import {service} from "./service"
 import {TableHeadRole} from './TableHeadRole'
-import './ins.css'
+import "./ins.css"
 
 export default class InsRoles extends Component {
 
@@ -85,6 +85,18 @@ export default class InsRoles extends Component {
                             'all_child': 25
                         },
                         {
+                            'id': '4',
+                            'name': "shinjeech",
+                            'parent_id': '2',
+                            'child_ids': [
+                                {'id': 1},
+                                {'id': 2},
+                                {'id': 3},
+                                {'id': 4},
+                            ],
+                            'all_child': 25
+                        },
+                        {
                             'id': '3',
                             'name': "coder",
                             'parent_id': '3',
@@ -157,10 +169,6 @@ export default class InsRoles extends Component {
         // this.handleCheckedFeature = this.handleCheckedFeature.bind(this)
     }
 
-    componentDidMount(){
-        console.log('themes');
-    }
-
     // handleRoles(){
     //     const id = this.props.match.params.id
     //     service.getInspireRoles(id).then(({success, data, roles}) => {
@@ -215,8 +223,10 @@ export default class InsRoles extends Component {
 
     render() {
         const {themes, tid, pid, fid, properties, packages, features, properties_perms} = this.state
-        console.log("hahahaha");
-        console.log(themes);
+        console.log(tid);
+        packages[0].packages.map((pack,idx) => {
+            console.log(pack);
+        })
         return (
             <div className="row">
                 <div className="col-md-6">
@@ -262,45 +272,45 @@ export default class InsRoles extends Component {
                         <div className="col-md-12 card fixed-height-left">
                             <div className="card-body">
                             <div className="my-0">
-                                {packages.map((package_data, package_index) => (
-                                    (package_data.packages.length > 0 &&
-                                        <div id={`accordion-p-${package_index+1+package_data.id}`} key={package_index}>
+                                {packages[0].packages.map((pack, package_index) => (
+                                    (pack.parent_id == tid &&
+                                        <div id={`accordion-p-${package_index + 1 + pack.id}`} key={package_index} onClick={() => this.setState({ pid: pack.id })}>
                                             <div className="">
                                                 <div className="">
                                                     <div className="">
                                                     <TableHeadRole
-                                                        root_1={tid}
-                                                        root_2={package_data.id}
-                                                        name={package_data.name}
-                                                        index={`-p-${package_index+1+package_data.id}`}
-                                                        tree={40} inspire="package"
-                                                        perm_all={package_data.perm_all}
-                                                        perm_view={package_data.perm_view}
-                                                        perm_create={package_data.perm_create}
-                                                        perm_remove={package_data.perm_remove}
-                                                        perm_update={package_data.perm_update}
-                                                        perm_approve={package_data.perm_approve}
-                                                        perm_revoce={package_data.perm_revoce}
-                                                        handleCheckedTheme={this.handleCheckedTheme}
-                                                        handleCheckedPackage={this.handleCheckedPackage}
-                                                        handleCheckedFeature={this.handleCheckedFeature}
+                                                        // root_1={tid}
+                                                        // root_2={pack.id}
+                                                        name={pack.name}
+                                                        index={`-p-${package_index + 1 + pack.id}`}
+                                                        // tree={40} inspire="package"
+                                                        // perm_all={pack.perm_all}
+                                                        // perm_view={pack.perm_view}
+                                                        // perm_create={pack.perm_create}
+                                                        // perm_remove={pack.perm_remove}
+                                                        // perm_update={pack.perm_update}
+                                                        // perm_approve={pack.perm_approve}
+                                                        // perm_revoce={pack.perm_revoce}
+                                                        // handleCheckedTheme={this.handleCheckedTheme}
+                                                        // handleCheckedPackage={this.handleCheckedPackage}
+                                                        // handleCheckedFeature={this.handleCheckedFeature}
                                                     ></TableHeadRole>
                                                     </div>
                                                 </div>
-                                                {/* <div>
+                                                <div>
                                                     <div className="role-table-card">
                                                         <div className="role-table-card-body">
-                                                        {package_data.features.map((feature_data, feature_index) => (
-                                                            (feature_data.properties.length > 0 &&
+                                                        {features[0].features.map((feature_data, feature_index) => (
+                                                            (features[0].features.length > 0 && feature_data.parent_id == pid &&
                                                             <div key={feature_index} className="border-bottom mt-3">
                                                                 <div className="">
                                                                     <div className="collapsed">
-                                                                        <div className="collapsed" onClick={() =>this.handleFeature(tid, package_data.id, feature_data.id, feature_data.properties)}>
+                                                                        <div className="collapsed" onClick={() =>this.handleFeature(tid, pack.id, feature_data.id, feature_data.properties)}>
                                                                             <div className="row">
                                                                                 <div className="col-4 arrow-tree collapsed" style={{width:'100px'}}>
                                                                                     <a scope="col"> {feature_data.name}</a>
                                                                                 </div>
-                                                                                <div className="col-8">
+                                                                    {/*     <div className="col-8">
                                                                                     <div className="row">
                                                                                         <div className="col-2">
                                                                                             <small className="ml-1 smaller text-center row">харах</small>
@@ -327,7 +337,7 @@ export default class InsRoles extends Component {
                                                                                             <small className="ml-1 smaller text-center row">{feature_data.perm_all}-{feature_data.perm_revoce}</small>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
+                                                                                </div>*/}
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -335,8 +345,8 @@ export default class InsRoles extends Component {
                                                             </div>)
                                                         ))}
                                                         </div>
-                                                    </div> */}
-                                                {/* </div> */}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     )

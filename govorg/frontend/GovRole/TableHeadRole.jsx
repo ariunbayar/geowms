@@ -21,7 +21,7 @@ export class TableHeadRole extends Component {
                 root_3, perm_all, perm_view, perm_create,
                 perm_remove, perm_update, perm_approve, perm_revoce
         } = this.props
-        console.log('themes');
+        console.log('its comp', name);
         return (
             <div className="role-card">
                 <div className="role-card-body">
@@ -29,7 +29,7 @@ export class TableHeadRole extends Component {
                         <div className="col-4 arrow-tree collapsed" style={{width:'100px'}}>
                             <a className="collapsed" data-toggle="collapse" aria-expanded="true" data-target={`#collapse${index}`} aria-controls={`collapse${index}`} scope="col text-wrap"> {name}</a>
                         </div>
-                        <div className="col-8">
+                        {/* <div className="col-8">
                             <div className="row">
                                 <div className="col-2">
                                     <small className="ml-1 smaller text-center">харах</small>
@@ -140,7 +140,7 @@ export class TableHeadRole extends Component {
                                     <small className="ml-1 smaller text-center">{perm_all}-{perm_revoce}</small>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>
