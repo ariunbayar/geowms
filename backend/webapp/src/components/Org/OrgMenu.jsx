@@ -98,6 +98,9 @@ export class OrgMenu extends Component {
                         <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
                     </Switch>
                 </div>
+                <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}>
+                    <small className="fa fa-chevron-circle-left">Буцах</small>
+                </a>
             </div>
         )
     }

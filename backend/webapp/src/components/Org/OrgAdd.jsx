@@ -216,18 +216,17 @@ export class OrgAdd extends Component {
         return (
             <div className="main-content">
                 <div className="page-container my-4">
-                    <div className="row justify-content-between">
-                        <div className="col-md-3 ml-3">
-                            <div className="text-left">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                    <p className="btn gp-outline-primary">
-                                        <i className="fa fa-angle-double-left"></i> Буцах
-                                    </p>
-                                </NavLink>
-                            </div>
-                            <br/>
-                            <h5 className="mb-3">Байгууллагын нэр</h5>
+                    <div className="text-left">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                            <p className="btn gp-outline-primary">
+                                <i className="fa fa-angle-double-left"></i> Буцах
+                            </p>
+                        </NavLink>
+                    </div>
+                    <div className="row">
+                        <div className="col-md-4 card-body">
                             <div className="form-group">
+                                <h5 className="mb-3">Байгууллагын нэр</h5>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -257,9 +256,9 @@ export class OrgAdd extends Component {
                                 </select>
                             </div>
 
-                        </div>
-                        <div className="col-md-6 mr-4">
-                            <table className="table table-bordered">
+                            <h5 className="mb-3">Байгууллагын хамрах хүрээ</h5>
+
+                            <table className="table">
                                 <tbody>
                                     <tr>
                                         <th style={{width:"38%"}}>Аймаг,Нийслэл</th>
@@ -298,7 +297,6 @@ export class OrgAdd extends Component {
                             </table>
                         </div>
                     </div>
-
                     <div className="row">
                         <div className="col-md-2 ml-3">
                             <div className="form-group">
