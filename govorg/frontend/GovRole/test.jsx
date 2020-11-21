@@ -230,7 +230,6 @@ export default class ItsTest extends Component {
 
     render() {
         const {themes, packages, features, fid, tid, pid, properties, perms } = this.state
-        console.log(perms);
         return (
             <div className="row">
                 <div className="col-md-6">
@@ -274,6 +273,9 @@ export default class ItsTest extends Component {
                                             )}
                                         </tr>
                                     </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
                                 </table>
                             </div>
                         </div>

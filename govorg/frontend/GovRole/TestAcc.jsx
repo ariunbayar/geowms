@@ -9,14 +9,14 @@ export class TestSwitches extends Component {
     }
 
     render () {
-        const { name, p_idx } = this.props
+        const { name, p_idx, index } = this.props
         return (
             <div className="col-2">
                 <div className="form-group">
                     <label>{name}</label>
                     <div className="custom-control custom-switch">
-                        <input type="checkbox" className="custom-control-input" id={p_idx} />
-                        <label className="custom-control-label" htmlFor={p_idx}>  </label>
+                        <input type="checkbox" className="custom-control-input" id={index} />
+                        <label className="custom-control-label" htmlFor={index}>  </label>
                     </div>
                 </div>
             </div>
@@ -45,7 +45,7 @@ export class TestAcc extends Component {
         const { perms } = this.state
         const { name, index, type, id } = this.props
         return (
-            <div className="card-header" id={name + index}>
+            <div className="card-header" id={`${name}-${index}`}>
                 <div className="row">
                     <div className="col-4">
                         <h5 className="mb-0">
@@ -66,6 +66,7 @@ export class TestAcc extends Component {
                                 <TestSwitches key={p_idx}
                                     name={perm.name}
                                     p_idx={p_idx}
+                                    index={`${p_idx}-perm-${name}-${index}`}
                                 />
                             )}
                         </div>
