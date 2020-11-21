@@ -9,31 +9,7 @@ export default class WMSLayerItems extends Component {
 
         this.state = {
             layers: props.layers,
-            visibility: props.layers.map(({code}) => ({code, is_visible: false}))
         }
-        this.handleToggleLayer = this.handleToggleLayer.bind(this)
-
-    }
-
-    handleToggleLayer({code}, is_visible) {
-
-        const visibility = this.state.visibility.map((layer) => {
-            if (layer.code == code)
-                return {code: layer.code, is_visible: is_visible}
-            else
-                return layer
-        })
-        this.setState({visibility})
-
-        const {tileWMS} = this.props
-        tileWMS.updateParams({
-            ...tileWMS.getParams(),
-            'LAYERS': visibility.reduce((acc, {code, is_visible}) => {
-                    if (is_visible) acc.push(code)
-                    return acc
-                }, []).join(','),
-        })
-        tileWMS.refresh()
     }
 
     render() {
@@ -43,7 +19,6 @@ export default class WMSLayerItems extends Component {
                     <WMSLayerItem
                         layer={layer}
                         key={idx}
-                        handleToggle={(v) => this.handleToggleLayer(layer, v)}
                     />
                 )}
             </ul>

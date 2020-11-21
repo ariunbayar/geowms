@@ -493,6 +493,10 @@ def dursgaltGazarAll(request, payload):
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'id'
+    if query == None:
+        query = ''
+    if page == None:
+        page = 1
     data = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuuh_soyol).annotate(search=SearchVector('dursgal')).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(data, per_page)

@@ -3,9 +3,10 @@ import React, { Component } from "react"
 import {EmployeeTable} from './EmployeeTable'
 import { service } from "./service"
 import { Pagination } from "../../components/pagination/pagination"
+import { NavLink } from "react-router-dom"
 
 
-export default class Employee extends Component {
+export class EmployeeForm extends Component {
 
     constructor(props) {
         super(props)
@@ -30,10 +31,15 @@ export default class Employee extends Component {
 
     render() {
         return (
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="card">
-                        <div className="card-body">
+            <div className="card">
+                <div className="card-body">
+                    <div className="row">
+                        <div className="col-md-12">
+                            <div className="text-right">
+                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/gov/role/employees/add/`}>
+                                    Нэмэх
+                                </NavLink>
+                            </div> 
                             <div className="table-responsive">
                                 <table className="table">
                                     <thead>
@@ -48,6 +54,8 @@ export default class Employee extends Component {
                                             <th scope="col">Хүйс</th >
                                             <th scope="col">Албан тушаал</th >
                                             <th scope="col">Үүсгэсэн огноо</th >
+                                            <th scope="col">Засах</th>
+                                            <th scope="col">Устгах</th>
                                         </tr>
                                     </thead>
                                     <tbody>
