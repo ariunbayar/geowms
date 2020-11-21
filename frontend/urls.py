@@ -31,7 +31,6 @@ urlpatterns = [
     path('m/', include(([
         path('', mobile_views.all, name='all'),
         path('дэд-сан/<int:pk>/', mobile_views.detail, name='detail'),
-        path('дэд-сан/<int:pk>/давхаргууд/', mobile_views.wms_layers, name='wms-layers'),
     ], 'mobile'))),
 
     path('суурь-давхарга/', include(([
@@ -67,6 +66,8 @@ urlpatterns = [
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
         path('get-details/', profile_views.tseg_details, name='tseg-details'),
+        path('info/', profile_views.user_info),
+        path('update-password/', profile_views.user_update_password),
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),

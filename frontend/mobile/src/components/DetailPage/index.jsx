@@ -1,8 +1,5 @@
 import React, { Component } from "react"
-
-import {service} from './service'
 import BundleMap from './BundleMap'
-
 
 export class DetailPage extends Component {
 
@@ -11,6 +8,7 @@ export class DetailPage extends Component {
 
         this.state = {
             bundle: props.bundle,
+            wmsLayerScreenIsload: props.wmsLayerScreenIsload,
         }
     }
 
@@ -18,10 +16,16 @@ export class DetailPage extends Component {
         e.preventDefault()
         this.setState({bundle})
     }
+    componentDidUpdate(pP){
+        if(pP.wmsLayerScreenIsload !== this.props.wmsLayerScreenIsload){
+            const wmsLayerScreenIsload = this.props.wmsLayerScreenIsload
+            this.setState({wmsLayerScreenIsload})
+        }
+    }
 
     render() {
         return (
-            <BundleMap bundle={this.state.bundle}/>
+            <BundleMap bundle={this.state.bundle} wmsLayerName={this.props.wmsLayerName} wmsLayerScreenIsload={this.state.wmsLayerScreenIsload}/>
         )
     }
 }

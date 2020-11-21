@@ -151,7 +151,7 @@ export class List extends Component {
         const { list_all, form_is_laod_left, model_name, model_id, code, edit_name, is_delete, info, hideRight } = this.state
         return (
             <div className="row m-0">
-                <div className="card col-md-4">
+                <div className="card col-md-4 right-scroll-sticky">
                     <div className="card-body">
                     <div className="icheck-danger float-right">
 						<input type="checkbox" id="active-delete" onChange={() => this.isDelete()}/>
@@ -251,7 +251,7 @@ export class List extends Component {
                     actionName='Устгах'
                     actionNameBack='Болих'
                 />
-                <div className={`card col-md-8`} style={{left:"10px"}}>
+                <div className="card col-md-8" style={{left:"10px"}}>
                     <div className="card-body">
                         {this.state.form_is_laod ?
                         <SideBar

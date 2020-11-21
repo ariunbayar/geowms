@@ -581,7 +581,8 @@ export  class Forms extends Component {
                                                     <div className="input-group">
                                                         <input
                                                             name="toviin_dugaar"
-                                                            type="text"
+                                                            type="number"
+                                                            onKeyDown={ e => ( e.keyCode === 69 || e.keyCode === 190 ) && e.preventDefault() }
                                                             id="toviin_dugaar"
                                                             list="tsegList"
                                                             autoComplete="off"
@@ -826,6 +827,7 @@ export  class Forms extends Component {
                                                         name='ondor'
                                                         id="id_ondor"
                                                         type="number"
+                                                        onKeyDown={ e => ( e.keyCode === 69 || e.keyCode === 190 ) && e.preventDefault() }
                                                     />
                                                     <ErrorMessage name="ondor" component="div" className="text-dange"/>
                                                 </th>

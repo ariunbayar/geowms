@@ -16,7 +16,7 @@
     right: 0px;
     left: 0px;
     height: 80%;
-    bottom: 0px;
+    bottom: -80%;
     background-color: white;
     color: rgba(0, 60, 136, 1);
     padding-bottom: 66px;
@@ -28,6 +28,12 @@
     -webkit-box-shadow: 0px -3px 12px -1px rgba(0,0,0,0.62);
     -moz-box-shadow: 0px -3px 12px -1px rgba(0,0,0,0.62);
     box-shadow: 0px -3px 12px -1px rgba(0,0,0,0.62);
+    transition: 0.8s;
+}
+.🌍 > .⚙-hide {
+    transition: 0.8s;
+    bottom: 0%;
+
 }
 .⚙ .checkbox{
     border-radius: 30px;
@@ -42,10 +48,10 @@
 }
 .🌍 > .⚙-toggle{
     position: fixed;
-    top: 27%;
+    top: 200px;
     right: 0px;
-    width: 47px;
-    height: 47px;
+    width: 39px;
+    height: 39px;
     background-color: rgba(0,60,136,0.5);
     border-radius: 4px;
     padding: 2px;
@@ -62,7 +68,7 @@
 }
 
 .⚙-toggle .fa-lg{
-    font-size: 33px;
+    font-size: 22px;
     color: white;
     padding: 9px 8px;
 }
@@ -70,21 +76,50 @@
     font-size: 30;
 }
 
+.🌍 > .⚙-location {
+    position: fixed;
+    top: 350px;
+    right: 0px;
+    width: 39px;
+    height: 39px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+    border-radius: 10px 0 0px 10px;
+    text-align: center;
+}
+
+.⚙-location:active{
+    background-color: rgba(0,60,136,0.7);
+
+}
+.⚙-location:hover{
+    background-color: rgba(0,60,136,0.7);
+
+}
+
+.⚙-location .fa-lg {
+    font-size: 18px;
+    color: white;
+    padding: 11px 9px;
+}
+
+.⚙-location .fa{
+    font-size: 30;
+}
+
 .суурь-давхаргууд{
-    right: 1px;
-    left: 1px;
-    width: 99%;
-    height: 7%;
-    bottom: 0.2%;
-    overflow: hidden;
+    right: .5rem;
+    bottom: 2px;
     position: fixed;
 }
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
-    width: 33.333%;
-    height: 100%;
-    margin: 0px;
-    border-radius: 3px;
+    width: 4rem;
+    height: 2rem;
+    overflow: hidden;
+    margin: 1px;
+    border-radius: 2px;
     float: right;
     transition: opacity .15s ease-out;
 }
@@ -100,12 +135,12 @@
 
 
 .ol-zoom {
-    width:50px;
-    height: 100px;
+    width:42px;
+    height: 84px;
     left: unset;
     right: 0px;
-    top: 40%;
-    font-size: 35px;
+    top: 250px;
+    font-size: 25px;
     position: fixed;
     background-color: unset;
 
@@ -115,14 +150,14 @@
 }
 
 .ol-zoom  .ol-zoom-out{
-    width: 50px;
-    height: 50px;
+    width: 39px;
+    height: 39px;
     border-radius: 0px 0 0px 10px;
 
 }
 .ol-zoom .ol-zoom-in{
-    width: 50px;
-    height: 50px;
+    width: 39px;
+    height: 39px;
     border-radius: 10px 0 0px 0px;
 
 }
@@ -162,28 +197,30 @@
 .xButtonLayer {
     font-size: 27px;
     position: absolute;
-    top: 2%;
-    right: 8%;
+    top: 12%;
+    right: 9%;
     color: rgba(0,60,136,1);
 }
 .searchComponent{
     padding: 0px 28px;
 }
 
-.sidebarHeader{
+.sidebarHeader {
     position: fixed;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
     background-color: white;
     left: 14px;
     width: 100%;
+    padding-top: 12px;
     -webkit-box-shadow: -2px 10px 6px -10px rgba(0,0,0,0.75);
     -moz-box-shadow: -2px 10px 6px -10px rgba(0,0,0,0.75);
-    box-shadow: -2px 10px 6px -10px rgba(0,0,0,0.75);
+    box-shadow: 0px 6px 6px -9px rgba(0,0,0,0.75);
     z-index: 2;
 }
 .sidebarFooter{
-    top: 35%;
-    position: fixed;
+    top: 19%;
+    position: absolute;
+    overflow-y: scroll;
 }
 

@@ -3,13 +3,14 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'geoportal_app/static/assets/pwa', 'geosw.js')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 AUTH_USER_MODEL = 'geoportal_app.User'
 
-INTERNAL_IPS = ['127.0.0.1',]
+INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_user_agents',
     'django.contrib.gis',
+    'pwa',
 
     # Dependencies
 
@@ -172,3 +174,122 @@ MEDIA_URL = '/media/'
 
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.
 DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [r'^/back/wms/WMS/', r'^/api/service/']
+
+
+
+
+# pwa тохиргоо
+
+PWA_APP_NAME = 'ГЕОПОРТАЛ'
+PWA_APP_DESCRIPTION = "ГЕОПОРТАЛ"
+PWA_APP_THEME_COLOR = 'white'
+PWA_APP_BACKGROUND_COLOR = 'white'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/m'
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/m'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '64x64'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '120x120'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '144x144'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '152x152'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '160x160'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '167x167'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '180x180'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '384x384'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '512x512'
+    }
+]
+PWA_APP_ICONS_APPLE = [
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '64x64'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '120x120'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '144x144'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '152x152'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '160x160'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '167x167'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '180x180'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '384x384'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'sizes': '512x512'
+    }
+]
+PWA_APP_SPLASH_SCREEN = [
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'media': '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'media': '(device-width: 568px) and (device-height: 900px) and (-webkit-device-pixel-ratio: 2)'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'media': '(device-width: 900px) and (device-height: 1200px) and (-webkit-device-pixel-ratio: 2)'
+    },
+    {
+        'src': '/static/assets/image/logo/logo-2.png',
+        'media': '(device-width: 1200px) and (-webkit-device-pixel-ratio: 2)'
+    },
+]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'mn-MN'

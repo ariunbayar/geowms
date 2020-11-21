@@ -14,7 +14,6 @@ from backend.inspire.models import LThemes
 def _get_bundles_display(request, bundle):
     theme = LThemes.objects.filter(theme_id=bundle.ltheme)
     return {
-        'id': bundle.id,
         'name': theme.theme_name if theme else '' ,
         'price': bundle.price,
         'is_removeable': bundle.is_removeable,
@@ -37,43 +36,19 @@ def detail(request, pk):
     bundle = get_object_or_404(Bundle, pk=pk)
     theme = LThemes.objects.filter(theme_id=bundle.ltheme)
 
+    bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
+
     bundle_display = {
         'id': bundle.id,
         'name': theme.theme_name if theme else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
-        'wms_list': [(WMS.objects.get(pk=wms[0]).name) for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': [
+            (WMS.objects.get(pk=wms[0]).name)
+            for wms in bundle_layers
+        ],
     }
 
     context = {
         'bundle_display': bundle_display,
     }
     return JsonResponse(context)
-
-
-@require_GET
-@ajax_required
-def wms_layers(request, pk):
-
-    bundle = get_object_or_404(Bundle, pk=pk)
-
-    wms_list = []
-
-    qs_layers = bundle.layers.all().order_by('wms__created_at')
-    for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
-        if wms.is_active:
-            url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk))
-            wms_data = {
-                'name': wms.name,
-                'url': request.build_absolute_uri(url),
-                'layers': [
-                    {'name': layer.name, 'code': layer.code}
-                    for layer in layers
-                ],
-            }
-            wms_list.append(wms_data)
-
-    rsp = {
-        'wms_list': wms_list,
-    }
-
-    return JsonResponse(rsp)

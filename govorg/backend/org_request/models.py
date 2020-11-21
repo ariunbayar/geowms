@@ -29,6 +29,8 @@ class ChangeRequest(models.Model):
 
     old_geo_id = models.CharField(max_length=100, null=True)
     new_geo_id = models.CharField(max_length=100, null=True)
+    order_no = models.CharField(max_length=50, null=True)
+    order_at = models.DateTimeField(null=True)
     theme_id = models.IntegerField()
     package_id = models.IntegerField()
     feature_id = models.IntegerField()
@@ -38,5 +40,4 @@ class ChangeRequest(models.Model):
     form_json = models.TextField(null=True)
     geo_json = models.TextField(null=True)
 
-    created_on = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

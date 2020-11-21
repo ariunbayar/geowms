@@ -9,54 +9,42 @@ export default class WMSLayerItem extends Component {
         this.state = {
             name: props.layer.name,
             code: props.layer.code,
+            tile: props.layer.tile,
             is_visible: props.layer.defaultCheck,
             legendURL: props.layer.legendURL,
-
         }
 
         this.toggle = this.toggle.bind(this)
     }
     componentDidMount(){
-        const is_visible = this.state.is_visible
-        if(is_visible === 1){
-            this.props.handleToggle(true)
-        }
-
+        this.state.tile.setVisible(this.props.layer.defaultCheck)
     }
-
     toggle(is_visible) {
-        if(is_visible)
-        {
-            this.setState({is_visible: 1})
-        }
-        else
-        {
-            this.setState({is_visible:0})
-        }
-        this.props.handleToggle(is_visible)
+        this.state.tile.setVisible(is_visible)
+        this.setState({is_visible})
     }
 
     render() {
 
-        const { name, code, is_visible, legendURL} = this.state
-
+        const { name, code, is_visible, legendURL } = this.state
         return (
             <li>
                 <label>
-                    <input
-                        type="checkbox"
+                    <div className="custom-control custom-switch">
+                        <input
+                        type="checkbox" className="custom-control-input" id={code}
                         onChange={(e) => this.toggle(e.target.checked)}
-                        checked={is_visible > 0 ? true : false}
+                        checked={is_visible}
                     />
-                    <a> {name}</a>
+                    <label className="custom-control-label" htmlFor={code}>{name}</label>
+                    </div>
                 </label>
-                {legendURL == "null" ?
-                null :
-                <li>
+                {legendURL != "null" &&
                     <ul>
-                        <img className="img" src={legendURL}/>
+                        <li>
+                            <img className="img" src={legendURL}/>
+                        </li>
                     </ul>
-                </li>
                 }
             </li>
         )
