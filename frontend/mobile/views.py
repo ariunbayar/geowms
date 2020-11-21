@@ -8,12 +8,14 @@ from main.decorators import ajax_required
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
+from backend.inspire.models import LThemes
 
 
 def _get_bundles_display(request, bundle):
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme)
     return {
-        'id': bundle.id,
-        'name': bundle.name,
+        'name': theme.theme_name if theme else '' ,
+        'price': bundle.price,
         'is_removeable': bundle.is_removeable,
         'created_at': bundle.created_at,
         'updated_at': bundle.updated_at,
@@ -32,12 +34,13 @@ def all(request):
 def detail(request, pk):
 
     bundle = get_object_or_404(Bundle, pk=pk)
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme)
 
     bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
 
     bundle_display = {
         'id': bundle.id,
-        'name': bundle.name,
+        'name': theme.theme_name if theme else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'wms_list': [
             (WMS.objects.get(pk=wms[0]).name)

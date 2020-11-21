@@ -1,25 +1,49 @@
-var staticCacheName = 'djangopwa-v1';
-self.addEventListener('install', function(event) {
+var staticCacheName = "django-pwa-v"
+var filesToCache = [
+  '/offline',
+];
+
+// Cache on install
+
+self.addEventListener("install", event => {
+  this.skipWaiting();
   event.waitUntil(
-    caches.open(staticCacheName).then(function(cache) {
-      return cache.addAll([
-        '/m'
-      ]);
-    })
-  );
+      caches.open(staticCacheName)
+          .then(cache => {
+              return cache.addAll(filesToCache);
+          })
+   )
+ });
+ self.addEventListener("install", event => {
+  this.skipWaiting();
+  event.waitUntil(
+      caches.open(staticCacheName)
+          .then(cache => {
+              return fetch('/offline').then(response => cache.put('/offline', new Response(response.body)));
+            })
+  )
+});
+// cache бүгдын арилгах
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(function(cacheNames) {
+          cacheNames.forEach(function(cacheName) {
+            caches.delete(cacheName);
+          })
+        })
+    );
 });
 
-self.addEventListener('fetch', function(event) {
-  var requestUrl = new URL(event.request.url);
-    if (requestUrl.origin === location.origin) {
-      if ((requestUrl.pathname === '/m')) {
-        event.respondWith(caches.match('/m'));
-        return;
-      }
-    }
+
+// Serve from Cache
+self.addEventListener("fetch", event => {
     event.respondWith(
-      caches.match(event.request).then(function(response) {
-        return response || fetch(event.request);
-      })
-    );
+        caches.match(event.request)
+            .then(response => {
+                return response || fetch(event.request);
+            })
+            .catch(() => {
+                return caches.match('offline');
+            })
+    )
 });
