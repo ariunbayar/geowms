@@ -65,7 +65,8 @@ def _get_property_data_display(property_id, feature_id, gov_perm):
 @require_GET
 @ajax_required
 def views(request):
-    org = Org.objects.filter(employee__user=request.user).first()
+
+    org = get_object_or_404(Org, employee__user=request.user)
     gov_perm = get_object_or_404(GovPerm, org=org)
 
     feature_ids = GovPermInspire.objects.filter(gov_perm=gov_perm).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True)
@@ -76,7 +77,5 @@ def views(request):
 
         for property_id in property_ids:
             properties.append(_get_property_data_display(property_id, feature_id, gov_perm))
-
-    print(properties)
 
     return JsonResponse({'success': True, 'property': properties})
