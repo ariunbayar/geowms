@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 
-export class TestSwitches extends Component {
+export class PermSwitches extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -24,14 +24,15 @@ export class TestSwitches extends Component {
         var splited = max_pos.split('p')[0]
         const child = element.children[0]
         if(count == 25) {
-            element.style.backgroundColor = 'blue'
-            max = splited
-        }
-        if(count < 25) {
-            element.style.backgroundColor = 'yellow'
+            element.style.backgroundColor = '#006CB6'
             max = Math.ceil(splited / 2)
         }
+        if(count < 25) {
+            element.style.backgroundColor = '#FFD24A'
+            max = Math.floor(splited / 3)
+        }
         if(count == 0) {
+            element.style.backgroundColor = '#ccc'
             max = 0
         }
         let pos = 0
@@ -69,7 +70,7 @@ export class TestSwitches extends Component {
 }
 
 
-export class TestAcc extends Component {
+export class PermAcc extends Component {
 
     constructor(props) {
         super(props)
@@ -107,7 +108,7 @@ export class TestAcc extends Component {
                     <div className="col-8">
                         <div className="row">
                             {perms.map((perm, p_idx) =>
-                                <TestSwitches key={p_idx}
+                                <PermSwitches key={p_idx}
                                     name={perm.name}
                                     p_idx={p_idx}
                                     index={`${p_idx}-perm-${name}-${index}`}

@@ -4,7 +4,7 @@ import { System } from "./System"
 import { Meta } from './Meta'
 import { Profile } from './Profile'
 
-import ItsTest from './Role/Role/test'
+import InsPerms from './Role/Role/GovPerms'
 import Gov from './Role/Gov/index'
 import { EmployeeForm } from './Role/Employee/EmployeeForm'
 
@@ -171,7 +171,7 @@ export class App extends Component {
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/role/" component={ItsTest} />
+                            <Route exact path="/gov/role/" component={InsPerms} />
                             <Route exact path="/gov/role/org/" component={Gov} />
                             <Route exact path="/gov/role/employees/" component={EmployeeForm} />
                             <Route exact path="/gov/help/" component={Help} />

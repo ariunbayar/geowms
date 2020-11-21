@@ -1,10 +1,10 @@
 import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
-// import {service} from "./service"
-import {TestAcc} from './TestAcc'
+import {service} from "./service"
+import {PermAcc} from './TestAcc'
 import "./ins.css"
 
-export default class ItsTest extends Component {
+export default class InsPerms extends Component {
 
     constructor(props) {
         super(props)
@@ -36,7 +36,7 @@ export default class ItsTest extends Component {
                                 {'id': 3},
                                 {'id': 4},
                             ],
-                            'all_child': 25
+                            'all_child': 0
                         },
                         {
                             'id': '3',
@@ -89,7 +89,7 @@ export default class ItsTest extends Component {
                                         {'id': 3},
                                         {'id': 4},
                                     ],
-                                    'all_child': 25
+                                    'all_child': 10
                                 },
                                 {
                                     'id': '3',
@@ -101,7 +101,7 @@ export default class ItsTest extends Component {
                                         {'id': 3},
                                         {'id': 4},
                                     ],
-                                    'all_child': 25
+                                    'all_child': 5
                                 },
                             ]
                         },
@@ -258,59 +258,14 @@ export default class ItsTest extends Component {
                     ]
                 }
             ],
-            properties: {
-                'properties': [
-                    {
-                        'id': '1',
-                        'name': "pc",
-                        'parent_id': '1',
-                        'roles': [
-                            {'perm_view': true},
-                            {'perm_create': false},
-                            {'perm_remove': true},
-                            {'perm_revoke': false},
-                            {'perm_update': true},
-                            {'perm_approve': false},
-                        ],
-                        'all_child': 25
-                    },
-                    {
-                        'id': '2',
-                        'name': "chihewch",
-                        'parent_id': '2',
-                        'roles': [
-                            {'perm_view': true},
-                            {'perm_create': true},
-                            {'perm_remove': false},
-                            {'perm_revoke': true},
-                            {'perm_update': true},
-                            {'perm_approve': true},
-                        ],
-                        'all_child': 25
-                    },
-                    {
-                        'id': '3',
-                        'name': "keyboard",
-                        'parent_id': '3',
-                        'roles': [
-                            {'perm_view': false},
-                            {'perm_create': false},
-                            {'perm_remove': false},
-                            {'perm_revoke': false},
-                            {'perm_update': true},
-                            {'perm_approve': false},
-                        ],
-                        'all_child': 24
-                    },
-                ],
-            },
+            properties: [],
             perms: [
-                {'name': 'харах', 'eng_name': 'perm_view'},
-                {'name': 'нэмэх', 'eng_name': 'perm_create'},
-                {'name': 'хасах', 'eng_name': 'perm_remove'},
-                {'name': 'цуцлах', 'eng_name': 'perm_revoke'},
-                {'name': 'хянах', 'eng_name': 'perm_update'},
-                {'name': 'батлах', 'eng_name': 'perm_approve'},
+                {'name': 'харах', 'eng_name': 'PERM_VIEW'},
+                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE'},
+                {'name': 'хасах', 'eng_name': 'PERM_REMOVE'},
+                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE'},
+                {'name': 'хянах', 'eng_name': 'PERM_UPDATE'},
+                {'name': 'батлах', 'eng_name': 'PERM_APPROVE'},
             ]
         }
 
@@ -323,26 +278,76 @@ export default class ItsTest extends Component {
        if(type == 'feature') this.setState({ fid: id })
     }
 
+    componentDidMount() {
+        service
+            .getPerms()
+            .then(({success, property}) => {
+                if(success) {
+                    this.setState({ properties: property })
+                }
+            })
+    }
+
     render() {
         const {themes, packages, features, fid, tid, pid, properties, perms } = this.state
         return (
             <div className="row">
-                <div className="col-md-6">
-                    <div className="card">
-                        <div className="card-body">
-                            <div className="accordion" id="accordion">
-                                    {themes[0].themes.map((theme, t_idx) =>
-                                        <div className="card" key={t_idx}>
-                                            <TestAcc
-                                                id={theme.id}
-                                                name={theme.name}
-                                                index={t_idx}
-                                                type="theme"
+                <div className="col-md-6 p-0">
+                    <div className="col">
+                        <div className="card">
+                            <div className="card-body">
+                                <div className="accordion" id="accordion">
+                                        {themes[0].themes.map((theme, t_idx) =>
+                                            <div className="card" key={t_idx}>
+                                                <PermAcc
+                                                    id={theme.id}
+                                                    name={theme.name}
+                                                    index={t_idx}
+                                                    type="theme"
+                                                    sendId={this.getId}
+                                                    count={theme.all_child}
+                                                />
+                                            </div>
+                                        )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col">
+                        <div className="card">
+                            <div className="card-body">
+                                <div className="accordion" id="accordion-2">
+                                    {packages[0].packages.map((pack, p_idx) =>
+                                        pack.parent_id == tid &&
+                                        <div className="card" key={p_idx}>
+                                            <PermAcc key={p_idx}
+                                                id={pack.id}
+                                                name={pack.name}
+                                                index={p_idx}
+                                                type="package"
                                                 sendId={this.getId}
-                                                count={theme.all_child}
+                                                count={pack.all_child}
                                             />
+                                            <div id={`acc-${pack.name}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
+                                                <div className="card-body">
+                                                    <div className="accordion" id="accordion-3">
+                                                        {pack.features.map((feature, f_idx) =>
+                                                        feature.parent_id == pid &&
+                                                            <PermAcc key={f_idx}
+                                                                id={feature.id}
+                                                                name={feature.name}
+                                                                index={f_idx}
+                                                                type="feature"
+                                                                sendId={this.getId}
+                                                                count={feature.all_child}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -369,66 +374,27 @@ export default class ItsTest extends Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {properties.properties.map((property, pro_idx) =>
-                                            property.parent_id == fid &&
+                                        {properties.length > 0 && properties.map((property, pro_idx) =>
+                                            // property.parent_id == fid &&
                                             <tr key={pro_idx}>
                                                 <th>
                                                     {property.name}
                                                 </th>
                                                 {perms.map((perm, perm_idx) =>
-                                                property.roles.map((role, r_idx) =>
-                                                Object.keys(role).map((key, k_idx) =>
+                                                Object.keys(property.roles).map((key, k_idx) =>
                                                     key == perm.eng_name &&
-                                                    <TestChecks key={perm_idx}
+                                                    <PermChecks key={perm_idx}
                                                         id={property.id}
                                                         index={perm_idx}
-                                                        value={role[key]}
+                                                        value={property.roles[key]}
                                                         name={property.name}
                                                         perm_name={perm.eng_name}
                                                     />
-                                                )))}
+                                                ))}
                                             </tr>
                                         )}
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-6">
-                    <div className="card">
-                        <div className="card-body">
-                            <div className="accordion" id="accordion-2">
-                                {packages[0].packages.map((pack, p_idx) =>
-                                    pack.parent_id == tid &&
-                                    <div className="card" key={p_idx}>
-                                        <TestAcc key={p_idx}
-                                            id={pack.id}
-                                            name={pack.name}
-                                            index={p_idx}
-                                            type="package"
-                                            sendId={this.getId}
-                                            count={pack.all_child}
-                                        />
-                                        <div id={`acc-${pack.name}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
-                                            <div className="card-body">
-                                                <div className="accordion" id="accordion-3">
-                                                    {pack.features.map((feature, f_idx) =>
-                                                    feature.parent_id == pid &&
-                                                        <TestAcc key={f_idx}
-                                                            id={feature.id}
-                                                            name={feature.name}
-                                                            index={f_idx}
-                                                            type="feature"
-                                                            sendId={this.getId}
-                                                            count={pack.all_child}
-                                                        />
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -438,7 +404,7 @@ export default class ItsTest extends Component {
     }
 }
 
-export class TestChecks extends Component {
+export class PermChecks extends Component {
     constructor(props) {
         super(props)
         this.state = {
