@@ -292,7 +292,7 @@ def get_version():
         assert rsp.status_code == 200
         resources = {
             res['@name']: res
-            for res in rsp.f()['about']['resource']
+            for res in rsp.json()['about']['resource']
         }
     except Exception:
         resources = {}
