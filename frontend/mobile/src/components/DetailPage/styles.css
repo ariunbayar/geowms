@@ -197,7 +197,6 @@
 .xButtonLayer {
     font-size: 27px;
     position: absolute;
-    top: 12%;
     right: 9%;
     color: rgba(0,60,136,1);
 }
@@ -219,7 +218,7 @@
     z-index: 2;
 }
 .sidebarFooter{
-    top: 19%;
+    top: 5%;
     position: absolute;
     overflow-y: scroll;
 }

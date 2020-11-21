@@ -166,7 +166,7 @@ export default class BundleMap extends Component {
         this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) =>
-                layer.tile.setVisible(false)
+                layer.defaultCheck == 0 && layer.tile.setVisible(false)
             )
         )
 
