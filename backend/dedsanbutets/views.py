@@ -657,7 +657,6 @@ def erese(request, payload):
 def get_colName_type(view_name, data):
     cursor = connections['default'].cursor()
     query_index = '''
-
         select
             ST_GeometryType(geo_data),
             Find_SRID('public', '{view_name}', '{data}'),
@@ -670,7 +669,6 @@ def get_colName_type(view_name, data):
                 )
 
     sql = '''
-
         SELECT
         attname AS column_name, format_type(atttypid, atttypmod) AS data_type
         FROM
@@ -678,7 +676,6 @@ def get_colName_type(view_name, data):
         WHERE
         attrelid = 'public.{view_name}'::regclass AND    attnum > 0
         ORDER  BY attnum
-
         '''.format(view_name=view_name)
 
     cursor.execute(sql)
@@ -900,8 +897,9 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                     return {'info': 'layer_remove'}
 
         wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
+        wms_id = wms.id
         if not wms_layer:
-            legend_url = geoserver.get_legend_url(ws_name, layer_name)
+            legend_url = geoserver.get_legend_url(wms_id, layer_name)
             WMSLayer.objects.create(
                 name=layer_name,
                 code=layer_name,
