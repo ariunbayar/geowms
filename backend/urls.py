@@ -93,6 +93,11 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/gov-perm/', org_views.getGovRoles, name='get-gov-roles'),
         path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.saveGovRoles, name='save-gov-roles'),
 
+        path('getAimags/', org_views.getAimags, name='getAimags'),
+        path('getSumuud/', org_views.getSumuud, name='getSumuud'),
+        path('getBaguud/', org_views.getBaguud, name='getBaguud'),
+        path('geo_id_display/', org_views.geo_id_display, name='geo_id_display'),
+
 
     ], 'org'))),
 

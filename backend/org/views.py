@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
+from django.db import connections
 
 from backend.bundle.models import Bundle
 from backend.govorg.models import GovOrg
@@ -369,13 +370,14 @@ def org_add(request, payload, level):
     role_id = payload.get('role_id')
     org_role_filter = GovRole.objects.filter(pk=role_id).first()
     org_id = payload.get('id')
+    geo_id = payload.get('geo_id')
     objs = []
     gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
 
     if org_id:
         if int(role_id) > -1:
             Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level)
-            GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
+            GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter, geo_id=geo_id)
             gov_perm = GovPerm.objects.filter(org_id=org_id).first()
             GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
             for gov_role_inspire in gov_role_inspire_all:
@@ -401,9 +403,9 @@ def org_add(request, payload, level):
     else:
         org = Org.objects.create(name=org_name, level=level)
         if org_role_filter:
-            gov_perm = GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user)
+            gov_perm = GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user, geo_id=geo_id)
         else:
-            gov_perm = GovPerm.objects.create(org=org, created_by=request.user, updated_by=request.user)
+            gov_perm = GovPerm.objects.create(org=org, created_by=request.user, updated_by=request.user, geo_id=geo_id)
         if gov_role_inspire_all:
             for gov_role_inspire in gov_role_inspire_all:
                 objs.append(GovPermInspire(
@@ -437,6 +439,8 @@ def org_remove(request, payload, level):
     for org_govorg in org_govorgs:
         org_govorg.delete()
     org.orgrole_set.all().delete()
+    govPerm = GovPerm.objects.filter(org_id=org_id)
+    govPerm.delete()
     org.delete()
 
     return JsonResponse({'success': True})
@@ -1249,3 +1253,145 @@ def saveGovRoles(request, payload, level, pk):
         'success': True,
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getAimags(request):
+
+    try:
+        aimguud = []
+
+        for ub_aimag in MDatasBoundary.objects.filter(property_id=24, feature_config_id=5, code_list_id=27):
+            for value_text in MDatasBoundary.objects.filter(geo_id=ub_aimag.geo_id, feature_config_id=5, data_type_id=5, property_id=26):
+                aimag_datas = MDatasBoundary.objects.filter(geo_id=value_text.value_text, feature_config_id=4, data_type_id=4, property_id=30)
+                for datas in aimag_datas:
+                    aimguud.append({
+                    'aimag_names': datas.value_text,
+                    'geo_id': datas.geo_id
+                })
+        aimguud_sorted = sorted(aimguud, key = lambda i:i['aimag_names'])
+        rsp = {
+            'info': aimguud_sorted,
+            'success': True,
+        }
+        return JsonResponse(rsp)
+    except Exception as error:
+        rsp = {
+            'info': '',
+            'success': True,
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getSumuud(request, aimag):
+
+    try:
+        sumuud = []
+        aimag_geo_id = list(MDatasBoundary.objects.filter(value_text=aimag).all())[-1].geo_id
+        cursor = connections['default'].cursor()
+        sql = """
+            select geo_id
+            from public.m_datas_boundary
+            where geo_id like %s and code_list_id = 28
+            order by geo_id asc;
+        """
+        like_pattern = 'au_{}%'.format(aimag_geo_id)
+        geo_ids = cursor.execute(sql, (like_pattern,))
+        geo_ids = cursor.fetchall()
+
+        for geo_id in geo_ids:
+            geo_id = ''.join(geo_id)
+
+            for sum_ob in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id=5, data_type_id=5, property_id=26):
+                sum_datas = MDatasBoundary.objects.filter(geo_id=sum_ob.value_text, feature_config_id=4, data_type_id=4, property_id=30)
+                for datas in sum_datas:
+                    sumuud.append({
+                    'sum_names': datas.value_text,
+                    'geo_id': datas.geo_id
+                })
+        sumuud_sorted = sorted(sumuud, key = lambda i:i['sum_names'])
+        rsp = {
+            'info': sumuud_sorted,
+            'success': True,
+        }
+        return JsonResponse(rsp)
+    except Exception as error:
+        rsp = {
+            'info': '',
+            'success': True,
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getBaguud(request, soum):
+
+    try:
+        baguud = []
+        soum_geo_id = list(MDatasBoundary.objects.filter(value_text=soum).all())[-1].geo_id
+        cursor = connections['default'].cursor()
+        sql = """
+            select geo_id
+            from public.m_datas_boundary
+            where geo_id like %s and code_list_id = 29
+            order by geo_id asc;
+        """
+        like_pattern = 'au_{}%'.format(soum_geo_id)
+        geo_ids = cursor.execute(sql, (like_pattern,))
+        geo_ids = cursor.fetchall()
+
+        for geo_id in geo_ids:
+            geo_id = ''.join(geo_id)
+
+            for bag in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id=5, data_type_id=5, property_id=26):
+                bag_datas = MDatasBoundary.objects.filter(geo_id=bag.value_text, feature_config_id=4, data_type_id=4, property_id=30)
+                for datas in bag_datas:
+                    baguud.append({
+                    'bag_names': datas.value_text,
+                    'geo_id': datas.geo_id
+                })
+        baguud_sorted = sorted(baguud, key = lambda i:i['bag_names'])
+        rsp = {
+            'info': baguud_sorted,
+            'success': True,
+        }
+        return JsonResponse(rsp)
+    except Exception as error:
+        rsp = {
+            'info': '',
+            'success': True,
+        }
+        return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def geo_id_display(request, payload):
+
+    org_id = payload.get('org_id')
+    if org_id:
+        govPerm_geo_id = GovPerm.objects.filter(org_id=org_id).first().geo_id
+        geo_id = ''
+        names = []
+        for geo_ids in range(0, len(govPerm_geo_id), 2):
+            geo_id += str(govPerm_geo_id[geo_ids:geo_ids+2])
+            names.append(MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id=4, data_type_id=4, property_id=30).first().value_text)
+        rsp = {
+            'info': names,
+            'success': True,
+        }
+        return JsonResponse(rsp)
+    else:
+        rsp = {
+            'info': '',
+            'success': True,
+        }
+        return JsonResponse(rsp)

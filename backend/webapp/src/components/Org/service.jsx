@@ -16,7 +16,11 @@ export const service = {
     orgAll,
     rolesAdd,
     inspireRoles,
-    getInspireRoles
+    getInspireRoles,
+    getAimags,
+    getSumuud,
+    getBaguud,
+    geo_id_display,
 }
 
 
@@ -138,4 +142,36 @@ function getInspireRoles() {
         ...getGetOptions(),
     }
     return fetch(`/back/api/org/get-role-name/`, opts).then(handleResponse)
+}
+
+function getAimags() {
+    const opts = {
+        ...getGetOptions(),
+        body: JSON.stringify(),
+    }
+    return fetch(`/back/api/org/getAimags/`, opts).then(handleResponse)
+}
+
+function getSumuud(aimag) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(aimag),
+    }
+    return fetch(`/back/api/org/getSumuud/`, opts).then(handleResponse)
+}
+
+function getBaguud(sum) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(sum),
+    }
+    return fetch(`/back/api/org/getBaguud/`, opts).then(handleResponse)
+}
+
+function geo_id_display(values) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify(values),
+    }
+    return fetch(`/back/api/org/geo_id_display/`, opts).then(handleResponse)
 }
