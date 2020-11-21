@@ -277,7 +277,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 srs=srs,
                 attributes=''.join(attributes_hoho),
             )
-    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
+    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
     return rsp
 
 
@@ -292,7 +292,7 @@ def get_version():
         assert rsp.status_code == 200
         resources = {
             res['@name']: res
-            for res in rsp.json()['about']['resource']
+            for res in rsp.f()['about']['resource']
         }
     except Exception:
         resources = {}
