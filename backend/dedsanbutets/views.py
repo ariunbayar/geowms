@@ -270,6 +270,7 @@ def getFields(request, payload):
     model_name = payload.get('name')
     savename = payload.get('name')
     id = payload.get('id')
+    model_name_old=model_name
     edit_name = payload.get('edit_name')
     try:
         model_name = getModel(model_name)
@@ -277,7 +278,7 @@ def getFields(request, payload):
         for i in model_name._meta.get_fields():
             name = i.name
             type_name = i.get_internal_type()
-            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
+            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField' and i.name != 'bundle':
                 if type_name == "CharField":
                     type_name = 'text'
                 if type_name == "IntegerField" or type_name == "BigIntegerField":
@@ -312,7 +313,7 @@ def getFields(request, payload):
                                 'field_name': i.name,
                                 'field_type': type_name,
                                 'data': id
-                            })
+                            })         
                     else:
                         fields.append({
                             'field_name': i.name,
@@ -320,21 +321,41 @@ def getFields(request, payload):
                             'data': ''
                         })
                 if edit_name != '':
-                    datas = model_name.objects.filter(pk=id)
-                    for data in datas:
-                        data_obj = model_to_dict(data)
-                        dat = data_obj[i.name]
-                        if dat == True and not 1:
-                            dat = 'true'
-                        if dat == False and not 0:
-                            dat = 'false'
-                        else:
-                            dat = dat
-                        fields.append({
-                            'field_name': i.name,
-                            'field_type': type_name,
-                            'data': dat if dat else ""
-                        })
+                    if model_name_old == 'theme':
+                        datas = model_name.objects.filter(pk=id)
+                        for data in datas:
+                            data_obj = model_to_dict(data)
+                            if i.name !='bundle':
+                                dat = data_obj[i.name]
+                                if dat == True and not 1:
+                                    dat = 'true'
+                                if dat == False and not 0:
+                                    dat = 'false'
+                                else:
+                                    dat = dat
+                                fields.append({
+                                    'field_name': i.name,
+                                    'field_type': type_name,
+                                    'data': dat if dat else ""
+                                })
+
+                        
+                    else:
+                        datas = model_name.objects.filter(pk=id)
+                        for data in datas:
+                            data_obj = model_to_dict(data)
+                            dat = data_obj[i.name]
+                            if dat == True and not 1:
+                                dat = 'true'
+                            if dat == False and not 0:
+                                dat = 'false'
+                            else:
+                                dat = dat
+                            fields.append({
+                                'field_name': i.name,
+                                'field_type': type_name,
+                                'data': dat if dat else ""
+                            })
         rsp = {
             'success': True,
             'fields': fields
