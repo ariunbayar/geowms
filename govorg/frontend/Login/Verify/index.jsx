@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 
-import {Form} from './Form'
+import {VerifyForm} from './Form'
 
 export class Verify extends Component {
 
@@ -12,7 +12,7 @@ export class Verify extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path={"/gov/admin/verify/"} component={Form}/>
+                <Route exact path={"/gov/admin/verify/"} component={VerifyForm}/>
             </Switch>
         )
     }

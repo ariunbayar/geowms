@@ -1,6 +1,6 @@
 import React, { Component } from "react"
-// import { validations } from "./validations"
-import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
+import { validations } from "./validations"
+import { Formik} from 'formik'
 import {service} from "./service"
 
 
@@ -31,15 +31,6 @@ export class Log extends Component {
                 >
                 {({
                     errors,
-                    status,
-                    touched,
-                    isSubmitting,
-                    setFieldValue,
-                    setValues,
-                    handleBlur,
-                    values,
-                    isValid,
-                    dirty,
                 }) => {
                     const has_error = Object.keys(errors).length > 0
                     return (
@@ -54,10 +45,12 @@ export class Log extends Component {
                                         <div className="form-group">
                                         <label htmlFor="email">Имэйл хаяг</label>
                                             <input type="text" className="form-control form-control-sm" placeholder="Имэйл хаяг" id="email"></input>
+                                            {/* <ErrorMessage name="email" component="span"/> */}
                                         </div>
                                         <div className="form-group">
                                         <label htmlFor="password">Нууц үг</label>
-                                            <input type="text" className="form-control form-control-sm" placeholder="Нууц үг" id="password"></input>
+                                            <input type="password" className="form-control form-control-sm" placeholder="Нууц үг" id="password"></input>
+                                            {/* <ErrorMessage name="email" component="span"/> */}
                                         </div>
                                         <button type="submit" className="btn gp-btn-primary">Нэвтрэх</button>
                                     </form>
