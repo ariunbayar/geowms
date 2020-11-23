@@ -92,7 +92,7 @@ export class PermAcc extends Component {
         const { perms, r_name } = this.state
         const { name, index, type, id, count, small, is_open, t_name, p_name, f_name } = this.props
         return (
-            <div className="card-header" id={`${name}-${type}`}>
+            <div className="card-header" id={`${index}-${type}`}>
                 <div className="row">
                     <div className="col-4">
                         <h5 className="mb-0 my-4">
@@ -100,15 +100,10 @@ export class PermAcc extends Component {
                             &nbsp;
                             <span
                                 role="button"
-                                className={`gp-text-primary ` +
-                                    (small ? small : `text-uppercase`) +
-                                    ` font-weight-bold
-                                    text-break
-                                    shadow-none
-                                `}
+                                className={`gp-text-primary ` + (small ? small : `text-uppercase`) + ` font-weight-bold text-break shadow-none`}
                                 data-toggle="collapse"
-                                data-target={`#acc-${name}-${type}`}
-                                aria-controls={`acc-${name}-${type}`}
+                                data-target={`#acc-${index}-${type}`}
+                                aria-controls={`acc-${index}-${type}`}
                                 aria-expanded="true"
                                 onClick={() => {
                                     this.setState({ r_name: name })

@@ -12,252 +12,8 @@ export default class InsPerms extends Component {
             tid: 0,
             pid: 0,
             fid: 0,
-            themes:
-            [
-                {
-                    'themes': [
-                        {
-                            'id': '1',
-                            'name': "utility",
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 20
-                        },
-                        {
-                            'id': '2',
-                            'name': "portal",
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 0
-                        },
-                        {
-                            'id': '3',
-                            'name': "worker",
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 25
-                        },
-                    ]
-                }
-            ],
-            packages: [
-                {
-                    'packages': [
-                        {
-                            'id': '1',
-                            'name': "zahiral",
-                            'parent_id': '1',
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 25,
-                            'features': [
-                                {
-                                    'id': '1',
-                                    'name': "Tuvshuu",
-                                    'parent_id': '1',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '2',
-                                    'name': "Bymbaa",
-                                    'parent_id': '1',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 10
-                                },
-                                {
-                                    'id': '3',
-                                    'name': "Amaraa",
-                                    'parent_id': '1',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 5
-                                },
-                            ]
-                        },
-                        {
-                            'id': '2',
-                            'name': "ahlah",
-                            'parent_id': '2',
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 25,
-                            'features': [
-                                {
-                                    'id': '1',
-                                    'name': "Baigali",
-                                    'parent_id': '2',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '2',
-                                    'name': "Tuugii",
-                                    'parent_id': '2',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '3',
-                                    'name': "Ariunbayar",
-                                    'parent_id': '2',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                            ]
-                        },
-                        {
-                            'id': '4',
-                            'name': "shinjeech",
-                            'parent_id': '2',
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 25,
-                            'features': [
-                                {
-                                    'id': '1',
-                                    'name': "uugnaa",
-                                    'parent_id': '4',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '2',
-                                    'name': "taiwnaa",
-                                    'parent_id': '4',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '3',
-                                    'name': "nandia",
-                                    'parent_id': '4',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                            ]
-                        },
-                        {
-                            'id': '3',
-                            'name': "coder",
-                            'parent_id': '3',
-                            'child_ids': [
-                                {'id': 1},
-                                {'id': 2},
-                                {'id': 3},
-                                {'id': 4},
-                            ],
-                            'all_child': 25,
-                            'features': [
-                                {
-                                    'id': '1',
-                                    'name': "tuvshuu",
-                                    'parent_id': '3',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '2',
-                                    'name': "Bymbaa",
-                                    'parent_id': '3',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 25
-                                },
-                                {
-                                    'id': '3',
-                                    'name': "odko",
-                                    'parent_id': '3',
-                                    'child_ids': [
-                                        {'id': 1},
-                                        {'id': 2},
-                                        {'id': 3},
-                                        {'id': 4},
-                                    ],
-                                    'all_child': 20
-                                },
-                            ]
-                        },
-                    ]
-                }
-            ],
+            themes: [],
+            package_features: [],
             properties: [],
             perms: [
                 {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false},
@@ -305,9 +61,10 @@ export default class InsPerms extends Component {
     componentDidMount() {
         service
             .getPerms()
-            .then(({success, property}) => {
+            .then(({success, themes, package_features, property}) => {
                 if(success) {
-                    this.setState({ properties: property })
+                    console.log(themes, package_features, property);
+                    this.setState({ properties: property, themes, package_features })
                 }
             })
     }
@@ -319,7 +76,7 @@ export default class InsPerms extends Component {
     }
 
     render() {
-        const {themes, packages, features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name } = this.state
+        const {themes, package_features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name } = this.state
         const { type } = this.props
         return (
             <div className="row">
@@ -328,7 +85,7 @@ export default class InsPerms extends Component {
                         <div className="card">
                             <div className="card-body">
                                 <div className="accordion" id="accordion">
-                                        {themes[0].themes.map((theme, t_idx) =>
+                                        {themes.length > 0 && themes.map((theme, t_idx) =>
                                             <div className="card" key={t_idx}>
                                                 <PermAcc
                                                     id={theme.id}
@@ -351,8 +108,8 @@ export default class InsPerms extends Component {
                             <div className="card-body">
                                 <div className="accordion" id="accordion-2">
                                     {
-                                    prevTid !== tid ?
-                                    packages[0].packages.map((pack, p_idx) =>
+                                    prevTid !== tid && package_features.length > 0 ?
+                                    package_features.map((pack, p_idx) =>
                                         pack.parent_id == tid &&
                                         <div className="card border border-dark" key={p_idx}>
                                             <PermAcc key={p_idx}
@@ -367,7 +124,7 @@ export default class InsPerms extends Component {
                                                 t_name={t_name}
                                                 cancelOpen={this.cancelOpen}
                                             />
-                                            <div id={`acc-${pack.name}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
+                                            <div id={`acc-${p_idx}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
                                                 <div className="card-body">
                                                     <div className="accordion" id="accordion-3">
                                                         {pack.features.map((feature, f_idx) =>
@@ -425,7 +182,7 @@ export default class InsPerms extends Component {
                                     </thead>
                                     <tbody>
                                         {properties.length > 0 && properties.map((property, pro_idx) =>
-                                            // property.parent_id == fid &&
+                                            property.parent_id == fid &&
                                             <tr key={pro_idx}>
                                                 <th>
                                                     {property.name}
