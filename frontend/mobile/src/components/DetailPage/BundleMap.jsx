@@ -7,8 +7,9 @@ import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
-import {Point} from 'ol/geom'
+import {Point, LineString} from 'ol/geom'
 import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from 'ol/style'
+import {getVectorContext} from 'ol/render'
 
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
@@ -30,7 +31,7 @@ export default class BundleMap extends Component {
 
     constructor(props) {
         super(props)
-
+        this.speed = 2000
         this.state = {
             projection: 'EPSG:3857',
             projection_display: 'EPSG:4326',
@@ -42,7 +43,7 @@ export default class BundleMap extends Component {
             hureelayer: null,
             longitude: 0,
             latitude: 0,
-            feature_info: []
+            feature_info: [],
         }
 
         this.controls = {
@@ -61,6 +62,10 @@ export default class BundleMap extends Component {
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.showFeaturesLimit = this.showFeaturesLimit.bind(this)
         this.locationSet = this.locationSet.bind(this)
+        this.connectPointToPoint = this.connectPointToPoint.bind(this)
+        this.startAnimation = this.startAnimation.bind(this)
+        this.stopAnimation = this.stopAnimation.bind(this)
+        this.moveFeature = this.moveFeature.bind(this)
     }
 
     initMarker() {
@@ -88,7 +93,7 @@ export default class BundleMap extends Component {
         if(this.state.bundle.id) this.loadMapData(this.state.bundle.id)
 
         navigator.geolocation.getCurrentPosition((position) => {
-            var location = [position.coords.longitude, position.coords.latitude]
+            const location = [position.coords.longitude, position.coords.latitude]
             this.setState({longitude: position.coords.longitude, latitude: position.coords.latitude})
         });
     }
@@ -265,15 +270,99 @@ export default class BundleMap extends Component {
 
     }
 
+    connectPointToPoint(features) {
+        const { longitude, latitude, vector_layer } = this.state
+        const coordinat_center = [longitude, latitude]
+        const coordinate_me = fromLonLat(coordinat_center, this.state.projection)
+
+        const linieStyle = new Style({
+              stroke: new Stroke({
+                color: '#d12710',
+                width: 4,
+                lineDash: [.6, 5]
+              })
+            })
+        this.features = []
+        features.map((feature, idx) => {
+            const geom = feature.getGeometry().getCoordinates()
+            const line = new LineString([coordinate_me, geom])
+            const lineFeature = new Feature(line)
+            lineFeature.setStyle(linieStyle)
+            vector_layer.getSource().addFeature(lineFeature)
+            const routeLength = line.getCoordinates().length;
+            this.line = line
+            this.routeLength = routeLength
+            this.startAnimation()
+        })
+        this.geoMarker = new Feature({
+            type: 'geoMarker',
+            geometry: new Point(coordinate_me[0]),
+        })
+    }
+
+    startAnimation() {
+        const map = this.map
+        if (this.animating) {
+            this.stopAnimation(false);
+        } else {
+            this.animating = true;
+            this.now = new Date().getTime();
+            this.geoMarker.setStyle(null);
+            this.state.vector_layer.on('postrender', (event) => this.moveFeature(event));
+            map.render();
+        }
+    }
+
+    stopAnimation(ended) {
+        const map = this.map
+        this.animating = false;
+        // if animation cancelled set the marker at the beginning
+        // const coord = ended ? this.line[this.routeLength - 1] : this.line[0];
+        // const geometry = this.geoMarker.getGeometry();
+        // geometry.setCoordinates(coord);
+        //remove listener
+        this.state.vector_layer.un('postrender', (event) => this.moveFeature(event));
+    }
+
+    moveFeature (event) {
+        const map = this.map
+        const vectorContext = getVectorContext(event);
+        const frameState = event.frameState;
+        if (this.animating) {
+          const elapsedTime = frameState.time - this.now;
+          console.log(elapsedTime);
+          const index = Math.round((this.speed * elapsedTime) / 1000);
+          console.log(index);
+          if (index >= this.routeLength) {
+            this.stopAnimation(true);
+            return;
+          }
+          const currentPoint = new Point(this.line[index]);
+          const feature = new Feature(currentPoint);
+          const style = new Style({
+            image: new CircleStyle({
+              radius: 7,
+              fill: new Fill({color: 'black'}),
+              stroke: new Stroke({
+                color: 'white',
+                width: 2,
+              }),
+            }),
+          })
+          vectorContext.drawFeature(feature, style);
+        }
+        // tell OpenLayers to continue the postrender animation
+        map.render();
+      };
+
     showFeaturesLimit() {
         const {longitude, latitude} = this.state
-        var coordinat_center = [longitude, latitude]
-        var coordinat_bottom = [longitude + 0.12, latitude + 0.4]
-        var coordinat_top = [longitude - 0.12, latitude - 0.4]
-        var coord0 = fromLonLat(coordinat_center, this.state.projection)
-        var coord1 = fromLonLat(coordinat_bottom, this.state.projection)
-        var coord2 = fromLonLat(coordinat_top, this.state.projection)
-
+        const coordinat_center = [longitude, latitude]
+        const coordinat_bottom = [longitude + 0.12, latitude + 0.4]
+        const coordinat_top = [longitude - 0.12, latitude - 0.4]
+        const coord0 = fromLonLat(coordinat_center, this.state.projection)
+        const coord1 = fromLonLat(coordinat_bottom, this.state.projection)
+        const coord2 = fromLonLat(coordinat_top, this.state.projection)
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -326,6 +415,7 @@ export default class BundleMap extends Component {
                             console.log(feature_info)
                             console.log(feature_info)
                             this.state.vector_layer.setSource(source)
+                            this.connectPointToPoint(features)
                             if(!this.state.is_draw_open){
                                 if(geodb_table == 'mpoint_view'){
                                 }
@@ -421,7 +511,7 @@ export default class BundleMap extends Component {
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
-        view.animate({zoom: zoom, duration: 4000}, {center: view.setCenter(map_coord), duration: 2000});
+        view.animate({zoom: zoom, duration: 200}, {center: view.setCenter(map_coord), duration: 200});
         const hureelayer = new VectorLayer({
             source: new VectorSource({
                 projection: this.state.projection_display,
@@ -449,7 +539,7 @@ export default class BundleMap extends Component {
         this.map.removeLayer(this.state.hureelayer)
         this.showFeaturesLimit()
         navigator.geolocation.getCurrentPosition((position) => {
-            var location = [position.coords.longitude, position.coords.latitude]
+            const location = [position.coords.longitude, position.coords.latitude]
             this.handleSetCenter(location, 14.6)
         });
 
