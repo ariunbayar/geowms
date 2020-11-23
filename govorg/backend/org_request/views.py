@@ -159,7 +159,7 @@ def _get_org_request(ob):
             'employee':user.first_name,
             'org':org.name,
             'order_no': ob.order_no,
-            'order_at': ob.order_at,
+            'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
         }
 
     else:
@@ -206,7 +206,7 @@ def _get_org_request(ob):
             'employee':user.first_name,
             'org':org.name,
             'order_no': ob.order_no,
-            'order_at': ob.order_at,
+            'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
         }
 
 

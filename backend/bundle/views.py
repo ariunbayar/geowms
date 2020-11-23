@@ -14,6 +14,7 @@ from django.db import connections
 
 from .forms import BundleForm
 from .models import Bundle, BundleLayer, BundleGIS
+from backend.inspire.models import LThemes
 
 def _layer_visible(layers):
     check = False
@@ -133,9 +134,10 @@ def _get_module_display(module):
 def _get_bundle_display(bundle):
     roles = _get_form_check_options(bundle.id)
     modules = [_get_module_display(q)for q in bundle.MODULE_CHOICES]
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
     return {
         'id': bundle.id,
-        'name': bundle.name,
+        'name': theme.theme_name if theme else '',
         'price':modules,
         'self_module':bundle.module if bundle.module else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
@@ -180,25 +182,6 @@ def get_form_options(request):
         'form_options': _get_bundle_options(),
     }
     return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def create(request, payload):
-    сүүлийн_дэд_сан = Bundle.objects.all().order_by('sort_order').last()
-    icon_data = payload.get('icon')
-    form = BundleForm(payload)
-    if form.is_valid() and icon_data:
-        form.instance.created_by = request.user
-        form.instance.sort_order = сүүлийн_дэд_сан.sort_order + 1
-        form.instance.is_removeable = True
-        [image_x2] = resize_b64_to_sizes(icon_data, [(200, 200)])
-        form.instance.icon = SimpleUploadedFile('icon.png', image_x2)
-        form.save()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
 
 
 @require_POST
@@ -255,20 +238,6 @@ def update(request, payload):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def remove(request, payload):
-
-    pk = payload.get('id')
-    bundle = get_object_or_404(Bundle, pk=pk, is_removeable=True)
-    bundle.layers.clear()
-    bundle.icon.delete(save=False)
-    bundle.delete()
-
-    return JsonResponse({'success': True})
 
 
 @require_POST

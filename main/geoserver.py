@@ -234,13 +234,11 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                     attributes_hoho.insert(i, attributes)
                 else:
                     attributes =  '''
-
                     <attribute>
                         <name>{attribute_name}</name>
                         <nillable>true</nillable>
                         <binding>org.locationtech.jts.geom.MultiPolygon</binding>
                     </attribute>
-
                     '''.format(
                         attribute_name=attribute_name[i]['column_name']
                     )
@@ -277,7 +275,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 srs=srs,
                 attributes=''.join(attributes_hoho),
             )
-    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
+    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
     return rsp
 
 
@@ -323,18 +321,13 @@ def get_wms_url(wms_name):
 
     return wms_url
 
+def get_legend_url(wms_id, layer_name):
 
-def get_legend_url(wms_name, layer_name):
-
-    conf_geoserver = get_connection_conf()
     legend_url =  (
-        'https://nsdi.gov.mn/geoserver/{wms_name}/ows?'
+        'https://nsdi.gov.mn/back/wms/WMS/{wms_id}/?'
         'service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'
     ).format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
-        wms_name=wms_name,
+        wms_id=wms_id,
         layer=layer_name,
     )
     return legend_url
-

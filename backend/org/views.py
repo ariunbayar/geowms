@@ -132,12 +132,12 @@ def all(request, payload, level):
 def _get_org_role_display(org_role):
 
     bundle = org_role.bundle
-
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme)
     return {
         'org_id': org_role.org_id,
         'bundle': {
             'id': bundle.id,
-            'name': bundle.name,
+            'name': theme.theme_name if theme else '',
             'icon_url': bundle.icon.url if bundle.icon else '',
         },
         'perm_view': org_role.perm_view,
@@ -707,6 +707,7 @@ def createPerm(request, payload):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def getInspireRoles(request, pk):
     roles = []
     data = []
@@ -918,6 +919,7 @@ def _get_feature_property_gov(feature_id, govRole):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def saveInspireRoles(request, payload, pk):
 
     values = payload.get('values')
@@ -983,6 +985,7 @@ def saveInspireRoles(request, payload, pk):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def getGovRoles(request, level, pk):
     roles = []
     data = []
@@ -1202,6 +1205,7 @@ def _get_feature_property(feature_id, gov_perm):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def saveGovRoles(request, payload, level, pk):
     values = payload.get('values')
     org = get_object_or_404(Org, pk=pk, level=level)
