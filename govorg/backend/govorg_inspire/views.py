@@ -679,6 +679,8 @@ def createDel(request, payload):
     pid = payload.get('pid')
     fid = payload.get('fid')
     old_geo_id = payload.get('old_geo_id')
+    order_no = form_json.get('order_no')
+    order_at = form_json.get('order_at')
 
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
@@ -691,6 +693,8 @@ def createDel(request, payload):
             kind = 3,
             form_json = None,
             geo_json = None,
+            order_at=order_at,
+            order_no=order_no,
     )
     rsp = {
         'success': True,
