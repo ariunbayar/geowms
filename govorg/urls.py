@@ -14,9 +14,10 @@ urlpatterns = [
     path('api/', include(([
 
         path('role/', include(([
-            path('org/', role_org_views.views),
+            path('org/', role_org_views.org_role),
             path('employee', employee_views.employees),
         ], 'role'))),
+
         path('system/', system_views.systemList, name='system'),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),

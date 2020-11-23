@@ -312,3 +312,83 @@ element.style {
     position: absolute;
     bottom: 5%;
 }
+
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 30px;
+    left: -50px;
+    min-width: 200px;
+    max-width: 400px;
+    z-index: 1030;
+}
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+
+
+.ol-popup-contet {
+    margin-top: 5px;
+    margin-left: 15px;
+    margin-bottom: 5px;
+    margin-right: 15px;
+}
+
+.ol-popup-header-content {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.ol-popup-header{
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    margin: 0;
+    top: 0;
+    padding: 0;
+    background-color:rgba(0,0,0,0.2);
+}
+
+.ol-popup-closer {
+    float: right;
+    text-decoration: none;
+}
+
+.ol-popup-closer:hover {
+    color: red
+}
+
+.ol-popup-table .table td, .ol-popup-table .table td{
+    padding:0px !important;
+}
+
+.borderless td, .borderless th {
+    border: none;
+}
+
+.no-padding td, .no-padding th {
+    padding-left: 10px !important;
+    padding-right: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 5px !important;
+}
