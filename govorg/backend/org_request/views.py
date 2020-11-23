@@ -296,7 +296,7 @@ def _getChoices(user):
 def getAll(request):
 
     org_request = []
-    org_request_list = ChangeRequest.objects.all()
+    org_request_list = ChangeRequest.objects.all().order_by('-created_at')
     if org_request_list:
         org_request = [_get_org_request(ob) for ob in org_request_list]
         choices = _getChoices(request.user)
