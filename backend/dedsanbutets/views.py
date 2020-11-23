@@ -954,7 +954,6 @@ def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
-
     try:
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}
@@ -975,7 +974,6 @@ def createView(ids, table_name, model_name):
                 cursor.execute(query)
                 cursor.execute(query_index)
         return True
-    
     except Exception:
         return False
 
