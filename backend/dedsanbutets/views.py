@@ -751,6 +751,8 @@ def get_colName_type(view_name, data):
 
 def _create_geoserver_detail(table_name, model_name, theme, user_id):
     
+    wms = []
+    wms_layer =[]
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
     ds_name = ws_name
@@ -760,12 +762,11 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
     wms = WMS.objects.filter(name=theme.theme_name).first()
     theme_name = theme.theme_name
     if not wms:
-        WMS.objects.create(
-            name=theme.theme_name,
-            url = wms_url,
-            created_by_id=user_id
-        )
-        wms = WMS.objects.filter(name=theme.theme_name).first()
+        wms = WMS.objects.create(
+                name=theme.theme_name,
+                url = wms_url,
+                created_by_id=user_id
+            )
     if check_workspace.status_code == 404:
 
         geoserver.create_space(ws_name)
@@ -946,33 +947,25 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                 else:
                     return {'info': 'layer_remove'}
 
-        wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
         wms_id = wms.id
-        theme = LThemes.objects.filter(theme_name=theme_name).first()
-        bunde_id = Bundle.objects.filter(ltheme=theme).first().id
+        wms_layer = WMSLayer.objects.filter(wms_id=wms_id, code=layer_name)
+        bundle_id = theme.bundle.id
         if not wms_layer:
             legend_url = geoserver.get_legend_url(wms_id, layer_name)
-            WMSLayer.objects.create(
-                name=layer_name,
-                code=layer_name,
-                wms=wms,
-                title=layer_name,
-                feature_price=0,
-                legend_url=legend_url
-            )
-            wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
+            wms_layer = WMSLayer.objects.create(
+                            name=layer_name,
+                            code=layer_name,
+                            wms=wms,
+                            title=layer_name,
+                            feature_price=0,
+                            legend_url=legend_url
+                        )
+        bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
+        if not  bundle_layer:
             BundleLayer.objects.create( 
-                bundle_id=bunde_id,
-                layer_id=wms_layer_id
+                bundle_id=bundle_id,
+                layer_id=wms_layer.id
             )
-        else:
-            wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
-            bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer_id).first()
-            if not  bundle_layer:
-                BundleLayer.objects.create( 
-                    bundle_id=bunde_id,
-                    layer_id=wms_layer_id
-                )
 
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
@@ -980,29 +973,27 @@ def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
-    try:
-        query = '''
-            CREATE MATERIALIZED VIEW public.{table_name}
-                AS
-            SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
-            ct(geo_id character varying(100), {create_columns})
-            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
-        '''.format(
-                table_name = table_name,
-                model_name = model_name,
-                columns=', '.join(['ct.{}'.format(f) for f in fields]),
-                properties=', '.join(['{}'.format(f) for f in ids]),
-                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
-        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
-        with connections['default'].cursor() as cursor:
-                cursor.execute(query)
-                cursor.execute(query_index)
-        return True
+    query = '''
+        CREATE MATERIALIZED VIEW public.{table_name}
+            AS
+        SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
+        FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
+        ct(geo_id character varying(100), {create_columns})
+        JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+    '''.format(
+            table_name = table_name,
+            model_name = model_name,
+            columns=', '.join(['ct.{}'.format(f) for f in fields]),
+            properties=', '.join(['{}'.format(f) for f in ids]),
+            create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+    query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
-    except Exception:
-        return False
+    with connections['default'].cursor() as cursor:
+            cursor.execute(query)
+            cursor.execute(query_index)
+    return True
+
 
 
 def removeView(table_name):
