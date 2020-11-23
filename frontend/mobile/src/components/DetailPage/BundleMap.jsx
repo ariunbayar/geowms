@@ -9,8 +9,6 @@ import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
 import {Point, LineString} from 'ol/geom'
 import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from 'ol/style'
-import {getVectorContext} from 'ol/render'
-
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
@@ -21,7 +19,6 @@ import {fromLonLat} from 'ol/proj';
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
-
 import "./styles.css"
 import {service} from './service'
 import {Sidebar} from './Sidebar'
@@ -63,9 +60,6 @@ export default class BundleMap extends Component {
         this.showFeaturesLimit = this.showFeaturesLimit.bind(this)
         this.locationSet = this.locationSet.bind(this)
         this.connectPointToPoint = this.connectPointToPoint.bind(this)
-        this.startAnimation = this.startAnimation.bind(this)
-        this.stopAnimation = this.stopAnimation.bind(this)
-        this.moveFeature = this.moveFeature.bind(this)
     }
 
     initMarker() {
@@ -79,19 +73,15 @@ export default class BundleMap extends Component {
                 src: '/static/assets/image/marker.png'
             })
         })
-
         const point = new Point([0, 0])
-
         const feature = new Feature({geometry: point})
         feature.setStyle(style)
-
         return {feature: feature, point: point}
 
     }
 
     componentDidMount() {
         if(this.state.bundle.id) this.loadMapData(this.state.bundle.id)
-
         navigator.geolocation.getCurrentPosition((position) => {
             const location = [position.coords.longitude, position.coords.latitude]
             this.setState({longitude: position.coords.longitude, latitude: position.coords.latitude})
@@ -103,12 +93,9 @@ export default class BundleMap extends Component {
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
-
         if (this.props.bundle.id === prevProps.bundle.id) return
-
         const {bundle} = this.props
         this.setState({bundle})
-
         this.loadMapData(bundle.id)
 
     }
@@ -153,12 +140,11 @@ export default class BundleMap extends Component {
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
             )
         )
+
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
-
                     let layer
-
                     if (base_layer_info.tilename == "xyz") {
                         layer = new Tile({
                             source: new TileImage({
@@ -167,7 +153,6 @@ export default class BundleMap extends Component {
                             }),
                         })
                     }
-
                     if (base_layer_info.tilename == "wms") {
                         layer = new Tile({
                             source: new TileWMS({
@@ -179,7 +164,6 @@ export default class BundleMap extends Component {
                             }),
                         })
                     }
-
                     acc.base_layers.push(layer)
                     acc.base_layer_controls.push({
                         is_active: idx == 0,
@@ -187,9 +171,7 @@ export default class BundleMap extends Component {
                         thumbnail_2x: base_layer_info.thumbnail_2x,
                         layer: layer,
                     })
-
                     return acc
-
                 },
                 {
                     base_layers: [],
@@ -299,61 +281,6 @@ export default class BundleMap extends Component {
         })
     }
 
-    startAnimation() {
-        const map = this.map
-        if (this.animating) {
-            this.stopAnimation(false);
-        } else {
-            this.animating = true;
-            this.now = new Date().getTime();
-            this.geoMarker.setStyle(null);
-            this.state.vector_layer.on('postrender', (event) => this.moveFeature(event));
-            map.render();
-        }
-    }
-
-    stopAnimation(ended) {
-        const map = this.map
-        this.animating = false;
-        // if animation cancelled set the marker at the beginning
-        // const coord = ended ? this.line[this.routeLength - 1] : this.line[0];
-        // const geometry = this.geoMarker.getGeometry();
-        // geometry.setCoordinates(coord);
-        //remove listener
-        this.state.vector_layer.un('postrender', (event) => this.moveFeature(event));
-    }
-
-    moveFeature (event) {
-        const map = this.map
-        const vectorContext = getVectorContext(event);
-        const frameState = event.frameState;
-        if (this.animating) {
-          const elapsedTime = frameState.time - this.now;
-          console.log(elapsedTime);
-          const index = Math.round((this.speed * elapsedTime) / 1000);
-          console.log(index);
-          if (index >= this.routeLength) {
-            this.stopAnimation(true);
-            return;
-          }
-          const currentPoint = new Point(this.line[index]);
-          const feature = new Feature(currentPoint);
-          const style = new Style({
-            image: new CircleStyle({
-              radius: 7,
-              fill: new Fill({color: 'black'}),
-              stroke: new Stroke({
-                color: 'white',
-                width: 2,
-              }),
-            }),
-          })
-          vectorContext.drawFeature(feature, style);
-        }
-        // tell OpenLayers to continue the postrender animation
-        map.render();
-      };
-
     showFeaturesLimit() {
         const {longitude, latitude} = this.state
         const coordinat_center = [longitude, latitude]
@@ -375,23 +302,16 @@ export default class BundleMap extends Component {
 
                 const url = wms_source.getFeatureInfoUrl(
                     coord0,
-                    200,
+                    5000,
                     projection,
                     {
                         //'INFO_FORMAT': 'text/xml'
                         //'INFO_FORMAT': 'text/html'
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
                         'feature_count': 10,
-                        'X':50,
-                        'Y':50,
-                        'WIDTH':101,
-                        'HEIGHT':101,
                     }
                 )
-                console.log(url)
                 if (url) {
-                    if(!this.state.is_draw_open){
-                    }
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
@@ -408,8 +328,6 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            this.state.vector_layer.setSource(source)
-                            this.connectPointToPoint(features)
                             if(!this.state.is_draw_open){
                                 if(geodb_table == 'mpoint_view'){
                                 }
@@ -420,6 +338,10 @@ export default class BundleMap extends Component {
                                             this.setState({feature_info})
                                         }
                                     }
+                                }
+                                if(geodb_table == 'covid'){
+                                    this.state.vector_layer.setSource(source)
+                                    this.connectPointToPoint(features)
                                 }
                             }
                         })
@@ -454,7 +376,6 @@ export default class BundleMap extends Component {
 
                     }
                 )
-                console.log(url)
                 if (url) {
                     if(!this.state.is_draw_open){
                     }
@@ -507,7 +428,7 @@ export default class BundleMap extends Component {
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
-        view.animate({zoom: zoom, duration: 200}, {center: view.setCenter(map_coord), duration: 200});
+        view.animate({zoom: zoom, duration: 4000}, {center: view.setCenter(map_coord), duration: 2000});
         const hureelayer = new VectorLayer({
             source: new VectorSource({
                 projection: this.state.projection_display,
@@ -516,7 +437,7 @@ export default class BundleMap extends Component {
             style: new Style({
                 stroke: new Stroke({
                     color: 'BLUE',
-                    width: 4
+                    width: 2
                 }),
                 fill: new Fill({
                     color: 'rgba(100, 255, 0, 0)'
