@@ -36,7 +36,7 @@ export default class InsPerms extends Component {
     }
 
     getId(id, type, name) {
-       if(type == 'theme') this.setState({ tid: id, is_open: true, t_name: name })
+       if(type == 'theme') this.setState({ tid: id, is_open: true, t_name: name, pid: 0, fid: 0 })
        if(type == 'package') this.setState({ pid: id, p_name: name })
        if(type == 'feature') this.setState({ fid: id, f_name: name })
     }
@@ -185,7 +185,7 @@ export default class InsPerms extends Component {
                                             property.parent_id == fid &&
                                             <tr key={pro_idx}>
                                                 <th>
-                                                    {property.name}
+                                                    {pro_idx + 1} - {property.name}
                                                 </th>
                                                 {perms.map((perm, perm_idx) =>
                                                 Object.keys(property.roles).map((key, k_idx) =>
@@ -257,7 +257,7 @@ export class PermChecks extends Component {
                         />
                 }
                 {
-                   type && value ?
+                type && value ?
                     <label htmlFor={`${name}-${index}-${idx}`}></label>
                     :
                     <label htmlFor={`${name}-${index}-${idx}`}></label>

@@ -77,12 +77,12 @@ export class PermAcc extends Component {
         super(props)
         this.state = {
             perms: [
-                {'name': 'харах'},
-                {'name': 'нэмэх'},
-                {'name': 'хасах'},
-                {'name': 'цуцлах'},
-                {'name': 'хянах'},
-                {'name': 'батлах'},
+                {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false},
+                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE', 'value': false},
+                {'name': 'хасах', 'eng_name': 'PERM_REMOVE', 'value': false},
+                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE', 'value': false},
+                {'name': 'хянах', 'eng_name': 'PERM_UPDATE', 'value': false},
+                {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
             ],
             r_name: '',
         }
@@ -96,7 +96,13 @@ export class PermAcc extends Component {
                 <div className="row">
                     <div className="col-4">
                         <h5 className="mb-0 my-4">
-                            <i className={`fa ` + (is_open && (t_name == r_name) || (p_name == r_name) || (f_name == r_name) ? `fa-angle-down` : `fa-angle-right`) + ' gp-text-primary'}></i>
+                            <i className={`fa ` +
+                                (is_open && (type == 'theme' && (t_name == r_name)) ||
+                                (type == 'package' && (p_name == r_name)) ||
+                                (type == 'feature' && (f_name == r_name))
+                                    ? `fa-angle-down` : `fa-angle-right`) +
+                                ' gp-text-primary'}
+                            ></i>
                             &nbsp;
                             <span
                                 role="button"
@@ -110,7 +116,7 @@ export class PermAcc extends Component {
                                     this.props.sendId(id, type, name)
                                 }}
                             >
-                            {name}
+                            {name} - {count}
                             </span>
                         </h5>
                     </div>
