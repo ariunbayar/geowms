@@ -12,23 +12,23 @@ export class PermSwitches extends Component {
     }
 
     componentDidMount() {
-        const {count, index} = this.props
+        const { count, index, now_length } = this.props
         const radio_div = document.getElementById(index)
-        this.setStyle(radio_div, count)
+        this.setStyle(radio_div, count, now_length)
     }
 
-    setStyle(element, count) {
+    setStyle(element, count, now_length) {
         const { radio_switch_name } = this.state
         var max = 0
         const elem = document.querySelector(`.${radio_switch_name}`)
         let max_pos = getComputedStyle(elem).width
         var splited = max_pos.split('p')[0]
         const child = element.children[0]
-        if(count == 25) {
+        if(count == now_length) {
             element.style.backgroundColor = '#006CB6'
             max = Math.ceil(splited / 2)
         }
-        if(count < 25) {
+        if(count > now_length) {
             element.style.backgroundColor = '#FFD24A'
             max = Math.floor(splited / 3)
         }
@@ -48,7 +48,7 @@ export class PermSwitches extends Component {
     }
 
     render () {
-        const { name, p_idx, index, count } = this.props
+        const { name, p_idx, index, count, now_length } = this.props
         const { radio_switch_name } = this.state
 
         return (
@@ -64,6 +64,7 @@ export class PermSwitches extends Component {
                         <input type="checkbox" className="custom-control-input" id={index} />
                         <label className="custom-control-label" htmlFor={index}>  </label>
                     </div> */}
+                    <small>{now_length} of {count}</small>
                 </div>
             </div>
         )
@@ -85,17 +86,18 @@ export class PermAcc extends Component {
                 {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
             ],
             r_name: '',
+            now_length: null,
         }
     }
 
     render () {
-        const { perms, r_name } = this.state
+        const { perms, r_name, now_length } = this.state
         const { name, index, type, id, count, small, is_open, t_name, p_name, f_name } = this.props
         return (
             <div className="card-header" id={`${index}-${type}`}>
                 <div className="row">
                     <div className="col-4">
-                        <h5 className="mb-0 my-4">
+                        <h5 className="mb-0 mt-4">
                             <i className={`fa ` +
                                 (is_open && (type == 'theme' && (t_name == r_name)) ||
                                 (type == 'package' && (p_name == r_name)) ||
@@ -128,6 +130,7 @@ export class PermAcc extends Component {
                                     p_idx={p_idx}
                                     index={`${p_idx}-perm-${name}-${index}`}
                                     count={count}
+                                    now_length={now_length}
                                 />
                             )}
                         </div>
