@@ -14,7 +14,8 @@ import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
 import {format as coordinateFormat} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-
+import Circle from 'ol/geom/Circle';
+import {fromLonLat} from 'ol/proj';
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
 import {Modal} from './controls/Modal'
@@ -37,6 +38,9 @@ export default class BundleMap extends Component {
             is_sidebar_open: false,
             coordinate_clicked: null,
             vector_layer: null,
+            hureelayer: null,
+            longitude: 0,
+            latitude: 0
         }
 
         this.controls = {
@@ -78,6 +82,11 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
+        navigator.geolocation.getCurrentPosition((position) => {
+            var location = [position.coords.longitude, position.coords.latitude]
+            this.setState({longitude: position.coords.longitude, latitude: position.coords.latitude})
+        });
+
         if(this.state.bundle.id) this.loadMapData(this.state.bundle.id)
     }
 
@@ -108,15 +117,21 @@ export default class BundleMap extends Component {
     }
 
     handleMapDataLoaded(base_layer_list, wms_list) {
+        // const {longitude, latitude} = this.state
+        // var coordinat_bottom = [longitude + 0.008, latitude + 0.007]
+        // var coordinat_top = [longitude - 0.008, latitude - 0.007]
+        // var coord1 = fromLonLat(coordinat_bottom,this.state.projection)
+        // var coord2 = fromLonLat(coordinat_top,this.state.projection)
 
         const map_wms_list = wms_list.map(({name, url, layers}) => {
-
+            console.log(url)
             return {
                 name,
                 layers: layers.map((layer) => {
                     return {
                         ...layer,
                         tile: new Tile({
+                            // extent: [coord1[0],coord1[1],coord2[0],coord2[1]],
                             source: new TileWMS({
                                 projection: this.state.projection,
                                 url: url,
@@ -131,6 +146,7 @@ export default class BundleMap extends Component {
                 }),
             }
         })
+        console.log(map_wms_list)
         this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) =>
@@ -200,7 +216,6 @@ export default class BundleMap extends Component {
                 features: [this.marker.feature],
             })
         })
-
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -238,6 +253,7 @@ export default class BundleMap extends Component {
     }
 
     handleMapClick(event) {
+        console.log(this.map.getView().calculateExtent(this.map.getSize()))
         if(this.state.is_sidebar_open){
             this.setState({is_sidebar_open:false})
         }
@@ -245,17 +261,19 @@ export default class BundleMap extends Component {
             this.props.wmsLayerName()
         }
         else{
-            this.marker.point.setCoordinates(event.coordinate)
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
+            console.log(event.coordinate)
+            console.log(coordinate_clicked)
+
             this.showFeaturesAt(event.coordinate)
         }
+
     }
 
     showFeaturesAt(coordinate) {
-
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -265,7 +283,6 @@ export default class BundleMap extends Component {
                 if (tile.getVisible() != true) {
                     return
                 }
-
                 const wms_source = tile.getSource()
                 const url = wms_source.getFeatureInfoUrl(
                     coordinate,
@@ -277,7 +294,7 @@ export default class BundleMap extends Component {
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
                     }
                 )
-
+                console.log(url)
                 if (url) {
                     if(!this.state.is_draw_open){
                     }
@@ -329,6 +346,23 @@ export default class BundleMap extends Component {
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
         this.marker.point.setCoordinates(map_coord)
         view.animate({zoom: zoom, duration: 4000}, {center: view.setCenter(map_coord), duration: 2000});
+        const hureelayer = new VectorLayer({
+            source: new VectorSource({
+                projection: this.state.projection_display,
+                features: [new Feature(new Circle(map_coord, 1000))]
+            }),
+            style: new Style({
+                stroke: new Stroke({
+                    color: 'BLUE',
+                    width: 4
+                }),
+                fill: new Fill({
+                    color: 'rgba(100, 255, 0, 0)'
+                })
+            })
+        })
+        this.setState({hureelayer})
+        this.map.addLayer(this.state.hureelayer);
     }
 
     toggleSidebar(event) {
@@ -336,10 +370,12 @@ export default class BundleMap extends Component {
     }
 
     locationSet(){
+        this.map.removeLayer(this.state.hureelayer)
         navigator.geolocation.getCurrentPosition((position) => {
             var location = [position.coords.longitude, position.coords.latitude]
-            this.handleSetCenter(location, 14)
+            this.handleSetCenter(location, 14.6)
         });
+
     }
 
     render() {
