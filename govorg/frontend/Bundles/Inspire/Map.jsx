@@ -81,6 +81,7 @@ export default class BarilgaSuurinGazar extends Component{
           isMeta: false,
           pointFeature: null,
           is_not_mongolia: false,
+          update_geom_from_list: false,
       }
 
       this.controls = {
@@ -109,6 +110,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.RemoveButton = this.RemoveButton.bind(this)
       this.FormButton = this.FormButton.bind(this)
       this.remove = this.remove.bind(this)
+      this.requestRemove = this.requestRemove.bind(this)
       this.removeModal = this.removeModal.bind(this)
       this.modifiedFeature = this.modifiedFeature.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
@@ -173,7 +175,8 @@ export default class BarilgaSuurinGazar extends Component{
         }
       }
       if(roles[1] || roles[3]) {
-        map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+        if (roles[6]) map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
+        else map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
         map.addControl(this.controls.metaList)
@@ -492,7 +495,9 @@ export default class BarilgaSuurinGazar extends Component{
           })
         }
       })
-      if (feature_type.includes('Polygon'))  this.feature_coordinates =  this.feature_coordinates[0]
+      if (feature_type.includes('Poly')) {
+          this.feature_coordinates = this.feature_coordinates[0]
+      }
       if (!feature_type.includes("Point")) {
         for(let i=0; i < this.feature_coordinates.length; i++) {
           const check = Mongolia_feaure.getGeometry().containsXY(this.feature_coordinates[i][0], this.feature_coordinates[i][1])
@@ -657,7 +662,7 @@ export default class BarilgaSuurinGazar extends Component{
         })
 
         const drawed = JSON.stringify(area)
-        this.setState({drawed, selectedFeature_ID: null})
+        this.setState({drawed, selectedFeature_ID: null, null_form_isload: true})
       } else {
         this.setState({ is_not_mongolia: true })
         this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
@@ -686,15 +691,16 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({ remove_button_active: true, modify_button_active: false })
       }
     }
+
     FormButton(){
       this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))
     }
 
-    removeModal(){
+    removeModal(values){
 
       if(this.state.selectedFeature_ID){
         if(this.state.roles[6]){
-          this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
+          this.controls.modal.showModal(() => this.remove(values), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
         }else{
           this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
         }
@@ -706,23 +712,31 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    remove(){
-      const vector = this.vector
-      const vectorLayer = this.vectorLayer
-      const selectedFeature_ID = this.state.selectedFeature_ID
-      var features_new = vector.getSource().getFeatures();
-      var features = vectorLayer.getSource().getFeatures();
+    requestRemove() {
       const tid = this.state.tid
       const fid = this.state.fid
       const pid = this.state.pid
+      const selectedFeature_ID = this.state.selectedFeature_ID
+      service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
+        if (success) {
+          this.props.refreshCount()
+          this.addNotif('success', 'Устгах хүсэлт үүслээ', 'check')
+          this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
+        }
+      })
+    }
+
+    remove(values){
+      const vector = this.vector
+      const vectorLayer = this.vectorLayer
+      const {tid, fid, pid, selectedFeature_ID} = this.state
+
+      const features_new = vector.getSource().getFeatures();
+      const features = vectorLayer.getSource().getFeatures();
+
       if(selectedFeature_ID){
           if(this.state.roles[6]){
-            service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
-              if (success) {
-                this.addNotif('success', 'Амжилттай', 'check')
-                this.setState({featureID_list: [], selectedFeature_ID: null})
-              }
-            })
+            this.setState({ togle_islaod: false })
           }
           else{
             service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
@@ -752,18 +766,35 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    SaveBtn(){
+    SaveBtn(form_values) {
       this.hideMetaList()
-      if(this.state.modifyend_selected_feature_ID){
-          if(this.state.modifyend_selected_feature_check)
+      const {modifyend_selected_feature_ID, modifyend_selected_feature_check, update_geom_from_list, build_name } = this.state
+      if(modifyend_selected_feature_ID){
+          if(modifyend_selected_feature_check || update_geom_from_list)
           {
             if(this.state.roles[6]){
-              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хянуулах уу`, null, null, "Үгүй")
-              this.setState({modifyend_selected_feature_check: false})
+              this.controls.modal.showModal(
+                    () => this.updateGeom(form_values),
+                    true,
+                    "Тийм",
+                    `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
+                    null,
+                    null,
+                    "Үгүй"
+              )
+              this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
             }
             else{
-              this.controls.modal.showModal(this.updateGeom, true, "Тийм", `${this.state.modifyend_selected_feature_ID} дугаартай мэдээллийг хадгалах уу`, null, null, "Үгүй")
-              this.setState({modifyend_selected_feature_check: false})
+              this.controls.modal.showModal(
+                    this.updateGeom,
+                    true,
+                    "Тийм",
+                    `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хадгалах уу`,
+                    null,
+                    null,
+                    "Үгүй"
+              )
+              this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
             }
           }
           else{
@@ -776,11 +807,14 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    updateGeom(changedJson){
+    updateGeom(values){
       const {tid, fid, pid, is_not_mongolia} = this.state
       if (!is_not_mongolia) {
         const id = this.state.selectedFeature_ID
-        const { changedFeature } = this.state
+        const { changedFeature, changedJson } = this.state
+        console.log(changedJson);
+        console.log(changedJson);
+        console.log(changedJson);
         this.feature = ''
         if (changedJson) {
           this.feature = changedJson
@@ -791,13 +825,14 @@ export default class BarilgaSuurinGazar extends Component{
         const datas = json.geometry
         this.setState({ is_loading:true })
         if(this.state.roles[6]){
-          service.createUpd(tid, pid, fid, null, datas, id).then(({success}) => {
+          service.createUpd(tid, pid, fid, values, datas, id).then(({success}) => {
             if(success){
-              this.addNotif('success', 'Амжилттай', 'check')
+              this.addNotif('success', 'Хүсэлтийг үүсгэлээ', 'check')
+              this.props.refreshCount()
               this.setState({is_loading:false})
             }
             else {
-              this.addNotif('danger', 'Амжилтгүй', 'times')
+              this.addNotif('danger', 'Хүсэлт үүсгэхэд алдаа гарсан байна', 'times')
               this.setState({is_loading:false})
             }
           })
@@ -824,14 +859,17 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     createGeom(){
+      console.log('shineeer uussgeh');
       const { is_not_mongolia } = this.state
       if (!is_not_mongolia) {
+        console.log('in mongol');
         const fid = this.state.fid
         const json = JSON.parse(this.state.drawed)
         const datas = json.geometry
-        this.setState({ is_loading:true })
+        this.setState({ is_loading: true })
         if(this.state.roles[6]){
-          this.setState({ is_loading:false, geojson: datas, null_form_isload: true, togle_islaod: false})
+          console.log('batlah erhtei');
+          this.setState({ is_loading: false, geojson: datas, togle_islaod: false})
         }
         else
         {
@@ -859,6 +897,7 @@ export default class BarilgaSuurinGazar extends Component{
       } else {
         this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
       }
+      this.is_save = true
     }
 
     ModifyButton(){
@@ -991,7 +1030,7 @@ export default class BarilgaSuurinGazar extends Component{
         if (check) {
           var coord_info = {
             'coordinate': feature[i],
-            'turning': i
+            'turning': i + 1
           }
           insideCoordinates.push(coord_info)
         }
@@ -1061,6 +1100,8 @@ export default class BarilgaSuurinGazar extends Component{
       const sendGeom = {
         "data": this.list,
         'id': name,
+        'last': data['last'],
+        'type': data['type'],
       }
       this.controls.coordList.showList(true, sendGeom, this.flyTo, () => this.listToModal(), this.updateFromList)
     }
@@ -1107,6 +1148,7 @@ export default class BarilgaSuurinGazar extends Component{
       source.forEachFeatureIntersectingExtent(extent, (feature) => {
         var feats = []
         const feat_type = feature.getGeometry().getType()
+        this.feat_type = feat_type
         if (feat_type.includes('MultiPolygon')) {
           const feat_multi = this.getTypeFunction(feature.getGeometry())
           feat_multi.map((feature_multi, idx) => {
@@ -1117,7 +1159,6 @@ export default class BarilgaSuurinGazar extends Component{
         }
         feats.map((feat_mutli, idx) => {
           var checkBounds = null
-          console.log(feat_type);
           if (feat_type.includes('MultiPolygon')) {
             checkBounds = feat_mutli.getCoordinates()
           }
@@ -1125,18 +1166,18 @@ export default class BarilgaSuurinGazar extends Component{
             checkBounds = [feat_mutli.getGeometry().getCoordinates()]
           }
           else if (feat_type == 'Point'){
-            checkBounds = [feat_mutli.getGeometry().getCoordinates()]
+            checkBounds = [[feat_mutli.getGeometry().getCoordinates()]]
           }
           else {
             checkBounds = feat_mutli.getGeometry().getCoordinates()
           }
           checkBounds.map((checkBound, idx) => {
+            const lastElement = checkBound.length
+            this.lastElement = lastElement
             for (let i = 0; i < checkBound.length; i ++){
               const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
-              console.log(check);
               if (check) {
                 const coordinates = this.getTurningPoints(dragBox, checkBound)
-                console.log(coordinates);
                 this.dupl = true
                 if (coordinates.length > 0) {
                   if (this.turningPoint.length > 0) {
@@ -1152,10 +1193,12 @@ export default class BarilgaSuurinGazar extends Component{
                   if (this.dupl) {
                     selectedFeatures.push(feature);
                     this.setState({ build_name: feature.get('id') })
-                    coordinates.map((coordinate, idx) => {
+                    coordinates.map((coordinate, i) => {
                       this.sendCoordinateList.push(coordinate.coordinate)
                       this.turningPoint.push(coordinate.turning)
-                      this.addMarker(coordinate)
+                      if (!feat_type.includes("Point") && lastElement !== coordinate.turning) {
+                        this.addMarker(coordinate)
+                      }
                     })
                   }
                 }
@@ -1167,6 +1210,8 @@ export default class BarilgaSuurinGazar extends Component{
       const data = {
         'geom': this.sendCoordinateList,
         'turning': this.turningPoint,
+        'last': this.lastElement,
+        'type': this.feat_type,
       }
       this.sendToShowList(data)
     }
@@ -1223,11 +1268,45 @@ export default class BarilgaSuurinGazar extends Component{
       const feature_id = selected_feature.get('id')
       if (feature_id == id) {
         const getType = selected_feature.getGeometry().getType()
-        const geom_coordinate = selected_feature.getGeometry().getCoordinates()[0]
-        coords.map(({conv_geom, turning}) => {
-          geom_coordinate[turning] = conv_geom
-        })
-        const geom = new geom_type[getType]([geom_coordinate])
+        var geom_coordinate = []
+        if (getType.includes('MultiPolygon')) {
+          geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        }
+        else if (getType.includes('MultiPoint')){
+          geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        }
+        else if (getType == 'Point'){
+          geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        }
+        else {
+          geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        }
+        if (getType.includes('MultiPolygon')) {
+          geom_coordinate.map((geo, idx) => {
+            geo.map((g, ix) => {
+              coords.map(({conv_geom, turning}) => {
+                geom_coordinate[idx][ix][turning - 1] = conv_geom
+              })
+            })
+          })
+        }
+        else if (getType == 'Point') {
+          coords.map(({conv_geom}) => {
+            geom_coordinate = conv_geom
+          })
+        } else if (getType == 'MultiPoint') {
+          coords.map(({conv_geom, turning}) => {
+            geom_coordinate[turning - 1] = conv_geom
+          })
+        }
+        else {
+          geom_coordinate.map((geo, idx) => {
+            coords.map(({conv_geom, turning}) => {
+              geom_coordinate[idx][turning - 1] = conv_geom
+            })
+          })
+        }
+        const geom = new geom_type[getType](geom_coordinate)
         const new_feature = new Feature({
           geometry: geom,
           id: feature_id
@@ -1235,10 +1314,9 @@ export default class BarilgaSuurinGazar extends Component{
         const check = this.checkInMongolia([new_feature])
         if (check) {
           source.removeFeature(selected_feature)
-          this.setState({ is_not_mongolia: false })
           source.addFeature(new_feature)
-          const changedFeature = this.writeFeat(new_feature)
-          this.updateGeom(changedFeature)
+          const changedJson = this.writeFeat(new_feature)
+          this.setState({ changedJson, is_not_mongolia: false, togle_islaod: false, update_geom_from_list: true })
           this.hideShowList()
         } else {
           this.setState({ is_not_mongolia: true })
@@ -1292,6 +1370,12 @@ export default class BarilgaSuurinGazar extends Component{
                           togle_islaod = {this.state.togle_islaod}
                           null_form_isload = {this.state.null_form_isload}
                           addNotif = {this.addNotif}
+                          SaveBtn={this.SaveBtn}
+                          requestRefreshCount={this.props.refreshCount}
+                          modifyend_selected_feature_check={this.state.modifyend_selected_feature_check}
+                          requestRemove={this.requestRemove}
+                          remove_button_active={this.state.remove_button_active}
+                          update_geom_from_list={this.state.update_geom_from_list}
                         >
                         </Маягт>
                       </div>
