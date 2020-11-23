@@ -292,7 +292,6 @@ export default class BundleMap extends Component {
             const routeLength = line.getCoordinates().length;
             this.line = line
             this.routeLength = routeLength
-            this.startAnimation()
         })
         this.geoMarker = new Feature({
             type: 'geoMarker',
@@ -409,11 +408,6 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            console.log(feature_info)
-                            console.log(feature_info)
-                            console.log(feature_info)
-                            console.log(feature_info)
-                            console.log(feature_info)
                             this.state.vector_layer.setSource(source)
                             this.connectPointToPoint(features)
                             if(!this.state.is_draw_open){
@@ -486,6 +480,8 @@ export default class BundleMap extends Component {
                                 else{
                                     if(!this.state.pay_modal_check && geodb_table != 'privite') {
                                         this.state.vector_layer.setSource(source)
+                                        this.connectPointToPoint(features)
+
                                         if(feature_info.length > 0) this.controls.modal.showModal(feature_info, true)
                                     }
                                 }
