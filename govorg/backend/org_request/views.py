@@ -328,7 +328,7 @@ def getAll(request):
 def requestDelete(request, pk):
 
     get_object_or_404(ChangeRequest, id=pk)
-    change_request = ChangeRequest.objects.filter(id = pk).update(state=2)
+    change_request = ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_REJECT)
 
     rsp = {
         'success': True,
@@ -408,7 +408,7 @@ def requestApprove(request, payload, pk):
                 geo_json = str(geo_json).replace("\'", "\"")
                 geom = GEOSGeometry(geo_json)
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
-                ChangeRequest.objects.filter(id = pk).update(state=3)
+                ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
                 view_check = refreshMaterializedView(feature_id)
                 rsp = {
                     'success': True,
@@ -419,7 +419,7 @@ def requestApprove(request, payload, pk):
                 data.delete()
                 geo_data_model = _get_model_name(theme_code).objects.filter(geo_id=old_geo_id)
                 geo_data_model.delete()
-                ChangeRequest.objects.filter(id = pk).update(state=3)
+                ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
                 view_check = refreshMaterializedView(feature_id)
                 rsp = {
                     'success': True,
@@ -481,7 +481,7 @@ def requestApprove(request, payload, pk):
                         property_id = i['property_id'],
                         value_text = value_data
                     )
-            ChangeRequest.objects.filter(id = pk).update(state=3)
+            ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
             view_check = refreshMaterializedView(feature_id)
             rsp = {
                 'success': True,
@@ -499,7 +499,7 @@ def requestApprove(request, payload, pk):
 @ajax_required
 def getCount(request):
     try:
-        count = ChangeRequest.objects.filter(state=1).count()
+        count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
         rsp = {
             'success': True,
             'count': count

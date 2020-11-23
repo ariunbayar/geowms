@@ -198,8 +198,7 @@
 .xButtonLayer {
     font-size: 27px;
     position: absolute;
-    top: 3%;
-    right: 12%;
+    right: 9%;
     color: rgba(0,60,136,1);
 }
 .searchComponent{
