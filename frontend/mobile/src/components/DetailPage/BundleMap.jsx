@@ -294,7 +294,7 @@ export default class BundleMap extends Component {
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
                     }
                 )
-                console.log(url)
+
                 if (url) {
                     if(!this.state.is_draw_open){
                     }
@@ -393,7 +393,7 @@ export default class BundleMap extends Component {
                                 handleSetCenter={this.handleSetCenter}
                             />
                             <div className={'⚙-toggle'}>
-                                <a href="#" onClick={() =>this.toggleSidebar(true)}>
+                                <a href="#" onClick={() =>  this.setState(prevState => ({is_sidebar_open: !prevState.is_sidebar_open}))}>
                                     <i className="fa fa-bars fa-lg" aria-hidden="true"></i>
                                 </a>
                             </div>
