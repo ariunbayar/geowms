@@ -28,7 +28,7 @@ export class App extends Component {
             tseg_burtgel: {},
             map_list: [],
         }
-        this.handleMapComponens = this.handleMapComponens.bind(this)
+        this.requestCount = this.requestCount.bind(this)
     }
 
     componentDidMount() {
@@ -43,10 +43,10 @@ export class App extends Component {
             }
         })
 
-        this.handleMapComponens()
+        this.requestCount()
     }
 
-    handleMapComponens() {
+    requestCount() {
         // service.component
         service.getCount().then(({ success, count, info }) => {
             if (success) {
@@ -161,9 +161,9 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
                             <Route path="/gov/zip-code/" component={ZipCode} />
-                            <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
+                            <Route path="/gov/org-request/" component={OrgRequest} />
                             <Route path="/gov/history/" component={ChangeRequest} />
                             <Route exact path="/gov/role/employees/" component={Employee} />
                             <Route exact path="/gov/role/" component={GovRole} />
