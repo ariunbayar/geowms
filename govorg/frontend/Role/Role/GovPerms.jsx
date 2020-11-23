@@ -27,12 +27,13 @@ export default class InsPerms extends Component {
             t_name: '',
             p_name: '',
             f_name: '',
+            roles: [],
         }
 
         this.getId = this.getId.bind(this)
         this.PermsOnChange = this.PermsOnChange.bind(this)
         this.cancelOpen = this.cancelOpen.bind(this)
-        this.getValue = this.getValue.bind(this)
+        this.getOrgRole = this.getOrgRole.bind(this)
     }
 
     getId(id, type, name) {
@@ -52,13 +53,17 @@ export default class InsPerms extends Component {
         this.setState({ perms })
     }
 
-    getValue(checked, property_name, index, idx, perm_name, property_id) {
-        this.values = new Object()
-        values['perms'] = perm_name
-        console.log(checked, property_name, index, idx, perm_name, property_id);
+    componentDidMount() {
+        if(this.props.dontDid){
+            const { themes, package_features, properties } = this.props.org_roles
+            console.log(themes, package_features, properties);
+            this.setState({ themes, package_features, properties })
+        } else {
+            this.getOrgRole()
+        }
     }
 
-    componentDidMount() {
+    getOrgRole() {
         service
             .getPerms()
             .then(({success, themes, package_features, property}) => {
@@ -191,6 +196,7 @@ export default class InsPerms extends Component {
                                                 Object.keys(property.roles).map((key, k_idx) =>
                                                     key == perm.eng_name &&
                                                     <PermChecks key={perm_idx}
+                                                        fid={fid}
                                                         id={property.id}
                                                         index={pro_idx}
                                                         idx={perm_idx}
@@ -198,7 +204,7 @@ export default class InsPerms extends Component {
                                                         name={property.name}
                                                         perm_name={perm.eng_name}
                                                         type={type}
-                                                        sendValue={this.getValue}
+                                                        sendValue={this.props.getValue}
                                                     />
                                                 ))}
                                             </tr>
@@ -224,10 +230,10 @@ export class PermChecks extends Component {
     }
 
     handleOnChange (checked) {
-        const { name, index, id, perm_name, type, value, idx } = this.props
+        const { name, index, id, perm_name, type, value, idx, fid } = this.props
         if(type) {
             this.setState({ checked_state: checked })
-            this.props.sendValue(checked, name, index, idx, perm_name, id)
+            this.props.sendValue(checked, name, index, idx, perm_name, id, fid)
         }
     }
 
@@ -246,7 +252,7 @@ export class PermChecks extends Component {
                             onChange={(e) => this.handleOnChange(e.target.checked)}
                         />
                         :
-                        <i class="fa fa-minus" aria-hidden="true"></i>
+                        <i className="fa fa-minus" aria-hidden="true"></i>
                     :
                         <input
                             type="checkbox"

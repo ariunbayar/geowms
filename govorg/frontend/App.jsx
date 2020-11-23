@@ -79,10 +79,10 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Эрх">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/" text="Эрхүүд"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/org/" text="Байгууллага"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/employees/" text="Хэрэглэгч"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/role/" text="Role"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/org/" text="Байгууллага"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employees/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Role"></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
@@ -166,14 +166,14 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
-                            <Route path="/gov/role/role/" component={Role} />
+                            <Route path="/gov/perm/role/" component={Role} />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/role/" component={InsPerms} />
-                            <Route exact path="/gov/role/org/" component={Gov} />
-                            <Route exact path="/gov/role/employees/" component={EmployeeForm} />
+                            <Route exact path="/gov/perm/" component={InsPerms} />
+                            <Route exact path="/gov/perm/org/" component={Gov} />
+                            <Route exact path="/gov/perm/employees/" component={EmployeeForm} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                         </Switch>
