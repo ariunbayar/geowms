@@ -1,50 +1,9 @@
 import React, { Component } from "react"
 import  { Redirect } from 'react-router-dom'
-
+import { Formik, input, ErrorMessage, validateYupSchema , inputArray} from 'formik'
 
 export class Form extends Component {
-
-    // constructor(props) {
-    //     super(props)
-    //     this.state = {
-    //         values: {
-    //             'name': '',
-    //             'description': ''
-    //         },
-    //         modal_alert_status: "closed",
-    //         title: '',
-    //         icon: ''
-
-    //     }
-    //     this.handleSubmit = this.handleSubmit.bind(this)
-
-    // }
-    // handleSubmit(values, {setStatus, setSubmitting}) {
-    //     setStatus('checking')
-    //     setSubmitting(true)
-    //     service.createPerm(values).then(({success}) => {
-    //         if(success){
-    //             setTimeout(() => {
-    //                 setStatus('saved')
-    //                 setSubmitting(false)
-    //                 this.setState({modal_alert_status: "open", title: 'Амжилттай хадгаллаа', icon: 'success'})
-    //                 this.modalClose()
-    //             }, 800)
-    //         }else{
-    //             setTimeout(() => {
-    //                 setStatus('saved')
-    //                 setSubmitting(false)
-    //                 this.setState({modal_alert_status: "open", title: 'Нэр давхцаж байна', icon: 'danger'})
-    //             }, 800)
-    //         }
-    //     })
-
-    // }
-
     render() {
-        // const ProtectedComponent = () => {if (authFails)
-        //       return <Redirect to='/login'  />
-        //     }
         return (
             <div className="login-container">
                 <div className="container">
@@ -57,12 +16,22 @@ export class Form extends Component {
                                         <h5 className="login name gp-text-primary mt-3">ХЭРЭГЛЭГЧ БАТАЛГААЖУУЛАХ ХЭСЭГ</h5>
                                     </div>
                                     <div className="form-group">
-                                        <label className="sr-only">Нууц үг</label>
-                                        <input type="text" className="form-control form-control-sm" placeholder="Нууц үг"></input>
+                                        <label htmlFor="new_password">Нууц үг</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-control form-control-sm" 
+                                            placeholder="Нууц үг"
+                                            id="new_password">
+                                        </input>
                                     </div>
                                     <div className="form-group">
-                                        <label className="sr-only">Нууц үгийг давтан оруулах</label>
-                                        <input type="text" className="form-control form-control-sm" placeholder="Нууц үгийг давтан оруулах"></input>
+                                        <label htmlFor="re_new_password">Нууц үгийг давтан оруулах</label>
+                                        <input 
+                                        type="text" 
+                                        className="form-control form-control-sm" 
+                                        placeholder="Нууц үгийг давтан оруулах"
+                                        id="re_new_password">
+                                        </input>
                                     </div>
                                     <button type="submit" className="btn gp-btn-primary">Баталгаажуулах</button>
                                 </form>
