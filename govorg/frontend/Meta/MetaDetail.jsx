@@ -66,7 +66,7 @@ export class MetaDetail extends Component {
                                             field.origin_name == meta
                                             ?
                                             <li className="float-left mr-3 mb-2" key={idx}>
-                                                <b>{field.name}:</b> <input disabled value={meta_data[meta]} className="form-control"/>
+                                                <b>{field.name}:</b> <input disabled value={meta_data[meta] || ''} className="form-control"/>
                                             </li>
                                             :
                                                 null
