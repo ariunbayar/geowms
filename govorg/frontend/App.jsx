@@ -59,6 +59,7 @@ export class App extends Component {
     }
 
     render() {
+      console.log(this.props.org.org_role)
         const {
             tuuhen_ov,
             tseg_burtgel,

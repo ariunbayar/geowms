@@ -72,8 +72,9 @@ INSTALLED_APPS = [
     # GovOrg apps
 
     'govorg.backend.org.apps.OrgConfig',
-    'govorg.backend.role_org.apps.RoleOrgConfig',
-    'govorg.backend.employee.apps.EmployeeConfig',
+    'govorg.backend.role.org.apps.RoleOrgConfig',
+    'govorg.backend.role.role.apps.RoleConfig',
+    'govorg.backend.role.employee.apps.RoleEmployeeConfig',
     'govorg.backend.system.apps.SystemConfig',
     'govorg.backend.govorg_inspire.apps.InspireConfig',
     'govorg.backend.org_request.apps.OrgRequestConfig',
