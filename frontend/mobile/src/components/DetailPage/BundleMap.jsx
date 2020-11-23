@@ -7,8 +7,9 @@ import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill} from 'ol/style'
 import {Point} from 'ol/geom'
+import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from 'ol/style'
+
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import OSM from 'ol/source/OSM'
@@ -40,7 +41,8 @@ export default class BundleMap extends Component {
             vector_layer: null,
             hureelayer: null,
             longitude: 0,
-            latitude: 0
+            latitude: 0,
+            feature_info: []
         }
 
         this.controls = {
@@ -118,7 +120,6 @@ export default class BundleMap extends Component {
     }
 
     handleMapDataLoaded(base_layer_list, wms_list) {
-
         const map_wms_list = wms_list.map(({name, url, layers}) => {
             return {
                 name,
@@ -126,7 +127,6 @@ export default class BundleMap extends Component {
                     return {
                         ...layer,
                         tile: new Tile({
-                            // extent: [coord1[0],coord1[1],coord2[0],coord2[1]],
                             source: new TileWMS({
                                 projection: this.state.projection,
                                 url: url,
@@ -134,7 +134,6 @@ export default class BundleMap extends Component {
                                     'LAYERS': layer.code,
                                     //'FORMAT': 'image/svg+xml',
                                     'FORMAT': 'image/png',
-                                    'feature_count': 10,
                                 }
                             }),
                         })
@@ -195,15 +194,16 @@ export default class BundleMap extends Component {
         const vector_layer = new VectorLayer({
             source: new VectorSource(),
             style: new Style({
-                stroke: new Stroke({
-                    color: 'rgba(100, 255, 0, 1)',
-                    width: 2
-                }),
-                fill: new Fill({
-                    color: 'rgba(100, 255, 0, 0.3)'
+                image: new Icon({
+                    anchor: [0.5, 86],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'pixels',
+                    scale: 0.4,
+                    src: '/static/assets/image/marker.png'
                 })
             })
         })
+
         this.setState({vector_layer})
 
         const marker_layer = new VectorLayer({
@@ -244,7 +244,6 @@ export default class BundleMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
-        this.showFeaturesLimit()
     }
 
     handleMapClick(event) {
@@ -273,9 +272,7 @@ export default class BundleMap extends Component {
         var coord0 = fromLonLat(coordinat_center, this.state.projection)
         var coord1 = fromLonLat(coordinat_bottom, this.state.projection)
         var coord2 = fromLonLat(coordinat_top, this.state.projection)
-        alert(coord0)
-        alert(coord1)
-        alert(coord2)
+
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -288,12 +285,13 @@ export default class BundleMap extends Component {
                 const wms_source = tile.getSource()
                 const url = wms_source.getFeatureInfoUrl(
                     coord0,
-                    resolution,
+                    1000,
                     projection,
                     {
                         //'INFO_FORMAT': 'text/xml'
                         //'INFO_FORMAT': 'text/html'
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
+                        'feature_count': 10
                     }
                 )
                 console.log(url)
@@ -316,13 +314,16 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
+                            this.state.vector_layer.setSource(source)
                             if(!this.state.is_draw_open){
                                 if(geodb_table == 'mpoint_view'){
                                 }
                                 else{
                                     if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                        this.state.vector_layer.setSource(source)
-                                        if(feature_info.length > 0) this.controls.modal.showModal(feature_info, true)
+                                        if(feature_info.length > 0) {
+                                            // this.controls.modal.showModal(feature_info, true)
+                                            this.setState({feature_info})
+                                        }
                                     }
                                 }
                             }
@@ -355,7 +356,7 @@ export default class BundleMap extends Component {
                         //'INFO_FORMAT': 'text/xml'
                         //'INFO_FORMAT': 'text/html'
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
-                        'feature_count': 10,
+
                     }
                 )
                 console.log(url)
@@ -435,6 +436,7 @@ export default class BundleMap extends Component {
 
     locationSet(){
         this.map.removeLayer(this.state.hureelayer)
+        this.showFeaturesLimit()
         navigator.geolocation.getCurrentPosition((position) => {
             var location = [position.coords.longitude, position.coords.latitude]
             this.handleSetCenter(location, 14.6)
