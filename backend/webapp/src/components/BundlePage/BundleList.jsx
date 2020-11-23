@@ -73,12 +73,6 @@ export class BundleList extends Component {
                     <div className="row">
 
                         <div className="col-md-12">
-                            <div className="text-right">
-                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/back/дэд-сан/үүсгэх/`}>
-                                    Нэмэх
-                                </NavLink>
-                            </div>
-
                             <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
                                 <thead>
