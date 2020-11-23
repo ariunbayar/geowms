@@ -141,6 +141,7 @@ export default class BundleMap extends Component {
                 }),
             }
         })
+
         this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) =>
@@ -283,15 +284,20 @@ export default class BundleMap extends Component {
                     return
                 }
                 const wms_source = tile.getSource()
+
                 const url = wms_source.getFeatureInfoUrl(
                     coord0,
-                    1000,
+                    200,
                     projection,
                     {
                         //'INFO_FORMAT': 'text/xml'
                         //'INFO_FORMAT': 'text/html'
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
-                        'feature_count': 10
+                        'feature_count': 10,
+                        'X':50,
+                        'Y':50,
+                        'WIDTH':101,
+                        'HEIGHT':101,
                     }
                 )
                 console.log(url)
@@ -314,6 +320,11 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
+                            console.log(feature_info)
+                            console.log(feature_info)
+                            console.log(feature_info)
+                            console.log(feature_info)
+                            console.log(feature_info)
                             this.state.vector_layer.setSource(source)
                             if(!this.state.is_draw_open){
                                 if(geodb_table == 'mpoint_view'){

@@ -12,10 +12,10 @@
 .🌍 > .⚙ {
     z-index: 2;
     position: fixed;
-    width: 70%;
+    width: 80%;
     top: 0;
     right: 0px;
-    left: -70%;
+    left: -85%;
     height: 100%;
     bottom: -80%;
     background-color: white;

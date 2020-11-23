@@ -36,7 +36,7 @@ export default class WMSLayerItem extends Component {
                         onChange={(e) => this.toggle(e.target.checked)}
                         checked={is_visible}
                     />
-                    <label className="custom-control-label" htmlFor={code}>{code}</label>
+                    <label className="custom-control-label" htmlFor={code}>{name}</label>
                     </div>
                 </label>
                 {legendURL != "null" &&
@@ -44,7 +44,7 @@ export default class WMSLayerItem extends Component {
                     <li>
                         {code == 'UB_GDB.SDE.Clinic' ? <img className="img" src={'/media/covid/emleg.png'}/>:
                         code == 'UB_GDB.SDE.Family_clinic' ? <img className="img" src={'/media/covid/orh_emleg.png'}/>:
-                        code == 'UB_GDB.SDE.Shinjilgee avah tseg' ? <img className="img" src={'/media/covid/shinjilgee_tseg.png'}/>:
+                        code == 'Шинжилгээ авах цэг' ? <img className="img" src={'/media/covid/shinjilgee_tseg.png'}/>:
                         code == 'UB_GDB.SDE.Shopping' ? <img className="img" src={'/media/covid/shinjilgee_tseg.png'}/>:
                         code == 'UB_GDB.SDE.Supermarket' ? <img className="img" src={'/media/covid/delguur.png'}/>:
                         code == 'UB_GDB.SDE.T271_EMIIN_SAN' ? <img className="img" src={'/media/covid/em_san.png'}/>:
