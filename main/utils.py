@@ -1,3 +1,4 @@
+import uuid
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
@@ -6,6 +7,12 @@ import re
 import unicodedata
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
+from django.conf import settings
+from datetime import timedelta
+from django.utils import timezone
+from django.core.mail import send_mail
+from geoportal_app.models import UserValidationEmail
+
 
 def resize_b64_to_sizes(src_b64, sizes):
 
@@ -194,6 +201,7 @@ def gis_fetch_one(oid, pk):
 
     return len(rows) and rows[0] or None
 
+
 def slugifyWord(word):
     word = unicodedata.normalize('NFKD', word).encode('ascii', 'ignore').decode('ascii')
     word = re.sub(r'[^\w\s_]', '', word.lower())
@@ -205,7 +213,7 @@ def refreshMaterializedView(fid):
 
     view_data = ViewNames.objects.filter(feature_id=fid).first()
     if view_data:
-        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_data.view_name )
+        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_data.view_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(sql)
             return True
@@ -213,3 +221,31 @@ def refreshMaterializedView(fid):
         return False
     else:
         return True
+
+
+def _generate_user_token():
+    return uuid.uuid4().hex[:32]
+
+
+def send_approve_email(user):
+
+    if not user.email:
+        return False
+
+    token = _generate_user_token()
+
+    UserValidationEmail.objects.create(
+        user=user,
+        token=token,
+        valid_before=timezone.now() + timedelta(days=90)
+    )
+
+    subject = 'Геопортал хэрэглэгч баталгаажуулах'
+    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://192.168.10.92/gov/user/approve/{token}/'.format(token=token)
+    from_email = settings.EMAIL_HOST_USER
+    to_email = [user.email]
+
+    send_mail(subject, msg, from_email, to_email, fail_silently=False)
+
+
+    return True

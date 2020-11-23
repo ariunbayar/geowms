@@ -78,7 +78,7 @@ export class TableHeadRole extends Component {
                                         <div className={perm_view <= 0 ? 'switch-all switch-tree' : 'switch-all'} 
                                         ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_view}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_view}</small> */}
                                 </div>
                                 <div className="col-2">
                                     <small className="smaller text-center ml-2">нэмэх</small>
@@ -106,7 +106,7 @@ export class TableHeadRole extends Component {
                                         <div className={0 < perm_create && perm_create < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_create == 0 ? 'switch-all switch-tree' : 'switch-all'} ></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_create}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_create}</small> */}
                                 </div>
                                 <div className="col-2"
                                 onClick={(e) =>
@@ -133,7 +133,7 @@ export class TableHeadRole extends Component {
                                         <div className={0 < perm_remove && perm_remove < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_remove == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_remove}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_remove}</small> */}
                                 </div>
                                 <div className="col-2"
                                 onClick={(e) =>
@@ -160,7 +160,7 @@ export class TableHeadRole extends Component {
                                         <div className={0 < perm_update && perm_update < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_update == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_update}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_update}</small> */}
                                 </div>
                                 <div className="col-2"
                                 onClick={(e) =>
@@ -187,7 +187,7 @@ export class TableHeadRole extends Component {
                                         <div className={0 < perm_approve && perm_approve < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_approve == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_approve}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_approve}</small> */}
                                 </div>
                                 <div className="col-2"
                                 onClick={(e) =>
@@ -214,7 +214,7 @@ export class TableHeadRole extends Component {
                                         <div className={0 < perm_revoce && perm_revoce < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_revoce == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
                                     </div>
-                                    <small className="smaller text-center">{perm_all}-{perm_revoce}</small>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_revoce}</small> */}
                                 </div>
                             </div>
                         </div>

@@ -30,13 +30,14 @@ from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.auth.decorators import user_passes_test
+from backend.bundle.models import Bundle
+from geoportal_app.models import User
 from backend.config.models import Config
 
 from backend.bundle.models import BundleLayer, Bundle
 from backend.wmslayer.models import WMSLayer
 from backend.wms.models import WMS
 from geoportal_app.models import User
-from main.settings import dev
 from main.utils import (
     dict_fetchall,
     slugifyWord
@@ -73,13 +74,17 @@ def _get_package(theme_id):
 @user_passes_test(lambda u: u.is_superuser)
 def bundleButetsAll(request):
     data = []
-    for themes in LThemes.objects.all():
-        data.append({
-                'id': themes.theme_id,
-                'code': themes.theme_code,
-                'name': themes.theme_name,
-                'package': _get_package(themes.theme_id),
-            })
+    for themes in LThemes.objects.all(): 
+        bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
+        if bundle:
+            data.append({
+                    'id': themes.theme_id,
+                    'code': themes.theme_code,
+                    'name': themes.theme_name,
+                    'package': _get_package(themes.theme_id),
+                })
+        else:
+            themes.delete()
     rsp = {
         'success': True,
         'data': data,
@@ -451,7 +456,7 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     check = createView(id_list, table_name, model_name)
     if check:
-        rsp = create_geoserver_detail(table_name, model_name, theme, user.id)
+        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -497,6 +502,7 @@ def save(request, payload):
     model_id = payload.get("model_id")
     edit_name = payload.get("edit_name")
     json = payload.get("form_values")
+    model_name_old = model_name
     model_name = getModel(model_name)
     json = json['form_values']
     fields = []
@@ -533,7 +539,40 @@ def save(request, payload):
         if edit_name == '':
             datas['created_by'] = request.user.id
             datas['modified_by'] = request.user.id
-            sain = model_name.objects.create(**datas)
+            if model_name_old == 'theme':
+
+                theme_code = datas['theme_code']
+                theme_name = datas['theme_name']
+                theme_name_eng = datas['theme_name_eng']
+                top_theme_id = datas['top_theme_id']
+                order_no = datas['order_no']
+                is_active = datas['is_active']
+                modified_by = datas['modified_by']
+                created_by = datas['created_by']
+                cb_bundle = User.objects.filter(id=created_by).first()
+
+                last_order_n = Bundle.objects.all().order_by('sort_order').last().sort_order
+                order_no = order_no if order_no else last_order_n+1
+                is_active = is_active if is_active else False
+                theme_model = model_name.objects.create(
+                                    theme_code=theme_code,
+                                    theme_name=theme_name,
+                                    theme_name_eng=theme_name_eng,
+                                    top_theme_id=top_theme_id,
+                                    order_no=order_no,
+                                    is_active=is_active,
+                                    created_by=created_by,
+                                    modified_by=modified_by,
+                                )
+
+                Bundle.objects.create(
+                    is_removeable=is_active,
+                    created_by=cb_bundle,
+                    sort_order=order_no,
+                    ltheme=theme_model,
+                )
+            else:
+                sain = model_name.objects.create(**datas)
         else:
             datas['modified_by'] = request.user.id
             sain = model_name.objects.filter(pk=model_id).update(**datas)
@@ -658,7 +697,6 @@ def erese(request, payload):
 def get_colName_type(view_name, data):
     cursor = connections['default'].cursor()
     query_index = '''
-
         select
             ST_GeometryType(geo_data),
             Find_SRID('public', '{view_name}', '{data}'),
@@ -671,7 +709,6 @@ def get_colName_type(view_name, data):
                 )
 
     sql = '''
-
         SELECT
         attname AS column_name, format_type(atttypid, atttypmod) AS data_type
         FROM
@@ -679,7 +716,6 @@ def get_colName_type(view_name, data):
         WHERE
         attrelid = 'public.{view_name}'::regclass AND    attnum > 0
         ORDER  BY attnum
-
         '''.format(view_name=view_name)
 
     cursor.execute(sql)
@@ -703,20 +739,12 @@ def check_them_name(theme_name):
         return theme_name
 
 
-def create_geoserver_detail(table_name, model_name, theme, user_id):
+def _create_geoserver_detail(table_name, model_name, theme, user_id):
+    
     theme_code = theme.theme_code
-    config = Config.objects.filter(name__in = ['geoserver_host', 'geoserver_pass', 'geoserver_port', 'geoserver_db']).values('value')
-    if not len(config) == 4:
-        removeView(table_name)
-        return {'success': False, 'info': 'config error'}
-    host = config[0]['value']
-    password = config[1]['value']
-    port = config[2]['value']
-    dbName = config[3]['value']
-
     ws_name = 'gp_'+theme_code
-
-    wms_url = 'http://{host}:{port}/geoserver/{ws_name}/ows'.format(ws_name=ws_name, host=host, port=port)
+    ds_name = ws_name
+    wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
     wms = WMS.objects.filter(name=theme.theme_name).first()
@@ -731,16 +759,12 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
     if check_workspace.status_code == 404:
 
         geoserver.create_space(ws_name)
-        ds_name = 'gp_' + ws_name
         check_ds_name = geoserver.getDataStore(ws_name, ds_name)
         if check_ds_name.status_code == 404:
             create_ds = geoserver.create_store(
                 ws_name,
                 ds_name,
                 ds_name,
-                host,
-                dbName,
-                password
                 )
             if create_ds.status_code == 201:
 
@@ -801,16 +825,12 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
                         return {"success": False, 'info': 'layer_remove'}
 
     else:
-        ds_name = 'gp_' + ws_name
         check_ds_name = geoserver.getDataStore(ws_name, ds_name)
         if check_ds_name.status_code == 404:
             create_ds = geoserver.create_store(
                 ws_name,
                 ds_name,
                 ds_name,
-                host,
-                'geo',
-                password
                 )
             if create_ds.status_code == 201:
 
@@ -917,8 +937,9 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
                     return {'info': 'layer_remove'}
 
         wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
+        wms_id = wms.id
         if not wms_layer:
-            legend_url = '''http://{host}:8080/geoserver/{ws_name}/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'''.format(host=host, ws_name=ws_name, layer=layer_name)
+            legend_url = geoserver.get_legend_url(wms_id, layer_name)
             WMSLayer.objects.create(
                 name=layer_name,
                 code=layer_name,
@@ -939,6 +960,7 @@ def create_geoserver_detail(table_name, model_name, theme, user_id):
 
 def createView(ids, table_name, model_name):
     data = LProperties.objects.filter(property_id__in=ids)
+    removeView(table_name)
     fields = [row.property_code for row in data]
     try:
         query = '''

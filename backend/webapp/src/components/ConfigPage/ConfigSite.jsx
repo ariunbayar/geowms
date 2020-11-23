@@ -15,7 +15,7 @@ const validationSchema = Yup.object().shape({
 })
 
 
-export class ConfigSite extends Component {
+export default class ConfigSite extends Component {
 
     constructor(props) {
 
@@ -38,7 +38,7 @@ export class ConfigSite extends Component {
     }
 
     componentDidMount() {
-        service.config.geoserver.get().then((values) => {
+        service.config.site.get().then((values) => {
             this.setState({
                 initial_values: values,
                 values,
@@ -60,7 +60,7 @@ export class ConfigSite extends Component {
 
         setStatus('saving')
 
-        service.config.geoserver
+        service.config.site
             .save(values)
             .then(({ success }) => {
 
@@ -89,145 +89,148 @@ export class ConfigSite extends Component {
         } = this.state
 
         return (
-            <div>
-
-                <div className="card-header">
-                    Сайтын тохиргоо
-                    <div className="card-action">
-                        <a href="#" onClick={ this.handleEdit }>
-                            <i className="fa fa-edit"></i>
-                        </a>
-                    </div>
-                </div>
-
+            <div className="card flex-grow-1">
                 <div className="card-body">
-                    <Formik
-                        initialValues={ initial_values }
-                        initialStatus={ 'initial' }
-                        enableReinitialize
-                        validationSchema={ validationSchema }
-                        onSubmit={ this.handleSubmit }
-                    >
-                        {({
-                            errors,
-                            status,
-                            touched,
-                            isSubmitting,
-                            setFieldValue,
-                            setStatus,
-                            setValues,
-                            handleBlur,
-                            values,
-                            isValid,
-                            dirty,
-                        }) => {
-                            return (
-                                <Form>
-                                    <fieldset disabled={ !is_editing }>
-                                        <div className="form-group">
-                                            <label htmlFor="id_site_title">Сайтын гарчиг</label>
-                                            <Field
-                                                name="site_title"
-                                                type="text"
-                                                className="form-control"
-                                                id="id_site_title"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="id_site_footer_text">Footer текст</label>
-                                            <Field
-                                                name="site_footer_text"
-                                                type="text"
-                                                className="form-control"
-                                                id="id_site_footer_text"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="id_agency_name">Агентлагийн нэр</label>
-                                            <Field
-                                                name="agency_name"
-                                                type="text"
-                                                className="form-control"
-                                                id="id_agency_name"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="id_agency_contact_address">Хаяг</label>
-                                            <Field
-                                                name="agency_contact_address"
-                                                type="text"
-                                                className="form-control"
-                                                id="id_agency_contact_address"
-                                            />
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="id_agency_contact_email">Мэйл</label>
+
+                    <div className="card-header">
+                        Сайтын тохиргоо
+                        <div className="card-action">
+                            <a href="#" onClick={ this.handleEdit }>
+                                <i className="fa fa-edit"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className="card-body">
+                        <Formik
+                            initialValues={ initial_values }
+                            initialStatus={ 'initial' }
+                            enableReinitialize
+                            validationSchema={ validationSchema }
+                            onSubmit={ this.handleSubmit }
+                        >
+                            {({
+                                errors,
+                                status,
+                                touched,
+                                isSubmitting,
+                                setFieldValue,
+                                setStatus,
+                                setValues,
+                                handleBlur,
+                                values,
+                                isValid,
+                                dirty,
+                            }) => {
+                                return (
+                                    <Form>
+                                        <fieldset disabled={ !is_editing }>
+                                            <div className="form-group">
+                                                <label htmlFor="id_site_title">Сайтын гарчиг</label>
                                                 <Field
-                                                    name="agency_contact_email"
+                                                    name="site_title"
                                                     type="text"
                                                     className="form-control"
-                                                    id="agency_contact_email"
+                                                    id="id_site_title"
                                                 />
                                             </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="id_agency_contact_phone">Утас</label>
+                                            <div className="form-group">
+                                                <label htmlFor="id_site_footer_text">Footer текст</label>
                                                 <Field
-                                                    name="agency_contact_phone"
-                                                    type=""
+                                                    name="site_footer_text"
+                                                    type="text"
                                                     className="form-control"
-                                                    id="id_agency_contact_phone"
+                                                    id="id_site_footer_text"
                                                 />
                                             </div>
-                                        </div>
+                                            <div className="form-group">
+                                                <label htmlFor="id_agency_name">Агентлагийн нэр</label>
+                                                <Field
+                                                    name="agency_name"
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="id_agency_name"
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label htmlFor="id_agency_contact_address">Хаяг</label>
+                                                <Field
+                                                    name="agency_contact_address"
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="id_agency_contact_address"
+                                                />
+                                            </div>
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="id_agency_contact_email">Мэйл</label>
+                                                    <Field
+                                                        name="agency_contact_email"
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="agency_contact_email"
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="id_agency_contact_phone">Утас</label>
+                                                    <Field
+                                                        name="agency_contact_phone"
+                                                        type=""
+                                                        className="form-control"
+                                                        id="id_agency_contact_phone"
+                                                    />
+                                                </div>
+                                            </div>
 
-                                        { is_editing &&
-                                            <button
-                                                type="submit"
-                                                className="btn gp-btn-primary"
-                                                disabled={ status == 'saving' }
-                                            >
-                                                {status == 'saving' &&
-                                                    <Fragment>
-                                                        <i className="fa fa-circle-o-notch fa-spin"></i> {}
-                                                        Түр хүлээнэ үү...
-                                                    </Fragment>
-                                                }
-                                                {status != 'saving' && 'Хадгалах' }
-                                            </button>
+                                            { is_editing &&
+                                                <button
+                                                    type="submit"
+                                                    className="btn gp-btn-primary"
+                                                    disabled={ status == 'saving' }
+                                                >
+                                                    {status == 'saving' &&
+                                                        <Fragment>
+                                                            <i className="fa fa-circle-o-notch fa-spin"></i> {}
+                                                            Түр хүлээнэ үү...
+                                                        </Fragment>
+                                                    }
+                                                    {status != 'saving' && 'Хадгалах' }
+                                                </button>
+                                            }
+
+                                        </fieldset>
+
+                                        { !is_editing && status == 'save_success' &&
+                                            <div className="alert alert-icon-success alert-dismissible" role="alert">
+                                                <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
+                                                <div className="alert-icon icon-part-success">
+                                                    <i className="icon-check"></i>
+                                                </div>
+                                                <div className="alert-message">
+                                                    <span>Амжилттай хадгаллаа!</span>
+                                                </div>
+                                            </div>
                                         }
 
-                                    </fieldset>
-
-                                    { !is_editing && status == 'save_success' &&
-                                        <div className="alert alert-icon-success alert-dismissible" role="alert">
-                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
-                                            <div className="alert-icon icon-part-success">
-                                                <i className="icon-check"></i>
+                                        { !is_editing && status == 'save_error' &&
+                                            <div className="alert alert-icon-warning alert-dismissible" role="alert">
+                                                <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
+                                                <div className="alert-icon icon-part-warning">
+                                                    <i className="icon-check"></i>
+                                                </div>
+                                                <div className="alert-message">
+                                                    <span>Хадгалахад алдаа гарлаа!</span>
+                                                </div>
                                             </div>
-                                            <div className="alert-message">
-                                                <span>Амжилттай хадгаллаа!</span>
-                                            </div>
-                                        </div>
-                                    }
-
-                                    { !is_editing && status == 'save_error' &&
-                                        <div className="alert alert-icon-warning alert-dismissible" role="alert">
-                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
-                                            <div className="alert-icon icon-part-warning">
-                                                <i className="icon-check"></i>
-                                            </div>
-                                            <div className="alert-message">
-                                                <span>Хадгалахад алдаа гарлаа!</span>
-                                            </div>
-                                        </div>
-                                    }
-                                </Form>
-                            )
-                        }}
-                    </Formik>
+                                        }
+                                    </Form>
+                                )
+                            }}
+                        </Formik>
+                    </div>
                 </div>
             </div>
+
         )
     }
 }

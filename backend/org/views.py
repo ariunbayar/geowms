@@ -442,7 +442,6 @@ def org_remove(request, payload, level):
     govPerm = GovPerm.objects.filter(org_id=org_id)
     govPerm.delete()
     org.delete()
-
     return JsonResponse({'success': True})
 
 
