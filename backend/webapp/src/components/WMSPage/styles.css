@@ -1,5 +1,3 @@
-
-
 @media (min-width: 576px) and (max-width: 1200px){
     .wms-floor-scroll {
         height: auto;
@@ -12,11 +10,11 @@
 @media (min-width: 1200px){
     .wms-floor-scroll {
         overflow-y: scroll;
-        height: calc(59vh - 36px);
+        height: calc(53vh - 33px);
     }
     /* wms-iin baruun gar taliin heseg */
     .wms-right-scroll {
         overflow-y: scroll;
-        height: calc(93vh - 47px);
+        height: calc(94vh - 43px);
     }
 }

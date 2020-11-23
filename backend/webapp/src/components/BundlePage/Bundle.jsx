@@ -10,27 +10,7 @@ export default class Bundle extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
-            modal_status: "closed",
         }
-
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-
-    }
-
-    handleModalDeleteOpen() {
-        this.setState({modal_status: "open"})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({modal_status: "closed"})
-    }
-
-    modalClose(){
-        this.props.handleRemove()
-        this.setState({modal_status: 'closed'})
     }
 
     render() {
@@ -77,11 +57,6 @@ export default class Bundle extends Component {
                 </td>
 
                 <td>
-                    <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o gp-text-primary" aria-hidden="true"></i>
-                    </a>
-                </td>
-                <td>
                     <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
                         <i className="fa fa-chevron-up gp-text-primary" aria-hidden="true"></i>
                     </a>
@@ -91,14 +66,6 @@ export default class Bundle extends Component {
                         <i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
-                <Modal
-                        modalAction={() => this.modalClose()}
-                        text={`Та "${name}" нэртэй дэд санг устгахдаа итгэлтэй байна уу?`}
-                        title="Дэд сан устгах"
-                        model_type_icon = "success"
-                        status={this.state.modal_status}
-                        modalClose={() => this.handleModalDeleteClose()}
-                    />
             </tr>
         )
     }

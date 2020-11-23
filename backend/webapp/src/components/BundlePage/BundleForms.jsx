@@ -60,20 +60,9 @@ export class BundleForms extends Component {
             service.update(values).then(({success}) => {
                 if (success) this.handleSaveSuccess()
             })
-        } else {
-            service.create(values).then(({success}) => {
-                if (success) {
-                    this.props.history.push( `/back/дэд-сан/`)
-                }
-            })
         }
     }
 
-    handleRemove(id) {
-        service.remove(id).then(({success}) => {
-            if (success) this.handleSaveSuccess()
-        })
-    }
 
     render() {
         return (
@@ -93,7 +82,7 @@ export class BundleForms extends Component {
                     </div>
                     {this.props.match.params.id &&
                     <div className="col-lg-8">
-                        <div className="bundle-table-scroll card">
+                        <div className="bundle-BundleAdminRights-scroll card mb-2 table-responsive ">
                             <div className="card-body">
                                 <BundleAdminRights
                                     handleSave={this.handleSave}

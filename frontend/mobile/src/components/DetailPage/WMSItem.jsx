@@ -10,7 +10,7 @@ export default class WMSItem extends Component {
 
         this.state = {
             name: props.wms.name,
-            tile: props.wms.tile,
+            tiles: props.wms.tiles,
             layers: props.wms.layers,
             is_visible: true,
         }
@@ -22,25 +22,25 @@ export default class WMSItem extends Component {
     toggle(e) {
         const is_visible = e.target.checked
         this.setState({is_visible})
-        this.state.tile.setVisible(is_visible)
+        this.state.layers.map((layer) =>
+            layer.tile.setVisible(is_visible)
+        )
     }
 
     render() {
 
-        const {tile, name, layers, is_visible} = this.state
+        const {tiles, name, layers, is_visible} = this.state
         return (
             <Fragment>
-
                 <div className="col-11">
                     <div className="col-12">
                         <span> {name}</span>
                         <hr></hr>
                     </div>
                 </div>
-
                 <WMSLayerItems
                     layers={layers}
-                    tileWMS={tile.getSource()}
+                    tileWMS={tiles}
                 />
             </Fragment>
         )

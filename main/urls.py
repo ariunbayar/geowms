@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/', include(api.urls)),
     path('gov/', include(govorg.urls)),
     path('', include(frontend.urls)),
+    path('', include('pwa.urls')),
 ]
 
 if settings.DEBUG:
