@@ -57,6 +57,7 @@ export default class BundleMap extends Component {
         this.toggleSidebar = this.toggleSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
+        this.showFeaturesLimit = this.showFeaturesLimit.bind(this)
         this.locationSet = this.locationSet.bind(this)
     }
 
@@ -82,12 +83,12 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
+        if(this.state.bundle.id) this.loadMapData(this.state.bundle.id)
+
         navigator.geolocation.getCurrentPosition((position) => {
             var location = [position.coords.longitude, position.coords.latitude]
             this.setState({longitude: position.coords.longitude, latitude: position.coords.latitude})
         });
-
-        if(this.state.bundle.id) this.loadMapData(this.state.bundle.id)
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -117,14 +118,8 @@ export default class BundleMap extends Component {
     }
 
     handleMapDataLoaded(base_layer_list, wms_list) {
-        // const {longitude, latitude} = this.state
-        // var coordinat_bottom = [longitude + 0.008, latitude + 0.007]
-        // var coordinat_top = [longitude - 0.008, latitude - 0.007]
-        // var coord1 = fromLonLat(coordinat_bottom,this.state.projection)
-        // var coord2 = fromLonLat(coordinat_top,this.state.projection)
 
         const map_wms_list = wms_list.map(({name, url, layers}) => {
-            console.log(url)
             return {
                 name,
                 layers: layers.map((layer) => {
@@ -139,6 +134,7 @@ export default class BundleMap extends Component {
                                     'LAYERS': layer.code,
                                     //'FORMAT': 'image/svg+xml',
                                     'FORMAT': 'image/png',
+                                    'feature_count': 10,
                                 }
                             }),
                         })
@@ -146,7 +142,6 @@ export default class BundleMap extends Component {
                 }),
             }
         })
-        console.log(map_wms_list)
         this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) =>
@@ -249,11 +244,10 @@ export default class BundleMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
-
+        this.showFeaturesLimit()
     }
 
     handleMapClick(event) {
-        console.log(this.map.getView().calculateExtent(this.map.getSize()))
         if(this.state.is_sidebar_open){
             this.setState({is_sidebar_open:false})
         }
@@ -265,11 +259,80 @@ export default class BundleMap extends Component {
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
-            console.log(event.coordinate)
-            console.log(coordinate_clicked)
 
             this.showFeaturesAt(event.coordinate)
         }
+
+    }
+
+    showFeaturesLimit() {
+        const {longitude, latitude} = this.state
+        var coordinat_center = [longitude, latitude]
+        var coordinat_bottom = [longitude + 0.12, latitude + 0.4]
+        var coordinat_top = [longitude - 0.12, latitude - 0.4]
+        var coord0 = fromLonLat(coordinat_center, this.state.projection)
+        var coord1 = fromLonLat(coordinat_bottom, this.state.projection)
+        var coord2 = fromLonLat(coordinat_top, this.state.projection)
+        alert(coord0)
+        alert(coord1)
+        alert(coord2)
+        const view = this.map.getView()
+        const projection = view.getProjection()
+        const resolution = view.getResolution()
+        this.setState({pay_modal_check: false})
+        this.state.map_wms_list.forEach(({layers}) => {
+            layers.forEach(({tile, feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                if (tile.getVisible() != true) {
+                    return
+                }
+                const wms_source = tile.getSource()
+                const url = wms_source.getFeatureInfoUrl(
+                    coord0,
+                    resolution,
+                    projection,
+                    {
+                        //'INFO_FORMAT': 'text/xml'
+                        //'INFO_FORMAT': 'text/html'
+                        'INFO_FORMAT': 'application/vnd.ogc.gml',
+                    }
+                )
+                console.log(url)
+                if (url) {
+                    if(!this.state.is_draw_open){
+                    }
+                    fetch(url)
+                        .then((response) => response.text())
+                        .then((text) => {
+                            const parser = new WMSGetFeatureInfo()
+                            const features = parser.readFeatures(text)
+                            const source = new VectorSource({
+                                features: features
+                            });
+                            const feature_info = features.map((feature) => {
+                                const geometry_name = feature.getGeometryName()
+                                const values =
+                                    feature.getKeys()
+                                    .filter((key) => key != geometry_name)
+                                    .map((key) => [key, feature.get(key)])
+                                return [feature.getId(), values]
+                            })
+                            if(!this.state.is_draw_open){
+                                if(geodb_table == 'mpoint_view'){
+                                }
+                                else{
+                                    if(!this.state.pay_modal_check && geodb_table != 'privite') {
+                                        this.state.vector_layer.setSource(source)
+                                        if(feature_info.length > 0) this.controls.modal.showModal(feature_info, true)
+                                    }
+                                }
+                            }
+                        })
+                } else {
+                    /* TODO */
+                    console.log('no feature url', wms_source);
+                }
+            })
+        })
 
     }
 
@@ -292,9 +355,10 @@ export default class BundleMap extends Component {
                         //'INFO_FORMAT': 'text/xml'
                         //'INFO_FORMAT': 'text/html'
                         'INFO_FORMAT': 'application/vnd.ogc.gml',
+                        'feature_count': 10,
                     }
                 )
-
+                console.log(url)
                 if (url) {
                     if(!this.state.is_draw_open){
                     }
