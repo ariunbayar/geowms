@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 import {service} from "./service"
-import {PermAcc} from './TestAcc'
+import {PermAcc} from './PermAccordion'
 import "./ins.css"
 
 export default class InsPerms extends Component {
@@ -268,7 +268,9 @@ export default class InsPerms extends Component {
                 {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
             ],
             is_open: false,
-            clicked_name: '',
+            t_name: '',
+            p_name: '',
+            f_name: '',
         }
 
         this.getId = this.getId.bind(this)
@@ -278,16 +280,13 @@ export default class InsPerms extends Component {
     }
 
     getId(id, type, name) {
-       if(type == 'theme') this.setState({ tid: id })
-       if(type == 'package') this.setState({ pid: id })
-       if(type == 'feature') this.setState({ fid: id })
-       this.setState({ is_open: true, clicked_name: name })
+       if(type == 'theme') this.setState({ tid: id, is_open: true, t_name: name })
+       if(type == 'package') this.setState({ pid: id, p_name: name })
+       if(type == 'feature') this.setState({ fid: id, f_name: name })
     }
 
-    cancelOpen(type) {
-        if(type) {
-            this.setState({ is_open: false })
-        }
+    cancelOpen() {
+        this.setState({ is_open: false })
     }
 
     PermsOnChange(target, name, index) {
@@ -315,13 +314,12 @@ export default class InsPerms extends Component {
 
     componentDidUpdate(pP, pS) {
         if(pS.tid !== this.state.tid) {
-            console.log("hahaha");
             this.setState({ prevTid: pS.tid })
         }
     }
 
     render() {
-        const {themes, packages, features, fid, tid, pid, properties, perms, prevTid, clicked_name } = this.state
+        const {themes, packages, features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name } = this.state
         const { type } = this.props
         return (
             <div className="row">
@@ -339,9 +337,8 @@ export default class InsPerms extends Component {
                                                     type="theme"
                                                     sendId={this.getId}
                                                     count={theme.all_child}
-                                                    is_open={this.state.is_open}
-                                                    cancelOpen={this.cancelOpen}
-                                                    clicked_name={clicked_name}
+                                                    is_open={is_open}
+                                                    t_name={t_name}
                                                 />
                                             </div>
                                         )}
@@ -364,7 +361,11 @@ export default class InsPerms extends Component {
                                                 index={p_idx}
                                                 type="package"
                                                 sendId={this.getId}
+                                                is_open={is_open}
                                                 count={pack.all_child}
+                                                p_name={p_name}
+                                                t_name={t_name}
+                                                cancelOpen={this.cancelOpen}
                                             />
                                             <div id={`acc-${pack.name}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
                                                 <div className="card-body">
@@ -379,6 +380,10 @@ export default class InsPerms extends Component {
                                                                 sendId={this.getId}
                                                                 count={feature.all_child}
                                                                 small={'text-lowercase'}
+                                                                is_open={is_open}
+                                                                t_name={t_name}
+                                                                p_name={p_name}
+                                                                f_name={f_name}
                                                             />
                                                         )}
                                                     </div>

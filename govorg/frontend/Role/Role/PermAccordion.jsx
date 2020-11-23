@@ -1,3 +1,4 @@
+import { textHeights } from "ol/render/canvas"
 import React, { Component } from "react"
 
 export class PermSwitches extends Component {
@@ -84,27 +85,18 @@ export class PermAcc extends Component {
                 {'name': 'батлах'},
             ],
             r_name: '',
-            is_p_open: false,
         }
     }
 
     render () {
-        const { perms, r_name, is_p_open } = this.state
-        const { name, index, type, id, count, small, is_open, clicked_name } = this.props
-        console.log(name, 'irj bgaa ner ', clicked_name, is_open);
+        const { perms, r_name } = this.state
+        const { name, index, type, id, count, small, is_open, t_name, p_name, f_name } = this.props
         return (
             <div className="card-header" id={`${name}-${type}`}>
                 <div className="row">
                     <div className="col-4">
                         <h5 className="mb-0 my-4">
-                            {
-                                type == 'theme' &&
-                                <i className={`fa ` + (is_open && r_name == clicked_name ? `fa-angle-down` : `fa-angle-right`) + ' gp-text-primary'}></i>
-                            }
-                            {
-                                type == 'package' &&
-                                <i className={`fa ` + (is_p_open && r_name == clicked_name ? `fa-angle-down` : `fa-angle-right`) + ' gp-text-primary'}></i>
-                            }
+                            <i className={`fa ` + (is_open && (t_name == r_name) || (p_name == r_name) || (f_name == r_name) ? `fa-angle-down` : `fa-angle-right`) + ' gp-text-primary'}></i>
                             &nbsp;
                             <span
                                 role="button"
@@ -112,17 +104,14 @@ export class PermAcc extends Component {
                                     (small ? small : `text-uppercase`) +
                                     ` font-weight-bold
                                     text-break
+                                    shadow-none
                                 `}
                                 data-toggle="collapse"
                                 data-target={`#acc-${name}-${type}`}
                                 aria-controls={`acc-${name}-${type}`}
+                                aria-expanded="true"
                                 onClick={() => {
                                     this.setState({ r_name: name })
-                                    is_open && r_name !== clicked_name ?
-                                    this.props.sendId(id, type, name)
-                                    : r_name !== clicked_name ?
-                                    this.props.sendId(id, type, name, 'zuruu')
-                                    :
                                     this.props.sendId(id, type, name)
                                 }}
                             >

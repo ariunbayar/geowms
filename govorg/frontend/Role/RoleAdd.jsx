@@ -94,12 +94,6 @@ export class RoleAdd extends Component {
                             </button>
                         }
                     </div>
-                    <br />
-                    <div className="col-md-12">
-                        <InsPerms
-                            type="editable"
-                        />
-                    </div>
 
                 </div>
             </div>
