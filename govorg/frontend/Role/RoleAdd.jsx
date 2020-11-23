@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
 // import ModalAlert from "../ModalAlert";
-
+import InsPerms from './Role/GovPerms'
 
 export class RoleAdd extends Component {
 
@@ -72,33 +72,35 @@ export class RoleAdd extends Component {
 
                         </div>
                     </div>
-
-                    <div className="row">
-                        <div className="col-md-2">
-                            <div className="form-group">
-                                {this.state.handleSaveIsLoad ?
-                                    <>
-                                        <button className="btn btn-block gp-btn-primary">
-                                            <a className="spinner-border text-light" role="status">
-                                                <span className="sr-only">Loading...</span>
-                                            </a>
-                                            <span> Шалгаж байна. </span>
-                                        </button>
-                                        <ModalAlert
-                                            modalAction={() => this.modalClose()}
-                                            status={this.state.modal_alert_status}
-                                            title="Амжилттай хадгаллаа"
-                                            model_type_icon="success"
-                                        />
-                                    </>
-                                    :
-                                    <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
-                                        Хадгалах
+                    <div>
+                        {this.state.handleSaveIsLoad ?
+                            <>
+                                <button className="btn btn-block gp-btn-primary">
+                                    <a className="spinner-border text-light" role="status">
+                                        <span className="sr-only">Loading...</span>
+                                    </a>
+                                    <span> Шалгаж байна. </span>
                                 </button>
-                                }
-                            </div>
-                        </div>
+                                <ModalAlert
+                                    modalAction={() => this.modalClose()}
+                                    status={this.state.modal_alert_status}
+                                    title="Амжилттай хадгаллаа"
+                                    model_type_icon="success"
+                                />
+                            </>
+                            :
+                            <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
+                                Хадгалах
+                            </button>
+                        }
                     </div>
+                    <br />
+                    <div className="col-md-12">
+                        <InsPerms
+                            type="editable"
+                        />
+                    </div>
+
                 </div>
             </div>
         )

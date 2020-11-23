@@ -260,22 +260,47 @@ export default class InsPerms extends Component {
             ],
             properties: [],
             perms: [
-                {'name': 'харах', 'eng_name': 'PERM_VIEW'},
-                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE'},
-                {'name': 'хасах', 'eng_name': 'PERM_REMOVE'},
-                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE'},
-                {'name': 'хянах', 'eng_name': 'PERM_UPDATE'},
-                {'name': 'батлах', 'eng_name': 'PERM_APPROVE'},
-            ]
+                {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false},
+                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE', 'value': false},
+                {'name': 'хасах', 'eng_name': 'PERM_REMOVE', 'value': false},
+                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE', 'value': false},
+                {'name': 'хянах', 'eng_name': 'PERM_UPDATE', 'value': false},
+                {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
+            ],
+            is_open: false,
+            clicked_name: '',
         }
 
         this.getId = this.getId.bind(this)
+        this.PermsOnChange = this.PermsOnChange.bind(this)
+        this.cancelOpen = this.cancelOpen.bind(this)
+        this.getValue = this.getValue.bind(this)
     }
 
-    getId(id, type) {
+    getId(id, type, name) {
        if(type == 'theme') this.setState({ tid: id })
        if(type == 'package') this.setState({ pid: id })
        if(type == 'feature') this.setState({ fid: id })
+       this.setState({ is_open: true, clicked_name: name })
+    }
+
+    cancelOpen(type) {
+        if(type) {
+            this.setState({ is_open: false })
+        }
+    }
+
+    PermsOnChange(target, name, index) {
+        const { perms } = this.state
+        const checked = target.checked
+        perms[index]['value'] = checked
+        this.setState({ perms })
+    }
+
+    getValue(checked, property_name, index, idx, perm_name, property_id) {
+        this.values = new Object()
+        values['perms'] = perm_name
+        console.log(checked, property_name, index, idx, perm_name, property_id);
     }
 
     componentDidMount() {
@@ -288,8 +313,16 @@ export default class InsPerms extends Component {
             })
     }
 
+    componentDidUpdate(pP, pS) {
+        if(pS.tid !== this.state.tid) {
+            console.log("hahaha");
+            this.setState({ prevTid: pS.tid })
+        }
+    }
+
     render() {
-        const {themes, packages, features, fid, tid, pid, properties, perms } = this.state
+        const {themes, packages, features, fid, tid, pid, properties, perms, prevTid, clicked_name } = this.state
+        const { type } = this.props
         return (
             <div className="row">
                 <div className="col-md-6 p-0">
@@ -306,6 +339,9 @@ export default class InsPerms extends Component {
                                                     type="theme"
                                                     sendId={this.getId}
                                                     count={theme.all_child}
+                                                    is_open={this.state.is_open}
+                                                    cancelOpen={this.cancelOpen}
+                                                    clicked_name={clicked_name}
                                                 />
                                             </div>
                                         )}
@@ -317,9 +353,11 @@ export default class InsPerms extends Component {
                         <div className="card">
                             <div className="card-body">
                                 <div className="accordion" id="accordion-2">
-                                    {packages[0].packages.map((pack, p_idx) =>
+                                    {
+                                    prevTid !== tid ?
+                                    packages[0].packages.map((pack, p_idx) =>
                                         pack.parent_id == tid &&
-                                        <div className="card" key={p_idx}>
+                                        <div className="card border border-dark" key={p_idx}>
                                             <PermAcc key={p_idx}
                                                 id={pack.id}
                                                 name={pack.name}
@@ -340,13 +378,17 @@ export default class InsPerms extends Component {
                                                                 type="feature"
                                                                 sendId={this.getId}
                                                                 count={feature.all_child}
+                                                                small={'text-lowercase'}
                                                             />
                                                         )}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    )}
+                                    )
+                                    :
+                                    <h5>Сонгоогүй байна</h5>
+                                   }
                                 </div>
                             </div>
                         </div>
@@ -361,11 +403,14 @@ export default class InsPerms extends Component {
                                         <tr>
                                             <th className="col"></th>
                                             {perms.map((perm, perm_idx) =>
-                                                <th className="col" className="vertical p-2" key={perm_idx}>
+                                                <th className="col" className="p-2 text-center" key={perm_idx}>
                                                     <span>{perm.name}</span>
-                                                    <div className="custom-control custom-switch col-lg-12">
+                                                    <div className="custom-control custom-switch col-lg-12 ml-2">
                                                         <input
-                                                            type="checkbox" className="custom-control-input" id={perm.name}
+                                                            type="checkbox"
+                                                            className="custom-control-input"
+                                                            id={perm.name}
+                                                            onChange={(e) => this.PermsOnChange(e.target, perm.name, perm_idx)}
                                                         />
                                                         <label className="custom-control-label " htmlFor={perm.name}></label>
                                                     </div>
@@ -385,10 +430,13 @@ export default class InsPerms extends Component {
                                                     key == perm.eng_name &&
                                                     <PermChecks key={perm_idx}
                                                         id={property.id}
-                                                        index={perm_idx}
+                                                        index={pro_idx}
+                                                        idx={perm_idx}
                                                         value={property.roles[key]}
                                                         name={property.name}
                                                         perm_name={perm.eng_name}
+                                                        type={type}
+                                                        sendValue={this.getValue}
                                                     />
                                                 ))}
                                             </tr>
@@ -408,28 +456,50 @@ export class PermChecks extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            checked: this.props.value
+            checked_state: this.props.value
         }
         this.handleOnChange = this.handleOnChange.bind(this)
     }
 
     handleOnChange (checked) {
-        // this.setState({ checked })
+        const { name, index, id, perm_name, type, value, idx } = this.props
+        if(type) {
+            this.setState({ checked_state: checked })
+            this.props.sendValue(checked, name, index, idx, perm_name, id)
+        }
     }
 
     render () {
-        const { name, index, id, perm_name } = this.props
-        const { checked } = this.state
+        const { name, index, id, perm_name, type, value, idx } = this.props
+        const { checked_state } = this.state
         return (
             <td className="icheck-primary">
-                <input
-                    type="checkbox"
-                    id={`${name}-${index}`}
-                    name={`${name}-${index}`}
-                    checked={checked}
-                    onChange={(e) => this.handleOnChange(e.target.checked)}
-                />
-                <label htmlFor={`${name}-${index}`}></label>
+                {
+                    type ?
+                        value ?
+                        <input
+                            type="checkbox"
+                            id={`${name}-${index}-${idx}`}
+                            name={`${name}-${index}-${idx}`}
+                            onChange={(e) => this.handleOnChange(e.target.checked)}
+                        />
+                        :
+                        <i class="fa fa-minus" aria-hidden="true"></i>
+                    :
+                        <input
+                            type="checkbox"
+                            id={`${name}-${index}-${idx}`}
+                            name={`${name}-${index}-${idx}`}
+                            checked={checked_state}
+                            onChange={(e) => this.handleOnChange(e.target.checked)}
+                        />
+                }
+                {
+                   type && value ?
+                    <label htmlFor={`${name}-${index}-${idx}`}></label>
+                    :
+                    <label htmlFor={`${name}-${index}-${idx}`}></label>
+                }
             </td>
         )
     }

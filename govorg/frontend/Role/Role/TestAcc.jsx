@@ -82,27 +82,52 @@ export class PermAcc extends Component {
                 {'name': 'цуцлах'},
                 {'name': 'хянах'},
                 {'name': 'батлах'},
-            ]
+            ],
+            r_name: '',
+            is_p_open: false,
         }
     }
 
     render () {
-        const { perms } = this.state
-        const { name, index, type, id, count } = this.props
+        const { perms, r_name, is_p_open } = this.state
+        const { name, index, type, id, count, small, is_open, clicked_name } = this.props
+        console.log(name, 'irj bgaa ner ', clicked_name, is_open);
         return (
             <div className="card-header" id={`${name}-${type}`}>
                 <div className="row">
                     <div className="col-4">
-                        <h5 className="mb-0">
-                            <button
-                                className="btn btn-link"
+                        <h5 className="mb-0 my-4">
+                            {
+                                type == 'theme' &&
+                                <i className={`fa ` + (is_open && r_name == clicked_name ? `fa-angle-down` : `fa-angle-right`) + ' gp-text-primary'}></i>
+                            }
+                            {
+                                type == 'package' &&
+                                <i className={`fa ` + (is_p_open && r_name == clicked_name ? `fa-angle-down` : `fa-angle-right`) + ' gp-text-primary'}></i>
+                            }
+                            &nbsp;
+                            <span
+                                role="button"
+                                className={`gp-text-primary ` +
+                                    (small ? small : `text-uppercase`) +
+                                    ` font-weight-bold
+                                    text-break
+                                `}
                                 data-toggle="collapse"
                                 data-target={`#acc-${name}-${type}`}
                                 aria-controls={`acc-${name}-${type}`}
-                                onClick={() => this.props.sendId(id, type)}
+                                onClick={() => {
+                                    this.setState({ r_name: name })
+                                    is_open && r_name !== clicked_name ?
+                                    this.props.sendId(id, type, name)
+                                    : r_name !== clicked_name ?
+                                    this.props.sendId(id, type, name, 'zuruu')
+                                    :
+                                    this.props.sendId(id, type, name)
+                                }}
                             >
                             {name}
-                            </button>
+                            </span>
                         </h5>
                     </div>
                     <div className="col-8">
