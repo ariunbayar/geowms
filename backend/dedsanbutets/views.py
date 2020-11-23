@@ -748,17 +748,6 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
-def check_them_name(theme_name):
-
-    if theme_name == 'Хил зааг':
-        theme_name = 'Хил, зааг'
-        return theme_name
-    elif theme_name == 'Газарзүйн нэр':
-        theme_name = 'Газар зүйн нэр'
-        return theme_name
-    else:
-        return theme_name
-
 
 def _create_geoserver_detail(table_name, model_name, theme, user_id):
     
@@ -959,6 +948,8 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
 
         wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
         wms_id = wms.id
+        theme = LThemes.objects.filter(theme_name=theme_name).first()
+        bunde_id = Bundle.objects.filter(ltheme=theme).first().id
         if not wms_layer:
             legend_url = geoserver.get_legend_url(wms_id, layer_name)
             WMSLayer.objects.create(
@@ -969,14 +960,20 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                 feature_price=0,
                 legend_url=legend_url
             )
-            bundle_name = check_them_name(theme_name)
-            bunde_id = Bundle.objects.filter(name=bundle_name).first().id
-
             wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
-            BundleLayer.objects.create(
+            BundleLayer.objects.create( 
                 bundle_id=bunde_id,
                 layer_id=wms_layer_id
             )
+        else:
+            wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
+            bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer_id).first()
+            if not  bundle_layer:
+                BundleLayer.objects.create( 
+                    bundle_id=bunde_id,
+                    layer_id=wms_layer_id
+                )
+
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
 def createView(ids, table_name, model_name):
