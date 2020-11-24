@@ -9,6 +9,7 @@ from govorg.backend.utils import (
     get_theme_data_display,
     get_property_data_display
 )
+
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
@@ -43,6 +44,7 @@ def _org_role(org):
     ]
 
     return {
+        'gov_perm_id': gov_perm.id,
         'themes': themes,
         'package_features': package_features,
         'property': properties,
