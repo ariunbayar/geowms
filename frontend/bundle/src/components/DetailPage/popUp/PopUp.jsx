@@ -108,14 +108,6 @@ class PopUpCmp extends Component {
                                             {info.value}
                                         </b> : null)
                         ))}
-                        {datas && datas.map((data, idx) =>
-                                    data.map((info, ix) =>
-                                        idx + 1 == startNumber &&
-                                        (info.field_name == 'point_name' ?
-                                        <b key={ix}>
-                                            {info.value}
-                                        </b> : null)
-                        ))}
                         <hr className="m-1 border border-secondary rounded"/>
                         <table className="table borderless no-padding">
                             <tbody>
@@ -133,10 +125,15 @@ class PopUpCmp extends Component {
                                             ))
                                         )
                                     :
-                                    <tr><th>Мэдээлэл байхгүй байна</th></tr>
+                                    <tr>
+                                        <th>Мэдээлэл байхгүй байна</th>
+                                    </tr>
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    <div className="ol-popup-arrow">
+
                     </div>
                 </div>
             )
