@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import F
 
 from backend.inspire.models import (
     GovPermInspire,
@@ -15,31 +16,48 @@ def get_convert_display_name(perm_list):
 
     roles = {
         'PERM_VIEW': False,
+        'view_gov_perm_inspire_id': None,
+
         'PERM_CREATE': False,
+        'create_gov_perm_inspire_id': None,
+
         'PERM_REMOVE': False,
+        'remove_gov_perm_inspire_id': None,
+
         'PERM_UPDATE': False,
+        'update_gov_perm_inspire_id': None,
+
         'PERM_APPROVE': False,
+        'approve_gov_perm_inspire_id': None,
+
         'PERM_REVOKE': False,
+        'revoke_gov_perm_inspire_id': None,
     }
 
     for perm in perm_list:
-        if perm == 1:
+        if perm.get('kind') == 1:
             roles['PERM_VIEW'] = True
+            roles['view_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
 
-        if perm == 2:
+        if perm.get('kind') == 2:
             roles['PERM_CREATE'] = True
+            roles['create_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
 
-        if perm == 3:
+        if perm.get('kind') == 3:
             roles['PERM_REMOVE'] = True
+            roles['remove_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
 
-        if perm == 4:
+        if perm.get('kind') == 4:
             roles['PERM_UPDATE'] = True
+            roles['update_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
 
-        if perm == 5:
+        if perm.get('kind') == 5:
             roles['PERM_APPROVE'] = True
+            roles['approve_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
 
-        if perm == 6:
+        if perm.get('kind') == 6:
             roles['PERM_REVOKE'] = True
+            roles['revoke_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
 
     return roles
 
@@ -48,12 +66,13 @@ def get_property_data_display(property_id, feature_id, gov_perm):
 
     property = get_object_or_404(LProperties, property_id=property_id)
 
-    perm_list = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, property_id=property_id).values_list('perm_kind', flat=True))
+    perm_list = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, property_id=property_id).values(gov_perm_ins_id=F('id'), kind=F('perm_kind')))
 
     roles = get_convert_display_name(perm_list)
 
     return{
           'id': property.property_id,
+          'name': property.property_name,
           'name': property.property_name,
           'parent_id': feature_id,
           'roles': roles

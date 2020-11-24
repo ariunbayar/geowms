@@ -1,7 +1,6 @@
 from django.urls import re_path, path, include
 
 from govorg.backend.org import views as org_views
-from govorg.backend.role.org import views as role_org_views
 from govorg.backend.role.employee import views as role_employee_views
 from govorg.backend.role.role import views as role_views
 from govorg.backend.system import views as system_views
@@ -15,7 +14,6 @@ urlpatterns = [
     path('api/', include(([
 
         path('role/', include(([
-            path('org/', role_org_views.org_role),
             path('employee/', include(([
                 path('', role_employee_views.list),
                 path('create/', role_employee_views.create),
