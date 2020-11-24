@@ -125,7 +125,9 @@ class PopUpCmp extends Component {
                                             ))
                                         )
                                     :
-                                    <tr><th>Мэдээлэл байхгүй байна</th></tr>
+                                    <tr>
+                                        <th>Мэдээлэл байхгүй байна</th>
+                                    </tr>
                                 }
                             </tbody>
                         </table>

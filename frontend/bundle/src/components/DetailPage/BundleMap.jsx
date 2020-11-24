@@ -304,7 +304,7 @@ export default class BundleMap extends Component {
             autoPanAnimation: {
                 duration: 250,
             },
-            autoPanMargin: 50,
+            autoPanMargin: 65,
             offset: [15, -150],
             positioning: 'top-right'
         });
