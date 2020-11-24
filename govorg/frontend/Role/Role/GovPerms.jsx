@@ -53,28 +53,14 @@ export default class InsPerms extends Component {
         const { perms } = this.state
         const checked = target.checked
         perms[index]['value'] = checked
-        console.log(perms);
         this.setState({ perms })
     }
 
     componentDidMount() {
-        if(this.props.dontDid){
-            const { themes, package_features, properties } = this.props.org_roles
-            console.log(themes, package_features, properties);
-            this.setState({ themes, package_features, properties })
-        } else {
-            this.getOrgRole()
+        if (this.props.org_roles) {
+            const { themes, package_features, property } = this.props.org_roles
+            this.setState({ themes, package_features, properties: property })
         }
-    }
-
-    getOrgRole() {
-        service
-            .getPerms()
-            .then(({success, themes, package_features, property}) => {
-                if(success) {
-                    this.setState({ properties: property, themes, package_features })
-                }
-            })
     }
 
     componentDidUpdate(pP, pS) {
@@ -101,7 +87,8 @@ export default class InsPerms extends Component {
                                                     index={t_idx}
                                                     type="theme"
                                                     sendId={this.getId}
-                                                    count={theme.all_child}
+                                                    total_length={theme.all_child}
+                                                    now_length={theme.perm_child_ids.length}
                                                     is_open={is_open}
                                                     t_name={t_name}
                                                 />
@@ -127,7 +114,8 @@ export default class InsPerms extends Component {
                                                 type="package"
                                                 sendId={this.getId}
                                                 is_open={is_open}
-                                                count={pack.all_child}
+                                                total_length={pack.all_child}
+                                                now_length={pack.features.length}
                                                 p_name={p_name}
                                                 t_name={t_name}
                                                 cancelOpen={this.cancelOpen}
@@ -143,7 +131,8 @@ export default class InsPerms extends Component {
                                                                 index={f_idx}
                                                                 type="feature"
                                                                 sendId={this.getId}
-                                                                count={feature.all_child}
+                                                                total_length={feature.all_child}
+                                                                now_length={feature.perm_child_ids.length}
                                                                 small={'text-lowercase'}
                                                                 is_open={is_open}
                                                                 t_name={t_name}
@@ -193,7 +182,7 @@ export default class InsPerms extends Component {
                                             property.parent_id == fid &&
                                             <tr key={pro_idx}>
                                                 <th>
-                                                    {pro_idx + 1} - {property.name}
+                                                    {property.name}
                                                 </th>
                                                 {perms.map((perm, perm_idx) =>
                                                 Object.keys(property.roles).map((key, k_idx) =>

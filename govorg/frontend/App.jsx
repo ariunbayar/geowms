@@ -61,11 +61,12 @@ export class App extends Component {
     }
 
     render() {
-      console.log(this.props.org.org_role)
         const {
             tuuhen_ov,
             tseg_burtgel,
         } = this.state
+
+        const { org_role } = this.props.org
         const org_inspire = this.props.org.org_inspire
 
         return (
@@ -172,7 +173,7 @@ export class App extends Component {
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/role/" component={InsPerms} />
+                            <Route exact path="/gov/role/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/role/org/" component={Gov} />
                             <Route exact path="/gov/role/employees/" component={EmployeeForm} />
                             <Route exact path="/gov/help/" component={Help} />
