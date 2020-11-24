@@ -32,26 +32,22 @@ export default class RoleTable extends Component {
 
     render() {
         const { role_id, role_name } = this.props.values
-        const { index, org_roles } = this.props
+        const { index } = this.props
         return (
             <tr>
                 <th>
                     {index}
                 </th>
                 <th>
-                <NavLink to={{
-                    pathname: `/gov/perm/role/${role_id}/detail/`,
-                    datas: org_roles
-                    }}
+                <NavLink
+                    to={`/gov/perm/role/${role_id}/detail/`}
                 >
                     {role_name}
                 </NavLink>
                 </th>
                 <th>
-                    <NavLink to={{
-                        pathname:`/gov/perm/role/${role_id}/edit/`,
-                        datas: org_roles
-                        }}
+                    <NavLink
+                        to={`/gov/perm/role/${role_id}/edit/`}
                     >
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
@@ -72,7 +68,5 @@ export default class RoleTable extends Component {
                 </th>
             </tr>
         )
-
     }
-
 }

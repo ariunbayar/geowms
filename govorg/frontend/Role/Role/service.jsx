@@ -2,16 +2,16 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
 export const service = {
-    getPerms,
     createRole,
     updateRole,
     deleteRole,
     detailRole,
+    getRoleList,
 }
 
-const prefix = '/gov/api/role/org'
+const prefix = '/gov/api/role'
 
-function getPerms() {
+function getRoleList() {
     const requestOptions = {
         ...getGetOptions(),
     }
@@ -19,19 +19,20 @@ function getPerms() {
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
-function createRole(values){
+function createRole(gov_perm_id, role_name, role_description, roles){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values })
+        body: JSON.stringify({ gov_perm_id, role_name, role_description, roles })
     }
 
     return fetch(`${prefix}/create/`, requestOptions).then(handleResponse)
 }
 
-function updateRole(id, values) {
+function updateRole(id, gov_perm_id, role_name, role_description, remove_roles, add_roles) {
+    console.log(id, gov_perm_id, role_name, role_description, remove_roles, add_roles);
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values })
+        body: JSON.stringify({ gov_perm_id, role_name, role_description, remove_roles, add_roles })
     }
 
     return fetch(`${prefix}/${id}/update/`, requestOptions).then(handleResponse)

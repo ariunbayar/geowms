@@ -68,7 +68,7 @@ export class App extends Component {
 
         const { org_role } = this.props.org
         const org_inspire = this.props.org.org_inspire
-
+        console.log(this.props);
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -168,7 +168,7 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
-                            <Route path="/gov/perm/role/" component={Role} />
+                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
