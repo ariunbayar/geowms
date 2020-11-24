@@ -51,13 +51,11 @@ def list(request):
 
 def _set_emp_role_data(emp_role, name, description):
 
-    with transaction.atomic():
-        emp_role.name = name
-        emp_role.description = description
-        emp_role.save()
-        return True
-
-    return False
+    print('_set_emp_role_data')
+    emp_role.name = name
+    emp_role.description = description
+    emp_role.save()
+    return True
 
 def _convert_perm_kind(kind):
 
@@ -80,17 +78,15 @@ def _convert_perm_kind(kind):
         return EmpRoleInspire.PERM_APPROVE
 
 
-def _set_emp_role_inspire_data(emp_role_inspire,roles):
+def _set_emp_role_inspire_data(emp_role_inspire,role):
 
-    with transaction.atomic():
-        for role in roles:
-            emp_role_inspire.feature_id = role.get('feature_id')
-            emp_role_inspire.property_id = role.get('property_id')
-            emp_role_inspire.perm_kind = _convert_perm_kind(role.get('perm_kind'))
-            emp_role_inspire.save()
-        return True
-
-    return False
+    print('_set_emp_role_inspire_data')
+    emp_role_inspire.feature_id = role.get('feature_id')
+    emp_role_inspire.property_id = role.get('property_id')
+    emp_role_inspire.perm_kind = _convert_perm_kind(role.get('perm_kind'))
+    emp_role_inspire.gov_perm_inspire = get_object_or_404(EmpRoleInspire, pk=role.get('gov_perm_ins_id'))
+    emp_role_inspire.save()
+    return True
 
 def _delete_emp_role_inspire_data(emp_role, gov_perm, roles):
 
@@ -101,27 +97,27 @@ def _delete_emp_role_inspire_data(emp_role, gov_perm, roles):
 @require_POST
 @ajax_required
 def create(request, payload):
+    print(payload)
 
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
-
     gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
+
+
     emp_role = EmpRole()
     emp_role.gov_perm = gov_perm
     emp_role.save()
+    _set_emp_role_data(emp_role, name, description)
 
-    if _set_emp_role_data(emp_role, name, description):
-
+    for role in roles:
         emp_role_inspire = EmpRoleInspire()
-
         emp_role_inspire.emp_role = emp_role
-        emp_role_inspire.gov_perm_inspire = gov_perm.govperminspire_set.first()
+        _set_emp_role_inspire_data(emp_role_inspire, role)
 
-        if _set_emp_role_inspire_data(emp_role_inspire, roles):
-            return JsonResponse({'success': True})
+    return JsonResponse({'success': True})
 
-    return JsonResponse({'success': False})
+
 
 
 @require_POST
