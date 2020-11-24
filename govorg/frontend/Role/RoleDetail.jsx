@@ -128,5 +128,4 @@ export class RoleDetail extends Component {
             </div>
         )
     }
-
 }

@@ -65,6 +65,8 @@ export class App extends Component {
             tuuhen_ov,
             tseg_burtgel,
         } = this.state
+
+        const { org_role } = this.props.org
         const org_inspire = this.props.org.org_inspire
 
         return (
@@ -171,7 +173,7 @@ export class App extends Component {
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/perm/" component={InsPerms} />
+                            <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/perm/org/" component={Gov} />
                             <Route exact path="/gov/perm/employees/" component={EmployeeForm} />
                             <Route exact path="/gov/help/" component={Help} />

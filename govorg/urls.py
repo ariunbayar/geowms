@@ -1,8 +1,9 @@
 from django.urls import re_path, path, include
 
 from govorg.backend.org import views as org_views
-from govorg.backend.role_org import views as role_org_views
-from govorg.backend.employee import views as employee_views
+from govorg.backend.role.org import views as role_org_views
+from govorg.backend.role.employee import views as role_employee_views
+from govorg.backend.role.role import views as role_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
@@ -15,7 +16,20 @@ urlpatterns = [
 
         path('role/', include(([
             path('org/', role_org_views.org_role),
-            path('employee', employee_views.employees),
+            path('employee/', include(([
+                path('', role_employee_views.list),
+                path('create/', role_employee_views.create),
+                path('<int:pk>/update/', role_employee_views.update),
+                path('<int:pk>/detail/', role_employee_views.detail),
+                path('<int:pk>/delete/', role_employee_views.delete),
+            ], 'employee'))),
+            path('', include(([
+                path('', role_views.list),
+                path('create/', role_views.create),
+                path('<int:pk>/update/', role_views.update),
+                path('<int:pk>/detail/', role_views.detail),
+                path('<int:pk>/delete/', role_views.delete),
+            ], 'role'))),
         ], 'role'))),
 
         path('system/', system_views.systemList, name='system'),

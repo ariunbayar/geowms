@@ -8,6 +8,7 @@ export default class InsPerms extends Component {
 
     constructor(props) {
         super(props)
+        this.forThemeCount=0
         this.state = {
             tid: 0,
             pid: 0,
@@ -16,12 +17,12 @@ export default class InsPerms extends Component {
             package_features: [],
             properties: [],
             perms: [
-                {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false},
-                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE', 'value': false},
-                {'name': 'хасах', 'eng_name': 'PERM_REMOVE', 'value': false},
-                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE', 'value': false},
-                {'name': 'хянах', 'eng_name': 'PERM_UPDATE', 'value': false},
-                {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
+                {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false, 'count': 0},
+                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE', 'value': false, 'count': 0},
+                {'name': 'хасах', 'eng_name': 'PERM_REMOVE', 'value': false, 'count': 0},
+                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE', 'value': false, 'count': 0},
+                {'name': 'хянах', 'eng_name': 'PERM_UPDATE', 'value': false, 'count': 0},
+                {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false, 'count': 0},
             ],
             is_open: false,
             t_name: '',
@@ -33,12 +34,15 @@ export default class InsPerms extends Component {
         this.getId = this.getId.bind(this)
         this.PermsOnChange = this.PermsOnChange.bind(this)
         this.cancelOpen = this.cancelOpen.bind(this)
-        this.getOrgRole = this.getOrgRole.bind(this)
     }
 
     getId(id, type, name) {
-       if(type == 'theme') this.setState({ tid: id, is_open: true, t_name: name })
-       if(type == 'package') this.setState({ pid: id, p_name: name })
+        if(type == 'theme') {
+           this.setState({ tid: id, is_open: true, t_name: name, pid: 0, fid: 0 })
+       }
+       if(type == 'package'){
+            this.setState({ pid: id, p_name: name })
+        }
        if(type == 'feature') this.setState({ fid: id, f_name: name })
     }
 
@@ -54,24 +58,10 @@ export default class InsPerms extends Component {
     }
 
     componentDidMount() {
-        if(this.props.dontDid){
-            const { themes, package_features, properties } = this.props.org_roles
-            console.log(themes, package_features, properties);
-            this.setState({ themes, package_features, properties })
-        } else {
-            this.getOrgRole()
+        if (this.props.org_roles) {
+            const { themes, package_features, property } = this.props.org_roles
+            this.setState({ themes, package_features, properties: property })
         }
-    }
-
-    getOrgRole() {
-        service
-            .getPerms()
-            .then(({success, themes, package_features, property}) => {
-                if(success) {
-                    console.log(themes, package_features, property);
-                    this.setState({ properties: property, themes, package_features })
-                }
-            })
     }
 
     componentDidUpdate(pP, pS) {
@@ -98,7 +88,8 @@ export default class InsPerms extends Component {
                                                     index={t_idx}
                                                     type="theme"
                                                     sendId={this.getId}
-                                                    count={theme.all_child}
+                                                    total_length={theme.all_child}
+                                                    now_length={theme.perm_child_ids.length}
                                                     is_open={is_open}
                                                     t_name={t_name}
                                                 />
@@ -124,7 +115,8 @@ export default class InsPerms extends Component {
                                                 type="package"
                                                 sendId={this.getId}
                                                 is_open={is_open}
-                                                count={pack.all_child}
+                                                total_length={pack.all_child}
+                                                now_length={pack.features.length}
                                                 p_name={p_name}
                                                 t_name={t_name}
                                                 cancelOpen={this.cancelOpen}
@@ -140,7 +132,8 @@ export default class InsPerms extends Component {
                                                                 index={f_idx}
                                                                 type="feature"
                                                                 sendId={this.getId}
-                                                                count={feature.all_child}
+                                                                total_length={feature.all_child}
+                                                                now_length={feature.perm_child_ids.length}
                                                                 small={'text-lowercase'}
                                                                 is_open={is_open}
                                                                 t_name={t_name}
@@ -197,6 +190,7 @@ export default class InsPerms extends Component {
                                                     key == perm.eng_name &&
                                                     <PermChecks key={perm_idx}
                                                         fid={fid}
+                                                        all_check_value={perm.value}
                                                         id={property.id}
                                                         index={pro_idx}
                                                         idx={perm_idx}
@@ -238,7 +232,7 @@ export class PermChecks extends Component {
     }
 
     render () {
-        const { name, index, id, perm_name, type, value, idx } = this.props
+        const { name, index, id, perm_name, type, value, idx, all_check_value } = this.props
         const { checked_state } = this.state
         return (
             <td className="icheck-primary">
@@ -258,12 +252,12 @@ export class PermChecks extends Component {
                             type="checkbox"
                             id={`${name}-${index}-${idx}`}
                             name={`${name}-${index}-${idx}`}
-                            checked={checked_state}
+                            checked={all_check_value ? all_check_value : checked_state}
                             onChange={(e) => this.handleOnChange(e.target.checked)}
                         />
                 }
                 {
-                   type && value ?
+                type && value ?
                     <label htmlFor={`${name}-${index}-${idx}`}></label>
                     :
                     <label htmlFor={`${name}-${index}-${idx}`}></label>
