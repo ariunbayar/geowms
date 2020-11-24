@@ -279,6 +279,7 @@ export default class BundleMap extends Component {
                 projection: this.state.projection,
                 center: [11461613.630815497, 5878656.0228370065],
                 zoom: 5.041301562246971,
+                minZoom: 1,
             })
         })
 
@@ -297,7 +298,6 @@ export default class BundleMap extends Component {
 
     getElement(element) {
         const map = this.map
-        this.element = element
         const overlay = new Overlay({
             element: element,
             autoPan: true,
@@ -464,8 +464,6 @@ export default class BundleMap extends Component {
 
     setSourceInPopUp(mode) {
         const source = this.selectSource
-        console.log(source);
-        const overlay = this.overlay
         if (mode != 'private') {
             this.state.vector_layer.setSource(null)
         }
