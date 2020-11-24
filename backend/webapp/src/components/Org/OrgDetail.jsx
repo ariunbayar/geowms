@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 
 
-export class OrgAdd extends Component {
+export class OrgDetail extends Component {
 
     constructor(props) {
         super(props)
