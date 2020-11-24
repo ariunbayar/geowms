@@ -495,22 +495,23 @@ def org_list(request, payload, level):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def OrgAll(request, level, pk):
-    orgs_display = []
+def detail(request, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
+
     org_roles = GovPerm.objects.filter(org=org).first()
     org_role = -1
     if org_roles:
         if org_roles.gov_role:
             org_role = org_roles.gov_role.id
-    for org in Org.objects.filter(level=level, pk=pk):
-        orgs_display.append({
-            'id': org.id,
-            'name': org.name,
-            'level': org.level,
-            'level_display': org.get_level_display(),
-            'org_role': org_role
-        })
+
+    orgs_display = [{
+        'id': org.id,
+        'name': org.name,
+        'level': org.level,
+        'level_display': org.get_level_display(),
+        'org_role': org_role
+    }]
+
     return JsonResponse({
         'orgs': orgs_display,
         'count': User.objects.filter(employee__org=org).count()
