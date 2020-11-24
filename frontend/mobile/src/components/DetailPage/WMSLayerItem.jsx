@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
 
 export default class WMSLayerItem extends Component {
@@ -11,7 +11,7 @@ export default class WMSLayerItem extends Component {
             code: props.layer.code,
             tile: props.layer.tile,
             is_visible: props.layer.defaultCheck,
-            legendURL: props.layer.legendURL,
+            legend: props.layer.legend,
         }
 
         this.toggle = this.toggle.bind(this)
@@ -26,7 +26,7 @@ export default class WMSLayerItem extends Component {
 
     render() {
 
-        const { name, code, is_visible, legendURL } = this.state
+        const { name, code, is_visible, legend } = this.state
         return (
             <li>
                 <label>
@@ -39,18 +39,10 @@ export default class WMSLayerItem extends Component {
                     <label className="custom-control-label" htmlFor={code}>{name}</label>
                     </div>
                 </label>
-                {legendURL != "null" &&
+                {legend &&
                 <ul>
                     <li>
-                        {code == 'UB_GDB.SDE.Clinic' ? <img className="img" src={'/media/covid/emleg.png'}/>:
-                        code == 'UB_GDB.SDE.Family_clinic' ? <img className="img" src={'/media/covid/orh_emleg.png'}/>:
-                        code == 'Шинжилгээ авах цэг' ? <img className="img" src={'/media/covid/shinjilgee_tseg.png'}/>:
-                        code == 'UB_GDB.SDE.Shopping' ? <img className="img" src={'/media/covid/shinjilgee_tseg.png'}/>:
-                        code == 'UB_GDB.SDE.Supermarket' ? <img className="img" src={'/media/covid/delguur.png'}/>:
-                        code == 'UB_GDB.SDE.T271_EMIIN_SAN' ? <img className="img" src={'/media/covid/em_san.png'}/>:
-                        code == 'UB_GDB.SDE.T280_ZOCHID_BUUDAL' ? <img className="img" src={'/media/covid/buudal.png'}/>:
-                        code == 'UB_GDB.SDE.T289_KHOROONII_BAIR' ? <img className="img" src={'/media/covid/horoo.png'}/>:
-                        <img className="img" src={legendURL}/>}
+                        <img className="img" src={legend}/>
                     </li>
                 </ul>
                 }

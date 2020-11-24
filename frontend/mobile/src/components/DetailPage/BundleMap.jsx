@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
 import 'ol/ol.css'
 import {Map, View, Feature} from 'ol'
@@ -11,9 +11,8 @@ import {Point, LineString} from 'ol/geom'
 import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from 'ol/style'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
-import OSM from 'ol/source/OSM'
 import {format as coordinateFormat} from 'ol/coordinate';
-import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
+import {defaults as defaultControls, MousePosition, ScaleLine} from 'ol/control'
 import Circle from 'ol/geom/Circle';
 import {fromLonLat} from 'ol/proj';
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
@@ -28,7 +27,6 @@ export default class BundleMap extends Component {
 
     constructor(props) {
         super(props)
-        this.speed = 2000
         this.state = {
             projection: 'EPSG:3857',
             projection_display: 'EPSG:4326',
@@ -134,12 +132,15 @@ export default class BundleMap extends Component {
             }
         })
 
-        this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
-            wms.layers.map((layer, idx) =>
+            wms.layers.map((layer, idx) =>{
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
+                layer['legend'] = layer.tile.getSource().getLegendUrl()
+
+                }
             )
         )
+        this.setState({map_wms_list})
 
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
@@ -246,7 +247,6 @@ export default class BundleMap extends Component {
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
-
             this.showFeaturesAt(event.coordinate)
         }
 
@@ -467,7 +467,6 @@ export default class BundleMap extends Component {
             <div>
                 <button onClick={this.showDetail} style={{display: 'none'}}>click here</button>
                 <div className="row">
-
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
@@ -488,7 +487,6 @@ export default class BundleMap extends Component {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         )
