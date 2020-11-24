@@ -14,6 +14,7 @@ export class List extends Component {
             check: '',
             fid: null,
             tid: null,
+            pid: null,
             id_list: [],
             view_name: '',
             fname: null,
@@ -36,8 +37,8 @@ export class List extends Component {
         })
     }
 
-    getProperties(fid, tid, fname) {
-        this.setState({fid, tid, fname})
+    getProperties(fid, tid, fname, pid) {
+        this.setState({fid, tid, fname, pid})
         service.getPropertyFields(fid).then(({success ,fields, id_list, view_name}) => {
             if(success){
                 this.setState({fields, id_list, view_name})
@@ -46,11 +47,11 @@ export class List extends Component {
     }
 
     render() {
-        const { list_all } = this.state
+        const { list_all, fid, tid, pid } = this.state
         return (
             <div className="row m-0">
-                <div className="card col-md-6 bundle-view-scroll p-1 mb-1">
-                    <div className="card-body">
+                <div className="col-md-6 bundle-view-scroll p-1 mb-1">
+                    <div className="">
                         <div id="accordion1">
                             {list_all.map((theme, theme_idx) =>
                                 <div className="card mb-2" key={theme_idx}>
@@ -60,7 +61,7 @@ export class List extends Component {
                                                 data-target={`#collapse-theme${theme_idx}`}
                                                 aria-expanded="false"
                                                 aria-controls={`collapse-theme${theme_idx}`}>
-                                            <span> {theme.name} </span>
+                                            <span> {theme.name} {theme.id == tid && <i class="fa fa-circle text-success" aria-hidden="true"></i>}</span>
                                         </button>
                                     </div>
                                     <div id={`collapse-theme${theme_idx}`} className="collapse" data-parent="#accordion1">
@@ -74,35 +75,24 @@ export class List extends Component {
                                                                     data-target={`#collapse-packages${theme_idx}${pack_idx}`}
                                                                     aria-expanded="false"
                                                                     aria-controls={`collapse-packages${theme_idx}${pack_idx}`}>
-                                                                <span> {packages.name} </span>
+                                                                <span> {packages.name} {packages.id == pid && <i class="fa fa-circle text-success" aria-hidden="true"></i>}</span>
                                                             </button>
                                                             <div id={`collapse-packages${theme_idx}${pack_idx}`} className="collapse" data-parent={`#accordion10${theme_idx}`}>
                                                                 <div className="card-body" style={{padding: "10px"}}>
                                                                     <div id={`accordion100${pack_idx}`}>
                                                                         {packages.features.map((feature, idx) =>
                                                                             <div className="mb-2" key={idx}>
-                                                                                <div className="card-header pt-0 pb-0 pl-2">
-                                                                                    <button className="btn btn-link  shadow-none collapsed pl-0 pt-1"
-                                                                                            data-toggle="collapse"
-                                                                                            data-target={`#collapse-feature${theme_idx}${pack_idx}${idx}`}
-                                                                                            aria-expanded="false"
-                                                                                            aria-controls={`collapse-feature${theme_idx}${pack_idx}${idx}`}>
-                                                                                        <span> {feature.name} </span>
-                                                                                    </button>
-                                                                                    <div id={`collapse-feature${theme_idx}${pack_idx}${idx}`} className="collapse" data-parent={`#accordion100${pack_idx}`}>
-                                                                                        <li key={idx} className="pl-4">
-                                                                                            <a onClick={() => this.getProperties(feature.id, theme.id, feature.name)}>
-                                                                                                <i className={feature.view ? "fa fa-table text-success": "fa fa-table text-muted"}></i> &nbsp;
-                                                                                                <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
-                                                                                                {feature.view &&
-                                                                                                    <ul>
-                                                                                                        <li>{feature.view['view_name']}</li>
-                                                                                                    </ul>
-                                                                                                }
-                                                                                            </a>
-                                                                                        </li>
-                                                                                    </div>
-                                                                                </div>
+                                                                                <li key={idx} className="pl-4">
+                                                                                    <a onClick={() => this.getProperties(feature.id, theme.id, feature.name, packages.id)}>
+                                                                                        <i className={feature.view ? "fa fa-table text-success": "fa fa-table text-muted"}></i> &nbsp;
+                                                                                        <span role="button" className="hidden-xs gp-text-primary" > {feature.name} {feature.id == fid && <i class="fa fa-circle text-success" aria-hidden="true"></i>}</span>
+                                                                                        {feature.view &&
+                                                                                            <ul>
+                                                                                                <li>{feature.view['view_name']}</li>
+                                                                                            </ul>
+                                                                                        }
+                                                                                    </a>
+                                                                                </li>
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -123,5 +113,4 @@ export class List extends Component {
             </div>
         )
     }
-
 }

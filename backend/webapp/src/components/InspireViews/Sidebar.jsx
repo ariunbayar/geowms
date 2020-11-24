@@ -100,11 +100,11 @@ export default class SideBar extends Component {
                                         onChange={this.handleInput}
                                         value={property['property_id']}
                                     />
-                                    <label htmlFor={property['property_code']}>{property['property_code']}</label>
+                                    <label htmlFor={property['property_code']}>&nbsp;{property['property_code']}</label>
                                 </div>
                             </div>
                         )}
-                        {save_is_load ? 
+                        {save_is_load ?
                         <a className="btn btn-block gp-btn-primary text-white">Уншиж байна</a>:
                         <a onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</a>
                         }
