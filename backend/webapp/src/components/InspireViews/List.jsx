@@ -81,11 +81,11 @@ export class List extends Component {
                                                                 <div className="card-body" style={{padding: "10px"}}>
                                                                     <div id={`accordion100${pack_idx}`}>
                                                                         {packages.features.map((feature, idx) =>
-                                                                            <div className="mb-2" key={idx}>
+                                                                            <div className={feature.id == fid ? "mb-2 border border-primary rounded" : "mb-2"} key={idx}>
                                                                                 <li key={idx} className="pl-4">
                                                                                     <a onClick={() => this.getProperties(feature.id, theme.id, feature.name, packages.id)}>
                                                                                         <i className={feature.view ? "fa fa-table text-success": "fa fa-table text-muted"}></i> &nbsp;
-                                                                                        <span role="button" className="hidden-xs gp-text-primary" > {feature.name} {feature.id == fid && <i class="fa fa-circle text-success" aria-hidden="true"></i>}</span>
+                                                                                        <span role="button" className="hidden-xs gp-text-primary" > {feature.name}</span>
                                                                                         {feature.view &&
                                                                                             <ul>
                                                                                                 <li>{feature.view['view_name']}</li>
