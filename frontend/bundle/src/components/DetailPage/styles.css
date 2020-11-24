@@ -319,14 +319,13 @@ element.style {
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     border-radius: 10px;
     border: 1px solid #cccccc;
-    bottom: 30px;
-    left: -50px;
     min-width: 200px;
-    max-width: 400px;
+    max-width: 600px;
     z-index: 1030;
 }
+
 .ol-popup:after, .ol-popup:before {
-    top: 100%;
+    top: 135px;
     border: solid transparent;
     content: " ";
     height: 0;
@@ -334,19 +333,22 @@ element.style {
     position: absolute;
     pointer-events: none;
 }
+
 .ol-popup:after {
     border-top-color: white;
     border-width: 10px;
-    left: 48px;
+    transform: rotate(90deg);
     margin-left: -10px;
-}
-.ol-popup:before {
-    border-top-color: #cccccc;
-    border-width: 11px;
-    left: 48px;
-    margin-left: -11px;
+    left: -10px;
 }
 
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 10px;
+    transform: rotate(90deg);
+    margin-left: -11px;
+    left: -10px;
+}
 
 .ol-popup-contet {
     margin-top: 5px;
@@ -391,4 +393,12 @@ element.style {
     padding-right: 0px !important;
     padding-top: 0px !important;
     padding-bottom: 5px !important;
+}
+
+.no-padding td {
+    padding-left: 20px !important;
+}
+
+.borderless th {
+    text-transform: lowercase;
 }
