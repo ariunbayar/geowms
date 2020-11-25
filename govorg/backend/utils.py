@@ -75,7 +75,7 @@ def get_property_data_display(property_id, feature_id, role_model, inspire_model
 
     roles = get_convert_display_name(perm_list)
 
-    return{
+    return {
           'id': property.property_id,
           'name': property.property_name,
           'name': property.property_name,

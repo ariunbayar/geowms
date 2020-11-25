@@ -1,13 +1,27 @@
-from django.shortcuts import render
-from backend.org.models import Org, OrgRole, Employee
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-from main.decorators import ajax_required
 from django.http import JsonResponse
-from django.core.paginator import Paginator
+from django.db import transaction
+
+from main.decorators import ajax_required
+from backend.org.models import Org
+from backend.inspire.models import (
+    GovPerm,
+    GovPermInspire,
+    EmpRole,
+    EmpRoleInspire,
+    LFeatures,
+    LPackages,
+)
+
+from govorg.backend.utils import (
+    get_package_features_data_display,
+    get_theme_data_display,
+    get_property_data_display,
+)
 
 
-@require_POST
+@require_GET
 @ajax_required
 def list(request):
 
@@ -20,7 +34,9 @@ def list(request):
 
 @require_POST
 @ajax_required
-def create(request):
+def create(request, payload):
+
+
 
     rsp = {
         'success': True,
@@ -40,7 +56,7 @@ def update(request):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 def detail(request):
 
@@ -51,7 +67,7 @@ def detail(request):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 def delete(request):
 
