@@ -105,9 +105,7 @@ export class RoleEdit extends Component {
     }
 
     getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id) {
-        console.log(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id);
         if(!checked && is_true_type && this.role.length > 0 && type == null) {
-            console.log("its remove");
             this.removeItemFromArray(
                 this.role,
                 feature_id,
@@ -140,7 +138,6 @@ export class RoleEdit extends Component {
         if (is_true_type && checked && type == null && this.remove_perms.length > 0) {
             this.removeItemFromRemoveRoles()
         }
-        console.log(this.remove_perms);
     }
 
     removeItemFromRemoveRoles() {
