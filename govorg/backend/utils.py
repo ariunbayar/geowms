@@ -16,57 +16,62 @@ def get_convert_display_name(perm_list):
 
     roles = {
         'PERM_VIEW': False,
-        'view_gov_perm_inspire_id': None,
+        'view_id': None,
 
         'PERM_CREATE': False,
-        'create_gov_perm_inspire_id': None,
+        'create_id': None,
 
         'PERM_REMOVE': False,
-        'remove_gov_perm_inspire_id': None,
+        'remove_id': None,
 
         'PERM_UPDATE': False,
-        'update_gov_perm_inspire_id': None,
+        'update_id': None,
 
         'PERM_APPROVE': False,
-        'approve_gov_perm_inspire_id': None,
+        'approve_id': None,
 
         'PERM_REVOKE': False,
-        'revoke_gov_perm_inspire_id': None,
+        'revoke_id': None,
     }
 
     for perm in perm_list:
         if perm.get('kind') == 1:
             roles['PERM_VIEW'] = True
-            roles['view_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
+            roles['view_id'] = perm.get('ins_id')
 
         if perm.get('kind') == 2:
             roles['PERM_CREATE'] = True
-            roles['create_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
+            roles['create_id'] = perm.get('ins_id')
 
         if perm.get('kind') == 3:
             roles['PERM_REMOVE'] = True
-            roles['remove_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
+            roles['remove_id'] = perm.get('ins_id')
 
         if perm.get('kind') == 4:
             roles['PERM_UPDATE'] = True
-            roles['update_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
+            roles['update_id'] = perm.get('ins_id')
 
         if perm.get('kind') == 5:
             roles['PERM_APPROVE'] = True
-            roles['approve_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
+            roles['approve_id'] = perm.get('ins_id')
 
         if perm.get('kind') == 6:
             roles['PERM_REVOKE'] = True
-            roles['revoke_gov_perm_inspire_id'] = perm.get('gov_perm_ins_id')
+            roles['revoke_id'] = perm.get('ins_id')
 
     return roles
 
 
-def get_property_data_display(property_id, feature_id, gov_perm):
+def get_property_data_display(property_id, feature_id, role_model, inspire_model):
+
+    if role_model.__class__.__name__ == 'EmpRole':
+        perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+
+    if role_model.__class__.__name__ == 'GovPerm':
+        perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
 
     property = get_object_or_404(LProperties, property_id=property_id)
 
-    perm_list = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, property_id=property_id).values(gov_perm_ins_id=F('id'), kind=F('perm_kind')))
 
     roles = get_convert_display_name(perm_list)
 
@@ -102,7 +107,7 @@ def get_feature_data_display(feature_id, property_of_feature):
         'id': feature.feature_id,
         'name': feature.feature_name,
         'parent_id': feature.package_id,
-        'perm_child_ids': property_of_feature,
+        'perm_child_ids': list(property_of_feature),
         'all_child':all_child
     }
 
@@ -134,6 +139,6 @@ def get_theme_data_display(theme_id, package_ids):
     return {
         'id': theme.theme_id,
         'name': theme.theme_name,
-        'perm_child_ids': package_ids,
+        'perm_child_ids': list(package_ids),
         'all_child': all_child,
     }
