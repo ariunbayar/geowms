@@ -79,12 +79,13 @@ def _convert_perm_kind(kind):
         return EmpRoleInspire.PERM_APPROVE
 
 
-def _set_emp_role_inspire_data(emp_role, role):
+def _set_emp_role_inspire_data(emp_role, role, user):
 
     gov_perm_inspire =  get_object_or_404(GovPermInspire, pk=role.get('gov_perm_inspire_id'))
 
     emp_role_inspire = EmpRoleInspire()
     emp_role_inspire.gov_perm_inspire = gov_perm_inspire
+    emp_role_inspire.created_by = user
     emp_role_inspire.emp_role = emp_role
     emp_role_inspire.feature_id = role.get('feature_id')
     emp_role_inspire.property_id = role.get('property_id')
@@ -98,29 +99,34 @@ def _delete_emp_role_inspire_data(emp_role, roles):
 
     with transaction.atomic():
         for role in roles:
-            EmpRoleInspire.objects.filter(pk=role.get('emp_role_ins_id')).delete()
-
-            return True
+            EmpRoleInspire.objects.filter(pk=role).delete()
+        return True
     return False
 
 
 @require_POST
 @ajax_required
 def create(request, payload):
+
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
-    gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
 
-    emp_role = EmpRole()
-    emp_role.gov_perm = gov_perm
-    emp_role.save()
+    with transaction.atomic():
 
-    if _set_emp_role_data(emp_role, name, description):
-        for role in roles:
-            _set_emp_role_inspire_data(emp_role, role)
+        gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
+        emp_role = EmpRole()
+        emp_role.gov_perm = gov_perm
+        emp_role.created_by = request.user
+        emp_role.save()
 
-    return JsonResponse({'success': True})
+        if _set_emp_role_data(emp_role, name, description):
+            for role in roles:
+                _set_emp_role_inspire_data(emp_role, role, request.user)
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False})
 
 
 @require_POST
@@ -133,6 +139,8 @@ def update(request, payload, pk):
     add_roles = payload.get('add_roles')
 
     emp_role = get_object_or_404(EmpRole, pk=pk)
+    emp_role.updated_by = request.user
+    emp_role.save()
 
     if not _set_emp_role_data(emp_role, name, description):
         return JsonResponse({'success': False})
@@ -140,8 +148,9 @@ def update(request, payload, pk):
     if not _delete_emp_role_inspire_data(emp_role, remove_roles):
         return JsonResponse({'success': False})
 
+        emp_role.created_by = request.user
     for role in add_roles:
-        if _set_emp_role_inspire_data(emp_role, role):
+        if _set_emp_role_inspire_data(emp_role, role, request.user):
 
             return JsonResponse({'success': True})
 
