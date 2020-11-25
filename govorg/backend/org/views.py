@@ -31,7 +31,7 @@ def _org_role(org):
 
         property_of_feature[feature_id] = property_ids
         for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, gov_perm))
+            properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire))
 
     package_features = [
         get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
