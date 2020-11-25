@@ -132,13 +132,11 @@ def all(request, payload, level):
 def _get_org_role_display(org_role):
 
     bundle = org_role.bundle
-
-    theme = LThemes.objects.filter(theme_id=bundle.ltheme.theme_id).first()
     return {
         'org_id': org_role.org_id,
         'bundle': {
             'id': bundle.id,
-            'name': theme.theme_name if theme else '',
+            'name': bundle.ltheme.theme_name if bundle.ltheme else '',
             'icon_url': bundle.icon.url if bundle.icon else '',
         },
         'perm_view': org_role.perm_view,
