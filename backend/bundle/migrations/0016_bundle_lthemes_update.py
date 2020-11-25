@@ -47,6 +47,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('backend_bundle', '0015_bundle_ltheme'),
+        ('backend_inspire', '0006_auto_20201115_2352'),
     ]
 
     operations = [
