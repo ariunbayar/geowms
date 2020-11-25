@@ -144,26 +144,26 @@ function getInspireRoles() {
     return fetch(`/back/api/org/get-role-name/`, opts).then(handleResponse)
 }
 
-function getAimags() {
+function getAimags(values) {
     const opts = {
-        ...getGetOptions(),
-        body: JSON.stringify(),
+        ...getPostOptions(values),
+        body: JSON.stringify(values),
     }
     return fetch(`/back/api/org/getAimags/`, opts).then(handleResponse)
 }
 
-function getSumuud(aimag) {
+function getSumuud(values) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(aimag),
+        body: JSON.stringify(values),
     }
     return fetch(`/back/api/org/getSumuud/`, opts).then(handleResponse)
 }
 
-function getBaguud(sum) {
+function getBaguud(values) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(sum),
+        body: JSON.stringify(values),
     }
     return fetch(`/back/api/org/getBaguud/`, opts).then(handleResponse)
 }

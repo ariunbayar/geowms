@@ -27,6 +27,16 @@ export class OrgAdd extends Component {
             sum_id: -1,
             baga_id: -1,
             geo_id: '',
+            feature_config_id_5: null,
+            data_type_id_5: null,
+            nationalCode: null,
+            feature_config_id_4: null,
+            data_type_id_4: null,
+            name: null,
+            NationalLevel: null,
+            code_list_id_aimag: null,
+            code_list_id_sum: null,
+            code_list_id_bag: null,
         }
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
@@ -48,7 +58,6 @@ export class OrgAdd extends Component {
         this.setState({upadte_level: org_level})
         this.handleGetAll(org_level,id)
         this.modalInspireRoles()
-        this.getAimag()
         this.geo_id_display()
     }
 
@@ -111,7 +120,16 @@ export class OrgAdd extends Component {
 
     getAimag() {
         this.setState({sumuud:[], baguud:[], sum_id: -1, bag_id: -1, disabled: true})
-        service.getAimags().then(({info, success}) => {
+        const values={  'feature_config_id_5': this.state.feature_config_id_5,
+                        'data_type_id_5': this.state.data_type_id_5,
+                        'nationalCode': this.state.nationalCode,
+                        'feature_config_id_4': this.state.feature_config_id_4,
+                        'data_type_id_4': this.state.data_type_id_4,
+                        'name': this.state.name,
+                        'NationalLevel': this.state.NationalLevel,
+                        'code_list_id_aimag': this.state.code_list_id_aimag,
+                    }
+        service.getAimags(values).then(({info, success}) => {
             if(success){
                 this.setState({aimags: info})
             }setTimeout(() => {
@@ -137,7 +155,17 @@ export class OrgAdd extends Component {
         }
         else{
             this.setState({baguud:[], bag_id: -1})
-            service.getSumuud(aimag).then(({info, success}) => {
+            const values={  'aimag': aimag,
+                            'feature_config_id_5': this.state.feature_config_id_5,
+                            'data_type_id_5': this.state.data_type_id_5,
+                            'nationalCode': this.state.nationalCode,
+                            'feature_config_id_4': this.state.feature_config_id_4,
+                            'data_type_id_4': this.state.data_type_id_4,
+                            'name': this.state.name,
+                            'code_list_id_sum': this.state.code_list_id_sum,
+                            'NationalLevel': this.state.NationalLevel,
+                        }
+            service.getSumuud(values).then(({info, success}) => {
                 if(success){
                     this.setState({sumuud: info})
                 }setTimeout(() => {
@@ -163,7 +191,17 @@ export class OrgAdd extends Component {
             this.setState({baguud:[], bag_id: -1, disabled: false})
         }
         else{
-            service.getBaguud(sum).then(({info, success}) => {
+            const values={  'soum': sum,
+                            'feature_config_id_5': this.state.feature_config_id_5,
+                            'data_type_id_5': this.state.data_type_id_5,
+                            'nationalCode': this.state.nationalCode,
+                            'feature_config_id_4': this.state.feature_config_id_4,
+                            'data_type_id_4': this.state.data_type_id_4,
+                            'name': this.state.name,
+                            'code_list_id_bag': this.state.code_list_id_bag,
+                            'NationalLevel': this.state.NationalLevel,
+                        }
+            service.getBaguud(values).then(({info, success}) => {
                 if(success){
                     this.setState({baguud: info})
                 }setTimeout(() => {
@@ -185,28 +223,34 @@ export class OrgAdd extends Component {
 
     geo_id_display() {
         const values={"org_id": this.props.match.params.id}
-        service.geo_id_display(values).then(({info, success}) => {
-            if(success){
-                if(info){
-                    info.map((data, idx) => {
-                        if (idx === 0){
-                            this.setState({aimag_id: data})
-                            this.getAimag()
-                        }
-                        if (idx === 1){
-                            this.setState({sum_id: data})
-                            this.getSum(this.state.aimag_id)
-                        }
-                        if (idx === 2){
-                            this.setState({bag_id: data})
-                            this.getBag(this.state.bag_id)
-                        }
-                    })
+        if(values){
+            service.geo_id_display(values).then(({info, success, feature_config_id_5, data_type_id_5, nationalCode, feature_config_id_4, data_type_id_4, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag}) => {
+                this.setState({info, success, feature_config_id_5, data_type_id_5, nationalCode, feature_config_id_4, data_type_id_4, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag})
+                if(success){{
+                    if(info){
+                        info.map((data, idx) => {
+                            if (idx === 0){
+                                this.setState({aimag_id: data})
+                                this.getAimag()
+                            }
+                            if (idx === 1){
+                                this.setState({sum_id: data})
+                                this.getSum(this.state.aimag_id)
+                            }
+                            if (idx === 2){
+                                this.setState({bag_id: data})
+                                this.getBag(this.state.bag_id)
+                            }
+                        })
+                    }
+                }setTimeout(() => {
+                    this.setState({disabled: false})
+                }, 100);}
+                else{
+                    this.getAimag()
                 }
-            }setTimeout(() => {
-                this.setState({disabled: false})
-            }, 100);
-        })
+            })
+        }
     }
 
     render() {
