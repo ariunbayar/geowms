@@ -142,17 +142,18 @@ def update(request, payload, pk):
     emp_role.updated_by = request.user
     emp_role.save()
 
-    if not _set_emp_role_data(emp_role, name, description):
-        return JsonResponse({'success': False})
+    with transaction.atomic():
 
-    if not _delete_emp_role_inspire_data(emp_role, remove_roles):
-        return JsonResponse({'success': False})
+        _set_emp_role_data(emp_role, name, description)
 
-        emp_role.created_by = request.user
-    for role in add_roles:
-        if _set_emp_role_inspire_data(emp_role, role, request.user):
+        if remove_roles:
+            _delete_emp_role_inspire_data(emp_role, remove_roles)
 
-            return JsonResponse({'success': True})
+        if add_roles:
+            for role in add_roles:
+                _set_emp_role_inspire_data(emp_role, role, request.user)
+
+        return JsonResponse({'success': True})
 
 
 def _get_emp_roles_data_display(emp_role):
