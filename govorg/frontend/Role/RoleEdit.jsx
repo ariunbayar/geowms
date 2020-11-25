@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom"
 import ModalAlert from "../components/helpers/ModalAlert";
 import { service } from "./Role/service";
 import InsPerms from './Role/GovPerms'
+import { array } from "yup";
 
 export class RoleEdit extends Component {
 
@@ -10,6 +11,7 @@ export class RoleEdit extends Component {
         super(props)
         this.perms=[]
         this.remove_perms=[]
+        this.role=[]
         this.state = {
             role_name: '',
             role_description: '',
@@ -22,9 +24,10 @@ export class RoleEdit extends Component {
         }
         this.handleSave = this.handleSave.bind(this)
         this.modalClose = this.modalClose.bind(this)
+        this.getAllValue = this.getAllValue.bind(this)
         this.getValue = this.getValue.bind(this)
         this.getRoleDetail = this.getRoleDetail.bind(this)
-        this.checkAllAndGet = this.checkAllAndGet.bind(this)
+        this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
     }
 
     handleSave() {
@@ -56,51 +59,115 @@ export class RoleEdit extends Component {
         }, 2000)
     }
 
-    getValue(checked, perm_kind, property_id, feature_id) {
-        if(!checked && this.perms.length > 0) {
-            this.perms.map((perm, idx) => {
-                if(perm.feature_id == feature_id &&
-                    perm.property_id == property_id &&
-                    perm.perm_kind == perm_kind)
-                {
-                    this.remove_perms.push(perm)
-                    this.perms.splice(idx, 1)
-                }
-            })
+    removeItemFromArray (array, feature_id, property_id, perm_kind, is_role_emp_id, is_true_type) {
+        array.map((perm, idx) => {
+            if(perm.feature_id == feature_id &&
+                perm.property_id == property_id &&
+                perm.perm_kind == perm_kind)
+            {
+                if(is_true_type) this.remove_perms.push(is_role_emp_id)
+                else array.splice(idx, 1)
+            }
+        })
+    }
+
+    getAllValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id) {
+        if(checked && type == "all" && is_role_emp_id && this.remove_perms.length > 0) {
+            this.removeItemFromRemoveRoles()
         }
-        if(checked) {
-            const role = {
+        if(!checked && type == 'all' && is_role_emp_id && this.role.length > 0) {
+            this.removeItemFromArray(
+                this.role,
+                feature_id,
+                property_id,
+                perm_kind,
+                is_role_emp_id,
+                is_true_type
+            )
+        }
+        if(checked && type == "all" && !is_role_emp_id) {
+            const add_role = {
                 'feature_id': feature_id,
                 'property_id': property_id,
                 'perm_kind': perm_kind,
+                'gov_perm_inspire_id': perm_inspire_id,
             }
-            this.perms.push(role)
+            this.perms.push(add_role)
         }
-        console.log(this.perms);
+        if(!checked && type == "all" && !is_role_emp_id && this.perms.length > 0) {
+            this.removeItemFromArray(
+                this.perms,
+                feature_id,
+                property_id,
+                perm_kind,
+            )
+        }
+    }
+
+    getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id) {
+        console.log(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id);
+        if(!checked && is_true_type && this.role.length > 0 && type == null) {
+            console.log("its remove");
+            this.removeItemFromArray(
+                this.role,
+                feature_id,
+                property_id,
+                perm_kind,
+                is_role_emp_id,
+                is_true_type
+            )
+        }
+        if(!checked && this.perms.length > 0) {
+            this.removeItemFromArray(
+                this.perms,
+                feature_id,
+                property_id,
+                perm_kind,
+            )
+        }
+        if((checked && !type && !is_true_type) ||
+            (checked && (type == 'role'))
+        ) {
+            const add_role = {
+                'feature_id': feature_id,
+                'property_id': property_id,
+                'perm_kind': perm_kind,
+                'gov_perm_inspire_id': perm_inspire_id,
+            }
+            if (type == 'role') this.role.push(add_role)
+            else this.perms.push(add_role)
+        }
+        if (is_true_type && checked && type == null && this.remove_perms.length > 0) {
+            this.removeItemFromRemoveRoles()
+        }
+        console.log(this.remove_perms);
+    }
+
+    removeItemFromRemoveRoles() {
+        this.remove_perms.map((id, idx) => {
+            if (id == is_role_emp_id) {
+                this.remove_perms.splice(idx, 1)
+            }
+        })
     }
 
     componentDidMount() {
-        // this.getRoleDetail()
+        this.getRoleDetail()
     }
 
     getRoleDetail() {
         this.setState({ is_continue: false })
         service
             .detailRole(this.props.match.params.id)
-            .then(rsp => {
-                console.log(rsp);
-                if (rsp.success) {
-                    this.setState({ is_continue: true })
+            .then(({ success, role_id, role_name, role_description, roles }) => {
+                if (success) {
+                    this.setState({ role_id, role_name, role_description, roles, is_continue: true })
                 }
             })
     }
 
-    checkAllAndGet(checked, perm_kind, property_info) {
-        
-    }
-
     render() {
-        const { role_name, is_continue, role_description } = this.state
+        const { role_name, is_continue, role_description, roles } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -167,13 +234,18 @@ export class RoleEdit extends Component {
 
                     <br />
                     <div>
-                        <InsPerms
-                            action_type="editable"
-                            getValue={this.getValue}
-                            dontDid={true}
-                            org_roles={org_roles}
-                            checkAllAndGet={this.checkAllAndGet}
-                        />
+                        {
+                            is_continue &&
+                            <InsPerms
+                                action_type="editable"
+                                getValue={this.getValue}
+                                sendAllValue={this.getAllValue}
+                                dontDid={true}
+                                org_roles={org_roles}
+                                role={roles}
+                                checkAllAndGet={this.checkAllAndGet}
+                            />
+                        }
                     </div>
                 </div>
             </div>

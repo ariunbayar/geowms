@@ -57,16 +57,15 @@ export class RoleDetail extends Component {
         this.setState({ is_continue: false })
         service
             .detailRole(this.props.match.params.id)
-            .then(rsp => {
-                if (rsp.success) {
-                    this.setState({ is_continue: true })
+            .then(({ success, role_name, role_description, roles }) => {
+                if (success) {
+                    this.setState({ role_name, role_description, roles, is_continue: true })
                 }
             })
     }
 
     render() {
-        const { role_name, is_continue, role_description } = this.state
-        const { org_roles } = this.props
+        const { role_name, is_continue, role_description, roles } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -113,7 +112,7 @@ export class RoleDetail extends Component {
                             is_continue &&
                             <InsPerms
                                 dontDid={true}
-                                org_roles={org_roles}
+                                org_roles={roles}
                             />
                         }
                     </div>

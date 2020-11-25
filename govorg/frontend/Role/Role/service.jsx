@@ -29,7 +29,6 @@ function createRole(gov_perm_id, role_name, role_description, roles){
 }
 
 function updateRole(id, gov_perm_id, role_name, role_description, remove_roles, add_roles) {
-    console.log(id, gov_perm_id, role_name, role_description, remove_roles, add_roles);
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({ gov_perm_id, role_name, role_description, remove_roles, add_roles })

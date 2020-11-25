@@ -73,7 +73,7 @@ export class RoleAdd extends Component {
                 'feature_id': feature_id,
                 'property_id': property_id,
                 'perm_kind': perm_kind,
-                'gov_perm_ins_id': perm_inspire_id,
+                'gov_perm_inspire_id': perm_inspire_id,
             }
             this.perms.push(role)
         }
@@ -158,5 +158,4 @@ export class RoleAdd extends Component {
             </div>
         )
     }
-
 }

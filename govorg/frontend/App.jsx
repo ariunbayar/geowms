@@ -68,7 +68,6 @@ export class App extends Component {
 
         const { org_role } = this.props.org
         const org_inspire = this.props.org.org_inspire
-        console.log(this.props);
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">

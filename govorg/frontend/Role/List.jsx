@@ -45,7 +45,6 @@ export class List extends Component {
             .deleteRole(id)
             .then(({ success }) => {
                 if (success) {
-                    console.log("ustgasan", id)
                     this.getRolesList()
                 }
             })
