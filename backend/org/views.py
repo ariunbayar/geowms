@@ -373,8 +373,8 @@ def org_add(request, payload, level):
     geo_id = payload.get('geo_id')
     objs = []
     if org_id:
+        Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level, geo_id=geo_id)
         if int(role_id) > -1:
-            Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level, geo_id=geo_id)
             gov_perm_role_check = GovPerm.objects.filter(org_id=org_id).first()
             if gov_perm_role_check.gov_role_id != role_id or not gov_perm_role_check.gov_role.id:
                 gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
@@ -758,7 +758,6 @@ def _get_theme_packages_gov(theme_id, govRole):
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
         features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce = _get_package_features_gove(package.package_id, govRole)
-        
         package_data.append({
                 'id': package.package_id,
                 'code': package.package_code,
@@ -858,7 +857,6 @@ def _get_package_features_gove(package_id, govRole):
             p_perm_revoce = p_perm_revoce + 0.5
         if perm_all == 0:
             p_perm_all = p_perm_all - 1
-        
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce
 
 

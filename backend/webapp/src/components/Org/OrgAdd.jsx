@@ -120,15 +120,16 @@ export class OrgAdd extends Component {
 
     getAimag() {
         this.setState({sumuud:[], baguud:[], sum_id: -1, bag_id: -1, disabled: true})
-        const values={  'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
-                        'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
-                        'nationalCode': this.state.nationalCode,
-                        'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
-                        'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
-                        'name': this.state.name,
-                        'NationalLevel': this.state.NationalLevel,
-                        'code_list_id_aimag': this.state.code_list_id_aimag,
-                    }
+        const values={  
+            'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
+            'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
+            'nationalCode': this.state.nationalCode,
+            'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
+            'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
+            'name': this.state.name,
+            'NationalLevel': this.state.NationalLevel,
+            'code_list_id_aimag': this.state.code_list_id_aimag,
+        }
         service.getAimags(values).then(({info, success}) => {
             if(success){
                 this.setState({aimags: info})
@@ -155,16 +156,17 @@ export class OrgAdd extends Component {
         }
         else{
             this.setState({baguud:[], bag_id: -1})
-            const values={  'aimag': aimag,
-                            'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
-                            'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
-                            'nationalCode': this.state.nationalCode,
-                            'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
-                            'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
-                            'name': this.state.name,
-                            'code_list_id_sum': this.state.code_list_id_sum,
-                            'NationalLevel': this.state.NationalLevel,
-                        }
+            const values={
+                'aimag': aimag,
+                'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
+                'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
+                'nationalCode': this.state.nationalCode,
+                'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
+                'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
+                'name': this.state.name,
+                'code_list_id_sum': this.state.code_list_id_sum,
+                'NationalLevel': this.state.NationalLevel,
+            }
             service.getSumuud(values).then(({info, success}) => {
                 if(success){
                     this.setState({sumuud: info})
@@ -191,16 +193,17 @@ export class OrgAdd extends Component {
             this.setState({baguud:[], bag_id: -1, disabled: false})
         }
         else{
-            const values={  'soum': sum,
-                            'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
-                            'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
-                            'nationalCode': this.state.nationalCode,
-                            'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
-                            'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
-                            'name': this.state.name,
-                            'code_list_id_bag': this.state.code_list_id_bag,
-                            'NationalLevel': this.state.NationalLevel,
-                        }
+            const values={
+                'soum': sum,
+                'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
+                'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
+                'nationalCode': this.state.nationalCode,
+                'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
+                'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
+                'name': this.state.name,
+                'code_list_id_bag': this.state.code_list_id_bag,
+                'NationalLevel': this.state.NationalLevel,
+            }
             service.getBaguud(values).then(({info, success}) => {
                 if(success){
                     this.setState({baguud: info})
@@ -232,10 +235,12 @@ export class OrgAdd extends Component {
                             if (idx === 0){
                                 this.setState({aimag_id: data})
                                 this.getAimag()
+                                this.getSum(this.state.aimag_id)
                             }
                             if (idx === 1){
                                 this.setState({sum_id: data})
                                 this.getSum(this.state.aimag_id)
+                                this.getBag(this.state.sum_id)
                             }
                             if (idx === 2){
                                 this.setState({bag_id: data})
@@ -329,7 +334,7 @@ export class OrgAdd extends Component {
                                     <tr>
                                         <th>Баг, Хороо</th>
                                         <td>
-                                            <select disabled={this.state.disabled} name="bag_id" id="bag_id" className='form-control' value={this.state.bag_id} onChange={(e) => this.handleInputBag(e.target.value)}>
+                                            <select disabled={this.state.disabled} name="bag_id" id="bag_id" className='form-control border border-primary' value={this.state.bag_id} onChange={(e) => this.handleInputBag(e.target.value)}>
                                                 <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
                                                 {this.state.baguud.map((data, idx) =>
                                                     <option key={idx} value={data['bag_names']}>{data['bag_names']}</option>
