@@ -38,13 +38,13 @@ export class RoleEdit extends Component {
             .updateRole(id, gov_perm_id, role_name, role_description, this.remove_perms, this.perms)
             .then(({success}) => {
                 if (success) {
+                    this.setState({ modal_alert_status: 'open' })
                     this.modalCloseTime()
                 }
             })
     }
 
     modalClose() {
-        const org_level = this.props.match.params.level
         this.setState({ handleSaveIsLoad: false })
         this.props.history.push(`/gov/perm/role/`)
         this.setState({ modal_alert_status: "closed" })
@@ -54,8 +54,8 @@ export class RoleEdit extends Component {
     modalCloseTime() {
         this.state.timer = setTimeout(() => {
             this.setState({ handleSaveIsLoad: false })
-            this.setState({ modal_alert_status: "closed" })
             this.props.history.push(`/gov/perm/role/`)
+            this.setState({ modal_alert_status: "closed" })
         }, 2000)
     }
 

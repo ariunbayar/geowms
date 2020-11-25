@@ -22,6 +22,7 @@ export class RoleAdd extends Component {
         }
         this.handleSave = this.handleSave.bind(this)
         this.modalClose = this.modalClose.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getValue = this.getValue.bind(this)
     }
 
@@ -32,13 +33,13 @@ export class RoleAdd extends Component {
             .createRole(gov_perm_id, role_name, role_description, this.perms)
             .then(({success}) => {
                 if(success) {
+                    this.setState({ modal_alert_status: 'open'})
                     this.modalCloseTime()
                 }
             })
     }
 
     modalClose() {
-        const org_level = this.props.match.params.level
         this.setState({ handleSaveIsLoad: false })
         this.props.history.push(`/gov/perm/role/`)
         this.setState({ modal_alert_status: "closed" })
@@ -48,8 +49,8 @@ export class RoleAdd extends Component {
     modalCloseTime() {
         setTimeout(() => {
             this.setState({ handleSaveIsLoad: false })
-            this.setState({ modal_alert_status: "closed" })
             this.props.history.push(`/gov/perm/role/`)
+            this.setState({ modal_alert_status: "closed" })
         }, 2000)
     }
 

@@ -12,7 +12,6 @@ export class List extends Component {
             alert: false,
             perms: props.perms,
             modal_alert_status: "closed",
-            timer: null,
             is_loading: false,
         }
         this.handleRemove = this.handleRemove.bind(this)
@@ -20,9 +19,7 @@ export class List extends Component {
     }
 
     modalClose() {
-        clearTimeout(this.state.timer)
         this.setState({ modal_alert_status: "closed" })
-        this.paginate(1, "")
     }
 
     componentDidMount(){
