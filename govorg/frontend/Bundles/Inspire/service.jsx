@@ -4,6 +4,7 @@ export const service = {
     geom,
     rows,
     remove,
+    cancel,
     save,
     detail,
     sendFeature,
@@ -54,6 +55,14 @@ function remove(pid, fid, gid) {
         body: JSON.stringify({gid}),
     }
     return fetch(`${prefix}/${pid}/${fid}/remove/`, opts).then(handleResponse)
+}
+
+function cancel(pid, fid, gid) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({gid}),
+    }
+    return fetch(`${prefix}/${pid}/${fid}/cancel/`, opts).then(handleResponse)
 }
 
 function save(oid, values) {

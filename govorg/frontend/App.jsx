@@ -5,6 +5,7 @@ import GovRole from './GovRole/'
 import { System } from "./System"
 import { Meta } from './Meta'
 import { Profile } from './Profile'
+import { CancelRequest } from './CancelRequest'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -82,6 +83,7 @@ export class App extends Component {
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-times-circle" url="/gov/cancel-request/" text="Цуцлах хүсэлт"></MenuItem>
                         <MenuItem
                             icon="gp-text-primary fa fa-plug"
                             url="/gov/org-request/"
@@ -160,6 +162,7 @@ export class App extends Component {
                                 <Route path="/gov/tuuhen-ov/" component={() => <TuuhenOv perms={this.state.tuuhen_ov} />} /> : null
                             }
                             <Route path="/gov/system/" component={System} />
+                            <Route path="/gov/cancel-request/" component={CancelRequest} />
                             <Route path="/gov/meta/" component={Meta} />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
                             <Route path="/gov/zip-code/" component={ZipCode} />

@@ -1,0 +1,26 @@
+import {handleResponse, getPostOptions, getGetOptions} from '../components/helpers/service'
+export const service = {
+    getAll,
+    requestDelete,
+    requestApprove,
+}
+
+const prefix = '/gov/api/cancel-request'
+
+function getAll() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
+}
+
+function requestDelete(id) {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/${id}/delete/`, requestOptions).then(handleResponse)
+}
+
+function requestApprove(id, values) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({values}),
+    }
+    return fetch(`${prefix}/${id}/approve/`, requestOptions).then(handleResponse)
+}
