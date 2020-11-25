@@ -321,7 +321,6 @@ class GovPerm(models.Model):
         db_table = 'perm_gov_perm'
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True, null=True)
-    geo_id = models.CharField(max_length=100)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
