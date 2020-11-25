@@ -1,6 +1,8 @@
 import React, { Component } from "react"
-import {service} from './service'
 import {Switch , Route, Link, NavLink} from "react-router-dom"
+
+import {service} from './service'
+import {OrgDetail} from './OrgDetail'
 import {OrgRoleOld} from './OrgRoleOld'
 import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
@@ -54,7 +56,15 @@ export class OrgMenu extends Component {
         const org_id = this.props.match.params.id
         return (
             <div>
-                <ul className="nav nav-tabs nav-tabs-dark-gray nav-justified">
+                <ul className="nav nav-tabs nav-tabs-dark-gray">
+
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/detail/`} className="nav-link"
+                            activeClassName="active"  data-toggle="tab">
+                            <i className="fa fa-th-large"></i> <span className="hidden-xs">{ org_name }</span>
+                        </NavLink>
+                    </li>
+
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
@@ -77,20 +87,21 @@ export class OrgMenu extends Component {
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
                         <i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span>
-                        <small className="badge float-right badge-dark-primary">{this.state.employee_count}</small>
+                        <small className="badge float-right badge-dark-primary ml-2">{this.state.employee_count}</small>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`} className="nav-link"
                                 activeClassName="active"  data-toggle="tab"><i className="icon-envelope-open">
                         </i> <span className="hidden-xs">Систем</span>
-                        <small className="badge float-right badge-dark-primary">{this.state.sistem_count}</small>
+                        <small className="badge float-right badge-dark-primary ml-2">{this.state.sistem_count}</small>
 
                         </NavLink>
                     </li>
                 </ul>
                 <div className="tab-content">
                     <Switch>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/detail/" component={OrgDetail}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRoleOld}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/org-role/" component={OrgRole}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/inspire/" component={OrgInspireRole}/>
