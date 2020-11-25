@@ -372,26 +372,27 @@ def org_add(request, payload, level):
     org_id = payload.get('id')
     geo_id = payload.get('geo_id')
     objs = []
-    gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
-
     if org_id:
         if int(role_id) > -1:
-            Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level)
-            GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter, geo_id=geo_id)
-            gov_perm = GovPerm.objects.filter(org_id=org_id).first()
-            GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
-            for gov_role_inspire in gov_role_inspire_all:
-                objs.append(GovPermInspire(
-                    gov_role_inspire=gov_role_inspire,
-                    gov_perm=gov_perm,
-                    perm_kind=gov_role_inspire.perm_kind,
-                    feature_id=gov_role_inspire.feature_id,
-                    property_id=gov_role_inspire.property_id,
-                    geom=gov_role_inspire.geom,
-                    created_by=gov_role_inspire.created_by,
-                    updated_by=gov_role_inspire.updated_by,
-                ))
-            GovPermInspire.objects.bulk_create(objs)
+            Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level, geo_id=geo_id)
+            gov_perm_role_check = GovPerm.objects.filter(org_id=org_id).first()
+            if gov_perm_role_check.gov_role_id != role_id or not gov_perm_role_check.gov_role.id:
+                gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
+                GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
+                gov_perm = GovPerm.objects.filter(org_id=org_id).first()
+                GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
+                for gov_role_inspire in gov_role_inspire_all:
+                    objs.append(GovPermInspire(
+                        gov_role_inspire=gov_role_inspire,
+                        gov_perm=gov_perm,
+                        perm_kind=gov_role_inspire.perm_kind,
+                        feature_id=gov_role_inspire.feature_id,
+                        property_id=gov_role_inspire.property_id,
+                        geom=gov_role_inspire.geom,
+                        created_by=gov_role_inspire.created_by,
+                        updated_by=gov_role_inspire.updated_by,
+                    ))
+                GovPermInspire.objects.bulk_create(objs)
             return JsonResponse({'success': True})
         else:
             gov_perm = GovPerm.objects.filter(org_id=org_id).first()
@@ -401,11 +402,12 @@ def org_add(request, payload, level):
                 GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
             return JsonResponse({'success': True})
     else:
-        org = Org.objects.create(name=org_name, level=level)
+        gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
+        org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
         if org_role_filter:
-            gov_perm = GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user, geo_id=geo_id)
+            gov_perm = GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user)
         else:
-            gov_perm = GovPerm.objects.create(org=org, created_by=request.user, updated_by=request.user, geo_id=geo_id)
+            gov_perm = GovPerm.objects.create(org=org, created_by=request.user, updated_by=request.user)
         if gov_role_inspire_all:
             for gov_role_inspire in gov_role_inspire_all:
                 objs.append(GovPermInspire(
@@ -1258,19 +1260,19 @@ def saveGovRoles(request, payload, level, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def getAimags(request, payload):
-    feature_config_id_5 = payload.get('feature_config_id_5')
-    data_type_id_5 = payload.get('data_type_id_5')
+    au_au_au_feature_config_id = payload.get('au_au_au_feature_config_id')
+    au_au_au_data_type_id = payload.get('au_au_au_data_type_id')
     nationalCode = payload.get('nationalCode')
-    feature_config_id_4 = payload.get('feature_config_id_4')
-    data_type_id_4 = payload.get('data_type_id_4')
+    au_au_ab_feature_config_id = payload.get('au_au_ab_feature_config_id')
+    au_au_ab_data_type_id = payload.get('au_au_ab_data_type_id')
     name = payload.get('name')
     NationalLevel = payload.get('NationalLevel')
     code_list_id_aimag = payload.get('code_list_id_aimag')
     try:
         aimguud = []
-        for ub_aimag in MDatasBoundary.objects.filter(property_id=NationalLevel, feature_config_id__in=feature_config_id_5, code_list_id=code_list_id_aimag):
-            for value_text in MDatasBoundary.objects.filter(geo_id=ub_aimag.geo_id, feature_config_id__in=feature_config_id_5, data_type_id=data_type_id_5, property_id=nationalCode):
-                aimag_datas = MDatasBoundary.objects.filter(geo_id=value_text.value_text, feature_config_id__in=feature_config_id_4, data_type_id=data_type_id_4, property_id=name)
+        for ub_aimag in MDatasBoundary.objects.filter(property_id=NationalLevel, feature_config_id__in=au_au_au_feature_config_id, code_list_id=code_list_id_aimag):
+            for value_text in MDatasBoundary.objects.filter(geo_id=ub_aimag.geo_id, feature_config_id__in=au_au_au_feature_config_id, data_type_id=au_au_au_data_type_id, property_id=nationalCode):
+                aimag_datas = MDatasBoundary.objects.filter(geo_id=value_text.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
                 for datas in aimag_datas:
                     aimguud.append({
                     'aimag_names': datas.value_text,
@@ -1295,11 +1297,11 @@ def getAimags(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def getSumuud(request, payload):
     aimag = payload.get('aimag')
-    feature_config_id_5 = payload.get('feature_config_id_5')
-    data_type_id_5 = payload.get('data_type_id_5')
+    au_au_au_feature_config_id = payload.get('au_au_au_feature_config_id')
+    au_au_au_data_type_id = payload.get('au_au_au_data_type_id')
     nationalCode = payload.get('nationalCode')
-    feature_config_id_4 = payload.get('feature_config_id_4')
-    data_type_id_4 = payload.get('data_type_id_4')
+    au_au_ab_feature_config_id = payload.get('au_au_ab_feature_config_id')
+    au_au_ab_data_type_id = payload.get('au_au_ab_data_type_id')
     name = payload.get('name')
     code_list_id_sum = payload.get('code_list_id_sum')
     try:
@@ -1320,8 +1322,8 @@ def getSumuud(request, payload):
         for geo_id in geo_ids:
             geo_id = ''.join(geo_id)
 
-            for sum_ob in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=feature_config_id_5, data_type_id=data_type_id_5, property_id=nationalCode):
-                sum_datas = MDatasBoundary.objects.filter(geo_id=sum_ob.value_text, feature_config_id__in=feature_config_id_4, data_type_id=data_type_id_4, property_id=name)
+            for sum_ob in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=au_au_au_feature_config_id, data_type_id=au_au_au_data_type_id, property_id=nationalCode):
+                sum_datas = MDatasBoundary.objects.filter(geo_id=sum_ob.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
                 for datas in sum_datas:
                     sumuud.append({
                     'sum_names': datas.value_text,
@@ -1346,11 +1348,11 @@ def getSumuud(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def getBaguud(request, payload):
     soum = payload.get('soum')
-    feature_config_id_5 = payload.get('feature_config_id_5')
-    data_type_id_5 = payload.get('data_type_id_5')
+    au_au_au_feature_config_id = payload.get('au_au_au_feature_config_id')
+    au_au_au_data_type_id = payload.get('au_au_au_data_type_id')
     nationalCode = payload.get('nationalCode')
-    feature_config_id_4 = payload.get('feature_config_id_4')
-    data_type_id_4 = payload.get('data_type_id_4')
+    au_au_ab_feature_config_id = payload.get('au_au_ab_feature_config_id')
+    au_au_ab_data_type_id = payload.get('au_au_ab_data_type_id')
     name = payload.get('name')
     code_list_id_bag = payload.get('code_list_id_bag')
     try:
@@ -1372,8 +1374,8 @@ def getBaguud(request, payload):
         for geo_id in geo_ids:
             geo_id = ''.join(geo_id)
 
-            for bag in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=feature_config_id_5, data_type_id=data_type_id_5, property_id=nationalCode):
-                bag_datas = MDatasBoundary.objects.filter(geo_id=bag.value_text, feature_config_id__in=feature_config_id_4, data_type_id=data_type_id_4, property_id=name)
+            for bag in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=au_au_au_feature_config_id, data_type_id=au_au_au_data_type_id, property_id=nationalCode):
+                bag_datas = MDatasBoundary.objects.filter(geo_id=bag.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
                 for datas in bag_datas:
                     baguud.append({
                     'bag_names': datas.value_text,
@@ -1400,19 +1402,11 @@ def geo_id_display(request, payload):
 
     org_id = payload.get('org_id')
 
-    feature_id_4 = LFeatures.objects.filter(feature_code="au-au-au").first().feature_id #4
-    feature_config_id_4_array = list(LFeatureConfigs.objects.filter(feature_id__in=[feature_id_4]).values('feature_config_id'))
+    au_au_au_feature_id = LFeatures.objects.filter(feature_code="au-au-au").first().feature_id #4
+    au_au_au_feature_config_id = [i['feature_config_id'] for i in  LFeatureConfigs.objects.filter(feature_id__in=[au_au_au_feature_id]).values('feature_config_id')]  # 5,6,7
 
-    feature_config_id_5 = [] # 5,6,7
-    for feature_config_id in feature_config_id_4_array:
-        feature_config_id_5.append(feature_config_id['feature_config_id'])
-
-    data_type_id_5 = list(LDataTypes.objects.filter(data_type_id__in=feature_config_id_5, data_type_code='AdministrativeUnit').values('data_type_id'))[0]['data_type_id']
-    property_ids_array = list(LDataTypeConfigs.objects.filter(data_type_id=data_type_id_5).values('property_id'))
-
-    property_ids = [] # 2, 22, 3, 4, 26, 24, 27
-    for property_id in property_ids_array:
-        property_ids.append(property_id['property_id'])
+    au_au_au_data_type_id = list(LDataTypes.objects.filter(data_type_id__in=au_au_au_feature_config_id, data_type_code='AdministrativeUnit').values('data_type_id'))[0]['data_type_id']
+    property_ids = [i['property_id'] for i in LDataTypeConfigs.objects.filter(data_type_id=au_au_au_data_type_id).values('property_id')] # 2, 22, 3, 4, 26, 24, 27
 
     NationalLevel = LProperties.objects.filter(property_id__in=property_ids, property_code='NationalLevel').values('property_id')[0]['property_id'] # Үндэсний засаг захиргааны түвшин: Энэ хил зааг бүхий бүх зэргэлдээ засаг захиргааны нэгжийн шаталсан түвшин.
     nationalCode = LProperties.objects.filter(property_id__in=property_ids, property_code='nationalCode').values('property_id')[0]['property_id'] # Улсын код: Улс орон бүрт тодорхойлсон үндэсний засаг захиргааны кодтой тохирох сэдэвчилсэн танигч.
@@ -1421,42 +1415,37 @@ def geo_id_display(request, payload):
     code_list_id_sum = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='3rdOrder\n').values('code_list_id'))[0]['code_list_id'] # "3rdOrder"
     code_list_id_bag = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='4thOrder\n').values('code_list_id'))[0]['code_list_id'] # "4thOrder"
 
-    feature_id_5 = LFeatures.objects.filter(feature_code="au-au-ab").first().feature_id #5
-    feature_config_id_5_array = list(LFeatureConfigs.objects.filter(feature_id__in=[feature_id_5]).values('feature_config_id'))
+    au_au_ab_feature_id = LFeatures.objects.filter(feature_code="au-au-ab").first().feature_id #5
+    au_au_ab_feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id__in=[au_au_ab_feature_id]).values('feature_config_id')]
 
-    feature_config_id_4 = [] # 4
-    for feature_config_id in feature_config_id_5_array:
-        feature_config_id_4.append(feature_config_id['feature_config_id'])
-
-    data_type_id_4 = list(LDataTypes.objects.filter(data_type_id__in=feature_config_id_4, data_type_code='AdministrativeBoundary').values('data_type_id'))[0]['data_type_id']
-    property_ids_array = list(LDataTypeConfigs.objects.filter(data_type_id=data_type_id_4).values('property_id'))
-
-    property_ids = [] # 2, 22, 3, 4, 26, 24, 27
-    for property_id in property_ids_array:
-        property_ids.append(property_id['property_id'])
+    au_au_ab_data_type_id = list(LDataTypes.objects.filter(data_type_id__in=au_au_ab_feature_config_id, data_type_code='AdministrativeBoundary').values('data_type_id'))[0]['data_type_id']
+    property_ids = [i['property_id'] for i in LDataTypeConfigs.objects.filter(data_type_id=au_au_ab_data_type_id).values('property_id')] # 2, 22, 3, 4, 26, 24, 27
 
     name = LProperties.objects.filter(property_id__in=property_ids, property_code='name').values('property_id')[0]['property_id'] # Улс, аймаг, сум, багын нэр
-
     if org_id:
-        govPerm_geo_id = GovPerm.objects.filter(org_id=org_id).first().geo_id
-        geo_id = ''
-        names = []
-        for geo_ids in range(0, len(govPerm_geo_id), 2):
-            geo_id += str(govPerm_geo_id[geo_ids:geo_ids+2])
-            names.append(MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id=4, data_type_id=4, property_id=30).first().value_text)
-        info = names
-        success = True
+        govPerm_geo_id = Org.objects.filter(id=org_id).first().geo_id
+        if govPerm_geo_id:
+            geo_id = ''
+            names = []
+            for geo_ids in range(0, len(govPerm_geo_id), 2):
+                geo_id += str(govPerm_geo_id[geo_ids:geo_ids+2])
+                names.append(MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name).first().value_text)
+            info = names
+            success = True
+        else:
+            info = ''
+            success = False
     else:
         info = ''
         success = False
     rsp = {
         'info': info,
         'success': success,
-        'feature_config_id_5': feature_config_id_5,
-        'data_type_id_5': data_type_id_5,
+        'au_au_au_feature_config_id': au_au_au_feature_config_id,
+        'au_au_au_data_type_id': au_au_au_data_type_id,
         'nationalCode': nationalCode,
-        'feature_config_id_4': feature_config_id_4,
-        'data_type_id_4': data_type_id_4,
+        'au_au_ab_feature_config_id': au_au_ab_feature_config_id,
+        'au_au_ab_data_type_id': au_au_ab_data_type_id,
         'name': name,
         'NationalLevel': NationalLevel,
         'code_list_id_aimag': code_list_id_aimag,

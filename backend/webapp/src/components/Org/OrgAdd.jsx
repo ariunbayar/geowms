@@ -27,11 +27,11 @@ export class OrgAdd extends Component {
             sum_id: -1,
             baga_id: -1,
             geo_id: '',
-            feature_config_id_5: null,
-            data_type_id_5: null,
+            au_au_au_feature_config_id: null,
+            au_au_au_data_type_id: null,
             nationalCode: null,
-            feature_config_id_4: null,
-            data_type_id_4: null,
+            au_au_ab_feature_config_id: null,
+            au_au_ab_data_type_id: null,
             name: null,
             NationalLevel: null,
             code_list_id_aimag: null,
@@ -120,11 +120,11 @@ export class OrgAdd extends Component {
 
     getAimag() {
         this.setState({sumuud:[], baguud:[], sum_id: -1, bag_id: -1, disabled: true})
-        const values={  'feature_config_id_5': this.state.feature_config_id_5,
-                        'data_type_id_5': this.state.data_type_id_5,
+        const values={  'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
+                        'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
                         'nationalCode': this.state.nationalCode,
-                        'feature_config_id_4': this.state.feature_config_id_4,
-                        'data_type_id_4': this.state.data_type_id_4,
+                        'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
+                        'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
                         'name': this.state.name,
                         'NationalLevel': this.state.NationalLevel,
                         'code_list_id_aimag': this.state.code_list_id_aimag,
@@ -156,11 +156,11 @@ export class OrgAdd extends Component {
         else{
             this.setState({baguud:[], bag_id: -1})
             const values={  'aimag': aimag,
-                            'feature_config_id_5': this.state.feature_config_id_5,
-                            'data_type_id_5': this.state.data_type_id_5,
+                            'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
+                            'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
                             'nationalCode': this.state.nationalCode,
-                            'feature_config_id_4': this.state.feature_config_id_4,
-                            'data_type_id_4': this.state.data_type_id_4,
+                            'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
+                            'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
                             'name': this.state.name,
                             'code_list_id_sum': this.state.code_list_id_sum,
                             'NationalLevel': this.state.NationalLevel,
@@ -192,11 +192,11 @@ export class OrgAdd extends Component {
         }
         else{
             const values={  'soum': sum,
-                            'feature_config_id_5': this.state.feature_config_id_5,
-                            'data_type_id_5': this.state.data_type_id_5,
+                            'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
+                            'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
                             'nationalCode': this.state.nationalCode,
-                            'feature_config_id_4': this.state.feature_config_id_4,
-                            'data_type_id_4': this.state.data_type_id_4,
+                            'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
+                            'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
                             'name': this.state.name,
                             'code_list_id_bag': this.state.code_list_id_bag,
                             'NationalLevel': this.state.NationalLevel,
@@ -224,8 +224,8 @@ export class OrgAdd extends Component {
     geo_id_display() {
         const values={"org_id": this.props.match.params.id}
         if(values){
-            service.geo_id_display(values).then(({info, success, feature_config_id_5, data_type_id_5, nationalCode, feature_config_id_4, data_type_id_4, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag}) => {
-                this.setState({info, success, feature_config_id_5, data_type_id_5, nationalCode, feature_config_id_4, data_type_id_4, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag})
+            service.geo_id_display(values).then(({info, success, au_au_au_feature_config_id, au_au_au_data_type_id, nationalCode, au_au_ab_feature_config_id, au_au_ab_data_type_id, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag}) => {
+                this.setState({info, success, au_au_au_feature_config_id, au_au_au_data_type_id, nationalCode, au_au_ab_feature_config_id, au_au_ab_data_type_id, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag})
                 if(success){{
                     if(info){
                         info.map((data, idx) => {
