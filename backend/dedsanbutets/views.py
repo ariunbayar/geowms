@@ -459,7 +459,7 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     check = createView(id_list, table_name, model_name)
     if check:
-        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
+        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id, feature)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -731,11 +731,12 @@ def get_colName_type(view_name, data):
     return geom_att, some_attributes
 
 
-def _create_geoserver_detail(table_name, model_name, theme, user_id):
+def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
     
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
     ds_name = ws_name
+    layer_title = feature.feature_name
     wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
@@ -779,7 +780,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -800,7 +801,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -847,7 +848,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -863,7 +864,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -893,7 +894,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                     ws_name,
                                     ds_name,
                                     layer_name,
-                                    layer_name,
+                                    layer_title,
                                     table_name,
                                     srs,
                                     geom_att,
@@ -912,7 +913,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                     ws_name,
                                     ds_name,
                                     layer_name,
-                                    layer_name,
+                                    layer_title,
                                     table_name,
                                     srs,
                                     geom_att,
@@ -932,10 +933,10 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
         if not wms_layer:
             legend_url = geoserver.get_legend_url(wms_id, layer_name)
             wms_layer = WMSLayer.objects.create(
-                            name=layer_name,
+                            name=layer_title,
                             code=layer_name,
                             wms=wms,
-                            title=layer_name,
+                            title=layer_title,
                             feature_price=0,
                             legend_url=legend_url
                         )
