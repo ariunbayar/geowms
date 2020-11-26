@@ -3,6 +3,8 @@ from django.db.models import F
 
 from backend.inspire.models import (
     GovPermInspire,
+    EmpRoleInspire,
+    EmpPermInspire,
     LProperties,
     LFeatures,
     LFeatureConfigs,
@@ -10,6 +12,26 @@ from backend.inspire.models import (
     LPackages,
     LThemes,
 )
+
+def get_convert_perm_kind(model, kind):
+
+    if kind == 'PERM_VIEW':
+        return model.PERM_VIEW
+
+    if kind == 'PERM_CREATE':
+        return model.PERM_CREATE
+
+    if kind == 'PERM_REMOVE':
+        return model.PERM_REMOVE
+
+    if kind == 'PERM_UPDATE':
+        return model.PERM_UPDATE
+
+    if kind == 'PERM_REVOKE':
+        return model.PERM_REVOKE
+
+    if kind == 'PERM_APPROVE':
+        return model.PERM_APPROVE
 
 
 def get_convert_display_name(perm_list):
@@ -69,6 +91,9 @@ def get_property_data_display(property_id, feature_id, role_model, inspire_model
 
     if role_model.__class__.__name__ == 'GovPerm':
         perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+
+    if role_model.__class__.__name__ == 'EmpPerm':
+        perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
 
     property = get_object_or_404(LProperties, property_id=property_id)
 

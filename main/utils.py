@@ -241,7 +241,7 @@ def send_approve_email(user):
     )
 
     subject = 'Геопортал хэрэглэгч баталгаажуулах'
-    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://192.168.10.92/gov/user/approve/{token}/'.format(token=token)
+    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://{host_name}/gov/user/approve/{token}/'.format(token=token, host_name=settings.EMAIL_HOST_NAME)
     from_email = settings.EMAIL_HOST_USER
     to_email = [user.email]
 
