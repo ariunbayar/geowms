@@ -11,6 +11,7 @@ from api.utils import filter_layers, replace_src_url
 from backend.govorg.models import GovOrg
 from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
+from main.decorators import cors
 
 def _get_service_url(request, token, wms):
     url = reverse('api:service:proxy', args=[token, wms.pk])
@@ -18,6 +19,7 @@ def _get_service_url(request, token, wms):
     return absolute_url
 
 
+@cors
 @require_GET
 def proxy(request, token, pk):
 
