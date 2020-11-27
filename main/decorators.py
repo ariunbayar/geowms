@@ -10,27 +10,6 @@ from django.apps import apps
 from urllib.parse import urlparse
 
 
-def cors(f):
-
-    def wrap(request, *args, **kwargs):
-
-        baseurl = request.build_absolute_uri()
-        parsed_uri = urlparse(baseurl)
-        result = '{uri.scheme}://{uri.netloc}'.format(uri=parsed_uri)
-        allowed_hosts = 'http://localhost:8000'
-
-        if  result not in allowed_hosts:
-            return HttpResponse(status=403)
-        else:
-            return f(request, *args, **kwargs)
-
-    wrap.__doc__ = f.__doc__
-    wrap.__name__ = f.__name__
-
-    return wrap
-
-
-
 def ajax_required(f):
 
     def wrap(request, *args, **kwargs):
