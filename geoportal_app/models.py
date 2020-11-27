@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
 
 
 class Role(models.Model):
@@ -36,3 +37,7 @@ class UserValidationEmail(models.Model):
     token = models.CharField(max_length=100, null=True, db_index=True)
     valid_before = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_active(self):
+        return now() < self.valid_before

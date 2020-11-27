@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'govorg.backend.zipcode.apps.ZipcodeConfig',
     'govorg.backend.forms.apps.FormsConfig',
     'govorg.backend.meta_data.apps.MetaDataConfig',
+    'govorg.backend.secure.apps.SecureConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
@@ -166,6 +167,7 @@ LOGIN_REDIRECT_URL = 'bundle:all'
 LOGIN_REDIRECT_ORG_URL = 'org:frontend'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
+LOGOUT_GOV_REDIRECT_URL = 'gov_secure:login'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 9175040 #70mb
 
