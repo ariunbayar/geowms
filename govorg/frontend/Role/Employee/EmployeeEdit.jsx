@@ -154,7 +154,6 @@ export class EmployeeEdit extends Component {
     }
 
     getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm) {
-        console.log(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm);
         if(!checked && this.role.length > 0 && type == null) {
             this.removeItemFromArray(
                 this.role,
@@ -190,10 +189,6 @@ export class EmployeeEdit extends Component {
         if (is_emp_perm && checked && type == null && this.remove_perms.length > 0) {
             this.removeItemFromRemoveRoles(is_role_emp_id)
         }
-        console.log(this.perms);
-        console.log(this.remove_perms);
-        console.log(this.role);
-        console.log(this.emp_perms);
     }
 
     removeItemFromRemoveRoles(is_role_emp_id) {
