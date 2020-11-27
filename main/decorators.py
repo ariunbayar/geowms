@@ -11,6 +11,7 @@ from django.apps import apps
 def ajax_required(f):
 
     def wrap(request, *args, **kwargs):
+
         if request.is_ajax():
 
             try:
