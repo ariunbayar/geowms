@@ -26,9 +26,9 @@ export class Sidebar extends Component {
         return (
             <div className={ this.props.is_sidebar_open ? 'col-md-12 ⚙ ⚙-hide' : 'col-md-12 ⚙'}>
             <div className="row">
-                <div className="row sidebarHeader">
+                {/* <div className="row sidebarHeader">
                     <div className="row">
-                        {/* <form onSubmit={this.handleSubmitCoordinate}>
+                        <form onSubmit={this.handleSubmitCoordinate}>
                             <div className="form-group searchComponent">
                                 <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
                                 <div className="input-group mb-3">
@@ -42,16 +42,19 @@ export class Sidebar extends Component {
                                     </div>
                                 </div>
                             </div>
-                        </form> */}
+                        </form>
                     </div>
                     <div className="row xButtonLayer">
                         <a onClick={() => this.props.toggleSidebar(false)}><i className="fa fa-times" aria-hidden="true"></i></a>
                     </div>
-                </div>
+                </div> */}
+                <div className="row xButtonLayer">
+                        <a onClick={() => this.props.toggleSidebar(false)}><i className="fa fa-times" aria-hidden="true"></i></a>
+                    </div>
                 <div className="row sidebarFooter">
                     {this.props.map_wms_list.map((wms, idx) =>
                     <WMSItem wms={wms} key={idx}/>
-                )}
+                    )}
                 </div>
             </div>
             </div>
