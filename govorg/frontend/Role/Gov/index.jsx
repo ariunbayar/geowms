@@ -3,7 +3,7 @@ import React, { Component } from "react"
 import { service } from "./service"
 import {Item}  from "./Items"
 
-export default class Bundle extends Component {
+export default class Gov extends Component {
 
     constructor(props) {
         super(props)

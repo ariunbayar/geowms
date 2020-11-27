@@ -31,19 +31,24 @@ export default class RoleTable extends Component {
     }
 
     render() {
-        const { idx, title } = this.props.values
+        const { role_id, role_name } = this.props.values
+        const { index } = this.props
         return (
             <tr>
                 <th>
-                    {idx}
+                    {index}
                 </th>
                 <th>
-                <NavLink to={`/gov/role/role/detail/`}>
-                    {title}
+                <NavLink
+                    to={`/gov/perm/role/${role_id}/detail/`}
+                >
+                    {role_name}
                 </NavLink>
                 </th>
                 <th>
-                    <NavLink to={`/gov/role/role/edit/`}>
+                    <NavLink
+                        to={`/gov/perm/role/${role_id}/edit/`}
+                    >
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </th>
@@ -56,14 +61,12 @@ export default class RoleTable extends Component {
                             modalClose={this.handleModalDeleteClose}
                             modalAction={this.props.handleRemove}
                             text={`Та устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
+                            role_name="Тохиргоог устгах"
                             model_type_icon="success"
                         />
                     }
                 </th>
             </tr>
         )
-
     }
-
 }

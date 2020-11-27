@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-import GovEmp from './Employee';
-import GovRole from './GovRole/'
 import { System } from "./System"
 import { Meta } from './Meta'
 import { Profile } from './Profile'
+
+import InsPerms from './Role/Role/GovPerms'
+import Gov from './Role/Gov/index'
+import { EmployeeForm } from './Role/Employee/EmployeeForm'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -61,13 +63,13 @@ export class App extends Component {
     }
 
     render() {
-      console.log(this.props.org.org_role)
         const {
             tuuhen_ov,
             tseg_burtgel,
         } = this.state
-        const org_inspire = this.props.org.org_inspire
 
+        const { org_role } = this.props.org
+        const org_inspire = this.props.org.org_inspire
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -80,9 +82,10 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Эрх">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/" text="Байгууллага"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/employees/" text="Хэрэглэгч"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/role/" text="Role"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/org/" text="Байгууллага"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employees/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Role"></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
@@ -166,6 +169,7 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
+                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
                             <Route path="/gov/admin/login/" component={Login} />
                             <Route path="/gov/admin/verify/" component={Verify} />
                             <Route path="/gov/role/role/" component={Role} />
@@ -173,8 +177,9 @@ export class App extends Component {
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route path="/gov/role/employees/" component={GovEmp} />
-                            <Route exact path="/gov/role/" component={GovRole} />
+                            <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                            <Route exact path="/gov/perm/org/" component={Gov} />
+                            <Route exact path="/gov/perm/employees/" component={EmployeeForm} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                         </Switch>

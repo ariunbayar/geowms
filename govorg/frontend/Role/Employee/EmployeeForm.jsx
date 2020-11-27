@@ -2,7 +2,7 @@
 import React, { Component } from "react"
 import {EmployeeTable} from './EmployeeTable'
 import { service } from "./service"
-import { Pagination } from "../components/pagination/pagination"
+import { Pagination } from "../../components/pagination/pagination"
 import { NavLink } from "react-router-dom"
 
 

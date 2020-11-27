@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
-import Modal from "../components/helpers/Modal"
+import Modal from "../../components/helpers/Modal"
 
 export class EmployeeTable extends Component {
 

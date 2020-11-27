@@ -8,12 +8,13 @@ import { RoleDetail } from './RoleDetail'
 export class Role extends Component {
 
     render() {
+        const { org_roles } = this.props
         return (
             <Switch>
-                <Route exact path="/gov/role/role/" component={List} />
-                <Route exact path="/gov/role/role/edit/" component={RoleEdit} />
-                <Route exact path="/gov/role/role/add/" component={RoleAdd} />
-                <Route exact path="/gov/role/role/detail/" component={RoleDetail} />
+                <Route exact path="/gov/perm/role/" component={List} />
+                <Route exact path="/gov/perm/role/:id/edit/" component={(props) => <RoleEdit {...props} org_roles={org_roles} /> } />
+                <Route exact path="/gov/perm/role/add/" component={(props) => <RoleAdd {...props} org_roles={org_roles} /> } />
+                <Route exact path="/gov/perm/role/:id/detail/" component={(props) => <RoleDetail {...props} org_roles={org_roles} /> } />
             </Switch>
         )
     }
