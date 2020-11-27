@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
@@ -21,11 +23,18 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LThemes
 from backend.inspire.models import LValueTypes
 from backend.inspire.models import MDatasBoundary
+from backend.inspire.models import GovRole
+from backend.inspire.models import GovPerm
+from backend.inspire.models import EmpRole
+from backend.inspire.models import EmpPerm
+from backend.inspire.models import GovRoleInspire
+from backend.inspire.models import GovPermInspire
+from backend.inspire.models import EmpRoleInspire
+from backend.inspire.models import EmpPermInspire
 from geoportal_app.models import User
 from main.decorators import ajax_required
+from main import utils
 
-from django.contrib.postgres.search import SearchVector
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, GovRole, GovPerm, EmpRole, EmpPerm, GovRoleInspire, GovPermInspire, EmpRoleInspire, EmpPermInspire
 from .models import Org, OrgRole, Employee, InspirePerm
 
 
@@ -498,6 +507,7 @@ def org_list(request, payload, level):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def detail(request, level, pk):
+
     org = get_object_or_404(Org, pk=pk, level=level)
 
     org_roles = GovPerm.objects.filter(org=org).first()
@@ -506,12 +516,16 @@ def detail(request, level, pk):
         if org_roles.gov_role:
             org_role = org_roles.gov_role.id
 
+    org.geo_id = 'au_41'  # TODO set org.geo_id as MultiPolygon geom, not LineString
+    geom = utils.get_geom(org.geo_id, 'MultiPolygon')
+
     orgs_display = [{
         'id': org.id,
         'name': org.name,
         'level': org.level,
         'level_display': org.get_level_display(),
-        'org_role': org_role
+        'allowed_geom': geom.json,
+        'org_role': org_role,
     }]
 
     return JsonResponse({

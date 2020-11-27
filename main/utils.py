@@ -5,6 +5,10 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
+
+from django.apps import apps
+from django.contrib.gis.db.models.functions import Transform
+from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from django.conf import settings
@@ -247,5 +251,39 @@ def send_approve_email(user):
 
     send_mail(subject, msg, from_email, to_email, fail_silently=False)
 
-
     return True
+
+
+def get_geom(geo_id, geom_type=None, srid=4326):
+
+    if not geo_id:
+        return None
+
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+
+    qs = MGeoDatas.objects
+    qs = qs.annotate(geo_data_transformed=Transform('geo_data', srid))
+    qs = qs.filter(geo_id=geo_id)
+    geom_info = qs.first()
+
+    if not geom_info:
+        return None
+
+    geom = geom_info.geo_data_transformed
+
+    if not isinstance(geom, GEOSGeometry):
+        msg = (
+            'MGeoDatas.geo_data<{geo_id}> нь геометр төрлийн утга байх ёстой.'
+        ).format(
+            geo_id=geo_id,
+        )
+        raise Exception(msg)
+
+    if geom_type and geom.geom_type != geom_type:
+        msg = (
+            'MGeoDatas.geo_data<{}> нь {} төрлийн '
+            'утга байх ёстой боловч {} байна.'
+        ).format(geo_id, geom_type, geom.geom_type)
+        raise Exception(msg)
+
+    return geom

@@ -96,7 +96,6 @@ urlpatterns = [
         path('getBaguud/', org_views.getBaguud, name='getBaguud'),
         path('geo_id_display/', org_views.geo_id_display, name='geo_id_display'),
 
-
     ], 'org'))),
 
     path('api/log/', include(([

@@ -11,47 +11,53 @@ import {OrgRole} from './OrgRole'
 
 
 export class OrgMenu extends Component {
+
     constructor(props) {
 
         super(props)
         this.state = {
-            org_name:'',
+            org_name: '',
+            allowed_geom: null,
             sistem_count: 0,
-            employee_count:null,
+            employee_count: null,
         }
-        this.getOrgName=this.getOrgName.bind(this)
-        this.handleSistemCount=this.handleSistemCount.bind(this)
+        this.getOrgName = this.getOrgName.bind(this)
+        this.handleSistemCount = this.handleSistemCount.bind(this)
 
     }
+
     componentDidMount() {
-        const level=this.props.match.params.level
-        const id=this.props.match.params.id
-        this.getOrgName(level,id)
+        const level= this.props.match.params.level
+        const id= this.props.match.params.id
+        this.getOrgName(level, id)
         this.handleSistemCount()
     }
 
     handleSistemCount(){
-        const id=this.props.match.params.id
+
+        const id = this.props.match.params.id
+
         service.sistemCount(id).then(({ count }) => {
-            this.setState({ sistem_count: count });
-          });
+            this.setState({ sistem_count: count })
+        })
     }
 
     getOrgName(org_level,id){
-        service.orgAll(org_level,id).then(({ orgs,count }) => {
+        service.orgAll(org_level,id).then(({ orgs, count }) => {
             if (orgs) {
-                orgs.map(org=>this.setState({
-                    org_name:org.name
+                orgs.map(org => this.setState({
+                    org_name: org.name,
+                    allowed_geom: org.allowed_geom,
                 }))
                 this.setState({
-                    employee_count:count
+                    employee_count: count
                 })
             }
         })
     }
 
     render() {
-        const { org_name} = this.state
+        const { org_name, employee_count, allowed_geom } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
@@ -86,8 +92,8 @@ export class OrgMenu extends Component {
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
-                        <i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span>
-                        <small className="badge float-right badge-dark-primary ml-2">{this.state.employee_count}</small>
+                            <i className="icon-user"></i> <span className="hidden-xs">Албан хаагчид</span>
+                            <small className="badge float-right badge-dark-primary ml-2">{ employee_count }</small>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
@@ -101,7 +107,9 @@ export class OrgMenu extends Component {
                 </ul>
                 <div className="tab-content">
                     <Switch>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/detail/" component={OrgDetail}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
+                            <OrgDetail { ...routeProps } allowed_geom={ allowed_geom }/>
+                        }/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRoleOld}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/org-role/" component={OrgRole}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/inspire/" component={OrgInspireRole}/>

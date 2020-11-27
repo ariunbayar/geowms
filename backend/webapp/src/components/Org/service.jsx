@@ -21,6 +21,7 @@ export const service = {
     getSumuud,
     getBaguud,
     geo_id_display,
+    getBaseLayers,
 }
 
 
@@ -174,4 +175,10 @@ function geo_id_display(values) {
         body: JSON.stringify(values),
     }
     return fetch(`/back/api/org/geo_id_display/`, opts).then(handleResponse)
+}
+
+
+function getBaseLayers() {
+    const opts = getGetOptions()
+    return fetch('/суурь-давхарга/', opts).then(handleResponse)
 }
