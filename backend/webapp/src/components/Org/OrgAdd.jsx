@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
 import ModalAlert from "../ModalAlert";
-import { set } from "ol/transform";
 
 
 export class OrgAdd extends Component {
@@ -40,21 +39,21 @@ export class OrgAdd extends Component {
         }
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
-        this.handleGetAll=this.handleGetAll.bind(this)
-        this.modalClose=this.modalClose.bind(this)
-        this.modalInspireRoles=this.modalInspireRoles.bind(this)
-        this.getAimag=this.getAimag.bind(this)
-        this.handleInputAimag=this.handleInputAimag.bind(this)
-        this.getSum=this.getSum.bind(this)
-        this.handleInputSum=this.handleInputSum.bind(this)
-        this.getBag=this.getBag.bind(this)
-        this.handleInputBag=this.handleInputBag.bind(this)
-        this.geo_id_display=this.geo_id_display.bind(this)
+        this.handleGetAll = this.handleGetAll.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalInspireRoles = this.modalInspireRoles.bind(this)
+        this.getAimag = this.getAimag.bind(this)
+        this.handleInputAimag = this.handleInputAimag.bind(this)
+        this.getSum = this.getSum.bind(this)
+        this.handleInputSum = this.handleInputSum.bind(this)
+        this.getBag = this.getBag.bind(this)
+        this.handleInputBag = this.handleInputBag.bind(this)
+        this.geo_id_display = this.geo_id_display.bind(this)
     }
 
     componentDidMount() {
-        const org_level=this.props.match.params.level
-        const id=this.props.match.params.id
+        const org_level = this.props.match.params.level
+        const id = this.props.match.params.id
         this.setState({upadte_level: org_level})
         this.handleGetAll(org_level,id)
         this.modalInspireRoles()
@@ -74,11 +73,11 @@ export class OrgAdd extends Component {
     handleSave(){
         this.setState({handleSaveIsLoad:true})
         const org_level = this.props.match.params.level
-        const org_id=this.props.match.params.id
+        const org_id = this.props.match.params.id
         const org_name = this.state.org_name
         const upadte_level = this.state.upadte_level
         const geo_id = this.state.geo_id
-        const values={"org_name":org_name,"id": org_id, 'upadte_level':upadte_level, "role_id":  this.state.org_role, "geo_id": geo_id}
+        const values = {"org_name":org_name,"id": org_id, 'upadte_level':upadte_level, "role_id":  this.state.org_role, "geo_id": geo_id}
         service.org_add(org_level, values).then(({ success }) => {
             success && this.setState({modal_alert_status: "open"})
         })
@@ -89,7 +88,7 @@ export class OrgAdd extends Component {
         if(id){
             service.orgAll(org_level,id).then(({ orgs }) => {
                 if (orgs) {
-                    orgs.map(org=>this.setState({
+                    orgs.map(org => this.setState({
                         org_name:org.name,
                         org_role:org.org_role
                     }))
@@ -120,7 +119,7 @@ export class OrgAdd extends Component {
 
     getAimag() {
         this.setState({sumuud:[], baguud:[], sum_id: -1, bag_id: -1, disabled: true})
-        const values={  
+        const values = {
             'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
             'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
             'nationalCode': this.state.nationalCode,
@@ -156,7 +155,7 @@ export class OrgAdd extends Component {
         }
         else{
             this.setState({baguud:[], bag_id: -1})
-            const values={
+            const values = {
                 'aimag': aimag,
                 'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
                 'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
@@ -193,7 +192,7 @@ export class OrgAdd extends Component {
             this.setState({baguud:[], bag_id: -1, disabled: false})
         }
         else{
-            const values={
+            const values = {
                 'soum': sum,
                 'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
                 'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
@@ -225,7 +224,7 @@ export class OrgAdd extends Component {
     }
 
     geo_id_display() {
-        const values={"org_id": this.props.match.params.id}
+        const values = {"org_id": this.props.match.params.id}
         if(values){
             service.geo_id_display(values).then(({info, success, au_au_au_feature_config_id, au_au_au_data_type_id, nationalCode, au_au_ab_feature_config_id, au_au_ab_data_type_id, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag}) => {
                 this.setState({info, success, au_au_au_feature_config_id, au_au_au_data_type_id, nationalCode, au_au_ab_feature_config_id, au_au_ab_data_type_id, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag})
@@ -259,9 +258,12 @@ export class OrgAdd extends Component {
     }
 
     render() {
+
         const {org_name, upadte_level, roles} = this.state
-        const org_id=this.props.match.params.id
-        const org_level=this.props.match.params.level
+
+        const org_id = this.props.match.params.id
+        const org_level = this.props.match.params.level
+
         return (
             <div className="main-content">
                 <div className="page-container my-4">
@@ -296,7 +298,7 @@ export class OrgAdd extends Component {
                                 </div>
                             }
                             <div className="form-group">
-                                <h5 className="mb-3">Байгуулгын эрх</h5>
+                                <h5 className="mb-3">Байгууллагын эрх</h5>
                                 <select className="form-control" id="org_role" value={this.state.org_role} onChange={(e) => this.setState({org_role: e.target.value})}>
                                     <option value={-1}>....</option>
                                     {roles.map((role, idx) =>
@@ -310,10 +312,10 @@ export class OrgAdd extends Component {
                             <table className="table">
                                 <tbody>
                                     <tr>
-                                        <th style={{width:"38%"}}>Аймаг,Нийслэл</th>
+                                        <th style={{width:"38%"}}>Аймаг, Хот</th>
                                         <td style={{widtd:"60%"}}>
                                             <select disabled={this.state.disabled} name="aimag_id" id="aimag_id" className='form-control' value={this.state.aimag_id} onChange={(e) => this.handleInputAimag(e.target.value )}>
-                                                <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
+                                                <option value='-1'>--- Аймаг/Хот сонгоно уу ---</option>
                                                 {this.state.aimags.map((data, idx) =>
                                                     <option key={idx} value={data['aimag_names']} >{data['aimag_names']}</option>
                                                 )}
