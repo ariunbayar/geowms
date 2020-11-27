@@ -74,7 +74,7 @@ def _get_package(theme_id):
 @user_passes_test(lambda u: u.is_superuser)
 def bundleButetsAll(request):
     data = []
-    for themes in LThemes.objects.all(): 
+    for themes in LThemes.objects.all():
         bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
         if bundle:
             data.append({
@@ -312,7 +312,7 @@ def getFields(request, payload):
                                 'field_name': i.name,
                                 'field_type': type_name,
                                 'data': id
-                            })         
+                            })
                     else:
                         fields.append({
                             'field_name': i.name,
@@ -457,7 +457,9 @@ def propertyFieldsSave(request, payload):
         check_name.delete()
 
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
-    check = createView(id_list, table_name, model_name)
+    data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
+    feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
+    check = createView(id_list, table_name, model_name, data_type_ids, feature_config_id)
     if check:
         rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
         if rsp['success']:
@@ -732,7 +734,6 @@ def get_colName_type(view_name, data):
 
 
 def _create_geoserver_detail(table_name, model_name, theme, user_id):
-    
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
     ds_name = ws_name
@@ -950,7 +951,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
 
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
-def createView(ids, table_name, model_name):
+def createView(ids, table_name, model_name, data_type_ids, feature_config_id):
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
@@ -959,7 +960,7 @@ def createView(ids, table_name, model_name):
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -967,6 +968,8 @@ def createView(ids, table_name, model_name):
                 model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
+                data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
+                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
