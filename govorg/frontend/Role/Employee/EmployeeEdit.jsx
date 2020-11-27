@@ -12,6 +12,7 @@ export class EmployeeEdit extends Component {
         this.perms=[]
         this.role=[]
         this.remove_perms=[]
+        this.emp_perms=[]
         this.state = {
             first_name: '',
             last_name: '',
@@ -39,11 +40,13 @@ export class EmployeeEdit extends Component {
         this.getDetail = this.getDetail.bind(this)
         this.removeItemFromArray = this.removeItemFromArray.bind(this)
         this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
+        this.checkRoleAndPerm = this.checkRoleAndPerm.bind(this)
     }
 
     handleSave() {
         const { first_name, last_name, email, position, is_admin, role_id, id } = this.state
         this.setState({ handleSaveIsLoad: true })
+        this.checkRoleAndPerm()
         service
             .updateEmployee(id, first_name, last_name, email, position, is_admin, role_id, this.perms, this.remove_perms)
             .then(({ success }) => {
@@ -52,6 +55,24 @@ export class EmployeeEdit extends Component {
                     this.modalCloseTime()
                 }
             })
+    }
+
+    checkRoleAndPerm() {
+        this.check = false
+        this.role.map((role, idx) => {
+            this.emp_perms.map((perm, p_idx) => {
+                if(role.property_id == perm.property_id && role.feature_id == perm.feature_id && role.perm_kind == perm.perm_kind) {
+                    this.remove_perms.map((rem_perm, r_idx) => {
+                        if(rem_perm == perm.gov_perm_ins_id) {
+                            this.check = true
+                        }
+                    })
+                    if(!this.check) {
+                        this.remove_perms.push(perm.gov_perm_ins_id)
+                    }
+                }
+            })
+        })
     }
 
     modalClose() {
@@ -70,6 +91,10 @@ export class EmployeeEdit extends Component {
     }
 
     componentDidMount() {
+        this.perms = []
+        this.role = []
+        this.remove_perms = []
+        this.emp_perms=[]
         this.getRolesForOption()
     }
 
@@ -91,6 +116,7 @@ export class EmployeeEdit extends Component {
             .getRole(emp_role_id_parsed)
             .then(({ success, role_name, role_id, role_description, roles }) => {
                 if (success) {
+                    this.role = []
                     this.setState({ roles, is_inspire_role: true })
                 }
             })
@@ -115,19 +141,20 @@ export class EmployeeEdit extends Component {
     }
 
 
-    removeItemFromArray (array, feature_id, property_id, perm_kind, perm_inspire_id, is_true_type) {
+    removeItemFromArray (array, feature_id, property_id, perm_kind, perm_inspire_id, is_emp_perm) {
         array.map((perm, idx) => {
             if(perm.feature_id == feature_id &&
                 perm.property_id == property_id &&
                 perm.perm_kind == perm_kind)
             {
-                if(is_true_type) this.remove_perms.push(perm_inspire_id)
+                if(is_emp_perm) this.remove_perms.push(perm_inspire_id)
                 else array.splice(idx, 1)
             }
         })
     }
 
-    getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id) {
+    getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm) {
+        console.log(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm);
         if(!checked && this.role.length > 0 && type == null) {
             this.removeItemFromArray(
                 this.role,
@@ -135,7 +162,7 @@ export class EmployeeEdit extends Component {
                 property_id,
                 perm_kind,
                 is_role_emp_id,
-                is_true_type
+                is_emp_perm
             )
         }
         if(!checked && this.perms.length > 0) {
@@ -146,8 +173,8 @@ export class EmployeeEdit extends Component {
                 perm_kind,
             )
         }
-        if((checked && !type && !is_true_type) ||
-            (checked && (type == 'role'))
+        if((checked && !type && !is_emp_perm) ||
+            (checked && (type == 'role' || type == "perms"))
         ) {
             const add_role = {
                 'feature_id': feature_id,
@@ -157,11 +184,16 @@ export class EmployeeEdit extends Component {
                 'emp_role_ins_id': is_role_emp_id ? is_role_emp_id : null,
             }
             if (type == 'role') this.role.push(add_role)
+            if (type == 'perms') this.emp_perms.push(add_role)
             else this.perms.push(add_role)
         }
-        if (is_true_type && checked && type == null && this.remove_perms.length > 0) {
+        if (is_emp_perm && checked && type == null && this.remove_perms.length > 0) {
             this.removeItemFromRemoveRoles(is_role_emp_id)
         }
+        console.log(this.perms);
+        console.log(this.remove_perms);
+        console.log(this.role);
+        console.log(this.emp_perms);
     }
 
     removeItemFromRemoveRoles(is_role_emp_id) {

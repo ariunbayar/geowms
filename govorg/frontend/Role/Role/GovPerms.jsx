@@ -111,8 +111,7 @@ export default class InsPerms extends Component {
         })
     }
 
-    isRoleSendValue(property, checked) {
-        const type_name = 'role'
+    isRoleSendValue(property, checked, type_name) {
         this.state.perms.map((perm, pe_idx) => {
             Object.keys(property.roles).map((key, k_idx) => {
                 if (perm.eng_name == key) {
@@ -151,7 +150,7 @@ export default class InsPerms extends Component {
         return checked
     }
 
-    isRoleChecked(array, main_array, key, is_send, parent_array, index) {
+    isRoleChecked(array, main_array, key, is_send_type, parent_array, index) {
         const checked = true
         array.map((item, idx) => {
             main_array.map((main_item, mp_idx) => {
@@ -168,8 +167,8 @@ export default class InsPerms extends Component {
                                 const perm_checked = this.isRolePermChecked(item, main_array, mp_idx, checked, key)
                                 if(perm_checked) {
                                     if(this.props.action_type !== 'viewable') {
-                                        if(is_send) {
-                                            this.isRoleSendValue(item, checked)
+                                        if(is_send_type) {
+                                            this.isRoleSendValue(item, checked, is_send_type)
                                         }
                                     }
                                 }
@@ -261,28 +260,25 @@ export default class InsPerms extends Component {
     convertToOurInspire(org_roles) {
         const { themes, package_features, property } = org_roles
         if(this.props.action_type == 'editable' && this.props.role) {
-            if(this.props.is_employee) {
-                this.is_employee = false
-            } else {
-                this.is_employee = true
-            }
+            const is_send_type = 'role'
             const { role } = this.props
             const key = 'is_role'
             const t_checked = this.isRoleChecked(role.themes, themes, key, null)
             if(t_checked){
                 const p_checked = this.isRoleChecked(role.package_features, package_features, key, null)
                 if(p_checked) {
-                    this.isRoleChecked(role.property, property, key, this.is_employee)
+                    this.isRoleChecked(role.property, property, key, is_send_type)
                 }
             }
             if(this.props.emp_perms) {
+                const is_send_type = 'perms'
                 const { emp_perms } = this.props
                 const key = 'is_employee_perm'
                 const t_checked = this.isRoleChecked(emp_perms.themes, themes, key, null)
                 if(t_checked){
                     const p_checked = this.isRoleChecked(emp_perms.package_features, package_features, key, null)
                     if(p_checked) {
-                        this.isRoleChecked(emp_perms.property, property, key, this.props.is_employee)
+                        this.isRoleChecked(emp_perms.property, property, key, is_send_type)
                     }
                 }
             }
@@ -331,6 +327,7 @@ export default class InsPerms extends Component {
     render() {
         const {themes, package_features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name, is_role_border, is_emp_border } = this.state
         const { action_type, is_employee } = this.props
+        console.log(properties);
         return (
             <div className="row">
                 <div className="col-md-6 p-0">
@@ -500,16 +497,7 @@ export class PermChecks extends Component {
         const { name, index, id, perm_name, action_type, value, idx, fid, insp_id, is_role_check, is_role_emp_id, is_emp_perm } = this.props
         if(action_type !== 'viewable') {
             this.setState({ [field]: checked })
-            if(!is_role_check && is_emp_perm) {
-                this.is_check_role_or_emp = is_emp_perm
-            }
-            else if (is_role_check && !is_emp_perm) {
-                this.is_check_role_or_emp = is_role_check
-            }
-            else if (!is_role_check && !is_emp_perm) {
-                this.is_check_role_or_emp = null
-            }
-            this.props.sendValue(checked, perm_name, id, fid, insp_id, null, this.is_check_role_or_emp, is_role_emp_id)
+            this.props.sendValue(checked, perm_name, id, fid, insp_id, null, is_role_check, is_role_emp_id, is_emp_perm)
         }
     }
 
@@ -529,7 +517,7 @@ export class PermChecks extends Component {
         const { name, index, id, perm_name, action_type, value, idx, insp_id, is_role_check, is_role_emp_id, is_employee, is_emp_perm } = this.props
         const { addable, editable } = this.state
         return (
-            <td className={`icheck-`+ (is_emp_perm ? 'info' : is_role_emp_id ? 'warning' : 'primary')}>
+            <td className={`icheck-`+ (is_role_check && is_emp_perm ? 'success' : is_role_check && !is_emp_perm ? 'warning' : is_emp_perm && !is_role_check ? "info" : 'primary')}>
                 {
                     action_type == 'addable' ?
                         value ?
@@ -549,7 +537,7 @@ export class PermChecks extends Component {
                             id={`${name}-${index}-${idx}`}
                             name={`${name}-${index}-${idx}`}
                             checked={editable}
-                            disabled={is_employee && is_role_emp_id && !is_emp_perm ? 'disabled' : ''}
+                            disabled={is_employee && is_role_emp_id && !is_emp_perm ? 'disabled' : is_role_check && is_emp_perm ? 'disabled' : null}
                             onChange={(e) => this.handleOnChange('editable', e.target.checked)}
                         />
                         :
