@@ -706,7 +706,6 @@ def createPerm(request, payload):
     return JsonResponse(rsp)
 
 
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -746,8 +745,8 @@ def getInspireRoles(request, pk):
         'success': True
     })
 
-def _get_theme_packages_gov(theme_id, govRole):
 
+def _get_theme_packages_gov(theme_id, govRole):
     package_data = []
     t_perm_all = 0
     t_perm_view = 0
@@ -759,7 +758,6 @@ def _get_theme_packages_gov(theme_id, govRole):
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
         features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce = _get_package_features_gove(package.package_id, govRole)
-        
         package_data.append({
                 'id': package.package_id,
                 'code': package.package_code,
@@ -861,7 +859,6 @@ def _get_package_features_gove(package_id, govRole):
             if perm_all == 0:
                 p_perm_all = p_perm_all - 1
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce
-
 
 
 def _get_feature_property_gov(feature_id, govRole):
@@ -998,7 +995,6 @@ def saveInspireRoles(request, payload, pk):
     return JsonResponse(rsp)
 # baiguulgaa govperm
 
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1045,8 +1041,8 @@ def getGovRoles(request, level, pk):
         'success': True
     })
 
-def _get_theme_packages(theme_id, gov_perm):
 
+def _get_theme_packages(theme_id, gov_perm):
     package_data = []
     t_perm_all = 0
     t_perm_view = 0
