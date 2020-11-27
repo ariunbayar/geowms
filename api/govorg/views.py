@@ -74,6 +74,7 @@ def qgis_submit(request):
 
     try:
         values_list = json.loads(values)
+
         changeset = ChangeSet()
         changeset.geom = values_list[0]
         changeset.features = values_list[1]
