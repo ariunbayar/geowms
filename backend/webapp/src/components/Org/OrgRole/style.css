@@ -1,6 +1,6 @@
-.fixed-height{
+.fixed-height-b{
     overflow-y: scroll;
-    height: calc(97vh - 88px);
+    height: calc(87vh - 88px);
 }
 
 .fixed-height-body{
