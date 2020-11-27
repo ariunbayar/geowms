@@ -26,10 +26,11 @@ def proxy(request, token, pk):
         'User-Agent': 'geo 1.0',
     }
     system = get_object_or_404(System, token=token)
+    website = system.website
     wms = get_object_or_404(WMS, pk=pk)
     base_url = wms.url
 
-    if not wms.is_active:
+    if not wms.is_active: 
         raise Http404
 
     queryargs = request.GET
@@ -56,9 +57,11 @@ def proxy(request, token, pk):
     )
 
     content_type = rsp.headers.get('content-type')
-
     rsp = HttpResponse(content, content_type=content_type)
-    rsp['Access-Control-Allow-Origin'] = 'http://localhost:8000'
+
+    if website:
+        rsp['Access-Control-Allow-Origin'] = website
+
     return rsp
 
 

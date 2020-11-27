@@ -37,7 +37,7 @@ export class Дэлгэрэнгүй extends Component {
 
     render() {
 
-        const {name, token} = this.state.govorg
+        const {name, token, website} = this.state.govorg
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
@@ -54,8 +54,10 @@ export class Дэлгэрэнгүй extends Component {
                     <div className="col-md-12 mb-4">
                         <h4>{name}</h4>
                         <p><strong>Token</strong>: {token} </p>
+                        {website ? <p><strong>Вебсайт</strong>: {website} </p>: ''}
+                        
                     </div>
-
+                
                     {this.state.govorg_wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
                             <h4> {wms.name} </h4>
