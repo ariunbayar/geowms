@@ -245,7 +245,7 @@ export default class InsPerms extends Component {
 
     render() {
         const {themes, package_features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name, is_role_border } = this.state
-        const { action_type } = this.props
+        const { action_type, is_employee } = this.props
         return (
             <div className="row">
                 <div className="col-md-6 p-0">
@@ -342,6 +342,7 @@ export default class InsPerms extends Component {
                                                 <th className="col" className="p-2 text-center" key={perm_idx}>
                                                     <span>{perm.name}</span>
                                                     {
+                                                        !is_employee ?
                                                         action_type && fid > 0 ?
                                                         <div className="custom-control custom-switch col-lg-12 ml-2">
                                                             <input
@@ -353,7 +354,7 @@ export default class InsPerms extends Component {
                                                             />
                                                             <label className="custom-control-label " htmlFor={perm.name}></label>
                                                         </div>
-                                                        : null
+                                                        : null : null
                                                     }
                                                 </th>
                                             )}
@@ -383,6 +384,7 @@ export default class InsPerms extends Component {
                                                         sendValue={this.props.getValue}
                                                         is_role_check={property.roles[perm.is_role_check]}
                                                         is_role_emp_id={property.roles[perm.is_role_emp_id]}
+                                                        is_employee={is_employee}
                                                     />
                                                 ))}
                                             </tr>
@@ -429,7 +431,7 @@ export class PermChecks extends Component {
     }
 
     render () {
-        const { name, index, id, perm_name, action_type, value, idx, insp_id, is_role_check, is_role_emp_id } = this.props
+        const { name, index, id, perm_name, action_type, value, idx, insp_id, is_role_check, is_role_emp_id, is_employee } = this.props
         const { addable, editable } = this.state
         return (
             <td className={`icheck-`+ (is_role_emp_id ? 'warning' : 'primary')}>
@@ -452,7 +454,7 @@ export class PermChecks extends Component {
                             id={`${name}-${index}-${idx}`}
                             name={`${name}-${index}-${idx}`}
                             checked={editable}
-                            // disabled={is_role_check ? 'disabled' : ''}
+                            disabled={is_employee && is_role_emp_id ? 'disabled' : ''}
                             onChange={(e) => this.handleOnChange('editable', e.target.checked)}
                         />
                         :

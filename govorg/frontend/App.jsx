@@ -6,7 +6,7 @@ import { Profile } from './Profile'
 
 import InsPerms from './Role/Role/GovPerms'
 import Gov from './Role/Gov/index'
-import { EmployeeForm } from './Role/Employee/EmployeeForm'
+import { Employee } from './Role/Employee'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -84,7 +84,7 @@ export class App extends Component {
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/org/" text="Байгууллага"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employees/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Role"></MenuItem>
                             </ul>
                         </MenuItem>
@@ -181,7 +181,7 @@ export class App extends Component {
                             <Route path="/gov/history/" component={ChangeRequest} />
                             <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/perm/org/" component={Gov} />
-                            <Route exact path="/gov/perm/employees/" component={EmployeeForm} />
+                            <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                         </Switch>

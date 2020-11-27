@@ -2,77 +2,101 @@
 import React, { Component } from "react"
 import {EmployeeTable} from './EmployeeTable'
 import { service } from "./service"
-import { Pagination } from "../../components/pagination/pagination"
 import { NavLink } from "react-router-dom"
+import { Notif } from "../../../../src/components/Notification/index"
 
 
 export class EmployeeForm extends Component {
 
     constructor(props) {
         super(props)
+
+        this.too = 0;
         this.state={
-            employee:[],
-            currentPage:1,
-            orgPerPage:20,
+            employees:[],
+            prefix: '/gov/perm/employee',
         }
-        this.paginate = this.paginate.bind(this)
+        this.getList = this.getList.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
+        this.addNotif = this.addNotif.bind(this)
     }
 
-    paginate (page) {
-        const perpage = this.state.orgPerPage
-        this.setState({ currentPage: page })
-            return service
-                .paginatedList(page, perpage)
-                .then(page => {
-                    this.setState({employee: page.items })
-                    return page
-                })
+    getList () {
+        service
+            .getListEmployee()
+            .then(({ success, employees }) => {
+                if (success) {
+                    this.setState({ employees })
+                }
+            })
+    }
+
+    componentDidMount() {
+        this.getList()
+    }
+
+    handleRemove(id) {
+        console.log('ustgah id', id);
+        service
+            .deleteEmployee(id)
+            .then(({ success }) => {
+                if(success) {
+                    this.addNotif('success', 'Амжилттай устгалаа', 'check')
+                }
+            })
+    }
+
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style, msg, icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
     }
 
     render() {
+        const { employees, prefix } = this.state
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-12">
                             <div className="text-right">
-                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`/gov/role/employees/add/`}>
+                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`${prefix}/add/`}>
                                     Нэмэх
                                 </NavLink>
-                            </div> 
+                            </div>
                             <div className="table-responsive">
                                 <table className="table">
                                     <thead>
                                         <tr>
                                             <th scope="col">№</th>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Овог</th>
-                                            <th scope="col">Нэр</th >
-                                            <th scope="col">Хэрэглэгчийн нэр</th >
+                                            <th scope="col">Овог нэр</th>
                                             <th scope="col">Имэйл</th >
-                                            <th scope="col">Регистр</th >
-                                            <th scope="col">Хүйс</th >
                                             <th scope="col">Албан тушаал</th >
-                                            <th scope="col">Үүсгэсэн огноо</th >
-                                            <th scope="col">Засах</th>
-                                            <th scope="col">Устгах</th>
+                                            <th className="text-center" scope="col">Админ эсэх</th >
+                                            <th className="text-center" scope="col">Засах</th>
+                                            <th className="text-center" scope="col">Устгах</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    { this.state.employee.map((p, idx) =>
-                                        <EmployeeTable
-                                            key={idx}
-                                            idx={(this.state.currentPage*20)-20+idx+1}
-                                            values={p}
-                                        />
+                                        {employees.map((item, idx) =>
+                                            <EmployeeTable key={idx}
+                                                idx={idx + 1}
+                                                values={item}
+                                                prefix={prefix}
+                                                handleRemove={() => this.handleRemove(item.id)}
+                                            />
                                         )}
                                     </tbody>
                                 </table>
                             </div>
-                            <Pagination paginate = { this.paginate }/>
                         </div>
                     </div>
                 </div>
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
             </div>
         )
     }
