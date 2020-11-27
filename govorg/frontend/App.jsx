@@ -33,7 +33,7 @@ export class App extends Component {
             tseg_burtgel: {},
             map_list: [],
         }
-        this.handleMapComponens = this.handleMapComponens.bind(this)
+        this.requestCount = this.requestCount.bind(this)
     }
 
     componentDidMount() {
@@ -48,10 +48,10 @@ export class App extends Component {
             }
         })
 
-        this.handleMapComponens()
+        this.requestCount()
     }
 
-    handleMapComponens() {
+    requestCount() {
         // service.component
         service.getCount().then(({ success, count, info }) => {
             if (success) {
@@ -169,13 +169,15 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
+
                             <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
                             <Route path="/gov/admin/login/" component={Login} />
                             <Route path="/gov/admin/verify/" component={Verify} />
                             <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={Bundles} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
+
                             <Route path="/gov/zip-code/" component={ZipCode} />
-                            <Route path="/gov/org-request/" component={(props) => <OrgRequest {...props} refreshCount={() => this.handleMapComponens()} />} />
+                            <Route path="/gov/org-request/" component={OrgRequest} />
                             <Route path="/gov/history/" component={ChangeRequest} />
                             <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/perm/org/" component={Gov} />

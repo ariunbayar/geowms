@@ -277,7 +277,7 @@ def getFields(request, payload):
         for i in model_name._meta.get_fields():
             name = i.name
             type_name = i.get_internal_type()
-            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
+            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField' and i.name != 'bundle':
                 if type_name == "CharField":
                     type_name = 'text'
                 if type_name == "IntegerField" or type_name == "BigIntegerField":
@@ -312,7 +312,7 @@ def getFields(request, payload):
                                 'field_name': i.name,
                                 'field_type': type_name,
                                 'data': id
-                            })
+                            })         
                     else:
                         fields.append({
                             'field_name': i.name,
@@ -320,21 +320,24 @@ def getFields(request, payload):
                             'data': ''
                         })
                 if edit_name != '':
-                    datas = model_name.objects.filter(pk=id)
-                    for data in datas:
-                        data_obj = model_to_dict(data)
-                        dat = data_obj[i.name]
-                        if dat == True and not 1:
-                            dat = 'true'
-                        if dat == False and not 0:
-                            dat = 'false'
-                        else:
-                            dat = dat
-                        fields.append({
-                            'field_name': i.name,
-                            'field_type': type_name,
-                            'data': dat if dat else ""
-                        })
+                    if savename == 'theme' and i.name == 'bundle':
+                        pass
+                    else:
+                        datas = model_name.objects.filter(pk=id)
+                        for data in datas:
+                            data_obj = model_to_dict(data)
+                            dat = data_obj[i.name]
+                            if dat == True and not 1:
+                                dat = 'true'
+                            if dat == False and not 0:
+                                dat = 'false'
+                            else:
+                                dat = dat
+                            fields.append({
+                                'field_name': i.name,
+                                'field_type': type_name,
+                                'data': dat if dat else ""
+                            })
         rsp = {
             'success': True,
             'fields': fields
@@ -727,17 +730,6 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
-def check_them_name(theme_name):
-
-    if theme_name == 'Хил зааг':
-        theme_name = 'Хил, зааг'
-        return theme_name
-    elif theme_name == 'Газарзүйн нэр':
-        theme_name = 'Газар зүйн нэр'
-        return theme_name
-    else:
-        return theme_name
-
 
 def _create_geoserver_detail(table_name, model_name, theme, user_id):
     
@@ -747,15 +739,14 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
     wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
-    wms = WMS.objects.filter(name=theme.theme_name).first()
     theme_name = theme.theme_name
+    wms = WMS.objects.filter(name=theme_name).first()
     if not wms:
-        WMS.objects.create(
-            name=theme.theme_name,
-            url = wms_url,
-            created_by_id=user_id
-        )
-        wms = WMS.objects.filter(name=theme.theme_name).first()
+        wms = WMS.objects.create(
+                name=theme_name,
+                url = wms_url,
+                created_by_id=user_id
+            )
     if check_workspace.status_code == 404:
 
         geoserver.create_space(ws_name)
@@ -936,26 +927,27 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                 else:
                     return {'info': 'layer_remove'}
 
-        wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
         wms_id = wms.id
+        wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
         if not wms_layer:
             legend_url = geoserver.get_legend_url(wms_id, layer_name)
-            WMSLayer.objects.create(
-                name=layer_name,
-                code=layer_name,
-                wms=wms,
-                title=layer_name,
-                feature_price=0,
-                legend_url=legend_url
-            )
-            bundle_name = check_them_name(theme_name)
-            bunde_id = Bundle.objects.filter(name=bundle_name).first().id
+            wms_layer = WMSLayer.objects.create(
+                            name=layer_name,
+                            code=layer_name,
+                            wms=wms,
+                            title=layer_name,
+                            feature_price=0,
+                            legend_url=legend_url
+                        )
 
-            wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
-            BundleLayer.objects.create(
-                bundle_id=bunde_id,
-                layer_id=wms_layer_id
+        bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
+        bundle_id = theme.bundle.id
+        if not  bundle_layer:
+            BundleLayer.objects.create( 
+                bundle_id=bundle_id,
+                layer_id=wms_layer.id
             )
+
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
 def createView(ids, table_name, model_name):
@@ -982,9 +974,9 @@ def createView(ids, table_name, model_name):
                 cursor.execute(query)
                 cursor.execute(query_index)
         return True
-
     except Exception:
         return False
+
 
 
 def removeView(table_name):

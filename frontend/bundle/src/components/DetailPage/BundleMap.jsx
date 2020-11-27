@@ -86,7 +86,7 @@ export default class BundleMap extends Component {
         this.onClickCloser = this.onClickCloser.bind(this)
         this.getElement = this.getElement.bind(this)
         this.listToJson = this.listToJson.bind(this)
-        this.setSource = this.setSource.bind(this)
+        this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
     }
 
     initMarker() {
@@ -173,7 +173,7 @@ export default class BundleMap extends Component {
         this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) =>
-                layer.tile.setVisible(false)
+                layer.defaultCheck == 0 && layer.tile.setVisible(false)
             )
         )
 
@@ -279,10 +279,11 @@ export default class BundleMap extends Component {
                 projection: this.state.projection,
                 center: [11461613.630815497, 5878656.0228370065],
                 zoom: 5.041301562246971,
+                minZoom: 1,
             })
         })
 
-        this.key = map.on('click', this.handleMapClick)
+        map.on('click', this.handleMapClick)
         this.map = map
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
@@ -292,7 +293,7 @@ export default class BundleMap extends Component {
         const closer = this.element_closer
         overlay.setPosition(undefined);
         closer.blur();
-        if (this.key) unByKey(this.key);
+        this.state.vector_layer.setSource(null)
     }
 
     getElement(element) {
@@ -303,6 +304,9 @@ export default class BundleMap extends Component {
             autoPanAnimation: {
                 duration: 250,
             },
+            autoPanMargin: 65,
+            offset: [15, -150],
+            positioning: 'top-right'
         });
 
         map.addOverlay(overlay)
@@ -395,14 +399,16 @@ export default class BundleMap extends Component {
                             const parser = new WMSGetFeatureInfo()
                             const features = parser.readFeatures(text)
                             if (features.length > 0) {
-                                const type = features[0].getGeometry().getType()
-                                if (type.includes('Point')) {
-                                    const style = features[0].getKeys()
-                                }
+                                features.map((feature, idx) => {
+                                    if(feature.getGeometry().getType().includes('Polygon')) {
+                                        const source = new VectorSource({
+                                            features: features
+                                        });
+                                        this.selectSource = source
+                                        this.state.vector_layer.setSource(this.selectSource)
+                                    }
+                                })
                             }
-                            const source = new VectorSource({
-                                features: features
-                            });
                             const feature_info = features.map((feature) => {
                                 const geometry_name = feature.getGeometryName()
                                 const values =
@@ -424,14 +430,9 @@ export default class BundleMap extends Component {
                                         const object = this.listToJson(feature_info, geodb_table)
                                         this.sendFeatureInfo.push(object)
                                     }
-                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSource, feature_price)
-                                this.selectSource = source
+                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
                                 if(geodb_table == 'mpoint_view'){
-                                    this.setState({pay_modal_check: true})
                                     this.state.vector_layer.setSource(null)
-                                }
-                                if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                    this.state.vector_layer.setSource(source)
                                 }
                             }
                                 // if(geodb_table == 'mpoint_view'){
@@ -461,9 +462,9 @@ export default class BundleMap extends Component {
         this.sendFeatureInfo = []
     }
 
-    setSource(mode) {
+    setSourceInPopUp(mode) {
         const source = this.selectSource
-        if (mode == 'mpoint_view') {
+        if (mode != 'private') {
             this.state.vector_layer.setSource(null)
         }
         if (mode == 'private') {

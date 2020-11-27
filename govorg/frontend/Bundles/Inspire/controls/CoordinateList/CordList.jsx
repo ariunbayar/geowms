@@ -33,12 +33,23 @@ class CoordInputs extends Component{
         const { coord } = this.state
         const { idx, ix } = this.props
         return (
-            <div className="input-group input-group-sm mb-3">
-                <div className="input-group-prepend">
-                    <span className="input-group-text" id={idx}>{idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}</span>
-                </div>
-                <input key={idx} className="form-control" type="number" value={coord} aria-describedby={idx} onChange={(e) => this.handleChange(e, ix, idx)}/>
-            </div>
+            <li className="float-left col-4 m-0 p-0 animated slideInLeft" key={idx}>
+                {/* <div className="input-group input-group-sm m-0 p-0">
+                    <div className="input-group-prepend">
+                        <span className="input-group-text" id={idx}>{idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}</span>
+                    </div> */}
+                <input
+                    key={idx}
+                    className="form-control"
+                    type="number"
+                    placeholder={idx == 0 ? 'X' : idx == 1 ? 'Y' : idx == 2 ? 'Z' : null}
+                    minLength="0"
+                    value={coord}
+                    aria-describedby={idx}
+                    onChange={(e) => this.handleChange(e, ix, idx)}
+                />
+                {/* </div> */}
+            </li>
         )
     }
 }
@@ -65,7 +76,14 @@ class ListComponent extends Component {
 
     sendCoordinate(coord, first, second) {
         const { coords_list } = this.state
-        const parsed = parseFloat(coord)
+        var parsed = null
+        if (coord) parsed = parseFloat(coord)
+        else parsed = coord
+        if(coords_list.data[first].turning == 1) {
+            if(coords_list.data[coords_list.data.length - 1].turning == coords_list.last){
+                coords_list.data[coords_list.data.length - 1].geom[second] = parsed
+            }
+        }
         coords_list.data[first].geom[second] = parsed
         this.setState({ coords_list })
     }
@@ -101,7 +119,7 @@ class ListComponent extends Component {
     render() {
         const { coords_list } = this.props
         return (
-            <div className="height-full">
+            <div className="height-full animated slideInLeft">
                 <center><label className="my-2 h5">{coords_list ? coords_list !== {} ? coords_list.id : 'NoName' : null}</label></center>
                 {
                     coords_list ?
@@ -110,16 +128,22 @@ class ListComponent extends Component {
                         ?
                         <div className="list-group overflow-auto">
                             {coords_list.data.map((datas, ix) =>
-                                <div key={ix} className="list-group-item">
+                                ((!coords_list.type.includes('Point')) ?
+                                (datas.turning == coords_list.last ?
+                                    ix !== coords_list.data.length - 1
+                                : ix == ix) : ix == ix) &&
+                                <div key={ix} className="list-group-item animated slideInLeft">
                                     <b>Эргэлтийн цэгийн дугаар: {datas.turning !== null ? datas.turning : ix}</b>
+                                    <ul className="m-0 p-0" style={{listStyle:'none'}}>
                                         {datas.geom.map((coords, idx) =>
-                                                <CoordInputs key={idx}
-                                                    coord={coords}
-                                                    idx={idx}
-                                                    ix={ix}
-                                                    send={this.sendCoordinate}
-                                                />
+                                            <CoordInputs key={idx}
+                                                coord={coords}
+                                                idx={idx}
+                                                ix={ix}
+                                                send={this.sendCoordinate}
+                                            />
                                         )}
+                                    </ul>
                                 </div>
                             )}
                         </div>
@@ -152,7 +176,7 @@ export class CoordList extends Control {
         })
 
         this.is_component_initialized = false
-        const cssClasses = `col-md-4 rounded bg-light`
+        const cssClasses = `col-md-4 rounded bg-light animated slideInLeft`
 
         this.element.className = cssClasses
         this.element.style.display = 'none'

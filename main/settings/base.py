@@ -8,6 +8,8 @@ PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'geoportal_app/static/assets/pw
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
+IS_TESTING = False
+
 AUTH_USER_MODEL = 'geoportal_app.User'
 
 INTERNAL_IPS = ['127.0.0.1']
