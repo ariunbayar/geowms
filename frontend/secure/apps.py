@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class SecureConfig(AppConfig):
-    name = 'govorg.backend.secure'
-    label = 'govorg_backend_secure'
+    name = 'frontend.secure'
+    label = 'frontend_secure'
