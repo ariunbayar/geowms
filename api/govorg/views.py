@@ -72,14 +72,12 @@ def qgis_submit(request):
 
     values = request.POST.get('values')
 
-
     try:
         values_list = json.loads(values)
-
         changeset = ChangeSet()
         changeset.geom = values_list[0]
         changeset.features = values_list[1]
-        changeset.projection = values_list[2]
+        changeset.projection = values_list[2]    
         changeset.save()
         return JsonResponse({'success': True})
 
