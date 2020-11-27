@@ -21,7 +21,7 @@ def _get_govorg_display(govorg):
         'id': govorg.pk,
         'name': govorg.name,
         'token': govorg.token,
-        'website':govorg.website,
+        'website': govorg.website,
         'created_at': govorg.created_at.strftime('%Y-%m-%d'),
         'layers': layers,
     }

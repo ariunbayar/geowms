@@ -126,8 +126,8 @@ export class GovorgForm extends Component {
                         <Formik
                             enableReinitialize
                             initialValues={{
-                                name:this.state.govorg.name || '',
-                                website:this.state.govorg.website || '',
+                                name: this.state.govorg.name || '',
+                                website: this.state.govorg.website || '',
                             }}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
@@ -166,7 +166,7 @@ export class GovorgForm extends Component {
                                                 Домэйнээр хязгаарлах:
                                             </label>
                                             <Field
-                                                className={'form-control my-1' + (errors.website? 'is-invalid' : '')}
+                                                className={'form-control my-1' + (errors.website ? 'is-invalid' : '')}
                                                 placeholder="Байршуулах вэбсайт"
                                                 name='website'
                                                 id="id_website"

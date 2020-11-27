@@ -26,7 +26,6 @@ def proxy(request, token, pk):
         'User-Agent': 'geo 1.0',
     }
     system = get_object_or_404(System, token=token)
-    website = system.website
     wms = get_object_or_404(WMS, pk=pk)
     base_url = wms.url
 
@@ -59,8 +58,10 @@ def proxy(request, token, pk):
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
 
-    if website:
-        rsp['Access-Control-Allow-Origin'] = website
+    if system.website:
+        rsp['Access-Control-Allow-Origin'] = system.website
+    else:
+        rsp['Access-Control-Allow-Origin'] = '*'
 
     return rsp
 
@@ -70,6 +71,7 @@ def proxy(request, token, pk):
 def qgis_submit(request):
 
     values = request.POST.get('values')
+
 
     try:
         values_list = json.loads(values)
