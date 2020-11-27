@@ -18,6 +18,7 @@ from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
     get_property_data_display,
+    get_convert_perm_kind,
 )
 
 
@@ -58,27 +59,6 @@ def _set_emp_role_data(emp_role, name, description):
     return True
 
 
-def _convert_perm_kind(kind):
-
-    if kind == 'PERM_VIEW':
-        return EmpRoleInspire.PERM_VIEW
-
-    if kind == 'PERM_CREATE':
-        return EmpRoleInspire.PERM_CREATE
-
-    if kind == 'PERM_REMOVE':
-        return EmpRoleInspire.PERM_REMOVE
-
-    if kind == 'PERM_UPDATE':
-        return EmpRoleInspire.PERM_UPDATE
-
-    if kind == 'PERM_REVOKE':
-        return EmpRoleInspire.PERM_REVOKE
-
-    if kind == 'PERM_APPROVE':
-        return EmpRoleInspire.PERM_APPROVE
-
-
 def _set_emp_role_inspire_data(emp_role, role, user):
 
     gov_perm_inspire =  get_object_or_404(GovPermInspire, pk=role.get('gov_perm_inspire_id'))
@@ -89,7 +69,7 @@ def _set_emp_role_inspire_data(emp_role, role, user):
     emp_role_inspire.emp_role = emp_role
     emp_role_inspire.feature_id = role.get('feature_id')
     emp_role_inspire.property_id = role.get('property_id')
-    emp_role_inspire.perm_kind = _convert_perm_kind(role.get('perm_kind'))
+    emp_role_inspire.perm_kind = get_convert_perm_kind(EmpRoleInspire, role.get('perm_kind'))
     emp_role_inspire.save()
 
     return True

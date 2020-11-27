@@ -9,6 +9,7 @@ from govorg.backend.govorg_inspire import views as govorg_inspire_views
 from govorg.backend.zipcode import views as zipcode_views
 from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
+from govorg.backend.secure import views as secure_views
 
 urlpatterns = [
     path('api/', include(([
@@ -118,6 +119,12 @@ urlpatterns = [
         ], 'meta-data'))),
 
     ], 'back_org'))),
+
+    path('secure/', include(([
+        path('login/', secure_views.login, name='login'),
+        path('approve/<str:token>/', secure_views.approve, name='approve'),
+        path('logout/', secure_views.logout, name='logout'),
+    ], 'gov_secure'))),
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),

@@ -171,7 +171,7 @@ a {
 /*login*/
 
 .login-container {
-  min-height: 550px;
+  min-height: 850px;
   background-image: url("../image/login-back.jpg");
   background-repeat: no-repeat;
   background-size: cover;
