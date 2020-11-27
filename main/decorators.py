@@ -4,10 +4,8 @@ from functools import wraps
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, get_list_or_404
-from http.server import SimpleHTTPRequestHandler
 
 from django.apps import apps
-from urllib.parse import urlparse
 
 
 def ajax_required(f):
