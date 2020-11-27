@@ -98,21 +98,22 @@ class LFeatureConfigs(models.Model):
 
 
 class LFeatures(models.Model):
+
     class Meta:
         db_table = 'l_features'
         managed = False
 
     feature_id = models.AutoField(primary_key=True)
-    feature_code = models.CharField(max_length=255)
-    feature_name = models.CharField(max_length=255)
-    feature_name_eng = models.CharField(max_length=255)
-    package_id = models.IntegerField()
-    order_no = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
+    feature_code = models.CharField(max_length=255, null=True)
+    feature_name = models.CharField(max_length=255, null=True)
+    feature_name_eng = models.CharField(max_length=255, null=True)
+    package_id = models.IntegerField(null=True)
+    order_no = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    created_by = models.IntegerField(null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class LPackages(models.Model):
@@ -121,16 +122,16 @@ class LPackages(models.Model):
         managed = False
 
     package_id = models.AutoField(primary_key=True)
-    package_code = models.CharField(max_length=255)
-    package_name = models.CharField(max_length=255)
-    package_name_eng = models.CharField(max_length=255)
-    theme_id = models.IntegerField()
-    order_no = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
+    package_code = models.CharField(max_length=255, null=True)
+    package_name = models.CharField(max_length=255, null=True)
+    package_name_eng = models.CharField(max_length=255, null=True)
+    theme_id = models.IntegerField(null=True)
+    order_no = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    created_by = models.IntegerField(null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class LProperties(models.Model):
@@ -159,16 +160,16 @@ class LThemes(models.Model):
         managed = False
 
     theme_id = models.AutoField(primary_key=True)
-    theme_code = models.CharField(max_length=255)
-    theme_name = models.CharField(max_length=255)
-    theme_name_eng = models.CharField(max_length=255)
-    top_theme_id = models.IntegerField()
-    order_no = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
+    theme_code = models.CharField(max_length=255, null=True)
+    theme_name = models.CharField(max_length=255, null=True)
+    theme_name_eng = models.CharField(max_length=255, null=True)
+    top_theme_id = models.IntegerField(null=True)
+    order_no = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    created_by = models.IntegerField(null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class LValueTypes(models.Model):
