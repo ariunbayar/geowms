@@ -78,12 +78,15 @@ def _set_employee_data(employee, position, is_admin):
 
 def _set_emp_perm_ins_data(emp_perm, perm, user):
 
-    gov_perm_inspire = get_object_or_404(GovPermInspire, pk=perm.get('gov_perm_ins_id'))
-    emp_role_inspire = get_object_or_404(EmpRoleInspire, pk=perm.get('emp_role_ins_id'))
-
     emp_perm_inspire = EmpPermInspire()
+
+    gov_perm_inspire = get_object_or_404(GovPermInspire, pk=perm.get('gov_perm_ins_id'))
+
+    if perm.get('emp_role_ins_id'):
+        emp_role_inspire = get_object_or_404(EmpRoleInspire, pk=perm.get('emp_role_ins_id'))
+        emp_perm_inspire.emp_role_inspire = emp_role_inspire
+
     emp_perm_inspire.emp_perm = emp_perm
-    emp_perm_inspire.emp_role_inspire = emp_role_inspire
     emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
     emp_perm_inspire.created_by = user
     emp_perm_inspire.feature_id = perm.get('feature_id')
