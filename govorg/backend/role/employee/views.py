@@ -135,7 +135,9 @@ def create(request, payload):
 
 
 def _delete_old_emp_role(old_emp_role):
-    EmpPermInspire.objects.filter(emp_role=old_emp_role).delete()
+
+    emp_role_inspire_list = EmpRoleInspire.objects.filter(emp_role=old_emp_role)
+    EmpPermInspire.objects.filter(emp_role_inspire__in=emp_role_inspire_list).delete()
 
 
 def _delete_remove_perm(remove_perms):
@@ -163,6 +165,8 @@ def update(request, payload, pk):
     with transaction.atomic():
         if new_emp_role != old_emp_role:
             _delete_old_emp_role(old_emp_role)
+            emp_perm.emp_role = new_emp_role
+            emp_perm.save()
 
         if remove_perms:
             _delete_remove_perm(remove_perms)
