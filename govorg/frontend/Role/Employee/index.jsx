@@ -16,7 +16,7 @@ export class Employee extends Component {
         return (
             <Switch>
                 <Route exact path="/gov/perm/employee/" component={EmployeeForm} />
-                <Route exact path="/gov/perm/employee/:id/edit/" component={EmployeeEdit} />
+                <Route exact path="/gov/perm/employee/:id/edit/" component={(props) => <EmployeeEdit {...props} org_roles={org_roles} />} />
                 <Route exact path="/gov/perm/employee/add/" component={ (props) => <EmployeeAdd {...props} org_roles={org_roles}/>} />
                 <Route exact path="/gov/perm/employee/:id/detail/" component={EmployeeDetail} />
             </Switch>

@@ -21,7 +21,7 @@ export class EmployeeForm extends Component {
         this.addNotif = this.addNotif.bind(this)
     }
 
-    getList () {
+    getList() {
         service
             .getListEmployee()
             .then(({ success, employees }) => {
@@ -36,12 +36,12 @@ export class EmployeeForm extends Component {
     }
 
     handleRemove(id) {
-        console.log('ustgah id', id);
         service
             .deleteEmployee(id)
             .then(({ success }) => {
                 if(success) {
                     this.addNotif('success', 'Амжилттай устгалаа', 'check')
+                    this.getList()
                 }
             })
     }
