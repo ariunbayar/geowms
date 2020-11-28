@@ -107,7 +107,7 @@ urlpatterns = [
 
         path('revoke_request/', include(([
             path('', revoke_request_views.all),
-            path('delete/', revoke_request_views.delete),
+            path('revoke/', revoke_request_views.revoke),
         ], 'revoke_request'))),
 
     ], 'back_org'))),
