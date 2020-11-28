@@ -73,7 +73,7 @@ export class RoleEdit extends Component {
 
     getAllValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id) {
         if(checked && type == "all" && is_role_emp_id && this.remove_perms.length > 0) {
-            this.removeItemFromRemoveRoles()
+            this.removeItemFromRemoveRoles(is_role_emp_id)
         }
         if(!checked && type == 'all' && is_role_emp_id && this.role.length > 0) {
             this.removeItemFromArray(
@@ -136,11 +136,11 @@ export class RoleEdit extends Component {
             else this.perms.push(add_role)
         }
         if (is_true_type && checked && type == null && this.remove_perms.length > 0) {
-            this.removeItemFromRemoveRoles()
+            this.removeItemFromRemoveRoles(is_role_emp_id)
         }
     }
 
-    removeItemFromRemoveRoles() {
+    removeItemFromRemoveRoles(is_role_emp_id) {
         this.remove_perms.map((id, idx) => {
             if (id == is_role_emp_id) {
                 this.remove_perms.splice(idx, 1)
@@ -240,7 +240,6 @@ export class RoleEdit extends Component {
                                 dontDid={true}
                                 org_roles={org_roles}
                                 role={roles}
-                                checkAllAndGet={this.checkAllAndGet}
                             />
                         }
                     </div>

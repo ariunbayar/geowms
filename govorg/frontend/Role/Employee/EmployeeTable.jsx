@@ -25,53 +25,53 @@ export class EmployeeTable extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (prevProps.values !== this.props.values) this.setState({ is_modal_delete_open: false })
+        if (prevProps.values !== this.props.values) {
+            this.setState({ is_modal_delete_open: false })
+        }
 
     }
-    
+
     render() {
-        const idx = this.props.idx
-        const {id, last_name, username,first_name, email, register, gender, position, created_at} = this.props.values
+        const { idx, prefix } = this.props
+        const { id, last_name, first_name, email, position, is_admin } = this.props.values
+
+        const last_name_conv = last_name.charAt(0).toUpperCase()
+        const firt_name_conv = first_name.charAt(0).toUpperCase() + first_name.slice(1)
+        const full_name = last_name_conv + '. ' + firt_name_conv
+
         return (
             <tr>
-                <td>
+                <th>
                     {idx}
-                </td>
+                </th>
                 <td>
-                    {id}
-                </td>
-                <td>
-                    {last_name}
-                </td>
-                <td>
-                    {first_name}
-                </td>
-                <td>
-                <NavLink to={`/gov/role/employees/detail/`}>
-                    {username}
+                <NavLink to={`${prefix}/${id}/detail/`}>
+                    <strong>{full_name}</strong>
                 </NavLink>
                 </td>
                 <td>
                     {email}
                 </td>
                 <td>
-                    {register}
-                </td>
-                <td>
-                    {gender}
-                </td>
-                <td>
                     {position}
                 </td>
-                <td>
-                    {created_at}
+                <td className="text-center">
+                    <i className={`fa ` +
+                        (is_admin
+                            ? `fa-check-circle-o text-success`
+                            : `fa-times-circle-o text-danger`
+                        ) +
+                            ` fa-lg`
+                        }
+                        aria-hidden="true"
+                    ></i>
                 </td>
-                <td>
-                    <NavLink to={`/gov/role/employees/edit/`}>
+                <td className="text-center">
+                    <NavLink to={`${prefix}/${id}/edit/`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </td>
-                <td>
+                <td className="text-center">
                     <a href="delete" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
