@@ -24,6 +24,8 @@ export class RoleAdd extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getValue = this.getValue.bind(this)
+        this.getAllValue = this.getAllValue.bind(this)
+        this.removeItemFromArray = this.removeItemFromArray.bind(this)
     }
 
     handleSave() {
@@ -58,16 +60,45 @@ export class RoleAdd extends Component {
         this.setState({ [field]: e.target.value })
     }
 
+    removeItemFromArray (array, feature_id, property_id, perm_kind, is_role_emp_id, is_true_type) {
+        array.map((perm, idx) => {
+            if(perm.feature_id == feature_id &&
+                perm.property_id == property_id &&
+                perm.perm_kind == perm_kind)
+            {
+                array.splice(idx, 1)
+            }
+        })
+    }
+
+    getAllValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id) {
+        if(checked && type == "all" && !is_role_emp_id) {
+            const add_role = {
+                'feature_id': feature_id,
+                'property_id': property_id,
+                'perm_kind': perm_kind,
+                'gov_perm_inspire_id': perm_inspire_id,
+            }
+            this.perms.push(add_role)
+        }
+        if(!checked && type == "all" && !is_role_emp_id && this.perms.length > 0) {
+            this.removeItemFromArray(
+                this.perms,
+                feature_id,
+                property_id,
+                perm_kind,
+            )
+        }
+    }
+
     getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id) {
         if(!checked && this.perms.length > 0) {
-            this.perms.map((perm, idx) => {
-                if(perm.feature_id == feature_id &&
-                    perm.property_id == property_id &&
-                    perm.perm_kind == perm_kind)
-                {
-                    this.perms.splice(idx, 1)
-                }
-            })
+            this.removeItemFromArray(
+                this.perms,
+                feature_id,
+                property_id,
+                perm_kind,
+            )
         }
         if(checked) {
             const role = {
@@ -151,6 +182,7 @@ export class RoleAdd extends Component {
                         <InsPerms
                             action_type="addable"
                             getValue={this.getValue}
+                            sendAllValue={this.getAllValue}
                             dontDid={true}
                             org_roles={org_roles}
                         />

@@ -285,20 +285,8 @@ export default class InsPerms extends Component {
             this.setState({ themes, package_features, properties: property })
         }
         if(this.props.action_type == 'viewable' && this.props.emp_perms) {
-            const key = 'is_role'
-            const { emp_perms } = this.props
-            const t_checked = this.isRoleChecked(themes, themes, key)
-            if(t_checked){
-                const p_checked = this.isRoleChecked(package_features, package_features, key)
-                if(p_checked) {
-                    const prop_checked = this.isRoleChecked(property, property, key)
-                    if(prop_checked) {
-                        this.pushToState(org_roles)
-                        this.pushToState(emp_perms)
-                        this.setState({ themes: this.state.themes, package_features: this.state.package_features, properties: this.state.properties })
-                    }
-                }
-            }
+            const { themes, package_features, property } = this.props.emp_perms
+            this.setState({ themes, package_features, properties: property })
         }
         if(this.props.action_type !== 'editable' && !this.props.role && this.props.action_type !== 'viewable' && !this.props.emp_perms) {
             this.setState({ themes, package_features, properties: property })
