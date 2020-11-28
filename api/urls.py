@@ -9,5 +9,6 @@ urlpatterns = [
         path('WMS/<int:bundle_id>/<int:wms_id>/', public_views.proxy, name='wms_proxy'),
         path('<str:token>/<int:pk>/', govorg_views.proxy, name='proxy'),
         path('qgis-submit/', govorg_views.qgis_submit, name='qgis_submit'),
+        path('user-check/', govorg_views.user_check, name='user_check')
     ], 'service'))),
 ]

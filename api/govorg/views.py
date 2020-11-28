@@ -10,7 +10,11 @@ from django.views.decorators.csrf import csrf_exempt
 from api.utils import filter_layers, replace_src_url
 from backend.govorg.models import GovOrg
 from backend.wms.models import WMS, WMSLog
-from backend.changeset.models import ChangeSet
+from govorg.backend.org_request.models import ChangeRequest
+from backend.org.models import Employee
+from geoportal_app.models import User
+from backend.inspire.models import LThemes, LPackages, LFeatures
+from django.contrib import auth
 
 def _get_service_url(request, token, wms):
     url = reverse('api:service:proxy', args=[token, wms.pk])
@@ -39,10 +43,9 @@ def proxy(request, token, pk):
     allowed_layers = [layer.code for layer in govorg.wms_layers.filter(wms=wms)]
     if request.GET.get('REQUEST') == 'GetCapabilities':
         content = filter_layers(content, allowed_layers)
-    
         service_url = _get_service_url(request, token, wms)
         content = replace_src_url(content, wms.url, service_url)
-    
+
     qs_request = queryargs.get('REQUEST', 'no request')
 
     WMSLog.objects.create(
@@ -62,18 +65,44 @@ def proxy(request, token, pk):
 @require_POST
 @csrf_exempt
 def qgis_submit(request):
-
     values = request.POST.get('values')
-
+    user_id = request.POST.get('user_id')
     try:
+        user = User.objects.filter(id=user_id).first()
+        employee = get_object_or_404(Employee, user=user)
         values_list = json.loads(values)
-    
-        changeset = ChangeSet()
-        changeset.geom = values_list[0]
-        changeset.features = values_list[1]
-        changeset.projection = values_list[2]        
-        changeset.save()
+        feature_id = values_list[1]['att']['feature_id']
+        package = LFeatures.objects.filter(feature_id=feature_id).first()
+        theme=LPackages.objects.filter(package_id=package.package_id).first()
+        ChangeRequest.objects.create(
+            old_geo_id = None,
+            new_geo_id = None,
+            theme_id = theme.theme_id,
+            package_id = package.package_id,
+            feature_id = feature_id,
+            employee = employee,
+            state = ChangeRequest.STATE_NEW,
+            kind = ChangeRequest.KIND_CREATE,
+            form_json = None,
+            geo_json = values_list[0]['geom'],
+        )
         return JsonResponse({'success': True})
-
     except Exception:
         return JsonResponse({'success': False})
+
+
+@require_POST
+@csrf_exempt
+def user_check(request):
+    user_info = request.POST.get('user_info')
+    user_info = json.loads(user_info)
+    try:
+        username = user_info[0]["username"]
+        password = user_info[0]["password"]
+        user = auth.authenticate(request, username=username, password=password)
+        if user:
+            return JsonResponse({'success': True, "user_id": user.id})
+        else:
+            return JsonResponse({'success': False, "user_id": user.id})
+    except Exception:
+        return JsonResponse({'success': False, "user_id": None})
