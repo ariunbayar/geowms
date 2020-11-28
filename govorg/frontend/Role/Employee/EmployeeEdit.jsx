@@ -58,16 +58,11 @@ export class EmployeeEdit extends Component {
     }
 
     checkRoleAndPerm() {
-        this.check = false
         this.role.map((role, idx) => {
             this.emp_perms.map((perm, p_idx) => {
                 if(role.property_id == perm.property_id && role.feature_id == perm.feature_id && role.perm_kind == perm.perm_kind) {
-                    this.remove_perms.map((rem_perm, r_idx) => {
-                        if(rem_perm == perm.gov_perm_ins_id) {
-                            this.check = true
-                        }
-                    })
-                    if(!this.check) {
+                    const found = this.remove_perms.find(element => element == perm.gov_perm_ins_id);
+                    if(!found) {
                         this.remove_perms.push(perm.gov_perm_ins_id)
                     }
                 }
