@@ -51,40 +51,65 @@ class ModalComponent extends Component{
 
         return (
             <div>
-                <div className="show d-block modal modal-dialog modal-dialog-scrollable ">
-                    <div className="modal-content">
-                        <div className="modal-header" onClick={this.props.handleClose}>
-                            <h5 className="modal-title">Дэлгэрэнгүй мэдээлэл</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="container">
-                                <div className="row">
-                                    <ul>
-                                        {layer_info.wms_list.map(({ name, layers }, idx) =>
-                                            <li key={ idx }>{ name }
-                                                <ul>
-                                                    {layers.map(({ name }, idx) =>
-                                                        <li key={ idx }>{ name }</li>
-                                                    )}
-                                                </ul>
-                                            </li>
-                                        )}
-                                    </ul>
+                <div className="show d-block modal bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">                    
+                        <div className="modal-content">
+                            <div className="modal-header" onClick={this.props.handleClose}>
+                                <h5 className="modal-title">Худалдан авалтын мэдээлэл</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="container">
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="form-group">
+                                                <label for="recipient-name" className="col-form-label">Худалдан авах талбайн хэмжээ:</label>
+                                                <span className="form-control" id="size">100km2</span>
+                                            </div>
+                                            <div className="form-group">
+                                                <label for="recipient-name" className="col-form-label">Худалдан авах мөнгөн дүн:</label>
+                                                <span className="form-control" id="price">100$</span>
+                                            </div>
+                                            <div className="form-group">
+                                                <label for="recipient-name" className="col-form-label">Хэрэглэгчийн нэр:</label>
+                                                <input type="text" className="form-control" id="user_name"></input>
+                                            </div>
+                                            <div className="form-group">
+                                                <label for="recipient-name" className="col-form-label">Хэрэглэгчийн утас:</label>
+                                                <input type="text" className="form-control" id="user_number"></input>
+                                            </div>
+                                            <div className="form-group">
+                                                <label for="recipient-name" className="col-form-label">Хэрэглэгчийн имэйл:</label>
+                                                <input type="text" className="form-control" id="user_email"></input>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <ul>
+                                                {layer_info.wms_list.map(({ name, layers }, idx) =>
+                                                    <li key={ idx }>{ name }
+                                                        <ul>
+                                                            {layers.map(({ name }, idx) =>
+                                                                <li key={ idx }>{ name }</li>
+                                                            )}
+                                                        </ul>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    {/* <div className="row"><code>{coodrinatLeftTop[0]}</code>, <code>{coodrinatLeftTop[1]}</code></div>
+                                    <div className="row"><code>{coodrinatRightBottom[0]}</code>, <code>{coodrinatRightBottom[1]}</code></div> */}
                                 </div>
-                                <div className="row"><code>{coodrinatLeftTop[0]}</code>, <code>{coodrinatLeftTop[1]}</code></div>
-                                <div className="row"><code>{coodrinatRightBottom[0]}</code>, <code>{coodrinatRightBottom[1]}</code></div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
+                                <button type="button" onClick={this.handlePayment} className="btn gp-btn-primary">Худалдаж авах</button>
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
-                            <button type="button" onClick={this.handlePayment} className="btn btn-secondary">Худалдаж авах</button>
-                        </div>
                     </div>
-                </div>
-                <div className='modal-backdrop fade show'></div>
+                </div><div className='modal-backdrop fade show'></div>
             </div>
         )
     }
