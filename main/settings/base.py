@@ -80,7 +80,7 @@ INSTALLED_APPS = [
     'govorg.backend.zipcode.apps.ZipcodeConfig',
     'govorg.backend.forms.apps.FormsConfig',
     'govorg.backend.meta_data.apps.MetaDataConfig',
-    'govorg.backend.recoke_request.apps.RevokeRequestConfig',
+    'govorg.backend.revoke_request.apps.RevokeRequestConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
