@@ -16,6 +16,7 @@ from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
+from backend.inspire.models import LThemes
 from geoportal_app.models import User
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
@@ -362,3 +363,37 @@ def download_zip(request, pk):
     src_file = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id), 'export.zip')
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="export.zip")
     return response
+
+
+def _calc_per_price(area, area_type, layer_length):
+    if area_type == 'km':
+        price_per_km = 1000
+        price = (area * price_per_km) * layer_length
+    if area_type == 'm':
+        price_per_m = 100
+        price = (area * price_per_m) * layer_length
+    return price
+
+
+@require_POST
+@ajax_required
+def calcPrice(request, payload):
+    area = payload.get('area')
+    layer_length = payload.get("layer_length")
+    area_type = area['type']
+    area = area['output']
+
+    is_user = request.user
+    if is_user:
+        is_user = True
+    else:
+        is_user = False
+
+    total_price = _calc_per_price(area, area_type, layer_length)
+
+    rsp = {
+        'success': True,
+        'total_price': total_price,
+        'is_user': is_user,
+    }
+    return JsonResponse(rsp)

@@ -23,11 +23,11 @@ class ModalComponent extends Component{
 
         this.setState({payLoad: true})
 
-        const {price, description} = this.state
-        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }} = this.props
+        const {description} = this.state
+        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price} = this.props
 
         const values = {
-            price,
+            pirce: total_price,
             description,
             coodrinatLeftTop,
             coodrinatRightBottom,
@@ -35,6 +35,8 @@ class ModalComponent extends Component{
             layer_ids: wms_list.reduce((acc, { layers }) => {
                 return [...acc, ...layers.map((layer) => layer.id)]
             }, []),
+            area: area.output,
+            area_type: area.type,
         }
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
@@ -47,12 +49,12 @@ class ModalComponent extends Component{
 
     render() {
         const {payLoad} = this.state
-        const { coodrinatLeftTop, coodrinatRightBottom, layer_info } = this.props
+        const { coodrinatLeftTop, coodrinatRightBottom, layer_info, is_loading, area, total_price, is_user } = this.props
 
         return (
             <div>
-                <div className="show d-block modal bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">                    
+                <div className="show d-block modal bd-example-modal-lg" tabIndex="-1" role="dialog" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
                         <div className="modal-content">
                             <div className="modal-header" onClick={this.props.handleClose}>
                                 <h5 className="modal-title">Худалдан авалтын мэдээлэл</h5>
@@ -60,30 +62,43 @@ class ModalComponent extends Component{
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
+                        {
+                            is_loading ?
+                            <div className="modal-body height-30">
+                                <div className="d-flex justify-content-center">
+                                    <div className="spinner-border gp-text-primary" role="status"></div>
+                                </div>
+                            </div>
+                            :
                             <div className="modal-body">
                                 <div className="container">
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="form-group">
-                                                <label for="recipient-name" className="col-form-label">Худалдан авах талбайн хэмжээ:</label>
-                                                <span className="form-control" id="size">100km2</span>
+                                                <label htmlFor="recipient-name" className="col-form-label">Худалдан авах талбайн хэмжээ:</label>
+                                                <span className="form-control" id="size">{area.output}{area.type}<sup>2</sup></span>
                                             </div>
                                             <div className="form-group">
-                                                <label for="recipient-name" className="col-form-label">Худалдан авах мөнгөн дүн:</label>
-                                                <span className="form-control" id="price">100$</span>
+                                                <label htmlFor="recipient-name" className="col-form-label">Худалдан авах мөнгөн дүн:</label>
+                                                <span className="form-control" id="price">{total_price}₮</span>
                                             </div>
-                                            <div className="form-group">
-                                                <label for="recipient-name" className="col-form-label">Хэрэглэгчийн нэр:</label>
-                                                <input type="text" className="form-control" id="user_name"></input>
-                                            </div>
-                                            <div className="form-group">
-                                                <label for="recipient-name" className="col-form-label">Хэрэглэгчийн утас:</label>
-                                                <input type="text" className="form-control" id="user_number"></input>
-                                            </div>
-                                            <div className="form-group">
-                                                <label for="recipient-name" className="col-form-label">Хэрэглэгчийн имэйл:</label>
-                                                <input type="text" className="form-control" id="user_email"></input>
-                                            </div>
+                                            {
+                                                !is_user &&
+                                                <div>
+                                                    <div className="form-group">
+                                                        <label htmlFor="user_name" className="col-form-label">Хэрэглэгчийн нэр:</label>
+                                                        <input type="text" className="form-control" id="user_name"></input>
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label htmlFor="user_number" className="col-form-label">Хэрэглэгчийн утас:</label>
+                                                        <input type="text" className="form-control" id="user_number"></input>
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label htmlFor="user_email" className="col-form-label">Хэрэглэгчийн имэйл:</label>
+                                                        <input type="text" className="form-control" id="user_email"></input>
+                                                    </div>
+                                                </div>
+                                            }
                                         </div>
                                         <div className="col-md-6">
                                             <ul>
@@ -103,10 +118,14 @@ class ModalComponent extends Component{
                                     <div className="row"><code>{coodrinatRightBottom[0]}</code>, <code>{coodrinatRightBottom[1]}</code></div> */}
                                 </div>
                             </div>
-                            <div className="modal-footer">
-                                <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
+                        }
+                        <div className="modal-footer">
+                            <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
+                            {
+                                !is_loading &&
                                 <button type="button" onClick={this.handlePayment} className="btn gp-btn-primary">Худалдаж авах</button>
-                            </div>
+                            }
+                        </div>
                         </div>
                     </div>
                 </div><div className='modal-backdrop fade show'></div>
@@ -151,9 +170,9 @@ export class DrawPayModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(coodrinatLeftTop, coodrinatRightBottom, layer_info) {
+    showModal(is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user) {
         this.toggleControl(true)
-        this.renderComponent({coodrinatLeftTop, coodrinatRightBottom, layer_info})
+        this.renderComponent({is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user})
     }
 
 }
