@@ -13,6 +13,9 @@ class ModalComponent extends Component{
             price: 3000,
             description: 'Газрын бүрхэвч, газар ашиглалт',
             payLoad: false,
+            user_name: '',
+            user_email: '',
+            user_number: '',
         }
 
         this.handlePayment = this.handlePayment.bind(this)
@@ -23,7 +26,7 @@ class ModalComponent extends Component{
 
         this.setState({payLoad: true})
 
-        const {description} = this.state
+        const {description, user_name, user_email, user_number} = this.state
         const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price} = this.props
 
         const values = {
@@ -37,6 +40,9 @@ class ModalComponent extends Component{
             }, []),
             area: area.output,
             area_type: area.type,
+            user_name,
+            user_email,
+            user_number
         }
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
@@ -48,7 +54,7 @@ class ModalComponent extends Component{
     }
 
     render() {
-        const {payLoad} = this.state
+        const {payLoad, user_name, user_email, user_number} = this.state
         const { coodrinatLeftTop, coodrinatRightBottom, layer_info, is_loading, area, total_price, is_user } = this.props
 
         return (
@@ -87,15 +93,30 @@ class ModalComponent extends Component{
                                                 <div>
                                                     <div className="form-group">
                                                         <label htmlFor="user_name" className="col-form-label">Хэрэглэгчийн нэр:</label>
-                                                        <input type="text" className="form-control" id="user_name"></input>
+                                                        <input type="text"
+                                                            className="form-control"
+                                                            id="user_name"
+                                                            value={user_name}
+                                                            onChange={(e) => this.setState({ user_name: e.target.value })}
+                                                        />
                                                     </div>
                                                     <div className="form-group">
                                                         <label htmlFor="user_number" className="col-form-label">Хэрэглэгчийн утас:</label>
-                                                        <input type="text" className="form-control" id="user_number"></input>
+                                                        <input type="text"
+                                                            className="form-control"
+                                                            id="user_number"
+                                                            value={user_number}
+                                                            onChange={(e) => this.setState({ user_number: e.target.value })}
+                                                        />
                                                     </div>
                                                     <div className="form-group">
                                                         <label htmlFor="user_email" className="col-form-label">Хэрэглэгчийн имэйл:</label>
-                                                        <input type="text" className="form-control" id="user_email"></input>
+                                                        <input type="text"
+                                                            className="form-control"
+                                                            id="user_email"
+                                                            value={user_email}
+                                                            onChange={(e) => this.setState({ user_email: e.target.value })}
+                                                        />
                                                     </div>
                                                 </div>
                                             }
