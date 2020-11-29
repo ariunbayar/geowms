@@ -144,7 +144,6 @@ export default class BundleMap extends Component {
             service.loadBaseLayers(),
             service.loadWMSLayers(bundle_id),
         ]).then(([{base_layer_list}, {wms_list}]) => {
-            console.log(wms_list);
             this.handleMapDataLoaded(base_layer_list, wms_list)
         })
 
@@ -400,10 +399,8 @@ export default class BundleMap extends Component {
                     fetch(url)
                         .then((response) => response.text())
                         .then((text) => {
-                            console.log(text);
                             const parser = new WMSGetFeatureInfo()
                             const features = parser.readFeatures(text)
-                            console.log(features);
                             if (features.length > 0) {
                                 features.map((feature, idx) => {
                                     if(feature.getGeometry().getType().includes('Polygon')) {
@@ -423,7 +420,6 @@ export default class BundleMap extends Component {
                                     .map((key) => [key, feature.get(key)])
                                 return [feature.getId(), values]
                             })
-                            console.log(feature_info);
                             if(!this.state.is_draw_open){
                                 if(feature_info.length > 0) {
                                     if(this.sendFeatureInfo.length > 0) {

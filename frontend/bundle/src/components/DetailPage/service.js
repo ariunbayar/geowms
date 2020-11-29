@@ -86,7 +86,6 @@ function payment(price, description, data_id) {
 }
 
 function paymentDraw(values) {
-    console.log(values);
     const requestOptions = {
         ..._getPostOptions(),
         body: JSON.stringify(values)
