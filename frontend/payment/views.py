@@ -384,7 +384,7 @@ def calcPrice(request, payload):
     area = area['output']
 
     is_user = request.user
-    if is_user:
+    if str(is_user) != 'AnonymousUser':
         is_user = True
     else:
         is_user = False
