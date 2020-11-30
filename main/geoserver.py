@@ -139,8 +139,6 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
     attributes_hoho = []
     geom_type = ''
     for i in range(len(attribute_name)):
-        print(attribute_name[i]['column_name'])
-
         if attribute_name[i]['data_type'][:4] == 'char' and attribute_name[i]['column_name'] != 'geo_id':
             attributes =  '''
                 <attribute>

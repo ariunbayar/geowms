@@ -76,7 +76,7 @@ def qgis_submit(request):
         if len(update_lists) > 0:
             for update_list in update_lists:
                 feature_id = update_list['att']['feature_id']
-                geo_id = update_list['att']['geom_id']
+                geo_id = update_list['att']['inspire_id']
                 package = LFeatures.objects.filter(feature_id=feature_id).first()
                 theme=LPackages.objects.filter(package_id=package.package_id).first()
                 ChangeRequest.objects.create(
@@ -95,7 +95,7 @@ def qgis_submit(request):
         if len(delete_lists) > 0:
             for update_list in delete_lists:
                 feature_id = update_list['att']['feature_id']
-                geo_id = update_list['att']['geom_id']
+                geo_id = update_list['att']['inspire_id']
                 package = LFeatures.objects.filter(feature_id=feature_id).first()
                 theme=LPackages.objects.filter(package_id=package.package_id).first()
                 ChangeRequest.objects.create(
