@@ -25,15 +25,7 @@ export class PasswordChange extends Component {
     }
 
     handChange(name, value) {
-        if (name === 'password'){
-            this.setState({password: value})
-        }
-        if (name === 'new_password'){
-            this.setState({new_password: value})
-        }
-        if (name === 'renew_password'){
-            this.setState({renew_password: value})
-        }
+        this.setState({[name]: value})
     }
 
     handSave() {
@@ -77,54 +69,51 @@ export class PasswordChange extends Component {
                     window.location.reload()
                 )
             }
-        }, 2222)
+        }, 2000)
     }
-
 
     render() {
 
         return (
-            <>
-                <div className="d-flex align-items-center justify-content-center" style={{marginTop: "180px"}}>
-                    <div className="card border-primary border-top-sm border-bottom-sm card-authentication1 mx-auto animated bounceInDown">
-                        <div className="card-body">
-                            <div className="card-content p-2">
-                                <div className="text-center">
-                                    <i className="fa fa-key fa-3x"></i>
-                                </div>
-                                <div className="card-title text-uppercase text-center py-3">Нууц үг солих</div>
-                                    <form>
-                                        <div className="form-group">
-                                            <div className="position-relative has-icon-right">
-                                                <label htmlFor="password">Хуучин нууц үг</label>
-                                                <input type="password" className="form-control form-control-rounded" placeholder="Хуучин нууц үгээ оруулна уу" value={this.state.password} onChange={(e) => this.handChange('password', e.target.value)}></input>
-                                                <div className="form-control-position">
-                                                    <i className="icon-lock"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <div className="position-relative has-icon-right">
-                                                <label htmlFor="new_password">Шинэ нууц үг</label>
-                                                <input type="password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ оруулна уу" value={this.state.new_password} onChange={(e) => this.handChange('new_password', e.target.value)}></input>
-                                                <div className="form-control-position">
-                                                    <i className="icon-lock"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-group">
-                                            <div className="position-relative has-icon-right">
-                                                <label htmlFor="renew_password">Шинэ нууц үг</label>
-                                                <input type="password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ дахин оруулна уу" value={this.state.renew_password} onChange={(e) => this.handChange('renew_password', e.target.value)}></input>
-                                                <div className="form-control-position">
-                                                    <i className="icon-lock"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button type="button" className="btn btn-primary shadow-primary btn-round btn-block waves-effect waves-light" onClick={() => this.handSave()}>Хадгалах</button>
-                                    </form>
+            <div className="d-flex align-items-center justify-content-center" style={{marginTop: "180px"}}>
+                <div className="card border-primary border-top-sm border-bottom-sm card-authentication1 mx-auto animated bounceInDown">
+                    <div className="card-body">
+                        <div className="card-content p-2">
+                            <div className="text-center">
+                                <i className="fa fa-key fa-3x"></i>
                             </div>
+                            <div className="card-title text-uppercase text-center py-3">Нууц үг солих</div>
+                            <form>
+                                <div className="form-group">
+                                    <div className="position-relative has-icon-right">
+                                        <label htmlFor="password">Хуучин нууц үг</label>
+                                        <input type="password" className="form-control form-control-rounded" placeholder="Хуучин нууц үгээ оруулна уу" value={this.state.password} onChange={(e) => this.handChange('password', e.target.value)}></input>
+                                        <div className="form-control-position">
+                                            <i className="icon-lock"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <div className="position-relative has-icon-right">
+                                        <label htmlFor="new_password">Шинэ нууц үг</label>
+                                        <input type="text" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ оруулна уу" value={this.state.new_password} onChange={(e) => this.handChange('new_password', e.target.value)}></input>
+                                        <div className="form-control-position">
+                                            <i className="icon-lock"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <div className="position-relative has-icon-right">
+                                        <label htmlFor="renew_password">Шинэ нууц үг</label>
+                                        <input type="text" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ дахин оруулна уу" value={this.state.renew_password} onChange={(e) => this.handChange('renew_password', e.target.value)}></input>
+                                        <div className="form-control-position">
+                                            <i className="icon-lock"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" className="btn btn-primary shadow-primary btn-round btn-block waves-effect waves-light" onClick={() => this.handSave()}>Хадгалах</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -134,7 +123,7 @@ export class PasswordChange extends Component {
                     title = {this.state.msg}
                     model_type_icon = {this.state.model_type_icon}
                 />
-            </>
+            </div>
         )
     }
 }

@@ -7,8 +7,7 @@ export const service = {
 function passwordChange(payload) {
     const requestOptions = {
         ...getPostOptions(),
-    body: JSON.stringify( payload ),
+        body: JSON.stringify( payload ),
     }
-
     return fetch(`/profile/api/update-password/`, requestOptions).then(handleResponse)
 }
