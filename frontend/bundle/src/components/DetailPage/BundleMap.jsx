@@ -5,7 +5,9 @@ import {Map, View, Feature, Overlay, Observable } from 'ol'
 import {unByKey} from 'ol/Observable'
 import {transform as transformCoordinate} from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
-
+import {getArea, getLength} from 'ol/sphere';
+import {getCenter} from 'ol/extent';
+import {toLonLat} from 'ol/proj';
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
 import {Vector as VectorSource} from 'ol/source'
@@ -87,6 +89,7 @@ export default class BundleMap extends Component {
         this.getElement = this.getElement.bind(this)
         this.listToJson = this.listToJson.bind(this)
         this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
+        this.formatArea = this.formatArea.bind(this)
     }
 
     initMarker() {
@@ -318,20 +321,20 @@ export default class BundleMap extends Component {
     }
 
     handleMapClick(event) {
+        if(!this.state.is_draw_open) {
 
-        const coordinate = event.coordinate
-        this.marker.point.setCoordinates(coordinate)
-        const overlay = this.overlay
+            const coordinate = event.coordinate
+            this.marker.point.setCoordinates(coordinate)
+            const overlay = this.overlay
 
-        const projection = event.map.getView().getProjection()
-        const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
-        const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
+            const projection = event.map.getView().getProjection()
+            const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+            const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-        this.setState({coordinate_clicked})
-
-        overlay.setPosition(coordinate)
-        this.showFeaturesAt(coordinate)
-
+            this.setState({coordinate_clicked})
+            overlay.setPosition(coordinate)
+            this.showFeaturesAt(coordinate)
+        }
         // Nov-15: commented for UX
         //this.showFeaturesAt(event.coordinate)
 
@@ -430,11 +433,14 @@ export default class BundleMap extends Component {
                                         const object = this.listToJson(feature_info, geodb_table)
                                         this.sendFeatureInfo.push(object)
                                     }
-                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
-                                if(geodb_table == 'mpoint_view'){
-                                    this.state.vector_layer.setSource(null)
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                    if(geodb_table == 'mpoint_view'){
+                                        this.state.vector_layer.setSource(null)
+                                    }
                                 }
-                            }
+                                else {
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                }
                                 // if(geodb_table == 'mpoint_view'){
                                 //     if(feature_info.length > 0){
                                 //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
@@ -508,16 +514,18 @@ export default class BundleMap extends Component {
     }
 
     toggleDrawed(event){
-        const projection = this.map.getView().getProjection()
+        const view = this.map.getView()
+        const projection = view.getProjection()
         const coordinat = event.feature.getGeometry().getCoordinates()
+        const feature_geometry = event.feature.getGeometry()
 
         const coodrinatLeftTop = coordinat[0][3]
         const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
-        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
+        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}')
 
         const coodrinatRightBottom = coordinat[0][1]
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
-        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
+        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}')
 
         const { bundle, map_wms_list } = this.state
 
@@ -535,10 +543,39 @@ export default class BundleMap extends Component {
                 if (wms.layers.length)
                     acc.push(wms)
                 return acc
-            }, [])
+            }, []),
         }
 
-        this.controls.drawModal.showModal(coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info)
+        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+        const is_loading = true
+        this.controls.drawModal.showModal(is_loading)
+    }
+
+    formatArea(polygon) {
+        const area = getArea(polygon);
+        let output;
+        let type;
+        if (area > 10000) {
+          output = Math.round((area / 1000000) * 100) / 100;
+          type = 'km'
+        } else {
+          output = Math.round(area * 100) / 100;
+          type = 'm'
+        }
+        return {output, type};
+    };
+
+    calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord) {
+        const area = this.formatArea(feature_geometry)
+        const layer_length = layer_info.wms_list[0].layers.length
+        service
+            .paymentCalcPrice(area, layer_length)
+            .then(({ success, total_price, is_user }) => {
+                if (success) {
+                    const is_loading = false
+                    this.controls.drawModal.showModal(is_loading, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info, area, total_price, is_user)
+                }
+            })
     }
 
     toggleDrawRemove(){

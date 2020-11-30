@@ -73,7 +73,7 @@ class PopUpCmp extends Component {
                 <div>
                     <div className="ol-popup-header">
                         <div className="ol-popup-header-content">
-                            {datas
+                            {datas && datas.length > 0
                                 ?
                                 <div className="ol-header-cont" role="group">
                                     {startNumber}
@@ -100,7 +100,7 @@ class PopUpCmp extends Component {
                         </div>
                     </div>
                     <div className="ol-popup-contet">
-                        {datas && datas.map((data, idx) =>
+                        {datas && datas.length > 0 && datas.map((data, idx) =>
                                     data.map((info, ix) =>
                                         idx + 1 == startNumber &&
                                         (info.field_name == 'name' ?
@@ -112,7 +112,7 @@ class PopUpCmp extends Component {
                         <table className="table borderless no-padding">
                             <tbody>
                                 {
-                                    datas
+                                    datas && datas.length > 0
                                     ?
                                         datas.map((data, idx) =>
                                             data.map((info, ix) =>

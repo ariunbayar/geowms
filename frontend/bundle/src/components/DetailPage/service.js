@@ -5,6 +5,7 @@ export const service = {
     loadBaseLayers,
     payment,
     paymentDraw,
+    paymentCalcPrice,
     purchaseFromCart,
     searchPoint,
     getAimags,
@@ -90,6 +91,14 @@ function paymentDraw(values) {
         body: JSON.stringify(values)
     }
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
+}
+
+function paymentCalcPrice(area, layer_length) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({ area, layer_length })
+    }
+    return fetch('/payment/calc-price/', requestOptions).then(handleResponse)
 }
 
 function purchaseFromCart(data, code){
