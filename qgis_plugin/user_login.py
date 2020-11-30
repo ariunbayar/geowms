@@ -219,7 +219,6 @@ class User_Login:
         if not active_layers:
             return
         for layer in active_layers:
-
             changed_geom = layer.editBuffer()
             fieldnames = [field.name() for field in layer.fields()]
             n_of_attributes = len(layer.fields())
@@ -227,21 +226,32 @@ class User_Login:
             xform = QgsCoordinateTransform(QgsCoordinateReferenceSystem(projection), QgsCoordinateReferenceSystem("EPSG:4326"), QgsProject.instance())
             if changed_geom:
                 ch = changed_geom.changedGeometries()
+                delete_ids = changed_geom.deletedFeatureIds()
+                updates = []
+                deletes = []
                 for j, feature_geom in ch.items():
                     feature_geom.transform(xform)
-                    values = []
-                    expr = QgsExpression('\'%s\=\%s\'' %(fieldnames[0] , j))
-
-                    for feature in layer.getFeatures(QgsFeatureRequest(expr)):
+                    for feature in layer.getFeatures(QgsFeatureRequest(j)):
                         attributes = {}
                         for j in range(len(layer.fields())):
                             attributes[str(fieldnames[j])] = str(feature[str(fieldnames[j])])
-                        values = [
-                            {"geom": feature_geom.asJson()},
-                            {"att": attributes},
-                            {"projection": projection if projection else ''}
-                        ]
-                    data = {'values': json.dumps(values)}
+                        updates.append({
+                            "geom": feature_geom.asJson(),
+                            "att": attributes,
+                            "projection": projection if projection else ''
+                        })
+                for feature in layer.dataProvider().getFeatures( QgsFeatureRequest().setFilterFids(delete_ids)):
+                    geom = feature.geometry()
+                    geom.transform(xform)
+                    attributes = {}
+                    for j in range(len(layer.fields())):
+                        attributes[str(fieldnames[j])] = str(feature[str(fieldnames[j])])
+                    deletes.append({
+                        "geom": geom.asJson(),
+                        "att": attributes,
+                        "projection": projection if projection else ''
+                    })
+                data = {'update': json.dumps(updates), 'delete': json.dumps(deletes)}
         self.dlg = User_LoginDialog()
         self.dlg.show()
         user_info = self.dlg.pushButton.clicked.connect(self.checkUser)
@@ -249,7 +259,6 @@ class User_Login:
 
         try:
             if self.user_check:
-                data["user_id"] = self.user_id
                 data["user_id"] = self.user_id
                 rsp = requests.post(self.geoportal_url+'api/service/qgis-submit/', data=data)
                 if rsp.json():
@@ -262,3 +271,4 @@ class User_Login:
                 QMessageBox.about(self.dlg, 'Connection',  'Холболт ажилтгүй боллоо')
         except Exception:
             QMessageBox.about(self.dlg, 'Connection',  'Холболт ажилтгүй боллоо')
+

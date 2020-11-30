@@ -139,110 +139,111 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
     attributes_hoho = []
     geom_type = ''
     for i in range(len(attribute_name)):
-        if attribute_name[i]['column_name'] != 'geo_id':
-            if attribute_name[i]['data_type'][:4] == 'char':
+        print(attribute_name[i]['column_name'])
+
+        if attribute_name[i]['data_type'][:4] == 'char' and attribute_name[i]['column_name'] != 'geo_id':
+            attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <length>500</length>
+                    <binding>java.lang.String</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+            attributes_hoho.insert(i, attributes)
+        elif attribute_name[i]['data_type'][:4] == 'inte':
+            attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>java.lang.Integer</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+            attributes_hoho.insert(i, attributes)
+        elif attribute_name[i]['data_type'][:4] == 'time':
+            attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>java.util.Date</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+            attributes_hoho.insert(i, attributes)
+        elif attribute_name[i]['data_type'][:4] == 'geom':
+            if some_attributes:
+                geom_type = some_attributes[0]['st_geometrytype'][3:]
+            if geom_type == 'Point':
                 attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <length>500</length>
-                        <binding>java.lang.String</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>org.locationtech.jts.geom.Point</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
                 attributes_hoho.insert(i, attributes)
-            elif attribute_name[i]['data_type'][:4] == 'inte':
+            elif geom_type == 'LineString':
                 attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>java.lang.Integer</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>org.locationtech.jts.geom.LineString</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
                 attributes_hoho.insert(i, attributes)
-            elif attribute_name[i]['data_type'][:4] == 'time':
+            elif geom_type == 'Polygon':
                 attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>java.util.Date</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>org.locationtech.jts.geom.Polygon</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
                 attributes_hoho.insert(i, attributes)
-            elif attribute_name[i]['data_type'][:4] == 'geom':
-                if some_attributes:
-                    geom_type = some_attributes[0]['st_geometrytype'][3:]
-                if geom_type == 'Point':
-                    attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>org.locationtech.jts.geom.Point</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
-                    attributes_hoho.insert(i, attributes)
-                elif geom_type == 'LineString':
-                    attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>org.locationtech.jts.geom.LineString</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
-                    attributes_hoho.insert(i, attributes)
-                elif geom_type == 'Polygon':
-                    attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>org.locationtech.jts.geom.Polygon</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
-                    attributes_hoho.insert(i, attributes)
-                elif geom_type == 'MultiPoint':
-                    attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>org.locationtech.jts.geom.MultiPoint</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
-                    attributes_hoho.insert(i, attributes)
-                elif geom_type == 'MultiLineString':
-                    attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>org.locationtech.jts.geom.MultiLineString</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
-                    attributes_hoho.insert(i, attributes)
-                else:
-                    attributes =  '''
-                    <attribute>
-                        <name>{attribute_name}</name>
-                        <nillable>true</nillable>
-                        <binding>org.locationtech.jts.geom.MultiPolygon</binding>
-                    </attribute>
-                    '''.format(
-                        attribute_name=attribute_name[i]['column_name']
-                    )
-                    attributes_hoho.insert(i, attributes)
+            elif geom_type == 'MultiPoint':
+                attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>org.locationtech.jts.geom.MultiPoint</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+                attributes_hoho.insert(i, attributes)
+            elif geom_type == 'MultiLineString':
+                attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>org.locationtech.jts.geom.MultiLineString</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+                attributes_hoho.insert(i, attributes)
+            else:
+                attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>org.locationtech.jts.geom.MultiPolygon</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+                attributes_hoho.insert(i, attributes)
 
     payload = '''
             <featureType>
@@ -276,6 +277,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 attributes=''.join(attributes_hoho),
             )
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
+    print(rsp.text)
     return rsp
 
 

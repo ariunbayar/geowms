@@ -958,7 +958,7 @@ def createView(ids, table_name, model_name):
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
-            SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
+            SELECT d.geo_id, d.geo_data, d.geo_id as geom_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
             FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text

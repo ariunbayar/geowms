@@ -65,27 +65,51 @@ def proxy(request, token, pk):
 @require_POST
 @csrf_exempt
 def qgis_submit(request):
-    values = request.POST.get('values')
+    update = request.POST.get('update')
+    delete = request.POST.get('delete')
     user_id = request.POST.get('user_id')
     try:
         user = User.objects.filter(id=user_id).first()
         employee = get_object_or_404(Employee, user=user)
-        values_list = json.loads(values)
-        feature_id = values_list[1]['att']['feature_id']
-        package = LFeatures.objects.filter(feature_id=feature_id).first()
-        theme=LPackages.objects.filter(package_id=package.package_id).first()
-        ChangeRequest.objects.create(
-            old_geo_id = None,
-            new_geo_id = None,
-            theme_id = theme.theme_id,
-            package_id = package.package_id,
-            feature_id = feature_id,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_CREATE,
-            form_json = None,
-            geo_json = values_list[0]['geom'],
-        )
+        update_lists = json.loads(update)
+        delete_lists = json.loads(delete)
+        if len(update_lists) > 0:
+            for update_list in update_lists:
+                feature_id = update_list['att']['feature_id']
+                geo_id = update_list['att']['geom_id']
+                package = LFeatures.objects.filter(feature_id=feature_id).first()
+                theme=LPackages.objects.filter(package_id=package.package_id).first()
+                ChangeRequest.objects.create(
+                    old_geo_id = geo_id,
+                    new_geo_id = None,
+                    theme_id = theme.theme_id,
+                    package_id = package.package_id,
+                    feature_id = feature_id,
+                    employee = employee,
+                    state = ChangeRequest.STATE_NEW,
+                    kind = ChangeRequest.KIND_DELETE,
+                    form_json = None,
+                    geo_json = update_list['geom'],
+                )
+
+        if len(delete_lists) > 0:
+            for update_list in delete_lists:
+                feature_id = update_list['att']['feature_id']
+                geo_id = update_list['att']['geom_id']
+                package = LFeatures.objects.filter(feature_id=feature_id).first()
+                theme=LPackages.objects.filter(package_id=package.package_id).first()
+                ChangeRequest.objects.create(
+                    old_geo_id = geo_id,
+                    new_geo_id = None,
+                    theme_id = theme.theme_id,
+                    package_id = package.package_id,
+                    feature_id = feature_id,
+                    employee = employee,
+                    state = ChangeRequest.STATE_NEW,
+                    kind = ChangeRequest.KIND_UPDATE,
+                    form_json = None,
+                    geo_json = update_list['geom'],
+                )
         return JsonResponse({'success': True})
     except Exception:
         return JsonResponse({'success': False})
