@@ -141,63 +141,51 @@ def get_all_file_remove(directory):
 
 
 def _create_shp_file(payment, layer, polygon):
+
     import sys
     sys.path.append('/usr/lib/python3/dist-packages/')
     from qgis.utils import iface
     from qgis.core import \
         QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
 
+    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+
+    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+
     try:
         qgs = QgsApplication([], False)
         QgsApplication.setPrefixPath("/usr", True)
         QgsApplication.initQgis()
-        uri = QgsDataSourceUri()
-        db_config = settings.DATABASES['postgis_db']
 
-        uri.setConnection(db_config['HOST'], db_config['PORT'], db_config['NAME'], db_config['USER'], db_config['PASSWORD'])
+        url = layer.wms.url + '/?'
+        wms = url.split('/')[4]
+        geoserver_layer = layer.code
+        bbox = '&bbox=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2)
 
-        x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+        params = {
+            'service': 'WFS',
+            'version': '1.3.0',
+            'request': 'GetFeature',
+        }
+        uri = url + urlencode(params) + '&typeName=' + wms + ':' + geoserver_layer + bbox
 
-        x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+        vlayer = QgsVectorLayer(uri, 'layer', 'WFS')
 
-        sql = f"""
-        SELECT
-            *
-        FROM (
-            SELECT id,
-                 st_intersection(st_transform(geom, 4326), st_setsrid(st_polygonfromtext('polygon((
-                     {x1} {y1},
-                     {x2} {y1},
-                     {x2} {y2},
-                     {x1} {y2},
-                     {x1} {y1}
-                 ))'), 4326)) AS geom
-            FROM {layer.geodb_schema}."{layer.geodb_table}"
-        ) as t
-        WHERE st_geometrytype(geom) != 'ST_GeometryCollection'
-        """
-
-        uri.setDataSource('', f'({sql})', 'geom', '', 'id')
-
-        vlayer = QgsVectorLayer(uri.uri(), 'test1', 'postgres')
-
-        if not vlayer.isValid():
-            print("Layer failed to load!")
-        else:
-            print("Layer success to load!")
+        if vlayer.isValid():
 
             path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
             if not os.path.isdir(path):
                 os.mkdir(path)
 
             filename = os.path.join(path, str(layer.pk) + '.shp')
+            # writer = QgsVectorFileWriter(vlayer, filename, 'UTF-8', QgsWkbTypes.Polygon, QgsCoordinateReferenceSystem('EPSG:32648'), 'ESRI Shapefile')
             writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
             del(writer)
 
-        qgs.exitQgis()
+            qgs.exitQgis()
+
     except Exception as e:
         raise e
-        pass
 
 
 def _export_shp(payment):
