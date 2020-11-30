@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {service} from './service'
 
 
-export class CancelRequestTable extends Component {
+export class RevokeRequestTable extends Component {
 
     constructor(props) {
         super(props)

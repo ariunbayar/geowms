@@ -1,14 +1,14 @@
 
 import React, { Component } from "react"
 import {service} from './service'
-import {CancelRequestTable} from './CancelRequestTable'
+import {RevokeRequestTable} from './RevokeRequestTable'
 
-export default class CancelRequestForm extends Component {
+export default class RevokeRequestForm extends Component {
 
     constructor(props) {
         super(props)
         this.state={
-            cancel_request:[],
+            revoke_request:[],
             is_loading: false,
         }
         this.getAll = this.getAll.bind(this)
@@ -22,7 +22,7 @@ export default class CancelRequestForm extends Component {
         this.setState({ is_loading: true })
         service
         .getAll()
-        .then(({ success ,cancel_request, choices, modules }) => {
+        .then(({ success ,revoke_request, choices, modules }) => {
            if(success){
                 this.themes = []
                 this.packages = []
@@ -36,7 +36,7 @@ export default class CancelRequestForm extends Component {
                         })
                     })
                 })
-               this.setState({cancel_request, is_loading: false, choices, modules, themes: this.themes, packages: this.packages, features: this.features})
+               this.setState({revoke_request, is_loading: false, choices, modules, themes: this.themes, packages: this.packages, features: this.features})
             }
         })
     }
@@ -87,7 +87,7 @@ export default class CancelRequestForm extends Component {
     }
 
     render() {
-        const cancel_request = this.state.cancel_request
+        const revoke_request = this.state.revoke_request
         return (
             <div className="card">
                 <div className="card-body">
@@ -107,8 +107,8 @@ export default class CancelRequestForm extends Component {
 
                             <tbody>
                                     {
-                                        cancel_request.length > 0 ? cancel_request.map((req, idx) =>
-                                            <CancelRequestTable
+                                        revoke_request.length > 0 ? revoke_request.map((req, idx) =>
+                                            <RevokeRequestTable
                                                 key={idx}
                                                 idx={idx}
                                                 values = {req}
