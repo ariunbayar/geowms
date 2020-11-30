@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 import { service } from './service'
 import ModalAlert from "../../ModalAlert";
-import { Redirect } from 'react-router-dom';
-import Axios from 'axios';
+import axios from 'axios';
 
 export class PasswordChange extends Component {
 
@@ -47,6 +46,11 @@ export class PasswordChange extends Component {
     modalClose(){
         this.setState({modal_alert_status: "closed"})
         clearTimeout(this.state.timer)
+        if (this.state.reset){
+            return (
+                window.location.reload()
+            )
+        }
     }
 
     modalCloseTime(){
@@ -54,7 +58,7 @@ export class PasswordChange extends Component {
             this.setState({modal_alert_status: "closed"})
             if (this.state.reset){
                 return (
-                    alert('login huudasruu shiljiil')
+                    window.location.reload()
                 )
             }
         }, 2222)
