@@ -14,16 +14,32 @@ export class PasswordChange extends Component {
             model_type_icon: "success",
             msg: "Нууц үг солиход алдаа гарлаа.",
             reset: false,
+            password: '',
+            new_password: '',
+            renew_password: ''
         }
         this.handSave = this.handSave.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handChange = this.handChange.bind(this)
+    }
+
+    handChange(name, value) {
+        if (name === 'password'){
+            this.setState({password: value})
+        }
+        if (name === 'new_password'){
+            this.setState({new_password: value})
+        }
+        if (name === 'renew_password'){
+            this.setState({renew_password: value})
+        }
     }
 
     handSave() {
-        const password = document.getElementById('password').value
-        const new_password = document.getElementById('new_password').value
-        const renew_password = document.getElementById('renew_password').value
+        const password = this.state.password
+        const new_password = this.state.new_password
+        const renew_password = this.state.renew_password
         if (new_password === renew_password){
             const values = {"old_password": password, "new_password": new_password}
             service.passwordChange(values).then(({success, msg, error}) => {
@@ -81,7 +97,7 @@ export class PasswordChange extends Component {
                                         <div className="form-group">
                                             <div className="position-relative has-icon-right">
                                                 <label htmlFor="password">Хуучин нууц үг</label>
-                                                <input type="password" id="password" className="form-control form-control-rounded" placeholder="Хуучин нууц үгээ оруулна уу"></input>
+                                                <input type="password" className="form-control form-control-rounded" placeholder="Хуучин нууц үгээ оруулна уу" value={this.state.password} onChange={(e) => this.handChange('password', e.target.value)}></input>
                                                 <div className="form-control-position">
                                                     <i className="icon-lock"></i>
                                                 </div>
@@ -91,7 +107,7 @@ export class PasswordChange extends Component {
                                         <div className="form-group">
                                             <div className="position-relative has-icon-right">
                                                 <label htmlFor="new_password">Шинэ нууц үг</label>
-                                                <input type="password" id="new_password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ оруулна уу"></input>
+                                                <input type="password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ оруулна уу" value={this.state.new_password} onChange={(e) => this.handChange('new_password', e.target.value)}></input>
                                                 <div className="form-control-position">
                                                     <i className="icon-lock"></i>
                                                 </div>
@@ -100,7 +116,7 @@ export class PasswordChange extends Component {
                                         <div className="form-group">
                                             <div className="position-relative has-icon-right">
                                                 <label htmlFor="renew_password">Шинэ нууц үг</label>
-                                                <input type="password" id="renew_password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ дахин оруулна уу"></input>
+                                                <input type="password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ дахин оруулна уу" value={this.state.renew_password} onChange={(e) => this.handChange('renew_password', e.target.value)}></input>
                                                 <div className="form-control-position">
                                                     <i className="icon-lock"></i>
                                                 </div>
