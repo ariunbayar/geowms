@@ -1,6 +1,7 @@
 from zipfile import ZipFile
 import os
 import uuid
+import subprocess
 
 from django.conf import settings
 from django.db import transaction
@@ -142,47 +143,76 @@ def get_all_file_remove(directory):
 
 def _create_shp_file(payment, layer, polygon):
 
-    import sys
-    sys.path.append('/usr/lib/python3/dist-packages/')
-    from qgis.utils import iface
-    from qgis.core import \
-        QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
+    # import sys
+    # sys.path.append('/usr/lib/python3/dist-packages/')
+    # from qgis.utils import iface
+    # from qgis.core import \
+    #     QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
 
     x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
 
     x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
 
     try:
-        qgs = QgsApplication([], False)
-        QgsApplication.setPrefixPath("/usr", True)
-        QgsApplication.initQgis()
+        file_type = 'ESRI SHAPEFILE'
+        path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+        if not os.path.isdir(path):
+            os.mkdir(path)
+        file_ext = '.shp'
+        filename = os.path.join(path, str(layer.pk) + file_ext)
 
-        url = layer.wms.url + '/?'
-        wms = url.split('/')[4]
+        url = layer.wms.url
+        url_service = 'SERVICE=WFS'
+        url_version = 'VERSION=1.1.0'
+        url_request = 'REQUEST=GetCapabilities'
         geoserver_layer = layer.code
-        bbox = '&bbox=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2)
 
-        params = {
-            'service': 'WFS',
-            'version': '1.3.0',
-            'request': 'GetFeature',
-        }
-        uri = url + urlencode(params) + '&typeName=' + wms + ':' + geoserver_layer + bbox
+        spat_srs = 'EPSG:4326'
+        source_srs = 'EPSG:32648'
+        trans_srs = 'EPSG:4326'
 
-        vlayer = QgsVectorLayer(uri, 'layer', 'WFS')
+        command = subprocess.run([
+            'ogr2ogr',
+            '-f', file_type,
+            filename,
+            'WFS:' + url + '?&' + url_service + '&' + url_version + '&' + url_request,
+            geoserver_layer,
+            '-spat_srs', spat_srs,
+            '-spat', str(x1), str(y1), str(x2), str(y2),
+            '-s_srs', source_srs,
+            '-t_srs', trans_srs
+        ])
 
-        if vlayer.isValid():
+        # qgs = QgsApplication([], False)
+        # QgsApplication.setPrefixPath("/usr", True)
+        # QgsApplication.initQgis()
 
-            path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-            if not os.path.isdir(path):
-                os.mkdir(path)
+        #  + '/?'
+        # wms = url.split('/')[4]
+        #
+        # bbox = '&bbox=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2)
 
-            filename = os.path.join(path, str(layer.pk) + '.shp')
-            # writer = QgsVectorFileWriter(vlayer, filename, 'UTF-8', QgsWkbTypes.Polygon, QgsCoordinateReferenceSystem('EPSG:32648'), 'ESRI Shapefile')
-            writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
-            del(writer)
+        # params = {
+        #     'service': 'WFS',
+        #     'version': '1.3.0',
+        #     'request': 'GetFeature',
+        # }
+        # uri = url + urlencode(params) + '&typeName=' + wms + ':' + geoserver_layer + bbox
 
-            qgs.exitQgis()
+        # vlayer = QgsVectorLayer(uri, 'layer', 'WFS')
+
+        # if vlayer.isValid():
+
+        #     path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
+        #     if not os.path.isdir(path):
+        #         os.mkdir(path)
+
+        #     filename = os.path.join(path, str(layer.pk) + '.shp')
+        #     # writer = QgsVectorFileWriter(vlayer, filename, 'UTF-8', QgsWkbTypes.Polygon, QgsCoordinateReferenceSystem('EPSG:32648'), 'ESRI Shapefile')
+        #     writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
+        #     del(writer)
+
+        #     qgs.exitQgis()
 
     except Exception as e:
         raise e
@@ -193,13 +223,13 @@ def _export_shp(payment):
     try:
         layers = PaymentLayer.objects.filter(payment=payment)
         polygon = PaymentPolygon.objects.filter(payment=payment).first()
-
+        print(layers)
         for layer in layers:
             _create_shp_file(payment, layer.wms_layer, polygon)
 
         path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-        file_paths = get_all_file_paths(path)
 
+        file_paths = get_all_file_paths(path)
         zip_path = os.path.join(path, 'export.zip')
         with ZipFile(zip_path,'w') as zip:
             for file in file_paths:
@@ -220,8 +250,9 @@ def _export_shp(payment):
 @ajax_required
 @login_required
 def download_purchase(request, pk):
-
+    payment = Payment.objects.filter(pk=pk, user=request.user).update(is_success=True)
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
+    print(payment.export_file)
     if payment.export_file:
         is_created = True
     else:
