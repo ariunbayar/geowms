@@ -19,6 +19,7 @@ import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
 import {OrgRole} from './OrgRole'
 import {Error500} from './Error500'
+import {Admin} from './Admin/PasswordChange'
 
 export default class App extends Component {
 
@@ -89,6 +90,11 @@ export default class App extends Component {
 
                     </ul>
                 </MenuItem>
+                <MenuItem icon="fa fa-user-cogs" url="/back/admin/" text="Админ">
+                    <ul className="sidebar-submenu">
+                        <MenuItem icon="fa fa-circle-o" url="/back/admin/password/change/" text="Пассворд солих"></MenuItem>
+                    </ul>
+                </MenuItem>
             </ul>
           </div>
           <div className="content-wrapper">
@@ -112,6 +118,7 @@ export default class App extends Component {
               <Route path={"/back/тохиргоо/"} component={ConfigPage} />
               <Route path={"/back/error500/"} component={Error500} />
               <Route path={"/back/дэд-сан/"} component={BundlePage} />
+              <Route path={"/back/admin/password/change/"} component={Admin} />
             </Switch>
           </div>
         </BrowserRouter>
