@@ -168,7 +168,7 @@ def _create_shp_file(payment, layer, polygon):
         geoserver_layer = layer.code
 
         spat_srs = 'EPSG:4326'
-        source_srs = 'EPSG:32648'
+        # source_srs = 'EPSG:32648'
         trans_srs = 'EPSG:4326'
 
         command = subprocess.run([
@@ -179,7 +179,7 @@ def _create_shp_file(payment, layer, polygon):
             geoserver_layer,
             '-spat_srs', spat_srs,
             '-spat', str(x1), str(y1), str(x2), str(y2),
-            '-s_srs', source_srs,
+            # '-s_srs', source_srs,
             '-t_srs', trans_srs
         ])
 
