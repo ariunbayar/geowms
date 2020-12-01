@@ -11,7 +11,6 @@ export class OrgAdd extends Component {
 
         this.state = {
             org_name: '',
-            edit: false,
             upadte_level: 1,
             org_role: -1,
             handleSaveIsLoad: false,
@@ -77,15 +76,21 @@ export class OrgAdd extends Component {
         const org_name = this.state.org_name
         const upadte_level = this.state.upadte_level
         const geo_id = this.state.geo_id
-        const values = {"org_name":org_name,"id": org_id, 'upadte_level':upadte_level, "role_id":  this.state.org_role, "geo_id": geo_id}
+        const values = {
+            org_name: org_name,
+            id: org_id,
+            upadte_level: upadte_level,
+            role_id: this.state.org_role,
+            geo_id: geo_id,
+        }
         service.org_add(org_level, values).then(({ success }) => {
             success && this.setState({modal_alert_status: "open"})
         })
         this.modalCloseTime()
     }
 
-    handleGetAll(org_level,id){
-        if(id){
+    handleGetAll(org_level, id){
+        if (id) {
             service.orgAll(org_level,id).then(({ orgs }) => {
                 if (orgs) {
                     orgs.map(org => this.setState({
@@ -93,9 +98,6 @@ export class OrgAdd extends Component {
                         org_role:org.org_role
                     }))
                 }
-                this.setState({
-                    edit:true
-                })
             })
         }
     }
@@ -188,10 +190,10 @@ export class OrgAdd extends Component {
     }
 
     getBag(sum) {
-        if(sum === '-1'){
+
+        if (sum === '-1') {
             this.setState({baguud:[], bag_id: -1, disabled: false})
-        }
-        else{
+        } else {
             const values = {
                 'soum': sum,
                 'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
@@ -204,11 +206,12 @@ export class OrgAdd extends Component {
                 'NationalLevel': this.state.NationalLevel,
             }
             service.getBaguud(values).then(({info, success}) => {
-                if(success){
+                if (success) {
                     this.setState({baguud: info})
-                }setTimeout(() => {
+                }
+                setTimeout(() => {
                     this.setState({disabled: false})
-                }, 100);
+                }, 100)
             })
         }
     }

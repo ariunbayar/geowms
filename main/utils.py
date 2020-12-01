@@ -1,10 +1,11 @@
-import uuid
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
 import base64
+import functools
 import re
 import unicodedata
+import uuid
 
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
@@ -15,7 +16,8 @@ from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
-from geoportal_app.models import UserValidationEmail
+
+from main.inspire import InspireFeature
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -238,7 +240,8 @@ def send_approve_email(user):
 
     token = _generate_user_token()
 
-    UserValidationEmail.objects.create(
+    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
+    UserValidationEmail .objects.create(
         user=user,
         token=token,
         valid_before=timezone.now() + timedelta(days=90)
@@ -252,6 +255,88 @@ def send_approve_email(user):
     send_mail(subject, msg, from_email, to_email, fail_silently=False)
 
     return True
+
+
+"""
+def inspire_fetch_by(feature_code, data_type_code):
+
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    LDataTypeConfigs = apps.get_model('backend_inspire', 'LDataTypeConfigs')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    MDatasBoundary = apps.get_model('backend_inspire', 'MDatasBoundary')
+
+    feature_ids = _get_feature_ids(feature_code)
+
+
+    data_type_ids = qs
+"""
+
+
+def get_administrative_levels():
+
+    table_au_au_au = InspireFeature('au-au-au')
+
+    table_au_au_au.select(
+        {
+            InspireDataType('AdministrativeUnit'): [
+                InspireProperty('nationalCode'),
+            ],
+        },
+    )
+
+    table_au_au_au.filter(
+        {
+            InspireDataType('AdministrativeUnit'): {
+                InspireProperty('NationalLevel'): [
+                    InspireCodeList('2ndOrder\n'),
+                    InspireCodeList('3rdOrder\n'),
+                    InspireCodeList('4thOrder\n'),
+                ],
+            }
+        }
+    )
+
+    results = table_au_au_au.fetch()
+
+    raise Exception
+
+
+    code_list_id_aimag = code_lists_national_level['2ndOrder\n']
+    code_list_id_sum = code_lists_national_level['3rdOrder\n']
+    code_list_id_bag = code_lists_national_level['4thOrder\n']
+
+    geo_ids = MDatasBoundary.objects.filter(
+        feature_config_id__in=feature_config_ids,
+        data_type_id__in=data_type_ids,
+        property_id__in=property_id_national_level,
+        code_list_id=code_lists_national_level['2ndOrder\n'],
+    ).values_list('geo_id', flat=True)
+
+    geo_ids_by_national_code = MDatasBoundary.objects.filter(
+        geo_id__in=geo_ids,
+        property_id__in=property_id_national_code,
+    ).values_list('value_text', flat=True)
+
+    print('\n\033[92m\033[01m', end=''); import pprint; pprint.pprint(geo_ids_by_national_code); print('\n\033[0m', end='')
+    print(geo_ids_by_national_code.count())
+
+    # names = MDatasBoundary.objects.filter(
+        # geo_id__in=geo_ids_by_national_code,
+        # property_id__in=property_id_name,
+    # ).values_list('geo_id', 'value_text')
+
+    # print(names)
+
+    # aimag_datas = MDatasBoundary.objects.filter(geo_id=value_text.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
+    # for datas in aimag_datas:
+        # aimguud.append({
+        # 'aimag_names': datas.value_text,
+        # 'geo_id': datas.geo_id,
+    # })
+
+    return []
 
 
 def get_geom(geo_id, geom_type=None, srid=4326):

@@ -1416,16 +1416,26 @@ def getBaguud(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def geo_id_display(request, payload):
 
+    rsp = {
+        'choices': utils.get_administrative_levels(),
+    }
+    return JsonResponse(rsp)
+
     org_id = payload.get('org_id')
 
-    au_au_au_feature_id = LFeatures.objects.filter(feature_code="au-au-au").first().feature_id #4
-    au_au_au_feature_config_id = [i['feature_config_id'] for i in  LFeatureConfigs.objects.filter(feature_id__in=[au_au_au_feature_id]).values('feature_config_id')]  # 5,6,7
+    au_au_au_data_type_id = LDataTypes.objects.filter(data_type_code='AdministrativeUnit').values_list('data_type_id', flat=True)
+    feature_ids = LFeatures.objects.filter(feature_code="au-au-au").values_list('feature_id', flat=True)
+    feature_config_ids = LFeatureConfigs.objects.filter(
+        feature_id__in=feature_ids,
+        data_type_id__in=au_au_au_data_type_id,
+    ).values_list('feature_config_id', flat=True)
 
-    au_au_au_data_type_id = list(LDataTypes.objects.filter(data_type_id__in=au_au_au_feature_config_id, data_type_code='AdministrativeUnit').values('data_type_id'))[0]['data_type_id']
-    property_ids = [i['property_id'] for i in LDataTypeConfigs.objects.filter(data_type_id=au_au_au_data_type_id).values('property_id')] # 2, 22, 3, 4, 26, 24, 27
+    property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=au_au_au_data_type_id).values_list('property_id', flat=True)
 
-    NationalLevel = LProperties.objects.filter(property_id__in=property_ids, property_code='NationalLevel').values('property_id')[0]['property_id'] # Үндэсний засаг захиргааны түвшин: Энэ хил зааг бүхий бүх зэргэлдээ засаг захиргааны нэгжийн шаталсан түвшин.
-    nationalCode = LProperties.objects.filter(property_id__in=property_ids, property_code='nationalCode').values('property_id')[0]['property_id'] # Улсын код: Улс орон бүрт тодорхойлсон үндэсний засаг захиргааны кодтой тохирох сэдэвчилсэн танигч.
+    # Үндэсний засаг захиргааны түвшин: Энэ хил зааг бүхий бүх зэргэлдээ засаг захиргааны нэгжийн шаталсан түвшин.
+    NationalLevel = LProperties.objects.filter(property_id__in=property_ids, property_code='NationalLevel').values('property_id')[0]['property_id']
+    # Улсын код: Улс орон бүрт тодорхойлсон үндэсний засаг захиргааны кодтой тохирох сэдэвчилсэн танигч.
+    nationalCode = LProperties.objects.filter(property_id__in=property_ids, property_code='nationalCode').values('property_id')[0]['property_id']
 
     code_list_id_aimag = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='2ndOrder\n').values('code_list_id'))[0]['code_list_id'] # "2ndOrder"
     code_list_id_sum = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='3rdOrder\n').values('code_list_id'))[0]['code_list_id'] # "3rdOrder"
@@ -1457,8 +1467,8 @@ def geo_id_display(request, payload):
     rsp = {
         'info': info,
         'success': success,
-        'au_au_au_feature_config_id': au_au_au_feature_config_id,
-        'au_au_au_data_type_id': au_au_au_data_type_id,
+        'au_au_au_feature_config_id': list(feature_config_ids),
+        'au_au_au_data_type_id': list(au_au_au_data_type_id),
         'nationalCode': nationalCode,
         'au_au_ab_feature_config_id': au_au_ab_feature_config_id,
         'au_au_ab_data_type_id': au_au_ab_data_type_id,

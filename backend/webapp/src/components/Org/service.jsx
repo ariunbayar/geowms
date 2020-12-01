@@ -117,9 +117,9 @@ function orgList(page, perpage, query, org_level, sort_name) {
     return fetch(`${prefix}/level-${org_level}/org-list/`, opts).then(handleResponse)
 }
 
-function orgAll(level,id){
+function orgAll(level, id) {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
+    return fetch(`/back/api/org/level-${level}/${id}/`, requestOptions).then(handleResponse)
 }
 
 function employee_list(page, perpage, query, level, org_id) {
