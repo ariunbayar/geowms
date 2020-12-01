@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { service } from './service'
 import ModalAlert from '../ModalAlert'
+import './styles.css'
 
 export default class SideBar extends Component {
 
@@ -84,7 +85,7 @@ export default class SideBar extends Component {
         const {fields, fid, fname} = this.props
         const {id_list, save_is_load, view_name} = this.state
         return (
-            <div className={`card col-md-7`} style={{left:"10px"}}>
+            <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
                 <div className="card-body">
                     {fid ?
                         <div>
