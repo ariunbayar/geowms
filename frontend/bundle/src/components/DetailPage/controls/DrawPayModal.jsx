@@ -28,7 +28,7 @@ class ModalComponent extends Component{
 
         const {description, user_name, user_email, user_number} = this.state
         const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price} = this.props
-        console.log(total_price);
+
         const values = {
             price: total_price,
             description,
