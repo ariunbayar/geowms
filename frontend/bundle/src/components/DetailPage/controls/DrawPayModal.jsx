@@ -47,7 +47,7 @@ class ModalComponent extends Component{
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
-                window.location.href = `/payment/purchase/${payment_id}/`;
+                window.location.href = `/payment/purchase/polygon/${payment_id}/`;
             }
         })
 
@@ -197,4 +197,3 @@ export class DrawPayModal extends Control {
     }
 
 }
-

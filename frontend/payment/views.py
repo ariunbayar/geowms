@@ -22,6 +22,7 @@ from geoportal_app.models import User
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required
+from main.utils import send_email
 
 
 def index(request):
@@ -143,12 +144,6 @@ def get_all_file_remove(directory):
 
 def _create_shp_file(payment, layer, polygon):
 
-    # import sys
-    # sys.path.append('/usr/lib/python3/dist-packages/')
-    # from qgis.utils import iface
-    # from qgis.core import \
-    #     QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
-
     x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
 
     x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
@@ -159,7 +154,7 @@ def _create_shp_file(payment, layer, polygon):
         if not os.path.isdir(path):
             os.mkdir(path)
         file_ext = '.shp'
-        filename = os.path.join(path, str(layer.pk) + file_ext)
+        filename = os.path.join(path, str(layer.code) + file_ext)
 
         url = layer.wms.url
         url_service = 'SERVICE=WFS'
@@ -183,39 +178,8 @@ def _create_shp_file(payment, layer, polygon):
             '-t_srs', trans_srs
         ])
 
-        # qgs = QgsApplication([], False)
-        # QgsApplication.setPrefixPath("/usr", True)
-        # QgsApplication.initQgis()
-
-        #  + '/?'
-        # wms = url.split('/')[4]
-        #
-        # bbox = '&bbox=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2)
-
-        # params = {
-        #     'service': 'WFS',
-        #     'version': '1.3.0',
-        #     'request': 'GetFeature',
-        # }
-        # uri = url + urlencode(params) + '&typeName=' + wms + ':' + geoserver_layer + bbox
-
-        # vlayer = QgsVectorLayer(uri, 'layer', 'WFS')
-
-        # if vlayer.isValid():
-
-        #     path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-        #     if not os.path.isdir(path):
-        #         os.mkdir(path)
-
-        #     filename = os.path.join(path, str(layer.pk) + '.shp')
-        #     # writer = QgsVectorFileWriter(vlayer, filename, 'UTF-8', QgsWkbTypes.Polygon, QgsCoordinateReferenceSystem('EPSG:32648'), 'ESRI Shapefile')
-        #     writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
-        #     del(writer)
-
-        #     qgs.exitQgis()
-
     except Exception as e:
-        raise e
+        print(e)
 
 
 def _export_shp(payment):
@@ -223,7 +187,7 @@ def _export_shp(payment):
     try:
         layers = PaymentLayer.objects.filter(payment=payment)
         polygon = PaymentPolygon.objects.filter(payment=payment).first()
-        print(layers)
+
         for layer in layers:
             _create_shp_file(payment, layer.wms_layer, polygon)
 
@@ -242,7 +206,7 @@ def _export_shp(payment):
         return True
 
     except Exception as e:
-        raise e
+        print(e)
         return False
 
 
@@ -252,11 +216,19 @@ def _export_shp(payment):
 def download_purchase(request, pk):
     payment = Payment.objects.filter(pk=pk, user=request.user).update(is_success=True)
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
-    print(payment.export_file)
+
     if payment.export_file:
         is_created = True
     else:
         is_created = _export_shp(payment)
+
+        if is_created:
+
+            subject = 'Худалдан авалт'
+            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу! http://192.168.10.92/profile/all/api/details/{id}/'.format(id=payment.pk)
+            to_email = [payment.user.email]
+
+            send_email(subject, msg, to_email)
 
     rsp = {
         'success': is_created,
