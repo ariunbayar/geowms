@@ -10,6 +10,7 @@ govorg/**/*.dev.html
 
 main/settings/dev.py
 main/settings/prod.py
+main/settings/test.py
 
 
 backend/webapp/static/
