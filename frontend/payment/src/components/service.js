@@ -4,6 +4,7 @@ export const service = {
     payment,
     purchaseAll,
     downloadPurchase,
+    getDetails,
 }
 
 
@@ -27,4 +28,9 @@ function downloadPurchase(id) {
         ...getGetOptions(),
     }
     return fetch(`/payment/api/download-purchase/${id}/`, requestOptions).then(handleResponse)
+}
+
+function getDetails(id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`/profile/api/${id}/get-details/`, requestOptions).then(handleResponse)
 }
