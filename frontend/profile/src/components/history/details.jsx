@@ -44,7 +44,7 @@ export class Details extends Component {
     }
 
     render() {
-        const { items, points, polygon, layers, id } = this.state
+        const { items, points, polygon, layers, payment_id } = this.state
         return (
             <div className="container">
                 <div className="row">
@@ -110,11 +110,11 @@ export class Details extends Component {
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
+                                                <td><i className="fa fa-money mr-2" aria-hidden="true"></i>Төлбөр:</td>
                                                 <td>{points.length > 0 && points.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
                                             </tr>
                                             <tr>
-                                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Огноо:</td>
+                                                <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
                                                 <td>{items.created_at}</td>
                                             </tr>
                                         </tbody>
@@ -144,12 +144,16 @@ export class Details extends Component {
                                                     )
                                                 }
                                             <tr>
-                                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
+                                                <td><i className="fa fa-money mr-2" aria-hidden="true"></i>Төлбөр:</td>
                                                 <td>{polygon.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
                                             </tr>
                                             <tr>
-                                                <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Огноо:</td>
+                                                <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
                                                 <td>{items.created_at}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
+                                                <td><a className="text-info" href={`/payment/download-zip/${payment_id}/`}>Энд дарж татаж авна уу!</a></td>
                                             </tr>
                                         </tbody>
                                     </table>
