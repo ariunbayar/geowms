@@ -142,6 +142,7 @@ def _datatypes(data_type_id):
             data_type_names.append({
                 'data_type_id': data_type.data_type_id,
                 'data_type_name': data_type.data_type_name,
+                'data_type_name_eng': data_type.data_type_name_eng,
                 'data_type_code': data_type.data_type_code,
                 'data_type_definition': data_type.data_type_definition,
                 'is_active': data_type.is_active,
@@ -350,44 +351,23 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
-def get_rows(fid):
-    cursor = connections['default'].cursor()
-    sql = """
-        select datas.property_id, l.property_code
-        from l_properties l
-        inner join (select l_feature_configs.feature_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
-        from l_feature_configs
-        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
-        where l_feature_configs.feature_id = {fid}
-        ) datas
-        on datas.property_id = l.property_id
-    """.format(
-        fid=fid
-    )
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
-    return rows
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
-    fields = get_rows(fid)
     view_name = ViewNames.objects.filter(feature_id=fid).first()
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
         rsp = {
             'success': True,
-            'fields': fields,
+            'fields': _lfeatureconfig(fid),
             'id_list': id_list,
             'view_name': view_name.view_name
         }
     else:
         rsp = {
             'success': True,
-            'fields': fields,
+            'fields': _lfeatureconfig(fid),
             'id_list': [],
             'view_name': ''
         }
