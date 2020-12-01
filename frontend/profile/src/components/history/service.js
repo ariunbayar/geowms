@@ -7,7 +7,6 @@ export const service = {
 const prefix = '/profile/api'
 
 function getDetails(id){
-    const requestOptions = {...getPostOptions(),
-        body: JSON.stringify({id})}
-    return fetch(`${prefix}/get-details/`, requestOptions).then(handleResponse)
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/${id}/get-details/`, requestOptions).then(handleResponse)
 }

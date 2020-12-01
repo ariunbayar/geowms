@@ -16,7 +16,6 @@ export  class History extends Component {
 
           <Switch>
             <Route exact path={"/profile/all/"}  component={HistoryForm}/>
-            <Route exact path={"/profile/api/"}  component={Info}/>
             <Route exact path={'/profile/all/api/details/:id/'} component={Details}/>
           </Switch>
     );

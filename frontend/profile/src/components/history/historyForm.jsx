@@ -32,7 +32,7 @@ export default class HistoryForm extends Component {
     render() {
         const {payment,payment_length} = this.state
         return (
-        <div className="container">
+        <div className="container pt-0">
             <div className="row">
                 { payment_length ===0 ?
                     <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:

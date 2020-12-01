@@ -8,7 +8,7 @@ export class HistoryTable extends Component {
     constructor(props) {
         super(props)
         this.state={
-            export_state: this.props.values.export_file ? 'success' : 'initial',
+            export_state: this.props.values.export_file ? 'success' : '',
         }
         this.handleDownload = this.handleDownload.bind(this)
     }
@@ -46,10 +46,6 @@ export class HistoryTable extends Component {
                         <p className="card-text">{geo_unique_number}</p>
                         <p className="card-text">Нийт үнэ: {total_amount}₮</p>
                         <p className="card-text text-muted">{created_at}</p>
-
-                        {export_state == 'initial' &&
-                            <a className="btn gp-outline-primary" href='#' onClick={e => this.handleDownload(id)}>Shape үүсгэх</a>
-                        }
 
                         {export_state == 'loading' &&
                             <button className="btn gp-outline-primary">
