@@ -211,6 +211,7 @@ def _get_layer_detail(payment):
         layer_info = WMSLayer.objects.filter(id=layer.wms_layer_id).first()
         layer_list.append({
             'name': layer_info.title,
+            'amount': layer.amount,
         })
     return layer_list
 
@@ -228,7 +229,7 @@ def _get_detail_items(payment, mpoint):
     })
     if mpoint:
          items.append({
-             'mpoint_aimag': mpoint.aimag,
+            'mpoint_aimag': mpoint.aimag,
             'mpoint_sum': mpoint.sum,
             'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
         })

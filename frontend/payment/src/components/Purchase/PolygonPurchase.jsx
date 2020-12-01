@@ -117,12 +117,12 @@ export class PolygonPurchase extends Component {
                             </tr>
                             {
                               layers.map((value, key) =>
-                              <tr>
+                              <tr key={key}>
                                 <td>
                                     {value.name}
                                 </td>
                                 <td>
-                                  {value.amount}
+                                    {value.amount}₮
                                 </td>
                              </tr>
                             )}

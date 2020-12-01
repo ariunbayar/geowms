@@ -65,6 +65,14 @@ def dictionaryResponse(request):
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
+def _calc_layer_amount(area, area_type):
+    if area_type == 'm':
+        amount = area * Payment.POLYGON_PER_M_AMOUNT
+    if area_type == 'km':
+        amount = area * Payment.POLYGON_PER_KM_AMOUNT
+    return amount
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -76,6 +84,8 @@ def purchaseDraw(request, payload):
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
     layer_ids = payload.get('layer_ids')
     bundle_id = payload.get('bundle_id')
+    area = payload.get('area')
+    area_type = payload.get('area_type')
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
@@ -88,7 +98,7 @@ def purchaseDraw(request, payload):
         payment.user = request.user
         payment.bundle = bundle
         payment.kind = Payment.KIND_QPAY
-        payment.total_amount = 0
+        payment.total_amount = price
         payment.export_kind = Payment.EXPORT_KIND_POLYGON
         payment.is_success = False
         payment.message = 'Хэсэгчлэн худалдаж авах хүсэлт'
@@ -99,7 +109,6 @@ def purchaseDraw(request, payload):
         payment_polygon.payment = payment
         payment_polygon.data_id = ''
         payment_polygon.pdf_id = ''
-        payment_polygon.amount = 1  # TODO
         payment_polygon.coodrinatLeftTopX = coodrinatLeftTop[0]
         payment_polygon.coodrinatLeftTopY = coodrinatLeftTop[1]
         payment_polygon.coodrinatRightBottomX = coodrinatRightBottom[0]
@@ -107,9 +116,11 @@ def purchaseDraw(request, payload):
         payment_polygon.save()
 
         for layer in layers:
+            layer_amount = _calc_layer_amount(area, area_type)
             payment_layer = PaymentLayer()
             payment_layer.payment = payment
             payment_layer.wms_layer = layer
+            payment_layer.amount = layer_amount
             payment_layer.save()
 
     return JsonResponse({
@@ -371,11 +382,9 @@ def download_zip(request, pk):
 
 def _calc_per_price(area, area_type, layer_length):
     if area_type == 'km':
-        price_per_km = 1000
-        price = (area * price_per_km) * layer_length
+        price = (area * Payment.POLYGON_PER_KM_AMOUNT) * layer_length
     if area_type == 'm':
-        price_per_m = 100
-        price = (area * price_per_m) * layer_length
+        price = (area * Payment.POLYGON_PER_M_AMOUNT) * layer_length
     return price
 
 

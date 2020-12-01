@@ -30,7 +30,7 @@ class ModalComponent extends Component{
         const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price} = this.props
 
         const values = {
-            pirce: total_price,
+            price: total_price,
             description,
             coodrinatLeftTop,
             coodrinatRightBottom,
