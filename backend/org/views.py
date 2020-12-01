@@ -855,7 +855,6 @@ def _get_package_features_gove(package_id, govRole):
             p_perm_revoce = p_perm_revoce + 0.5
         if perm_all == 0:
             p_perm_all = p_perm_all - 1
-        
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce
 
 

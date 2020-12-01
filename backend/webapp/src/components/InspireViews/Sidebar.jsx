@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { service } from './service'
 import ModalAlert from '../ModalAlert'
+import './styles.css'
 
 export default class SideBar extends Component {
 
@@ -80,15 +81,15 @@ export default class SideBar extends Component {
         }, 2000)
     }
     render() {
-        const {fields, fid} = this.props
+        const {fields, fid, fname} = this.props
         const {id_list, save_is_load, view_name} = this.state
         return (
-            <div className={`card col-md-7`} style={{left:"10px"}}>
+            <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
                 <div className="card-body">
                     {fields.length > 0 ?
                     <div>
-                        <h4 className="text-center">Feature id: {fid}</h4>
-                        {view_name && <h4 className="text-center">View name: {view_name}</h4>}
+                        <h4 className="text-center">Feature name: {fname}</h4>
+                        {view_name && <h5 className="text-center">View name: {view_name}</h5>}
                         {fields.map((property, idx) =>
                             <div key={idx} className='form-group'>
                                 <div className="icheck-primary">
@@ -99,11 +100,11 @@ export default class SideBar extends Component {
                                         onChange={this.handleInput}
                                         value={property['property_id']}
                                     />
-                                    <label for={property['property_code']}>{property['property_code']}</label>
+                                    <label htmlFor={property['property_code']}>&nbsp;{property['property_code']}</label>
                                 </div>
                             </div>
                         )}
-                        {save_is_load ? 
+                        {save_is_load ?
                         <a className="btn btn-block gp-btn-primary text-white">Уншиж байна</a>:
                         <a onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</a>
                         }
