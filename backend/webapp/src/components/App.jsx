@@ -90,11 +90,6 @@ export default class App extends Component {
 
                     </ul>
                 </MenuItem>
-                <MenuItem icon="fa fa-user-circle" url="/back/admin/" text="Админ">
-                    <ul className="sidebar-submenu">
-                        <MenuItem icon="fa fa-circle-o" url="/back/admin/password/change/" text="Пассворд солих"></MenuItem>
-                    </ul>
-                </MenuItem>
             </ul>
           </div>
           <div className="content-wrapper">

@@ -97,7 +97,7 @@ export class PasswordChange extends Component {
                                 <div className="form-group">
                                     <div className="position-relative has-icon-right">
                                         <label htmlFor="new_password">Шинэ нууц үг</label>
-                                        <input type="text" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ оруулна уу" value={this.state.new_password} onChange={(e) => this.handChange('new_password', e.target.value)}></input>
+                                        <input type="password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ оруулна уу" value={this.state.new_password} onChange={(e) => this.handChange('new_password', e.target.value)}></input>
                                         <div className="form-control-position">
                                             <i className="icon-lock"></i>
                                         </div>
@@ -106,7 +106,7 @@ export class PasswordChange extends Component {
                                 <div className="form-group">
                                     <div className="position-relative has-icon-right">
                                         <label htmlFor="renew_password">Шинэ нууц үг</label>
-                                        <input type="text" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ дахин оруулна уу" value={this.state.renew_password} onChange={(e) => this.handChange('renew_password', e.target.value)}></input>
+                                        <input type="password" className="form-control form-control-rounded" placeholder="Шинэ нууц үгээ дахин оруулна уу" value={this.state.renew_password} onChange={(e) => this.handChange('renew_password', e.target.value)}></input>
                                         <div className="form-control-position">
                                             <i className="icon-lock"></i>
                                         </div>
