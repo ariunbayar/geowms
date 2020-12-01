@@ -14,7 +14,8 @@ export class List extends Component {
             fid: null,
             tid: null,
             id_list: [],
-            view_name: ''
+            view_name: '',
+            fname: ''
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -34,8 +35,8 @@ export class List extends Component {
         })
     }
 
-    getProperties(fid, tid) {
-        this.setState({fid, tid})
+    getProperties(fid, tid, fname) {
+        this.setState({fid, tid, fname})
         service.getPropertyFields(fid).then(({success ,fields, id_list, view_name}) => {
             if(success){
                 this.setState({fields, id_list, view_name})
@@ -60,7 +61,7 @@ export class List extends Component {
                                             <ul>
                                                 {packages.features.map((feature, idx) =>
                                                     <li key={idx}>
-                                                        <a onClick={() => this.getProperties(feature.id, theme.id)}>
+                                                        <a onClick={() => this.getProperties(feature.id, theme.id, feature.name)}>
                                                             <i className={feature.view ? "fa fa-table text-success": "fa fa-table text-muted"}></i> &nbsp;
                                                             <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
                                                             {feature.view &&
@@ -80,7 +81,7 @@ export class List extends Component {
                         </ul>
                     </div>
                 </div>
-                <SideBar fields={this.state.fields} fid={this.state.fid} tid={this.state.tid} id_list={this.state.id_list} view_name={this.state.view_name}/>
+                <SideBar getAll={this.getAll} fields={this.state.fields} fid={this.state.fid} fname={this.state.fname} tid={this.state.tid} id_list={this.state.id_list} view_name={this.state.view_name}/>
             </div>
         )
     }

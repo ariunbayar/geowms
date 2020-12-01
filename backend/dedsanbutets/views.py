@@ -74,7 +74,7 @@ def _get_package(theme_id):
 @user_passes_test(lambda u: u.is_superuser)
 def bundleButetsAll(request):
     data = []
-    for themes in LThemes.objects.all(): 
+    for themes in LThemes.objects.all():
         bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
         if bundle:
             data.append({
@@ -142,6 +142,7 @@ def _datatypes(data_type_id):
             data_type_names.append({
                 'data_type_id': data_type.data_type_id,
                 'data_type_name': data_type.data_type_name,
+                'data_type_name_eng': data_type.data_type_name_eng,
                 'data_type_code': data_type.data_type_code,
                 'data_type_definition': data_type.data_type_definition,
                 'is_active': data_type.is_active,
@@ -312,7 +313,7 @@ def getFields(request, payload):
                                 'field_name': i.name,
                                 'field_type': type_name,
                                 'data': id
-                            })         
+                            })
                     else:
                         fields.append({
                             'field_name': i.name,
@@ -350,44 +351,23 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
-def get_rows(fid):
-    cursor = connections['default'].cursor()
-    sql = """
-        select datas.property_id, l.property_code
-        from l_properties l
-        inner join (select l_feature_configs.feature_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
-        from l_feature_configs
-        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
-        where l_feature_configs.feature_id = {fid}
-        ) datas
-        on datas.property_id = l.property_id
-    """.format(
-        fid=fid
-    )
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
-    return rows
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
-    fields = get_rows(fid)
     view_name = ViewNames.objects.filter(feature_id=fid).first()
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
         rsp = {
             'success': True,
-            'fields': fields,
+            'fields': _lfeatureconfig(fid),
             'id_list': id_list,
             'view_name': view_name.view_name
         }
     else:
         rsp = {
             'success': True,
-            'fields': fields,
+            'fields': _lfeatureconfig(fid),
             'id_list': [],
             'view_name': ''
         }
@@ -457,9 +437,11 @@ def propertyFieldsSave(request, payload):
         check_name.delete()
 
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
-    check = createView(id_list, table_name, model_name)
+    data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
+    feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
+    check = createView(id_list, table_name, model_name, data_type_ids, feature_config_id)
     if check:
-        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
+        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id, feature)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -731,11 +713,11 @@ def get_colName_type(view_name, data):
     return geom_att, some_attributes
 
 
-def _create_geoserver_detail(table_name, model_name, theme, user_id):
-    
+def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
     ds_name = ws_name
+    layer_title = feature.feature_name
     wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
@@ -779,7 +761,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -800,7 +782,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -847,7 +829,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -863,7 +845,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -893,7 +875,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                     ws_name,
                                     ds_name,
                                     layer_name,
-                                    layer_name,
+                                    layer_title,
                                     table_name,
                                     srs,
                                     geom_att,
@@ -912,7 +894,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                     ws_name,
                                     ds_name,
                                     layer_name,
-                                    layer_name,
+                                    layer_title,
                                     table_name,
                                     srs,
                                     geom_att,
@@ -932,10 +914,10 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
         if not wms_layer:
             legend_url = geoserver.get_legend_url(wms_id, layer_name)
             wms_layer = WMSLayer.objects.create(
-                            name=layer_name,
+                            name=layer_title,
                             code=layer_name,
                             wms=wms,
-                            title=layer_name,
+                            title=layer_title,
                             feature_price=0,
                             legend_url=legend_url
                         )
@@ -950,7 +932,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
 
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
-def createView(ids, table_name, model_name):
+def createView(ids, table_name, model_name, data_type_ids, feature_config_id):
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
@@ -967,6 +949,8 @@ def createView(ids, table_name, model_name):
                 model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
+                data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
+                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
