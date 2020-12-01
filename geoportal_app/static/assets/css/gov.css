@@ -1,3 +1,304 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
 .nav-link i  {
-    color:#1969c3;
+  color:#1969c3;
+}
+
+.gp-bg-primary {
+  background-color: #034ea2;
+  color: #fff;
+}
+
+.gp-bg-dark {
+  background-color: #004085 !important;
+  color: #fff;
+}
+
+.gp-bg-darker {
+  background-color: #0e366e !important;
+  color: #fff;
+}
+.gp-btn-primary {
+  color: #fff;
+  background-color: #034ea2;
+  border-color: #034ea2;
+}
+.gp-btn-primary:hover {
+  color: #fff;
+  background-color: #1969c3;
+  border-color: #1969c3;
+}
+
+.gp-text-primary {
+    color: #034ea2;
+    font-family: "Rubik";
+    font-weight: 400;
+    font-size: small;
+}
+
+.section-title > .gp-text-primary {
+    font-size: xx-large;
+}
+
+.gp-text-light-primary {
+  color: #428ce0 !important;
+}
+.gp-outline-primary {
+  color: #034ea2;
+  background-color: transparent;
+  background-image: none;
+  border-color: #034ea2;
+}
+
+.owl-carousel .owl-item img {
+    height: 365px !important;
+    width: auto !important;
+    margin: 0 auto;
+}
+.owl-carousel .owl-item h1,
+.owl-carousel .owl-item h6 {
+    text-shadow: 0 0 2px #fff;
+}
+.owl-item .item .caption {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: .4rem;
+    padding: 1rem 4rem;
+}
+
+/*bootstrap color change*/
+
+.btn {
+  font-size: 13px;
+  border-radius: 0.18rem;
+}
+
+.form-control {
+  font-size: 0.8rem;
+}
+
+body {
+  font-family: "Roboto", "sans-serif" !important;
+  font-size: 14px;
+  font-weight: 400;
+  color: #484848;
+}
+
+a {
+  color: #484848;
+}
+/*slider*/
+.owl-item .item {
+  position: relative;
+}
+.owl-item .item .caption {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/*pages*/
+.page-container {
+  min-height: 500px;
+}
+
+/*subs*/
+.sub .icon {
+  width: 80px;
+}
+/*.sub::before{*/
+/*    content: '';*/
+/*    background-color: red;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*}*/
+
+.sub {
+    padding: 1rem 0;
+}
+
+.sub .icon {
+    transition:
+        opacity .15s ease-in,
+        transform .15s ease-in;
+}
+.sub a:focus {
+    outline: 0;
+}
+.sub:hover .icon,
+.sub a:focus .icon {
+    opacity: .1;
+    transform: scale(1.1) translateY(-4px);
+}
+.sub h6 {
+    transition: transform .25s ease-out .07s;
+    padding: 1rem;
+}
+.sub:hover h6,
+.sub a:focus h6 {
+    transform: translateY(-40px) scale(1.2);
+}
+.sub > a {
+    text-decoration: none;
+    display: block;
+}
+
+/*header*/
+.logo-top {
+  width: 190px;
+}
+
+.search-input {
+  border: 1px solid #034ea2;
+}
+
+.navbar-nav .active {
+  border-bottom: 3px solid #fff;
+}
+.navbar-brand {
+  font-size: 14px;
+}
+
+.navbar-nav > .nav-item > .nav-link {
+    transition: color .15s ease-in;
+    font-size: smaller;
+}
+
+/*footer*/
+
+.logo-bottom {
+  width: 137px;
+}
+
+/*login*/
+
+.login-container {
+  min-height: 1000px;
+  background-image: url("../image/login-back.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+
+/* help table */
+.serviceDiv tbody {
+  display: table-row-group;
+  vertical-align: middle;
+  border-color: inherit;
+}
+.serviceDiv table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  border-top: #034ea2 2px solid;
+  border-left: #ccc 1px solid;
+}
+.serviceDiv .uk-text-left {
+  text-align: left !important;
+}
+.serviceDiv tr {
+  display: table-row;
+  vertical-align: inherit;
+  border-color: inherit;
+}
+.serviceDiv table td {
+  padding: 16px 12px;
+  vertical-align: top;
+  display: table-cell;
+  border-bottom: #ccc 1px solid;
+  border-right: #ccc 1px solid;
+}
+.serviceH2 {
+  color: blue;
+  font-size: 1.255rem;
+}
+
+.serviceTitle {
+  font-size: 1.725rem;
+}
+.serviceTitle::before {
+  border-left: 5px solid #00aeef;
+  content: "";
+  display: inline-block;
+  position: relative;
+  top: calc(-0.1 * 1em);
+  vertical-align: middle;
+  height: calc(4px + 0.7em);
+  margin-right: calc(5px + 0.2em);
+}
+/* help table end*/
+
+/* service img */
+.serviceImg {
+  font-weight: 100%;
+  height: 800px;
+}
+/* service img end */
+
+/* home page -> хайх button */
+.input-group-append {
+  z-index: 0;
+}
+/* home page -> хайх button end */
+
+/* Loading style ...................*/
+
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+}
+
+/*  Loading style ................... end*/
+
+/* backend user dan logo*/
+.dan-logo-icon{
+  width: 40px;
+}
+/* backend user dan logo end .......*/
+
+
+/* backend user govorg menu*/
+
+a.active .list-group-item{
+  color: white;
+  background-color: #034ea2;
+
+}
+/* backend user govorg menu end .......*/
+
+
+/**
+ * Table style
+ */
+.table th.vertical > span {
+    writing-mode: vertical-rl;
+    -webkit-writing-mode: vertical-lr;
+    -ms-writing-mode: vertical-lr;
+}
+
+/* scroll */
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #ffffff; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #484848; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #034ea2; 
 }
