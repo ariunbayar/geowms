@@ -151,10 +151,14 @@ export class Details extends Component {
                                                 <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
                                                 <td>{items.created_at}</td>
                                             </tr>
-                                            <tr>
-                                                <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
-                                                <td><a className="text-info" href={`/payment/download-zip/${payment_id}/`}>Энд дарж татаж авна уу!</a></td>
-                                            </tr>
+                                            {
+                                                items.is_success ?
+                                                    <tr>
+                                                        <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
+                                                        <td><a className="text-info" href={`/payment/download-zip/${payment_id}/`}>Энд дарж татаж авна уу!</a></td>
+                                                    </tr>
+                                                : null
+                                            }
                                         </tbody>
                                     </table>
                                 : null
