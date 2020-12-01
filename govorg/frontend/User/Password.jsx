@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { validations } from "./validations"
 import { Formik, Form, Field, ErrorMessage} from 'formik'
-// import ModalAlert from "../../ModalAlert"
+import {service} from '../service'
+import ModalAlert from "../../../backend/webapp/src/components/ModalAlert"
 
 export class Password extends Component {
     constructor(props) {
@@ -10,12 +11,34 @@ export class Password extends Component {
             old_password: '',
             new_password: '',
             re_new_password: '',
+            handleSubmitIsLoad: false,
+            modal_alert_status: "closed",
+            timer: null,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.modalClose=this.modalClose.bind(this)
     }
 
-    handleSubmit(values, {setStatus, setSubmitting}) {
-        service.updatePassword(values.new_password, values.old_password).then(success=> {console.log(success)})
+    handleSubmit(values) {
+        this.setState({handleSubmitIsLoad:true})
+        service.updatePassword(values.new_password, values.old_password).then(({ success }) => {
+            success && this.setState({modal_alert_status: "open"})
+        })
+        this.modalCloseTime()
+    }
+
+    modalClose(){
+        this.setState({handleSubmitIsLoad:false})
+        this.props.history.push( `/gov/profile/`)
+        this.setState({modal_alert_status: "closed"})
+    }
+
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.setState({handleSubmitIsLoad:false})
+            this.props.history.push( `/gov/profile/`)
+            this.setState({modal_alert_status: "closed"})
+        }, 2000)
     }
 
     render() {
@@ -74,7 +97,28 @@ export class Password extends Component {
                                     <ErrorMessage name="re_new_password" component="span"/>
                                 </div>
                             </div>
-                            <button type="submit" className="btn gp-btn-primary">Хадгалах</button>
+                            <div className="form-group">
+                                    {this.state.handleSubmitIsLoad ?
+                                        <>
+                                            <button className="btn gp-btn-primary">
+                                                <a className="spinner-border text-light" role="status">
+                                                    <span className="sr-only">Loading...</span>
+                                                </a>
+                                                <span> Шалгаж байна. </span>
+                                            </button>
+                                            <ModalAlert
+                                                modalAction={() => this.modalClose()}
+                                                status={this.state.modal_alert_status}
+                                                title="Амжилттай хадгаллаа"
+                                                model_type_icon = "success"
+                                            />
+                                        </>
+                                        :
+                                        <button className="btn gp-btn-primary" onClick={this.handleSubmitIsLoad} >
+                                            Хадгалах
+                                        </button>
+                                    }
+                                </div>
                         </Form>
                     )}}
                     </Formik>

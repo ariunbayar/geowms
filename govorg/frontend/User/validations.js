@@ -4,10 +4,10 @@ function stringSchema(max) {
     if (max !== null && max !== undefined) {
         return string()
             .max(max, '${max}-с илүүгүй урттай оруулна уу!')
-            .required('оруулна уу!')
+            .required('Хоосон байна!')
     } else {
         return string()
-            .required('оруулна уу!')
+            .required('Хоосон байна!')
     }
 }
 

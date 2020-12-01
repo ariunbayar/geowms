@@ -31,7 +31,8 @@ export class Profile extends Component {
                 <div className="card-body">
                     <div className="col-6 my-4">
                         <div className="row">
-                            <div className="col-md-12">
+                            <div className="col-md-12">\
+                            <h4>ХЭРЭГЛЭГЧИЙН МЭДЭЭЛЭЛ</h4>
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
                                         <label className="col-form-label">Хэрэглэгчийн нэр:</label>
