@@ -21,7 +21,6 @@ export class Profile extends Component {
         .detail()
         .then(({user_detail}) => {
             this.setState({user_detail})
-            console.log(user_detail)
         })
     }
 
@@ -30,15 +29,43 @@ export class Profile extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="card-body">
+                    <div className="col-6 my-4">
                         <div className="row">
-                            <div className="col-md-4 mb-4">
-                                <p><strong>Хэрэглэгчийн нэр</strong>: {username} </p>
-                                <p><strong>Овог</strong>: {last_name} </p>
-                                <p><strong>Нэр</strong>: {first_name} </p>
-                                <p><strong>Цахим хаяг</strong>: {email} </p>
-                                <p><strong>Хүйс</strong>: {gender} </p>
-                                <p><strong>Регистр</strong>: {register} </p>
+                            <div className="col-md-12">
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label className="col-form-label">Хэрэглэгчийн нэр:</label>
+                                        <span className="form-control" id="price">{username}</span>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-3">
+                                        <label className="col-form-label">Овог:</label>
+                                        <span className="form-control" id="price">{last_name}</span>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <label className="col-form-label">Нэр:</label>
+                                        <span className="form-control" id="price">{first_name}</span>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label className="col-form-label">Цахим хаяг:</label>
+                                        <span className="form-control" id="price">{email}</span>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label className="col-form-label">Хүйс:</label>
+                                        <span className="form-control" id="price">{gender}</span>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label className="col-form-label">Регистер:</label>
+                                        <span className="form-control" id="price">{register}</span>
+                                    </div>
+                                </div>
                                 <button onClick={() => this.props.history.push(`/gov/profile/password/`)} className="btn gp-btn-primary">Нууц үг солих</button>
                             </div>
                         </div>
