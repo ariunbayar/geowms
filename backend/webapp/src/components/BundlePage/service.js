@@ -1,8 +1,6 @@
 export const service = {
     getAll,
-    create,
     update,
-    remove,
     move,
     roleCreate,
     roleRemove,
@@ -72,16 +70,6 @@ function getAll() {
     return fetch(`${prefix}/bundle/all/`, requestOptions).then(handleResponse)
 }
 
-function create(values) {
-
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify(values),
-    }
-
-    return fetch(`${prefix}/bundle/create/`, opts).then(handleResponse)
-}
-
 
 function detail(id) {
     const requestOptions = {..._getGetOptions()}
@@ -103,16 +91,6 @@ function update(values) {
     }
 
     return fetch(`${prefix}/bundle/update/`, opts).then(handleResponse)
-}
-
-
-function remove(id) {
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify({id}),
-    }
-
-    return fetch(`${prefix}/bundle/remove/`, opts).then(handleResponse)
 }
 
 

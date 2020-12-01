@@ -125,6 +125,7 @@ export class Upload extends Component {
             else{
                 alert(info)
             }
+            this.cancel()
             this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
             this.props.func()
         })
