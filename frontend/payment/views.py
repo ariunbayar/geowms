@@ -214,7 +214,6 @@ def _export_shp(payment):
 @ajax_required
 @login_required
 def download_purchase(request, pk):
-    payment = Payment.objects.filter(pk=pk, user=request.user).update(is_success=True)
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
 
     if payment.export_file:
@@ -232,6 +231,20 @@ def download_purchase(request, pk):
 
     rsp = {
         'success': is_created,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required
+def test_payment(request, pk):
+
+    payment = Payment.objects.filter(pk=pk, user=request.user).update(is_success=True)
+
+    rsp = {
+        'success': True,
     }
 
     return JsonResponse(rsp)

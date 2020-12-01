@@ -35,7 +35,7 @@ import {DrawButton} from './controls/Draw'
 import {PopUp} from './popUp/PopUp'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
-
+import LoginModal from '../../../../../src/components/Modal/InfoModal'
 export default class BundleMap extends Component {
 
     constructor(props) {
@@ -43,11 +43,13 @@ export default class BundleMap extends Component {
         this.sendFeatureInfo = []
         this.state = {
             projection: 'EPSG:3857',
+            is_user: false,
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
             is_sidebar_open: true,
             is_search_sidebar_open: true,
+            is_modal_info_open: false,
             coordinate_clicked: null,
             vector_layer: null,
             is_draw_open: false,
@@ -90,6 +92,7 @@ export default class BundleMap extends Component {
         this.listToJson = this.listToJson.bind(this)
         this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
         this.formatArea = this.formatArea.bind(this)
+        this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
     }
 
     initMarker() {
@@ -113,6 +116,10 @@ export default class BundleMap extends Component {
 
     }
 
+    handleModalApproveClose(){
+      this.setState({'is_modal_info_open': false})
+    }
+
     cartButton(is_cart, content,  code){
         if(is_cart == true){
             this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code)
@@ -120,6 +127,12 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
+      service.isUser().then(({success}) =>
+      {
+        if (success) {
+            this.setState({is_user: true})
+        }
+      })
         this.loadMapData(this.state.bundle.id)
     }
 
@@ -145,6 +158,7 @@ export default class BundleMap extends Component {
             service.loadWMSLayers(bundle_id),
         ]).then(([{base_layer_list}, {wms_list}]) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
+
         })
 
     }
@@ -514,6 +528,7 @@ export default class BundleMap extends Component {
     }
 
     toggleDrawed(event){
+
         const view = this.map.getView()
         const projection = view.getProjection()
         const coordinat = event.feature.getGeometry().getCoordinates()
@@ -547,6 +562,7 @@ export default class BundleMap extends Component {
         }
 
         this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+
         const is_loading = true
         this.controls.drawModal.showModal(is_loading)
     }
@@ -589,43 +605,62 @@ export default class BundleMap extends Component {
 
     toggleDraw() {
 
-        this.setState(prevState => ({
-            is_draw_open: !prevState.is_draw_open,
-        }))
+        const {is_user} = this.state
 
-        if(this.state.is_draw_open){
-            const source_draw = new VectorSource()
+        if (is_user){
 
-            const draw_layer = new VectorLayer({
-                source: source_draw
-            })
+          this.setState(prevState => ({
+              is_draw_open: !prevState.is_draw_open,
+          }))
 
-            this.setState({source_draw})
+          if(this.state.is_draw_open){
+              const source_draw = new VectorSource()
 
-            const draw = new Draw({
-                source: this.state.source_draw,
-                type: 'Circle',
-                geometryFunction: createBox(),
-            });
-            this.setState({draw, draw_layer})
-            this.map.addLayer(draw_layer);
-            this.map.addInteraction(draw);
-            draw.on('drawend', this.toggleDrawed)
-            draw.on('drawstart', this.toggleDrawRemove)
+              const draw_layer = new VectorLayer({
+                  source: source_draw
+              })
+
+              this.setState({source_draw})
+
+              const draw = new Draw({
+                  source: this.state.source_draw,
+                  type: 'Circle',
+                  geometryFunction: createBox(),
+              });
+              this.setState({draw, draw_layer})
+              this.map.addLayer(draw_layer);
+              this.map.addInteraction(draw);
+              draw.on('drawend', this.toggleDrawed)
+              draw.on('drawstart', this.toggleDrawRemove)
+          }
+          else{
+              this.map.removeInteraction(this.state.draw);
+              this.toggleDrawRemove()
+          }
         }
         else{
-            this.map.removeInteraction(this.state.draw);
-            this.toggleDrawRemove()
+          this.setState({'is_modal_info_open': true})
         }
     }
 
     render() {
+      const is_modal_info_open = this.state.is_modal_info_open
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
+                            {
+                             is_modal_info_open &&
+                                <LoginModal
+                                    modalClose = {() => this.handleModalApproveClose()}
+                                    text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
+                                    title="Худалдан авалтын мэдээлэл"
+                                    status={this.state.status}
+                                    actionNameDelete="зөвшөөрөх"
+                                />
+                            }
                         </div>
                     </div>
                 </div>

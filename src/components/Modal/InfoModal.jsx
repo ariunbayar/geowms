@@ -78,9 +78,6 @@ export default class Modal extends Component {
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
                                 </button>
                             </div>
-                            <div className="d-flex justify-content-center">
-                              <i className="fa fa-check-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
-                            </div>
                             <div className="d-flex justify-content-center my-3">
                                 <h5 >{this.props.title}</h5>
                             </div>

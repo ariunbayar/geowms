@@ -58,9 +58,15 @@ export class PolygonPurchase extends Component {
     }
 
     handleTest(){
-        this.setState(prevState => ({
-            is_modal_info_open: !prevState.is_modal_info_open,
-        }))
+      const id = this.state.payment_id
+      service.paymentTest(id).then(({ success }) => {
+          if (success) {
+            this.setState(prevState => ({
+                is_modal_info_open: !prevState.is_modal_info_open,
+            }))
+            service.downloadPurchase(id)
+          }
+      })
     }
 
     handleModalApproveClose(){

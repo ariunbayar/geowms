@@ -10,6 +10,7 @@ export const service = {
     searchPoint,
     getAimags,
     getSum,
+    isUser,
 }
 
 function getCookie(name) {
@@ -75,6 +76,13 @@ function loadBaseLayers() {
         ..._getGetOptions(),
     }
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
+}
+
+function isUser() {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch('/is_user/', requestOptions).then(handleResponse)
 }
 
 function payment(price, description, data_id) {

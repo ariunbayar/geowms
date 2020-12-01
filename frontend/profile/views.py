@@ -200,7 +200,6 @@ def _get_polygon_detail(payment):
         'LeftTopY': polygon.coodrinatLeftTopY,
         'RightBottomX': polygon.coodrinatRightBottomX,
         'RightBottomY': polygon.coodrinatRightBottomY,
-        'amount': polygon.amount,
     })
     return polygon_detail
 

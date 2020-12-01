@@ -17,6 +17,7 @@ urlpatterns = [
         path('api/sum/', bundle_views.sumfind, name='sum'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
+        path('is_user/', bundle_views.is_user, name='is_user'),
     ], 'bundle'))),
 
     path('', include(([
@@ -50,6 +51,7 @@ urlpatterns = [
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
         path('api/download-purchase/<int:pk>/', payment_views.download_purchase, name="download_purchase"),
+        path('api/test/payment/<int:pk>/', payment_views.test_payment, name="download_purchase"),
         path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
         path('download-pdf/<str:pk>/', payment_views.download_pdf, name='download-pdf'),
         path('download-zip/<int:pk>/', payment_views.download_zip, name='download-zip'),
