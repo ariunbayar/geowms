@@ -66,7 +66,7 @@ urlpatterns = [
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
-        path('get-details/', profile_views.tseg_details, name='tseg-details'),
+        path('<int:pk>/get-details/', profile_views.getDetail, name='tseg-details'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
     ], 'profile'))),

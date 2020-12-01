@@ -12,7 +12,7 @@ export class App extends Component {
           <BrowserRouter>
             <div className="container my-3 p-3 mb-5">
                 <div className="row">
-                    <div className="col-md-2 p-0">
+                    <div className="col-md-2">
                         <div className="my-0">
                             <div className="list-group border">
                                 <NavLink className="menu" exact to={'/profile/api/'} activeClassName="active">
