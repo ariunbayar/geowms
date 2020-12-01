@@ -54,23 +54,23 @@ export class Details extends Component {
                         </NavLink>
                         <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                         <div id="container">
+                            <h5 className="my-3">
+                                {
+                                    polygon && polygon.length > 0
+                                    ?
+                                    'Хэсэгчлэн худалдан авалт'
+                                    : 'Лавлах'
+                                }
+                            </h5>
                             {
-                                polygon && polygon.length > 0
-                                ?
-                                    <h5 className="mb-3 mt-3">
-                                        Хэсэгчлэн худалдан авалт
-                                    </h5>
-                                : <h5 className="mb-3">Лавлах</h5>
-                            }
-                            {
-                                points && points.length > 0 ?
+                                points ?
                                     <table className="table table-bordered">
                                         <tbody>
                                             <tr>
                                                 <td ><i className="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
                                                 <td>
                                                     {
-                                                        points.map((value, key) => <b key={key}>{'"'+ value.name + '" '}</b>)
+                                                       points.length > 0 && points.map((value, key) => <b key={key}>{'"'+ value.name + '" '}</b>)
                                                     }
                                                     {items.point_name}
                                                 </td>
@@ -97,13 +97,13 @@ export class Details extends Component {
                                             <tr>
                                                 <td scope="">
                                                     {
-                                                        points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>{value.name}</li>)
+                                                        points.length > 0 && points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>{value.name}</li>)
                                                     }
                                                 </td>
                                                 <td scope="">
                                                     <div>
                                                     {
-                                                        points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>
+                                                        points.length > 0 && points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>
                                                             <a className="text-info" href={`/payment/download-pdf/${value.file_name}/`}>файл</a></li>)
                                                     }
                                                     </div>
@@ -111,7 +111,7 @@ export class Details extends Component {
                                             </tr>
                                             <tr>
                                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Төлбөр</td>
-                                                <td>{points.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
+                                                <td>{points.length > 0 && points.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
                                             </tr>
                                             <tr>
                                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Огноо:</td>
