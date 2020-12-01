@@ -567,7 +567,12 @@ export default class BundleMap extends Component {
 
     calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord) {
         const area = this.formatArea(feature_geometry)
-        const layer_length = layer_info.wms_list[0].layers.length
+
+        var layer_length = 0
+        layer_info.wms_list.map((layer, idx) => {
+            layer_length = layer_length + layer.layers.length
+        })
+
         service
             .paymentCalcPrice(area, layer_length)
             .then(({ success, total_price, is_user }) => {
