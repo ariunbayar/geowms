@@ -226,6 +226,7 @@ def _get_detail_items(payment, mpoint):
         'user_id': payment.user_id,
         'geo_unique_number': payment.geo_unique_number,
         'total': payment.total_amount,
+        'export_file': payment.export_file,
     })
     if mpoint:
          items.append({

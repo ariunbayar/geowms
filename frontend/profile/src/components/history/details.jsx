@@ -122,37 +122,41 @@ export class Details extends Component {
                                 : null
                             }
                             {
-                                items !== {} > 0 && polygon.length > 0 && polygon ?
+                                items !== {} && polygon.length > 0 && polygon ?
                                     <table className="table table-bordered">
                                         <tbody>
                                             <tr>
-                                                <th className="text-center" colSpan="3" scope="rowgroup" style={{fontSize: '20px'}}>
+                                                <th className="text-center" colSpan="2" style={{fontSize: '20px'}}>
                                                     <i className="fa fa-location-arrow mr-2" aria-hidden="true">
                                                     </i>Давхаргын мэдээлэл
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i className="fa fa-map mr-2" aria-hidden="true"></i>Давхаргын нэр
+                                                </th>
+                                                <th>
+                                                    <i className="fa fa-money mr-2" aria-hidden="true"></i>Давхаргын үнэ
                                                 </th>
                                             </tr>
                                                 {
                                                     layers.map((value, key) =>
                                                         <tr key={key}>
-                                                            <th>
-                                                                <i className="fa fa-map mr-2" aria-hidden="true"></i>Давхаргын нэр
-                                                            </th>
-                                                            <td colSpan="3">
-                                                                <label key={key}>{value.name}</label>
+                                                            <td>
+                                                                <label>{value.name}</label>
+                                                            </td>
+                                                            <td>
+                                                                <label>{value.amount}₮</label>
                                                             </td>
                                                         </tr>
                                                     )
                                                 }
                                             <tr>
-                                                <td><i className="fa fa-money mr-2" aria-hidden="true"></i>Төлбөр:</td>
-                                                <td>{polygon.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
-                                            </tr>
-                                            <tr>
                                                 <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
                                                 <td>{items.created_at}</td>
                                             </tr>
                                             {
-                                                items.is_success ?
+                                                items.is_success && items.export_file !== null ?
                                                     <tr>
                                                         <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
                                                         <td><a className="text-info" href={`/payment/download-zip/${payment_id}/`}>Энд дарж татаж авна уу!</a></td>
