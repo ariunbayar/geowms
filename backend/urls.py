@@ -38,10 +38,8 @@ urlpatterns = [
 
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
-        path('create/', bundle_views.create, name='create'),
         path('module-check/', bundle_views.moduleCheck, name='module-check'),
         path('update/', bundle_views.update, name='update'),
-        path('remove/', bundle_views.remove, name='remove'),
         path('move/', bundle_views.move, name='move'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
         path('get-layer/', bundle_views.get_form_options, name='get-layer'),
@@ -70,6 +68,7 @@ urlpatterns = [
 
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
+        path('level-<int:level>/<int:pk>/', org_views.detail),
         path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
         path('level-<int:level>/<int:pk>/Inspireroles/', org_views.Inspireroles, name='Inspireroles'),
         path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
@@ -81,7 +80,6 @@ urlpatterns = [
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
         path('level-<int:level>/<int:pk>/employeeList/', org_views.employeeList, name='employeeList'),
-        path('level-<int:level>/<int:pk>/', org_views.OrgAll, name='OrgAll'),
         path('level-<int:level>/org-list/', org_views.org_list, name='orgList'),
         path('org-count/', org_views.countOrg, name='org-count'),
         path('perm-get-list/', org_views.permGetList, name='perm-get-list'),

@@ -9,14 +9,25 @@ from main.decorators import ajax_required
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
+from backend.inspire.models import LThemes
 
 
 def all(request):
-
+    context_list = []
     bundles = Bundle.objects.all()
+    for bundle in bundles:
+        bundle_list = []
+        theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+        bundle_list = {
+            'pk': bundle.id,
+            'icon': bundle.icon,
+            'name': theme.theme_name if theme else ''
+        }
+
+        context_list.append(bundle_list)
 
     context = {
-        'bundles': bundles,
+        'bundles': context_list,
     }
     return render(request, 'bundle/all.html', context)
 
@@ -24,12 +35,12 @@ def all(request):
 def detail(request, pk):
 
     bundle = get_object_or_404(Bundle, pk=pk)
-
+    theme = LThemes.objects.filter(theme_id = bundle.ltheme_id).first()
     bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
 
     bundle_display = {
         'id': bundle.id,
-        'name': bundle.name,
+        'name': theme.theme_name if theme else '',
         'layers': list(bundle.layers.all().values_list('id', flat=True)),
         'wms_list': [
             (WMS.objects.get(pk=wms[0]).name)

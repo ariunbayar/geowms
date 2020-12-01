@@ -186,7 +186,6 @@ class ListComponent extends Component {
             .then(({success, fields}) => {
                 if (success) {
                     this.values = new Object();
-                    this.z = []
                     fields.map((field, idx) => {
                         this.values[field.origin_name] = ''
                     })
@@ -198,7 +197,6 @@ class ListComponent extends Component {
 
     getValues(input_datas, idx, name) {
         this.values[name] = input_datas
-        console.log(this.values);
         this.setState({ is_create_meta: true })
     }
 

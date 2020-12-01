@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -5,7 +6,6 @@ from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 
 from main.decorators import ajax_required
-from easyaudit.models import RequestEvent, CRUDEvent, LoginEvent
 from geoportal_app.models import User
 from backend.wms.models import WMSLog
 
@@ -14,6 +14,9 @@ from backend.wms.models import WMSLog
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def login_all(request, payload):
+
+    LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
+
     last = payload.get('last')
     first = payload.get('first')
     login_log_all_display = []
@@ -37,6 +40,9 @@ def login_all(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def login_list(request, payload):
+
+    LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
+
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
@@ -78,6 +84,9 @@ def login_list(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def login_date_count(request):
+
+    LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
+
     user_login_date_all = LoginEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     user_login_date = []
     user_login_date_count = []
@@ -96,6 +105,9 @@ def login_date_count(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def page_list(request, payload):
+
+    RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
+
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
@@ -139,6 +151,9 @@ def page_list(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def page_date_count(request):
+
+    RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
+
     page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     page_date = []
     page_date_count = []
@@ -157,6 +172,8 @@ def page_date_count(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def page_user_count(request):
+
+    RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
 
     rsp = {
         'user_count': RequestEvent.objects.filter(user_id__isnull=True).count(),
@@ -178,6 +195,9 @@ def _get_user_name(user_id):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crudList(request, payload):
+
+    CRUDEvent = apps.get_model('easyaudit', 'CRUDEvent')
+
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
@@ -221,6 +241,9 @@ def crudList(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crud_method_count(request):
+
+    CRUDEvent = apps.get_model('easyaudit', 'CRUDEvent')
+
     method_all = CRUDEvent.objects.all().order_by('event_type').distinct('event_type')
     method_id = []
     method_id_count = []
@@ -239,6 +262,9 @@ def crud_method_count(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def crud_date_count(request):
+
+    CRUDEvent = apps.get_model('easyaudit', 'CRUDEvent')
+
     date_all = CRUDEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     crud_date = []
     crud_date_count = []

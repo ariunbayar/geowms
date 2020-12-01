@@ -2,6 +2,7 @@ from django.shortcuts import render
 from backend.org.models import Org, OrgRole, Employee
 from backend.bundle.models import Bundle
 from django.views.decorators.http import require_POST, require_GET
+from backend.inspire.models import LThemes
 from main.decorators import ajax_required
 from django.http import JsonResponse
 
@@ -9,12 +10,12 @@ from django.http import JsonResponse
 def _get_org_role_display(org_role):
 
     bundle = org_role.bundle
-
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
     return {
         'org_id': org_role.org_id,
         'bundle': {
             'id': bundle.id,
-            'name': bundle.name,
+            'name': theme.theme_name if theme else '',
             'icon_url': bundle.icon.url if bundle.icon else '',
         },
         'perm_view': org_role.perm_view,

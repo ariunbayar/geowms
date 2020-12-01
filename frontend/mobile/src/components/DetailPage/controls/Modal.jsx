@@ -8,8 +8,8 @@ class ModalComponent extends Component{
     render() {
         const {content, is_complete} = this.props
         return (
-            <div className="modal-dialog modal-dialog-scrollable" style={{zIndex:"5"}}>
-                <div className="modal-content">
+            <div className="modal-dialog modal-dialog-scrollable phone-modal" style={{zIndex:"5"}}>
+                <div className="modal-content" onClick={this.props.handleClose}>
                     <div className="modal-header" onClick={this.props.handleClose}>
                         <h5 className="modal-title">Дэлгэрэнгүй мэдээлэл</h5>
                         <button type="button" className="close" data-dismiss="modal" aria-label="Close">
