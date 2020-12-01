@@ -13,8 +13,9 @@ from backend.wms.models import WMS, WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Employee
 from geoportal_app.models import User
-from backend.inspire.models import LThemes, LPackages, LFeatures
+from backend.inspire.models import LPackages, LFeatures
 from django.contrib import auth
+import datetime
 
 
 def _get_service_url(request, token, wms):
@@ -33,7 +34,7 @@ def proxy(request, token, pk):
     wms = get_object_or_404(WMS, pk=pk)
     base_url = wms.url
 
-    if not wms.is_active: 
+    if not wms.is_active:
         raise Http404
 
     queryargs = request.GET
@@ -75,6 +76,8 @@ def qgis_submit(request):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
     user_id = request.POST.get('user_id')
+    burtgel_dugaar_date = request.POST.get('burtgel_dugaar_date')
+    burtgel_dugaar = request.POST.get('burtgel_dugaar')
     try:
         user = User.objects.filter(id=user_id).first()
         employee = get_object_or_404(Employee, user=user)
@@ -97,6 +100,8 @@ def qgis_submit(request):
                     kind = ChangeRequest.KIND_DELETE,
                     form_json = None,
                     geo_json = update_list['geom'],
+                    order_at=datetime.datetime.strptime(burtgel_dugaar_date, '%Y.%m.%d').replace(tzinfo=datetime.timezone.utc),
+                    order_no=burtgel_dugaar
                 )
 
         if len(delete_lists) > 0:
@@ -116,6 +121,8 @@ def qgis_submit(request):
                     kind = ChangeRequest.KIND_UPDATE,
                     form_json = None,
                     geo_json = update_list['geom'],
+                    order_at=datetime.datetime.strptime(burtgel_dugaar_date, '%Y.%m.%d').replace(tzinfo=datetime.timezone.utc),
+                    order_no=burtgel_dugaar
                 )
         return JsonResponse({'success': True})
     except Exception:
