@@ -1,6 +1,5 @@
 import React, {Component} from "react";
 import { Link } from 'react-router-dom'
-import {service} from './service'
 import { useHistory } from "react-router-dom";
 
 export  class Info extends Component {

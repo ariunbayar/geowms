@@ -7,6 +7,7 @@ export const service = {
     tableListBarilgaSuurinGazar,
     tableListDedButets,
     getCount,
+    detail,
 }
 
 function tableListTeevriinSuljee() {
@@ -40,4 +41,12 @@ function getCount() {
     }
 
     return fetch(`/gov/api/org-request/getCount/`, requestOptions).then(handleResponse)
+}
+
+function detail() {
+    const opts = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`/profile/api/info/`, opts).then(handleResponse)
 }

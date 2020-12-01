@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 
-export class Form extends Component {
+export class Password extends Component {
     constructor(props) {
         super(props);
     }
