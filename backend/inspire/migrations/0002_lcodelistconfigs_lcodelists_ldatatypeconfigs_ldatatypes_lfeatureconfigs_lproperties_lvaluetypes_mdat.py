@@ -2,6 +2,7 @@
 
 import django.contrib.gis.db.models.fields
 from django.db import migrations, models
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
@@ -14,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='LCodeListConfigs',
             fields=[
-                ('code_list_config_id', models.AutoField(primary_key=True, serialize=False)),
+                ('code_list_config_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('property_id', models.IntegerField()),
                 ('to_property_id', models.IntegerField()),
                 ('order_no', models.IntegerField()),
@@ -26,13 +27,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_code_list_configs',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='LCodeLists',
             fields=[
-                ('code_list_id', models.AutoField(primary_key=True, serialize=False)),
+                ('code_list_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('property_id', models.IntegerField()),
                 ('code_list_code', models.CharField(max_length=255)),
                 ('code_list_name', models.CharField(max_length=255)),
@@ -49,13 +50,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_code_lists',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='LDataTypeConfigs',
             fields=[
-                ('data_type_config_id', models.AutoField(primary_key=True, serialize=False)),
+                ('data_type_config_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('data_type_id', models.IntegerField()),
                 ('property_id', models.IntegerField()),
                 ('order_no', models.IntegerField()),
@@ -67,13 +68,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_data_type_configs',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='LDataTypes',
             fields=[
-                ('data_type_id', models.AutoField(primary_key=True, serialize=False)),
+                ('data_type_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('data_type_code', models.CharField(max_length=255)),
                 ('data_type_name', models.CharField(max_length=255)),
                 ('data_type_name_eng', models.CharField(max_length=255)),
@@ -88,13 +89,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_data_types',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='LFeatureConfigs',
             fields=[
-                ('feature_config_id', models.AutoField(primary_key=True, serialize=False)),
+                ('feature_config_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('feature_id', models.IntegerField()),
                 ('has_class', models.BooleanField(default=True)),
                 ('data_type_id', models.IntegerField()),
@@ -113,13 +114,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_feature_configs',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='LProperties',
             fields=[
-                ('property_id', models.AutoField(primary_key=True, serialize=False)),
+                ('property_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('property_code', models.CharField(max_length=255)),
                 ('property_name', models.CharField(max_length=255)),
                 ('property_name_eng', models.CharField(max_length=255)),
@@ -135,13 +136,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_properties',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='LValueTypes',
             fields=[
-                ('value_type_id', models.AutoField(primary_key=True, serialize=False)),
+                ('value_type_id', models.AutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('value_type_name', models.CharField(max_length=255)),
                 ('value_type_name_eng', models.CharField(max_length=255)),
                 ('order_no', models.IntegerField()),
@@ -152,13 +153,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'l_value_types',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='MDatasBoundary',
             fields=[
-                ('boundary_id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('boundary_id', models.BigAutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('geo_id', models.CharField(max_length=100)),
                 ('feature_config_id', models.IntegerField()),
                 ('data_type_id', models.IntegerField()),
@@ -175,13 +176,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'm_datas_boundary',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='MDatasBuilding',
             fields=[
-                ('building_id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('building_id', models.BigAutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('geo_id', models.CharField(max_length=100)),
                 ('feature_config_id', models.IntegerField()),
                 ('data_type_id', models.IntegerField()),
@@ -198,13 +199,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'm_datas_building',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='MDatasCadastral',
             fields=[
-                ('cadastral_id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('cadastral_id', models.BigAutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('geo_id', models.CharField(max_length=100)),
                 ('feature_config_id', models.IntegerField()),
                 ('data_type_id', models.IntegerField()),
@@ -221,13 +222,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'm_datas_cadastral',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='MDatasGeographical',
             fields=[
-                ('geographical_id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('geographical_id', models.BigAutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('geo_id', models.CharField(max_length=100)),
                 ('feature_config_id', models.IntegerField()),
                 ('data_type_id', models.IntegerField()),
@@ -244,13 +245,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'm_datas_geographical',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
             name='MDatasHydrography',
             fields=[
-                ('hydrography_id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('hydrography_id', models.BigAutoField(auto_created=settings.IS_TESTING, primary_key=True, serialize=False)),
                 ('geo_id', models.CharField(max_length=100)),
                 ('feature_config_id', models.IntegerField()),
                 ('data_type_id', models.IntegerField()),
@@ -267,7 +268,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'm_datas_hydrography',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -283,7 +284,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'm_geo_datas',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
     ]

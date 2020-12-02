@@ -74,7 +74,7 @@ def _get_package(theme_id):
 @user_passes_test(lambda u: u.is_superuser)
 def bundleButetsAll(request):
     data = []
-    for themes in LThemes.objects.all(): 
+    for themes in LThemes.objects.all():
         bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
         if bundle:
             data.append({
@@ -142,6 +142,7 @@ def _datatypes(data_type_id):
             data_type_names.append({
                 'data_type_id': data_type.data_type_id,
                 'data_type_name': data_type.data_type_name,
+                'data_type_name_eng': data_type.data_type_name_eng,
                 'data_type_code': data_type.data_type_code,
                 'data_type_definition': data_type.data_type_definition,
                 'is_active': data_type.is_active,
@@ -277,7 +278,7 @@ def getFields(request, payload):
         for i in model_name._meta.get_fields():
             name = i.name
             type_name = i.get_internal_type()
-            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
+            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField' and i.name != 'bundle':
                 if type_name == "CharField":
                     type_name = 'text'
                 if type_name == "IntegerField" or type_name == "BigIntegerField":
@@ -320,21 +321,24 @@ def getFields(request, payload):
                             'data': ''
                         })
                 if edit_name != '':
-                    datas = model_name.objects.filter(pk=id)
-                    for data in datas:
-                        data_obj = model_to_dict(data)
-                        dat = data_obj[i.name]
-                        if dat == True and not 1:
-                            dat = 'true'
-                        if dat == False and not 0:
-                            dat = 'false'
-                        else:
-                            dat = dat
-                        fields.append({
-                            'field_name': i.name,
-                            'field_type': type_name,
-                            'data': dat if dat else ""
-                        })
+                    if savename == 'theme' and i.name == 'bundle':
+                        pass
+                    else:
+                        datas = model_name.objects.filter(pk=id)
+                        for data in datas:
+                            data_obj = model_to_dict(data)
+                            dat = data_obj[i.name]
+                            if dat == True and not 1:
+                                dat = 'true'
+                            if dat == False and not 0:
+                                dat = 'false'
+                            else:
+                                dat = dat
+                            fields.append({
+                                'field_name': i.name,
+                                'field_type': type_name,
+                                'data': dat if dat else ""
+                            })
         rsp = {
             'success': True,
             'fields': fields
@@ -347,44 +351,23 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
-def get_rows(fid):
-    cursor = connections['default'].cursor()
-    sql = """
-        select datas.property_id, l.property_code
-        from l_properties l
-        inner join (select l_feature_configs.feature_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
-        from l_feature_configs
-        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
-        where l_feature_configs.feature_id = {fid}
-        ) datas
-        on datas.property_id = l.property_id
-    """.format(
-        fid=fid
-    )
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
-    return rows
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
-    fields = get_rows(fid)
     view_name = ViewNames.objects.filter(feature_id=fid).first()
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
         rsp = {
             'success': True,
-            'fields': fields,
+            'fields': _lfeatureconfig(fid),
             'id_list': id_list,
             'view_name': view_name.view_name
         }
     else:
         rsp = {
             'success': True,
-            'fields': fields,
+            'fields': _lfeatureconfig(fid),
             'id_list': [],
             'view_name': ''
         }
@@ -454,9 +437,11 @@ def propertyFieldsSave(request, payload):
         check_name.delete()
 
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
-    check = createView(id_list, table_name, model_name)
+    data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
+    feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
+    check = createView(id_list, table_name, model_name, data_type_ids, feature_config_id)
     if check:
-        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id)
+        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id, feature)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -727,35 +712,23 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
-def check_them_name(theme_name):
 
-    if theme_name == 'Хил зааг':
-        theme_name = 'Хил, зааг'
-        return theme_name
-    elif theme_name == 'Газарзүйн нэр':
-        theme_name = 'Газар зүйн нэр'
-        return theme_name
-    else:
-        return theme_name
-
-
-def _create_geoserver_detail(table_name, model_name, theme, user_id):
-    
+def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
     ds_name = ws_name
+    layer_title = feature.feature_name
     wms_url = geoserver.get_wms_url(ws_name)
 
     check_workspace = geoserver.getWorkspace(ws_name)
-    wms = WMS.objects.filter(name=theme.theme_name).first()
     theme_name = theme.theme_name
+    wms = WMS.objects.filter(name=theme_name).first()
     if not wms:
-        WMS.objects.create(
-            name=theme.theme_name,
-            url = wms_url,
-            created_by_id=user_id
-        )
-        wms = WMS.objects.filter(name=theme.theme_name).first()
+        wms = WMS.objects.create(
+                name=theme_name,
+                url = wms_url,
+                created_by_id=user_id
+            )
     if check_workspace.status_code == 404:
 
         geoserver.create_space(ws_name)
@@ -788,7 +761,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -809,7 +782,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -856,7 +829,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -872,7 +845,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                         ws_name,
                                         ds_name,
                                         layer_name,
-                                        layer_name,
+                                        layer_title,
                                         table_name,
                                         srs,
                                         geom_att,
@@ -902,7 +875,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                     ws_name,
                                     ds_name,
                                     layer_name,
-                                    layer_name,
+                                    layer_title,
                                     table_name,
                                     srs,
                                     geom_att,
@@ -921,7 +894,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                                     ws_name,
                                     ds_name,
                                     layer_name,
-                                    layer_name,
+                                    layer_title,
                                     table_name,
                                     srs,
                                     geom_att,
@@ -936,29 +909,30 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id):
                 else:
                     return {'info': 'layer_remove'}
 
-        wms_layer = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first()
         wms_id = wms.id
+        wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
         if not wms_layer:
             legend_url = geoserver.get_legend_url(wms_id, layer_name)
-            WMSLayer.objects.create(
-                name=layer_name,
-                code=layer_name,
-                wms=wms,
-                title=layer_name,
-                feature_price=0,
-                legend_url=legend_url
-            )
-            bundle_name = check_them_name(theme_name)
-            bunde_id = Bundle.objects.filter(name=bundle_name).first().id
+            wms_layer = WMSLayer.objects.create(
+                            name=layer_title,
+                            code=layer_name,
+                            wms=wms,
+                            title=layer_title,
+                            feature_price=0,
+                            legend_url=legend_url
+                        )
 
-            wms_layer_id = WMSLayer.objects.filter(wms_id=wms.id, code=layer_name).first().id
-            BundleLayer.objects.create(
-                bundle_id=bunde_id,
-                layer_id=wms_layer_id
+        bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
+        bundle_id = theme.bundle.id
+        if not  bundle_layer:
+            BundleLayer.objects.create( 
+                bundle_id=bundle_id,
+                layer_id=wms_layer.id
             )
+
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
-def createView(ids, table_name, model_name):
+def createView(ids, table_name, model_name, data_type_ids, feature_config_id):
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
@@ -967,7 +941,7 @@ def createView(ids, table_name, model_name):
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -975,6 +949,8 @@ def createView(ids, table_name, model_name):
                 model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
+                data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
+                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
@@ -982,9 +958,9 @@ def createView(ids, table_name, model_name):
                 cursor.execute(query)
                 cursor.execute(query_index)
         return True
-
     except Exception:
         return False
+
 
 
 def removeView(table_name):

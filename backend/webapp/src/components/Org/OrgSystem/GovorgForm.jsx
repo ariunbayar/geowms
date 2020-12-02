@@ -109,7 +109,7 @@ export class GovorgForm extends Component {
     }
 
     render() {
-        const {name, token} = this.state.govorg
+        const {name, token, website} = this.state.govorg
         return (
 
             <div className="my-4">
@@ -125,7 +125,10 @@ export class GovorgForm extends Component {
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
-                            initialValues={{name:this.state.govorg.name || ''}}
+                            initialValues={{
+                                name: this.state.govorg.name || '',
+                                website: this.state.govorg.website || '',
+                            }}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -151,15 +154,27 @@ export class GovorgForm extends Component {
                                             </label>
 
                                             <Field
-                                                className={'form-control ' + (errors.name ? 'is-invalid' : '')}
+                                                className={'form-control mb-2' + (errors.name ? 'is-invalid' : '')}
                                                 placeholder="Системүүдийн нэр"
                                                 name='name'
                                                 id="id_name"
                                                 type="text"
                                             />
-
                                             <ErrorMessage name="name" component="div" className="invalid-feedback"/>
-                                        </div>
+
+                                            <label htmlFor="id_website">
+                                                Домэйнээр хязгаарлах:
+                                            </label>
+                                            <Field
+                                                className={'form-control my-1' + (errors.website ? 'is-invalid' : '')}
+                                                placeholder="Байршуулах вэбсайт"
+                                                name='website'
+                                                id="id_website"
+                                                type="text"
+                                            />      
+                                            <ErrorMessage name="website" component="div" className="invalid-feedback"/>
+                                            <small className="text-muted">жишээ нь: https://domain.mn</small>
+                                        </div> 
 
                                         <div></div>
                                         <div className="span3">
