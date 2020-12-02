@@ -501,7 +501,6 @@ def getCount(request):
     try:
         count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
         revoke_count = ChangeRequest.objects.filter(kind=ChangeRequest.KIND_REVOKE, state=ChangeRequest.STATE_APPROVE).count()
-        print(revoke_count)
         rsp = {
             'success': True,
             'count': count,
