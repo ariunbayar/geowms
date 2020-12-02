@@ -302,40 +302,6 @@ def get_administrative_levels():
 
     raise Exception
 
-
-    code_list_id_aimag = code_lists_national_level['2ndOrder\n']
-    code_list_id_sum = code_lists_national_level['3rdOrder\n']
-    code_list_id_bag = code_lists_national_level['4thOrder\n']
-
-    geo_ids = MDatasBoundary.objects.filter(
-        feature_config_id__in=feature_config_ids,
-        data_type_id__in=data_type_ids,
-        property_id__in=property_id_national_level,
-        code_list_id=code_lists_national_level['2ndOrder\n'],
-    ).values_list('geo_id', flat=True)
-
-    geo_ids_by_national_code = MDatasBoundary.objects.filter(
-        geo_id__in=geo_ids,
-        property_id__in=property_id_national_code,
-    ).values_list('value_text', flat=True)
-
-    print('\n\033[92m\033[01m', end=''); import pprint; pprint.pprint(geo_ids_by_national_code); print('\n\033[0m', end='')
-    print(geo_ids_by_national_code.count())
-
-    # names = MDatasBoundary.objects.filter(
-        # geo_id__in=geo_ids_by_national_code,
-        # property_id__in=property_id_name,
-    # ).values_list('geo_id', 'value_text')
-
-    # print(names)
-
-    # aimag_datas = MDatasBoundary.objects.filter(geo_id=value_text.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
-    # for datas in aimag_datas:
-        # aimguud.append({
-        # 'aimag_names': datas.value_text,
-        # 'geo_id': datas.geo_id,
-    # })
-
     return []
 
 
