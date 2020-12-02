@@ -70,9 +70,7 @@ class User_Login:
         self.first_start = None
         self.user_id = None
         self.user_check = False
-        self.geoportal_url = 'https://nsdi.gov.mn/'
-        self.burtgel_dugaar = None
-        self.burtgel_dugaar_date = None
+        self.geoportal_url = 'http://localhost:8000/'
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -215,12 +213,6 @@ class User_Login:
             self.user_id = None
 
 
-    def burtgelDugaar(self):
-        self.burtgel_dugaar = self.td_dlg.lineEdit.text()
-        self.burtgel_dugaar_date = self.td_dlg.dateEdit.text()
-        self.td_dlg.hide()
-
-
     def activ_layer(self):
 
         active_layers = self.iface.mapCanvas().layers()
@@ -262,18 +254,12 @@ class User_Login:
                     })
                 data = {'update': json.dumps(updates), 'delete': json.dumps(deletes)}
         self.dlg = User_LoginDialog()
-        self.td_dlg = TushaalDugaarDialog()
         self.dlg.show()
         user_info = self.dlg.pushButton.clicked.connect(self.checkUser)
         result = self.dlg.exec_()
         try:
             if self.user_check:
-                self.td_dlg.show()
-                self.td_dlg.pushButton.clicked.connect(self.burtgelDugaar)
-                result = self.td_dlg.exec_()
                 data["user_id"] = self.user_id
-                data["burtgel_dugaar"] = self.burtgel_dugaar
-                data["burtgel_dugaar_date"] = self.burtgel_dugaar_date
                 rsp = requests.post(self.geoportal_url+'api/service/qgis-submit/', data=data)
                 if rsp.json():
                     check = rsp.json()

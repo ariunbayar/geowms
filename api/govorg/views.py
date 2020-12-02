@@ -70,6 +70,7 @@ def proxy(request, token, pk):
 
     return rsp
 
+
 def geoJsonConvertGeom(geojson):
     with connections['default'].cursor() as cursor:
         sql = """ SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326),4326)) """
@@ -78,14 +79,13 @@ def geoJsonConvertGeom(geojson):
         geom =  ''.join(geom)
         return geom
 
+
 @require_POST
 @csrf_exempt
 def qgis_submit(request):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
     user_id = request.POST.get('user_id')
-    burtgel_dugaar_date = request.POST.get('burtgel_dugaar_date')
-    burtgel_dugaar = request.POST.get('burtgel_dugaar')
     try:
         user = User.objects.filter(id=user_id).first()
         employee = get_object_or_404(Employee, user=user)
@@ -111,8 +111,6 @@ def qgis_submit(request):
                     kind = ChangeRequest.KIND_DELETE,
                     form_json = None,
                     geo_json = geoJsonConvertGeom(update_list['geom']),
-                    order_at=datetime.datetime.strptime(burtgel_dugaar_date, '%Y.%m.%d').replace(tzinfo=datetime.timezone.utc),
-                    order_no=burtgel_dugaar
                 )
 
         if len(delete_lists) > 0:
@@ -135,8 +133,6 @@ def qgis_submit(request):
                     kind = ChangeRequest.KIND_UPDATE,
                     form_json = None,
                     geo_json = geoJsonConvertGeom(update_list['geom']),
-                    order_at=datetime.datetime.strptime(burtgel_dugaar_date, '%Y.%m.%d').replace(tzinfo=datetime.timezone.utc),
-                    order_no=burtgel_dugaar
                 )
         return JsonResponse({'success': True})
     except Exception:
