@@ -26,6 +26,7 @@ import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {MetaBarButton} from './controls/MetaData/MetaBarButton'
 import {MetaList} from './controls/MetaData/MetaList'
+import {CancelBarButton} from './controls/Cancel/CancelBarButton'
 
 import {CoordList} from './controls/CoordinateList/CordList'
 
@@ -62,6 +63,7 @@ export default class BarilgaSuurinGazar extends Component{
           featureID: null,
           featureID_list: [],
           remove_button_active: false,
+          cancel_button_active: false,
           modify_button_active: false,
           selectedFeature_ID: null,
           modifyend_selected_feature_ID: null,
@@ -108,10 +110,13 @@ export default class BarilgaSuurinGazar extends Component{
       this.PolygonButton = this.PolygonButton.bind(this)
       this.SaveBtn = this.SaveBtn.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
+      this.CancelButton = this.CancelButton.bind(this)
       this.FormButton = this.FormButton.bind(this)
       this.remove = this.remove.bind(this)
       this.requestRemove = this.requestRemove.bind(this)
+      this.requestCancel = this.requestCancel.bind(this)
       this.removeModal = this.removeModal.bind(this)
+      this.cancelModal = this.cancelModal.bind(this)
       this.modifiedFeature = this.modifiedFeature.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
@@ -183,7 +188,7 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.sidebar)
       }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-
+      if(roles[2]) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
@@ -441,6 +446,11 @@ export default class BarilgaSuurinGazar extends Component{
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
+          if(this.state.cancel_button_active){
+            const geom_for_revoke = event.selected[0]
+            this.setState({ geom_for_revoke })
+            this.cancelModal()
+          }
         } else {
           const feature = event.selected[0]
           this.collectFeatures(feature)
@@ -766,6 +776,92 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
+    CancelButton() {
+      this.hideMetaList()
+      this.drawE.setActive(false);
+      this.modifyE.setActive(true);
+      if(this.state.cancel_button_active)
+      {
+        document.getElementById('⚙-toggle-cancel-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({ cancel_button_active: false })
+      }
+      else
+      {
+        document.getElementById('⚙-toggle-cancel-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        if(this.state.selectedFeature_ID) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        this.setState({ cancel_button_active: true, modify_button_active: false })
+      }
+    }
+
+    cancelModal(values){
+
+      if(this.state.selectedFeature_ID){
+        if(this.state.roles[6]){
+          this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
+        }else{
+          this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг цуцлах уу`, null, 'danger', "Үгүй")
+        }
+      }
+      else
+      {
+        if(this.state.drawed) this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `Шинээр үүссэн цэгийг цуцлах уу`, null, 'danger', "Үгүй")
+        else this.addNotif('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
+      }
+    }
+
+    requestCancel(order_at, number, form_json) {
+      const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
+      const geo_json = this.writeFeat(geom_for_revoke)
+      service.cancel(pid, fid, tid, selectedFeature_ID, geo_json, form_json, number, order_at).then(({ success }) => {
+        if (success) {
+          this.props.refreshCount()
+          this.addNotif('success', 'Цуцлах хүсэлт үүслээ', 'check')
+          this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
+        }
+      })
+    }
+
+    cancel(order_at, number, form_json){
+      const vector = this.vector
+      const vectorLayer = this.vectorLayer
+      const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
+      const geo_json = this.writeFeat(geom_for_revoke)
+
+      const features_new = vector.getSource().getFeatures();
+      const features = vectorLayer.getSource().getFeatures();
+
+      if(selectedFeature_ID){
+          if(this.state.roles[6]){
+            this.setState({ togle_islaod: false })
+          }
+          else{
+            service.cancel(pid, fid, tid, selectedFeature_ID, geo_json, form_json, number, order_at).then(({ success, info }) => {
+              if (success) {
+                this.addNotif('success', info, 'check')
+                this.setState({featureID_list: [], selectedFeature_ID: null})
+                if (features != null && features.length > 0) {
+                  features.map((x) => {
+                    const id = x.getProperties()['id']
+                    id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
+                  })
+                }
+              }
+            })
+          }
+      }
+      else
+      {
+        if (features_new != null && features_new.length > 0) {
+          features_new.map((x) => {
+            var id = x.getProperties()['id']
+            id == selectedFeature_ID && vector.getSource().removeFeature(x)
+          })
+          this.addNotif('success', "Шинээр үүссэн мэдээллийг цуцлав.", 'check')
+          this.setState({featureID_list: [], drawed: null})
+        }
+      }
+    }
+
     SaveBtn(form_values) {
       this.hideMetaList()
       const {modifyend_selected_feature_ID, modifyend_selected_feature_check, update_geom_from_list, build_name } = this.state
@@ -812,9 +908,6 @@ export default class BarilgaSuurinGazar extends Component{
       if (!is_not_mongolia) {
         const id = this.state.selectedFeature_ID
         const { changedFeature, changedJson } = this.state
-        console.log(changedJson);
-        console.log(changedJson);
-        console.log(changedJson);
         this.feature = ''
         if (changedJson) {
           this.feature = changedJson
@@ -859,16 +952,13 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     createGeom(){
-      console.log('shineeer uussgeh');
       const { is_not_mongolia } = this.state
       if (!is_not_mongolia) {
-        console.log('in mongol');
         const fid = this.state.fid
         const json = JSON.parse(this.state.drawed)
         const datas = json.geometry
         this.setState({ is_loading: true })
         if(this.state.roles[6]){
-          console.log('batlah erhtei');
           this.setState({ is_loading: false, geojson: datas, togle_islaod: false})
         }
         else
@@ -909,6 +999,7 @@ export default class BarilgaSuurinGazar extends Component{
         if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
         if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: true,  remove_button_active: false})
+        this.setState({modify_button_active: true,  cancel_button_active: false})
       }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
@@ -919,6 +1010,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
+      this.setState({modify_button_active: false,  cancel_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -930,6 +1022,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
+      this.setState({modify_button_active: false,  cancel_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -941,6 +1034,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
+      this.setState({modify_button_active: false,  cancel_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -1367,6 +1461,7 @@ export default class BarilgaSuurinGazar extends Component{
                           geojson = {this.state.geojson}
                           roles = {this.state.roles}
                           gid = {this.state.selectedFeature_ID}
+                          cancel = {this.cancel}
                           togle_islaod = {this.state.togle_islaod}
                           null_form_isload = {this.state.null_form_isload}
                           addNotif = {this.addNotif}
@@ -1374,7 +1469,9 @@ export default class BarilgaSuurinGazar extends Component{
                           requestRefreshCount={this.props.refreshCount}
                           modifyend_selected_feature_check={this.state.modifyend_selected_feature_check}
                           requestRemove={this.requestRemove}
+                          requestCancel={this.requestCancel}
                           remove_button_active={this.state.remove_button_active}
+                          cancel_button_active={this.state.cancel_button_active}
                           update_geom_from_list={this.state.update_geom_from_list}
                         >
                         </Маягт>
