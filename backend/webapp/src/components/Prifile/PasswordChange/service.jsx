@@ -1,10 +1,10 @@
 import {getPostOptions, handleResponse} from '../../../helpers/service'
 
 export const service = {
-    passwordChange,
+    updatePassword,
 }
 
-function passwordChange(payload) {
+function updatePassword(payload) {
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify( payload ),
