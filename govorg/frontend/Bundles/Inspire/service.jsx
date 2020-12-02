@@ -57,10 +57,10 @@ function remove(pid, fid, gid) {
     return fetch(`${prefix}/${pid}/${fid}/remove/`, opts).then(handleResponse)
 }
 
-function cancel(pid, fid, gid, old_geo_id, geo_json, form_json, order_no, order_at, tcode) {
+function cancel(pid, fid, tid, old_geo_id, geo_json, form_json, order_no, order_at) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({gid, pid, fid, old_geo_id, geo_json, form_json, order_no, order_at, tcode}),
+        body: JSON.stringify({pid, fid, tid, old_geo_id, geo_json, form_json, order_no, order_at}),
     }
     return fetch(`/gov/api/revoke_request/revoke/`, opts).then(handleResponse)
 }

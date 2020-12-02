@@ -40,6 +40,8 @@ export class RevokeRequestTable extends Component {
         const idx = this.props.idx
         const {
             id,
+            last_name,
+            first_name,
             theme_name,
             package_name,
             feature_name,
@@ -62,7 +64,7 @@ export class RevokeRequestTable extends Component {
                     {theme_name + '/'+ package_name + '/' +feature_name}
                 </td>
                 <td>
-                    {org+'/'+employee}
+                    {org+'/'+last_name.charAt(0).toUpperCase() + '.' + first_name}
                 </td>
                 <td>
                     {order_no}
