@@ -51,8 +51,8 @@ export class PermSwitches extends Component {
 
         return (
             <div className="col-2">
-                <div className="form-group">
-                    <label htmlFor={index}>{name}</label>
+                <div className="form-group text-center">
+                    <label className="col-lg-12" htmlFor={index}>{name}</label>
                     <div className={`${radio_switch_class_name} col-lg-12`}>
                         <span id={index} className={`slider-point slider-point-round`} >
                             <div className="slider-pointer slider-point-round"></div>
