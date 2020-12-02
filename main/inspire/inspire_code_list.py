@@ -8,11 +8,6 @@ class InspireCodeList(InspireValue, BaseCodeEntity):
     items_mapped = {}
     items_pending = set()
 
-    def __init__(self, code):
-        super().__init__(code)
-        if code not in self.items_mapped:
-            self.items_pending.add(code)
-
     @classmethod
     def map_pending_items(cls):
 
@@ -34,6 +29,13 @@ class InspireCodeList(InspireValue, BaseCodeEntity):
             code_list_code: code_list_id
             for code_list_code, code_list_id in code_list_pairs
         })
+
+        cls.items_pending = set()
+
+    def __init__(self, code):
+        super().__init__(code)
+        if code not in self.items_mapped:
+            self.items_pending.add(code)
 
     @property
     def code_list_id(self):

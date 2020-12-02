@@ -38,6 +38,8 @@ class InspireFeature():
 
         self.manager = InspireManager.get_instance()
 
+        self.feature_config_map = None
+
         self.select_options = []
         self.filter_options = []
 
@@ -63,48 +65,56 @@ class InspireFeature():
 
         self.select_options = select_options
 
-        for inspire_data_type, inspire_properties in select_options.items():
-            assert isinstance(inspire_data_type, InspireDataType)
-            for inspire_property in inspire_properties:
-                assert isinstance(inspire_property, InspireProperty)
+        for i_data_type, i_properties in select_options.items():
+            if i_data_type is 'geo_id':
+                continue
+            assert isinstance(i_data_type, InspireDataType)
+            for i_property in i_properties:
+                assert isinstance(i_property, InspireProperty)
 
     def filter(self, filter_options):
 
         self.filter_options = filter_options
 
-        for inspire_data_type, filter_property_options in filter_options.items():
+        for filter_key, filter_property_options in filter_options.items():
 
-            assert isinstance(inspire_data_type, InspireDataType)
+            if filter_key is 'geo_id':
+                continue
 
-            for inspire_property, inspire_values in filter_property_options.items():
+            assert isinstance(filter_key, InspireDataType)
 
-                assert isinstance(inspire_property, InspireProperty)
+            for i_property, i_values in filter_property_options.items():
 
-                if not isinstance(inspire_values, list):
-                    inspire_values = [inspire_values]
-                for inspire_value in inspire_values:
-                    assert isinstance(inspire_value, InspireValue)
-                    if not isinstance(inspire_value, InspireCodeList):
-                        raise Exception('Undefined InspireValue instance {}'.format(repr(inspire_value)))
+                assert isinstance(i_property, InspireProperty)
+
+                if not isinstance(i_values, list):
+                    i_values = [i_values]
+                for i_value in i_values:
+                    assert isinstance(i_value, InspireValue)
+                    if not isinstance(i_value, InspireCodeList):
+                        raise Exception('Undefined InspireValue instance {}'.format(repr(i_value)))
 
     def _get_feature_config_id(self, i_data_type):
 
-        qs = self.manager.get_model('LFeatureConfigs').objects
-        qs = qs.filter(
-            feature_id=self.feature_id,
-            data_type_id=i_data_type.data_type_id,
-        )
-        qs = qs.values_list('feature_config_id', flat=True)
-        feature_config_ids = list(qs)
+        if self.feature_config_map is None:
 
-        if len(feature_config_ids) != 1:
+            qs = self.manager.get_model('LFeatureConfigs').objects
+            qs = qs.filter(feature_id=self.feature_id)
+            items = qs.values_list('feature_config_id', 'data_type_id')
+
+            self.feature_config_map = {
+                data_type_id: feature_config_id
+                for feature_config_id, data_type_id in items
+            }
+
+        if i_data_type.data_type_id not in self.feature_config_map:
             msg = (
-                'Expected 1 LFeatureConfigs.feature_config_id by '
+                'LFeatureConfigs.feature_config_id not found by '
                 '"feature_id={}, data_type_id={}"'
             ).format(feature_id, i_data_type.data_type_id)
             raise Exception(msg)
 
-        return feature_config_ids[0]
+        return self.feature_config_map[i_data_type.data_type_id]
 
     def _build_filter_statement_for_code_list(self, i_code_lists):
 
@@ -144,26 +154,42 @@ class InspireFeature():
 
         return Q(**options)
 
+
+    def _build_filter_geo_id_statement(self, values):
+        if isinstance(values, list):
+            return Q(geo_id__in=values)
+        else:
+            return Q(geo_id=values)
+
     def _apply_filter(self, qs, filter_options):
 
         statements = []
 
-        for i_data_type, property_options in filter_options.items():
+        for key, values in filter_options.items():
 
-            feature_config_id = self._get_feature_config_id(i_data_type)
+            if key is 'geo_id':
 
-            for i_property, i_values in property_options.items():
-
-                statement = self._build_filter_statement(
-                    feature_config_id,
-                    i_data_type,
-                    i_property,
-                    i_values
-                )
-
+                statement = self._build_filter_geo_id_statement(values)
                 statements.append(statement)
 
-        final_statement = functools.reduce(operator.or_, statements)
+            else:
+
+                i_data_type = key
+                property_options = values
+                feature_config_id = self._get_feature_config_id(i_data_type)
+
+                for i_property, i_values in property_options.items():
+
+                    statement = self._build_filter_statement(
+                        feature_config_id,
+                        i_data_type,
+                        i_property,
+                        i_values
+                    )
+
+                    statements.append(statement)
+
+        final_statement = functools.reduce(operator.and_, statements)
 
         return qs.filter(final_statement)
 
@@ -172,6 +198,9 @@ class InspireFeature():
         statements = []
 
         for i_data_type, i_properties in select_options.items():
+
+            if i_data_type is 'geo_id':
+                continue
 
             feature_config_id = self._get_feature_config_id(i_data_type)
 
@@ -201,7 +230,7 @@ class InspireFeature():
                 if last_geo_id is not None:
                     yield row
 
-                row = dict()
+                row = dict(geo_id=cell_value.geo_id)
                 last_geo_id = cell_value.geo_id
 
             key = (
@@ -216,14 +245,14 @@ class InspireFeature():
 
     def fetch(self):
 
+        # TODO optimize when it filters only by geo_id
         qs_geo_ids = self._apply_filter(self.model.objects, self.filter_options)
         qs_geo_ids = qs_geo_ids.values_list('geo_id', flat=True)
 
         qs = self.model.objects.filter(geo_id__in=qs_geo_ids)
         qs = self._apply_select(qs, self.select_options)
         qs = qs.order_by('geo_id')
-        print(qs.query)
-        print(qs.count())
+
         data_results = self._iterate_data_results(qs)
 
         for data_result in data_results:
@@ -231,6 +260,11 @@ class InspireFeature():
             row = dict()
 
             for i_data_type, i_properties in self.select_options.items():
+
+                if i_data_type is 'geo_id':
+                    row['geo_id'] = data_result['geo_id']
+                    continue
+
                 feature_config_id = self._get_feature_config_id(i_data_type)
                 for i_property in i_properties:
 
@@ -243,12 +277,13 @@ class InspireFeature():
                     row[i_data_type] = row.get(i_data_type, dict())
 
                     if i_property.value_type_id in ['text', 'multi-text']:
-                        row[i_data_type][i_property] = data_result[key].value_text
+                        value = data_result[key].value_text
                     elif i_property.value_type_id == 'date':
-                        row[i_data_type][i_property] = data_result[key].value_date
+                        value = data_result[key].value_date
                     elif i_property.value_type_id in ['single-select', 'multi-select']:
-                        row[i_data_type][i_property] = data_result[key].code_list_id
+                        value = data_result[key].code_list_id
                     else:
                         raise Exception('***\n' * 20)
+                    row[i_data_type][i_property] = value
 
             yield row

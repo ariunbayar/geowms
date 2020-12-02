@@ -17,6 +17,9 @@ from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
 
+from main.inspire import InspireProperty
+from main.inspire import InspireCodeList
+from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 
 
@@ -257,52 +260,200 @@ def send_approve_email(user):
     return True
 
 
-"""
-def inspire_fetch_by(feature_code, data_type_code):
-
-    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
-    LDataTypeConfigs = apps.get_model('backend_inspire', 'LDataTypeConfigs')
-    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
-    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
-    LProperties = apps.get_model('backend_inspire', 'LProperties')
-    MDatasBoundary = apps.get_model('backend_inspire', 'MDatasBoundary')
-
-    feature_ids = _get_feature_ids(feature_code)
-
-
-    data_type_ids = qs
-"""
-
-
 def get_administrative_levels():
 
-    table_au_au_au = InspireFeature('au-au-au')
-
-    table_au_au_au.select(
-        {
-            InspireDataType('AdministrativeUnit'): [
-                InspireProperty('nationalCode'),
-            ],
-        },
-    )
-
-    table_au_au_au.filter(
-        {
-            InspireDataType('AdministrativeUnit'): {
-                InspireProperty('NationalLevel'): [
-                    InspireCodeList('2ndOrder\n'),
-                    InspireCodeList('3rdOrder\n'),
-                    InspireCodeList('4thOrder\n'),
+    """
+    Returns a nested structure:
+    ```
+        [
+            {
+                'geo_id': 'au_62',
+                'name': 'Өвөрхангай',
+                'children': [
+                    {
+                        'geo_id': 'au_6255',
+                        'name': 'Хужирт',
+                        'children': [
+                            {'geo_id': 'au_625551', 'name': '1-р баг'},
+                            {'geo_id': 'au_625553', 'name': '2-р баг'}
+                        ]
+                    },
+                    {
+                        'geo_id': 'au_6234',
+                        'name': 'Өлзийт',
+                        'children': [
+                            {'geo_id': 'au_623451', 'name': '1-р баг'},
+                            {'geo_id': 'au_623453', 'name': '2-р баг'},
+                            {'geo_id': 'au_623455', 'name': '3-р баг'},
+                            {'geo_id': 'au_623457', 'name': '4-р баг'}
+                        ]
+                    }
+                ]
+            },
+            {
+                'geo_id': 'au_46',
+                'name': 'Өмнөговь',
+                'children': [
+                    {
+                        'geo_id': 'au_4607',
+                        'name': 'Баян-Овоо',
+                        'children': [
+                            {'geo_id': 'au_460751', 'name': '1-р баг'},
+                            {'geo_id': 'au_460753', 'name': '2-р баг'},
+                            {'geo_id': 'au_460755', 'name': '3-р баг'}
+                        ]
+                    },
+                    {
+                       'geo_id': 'au_4604',
+                        'name': 'Баяндалай',
+                        'children': [
+                            {'geo_id': 'au_460451', 'name': '1-р баг'},
+                            {'geo_id': 'au_460453', 'name': '2-р баг'},
+                            {'geo_id': 'au_460455', 'name': '3-р баг'}
+                        ]
+                    }
                 ],
             }
+        ]
+    ```
+    """
+
+    i_code_list_2nd_order = InspireCodeList('2ndOrder\n')
+    i_code_list_3rd_order = InspireCodeList('3rdOrder\n')
+    i_code_list_4th_order = InspireCodeList('4thOrder\n')
+
+    def _get_code_names(national_codes):
+
+        table_au_au_ab = InspireFeature('au-au-ab')
+
+        i_data_type_administrative_boundary = InspireDataType('AdministrativeBoundary')
+        i_property_name = InspireProperty('name')
+
+        table_au_au_ab.filter({'geo_id': national_codes})
+        table_au_au_ab.select({
+            'geo_id': True,
+            i_data_type_administrative_boundary: {i_property_name},
+        })
+
+        for item in table_au_au_ab.fetch():
+            code = item['geo_id']
+            name = item[i_data_type_administrative_boundary][i_property_name]
+            yield code, name
+
+    def _get_au_items():
+        table_au_au_au = InspireFeature('au-au-au')
+
+        table_au_au_au.filter(
+            {
+                InspireDataType('AdministrativeUnit'): {
+                    InspireProperty('NationalLevel'): [
+                        i_code_list_2nd_order,
+                        i_code_list_3rd_order,
+                        i_code_list_4th_order,
+                    ],
+                }
+            }
+        )
+
+        table_au_au_au.select(
+            {
+                'geo_id': True,
+                InspireDataType('AdministrativeUnit'): [
+                    InspireProperty('NationalLevel'),
+                    InspireProperty('nationalCode'),
+                ],
+            },
+        )
+
+        for row in table_au_au_au.fetch():
+            geo_id = row['geo_id']
+            level = row[InspireDataType('AdministrativeUnit')][InspireProperty('NationalLevel')]
+            code = row[InspireDataType('AdministrativeUnit')][InspireProperty('nationalCode')]
+            yield geo_id, level, code
+
+    # build flat data
+
+    items = {
+        '#root': {
+            'children': list()
         }
-    )
+    }
 
-    results = table_au_au_au.fetch()
+    for geo_id, level, code in _get_au_items():
+        items[code] = {
+            'geo_id': geo_id,
+            'level': level,
+            'code': code,
+            'name': '',
+            'children': list(),
+        }
 
-    raise Exception
+    codes = list(items.keys())
+    for code, name in _get_code_names(codes):
+        items[code]['name'] = name
 
-    return []
+    # makes nested structure to items['#root']['children']
+
+    def _get_parent_code(level, code):
+        if level == i_code_list_4th_order.code_list_id:
+            return code[:4]
+        if level == i_code_list_3rd_order.code_list_id:
+            return code[:2]
+        if level == i_code_list_2nd_order.code_list_id:
+            return '#root'
+        raise Exception
+
+    warning_message = ''
+
+    for code, item in items.items():
+
+        if code is '#root':
+            continue
+
+        code_parent = _get_parent_code(item['level'], code)
+
+        if code_parent not in items:
+            warning_message += '[WARNING] Missing {} for {} - {}\n'.format(code_parent, code, item['name'])
+            continue
+
+        children = items[code_parent]['children']
+        children.append(item)
+
+    if warning_message:
+        Error500 = apps.get_model('backend_config', 'Error500')
+        Error500.objects.create(
+            request_scheme='system',
+            request_url='main.utils.get_administrative_levels',
+            request_method='system',
+            request_headers='{}',
+            request_data='{}',
+            description=warning_message,
+        )
+
+    # cleanup temporary keys: level, code. children for leaf nodes
+
+    def _is_leaf_node(level):
+        return level == i_code_list_4th_order.code_list_id
+
+    for code, item in items.items():
+        if code is not '#root':
+            if _is_leaf_node(item['level']):
+                del item['children']
+            del item['level']
+            del item['code']
+
+    # sort children
+
+    def _sort_children_recursively(items):
+        for item in items:
+            children = item.get('children')
+            if children:
+                item['children'] = _sort_children_recursively(children)
+        return sorted(items, key=lambda v: v['name'])
+
+    root = _sort_children_recursively(items['#root']['children'])
+
+    return root
 
 
 def get_geom(geo_id, geom_type=None, srid=4326):
