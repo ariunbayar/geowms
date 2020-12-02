@@ -49,9 +49,9 @@ export class App extends Component {
 
     requestCount() {
         // service.component
-        service.getCount().then(({ success, count, info }) => {
+        service.getCount().then(({ success, count, revoke_count, info }) => {
             if (success) {
-                this.setState({ request_count: count })
+                this.setState({ request_count: count, revoke_count })
             } else {
                 console.log(info);
             }
@@ -83,7 +83,12 @@ export class App extends Component {
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-times-circle" url="/gov/revoke-request/" text="Цуцлах хүсэлт"></MenuItem>
+                        <MenuItem
+                            icon="gp-text-primary fa fa-times-circle"
+                            url="/gov/revoke-request/"
+                            text="Цуцлах хүсэлт"
+                            count={this.state.revoke_count}
+                        ></MenuItem>
                         <MenuItem
                             icon="gp-text-primary fa fa-plug"
                             url="/gov/org-request/"
