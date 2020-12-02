@@ -16,6 +16,7 @@ from geoportal_app.models import User
 from backend.inspire.models import LPackages, LFeatures
 from django.contrib import auth
 import datetime
+from django.db import connections
 
 
 def _get_service_url(request, token, wms):
@@ -69,6 +70,13 @@ def proxy(request, token, pk):
 
     return rsp
 
+def geoJsonConvertGeom(geojson):
+    with connections['default'].cursor() as cursor:
+        sql = """ SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326),4326)) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        geom =  ''.join(geom)
+        return geom
 
 @require_POST
 @csrf_exempt
@@ -86,7 +94,10 @@ def qgis_submit(request):
         if len(update_lists) > 0:
             for update_list in update_lists:
                 feature_id = update_list['att']['feature_id']
-                geo_id = update_list['att']['inspire_id']
+                if update_list['att']['inspire_id']:
+                    geo_id = update_list['att']['inspire_id']
+                else:
+                    geo_id = update_list['att']['geo_id']
                 package = LFeatures.objects.filter(feature_id=feature_id).first()
                 theme=LPackages.objects.filter(package_id=package.package_id).first()
                 ChangeRequest.objects.create(
@@ -99,7 +110,7 @@ def qgis_submit(request):
                     state = ChangeRequest.STATE_NEW,
                     kind = ChangeRequest.KIND_DELETE,
                     form_json = None,
-                    geo_json = update_list['geom'],
+                    geo_json = geoJsonConvertGeom(update_list['geom']),
                     order_at=datetime.datetime.strptime(burtgel_dugaar_date, '%Y.%m.%d').replace(tzinfo=datetime.timezone.utc),
                     order_no=burtgel_dugaar
                 )
@@ -107,7 +118,10 @@ def qgis_submit(request):
         if len(delete_lists) > 0:
             for update_list in delete_lists:
                 feature_id = update_list['att']['feature_id']
-                geo_id = update_list['att']['inspire_id']
+                if update_list['att']['inspire_id']:
+                    geo_id = update_list['att']['inspire_id']
+                else:
+                    geo_id = update_list['att']['geo_id']
                 package = LFeatures.objects.filter(feature_id=feature_id).first()
                 theme=LPackages.objects.filter(package_id=package.package_id).first()
                 ChangeRequest.objects.create(
@@ -120,7 +134,7 @@ def qgis_submit(request):
                     state = ChangeRequest.STATE_NEW,
                     kind = ChangeRequest.KIND_UPDATE,
                     form_json = None,
-                    geo_json = update_list['geom'],
+                    geo_json = geoJsonConvertGeom(update_list['geom']),
                     order_at=datetime.datetime.strptime(burtgel_dugaar_date, '%Y.%m.%d').replace(tzinfo=datetime.timezone.utc),
                     order_no=burtgel_dugaar
                 )
