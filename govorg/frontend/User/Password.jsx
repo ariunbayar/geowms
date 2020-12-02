@@ -14,6 +14,8 @@ export class Password extends Component {
             handleSubmitIsLoad: false,
             modal_alert_status: "closed",
             timer: null,
+            msg: '',
+            error: '',
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose=this.modalClose.bind(this)
@@ -21,15 +23,30 @@ export class Password extends Component {
 
     handleSubmit(values) {
         this.setState({handleSubmitIsLoad:true})
-        service.updatePassword(values.new_password, values.old_password).then(({ success }) => {
-            success && this.setState({modal_alert_status: "open"})
-        })
-        this.modalCloseTime()
+        if(values.new_password == values.re_new_password) {
+            service
+                .updatePassword(values.new_password, values.old_password, values.re_new_password)
+                .then(({ success, error, msg }) => {
+                if (success) {
+                    this.setState({ msg, modal_alert_status: "open" })
+                    this.modalCloseTime()
+                } else {
+                    this.setState({ error, modal_alert_status: "open" })
+                }
+            })
+        } else {
+            this.setState({ error: "Таарахгүй байна", modal_alert_status: "open" })
+        }
     }
 
     modalClose(){
         this.setState({handleSubmitIsLoad:false})
-        this.props.history.push( `/gov/profile/`)
+        if (this.state.msg) {
+            this.props.history.push( `/gov/profile/`)
+        }
+        if(this.state.error) {
+            this.setState({ error: '' })
+        }
         this.setState({modal_alert_status: "closed"})
     }
 
@@ -42,7 +59,7 @@ export class Password extends Component {
     }
 
     render() {
-
+        const { msg, error } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -109,12 +126,12 @@ export class Password extends Component {
                                             <ModalAlert
                                                 modalAction={() => this.modalClose()}
                                                 status={this.state.modal_alert_status}
-                                                title="Амжилттай хадгаллаа"
-                                                model_type_icon = "success"
+                                                title={msg || error}
+                                                model_type_icon = {error !== '' ? "danger" : "success"}
                                             />
                                         </>
                                         :
-                                        <button className="btn gp-btn-primary" onClick={this.handleSubmitIsLoad} >
+                                        <button type="submit" className="btn gp-btn-primary">
                                             Хадгалах
                                         </button>
                                     }

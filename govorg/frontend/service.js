@@ -52,10 +52,10 @@ function detail() {
     return fetch(`/profile/api/info/`, opts).then(handleResponse)
 }
 
-function updatePassword(new_password, old_password) {
+function updatePassword(new_password, old_password, re_password) {
     const requestOptions = {
         ...getPostOptions(),
-          body: JSON.stringify({ new_password, old_password }),
-    }    
+          body: JSON.stringify({ new_password, old_password, re_password }),
+    }
     return fetch(`/profile/api/update-password/`, requestOptions).then(handleResponse)
 }
