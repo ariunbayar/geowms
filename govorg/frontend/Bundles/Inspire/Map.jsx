@@ -446,6 +446,11 @@ export default class BarilgaSuurinGazar extends Component{
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
+          if(this.state.cancel_button_active){
+            const geom_for_revoke = event.selected[0]
+            this.setState({ geom_for_revoke })
+            this.cancelModal()
+          }
         } else {
           const feature = event.selected[0]
           this.collectFeatures(feature)
@@ -792,24 +797,22 @@ export default class BarilgaSuurinGazar extends Component{
 
       if(this.state.selectedFeature_ID){
         if(this.state.roles[6]){
-          this.controls.modal.showModal(() => this.cancel(values), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
+          this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
         }else{
-          this.controls.modal.showModal(this.cancel, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг цуцлах уу`, null, 'danger', "Үгүй")
+          this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг цуцлах уу`, null, 'danger', "Үгүй")
         }
       }
       else
       {
-        if(this.state.drawed) this.controls.modal.showModal(this.cancel, true, "Тийм", `Шинээр үүссэн цэгийг цуцлах уу`, null, 'danger', "Үгүй")
+        if(this.state.drawed) this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `Шинээр үүссэн цэгийг цуцлах уу`, null, 'danger', "Үгүй")
         else this.addNotif('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
       }
     }
 
-    requestCancel() {
-      const tid = this.state.tid
-      const fid = this.state.fid
-      const pid = this.state.pid
-      const selectedFeature_ID = this.state.selectedFeature_ID
-      service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
+    requestCancel(order_at, number, form_json) {
+      const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
+      const geo_json = this.writeFeat(geom_for_revoke)
+      service.cancel(pid, fid, tid, selectedFeature_ID, geo_json, form_json, number, order_at).then(({ success }) => {
         if (success) {
           this.props.refreshCount()
           this.addNotif('success', 'Цуцлах хүсэлт үүслээ', 'check')
@@ -818,10 +821,11 @@ export default class BarilgaSuurinGazar extends Component{
       })
     }
 
-    cancel(values){
+    cancel(order_at, number, form_json){
       const vector = this.vector
       const vectorLayer = this.vectorLayer
-      const {tid, fid, pid, selectedFeature_ID} = this.state
+      const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
+      const geo_json = this.writeFeat(geom_for_revoke)
 
       const features_new = vector.getSource().getFeatures();
       const features = vectorLayer.getSource().getFeatures();
@@ -831,7 +835,7 @@ export default class BarilgaSuurinGazar extends Component{
             this.setState({ togle_islaod: false })
           }
           else{
-            service.cancel(pid, fid, selectedFeature_ID).then(({ success, info }) => {
+            service.cancel(pid, fid, tid, selectedFeature_ID, geo_json, form_json, number, order_at).then(({ success, info }) => {
               if (success) {
                 this.addNotif('success', info, 'check')
                 this.setState({featureID_list: [], selectedFeature_ID: null})
@@ -904,9 +908,6 @@ export default class BarilgaSuurinGazar extends Component{
       if (!is_not_mongolia) {
         const id = this.state.selectedFeature_ID
         const { changedFeature, changedJson } = this.state
-        console.log(changedJson);
-        console.log(changedJson);
-        console.log(changedJson);
         this.feature = ''
         if (changedJson) {
           this.feature = changedJson
@@ -951,16 +952,13 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     createGeom(){
-      console.log('shineeer uussgeh');
       const { is_not_mongolia } = this.state
       if (!is_not_mongolia) {
-        console.log('in mongol');
         const fid = this.state.fid
         const json = JSON.parse(this.state.drawed)
         const datas = json.geometry
         this.setState({ is_loading: true })
         if(this.state.roles[6]){
-          console.log('batlah erhtei');
           this.setState({ is_loading: false, geojson: datas, togle_islaod: false})
         }
         else
@@ -1463,6 +1461,7 @@ export default class BarilgaSuurinGazar extends Component{
                           geojson = {this.state.geojson}
                           roles = {this.state.roles}
                           gid = {this.state.selectedFeature_ID}
+                          cancel = {this.cancel}
                           togle_islaod = {this.state.togle_islaod}
                           null_form_isload = {this.state.null_form_isload}
                           addNotif = {this.addNotif}

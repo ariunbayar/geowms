@@ -23,8 +23,8 @@ class ChangeRequest(models.Model):
 
     KIND_CHOICES = (
         (KIND_CREATE, 'ҮҮССЭН'),
-        (KIND_DELETE, 'ЗАССАН'),
-        (KIND_UPDATE, 'УСТГАСАН'),
+        (KIND_DELETE, 'УСТГАСАН'),
+        (KIND_UPDATE, 'ЗАССАН'),
         (KIND_REVOKE, 'ЦУЦЛАХ'),
         (KIND_DIRECT, 'ШУУД'),
     )

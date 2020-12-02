@@ -7,7 +7,7 @@ import json
 from main.decorators import ajax_required
 from main.utils import refreshMaterializedView
 
-from backend.inspire.models import MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography
+from backend.inspire.models import MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography, LThemes, LPackages, LFeatures
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Org, Employee
 
@@ -24,10 +24,10 @@ def _get_revoke_request_display(revoke_request):
             'id': revoke_request.id,
             'old_geo_id': revoke_request.old_geo_id,
             'order_no': revoke_request.order_no,
-            'order_at': revoke_request.order_at,
-            'theme_id': revoke_request.theme_id,
-            'package_id': revoke_request.package_id,
-            'feature_id': revoke_request.feature_id,
+            'order_at': revoke_request.order_at.strftime('%Y-%m-%d'),
+            'theme_name': LThemes.objects.filter(theme_id=revoke_request.theme_id).first().theme_name,
+            'package_name': LPackages.objects.filter(package_id=revoke_request.package_id).first().package_name,
+            'feature_name': LFeatures.objects.filter(feature_id=revoke_request.feature_id).first().feature_name,
             'last_name': revoke_request.employee.user.last_name,
             'first_name': revoke_request.employee.user.first_name,
             'org': revoke_request.employee.org.name,
@@ -57,7 +57,7 @@ def all(request):
     return JsonResponse(rsp)
 
 
-def _set_change_request(employee, data):
+def _set_change_request(employee, payload):
 
     theme_id = payload.get('tid')
     package_id = payload.get('pid')
@@ -101,15 +101,16 @@ def _get_model_name(name):
 @require_POST
 @ajax_required
 def revoke(request, payload):
-
         employee = get_object_or_404(Employee, user=request.user)
 
-        theme_code = payload.get('tcode')
+        theme_id = payload.get('tid')
         feature_id = payload.get('fid')
         old_geo_id = payload.get('old_geo_id')
 
         _set_change_request(employee, payload)
 
         MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).delete()
+        theme_code=LThemes.objects.filter(theme_id=theme_id).first().theme_code
         _get_model_name(theme_code).objects.filter(geo_id=old_geo_id).delete()
         refreshMaterializedView(feature_id)
+        return JsonResponse({ 'success':True })

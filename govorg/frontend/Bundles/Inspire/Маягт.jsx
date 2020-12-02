@@ -29,47 +29,59 @@ export default class Маягт extends Component {
     onSubmit(values, { setStatus, setSubmitting }) {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list } = this.props
         if(this.props.roles[6]){
-            if(null_form_isload){
-                service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.props.requestRefreshCount()
-                        this.addNotif('success', 'Property хадгалалаа', 'check')
-                    }
-                })
-            }
-            else if (modifyend_selected_feature_check || update_geom_from_list) {
-                this.props.SaveBtn(values)
-            }
-            else if (remove_button_active) {
-                this.props.requestRemove(values)
-            }
-            else {
-                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.props.requestRefreshCount()
-                        this.addNotif('success', 'Property хадгалалаа', 'check')
-                    }
-                })
+            if(!this.props.cancel_button_active) {
+                if(null_form_isload) {
+                    service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.props.requestRefreshCount()
+                            this.addNotif('success', 'Property хадгалалаа', 'check')
+                        }
+                    })
+                }
+                else if (modifyend_selected_feature_check || update_geom_from_list) {
+                    this.props.SaveBtn(values)
+                }
+                else if (remove_button_active) {
+                    this.props.requestRemove(values)
+                }
+                else {
+                    service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.props.requestRefreshCount()
+                            this.addNotif('success', 'Property хадгалалаа', 'check')
+                        }
+                    })
+                }
             }
         }
         else{
-            if(null_form_isload){
-                service.save(this.state.fid, values).then(({ success }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.handleUpdate(gid)
-                    }
-                })
+            if(!this.props.cancel_button_active) {
+                if(null_form_isload) {
+                    service.save(this.state.fid, values).then(({ success }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.handleUpdate(gid)
+                        }
+                    })
+                }
+                else {
+                    service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.handleUpdate(gid)
+                        }
+                    })
+                }
             }
-            else{
-                service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.handleUpdate(gid)
-                    }
-                })
+        }
+        if (this.props.cancel_button_active) {
+            if (this.props.roles[6]) {
+                this.props.requestCancel(values.order_at, values.order_no, values.form_values)
+            }
+            else {
+                this.props.cancel(values.order_at, values.order_no, values.form_values)
             }
         }
     }
