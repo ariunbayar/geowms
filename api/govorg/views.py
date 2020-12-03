@@ -154,3 +154,37 @@ def user_check(request):
             return JsonResponse({'success': False, "user_id": user.id})
     except Exception:
         return JsonResponse({'success': False, "user_id": None})
+
+
+@require_GET
+def qgisProxy(request, token):
+    print(token)
+    print(token)
+    print(token)
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    employee = get_object_or_404(Employee, token=token)
+    print(employee)
+    print(employee)
+    print(employee)
+    print(employee)
+    print(employee)
+    base_url = 'http://localhost:8080/geoserver/ows'
+
+
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    content = rsp.content
+
+
+    content_type = rsp.headers.get('content-type')
+    rsp = HttpResponse(content, content_type=content_type)
+
+    if system.website:
+        rsp['Access-Control-Allow-Origin'] = system.website
+    else:
+        rsp['Access-Control-Allow-Origin'] = '*'
+
+    return rsp

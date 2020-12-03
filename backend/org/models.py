@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
-
+from main.utils import (
+    _generate_user_token
+)
 
 class Org(models.Model):
     LEVEL_CHOICES = [
@@ -21,6 +23,11 @@ class Employee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_admin = models.BooleanField(default=False)
+    token = models.CharField(max_length=250, db_index=True, null=True)
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.token=_generate_user_token()
+        super(Employee, self).save(*args, **kwargs)
 
 
 class OrgRole(models.Model):
