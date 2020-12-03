@@ -154,7 +154,7 @@ export class TableHeadRole extends Component {
                                     this.props.handleCheckedFeature(true, 4, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
                                     null)
                                 }>
-                                    <small className="smaller text-center ml-2">цуцлах</small>
+                                    <small className="smaller text-center ml-2">засах</small>
                                     <div className="switch-tree-state col-lg-12">
                                         <div className={perm_update == perm_all ? 'switch-all switch-one' : 'switch-all'}></div>
                                         <div className={0 < perm_update && perm_update < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
@@ -181,7 +181,7 @@ export class TableHeadRole extends Component {
                                     this.props.handleCheckedFeature(true, 5, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
                                     null)
                                 }>
-                                    <small className="smaller text-center ml-2">хянах</small>
+                                    <small className="smaller text-center ml-2">цуцлах</small>
                                     <div className="switch-tree-state col-lg-12">
                                         <div className={perm_approve == perm_all ? 'switch-all switch-one' : 'switch-all'}></div>
                                         <div className={0 < perm_approve && perm_approve < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
