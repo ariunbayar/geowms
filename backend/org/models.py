@@ -9,7 +9,7 @@ class Org(models.Model):
         (3, '3-р түвшин'),
         (4, '4-р түвшин'),
     ]
-
+    geo_id = models.CharField(max_length=100, null=True)
     name = models.CharField(max_length=250)
     level = models.PositiveIntegerField(choices=LEVEL_CHOICES, db_index=True)
 
