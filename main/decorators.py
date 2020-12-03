@@ -109,5 +109,4 @@ def gov_org_required(module):
         wrap.__name__ = f.__name__
 
         return wrap
-
     return inner
