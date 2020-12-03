@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_inspire', '0006_auto_20201115_2352'),
+        ('backend_inspire', '0007_remove_govperm_geo_id'),
     ]
 
     operations = [
