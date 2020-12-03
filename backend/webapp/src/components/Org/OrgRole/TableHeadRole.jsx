@@ -17,7 +17,7 @@ export class TableHeadRole extends Component {
         const {fid, properties, name, index,
                 tree, inspire, root_1, root_2,
                 root_3, perm_all, perm_view, perm_create,
-                perm_remove, perm_update, perm_approve, perm_revoce, mtop,
+                perm_remove, perm_update, perm_approve, perm_revoke, mtop,
                 root_1_index, root_2_index, root_3_index
         } = this.props
         return (
@@ -164,6 +164,33 @@ export class TableHeadRole extends Component {
                                 </div>
                                 <div className="col-2"
                                 onClick={(e) =>
+                                    perm_revoke >= perm_all ?
+                                    (inspire == 'theme' ?
+                                    this.props.handleCheckedTheme(false, 6, root_1, root_1_index):
+                                    inspire == 'package' ?
+                                    this.props.handleCheckedPackage(false, 6, root_1, root_1_index, root_2, root_2_index):
+                                    inspire == 'feature' ?
+                                    this.props.handleCheckedFeature(false, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                    null)
+                                    :
+                                    (inspire == 'theme' ?
+                                    this.props.handleCheckedTheme(true, 6, root_1, root_1_index):
+                                    inspire == 'package' ?
+                                    this.props.handleCheckedPackage(true, 6, root_1, root_1_index, root_2, root_2_index):
+                                    inspire == 'feature' ?
+                                    this.props.handleCheckedFeature(true, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
+                                    null)
+                                }>
+                                    <small className="smaller text-center ml-2">цуцлах</small>
+                                    <div className="switch-tree-state col-lg-12">
+                                        <div className={perm_revoke == perm_all ? 'switch-all switch-one' : 'switch-all'}></div>
+                                        <div className={0 < perm_revoke && perm_revoke < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
+                                        <div className={perm_revoke == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
+                                    </div>
+                                    {/* <small className="smaller text-center">{perm_all}-{perm_revoke}</small> */}
+                                </div>
+                                <div className="col-2"
+                                onClick={(e) =>
                                     perm_approve >= perm_all ?
                                     (inspire == 'theme' ?
                                     this.props.handleCheckedTheme(false, 5, root_1, root_1_index):
@@ -181,40 +208,13 @@ export class TableHeadRole extends Component {
                                     this.props.handleCheckedFeature(true, 5, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
                                     null)
                                 }>
-                                    <small className="smaller text-center ml-2">цуцлах</small>
+                                    <small className="smaller text-center ml-2">батлах</small>
                                     <div className="switch-tree-state col-lg-12">
                                         <div className={perm_approve == perm_all ? 'switch-all switch-one' : 'switch-all'}></div>
                                         <div className={0 < perm_approve && perm_approve < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_approve == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_approve}</small> */}
-                                </div>
-                                <div className="col-2"
-                                onClick={(e) =>
-                                    perm_revoce >= perm_all ?
-                                    (inspire == 'theme' ?
-                                    this.props.handleCheckedTheme(false, 6, root_1, root_1_index):
-                                    inspire == 'package' ?
-                                    this.props.handleCheckedPackage(false, 6, root_1, root_1_index, root_2, root_2_index):
-                                    inspire == 'feature' ?
-                                    this.props.handleCheckedFeature(false, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                    null)
-                                    :
-                                    (inspire == 'theme' ?
-                                    this.props.handleCheckedTheme(true, 6, root_1, root_1_index):
-                                    inspire == 'package' ?
-                                    this.props.handleCheckedPackage(true, 6, root_1, root_1_index, root_2, root_2_index):
-                                    inspire == 'feature' ?
-                                    this.props.handleCheckedFeature(true, 6, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
-                                    null)
-                                }>
-                                    <small className="smaller text-center ml-2">батлах</small>
-                                    <div className="switch-tree-state col-lg-12">
-                                        <div className={perm_revoce == perm_all ? 'switch-all switch-one' : 'switch-all'}></div>
-                                        <div className={0 < perm_revoce && perm_revoce < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
-                                        <div className={perm_revoce == 0 ? 'switch-all switch-tree' : 'switch-all'}></div>
-                                    </div>
-                                    {/* <small className="smaller text-center">{perm_all}-{perm_revoce}</small> */}
                                 </div>
                             </div>
                         </div>
