@@ -1000,11 +1000,13 @@ def saveInspireRoles(request, payload, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def getGovRoles(request, level, pk):
-    roles = []
     data = []
     roles = []
     org = get_object_or_404(Org, pk=pk, level=level)
-    gov_perm = GovPerm.objects.filter( org=org).first()
+    gov_perm = GovPerm.objects.filter(org=org).first()
+    if not gov_perm:
+        gov_perm = GovPerm.objects.create(org=org, created_by=request.user, updated_by=request.user)
+
     for themes in LThemes.objects.all():
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoce = _get_theme_packages(themes.theme_id, gov_perm)
         data.append({
@@ -1020,7 +1022,6 @@ def getGovRoles(request, level, pk):
                 'perm_approve': t_perm_approve,
                 'perm_revoce': t_perm_revoce,
             })
-    if gov_perm:
         gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
         if gov_perm_inspire_all:
             for datas in gov_perm_inspire_all:
