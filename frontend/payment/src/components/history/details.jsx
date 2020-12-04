@@ -49,7 +49,7 @@ export class Details extends Component {
             <div className="container">
                 <div className="row">
                     <div className="col-md-12 py-0 my-3">
-                        <NavLink to="/profile/all/" className="btn mt-2 gp-outline-primary">
+                        <NavLink to="/payment/history/" className="btn mt-2 gp-outline-primary">
                             Буцах
                         </NavLink>
                         <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>

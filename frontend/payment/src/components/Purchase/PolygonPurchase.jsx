@@ -49,7 +49,7 @@ export class PolygonPurchase extends Component {
         const {purchase_all} = this.state
         service.payment(purchase_all).then(({ success }) => {
             if (success) {
-                this.props.history.push(`/profile/all/api/details/${purchase_id}/`)
+                this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
             } else {
                 this.props.history.push(`/payment/failed/${purchase_id}/`)
             }
@@ -71,7 +71,7 @@ export class PolygonPurchase extends Component {
 
     handleModalApproveClose(){
       const purchase_id = this.props.match.params.id
-      this.props.history.push(`/profile/all/api/details/${purchase_id}/`)
+      this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 
     handleQpay(){

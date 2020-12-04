@@ -6,6 +6,7 @@ export const service = {
     downloadPurchase,
     getDetails,
     paymentTest,
+    paginatedList,
 }
 
 
@@ -41,4 +42,13 @@ function paymentTest(id) {
 function getDetails(id){
     const requestOptions = {...getGetOptions()}
     return fetch(`/profile/api/${id}/get-details/`, requestOptions).then(handleResponse)
+}
+
+function paginatedList(page, per_page) {
+    const requestOptions = {
+        ...getPostOptions(),
+    body: JSON.stringify({ page, per_page }),
+    }
+
+    return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
 }

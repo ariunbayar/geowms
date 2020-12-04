@@ -235,7 +235,7 @@ def download_purchase(request, pk):
         if is_created:
 
             subject = 'Худалдан авалт'
-            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу! http://192.168.10.92/profile/all/api/details/{id}/'.format(id=payment.pk)
+            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу! http://192.168.10.92/payment/history/api/details/{id}/'.format(id=payment.pk)
             to_email = [payment.user.email]
 
             send_email(subject, msg, to_email)
