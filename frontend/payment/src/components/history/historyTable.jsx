@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import {Details} from './details'
 import {Link} from "react-router-dom"
 import {service} from '../service'
 
@@ -32,7 +31,7 @@ export class HistoryTable extends Component {
             <div className="col-4 my-2">
                 <div className="card">
                     <div className="card-body">
-                        <Link to={`/profile/all/api/details/${id}/`}>
+                        <Link to={`/payment/history/api/details/${id}/`}>
                             <h5>
                                 { is_success
                                     ?

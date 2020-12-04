@@ -32,23 +32,27 @@ export default class HistoryForm extends Component {
     render() {
         const {payment,payment_length} = this.state
         return (
-        <div className="container pt-0">
-            <div className="row">
-                { payment_length ===0 ?
-                    <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
-                        payment.map((p, idx) =>
-                            <HistoryTable
-                                key={idx}
-                                values={p}
-                            >
-                            </HistoryTable>
-                        )
-                }
+            <div className="card">
+                <div className="card-body">
+                    <div className="container pt-0">
+                        <div className="row">
+                            { payment_length ===0 ?
+                                <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
+                                    payment.map((p, idx) =>
+                                        <HistoryTable
+                                            key={idx}
+                                            values={p}
+                                        >
+                                        </HistoryTable>
+                                    )
+                            }
+                        </div>
+                        {payment_length !=0 &&
+                                <Pagination paginate = { this.paginate }/>
+                        }
+                    </div>
+                </div>
             </div>
-            {payment_length !=0 &&
-                    <Pagination paginate = { this.paginate }/>
-            }
-        </div>
         )
     }
 }
