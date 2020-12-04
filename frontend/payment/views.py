@@ -393,6 +393,7 @@ def _calc_per_price(area, area_type, layer_length):
 def calcPrice(request, payload):
     area = payload.get('area')
     layer_length = payload.get("layer_length")
+    feature_info_list = payload.get("feature_info_list")
     area_type = area['type']
     area = area['output']
 
