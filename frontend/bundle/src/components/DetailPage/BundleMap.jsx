@@ -567,44 +567,53 @@ export default class BundleMap extends Component {
         const extent = toLonLat([x1, y1])
         const extent2 = toLonLat([x2, y2])
         const full_extent = extent.toString() + ',' + extent2.toString()
+        var list = []
         map_wms_list.map(({ name, layers }) => {
-            layers.map(({ id, code, tile }) => {
-                const main_url = tile.getSource().urls[0]
-                if(main_url) {
-                    const url =
-                        main_url.slice(0, -1) +
-                        '?service=WFS' +
-                        '&version=1.1.0' +
-                        '&request=GetFeature' +
-                        '&typeName=' + code +
-                        '&bbox=' + full_extent + ',' + this.state.projection_display
-                    fetch(url)
-                        .then((rsp) => rsp.text())
-                        .then((text) => {
-                            const parser = new WMSGetFeatureInfo()
-                            const features = parser.readFeatures(text)
-                            const feature_info = features.map((feature) => {
-                                const geometry_name = feature.getGeometryName()
-                                const values =
-                                    feature.getKeys()
-                                        .filter((key) => key != geometry_name)
-                                        .map((key) => [key, feature.get(key)])
-                                const list_id = feature.getId().split('.')
-                                const id = list_id[list_id.length - 1]
-                                return [id, values]
-                            })
-                            const info = feature_info.map((feature, idx) => {
-                                var obj = new Object()
-                                obj['geom_id'] = feature[0]
-                                feature[1].map((info, idx) => {
-                                    if(info[0] == 'feature_id') {
-                                        obj['feature_id'] = info[1]
-                                    }
+            layers.map(({ id, code, tile }, idx) => {
+                if (tile.getVisible()) {
+                    const main_url = tile.getSource().urls[0]
+                    if(main_url) {
+                        const url =
+                            main_url.slice(0, -1) +
+                            '?service=WFS' +
+                            '&version=1.1.0' +
+                            '&request=GetFeature' +
+                            '&typeName=' + code +
+                            '&bbox=' + full_extent + ',' + this.state.projection_display
+                        fetch(url)
+                            .then((rsp) => rsp.text())
+                            .then((text) => {
+                                const parser = new WMSGetFeatureInfo()
+                                const features = parser.readFeatures(text)
+                                const feature_info = features.map((feature) => {
+                                    const geometry_name = feature.getGeometryName()
+                                    const values =
+                                        feature.getKeys()
+                                            .filter((key) => key != geometry_name)
+                                            .map((key) => [key, feature.get(key)])
+                                    const list_id = feature.getId().split('.')
+                                    const id = list_id[list_id.length - 1]
+                                    return [id, values]
                                 })
-                                return obj
-                            })
-                            this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, info)
-                    })
+                                if(feature_info.length > 0) {
+                                    const info = feature_info.map((feature, idx) => {
+                                        var obj = new Object()
+                                        obj['geom_id'] = feature[0]
+                                        feature[1].map((info, idx) => {
+                                            if(info[0] == 'feature_id') {
+                                                obj['feature_id'] = info[1]
+                                            }
+                                        })
+                                        obj['layer_code'] = code
+                                        return obj
+                                    })
+                                    list.push({[code]: info})
+                                    if(layers.length - 1 == idx) {
+                                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                                    }
+                                }
+                        })
+                    }
                 }
             })
         })
@@ -630,13 +639,14 @@ export default class BundleMap extends Component {
     calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, feature_info_list) {
         const area = this.formatArea(feature_geometry)
 
-        var layer_length = 0
-        layer_info.wms_list.map((layer, idx) => {
-            layer_length = layer_length + layer.layers.length
+        var layer_list = []
+        layer_info.wms_list.map((w, idx) => {
+            w.layers.map((layer, idx) => {
+                layer_list.push(layer.name)
+            })
         })
-
         service
-            .paymentCalcPrice(area, layer_length, feature_info_list)
+            .paymentCalcPrice(area, layer_list, feature_info_list)
             .then(({ success, total_price, is_user }) => {
                 if (success) {
                     const is_loading = false
