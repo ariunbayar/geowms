@@ -84,17 +84,11 @@ urlpatterns = [
         path('org-count/', org_views.countOrg, name='org-count'),
         path('perm-get-list/', org_views.permGetList, name='perm-get-list'),
         path('create-perm/', org_views.createPerm, name='create-perm'),
-        path('get-role-name/', org_views.getgetRolesNames, name='get-role-name'),
         path('inspire-roles/<int:pk>/', org_views.getInspireRoles, name='inspire-roles'),
         path('inspire-roles/<int:pk>/save/', org_views.saveInspireRoles, name='inspire-roles-save'),
-
         path('level-<int:level>/<int:pk>/gov-perm/', org_views.getGovRoles, name='get-gov-roles'),
         path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.saveGovRoles, name='save-gov-roles'),
-
-        path('getAimags/', org_views.getAimags, name='getAimags'),
-        path('getSumuud/', org_views.getSumuud, name='getSumuud'),
-        path('getBaguud/', org_views.getBaguud, name='getBaguud'),
-        path('geo_id_display/', org_views.geo_id_display, name='geo_id_display'),
+        path('form-options/', org_views.formOptions, name='form-options'),
 
     ], 'org'))),
 

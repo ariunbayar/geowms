@@ -516,7 +516,12 @@ def detail(request, level, pk):
         if org_roles.gov_role:
             org_role = org_roles.gov_role.id
 
-    org.geo_id = 'au_41'  # TODO set org.geo_id as MultiPolygon geom, not LineString
+    if pk:
+        geo_id = Org.objects.filter(id=pk).first().geo_id
+    else:
+        geo_id = None
+
+    org.geo_id = geo_id  # TODO set org.geo_id as MultiPolygon geom, not LineString
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
 
     orgs_display = [{
@@ -644,22 +649,15 @@ def countOrg(request):
     return JsonResponse(rsp)
 
 
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def getgetRolesNames(request):
+def getgetRolesNames():
     gov_role_display = []
     for gov_role in GovRole.objects.all():
         gov_role_display.append({
             'id': gov_role.id,
             'name': gov_role.name,
         })
-    rsp = {
-        'success': True,
-        'roles': gov_role_display
-    }
 
-    return JsonResponse(rsp)
+    return gov_role_display
 
 
 @require_POST
@@ -1275,197 +1273,20 @@ def saveGovRoles(request, payload, level, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def getAimags(request, payload):
-    au_au_au_feature_config_id = payload.get('au_au_au_feature_config_id')
-    au_au_au_data_type_id = payload.get('au_au_au_data_type_id')
-    nationalCode = payload.get('nationalCode')
-    au_au_ab_feature_config_id = payload.get('au_au_ab_feature_config_id')
-    au_au_ab_data_type_id = payload.get('au_au_ab_data_type_id')
-    name = payload.get('name')
-    NationalLevel = payload.get('NationalLevel')
-    code_list_id_aimag = payload.get('code_list_id_aimag')
-    try:
-        aimguud = []
-        for ub_aimag in MDatasBoundary.objects.filter(property_id=NationalLevel, feature_config_id__in=au_au_au_feature_config_id, code_list_id=code_list_id_aimag):
-            for value_text in MDatasBoundary.objects.filter(geo_id=ub_aimag.geo_id, feature_config_id__in=au_au_au_feature_config_id, data_type_id=au_au_au_data_type_id, property_id=nationalCode):
-                aimag_datas = MDatasBoundary.objects.filter(geo_id=value_text.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
-                for datas in aimag_datas:
-                    aimguud.append({
-                    'aimag_names': datas.value_text,
-                    'geo_id': datas.geo_id,
-                })
-        aimguud_sorted = sorted(aimguud, key = lambda i:i['aimag_names'])
-        rsp = {
-            'info': aimguud_sorted,
-            'success': True,
-        }
-        return JsonResponse(rsp)
-    except Exception as error:
-        rsp = {
-            'info': '',
-            'success': False,
-        }
-        return JsonResponse(rsp)
+def formOptions(request, payload):
 
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def getSumuud(request, payload):
-    aimag = payload.get('aimag')
-    au_au_au_feature_config_id = payload.get('au_au_au_feature_config_id')
-    au_au_au_data_type_id = payload.get('au_au_au_data_type_id')
-    nationalCode = payload.get('nationalCode')
-    au_au_ab_feature_config_id = payload.get('au_au_ab_feature_config_id')
-    au_au_ab_data_type_id = payload.get('au_au_ab_data_type_id')
-    name = payload.get('name')
-    code_list_id_sum = payload.get('code_list_id_sum')
-    try:
-        sumuud = []
-        aimag_geo_id = list(MDatasBoundary.objects.filter(value_text=aimag).all())[-1].geo_id
-        cursor = connections['default'].cursor()
-        sql = """
-            select geo_id
-            from public.m_datas_boundary
-            where geo_id like 'au_{aimag_geo_id}%' and code_list_id = {code_list_id_sum}
-            order by geo_id asc;
-        """.format(
-                aimag_geo_id = aimag_geo_id,
-                code_list_id_sum = code_list_id_sum
-        )
-        geo_ids = cursor.execute(sql)
-        geo_ids = cursor.fetchall()
-        for geo_id in geo_ids:
-            geo_id = ''.join(geo_id)
-
-            for sum_ob in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=au_au_au_feature_config_id, data_type_id=au_au_au_data_type_id, property_id=nationalCode):
-                sum_datas = MDatasBoundary.objects.filter(geo_id=sum_ob.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
-                for datas in sum_datas:
-                    sumuud.append({
-                    'sum_names': datas.value_text,
-                    'geo_id': datas.geo_id
-                })
-        sumuud_sorted = sorted(sumuud, key = lambda i:i['sum_names'])
-        rsp = {
-            'info': sumuud_sorted,
-            'success': True,
-        }
-        return JsonResponse(rsp)
-    except Exception as error:
-        rsp = {
-            'info': '',
-            'success': False,
-        }
-        return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def getBaguud(request, payload):
-    soum = payload.get('soum')
-    au_au_au_feature_config_id = payload.get('au_au_au_feature_config_id')
-    au_au_au_data_type_id = payload.get('au_au_au_data_type_id')
-    nationalCode = payload.get('nationalCode')
-    au_au_ab_feature_config_id = payload.get('au_au_ab_feature_config_id')
-    au_au_ab_data_type_id = payload.get('au_au_ab_data_type_id')
-    name = payload.get('name')
-    code_list_id_bag = payload.get('code_list_id_bag')
-    try:
-        baguud = []
-        soum_geo_id = list(MDatasBoundary.objects.filter(value_text=soum).all())[-1].geo_id
-        cursor = connections['default'].cursor()
-        sql = """
-            select geo_id
-            from public.m_datas_boundary
-            where geo_id like 'au_{soum_geo_id}%' and code_list_id = {code_list_id_bag}
-            order by geo_id asc;
-        """.format(
-                soum_geo_id = soum_geo_id,
-                code_list_id_bag = code_list_id_bag
-        )
-        geo_ids = cursor.execute(sql)
-        geo_ids = cursor.fetchall()
-
-        for geo_id in geo_ids:
-            geo_id = ''.join(geo_id)
-
-            for bag in MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=au_au_au_feature_config_id, data_type_id=au_au_au_data_type_id, property_id=nationalCode):
-                bag_datas = MDatasBoundary.objects.filter(geo_id=bag.value_text, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name)
-                for datas in bag_datas:
-                    baguud.append({
-                    'bag_names': datas.value_text,
-                    'geo_id': datas.geo_id
-                })
-        baguud_sorted = sorted(baguud, key = lambda i:i['bag_names'])
-        rsp = {
-            'info': baguud_sorted,
-            'success': True,
-        }
-        return JsonResponse(rsp)
-    except Exception as error:
-        rsp = {
-            'info': '',
-            'success': False,
-        }
-        return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def geo_id_display(request, payload):
-
+    org_level = payload.get('org_level')
     org_id = payload.get('org_id')
-
-    au_au_au_feature_id = LFeatures.objects.filter(feature_code="au-au-au").first().feature_id #4
-    au_au_au_feature_config_id = [i['feature_config_id'] for i in  LFeatureConfigs.objects.filter(feature_id__in=[au_au_au_feature_id]).values('feature_config_id')]  # 5,6,7
-
-    au_au_au_data_type_id = list(LDataTypes.objects.filter(data_type_id__in=au_au_au_feature_config_id, data_type_code='AdministrativeUnit').values('data_type_id'))[0]['data_type_id']
-    property_ids = [i['property_id'] for i in LDataTypeConfigs.objects.filter(data_type_id=au_au_au_data_type_id).values('property_id')] # 2, 22, 3, 4, 26, 24, 27
-
-    NationalLevel = LProperties.objects.filter(property_id__in=property_ids, property_code='NationalLevel').values('property_id')[0]['property_id'] # Үндэсний засаг захиргааны түвшин: Энэ хил зааг бүхий бүх зэргэлдээ засаг захиргааны нэгжийн шаталсан түвшин.
-    nationalCode = LProperties.objects.filter(property_id__in=property_ids, property_code='nationalCode').values('property_id')[0]['property_id'] # Улсын код: Улс орон бүрт тодорхойлсон үндэсний засаг захиргааны кодтой тохирох сэдэвчилсэн танигч.
-
-    code_list_id_aimag = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='2ndOrder\n').values('code_list_id'))[0]['code_list_id'] # "2ndOrder"
-    code_list_id_sum = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='3rdOrder\n').values('code_list_id'))[0]['code_list_id'] # "3rdOrder"
-    code_list_id_bag = list(LCodeLists.objects.filter(property_id=NationalLevel, code_list_code='4thOrder\n').values('code_list_id'))[0]['code_list_id'] # "4thOrder"
-
-    au_au_ab_feature_id = LFeatures.objects.filter(feature_code="au-au-ab").first().feature_id #5
-    au_au_ab_feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id__in=[au_au_ab_feature_id]).values('feature_config_id')]
-
-    au_au_ab_data_type_id = list(LDataTypes.objects.filter(data_type_id__in=au_au_ab_feature_config_id, data_type_code='AdministrativeBoundary').values('data_type_id'))[0]['data_type_id']
-    property_ids = [i['property_id'] for i in LDataTypeConfigs.objects.filter(data_type_id=au_au_ab_data_type_id).values('property_id')] # 2, 22, 3, 4, 26, 24, 27
-
-    name = LProperties.objects.filter(property_id__in=property_ids, property_code='name').values('property_id')[0]['property_id'] # Улс, аймаг, сум, багын нэр
+    secondOrder = utils.get_administrative_levels()
     if org_id:
-        govPerm_geo_id = Org.objects.filter(id=org_id).first().geo_id
-        if govPerm_geo_id:
-            geo_id = ''
-            names = []
-            for geo_ids in range(0, len(govPerm_geo_id), 2):
-                geo_id += str(govPerm_geo_id[geo_ids:geo_ids+2])
-                names.append(MDatasBoundary.objects.filter(geo_id=geo_id, feature_config_id__in=au_au_ab_feature_config_id, data_type_id=au_au_ab_data_type_id, property_id=name).first().value_text)
-            info = names
-            success = True
-        else:
-            info = ''
-            success = False
+        geo_id = Org.objects.filter(id=org_id).first().geo_id
     else:
-        info = ''
-        success = False
+        geo_id = None
+    roles = getgetRolesNames()
     rsp = {
-        'info': info,
-        'success': success,
-        'au_au_au_feature_config_id': au_au_au_feature_config_id,
-        'au_au_au_data_type_id': au_au_au_data_type_id,
-        'nationalCode': nationalCode,
-        'au_au_ab_feature_config_id': au_au_ab_feature_config_id,
-        'au_au_ab_data_type_id': au_au_ab_data_type_id,
-        'name': name,
-        'NationalLevel': NationalLevel,
-        'code_list_id_aimag': code_list_id_aimag,
-        'code_list_id_sum': code_list_id_sum,
-        'code_list_id_bag': code_list_id_bag,
+        'success': True,
+        'secondOrder': secondOrder,
+        'geo_id': geo_id,
+        'roles': roles,
     }
     return JsonResponse(rsp)

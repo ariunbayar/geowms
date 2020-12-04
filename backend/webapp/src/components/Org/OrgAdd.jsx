@@ -17,96 +17,165 @@ export class OrgAdd extends Component {
             modal_alert_status: "closed",
             timer: null,
             roles: [],
-            aimags:[],
-            sumuud: [],
-            baguud: [],
-            disabled: false,
-            aimag_id: -1,
-            sum_id: -1,
-            baga_id: -1,
-            geo_id: '',
-            au_au_au_feature_config_id: null,
-            au_au_au_data_type_id: null,
-            nationalCode: null,
-            au_au_ab_feature_config_id: null,
-            au_au_ab_data_type_id: null,
-            name: null,
-            NationalLevel: null,
-            code_list_id_aimag: null,
-            code_list_id_sum: null,
-            code_list_id_bag: null,
+            secondOrder: [],
+            secondOrder_value: -1,
+            thirthOrder: [],
+            thirthOrder_value: -1,
+            fourthOrder: [],
+            fourthOrder_value: -1,
+            geo_id: null,
         }
+
         this.handleUserSearch = this.handleUserSearch.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalClose = this.modalClose.bind(this)
-        this.modalInspireRoles = this.modalInspireRoles.bind(this)
-        this.getAimag = this.getAimag.bind(this)
-        this.handleInputAimag = this.handleInputAimag.bind(this)
-        this.getSum = this.getSum.bind(this)
-        this.handleInputSum = this.handleInputSum.bind(this)
-        this.getBag = this.getBag.bind(this)
-        this.handleInputBag = this.handleInputBag.bind(this)
-        this.geo_id_display = this.geo_id_display.bind(this)
+        this.formOptions = this.formOptions.bind(this)
+        this.handle2ndOrder = this.handle2ndOrder.bind(this)
+        this.handle3rdOrder = this.handle3rdOrder.bind(this)
+        this.handle4thOrder = this.handle4thOrder.bind(this)
     }
 
     componentDidMount() {
         const org_level = this.props.match.params.level
-        const id = this.props.match.params.id
-        this.setState({upadte_level: org_level})
-        this.handleGetAll(org_level,id)
-        this.modalInspireRoles()
-        this.geo_id_display()
-    }
-
-    handleUserSearch(field, e){
-        this.setState({[field]: e.target.value})
-    }
-
-    modalInspireRoles(){
-        service.getInspireRoles().then(({success, roles}) => {
-            if(success) this.setState({roles})
-        })
-    }
-
-    handleSave(){
-        this.setState({handleSaveIsLoad:true})
-        const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        const org_name = this.state.org_name
-        const upadte_level = this.state.upadte_level
-        const geo_id = this.state.geo_id
-        const values = {
-            org_name: org_name,
-            id: org_id,
-            upadte_level: upadte_level,
-            role_id: this.state.org_role,
-            geo_id: geo_id,
-        }
-        service.org_add(org_level, values).then(({ success }) => {
-            success && this.setState({modal_alert_status: "open"})
-        })
-        this.modalCloseTime()
+        this.setState({upadte_level: org_level})
+        this.handleGetAll(org_level,org_id)
+        this.formOptions(org_level, org_id)
     }
 
-    handleGetAll(org_level, id){
-        if (id) {
-            service.orgAll(org_level,id).then(({ orgs }) => {
+    handleGetAll(org_level, org_id){
+        if (org_id) {
+            service.orgAll(org_level, org_id).then(({ orgs }) => {
                 if (orgs) {
                     orgs.map(org => this.setState({
-                        org_name:org.name,
-                        org_role:org.org_role
+                        org_name: org.name,
+                        org_role: org.org_role,
                     }))
                 }
             })
         }
     }
 
+    handleUserSearch(org_name, e){
+        this.setState({[org_name]: e.target.value})
+    }
+
+    formOptions(org_level, org_id) {
+        const values = {org_level, org_id}
+        service.formOptions(values).then(({success, secondOrder, geo_id, roles}) => {
+            if (success) {
+                this.setState({secondOrder, geo_id, roles})
+                if (geo_id) {
+                    var find_text = ''
+                    for (var i = 0; i < geo_id.length; i++){
+                        find_text += geo_id[i]
+                        if (i === 4) {
+                            secondOrder.map((value) => {
+                                if (value['geo_id'] === find_text) {
+                                    this.handle2ndOrder(value['name'])
+                                }
+                            })
+                        }
+                        if (i === 6) {
+                            this.state.thirthOrder.map((value) => {
+                                if (value['geo_id'] === find_text) {
+                                    this.handle3rdOrder(value['name'])
+                                }
+                            })
+                        }
+                        if (i === 8) {
+                            this.state.fourthOrder.map((value) => {
+                                if (value['geo_id'] === find_text) {
+                                    this.handle4thOrder(value['name'])
+                                }
+                            })
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    handle2ndOrder(value) {
+        const { secondOrder } = this.state
+        if (value !== '-1') {
+            secondOrder.map((province) => {
+                if (province['name'] === value){
+                    this.setState({
+                        thirthOrder: province['children'],
+                        geo_id: province['geo_id'],
+                    })
+                }
+            })
+        } else {
+            this.setState({
+                thirthOrder: [],
+                thirthOrder_value: '-1',
+            })
+        }
+        this.setState({
+            secondOrder_value: value,
+            thirthOrder_value: '-1',
+            fourthOrder: [],
+            fourthOrder_value: '-1',
+        })
+    }
+
+    handle3rdOrder(value) {
+        const { thirthOrder } = this.state
+        if (value === '-1') {
+            this.setState({ fourthOrder: [], fourthOrder_value: '-1'})
+            this.handle2ndOrder(this.state.secondOrder_value)
+        } else {
+            thirthOrder.map((soum) => {
+                if (soum['name'] === value){
+                    this.setState({
+                        fourthOrder: soum['children'],
+                        geo_id: soum['geo_id']
+                    })
+                }
+            })
+        }
+        this.setState({ thirthOrder_value: value, fourthOrder_value: '-1'})
+    }
+
+    handle4thOrder(value) {
+        if (value !== '-1') {
+            this.state.fourthOrder.map((team) => {
+                if (team['name'] === value){
+                    this.setState({geo_id: team['geo_id']})
+                }
+            })
+        } else {
+            this.handle3rdOrder(this.state.thirthOrder_value)
+        }
+        this.setState({fourthOrder_value: value})
+    }
+
+    handleSave(){
+        this.setState({handleSaveIsLoad:true})
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        const {org_name, upadte_level, geo_id, org_role} = this.state
+        const values = {
+            org_name: org_name,
+            id: org_id,
+            upadte_level: upadte_level,
+            role_id: org_role,
+            geo_id: geo_id,
+        }
+        service.org_add(org_level, values).then(({ success }) => {
+            success && this.setState({modal_alert_status: "open"})
+            this.modalCloseTime()
+        })
+    }
+
     modalClose(){
         const org_level = this.props.match.params.level
         this.setState({handleSaveIsLoad:false})
-        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
         this.setState({modal_alert_status: "closed"})
+        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
         clearTimeout(this.state.timer)
     }
 
@@ -114,150 +183,9 @@ export class OrgAdd extends Component {
         const org_level = this.props.match.params.level
         this.state.timer = setTimeout(() => {
             this.setState({handleSaveIsLoad:false})
-            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
             this.setState({modal_alert_status: "closed"})
-        }, 2222)
-    }
-
-    getAimag() {
-        this.setState({sumuud:[], baguud:[], sum_id: -1, bag_id: -1, disabled: true})
-        const values = {
-            'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
-            'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
-            'nationalCode': this.state.nationalCode,
-            'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
-            'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
-            'name': this.state.name,
-            'NationalLevel': this.state.NationalLevel,
-            'code_list_id_aimag': this.state.code_list_id_aimag,
-        }
-        service.getAimags(values).then(({info, success}) => {
-            if(success){
-                this.setState({aimags: info})
-            }setTimeout(() => {
-                this.setState({disabled: false})
-            }, 100);
-        })
-    }
-
-    handleInputAimag(aimag) {
-        const aimags = this.state.aimags
-        aimags.map((data) => {
-            if (data['aimag_names'] === aimag){
-                this.setState({geo_id: data['geo_id']})
-            }
-        })
-        this.setState({aimag_id: aimag, disabled: true})
-        this.getSum(aimag)
-    }
-
-    getSum(aimag) {
-        if(aimag === '-1'){
-            this.setState({sumuud:[], baguud:[], sum_id: -1, bag_id: -1, disabled: false})
-        }
-        else{
-            this.setState({baguud:[], bag_id: -1})
-            const values = {
-                'aimag': aimag,
-                'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
-                'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
-                'nationalCode': this.state.nationalCode,
-                'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
-                'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
-                'name': this.state.name,
-                'code_list_id_sum': this.state.code_list_id_sum,
-                'NationalLevel': this.state.NationalLevel,
-            }
-            service.getSumuud(values).then(({info, success}) => {
-                if(success){
-                    this.setState({sumuud: info})
-                }setTimeout(() => {
-                    this.setState({disabled: false})
-                }, 200);
-            })
-        }
-    }
-
-    handleInputSum(sum) {
-        const sumuud = this.state.sumuud
-        sumuud.map((data) => {
-            if (data['sum_names'] === sum){
-                this.setState({geo_id: data['geo_id']})
-            }
-        })
-        this.setState({sum_id: sum, disabled: true})
-        this.getBag(sum)
-    }
-
-    getBag(sum) {
-
-        if (sum === '-1') {
-            this.setState({baguud:[], bag_id: -1, disabled: false})
-        } else {
-            const values = {
-                'soum': sum,
-                'au_au_au_feature_config_id': this.state.au_au_au_feature_config_id,
-                'au_au_au_data_type_id': this.state.au_au_au_data_type_id,
-                'nationalCode': this.state.nationalCode,
-                'au_au_ab_feature_config_id': this.state.au_au_ab_feature_config_id,
-                'au_au_ab_data_type_id': this.state.au_au_ab_data_type_id,
-                'name': this.state.name,
-                'code_list_id_bag': this.state.code_list_id_bag,
-                'NationalLevel': this.state.NationalLevel,
-            }
-            service.getBaguud(values).then(({info, success}) => {
-                if (success) {
-                    this.setState({baguud: info})
-                }
-                setTimeout(() => {
-                    this.setState({disabled: false})
-                }, 100)
-            })
-        }
-    }
-
-    handleInputBag(bag) {
-        const baguud = this.state.baguud
-        baguud.map((data) => {
-            if (data['bag_names'] === bag){
-                this.setState({geo_id: data['geo_id']})
-            }
-        })
-        this.setState({bag_id: bag})
-    }
-
-    geo_id_display() {
-        const values = {"org_id": this.props.match.params.id}
-        if(values){
-            service.geo_id_display(values).then(({info, success, au_au_au_feature_config_id, au_au_au_data_type_id, nationalCode, au_au_ab_feature_config_id, au_au_ab_data_type_id, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag}) => {
-                this.setState({info, success, au_au_au_feature_config_id, au_au_au_data_type_id, nationalCode, au_au_ab_feature_config_id, au_au_ab_data_type_id, name, NationalLevel, code_list_id_aimag, code_list_id_sum, code_list_id_bag})
-                if(success){{
-                    if(info){
-                        info.map((data, idx) => {
-                            if (idx === 0){
-                                this.setState({aimag_id: data})
-                                this.getAimag()
-                                this.getSum(this.state.aimag_id)
-                            }
-                            if (idx === 1){
-                                this.setState({sum_id: data})
-                                this.getSum(this.state.aimag_id)
-                                this.getBag(this.state.sum_id)
-                            }
-                            if (idx === 2){
-                                this.setState({bag_id: data})
-                                this.getBag(this.state.bag_id)
-                            }
-                        })
-                    }
-                }setTimeout(() => {
-                    this.setState({disabled: false})
-                }, 100);}
-                else{
-                    this.getAimag()
-                }
-            })
-        }
+            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+        }, 2000)
     }
 
     render() {
@@ -315,34 +243,34 @@ export class OrgAdd extends Component {
                             <table className="table">
                                 <tbody>
                                     <tr>
-                                        <th style={{width:"38%"}}>Аймаг, Хот</th>
+                                        <th style={{width:"38%"}}>Аймаг/ Хот</th>
                                         <td style={{widtd:"60%"}}>
-                                            <select disabled={this.state.disabled} name="aimag_id" id="aimag_id" className='form-control' value={this.state.aimag_id} onChange={(e) => this.handleInputAimag(e.target.value )}>
+                                            <select className='form-control' value={this.state.secondOrder_value} onChange={(e) => this.handle2ndOrder(e.target.value)}>
                                                 <option value='-1'>--- Аймаг/Хот сонгоно уу ---</option>
-                                                {this.state.aimags.map((data, idx) =>
-                                                    <option key={idx} value={data['aimag_names']} >{data['aimag_names']}</option>
+                                                {this.state.secondOrder.map((data, idx) =>
+                                                    <option key={idx} value={data['name']} >{data['name']}</option>
                                                 )}
                                             </select>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Сум, Дүүрэг</th>
+                                        <th>Сум/ Дүүрэг</th>
                                         <td>
-                                            <select disabled={this.state.disabled} name="sum_id" id="sum_id" className='form-control' value={this.state.sum_id} onChange={(e) => this.handleInputSum(e.target.value)}>
+                                            <select className='form-control' value={this.state.thirthOrder_value} onChange={(e) => this.handle3rdOrder(e.target.value)}>
                                                 <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
-                                                {this.state.sumuud.map((data, idx) =>
-                                                    <option key={idx} value={data['sum_names']}>{data['sum_names']}</option>
+                                                {this.state.thirthOrder.map((data, idx) =>
+                                                    <option key={idx} value={data['name']}>{data['name']}</option>
                                                 )}
                                             </select>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Баг, Хороо</th>
+                                        <th>Баг/ Хороо</th>
                                         <td>
-                                            <select disabled={this.state.disabled} name="bag_id" id="bag_id" className='form-control border border-primary' value={this.state.bag_id} onChange={(e) => this.handleInputBag(e.target.value)}>
+                                            <select className='form-control' value={this.state.fourthOrder_value} onChange={(e) => this.handle4thOrder(e.target.value)}>
                                                 <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
-                                                {this.state.baguud.map((data, idx) =>
-                                                    <option key={idx} value={data['bag_names']}>{data['bag_names']}</option>
+                                                {this.state.fourthOrder.map((data, idx) =>
+                                                    <option key={idx} value={data['name']}>{data['name']}</option>
                                                 )}
                                             </select>
                                         </td>

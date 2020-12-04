@@ -407,7 +407,7 @@ def get_administrative_levels():
 
     for code, item in items.items():
 
-        if code is '#root':
+        if code == '#root':
             continue
 
         code_parent = _get_parent_code(item['level'], code)
@@ -436,7 +436,7 @@ def get_administrative_levels():
         return level == i_code_list_4th_order.code_list_id
 
     for code, item in items.items():
-        if code is not '#root':
+        if code != '#root':
             if _is_leaf_node(item['level']):
                 del item['children']
             del item['level']

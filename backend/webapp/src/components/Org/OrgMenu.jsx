@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch , Route, Link, NavLink} from "react-router-dom"
 
 import {service} from './service'
-import {OrgDetail} from './OrgDetail'
+import {OrgDetail} from './OrgDetail/index'
 import {OrgRoleOld} from './OrgRoleOld'
 import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
@@ -67,7 +67,7 @@ export class OrgMenu extends Component {
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/detail/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
-                            <i className="fa fa-th-large"></i> <span className="hidden-xs">{ org_name }</span>
+                            <i className="fa fa-th-large"></i> <span className="hidden-xs"></span>
                         </NavLink>
                     </li>
 
@@ -118,7 +118,7 @@ export class OrgMenu extends Component {
                     </Switch>
                 </div>
                 <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}>
-                    <small className="fa fa-chevron-circle-left">Буцах</small>
+                    <small className="fa fa-chevron-circle-left"> {org_name}</small>
                 </a>
             </div>
         )

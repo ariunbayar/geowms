@@ -16,12 +16,8 @@ export const service = {
     orgAll,
     rolesAdd,
     inspireRoles,
-    getInspireRoles,
-    getAimags,
-    getSumuud,
-    getBaguud,
-    geo_id_display,
     getBaseLayers,
+    formOptions,
 }
 
 
@@ -138,45 +134,13 @@ function rolesAdd(level, org_id, values) {
     return fetch(`${prefix}/level-${level}/${org_id}/roles-add/`, opts).then(handleResponse)
 }
 
-function getInspireRoles() {
-    const opts = {
-        ...getGetOptions(),
-    }
-    return fetch(`/back/api/org/get-role-name/`, opts).then(handleResponse)
-}
-
-function getAimags(values) {
-    const opts = {
-        ...getPostOptions(values),
-        body: JSON.stringify(values),
-    }
-    return fetch(`/back/api/org/getAimags/`, opts).then(handleResponse)
-}
-
-function getSumuud(values) {
+function formOptions(values) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(values),
     }
-    return fetch(`/back/api/org/getSumuud/`, opts).then(handleResponse)
+    return fetch(`/back/api/org/form-options/`, opts).then(handleResponse)
 }
-
-function getBaguud(values) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify(values),
-    }
-    return fetch(`/back/api/org/getBaguud/`, opts).then(handleResponse)
-}
-
-function geo_id_display(values) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify(values),
-    }
-    return fetch(`/back/api/org/geo_id_display/`, opts).then(handleResponse)
-}
-
 
 function getBaseLayers() {
     const opts = getGetOptions()
