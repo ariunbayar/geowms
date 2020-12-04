@@ -17,6 +17,7 @@ from backend.inspire.models import LPackages, LFeatures
 from django.contrib import auth
 import datetime
 from django.db import connections
+import main.geoserver as geoserver
 
 
 def _get_service_url(request, token, wms):
@@ -82,13 +83,11 @@ def geoJsonConvertGeom(geojson):
 
 @require_POST
 @csrf_exempt
-def qgis_submit(request):
+def qgis_submit(request, token):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
-    user_id = request.POST.get('user_id')
     try:
-        user = User.objects.filter(id=user_id).first()
-        employee = get_object_or_404(Employee, user=user)
+        employee = get_object_or_404(Employee, token=token)
         update_lists = json.loads(update)
         delete_lists = json.loads(delete)
         if len(update_lists) > 0:
@@ -139,35 +138,19 @@ def qgis_submit(request):
         return JsonResponse({'success': False})
 
 
-@require_POST
-@csrf_exempt
-def user_check(request):
-    user_info = request.POST.get('user_info')
-    user_info = json.loads(user_info)
-    try:
-        username = user_info[0]["username"]
-        password = user_info[0]["password"]
-        user = auth.authenticate(request, username=username, password=password)
-        if user:
-            return JsonResponse({'success': True, "user_id": user.id})
-        else:
-            return JsonResponse({'success': False, "user_id": user.id})
-    except Exception:
-        return JsonResponse({'success': False, "user_id": None})
-
-
 @require_GET
 def qgisProxy(request, token):
-    print(token)
     print(token)
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     employee = get_object_or_404(Employee, token=token)
-    print(employee)
-    print(employee)
-    base_url = 'http://localhost:8080/geoserver/ows'
 
+    conf_geoserver = geoserver.get_connection_conf()
+    base_url = 'http://{host}:{port}/geoserver/ows'.format(
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port'],
+    )
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
@@ -177,5 +160,4 @@ def qgisProxy(request, token):
 
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
-
     return rsp
