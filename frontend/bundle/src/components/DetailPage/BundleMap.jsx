@@ -347,7 +347,7 @@ export default class BundleMap extends Component {
 
             this.setState({coordinate_clicked})
             overlay.setPosition(coordinate)
-            this.showFeaturesAt(coordinate)
+            // this.showFeaturesAt(coordinate)
         }
         // Nov-15: commented for UX
         //this.showFeaturesAt(event.coordinate)
@@ -528,6 +528,7 @@ export default class BundleMap extends Component {
     }
 
     toggleDrawed(event){
+        this.feature_info_list = []
 
         const view = this.map.getView()
         const projection = view.getProjection()
@@ -536,14 +537,13 @@ export default class BundleMap extends Component {
 
         const coodrinatLeftTop = coordinat[0][3]
         const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
-        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}')
+        const coodrinatLeftTopFormat = coordinateFormat(coodrinatLeftTop_map_coord, '{y},{x}', 6)
 
         const coodrinatRightBottom = coordinat[0][1]
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
-        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}')
+        const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
-        const { bundle, map_wms_list } = this.state
-
+        const { bundle, map_wms_list } = this.state //http://127.0.0.1:8080/geoserver/gp_bu/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=gp_bu:gp_layer_building_view&bbox=100.4464067,46.2854066,100.4489819,46.2870236,EPSG:4326
         const layer_info = {
             bundle: { id: bundle.id },
             wms_list: map_wms_list.reduce((acc, { name, layers }) => {
@@ -560,8 +560,54 @@ export default class BundleMap extends Component {
                 return acc
             }, []),
         }
-
-        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord)
+        const x1 = event.feature.getGeometry().getExtent()[0]
+        const y1 = event.feature.getGeometry().getExtent()[1]
+        const x2 = event.feature.getGeometry().getExtent()[2]
+        const y2 = event.feature.getGeometry().getExtent()[3]
+        const extent = toLonLat([x1, y1])
+        const extent2 = toLonLat([x2, y2])
+        const full_extent = extent.toString() + ',' + extent2.toString()
+        map_wms_list.map(({ name, layers }) => {
+            layers.map(({ id, code, tile }) => {
+                const main_url = tile.getSource().urls[0]
+                if(main_url) {
+                    const url =
+                        main_url.slice(0, -1) +
+                        '?service=WFS' +
+                        '&version=1.1.0' +
+                        '&request=GetFeature' +
+                        '&typeName=' + code +
+                        '&bbox=' + full_extent + ',' + this.state.projection_display
+                    fetch(url)
+                        .then((rsp) => rsp.text())
+                        .then((text) => {
+                            const parser = new WMSGetFeatureInfo()
+                            const features = parser.readFeatures(text)
+                            const feature_info = features.map((feature) => {
+                                const geometry_name = feature.getGeometryName()
+                                const values =
+                                    feature.getKeys()
+                                        .filter((key) => key != geometry_name)
+                                        .map((key) => [key, feature.get(key)])
+                                const list_id = feature.getId().split('.')
+                                const id = list_id[list_id.length - 1]
+                                return [id, values]
+                            })
+                            const info = feature_info.map((feature, idx) => {
+                                var obj = new Object()
+                                obj['geom_id'] = feature[0]
+                                feature[1].map((info, idx) => {
+                                    if(info[0] == 'feature_id') {
+                                        obj['feature_id'] = info[1]
+                                    }
+                                })
+                                return obj
+                            })
+                            this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, info)
+                    })
+                }
+            })
+        })
 
         const is_loading = true
         this.controls.drawModal.showModal(is_loading)
@@ -581,7 +627,7 @@ export default class BundleMap extends Component {
         return {output, type};
     };
 
-    calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord) {
+    calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, feature_info_list) {
         const area = this.formatArea(feature_geometry)
 
         var layer_length = 0
@@ -590,7 +636,7 @@ export default class BundleMap extends Component {
         })
 
         service
-            .paymentCalcPrice(area, layer_length)
+            .paymentCalcPrice(area, layer_length, feature_info_list)
             .then(({ success, total_price, is_user }) => {
                 if (success) {
                     const is_loading = false
