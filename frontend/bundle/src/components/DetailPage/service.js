@@ -102,7 +102,6 @@ function paymentDraw(values) {
 }
 
 function paymentCalcPrice(area, layer_length, feature_info_list) {
-    console.log(JSON.stringify({ area, layer_length, [feature_info_list]: feature_info_list }));
     const requestOptions = {
         ..._getPostOptions(),
         body: JSON.stringify({ area, layer_length, feature_info_list })

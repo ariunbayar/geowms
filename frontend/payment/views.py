@@ -17,7 +17,7 @@ from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
-from backend.inspire.models import LThemes
+from backend.inspire.models import LThemes, LFeatureConfigs, LDataTypeConfigs
 from geoportal_app.models import User
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
@@ -380,11 +380,41 @@ def download_zip(request, pk):
     return response
 
 
-def _calc_per_price(area, area_type, layer_length):
+def _data_type_configs(data_type_id):
+    property_len = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).count()
+    return property_len
+
+
+def _get_all_property_count(feature_id):
+    all_count = 0
+    f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    for f_config in f_configs:
+        data_type_id = f_config.data_type_id
+        connect_feature_id = f_config.connect_feature_id
+        if data_type_id is not None:
+            prop_count = _data_type_configs(data_type_id)
+            all_count += prop_count
+        else:
+            connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
+            for connect_feature in connect_features:
+                connected_feature_id = connect_feature.connect_feature_id
+                fc_data_type_id = connect_feature.data_type_id
+                if fc_data_type_id is not None:
+                    prop_count = _data_type_configs(fc_data_type_id)
+                    all_count += prop_count
+        if data_type_id is None and connect_feature_id is None:
+            prop_count = _data_type_configs(data_type_id)
+            all_count += prop_count
+    return all_count
+
+
+def _calc_per_price(area, area_type, layer_length, all_len_property):
+    amount = None
     if area_type == 'km':
-        price = (area * Payment.POLYGON_PER_KM_AMOUNT) * layer_length
+        amount = Payment.POLYGON_PER_KM_AMOUNT
     if area_type == 'm':
-        price = (area * Payment.POLYGON_PER_M_AMOUNT) * layer_length
+        amount = Payment.POLYGON_PER_M_AMOUNT
+    price = ((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length
     return price
 
 
@@ -403,7 +433,8 @@ def calcPrice(request, payload):
     else:
         is_user = False
 
-    total_price = _calc_per_price(area, area_type, layer_length)
+    all_len_property = _get_all_property_count(feature_info_list[0]['feature_id'])
+    total_price = _calc_per_price(area, area_type, layer_length, all_len_property)
 
     rsp = {
         'success': True,
