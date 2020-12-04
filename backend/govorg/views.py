@@ -21,6 +21,7 @@ def _get_govorg_display(govorg):
         'id': govorg.pk,
         'name': govorg.name,
         'token': govorg.token,
+        'website': govorg.website,
         'created_at': govorg.created_at.strftime('%Y-%m-%d'),
         'layers': layers,
     }
@@ -35,10 +36,13 @@ def _generate_govorg_token():
 @user_passes_test(lambda u: u.is_superuser)
 def үүсгэх(request, payload):
     org_id = payload.get('org_id')
+    website = payload.get('website')
+
     govorg = GovOrg.objects.create(
         name=payload.get('name'),
         token=_generate_govorg_token(),
-        org_id=org_id
+        org_id=org_id,
+        website=website
     )
 
     layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
@@ -92,6 +96,7 @@ def хадгалах(request, payload, pk):
     govorg = get_object_or_404(GovOrg, pk=pk)
 
     govorg.name = payload.get('name')
+    govorg.website = payload.get('website')
     govorg.org_id = payload.get('org_id')
     govorg.save()
 
