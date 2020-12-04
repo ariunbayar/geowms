@@ -347,7 +347,7 @@ export default class BundleMap extends Component {
 
             this.setState({coordinate_clicked})
             overlay.setPosition(coordinate)
-            // this.showFeaturesAt(coordinate)
+            this.showFeaturesAt(coordinate)
         }
         // Nov-15: commented for UX
         //this.showFeaturesAt(event.coordinate)
