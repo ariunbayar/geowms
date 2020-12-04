@@ -549,9 +549,9 @@ export default class BundleMap extends Component {
             wms_list: map_wms_list.reduce((acc, { name, layers }) => {
                 const wms = {
                     name,
-                    layers: layers.reduce((acc, { id, name, tile }) => {
+                    layers: layers.reduce((acc, { id, code, name, tile }) => {
                         if (tile.getVisible())
-                            acc.push({ id, name })
+                            acc.push({ id, name, code })
                         return acc
                     }, []),
                 }
@@ -568,7 +568,7 @@ export default class BundleMap extends Component {
         const extent2 = toLonLat([x2, y2])
         const full_extent = extent.toString() + ',' + extent2.toString()
         var list = []
-        map_wms_list.map(({ name, layers }) => {
+        map_wms_list.map(({ name, layers }, l_idx) => {
             layers.map(({ id, code, tile }, idx) => {
                 if (tile.getVisible()) {
                     const main_url = tile.getSource().urls[0]
@@ -608,7 +608,7 @@ export default class BundleMap extends Component {
                                         return obj
                                     })
                                     list.push({[code]: info})
-                                    if(layers.length - 1 == idx) {
+                                    if(l_idx == map_wms_list.length - 1 && layers.length - 1 == idx) {
                                         this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
                                     }
                                 }
@@ -638,11 +638,10 @@ export default class BundleMap extends Component {
 
     calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, feature_info_list) {
         const area = this.formatArea(feature_geometry)
-
         var layer_list = []
         layer_info.wms_list.map((w, idx) => {
             w.layers.map((layer, idx) => {
-                layer_list.push(layer.name)
+                layer_list.push(layer.code)
             })
         })
         service
