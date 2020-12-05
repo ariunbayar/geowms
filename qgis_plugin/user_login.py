@@ -29,12 +29,13 @@ from PyQt5.QtWidgets import QMessageBox
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsProject, QgsCoordinateReferenceSystem, QgsCoordinateTransform
+from qgis.core import QgsProject, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsDataSourceUri, QgsProviderRegistry
 from qgis.core import QgsProject, QgsFeature, QgsFeatureRequest, QgsExpression
 from .resources import *
 from .user_login_dialog import User_LoginDialog
 from .tushaal_dugaar import TushaalDugaarDialog
 import datetime
+import re
 
 class User_Login:
     """QGIS Plugin Implementation."""
@@ -68,9 +69,6 @@ class User_Login:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
-        self.user_id = None
-        self.user_check = False
-        self.geoportal_url = 'http://localhost:8000/'
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -190,85 +188,63 @@ class User_Login:
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
-            self.first_start = False
+            # self.first_start = False
             self.activ_layer()
 
 
-    def checkUser(self):
-        user_info = []
-        user_info.append({
-            "username": self.dlg.lineEdit.text(),
-            "password": self.dlg.lineEdit_2.text()
-        })
-        try:
-            rsp = requests.post(self.geoportal_url+'api/service/user-check/', data={"user_info":json.dumps(user_info)})
-            self.dlg.hide()
-            json_data = rsp.json()
-            self.user_check = json_data['success']
-            self.user_id = json_data['user_id']
-
-        except Exception:
-            self.dlg.hide()
-            self.user_check = False
-            self.user_id = None
-
-
     def activ_layer(self):
-
+        self.dlg = User_LoginDialog()
         active_layers = self.iface.mapCanvas().layers()
         features = QgsFeatureRequest()
         if not active_layers:
             return
+        layer_name = ''
+        updates = []
+        deletes = []
         for layer in active_layers:
-            changed_geom = layer.editBuffer()
-            fieldnames = [field.name() for field in layer.fields()]
-            n_of_attributes = len(layer.fields())
-            projection = layer.crs().authid()
-            xform = QgsCoordinateTransform(QgsCoordinateReferenceSystem(projection), QgsCoordinateReferenceSystem("EPSG:4326"), QgsProject.instance())
-            if changed_geom:
-                ch = changed_geom.changedGeometries()
-                delete_ids = changed_geom.deletedFeatureIds()
-                updates = []
-                deletes = []
-                for j, feature_geom in ch.items():
-                    feature_geom.transform(xform)
-                    for feature in layer.getFeatures(QgsFeatureRequest(j)):
+            data_source_uri = layer.dataProvider().dataSourceUri(expandAuthConfig = True)
+            wfs_url = re.search("(?P<url>http?://[^\s]+)", data_source_uri).group("url")[:-1]
+            if wfs_url.find('/api/service/') > 0 and wfs_url:
+                layer_name = layer_name + layer.name() + ', '
+                changed_geom = layer.editBuffer()
+                fieldnames = [field.name() for field in layer.fields()]
+                n_of_attributes = len(layer.fields())
+                projection = layer.crs().authid()
+                xform = QgsCoordinateTransform(QgsCoordinateReferenceSystem(projection), QgsCoordinateReferenceSystem("EPSG:4326"), QgsProject.instance())
+                if changed_geom:
+                    ch = changed_geom.changedGeometries()
+                    delete_ids = changed_geom.deletedFeatureIds()
+                    for j, feature_geom in ch.items():
+                        feature_geom.transform(xform)
+                        for feature in layer.getFeatures(QgsFeatureRequest(j)):
+                            attributes = {}
+                            for j in range(len(layer.fields())):
+                                attributes[str(fieldnames[j])] = str(feature[str(fieldnames[j])])
+                            updates.append({
+                                "geom": feature_geom.asJson(),
+                                "att": attributes,
+                                "projection": projection if projection else ''
+                            })
+                    for feature in layer.dataProvider().getFeatures(QgsFeatureRequest().setFilterFids(delete_ids)):
+                        geom = feature.geometry()
+                        geom.transform(xform)
                         attributes = {}
                         for j in range(len(layer.fields())):
                             attributes[str(fieldnames[j])] = str(feature[str(fieldnames[j])])
-                        updates.append({
-                            "geom": feature_geom.asJson(),
+                        deletes.append({
+                            "geom": geom.asJson(),
                             "att": attributes,
                             "projection": projection if projection else ''
                         })
-                for feature in layer.dataProvider().getFeatures( QgsFeatureRequest().setFilterFids(delete_ids)):
-                    geom = feature.geometry()
-                    geom.transform(xform)
-                    attributes = {}
-                    for j in range(len(layer.fields())):
-                        attributes[str(fieldnames[j])] = str(feature[str(fieldnames[j])])
-                    deletes.append({
-                        "geom": geom.asJson(),
-                        "att": attributes,
-                        "projection": projection if projection else ''
-                    })
-                data = {'update': json.dumps(updates), 'delete': json.dumps(deletes)}
-        self.dlg = User_LoginDialog()
-        self.dlg.show()
-        user_info = self.dlg.pushButton.clicked.connect(self.checkUser)
-        result = self.dlg.exec_()
+        data = {'update': json.dumps(updates), 'delete': json.dumps(deletes)}
         try:
-            if self.user_check:
-                data["user_id"] = self.user_id
-                rsp = requests.post(self.geoportal_url+'api/service/qgis-submit/', data=data)
-                if rsp.json():
-                    check = rsp.json()
-                    if check['success']:
-                        QMessageBox.about(self.dlg, 'Connection',  'Амжилттай хадгаллаа')
-                    else:
-                        QMessageBox.about(self.dlg, 'Connection',  'Амжилтгүй хадгаллаа')
-            else:
-                QMessageBox.about(self.dlg, 'Connection',  'Холболт ажилтгүй боллоо')
+            rsp = requests.post(wfs_url+'qgis-submit/', data=data)
+            if rsp.json():
+                check = rsp.json()
+                if check['success']:
+                    QMessageBox.about(self.dlg, 'Connection',  layer_name[:-2] + '. Амжилттай хадгаллаа. <a href="https://nsdi.gov.mn/gov/history/">Энд дарж</a> хүсэлтээ баталгаажуулна уу.')
+                else:
+                    QMessageBox.about(self.dlg, 'Connection',  layer_name[:-2] + ', Амжилтгүй хадгаллаа')
         except Exception:
-            QMessageBox.about(self.dlg, 'Connection',  'Холболт ажилтгүй боллоо')
+            QMessageBox.about(self.dlg, 'Connection',  layer_name[:-2] + ', Холболт ажилтгүй боллоо')
 

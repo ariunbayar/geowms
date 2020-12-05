@@ -7,19 +7,17 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from api.utils import filter_layers, replace_src_url
+from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.govorg.models import GovOrg as System
 from backend.wms.models import WMS, WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Employee
 from geoportal_app.models import User
-from backend.inspire.models import LPackages, LFeatures
+from backend.inspire.models import LThemes, LPackages, LFeatures
 from django.contrib import auth
-import datetime
 from django.db import connections
 import main.geoserver as geoserver
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, GovRole, GovPerm, EmpRole, EmpPerm, GovRoleInspire, GovPermInspire, EmpRoleInspire, EmpPermInspire
-from backend.dedsanbutets.models import ViewNames, ViewProperties
+from backend.dedsanbutets.models import ViewNames
 
 
 def _get_service_url(request, token, wms):
@@ -48,7 +46,10 @@ def proxy(request, token, pk):
 
     allowed_layers = [layer.code for layer in system.wms_layers.filter(wms=wms)]
     if request.GET.get('REQUEST') == 'GetCapabilities':
-        content = filter_layers(content, allowed_layers)
+        if request.GET.get('SERVICE') == 'WFS':
+            content = filter_layers_wfs(content, allowed_layers)
+        else:
+            content = filter_layers(content, allowed_layers)
         service_url = _get_service_url(request, token, wms)
         content = replace_src_url(content, wms.url, service_url)
 
@@ -177,9 +178,10 @@ def qgisProxy(request, token):
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
-        content = filter_layers(content, allowed_layers)
-
-    gp_au:gp_administrative_unit_view
+        if request.GET.get('SERVICE') == 'WFS':
+            content = filter_layers_wfs(content, allowed_layers)
+        else:
+            content = filter_layers(content, allowed_layers)
 
     qs_request = queryargs.get('REQUEST', 'no request')
 
