@@ -427,13 +427,13 @@ def _get_all_property_count(layer_list, feature_info_list):
     return count
 
 
-def _calc_per_price(area, area_type, layer_length, all_len_property):
+def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer):
     amount = None
     if area_type == 'km':
         amount = Payment.POLYGON_PER_KM_AMOUNT
     if area_type == 'm':
         amount = Payment.POLYGON_PER_M_AMOUNT
-    price = ((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length
+    price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
     return price
 
 
@@ -453,7 +453,7 @@ def calcPrice(request, payload):
         is_user = False
 
     all_len_property = _get_all_property_count(layer_list, feature_info_list)
-    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property)
+    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list))
 
     rsp = {
         'success': True,
