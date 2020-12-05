@@ -17,12 +17,22 @@ from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
-from backend.inspire.models import LThemes, LFeatureConfigs, LDataTypeConfigs
+from backend.inspire.models import (
+    LThemes, LFeatureConfigs,
+    LDataTypeConfigs, LProperties,
+    LValueTypes, LCodeListConfigs,
+    LCodeLists, LFeatures, LPackages,
+    MDatasBoundary, MDatasHydrography,
+    MDatasBuilding, MDatasGeographical,
+    MDatasGeographical, MDatasCadastral,
+)
 from geoportal_app.models import User
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required
 from main.utils import send_email
+
+from django.contrib.gis.gdal import DataSource
 
 
 def index(request):
@@ -66,10 +76,12 @@ def dictionaryResponse(request):
 
 
 def _calc_layer_amount(area, area_type):
+    amount = 0
     if area_type == 'm':
-        amount = area * Payment.POLYGON_PER_M_AMOUNT
+        amount = Payment.POLYGON_PER_M_AMOUNT
     if area_type == 'km':
-        amount = area * Payment.POLYGON_PER_KM_AMOUNT
+        amount = Payment.POLYGON_PER_KM_AMOUNT
+    amount = area * amount
     return amount
 
 
@@ -86,6 +98,7 @@ def purchaseDraw(request, payload):
     bundle_id = payload.get('bundle_id')
     area = payload.get('area')
     area_type = payload.get('area_type')
+    feature_info_list = payload.get('feature_info_list')
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
@@ -153,6 +166,170 @@ def get_all_file_remove(directory):
                 os.remove(filepath)
 
 
+def _lfeatureconfig(feature_id, table_name, path, saved_fields):
+    feature_configs_name = []
+    f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    for f_config in f_configs:
+        data_type_id = f_config.data_type_id
+        connect_feature_id = f_config.connect_feature_id
+        if data_type_id is not None:
+            feature_configs_name.append({
+                'data_types': _get_property_names(data_type_id, table_name, path, saved_fields)
+            })
+        else:
+            connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
+            for connect_feature in connect_features:
+                connected_feature_id = connect_feature.connect_feature_id
+                fc_data_type_id = connect_feature.data_type_id
+                if fc_data_type_id is not None:
+                    feature_configs_name.append({
+                        'data_types': _get_property_names(fc_data_type_id, table_name, path, saved_fields)
+                    })
+        if data_type_id is None and connect_feature_id is None:
+            feature_configs_name.append({
+                'data_types': _get_property_names(data_type_id, table_name, path, saved_fields)
+            })
+    return feature_configs_name
+
+
+def _get_property_names(data_type_id, table_name, path, saved_fields):
+    property_names = []
+    is_saved_field = True
+    data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id)
+    if data_type_configs:
+        for data_type_config in data_type_configs:
+            property_id = data_type_config.property_id
+            properties = LProperties.objects.filter(property_id=property_id)
+            if properties:
+                for prop in properties:
+                    property_code = prop.property_code
+                    property_names.append({
+                        'property_code': prop.property_code,
+                        'property_id': prop.property_id,
+                        'value_types': _value_types(prop.value_type_id, property_id),
+                    })
+                    for saved_field in saved_fields:
+                        if saved_field in property_code.lower():
+                            is_saved_field = False
+                    if is_saved_field:
+                        subprocess.run([
+                            'ogrinfo',
+                            path,
+                            '-sql',
+                            "ALTER TABLE " + table_name + " ADD COLUMN " + property_code + " " + 'VARCHAR(100)',
+                        ])
+                    is_saved_field = True
+    return property_names
+
+
+def _value_types(value_type_id, property_id):
+    value_type_names = []
+    codelists = []
+    value_types = LValueTypes.objects.filter(value_type_id=value_type_id)
+    if value_types:
+        for value_type in value_types:
+            value_type_names.append({
+                'value_type_id': value_type.value_type_id,
+            })
+    return value_type_names
+
+def _get_datas_model(theme_code):
+    if theme_code == 'hg':
+        return MDatasHydrography
+    elif theme_code == 'au':
+        return MDatasBoundary
+    elif theme_code =='bu':
+        return MDatasBuilding
+    elif theme_code=='gn':
+        return MDatasGeographical
+    elif theme_code=='cp':
+        return MDatasCadastral
+
+
+def _get_theme_code(feature_id):
+    package_id = get_object_or_404(LFeatures, feature_id=feature_id).package_id
+    theme_id = get_object_or_404(LPackages, package_id=package_id).theme_id
+    theme_code = get_object_or_404(LThemes, theme_id=theme_id).theme_code
+    return theme_code
+
+
+def _get_code_list_name(code_list_id):
+    code_list_name = None
+    code_list = LCodeLists.objects.filter(code_list_id=code_list_id)
+    if code_list:
+        code_list_name = code_list.first().code_list_name
+    return code_list_name
+
+
+def _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name):
+    theme_code = _get_theme_code(feature_id)
+    MDatasModel = _get_datas_model(theme_code)
+    att_type = ''
+    for info in feature_infos:
+        for property in info['data_types']:
+            property_code = property['property_code']
+            mdata_value = MDatasModel.objects.filter(geo_id=geo_id, property_id=property['property_id'])
+            if mdata_value:
+                mdata_value = mdata_value.first()
+            for value_type in property['value_types']:
+                value_type = value_type['value_type_id']
+                if value_type == 'double':
+                    value_type = 'number'
+                if value_type == 'single-select':
+                    value_type = 'code_list_id'
+
+            if 'code' in value_type:
+                filter_value = value_type
+            else:
+                filter_value = "value_" + value_type
+
+            value = getattr(mdata_value, filter_value)
+
+            if filter_value == 'value_date' and value:
+                value = value.strftime('%m/%d/%Y, %H:%M:%S')
+            if filter_value == 'value_number' and value:
+                value = str(value)
+            if 'code_list' in filter_value and value:
+                value = _get_code_list_name(value)
+            if value:
+                subprocess.run([
+                    'ogrinfo',
+                    path,
+                    '-dialect', 'SQLite',
+                    '-sql', "UPDATE '" + table_name + "' SET " + property_code[0:10] + "='" + value + "' WHERE gml_id='" + gml_id + "'"
+                ])
+
+
+def _update_and_add_column_with_value(path, file_name):
+    path = os.path.join(path, file_name)
+    ds = DataSource(str(path))
+
+    lyr = ds[0]
+    before_feature_id = 0
+    feature_id = 0
+    feature_infos = None
+    table_name = file_name.split(".")[0]
+
+    for val in lyr:
+        for field in lyr.fields:
+            if field == 'feature_id':
+                feature_id = val.get(field)
+            if field == 'gml_id':
+                gml_id = val.get(field)
+                if gml_id:
+                    list = gml_id.split(".")
+                    geo_id = list[len(list) - 1]
+        if before_feature_id != feature_id:
+            feature_infos = _lfeatureconfig(feature_id, table_name, path, lyr.fields)
+        if geo_id and feature_id:
+            _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name)
+            geo_id = None
+
+        before_feature_id = feature_id
+
+    return True
+
+
 def _create_shp_file(payment, layer, polygon):
 
     x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
@@ -187,8 +364,10 @@ def _create_shp_file(payment, layer, polygon):
             '-spat', str(x1), str(y1), str(x2), str(y2),
             '-lco', meta,
             # '-s_srs', source_srs,
-            '-t_srs', trans_srs
+            '-t_srs', trans_srs,
+            '-skipfailures'
         ])
+        _update_and_add_column_with_value(path, str(layer.code) + file_ext)
 
     except Exception as e:
         print(e)
@@ -381,14 +560,14 @@ def download_zip(request, pk):
     return response
 
 
-def _lfeature_config(feature_id):
+def _lfeature_config_count(feature_id):
     all_count = 0
     f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
     for f_config in f_configs:
         data_type_id = f_config.data_type_id
         connect_feature_id = f_config.connect_feature_id
         if data_type_id is not None:
-            prop_count = _data_type_configs(data_type_id)
+            prop_count = _data_type_configs_count(data_type_id)
             all_count += prop_count
         else:
             connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
@@ -396,15 +575,15 @@ def _lfeature_config(feature_id):
                 connected_feature_id = connect_feature.connect_feature_id
                 fc_data_type_id = connect_feature.data_type_id
                 if fc_data_type_id is not None:
-                    prop_count = _data_type_configs(fc_data_type_id)
+                    prop_count = _data_type_configs_count(fc_data_type_id)
                     all_count += prop_count
         if data_type_id is None and connect_feature_id is None:
-            prop_count = _data_type_configs(data_type_id)
+            prop_count = _data_type_configs_count(data_type_id)
             all_count += prop_count
     return all_count
 
 
-def _data_type_configs(data_type_id):
+def _data_type_configs_count(data_type_id):
     property_len = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).count()
     return property_len
 
@@ -422,7 +601,7 @@ def _get_all_property_count(layer_list, feature_info_list):
             key = _get_key_and_compare(feature, code)
             if key:
                 for info in feature[key]:
-                    fconfig_count = _lfeature_config(info['feature_id'])
+                    fconfig_count = _lfeature_config_count(info['feature_id'])
                     count += fconfig_count
     return count
 
