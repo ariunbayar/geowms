@@ -16,6 +16,7 @@ class ModalComponent extends Component{
             user_name: '',
             user_email: '',
             user_number: '',
+            handlePaymentIsLoad: false,
         }
 
         this.handlePayment = this.handlePayment.bind(this)
@@ -24,7 +25,7 @@ class ModalComponent extends Component{
 
     handlePayment(){
 
-        this.setState({payLoad: true})
+        this.setState({payLoad: true, handlePaymentIsLoad:true})
 
         const {description, user_name, user_email, user_number} = this.state
         const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price} = this.props
@@ -54,8 +55,8 @@ class ModalComponent extends Component{
     }
 
     render() {
-        const {payLoad, user_name, user_email, user_number} = this.state
-        const { coodrinatLeftTop, coodrinatRightBottom, layer_info, is_loading, area, total_price, is_user } = this.props
+        const {user_name, user_email, user_number} = this.state
+        const { layer_info, is_loading, area, total_price, is_user } = this.props
 
         return (
             <div>
@@ -68,88 +69,99 @@ class ModalComponent extends Component{
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                        {
-                            is_loading ?
-                            <div className="modal-body height-30">
-                                <div className="d-flex justify-content-center">
-                                    <div className="spinner-border gp-text-primary" role="status"></div>
+                            {
+                                is_loading ?
+                                <div className="modal-body height-30">
+                                    <div className="d-flex justify-content-center">
+                                        <div className="spinner-border gp-text-primary" role="status"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            :
-                            <div className="modal-body">
-                                <div className="container">
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <div className="form-group">
-                                                <label htmlFor="recipient-name" className="col-form-label">Худалдан авах талбайн хэмжээ:</label>
-                                                <span className="form-control" id="size">{area.output}{area.type}<sup>2</sup></span>
-                                            </div>
-                                            <div className="form-group">
-                                                <label htmlFor="recipient-name" className="col-form-label">Худалдан авах мөнгөн дүн:</label>
-                                                <span className="form-control" id="price">{total_price}₮</span>
-                                            </div>
-                                            {
-                                                !is_user &&
-                                                <div>
-                                                    <div className="form-group">
-                                                        <label htmlFor="user_name" className="col-form-label">Хэрэглэгчийн нэр:</label>
-                                                        <input type="text"
-                                                            className="form-control"
-                                                            id="user_name"
-                                                            value={user_name}
-                                                            onChange={(e) => this.setState({ user_name: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group">
-                                                        <label htmlFor="user_number" className="col-form-label">Хэрэглэгчийн утас:</label>
-                                                        <input type="text"
-                                                            className="form-control"
-                                                            id="user_number"
-                                                            value={user_number}
-                                                            onChange={(e) => this.setState({ user_number: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group">
-                                                        <label htmlFor="user_email" className="col-form-label">Хэрэглэгчийн имэйл:</label>
-                                                        <input type="text"
-                                                            className="form-control"
-                                                            id="user_email"
-                                                            value={user_email}
-                                                            onChange={(e) => this.setState({ user_email: e.target.value })}
-                                                        />
-                                                    </div>
+                                :
+                                <div className="modal-body">
+                                    <div className="container">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <div className="form-group">
+                                                    <label htmlFor="recipient-name" className="col-form-label">Худалдан авах талбайн хэмжээ:</label>
+                                                    <span className="form-control" id="size">{area.output}{area.type}<sup>2</sup></span>
                                                 </div>
-                                            }
-                                        </div>
-                                        <div className="col-md-6">
-                                            <ul>
-                                                {layer_info.wms_list.map(({ name, layers }, idx) =>
-                                                    <li key={ idx }>{ name }
-                                                        <ul>
-                                                            {layers.map(({ name }, idx) =>
-                                                                <li key={ idx }>{ name }</li>
-                                                            )}
-                                                        </ul>
-                                                    </li>
-                                                )}
-                                            </ul>
+                                                <div className="form-group">
+                                                    <label htmlFor="recipient-name" className="col-form-label">Худалдан авах мөнгөн дүн:</label>
+                                                    <span className="form-control" id="price">{total_price}₮</span>
+                                                </div>
+                                                {
+                                                    !is_user &&
+                                                    <div>
+                                                        <div className="form-group">
+                                                            <label htmlFor="user_name" className="col-form-label">Хэрэглэгчийн нэр:</label>
+                                                            <input type="text"
+                                                                className="form-control"
+                                                                id="user_name"
+                                                                value={user_name}
+                                                                onChange={(e) => this.setState({ user_name: e.target.value })}
+                                                            />
+                                                        </div>
+                                                        <div className="form-group">
+                                                            <label htmlFor="user_number" className="col-form-label">Хэрэглэгчийн утас:</label>
+                                                            <input type="text"
+                                                                className="form-control"
+                                                                id="user_number"
+                                                                value={user_number}
+                                                                onChange={(e) => this.setState({ user_number: e.target.value })}
+                                                            />
+                                                        </div>
+                                                        <div className="form-group">
+                                                            <label htmlFor="user_email" className="col-form-label">Хэрэглэгчийн имэйл:</label>
+                                                            <input type="text"
+                                                                className="form-control"
+                                                                id="user_email"
+                                                                value={user_email}
+                                                                onChange={(e) => this.setState({ user_email: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div className="col-md-6">
+                                                <ul>
+                                                    {layer_info.wms_list.map(({ name, layers }, idx) =>
+                                                        <li key={ idx }>{ name }
+                                                            <ul>
+                                                                {layers.map(({ name }, idx) =>
+                                                                    <li key={ idx }>{ name }</li>
+                                                                )}
+                                                            </ul>
+                                                        </li>
+                                                    )}
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
-                                    {/* <div className="row"><code>{coodrinatLeftTop[0]}</code>, <code>{coodrinatLeftTop[1]}</code></div>
-                                    <div className="row"><code>{coodrinatRightBottom[0]}</code>, <code>{coodrinatRightBottom[1]}</code></div> */}
+                                </div>
+                            }
+                            <div className="modal-footer">
+                                <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
+                                <div className="form-group">
+                                    {this.state.handlePaymentIsLoad ?
+                                        <>
+                                            <button className="btn gp-btn-primary">
+                                                <a className="spinner-border text-light" role="status">
+                                                    <span className="sr-only">Loading...</span>
+                                                </a>
+                                                <span> Уншиж байна. </span>
+                                            </button>
+                                        </>
+                                        :
+                                        <button type="button" className="btn gp-btn-primary" onClick={this.handlePayment} >
+                                            Худалдаж авах
+                                        </button>
+                                    }
                                 </div>
                             </div>
-                        }
-                        <div className="modal-footer">
-                            <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
-                            {
-                                !is_loading &&
-                                <button type="button" onClick={this.handlePayment} className="btn gp-btn-primary">Худалдаж авах</button>
-                            }
-                        </div>
                         </div>
                     </div>
-                </div><div className='modal-backdrop fade show'></div>
+                </div>
+                <div className='modal-backdrop fade show'></div>
             </div>
         )
     }

@@ -14,6 +14,7 @@ export default class HistoryForm extends Component {
             payment_length:null,
             currentPage:1,
             paymentPerPage:12,
+            is_loading: true,
         }
         this.paginate = this.paginate.bind(this)
 
@@ -31,26 +32,42 @@ export default class HistoryForm extends Component {
     }
     render() {
         const {payment,payment_length} = this.state
+        const {is_loading} = this.props
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="container pt-0">
-                        <div className="row">
-                            { payment_length ===0 ?
-                                <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
-                                    payment.map((p, idx) =>
-                                        <HistoryTable
-                                            key={idx}
-                                            values={p}
-                                        >
-                                        </HistoryTable>
-                                    )
-                            }
+                    {
+                        is_loading ?
+                        <div className="container pt-0">
+                            <div className="row">
+                                <div className="d-flex justify-content-center">
+                                    <div className="fa fa-spinner fa-pulse fa-3x fa-fw">
+                                        <br/>Уншиж байна.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        {payment_length !=0 &&
-                                <Pagination paginate = { this.paginate }/>
-                        }
-                    </div>
+                        :
+                        <div className="modal-body">
+                            <div className="container pt-0">
+                                <div className="row">
+                                    { payment_length ===0 ?
+                                        <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
+                                            payment.map((p, idx) =>
+                                                <HistoryTable
+                                                    key={idx}
+                                                    values={p}
+                                                >
+                                                </HistoryTable>
+                                            )
+                                    }
+                                </div>
+                                {payment_length !=0 &&
+                                    <Pagination paginate = { this.paginate }/>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         )
