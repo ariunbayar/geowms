@@ -62,7 +62,6 @@ export class OrgAdd extends Component {
         if(id){
             service.orgAll(org_level,id).then(({ orgs }) => {
                 if (orgs) {
-                    console.log(orgs)
                     orgs.map(org=>this.setState({
                         org_name:org.name,
                         org_role:org.org_role

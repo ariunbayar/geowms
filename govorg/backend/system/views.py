@@ -11,6 +11,7 @@ from django.core.paginator import Paginator
 from django.db import connections
 from django.contrib.postgres.search import SearchVector
 from backend.govorg.models import GovOrg
+from backend.org.models import Employee
 
 def _get_govorg_display(govorg):
 
@@ -50,6 +51,19 @@ def systemList(request, payload):
         'items': items,
         'page': page,
         'total_page': total_page,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def userToken(request):
+
+    emp = get_object_or_404(Employee, user=request.user)
+    rsp = {
+        'success': True,
+        'token': emp.token,
     }
 
     return JsonResponse(rsp)

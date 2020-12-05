@@ -140,6 +140,7 @@ def _get_org_request(ob):
             geo_json = FeatureCollection([geo_json])
 
         return {
+            'change_request_id':ob.id,
             'old_geo_id':ob.old_geo_id,
             'new_geo_id':ob.new_geo_id,
             'id':ob.id,
@@ -544,4 +545,31 @@ def search(request, payload):
             'success': False,
             'info': str(e)
         }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def controlToApprove(request, payload):
+    form_json = payload.get("values")
+    change_request_id = payload.get("change_request_id")
+    order_at = form_json['order_at']
+    order_no = form_json['order_no']
+    get_object_or_404(ChangeRequest, id=change_request_id)
+    ChangeRequest.objects.filter(id=change_request_id).update(order_no=order_no, order_at=order_at, form_json=form_json, state=1)
+    rsp = {
+            'success': True,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def controlToRemove(request, payload):
+    change_request_id = payload.get("change_request_id")
+    get_object_or_404(ChangeRequest, id=change_request_id)
+    ChangeRequest.objects.filter(id=change_request_id).delete()
+    rsp = {
+            'success': True,
+    }
     return JsonResponse(rsp)

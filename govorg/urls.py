@@ -17,6 +17,7 @@ urlpatterns = [
         path('', employee_views.employees, name='employees'),
         ], 'employee'))),
         path('system/', system_views.systemList, name='system'),
+        path('system/user-token/', system_views.userToken, name='user-token'),
         path('bundle/', bundle_views.bundle, name='bundle'),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
@@ -29,7 +30,7 @@ urlpatterns = [
             path('create/', govorg_inspire_views.create),
             path('createDel/', govorg_inspire_views.createDel),
             path('createUpd/', govorg_inspire_views.createUpd),
-            path('<str:pk>/<str:fid>/detail/', govorg_inspire_views.detail),
+            path('<str:pk>/<int:tid>/<int:fid>/detail/', govorg_inspire_views.detail),
             path('<int:tid>/<int:pid>/<int:fid>/detail/', govorg_inspire_views.detailNone),
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
@@ -40,6 +41,8 @@ urlpatterns = [
         path('org-request/', include(([
             path('', org_request_views.getAll, name="all"),
             path('change-request/', org_request_views.getChangeAll, name="change-request"),
+            path('control-to-approve/', org_request_views.controlToApprove, name="control-to-approve"),
+            path('control-to-remove/', org_request_views.controlToRemove, name="control-to-remove"),
             path('<int:pk>/delete/', org_request_views.requestDelete, name="delete"),
             path('<int:pk>/approve/', org_request_views.requestApprove, name="approve"),
             path('getCount/', org_request_views.getCount, name='getCount'),

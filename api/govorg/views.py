@@ -18,6 +18,8 @@ from django.contrib import auth
 import datetime
 from django.db import connections
 import main.geoserver as geoserver
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, GovRole, GovPerm, EmpRole, EmpPerm, GovRoleInspire, GovPermInspire, EmpRoleInspire, EmpPermInspire
+from backend.dedsanbutets.models import ViewNames, ViewProperties
 
 
 def _get_service_url(request, token, wms):
@@ -106,7 +108,7 @@ def qgis_submit(request, token):
                     package_id = package.package_id,
                     feature_id = feature_id,
                     employee = employee,
-                    state = ChangeRequest.STATE_NEW,
+                    state = ChangeRequest.STATE_CONTROL,
                     kind = ChangeRequest.KIND_DELETE,
                     form_json = None,
                     geo_json = geoJsonConvertGeom(update_list['geom']),
@@ -128,7 +130,7 @@ def qgis_submit(request, token):
                     package_id = package.package_id,
                     feature_id = feature_id,
                     employee = employee,
-                    state = ChangeRequest.STATE_NEW,
+                    state = ChangeRequest.STATE_CONTROL,
                     kind = ChangeRequest.KIND_UPDATE,
                     form_json = None,
                     geo_json = geoJsonConvertGeom(update_list['geom']),
@@ -138,26 +140,57 @@ def qgis_submit(request, token):
         return JsonResponse({'success': False})
 
 
+def _get_wms_name(employee):
+    gov_perm = GovPerm.objects.filter(org=employee.org).first()
+    feature_ids = GovPermInspire.objects.filter(gov_perm=gov_perm, geom=True, perm_kind=4).values_list('feature_id', flat=True)
+    view_names = ViewNames.objects.filter(feature_id__in=feature_ids)
+    allowed_layers = []
+    if view_names:
+        for view_name in view_names:
+            feature = LFeatures.objects.filter(feature_id=view_name.feature_id).first()
+            package = LPackages.objects.filter(package_id=feature.package_id).first()
+            theme = LThemes.objects.filter(theme_id=package.theme_id).first()
+            theme_ws_name = 'gp_'+ theme.theme_code
+            layer_ws_name = 'gp_layer_'+ view_name.view_name
+            layer_code = theme_ws_name + ":" + layer_ws_name
+            allowed_layers.append(layer_code)
+        return allowed_layers
+    else:
+        return allowed_layers
+
+
 @require_GET
 def qgisProxy(request, token):
-    print(token)
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     employee = get_object_or_404(Employee, token=token)
-
+    allowed_layers = _get_wms_name(employee)
     conf_geoserver = geoserver.get_connection_conf()
     base_url = 'http://{host}:{port}/geoserver/ows'.format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
     )
-
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
 
+    if request.GET.get('REQUEST') == 'GetCapabilities':
+        content = filter_layers(content, allowed_layers)
 
+    gp_au:gp_administrative_unit_view
+
+    qs_request = queryargs.get('REQUEST', 'no request')
+
+    WMSLog.objects.create(
+        qs_all= dict(queryargs),
+        qs_request=qs_request,
+        rsp_status=rsp.status_code,
+        rsp_size=len(rsp.content),
+        employee=employee,
+    )
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
+
     return rsp

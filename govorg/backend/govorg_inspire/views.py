@@ -346,7 +346,7 @@ def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
 
-def _get_property(ob):
+def _get_property(ob, theme_id):
     data = None
     value_type = ''
     data_list = []
@@ -378,7 +378,7 @@ def _get_property(ob):
     if data:
         data = data[0]
     return {
-        'building_id':ob['building_id'],
+        theme_id:ob[theme_id],
         'geo_id':ob['geo_id'],
         'property_name':ob['property_name'],
         'property_id':ob['property_id'],
@@ -411,44 +411,58 @@ def _get_type(value_type_id):
         value_type = 'option'
     return value_type
 
+def getThemeName(tid):
+    if tid == 1:
+        return 'm_datas_boundary', 'boundary_id'
+    elif tid == 1:
+        return 'm_datas_building', 'building_id'
+    elif tid == 1:
+        return 'm_datas_cadastral', 'cadastral_id'
+    elif tid == 1:
+        return 'm_datas_geographical', 'geographical_id'
+    elif tid == 1:
+        return 'm_datas_hydrography', 'hydrography_id'
+    else: None, None
+
 
 @require_GET
 @ajax_required
-def detail(request, pk, fid):
+def detail(request, pk, tid, fid):
+    theme_name, theme_id = getThemeName(tid)
     org = get_object_or_404(Org, employee__user=request.user)
     org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
     find_cursor = connections['default'].cursor()
-    find_cursor.execute('''
-    select
-        datas.building_id,
-        datas.geo_id,
-        l.property_name,
-        l.property_code,
-        l.property_definition,
-        l.value_type_id,
-        datas.property_id,
-        datas.value_text,
-        datas.value_number,
-        datas.value_date,
-        datas.code_list_id
-    from l_properties l
-    inner join m_datas_building datas on
-        l.property_id = datas.property_id
-    where
-        datas.geo_id = %s
-    order by property_name asc
-    '''
-    , [pk])
+    quuery = '''
+        select
+            datas.{theme_id},
+            datas.geo_id,
+            l.property_name,
+            l.property_code,
+            l.property_definition,
+            l.value_type_id,
+            datas.property_id,
+            datas.value_text,
+            datas.value_number,
+            datas.value_date,
+            datas.code_list_id
+        from l_properties l
+        inner join {theme_name} datas on
+            l.property_id = datas.property_id
+        where
+            datas.geo_id = %s
+        order by property_name asc
+    '''.format(theme_name=theme_name, theme_id=theme_id)
+    find_cursor.execute(quuery, [pk])
 
     data = dict_fetchall(find_cursor)
     data = list(data)
     org_propties_front = []
-    properties = [_get_property(ob) for ob in data]
+    properties = [_get_property(ob, theme_id) for ob in data]
     for org_prop in org_properties:
         for inspire_prop in properties:
             if org_prop.module_id == inspire_prop['property_id']:
                 org_propties_front.append({
-                    'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
+                    theme_id:inspire_prop[theme_id] if inspire_prop[theme_id] else '',
                     'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
                     'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
                     'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
@@ -715,7 +729,7 @@ def createUpd(request, payload):
     geo_json = payload.get('geo_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
-
+    print(form_json)
     if not form_json:
         form_json = ''
     if not geo_json:
