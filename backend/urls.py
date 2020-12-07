@@ -88,7 +88,7 @@ urlpatterns = [
         path('inspire-roles/<int:pk>/save/', org_views.saveInspireRoles, name='inspire-roles-save'),
         path('level-<int:level>/<int:pk>/gov-perm/', org_views.getGovRoles, name='get-gov-roles'),
         path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.saveGovRoles, name='save-gov-roles'),
-        path('form-options/', org_views.formOptions, name='form-options'),
+        path('form-options/', org_views.form_options),
 
     ], 'org'))),
 

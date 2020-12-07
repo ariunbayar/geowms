@@ -1,19 +1,15 @@
-import json
-
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.shortcuts import get_list_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
-from django.db import connections
 
 from backend.bundle.models import Bundle
 from backend.govorg.models import GovOrg
-from backend.inspire.models import LCodeListConfigs
-from backend.inspire.models import LCodeLists
 from backend.inspire.models import LDataTypeConfigs
 from backend.inspire.models import LDataTypes
 from backend.inspire.models import LFeatureConfigs
@@ -21,16 +17,10 @@ from backend.inspire.models import LFeatures
 from backend.inspire.models import LPackages
 from backend.inspire.models import LProperties
 from backend.inspire.models import LThemes
-from backend.inspire.models import LValueTypes
-from backend.inspire.models import MDatasBoundary
 from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
-from backend.inspire.models import EmpRole
-from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import EmpRoleInspire
-from backend.inspire.models import EmpPermInspire
 from geoportal_app.models import User
 from main.decorators import ajax_required
 from main import utils
@@ -102,7 +92,6 @@ def _get_roles(org_id, module_id, module, module_root_id):
 @user_passes_test(lambda u: u.is_superuser)
 def Inspireroles(request, level, pk):
 
-    roles = []
     data = []
     org = get_object_or_404(Org, pk=pk, level=level)
     for themes in LThemes.objects.all():
@@ -359,10 +348,7 @@ def employee_add(request, payload, level, pk):
 def employee_remove(request, payload, level, pk):
 
     user_id = payload.get('user_id')
-    get_object_or_404(User, pk=user_id)
-
-    user = User.objects.filter(pk=user_id)
-    employee = Employee.objects.filter(user_id=user_id)
+    employee = get_list_or_404(Employee, user_id=user_id)
     employee.delete()
 
     return JsonResponse({'success': True})
@@ -648,17 +634,6 @@ def countOrg(request):
         }
     }
     return JsonResponse(rsp)
-
-
-def getgetRolesNames():
-    gov_role_display = []
-    for gov_role in GovRole.objects.all():
-        gov_role_display.append({
-            'id': gov_role.id,
-            'name': gov_role.name,
-        })
-
-    return gov_role_display
 
 
 @require_POST
@@ -1297,23 +1272,34 @@ def saveGovRoles(request, payload, level, pk):
     return JsonResponse(rsp)
 
 
+def _get_roles_display():
+
+    return [
+        {
+            'id': gov_role.id,
+            'name': gov_role.name,
+        }
+        for gov_role in GovRole.objects.all()
+    ]
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def formOptions(request, payload):
+def form_options(request, payload):
 
-    org_level = payload.get('org_level')
     org_id = payload.get('org_id')
-    secondOrder = utils.get_administrative_levels()
-    if org_id:
-        geo_id = Org.objects.filter(id=org_id).first().geo_id
-    else:
-        geo_id = None
-    roles = getgetRolesNames()
+    org = get_object_or_404(Org, pk=org_id)
+
+    geo_id = org.geo_id
+    admin_levels = utils.get_administrative_levels()
+    roles = _get_roles_display()
+
     rsp = {
         'success': True,
-        'secondOrder': secondOrder,
+        'secondOrder': admin_levels,
         'geo_id': geo_id,
         'roles': roles,
     }
+
     return JsonResponse(rsp)
