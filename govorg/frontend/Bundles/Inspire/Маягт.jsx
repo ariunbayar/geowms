@@ -14,6 +14,7 @@ export default class Маягт extends Component {
             tid: props.tid,
             pid: props.pid,
             fid: props.fid,
+            property_ids: props.property_ids,
             values: {},
             geojson: {},
             order_at: '',
@@ -28,7 +29,6 @@ export default class Маягт extends Component {
 
     onSubmit(values, { setStatus, setSubmitting }) {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list } = this.props
-        if(this.props.roles[6]){
             if(null_form_isload){
                 service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
                     if (success) {
@@ -45,7 +45,7 @@ export default class Маягт extends Component {
                 this.props.requestRemove(values)
             }
             else {
-                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
+                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {               
                     if (success) {
                         this.setState({is_loading: true})
                         this.props.requestRefreshCount()
@@ -53,30 +53,11 @@ export default class Маягт extends Component {
                     }
                 })
             }
-        }
-        else{
-            if(null_form_isload){
-                service.save(this.state.fid, values).then(({ success }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.handleUpdate(gid)
-                    }
-                })
-            }
-            else{
-                service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.handleUpdate(gid)
-                    }
-                })
-            }
-        }
     }
 
     handleUpdate(gid){
-        const fid = this.state.fid
-        service.detail(gid, fid).then(({success, datas}) => {
+        const {fid, property_ids} = this.state
+        service.detail(gid, fid, property_ids).then(({success, datas}) => {
             if(success){
                 this.setState({
                     values:datas,
@@ -88,7 +69,7 @@ export default class Маягт extends Component {
 
     handleCreate(){
 
-        service.detailNone(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
+        service.detailNone(this.state.tid, this.state.pid, this.state.fid, this.state.property_ids).then(({success, datas}) => {
             if(success){
                 this.setState({
                     values:datas,
@@ -107,7 +88,7 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
-                    if(this.props.roles[6]) this.props.SaveBtn()
+                    this.props.SaveBtn()
                     this.handleCreate()
                     this.setState({is_loading:true})
                 }
@@ -123,7 +104,7 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
-                    if(this.props.roles[6]) this.props.SaveBtn()
+                    this.props.SaveBtn()
                     this.handleCreate()
                     this.setState({is_loading:true})
                 }
@@ -168,7 +149,7 @@ export default class Маягт extends Component {
             <div className='overflow-auto card-body'>
                 {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
                 <hr></hr>
-                <Formik
+                <Formik 
                     enableReinitialize
                     initialValues={{
                         form_values: values,
@@ -199,6 +180,7 @@ export default class Маягт extends Component {
                             <div>
                                 {values.form_values && values.form_values.length > 0 ? (
                                 values.form_values.map((friend, index) => (
+                                    friend.role.PERM_VIEW ?
                                     <div key={index} className="row my-3 ">
                                         <div className="col-md-3">
                                             <label className="col-form-label">{friend.property_code ? friend.property_code : ''}</label>
@@ -206,7 +188,7 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role == 1 ? true : false}>
+                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role.PERM_UPDATE ? false : true}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
@@ -223,7 +205,7 @@ export default class Маягт extends Component {
                                                 name={`form_values.${index}.data`|| ""}
                                                 as="select"
                                                 className='form-control'
-                                                disabled={friend.role == 1 ? true : false}
+                                                disabled={friend.role.PERM_UPDATE ? false : true}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -232,7 +214,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
-                                                    disabled={friend.role == 1 ? true : false}
+                                                    disabled={friend.role.PERM_UPDATE ? false : true}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                     />
@@ -241,6 +223,7 @@ export default class Маягт extends Component {
                                             </div>
                                         }
                                     </div>
+                                : null 
                                 ))
                                 ) : ( null
                                 )}
@@ -272,10 +255,7 @@ export default class Маягт extends Component {
                                     </div>
                                 </div>
                                 <div>
-                                    {this.props.roles[6] ?
-                                    <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>:
-                                    <button type="submit" className="btn btn-block gp-btn-primary">Хадгалах</button>
-                                    }
+                                    <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>
                                 </div>
                             </div>
                             )}

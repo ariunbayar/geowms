@@ -412,11 +412,10 @@ def _get_type(value_type_id):
     return value_type
 
 
-@require_GET
+@require_POST
 @ajax_required
-def detail(request, pk, fid):
-    org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
+def detail(request, payload, pk, fid):
+    org_properties = payload.get("property_ids")
     find_cursor = connections['default'].cursor()
     find_cursor.execute('''
     select
@@ -446,7 +445,7 @@ def detail(request, pk, fid):
     properties = [_get_property(ob) for ob in data]
     for org_prop in org_properties:
         for inspire_prop in properties:
-            if org_prop.module_id == inspire_prop['property_id']:
+            if org_prop['property_id'] == inspire_prop['property_id']:
                 org_propties_front.append({
                     'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
                     'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
@@ -458,7 +457,7 @@ def detail(request, pk, fid):
                     'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
                     'data': inspire_prop['data'] if inspire_prop['data'] else '',
                     'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
-                    'role': '1' if org_prop.perm_update else '0',
+                    'role': org_prop['roles'],
                 })
     rsp = {
         'success': True,
@@ -467,11 +466,11 @@ def detail(request, pk, fid):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-def detailNone(request, tid, pid, fid):
+def detailNone(request,payload, tid, pid, fid):
     org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
+    org_properties = payload.get('property_ids')
     find_cursor = connections['default'].cursor()
     find_cursor.execute('''
         select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id
@@ -479,7 +478,7 @@ def detailNone(request, tid, pid, fid):
         inner join (select l_feature_configs.feature_id, l_feature_configs.feature_config_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
         from l_feature_configs
         inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
-        where l_feature_configs.feature_id = 38
+        where l_feature_configs.feature_id = %s
         ) datas
         on datas.property_id = l.property_id
     '''
@@ -489,22 +488,24 @@ def detailNone(request, tid, pid, fid):
     datas = list(data)
     org_propties_front = []
 
-
-    for data in datas:
-        org_propties_front.append({
-            'property_name':data['property_name'] if data['property_name'] else '' ,
-            'property_id':data['property_id'] if data['property_id'] else '',
-            'property_code':data['property_code'] if data['property_code'] else '',
-            'property_definition': data['property_definition'] if data['property_definition'] else '',
-            'value_type_id':data['value_type_id'] if data['value_type_id'] else '',
-            'feature_id' : data['feature_id'] if data['feature_id'] else '',
-            'theme_id' : tid,
-            'package_id' : pid,
-            'value_type' : _get_type(data['value_type_id']) if _get_type(data['value_type_id']) else '',
-            'data': '',
-            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else '',
-            # 'role': not org_prop.perm_update
-        })
+    if org_properties:
+        for data in datas:
+            for prop_id in org_properties:
+                if prop_id['propert_id'] == data['property_id']:
+                    org_propties_front.append({
+                        'property_name':data['property_name'] if data['property_name'] else '' ,
+                        'property_id':data['property_id'] if data['property_id'] else '',
+                        'property_code':data['property_code'] if data['property_code'] else '',
+                        'property_definition': data['property_definition'] if data['property_definition'] else '',
+                        'value_type_id':data['value_type_id'] if data['value_type_id'] else '',
+                        'feature_id' : data['feature_id'] if data['feature_id'] else '',
+                        'theme_id' : tid,
+                        'package_id' : pid,
+                        'value_type' : _get_type(data['value_type_id']) if _get_type(data['value_type_id']) else '',
+                        'data': '',
+                        'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else '',
+                        'role': prop_id['roles']
+                    })
 
     rsp = {
         'success': True,
@@ -648,7 +649,7 @@ def create(request, payload):
     geo_json = payload.get('geo_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
-
+    
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,

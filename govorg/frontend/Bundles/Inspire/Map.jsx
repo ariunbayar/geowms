@@ -48,11 +48,13 @@ export default class BarilgaSuurinGazar extends Component{
 
       this.sendCoordinateList = [] //boxEnd
       this.turningPoint = [] //boxEnd
+      this.inspire_roles = []
+      this.property_ids = []
 
       this.state = {
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857',
+          featureProjection: 'EPSG:3857', 
           tid: props.match.params.tid,
           pid: props.match.params.pid,
           fid: props.match.params.fid,
@@ -148,22 +150,51 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     getRole(){
-      const {pid, fid} = this.state
-      service
-          .getRole(pid, fid)
-          .then(({ success, roles }) => {
-              if(success){
-                this.loadControls(roles)
+      const fid = this.state.fid
+      var perm_approve = false
+      var perm_create = false
+      var perm_update = false
+      var perm_remove = false
+      var perm_revoke = false
+      const properties = this.props.property
+      if(properties){
+        
+        properties.forEach(property => {
+          if(property.parent_id==fid){
+                if (property.roles['PERM_CREATE']) perm_create = true
+                if (property.roles['PERM_UPDATE']) perm_update = true
+                if (property.roles['PERM_REMOVE']) perm_remove  = true
+                if (property.roles['PERM_APPROVE']) perm_approve = true
+                if (property.roles['PERM_REVOKE']) perm_revoke = true
+                this.property_ids.push({
+                  'propert_id': property.id, 
+                  'roles': {
+                    'PERM_VIEW': property.roles['PERM_REVOKE'] ? true : false,
+                    'PERM_UPDATE': property.roles['PERM_UPDATE'] ? true : false
+                  }
+              })
               }
           })
+
+          this.inspire_roles.push({
+            'PERM_CREATE': perm_create,
+            'PERM_UPDATE': perm_update,
+            'PERM_REMOVE': perm_remove,
+            'PERM_APPROVE': perm_approve,
+            'PERM_REVOKE': perm_revoke
+          })
+
+        this.loadControls()
+      }
     }
 
-    loadControls(roles){
+    loadControls(){
       const map = this.map
+      const {PERM_CREATE, PERM_UPDATE, PERM_REMOVE, PERM_APPROVE} = this.inspire_roles[0]
       const { type } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
-      if(roles[1]){
+      if(PERM_CREATE){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
         else if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
@@ -174,27 +205,47 @@ export default class BarilgaSuurinGazar extends Component{
           map.addControl(new PolygonBarButton(({PolygonButton: this.PolygonButton, 'null': true})))
         }
       }
-      if(roles[1] || roles[3]) {
-        if (roles[6]) map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
-        else map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
+      if(PERM_CREATE || PERM_UPDATE) {
+        map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
       }
-      if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      if(PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
 
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
-      if(roles[3]){
+      if(PERM_UPDATE){
         map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
-      this.setState({ is_loading:false, roles })
-    }
+      if(PERM_APPROVE){
+        if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
+        else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
+        else if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+        else {
+          this.addNotif('warning', type, 'times')
+          map.addControl(new LineBarButton({LineButton: this.LineButton, 'null': true}))
+          map.addControl(new PointBarButton(({PointButton: this.PointButton, 'null': true})))
+          map.addControl(new PolygonBarButton(({PolygonButton: this.PolygonButton, 'null': true})))
+        }
+        map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
+        map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
+        map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+        map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
+        map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
+        map.addControl(new FormBarButton({FormButton: this.FormButton}))
+        map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
+        map.addControl(this.controls.upload)
+        map.addControl(this.controls.metaList)
+        map.addControl(this.controls.sidebar)
+      }
 
+      this.setState({ is_loading:false})
+    }
     loadData(){
 
         const rows = this.state.rows
@@ -601,7 +652,7 @@ export default class BarilgaSuurinGazar extends Component{
     componentDidUpdate(prevProps, prevState) {
         const oid_old = prevProps.match.params.oid
         const old_roles = prevState.roles
-        const roles = this.state.roles
+        const roles = this.inspire_roles[0]
         const oid = this.props.match.params.oid
         const type = this.state.type
         if(prevState.type !== type){
@@ -699,11 +750,7 @@ export default class BarilgaSuurinGazar extends Component{
     removeModal(values){
 
       if(this.state.selectedFeature_ID){
-        if(this.state.roles[6]){
           this.controls.modal.showModal(() => this.remove(values), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг хянуулах уу`, null, 'danger', "Үгүй")
-        }else{
-          this.controls.modal.showModal(this.remove, true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг устгах уу`, null, 'danger', "Үгүй")
-        }
       }
       else
       {
@@ -735,23 +782,24 @@ export default class BarilgaSuurinGazar extends Component{
       const features = vectorLayer.getSource().getFeatures();
 
       if(selectedFeature_ID){
-          if(this.state.roles[6]){
+          // if(this.inspire_roles.PERM_APPROVE){
+            //ene hesegt remove hiihde change set-ruu hadgalah estoin 
             this.setState({ togle_islaod: false })
-          }
-          else{
-            service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
-              if (success) {
-                this.addNotif('success', info, 'check')
-                this.setState({featureID_list: [], selectedFeature_ID: null})
-                if (features != null && features.length > 0) {
-                  features.map((x) => {
-                    const id = x.getProperties()['id']
-                    id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
-                  })
-                }
-              }
-            })
-          }
+          // }
+          // else{
+          //   service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
+          //     if (success) {
+          //       this.addNotif('success', info, 'check')
+          //       this.setState({featureID_list: [], selectedFeature_ID: null})
+          //       if (features != null && features.length > 0) {
+          //         features.map((x) => {
+          //           const id = x.getProperties()['id']
+          //           id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
+          //         })
+          //       }
+          //     }
+          //   })
+          // }
       }
       else
       {
@@ -772,7 +820,6 @@ export default class BarilgaSuurinGazar extends Component{
       if(modifyend_selected_feature_ID){
           if(modifyend_selected_feature_check || update_geom_from_list)
           {
-            if(this.state.roles[6]){
               this.controls.modal.showModal(
                     () => this.updateGeom(form_values),
                     true,
@@ -783,19 +830,6 @@ export default class BarilgaSuurinGazar extends Component{
                     "Үгүй"
               )
               this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-            }
-            else{
-              this.controls.modal.showModal(
-                    this.updateGeom,
-                    true,
-                    "Тийм",
-                    `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хадгалах уу`,
-                    null,
-                    null,
-                    "Үгүй"
-              )
-              this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-            }
           }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
@@ -824,7 +858,6 @@ export default class BarilgaSuurinGazar extends Component{
         const json = JSON.parse(this.feature)
         const datas = json.geometry
         this.setState({ is_loading:true })
-        if(this.state.roles[6]){
           service.createUpd(tid, pid, fid, values, datas, id).then(({success}) => {
             if(success){
               this.addNotif('success', 'Хүсэлтийг үүсгэлээ', 'check')
@@ -836,64 +869,18 @@ export default class BarilgaSuurinGazar extends Component{
               this.setState({is_loading:false})
             }
           })
-        }
-        else{
-          service.geomUpdate(datas, fid, id).then(({success, info}) => {
-            if(success){
-              this.addNotif('success', info, 'check')
-              this.setState({
-                is_loading:false
-              })
-            }
-            else {
-              this.addNotif('danger', info, 'times')
-              this.setState({
-                is_loading:false
-              })
-            }
-          })
-        }
       } else {
         this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
       }
     }
 
     createGeom(){
-      console.log('shineeer uussgeh');
       const { is_not_mongolia } = this.state
       if (!is_not_mongolia) {
-        console.log('in mongol');
         const fid = this.state.fid
         const json = JSON.parse(this.state.drawed)
         const datas = json.geometry
-        this.setState({ is_loading: true })
-        if(this.state.roles[6]){
-          console.log('batlah erhtei');
           this.setState({ is_loading: false, geojson: datas, togle_islaod: false})
-        }
-        else
-        {
-          service.geomAdd(datas, fid).then(({success, info, id}) => {
-            if(success){
-              {
-                this.addNotif('success', info, 'check')
-                this.setState({
-                  is_loading:false
-                })
-              }
-              if(id && this.state.roles[3]){
-                this.setState({selectedFeature_ID: id, togle_islaod: false})
-              }
-            }
-            else
-            {
-              this.addNotif('danger', info, 'times')
-              this.setState({
-                is_loading:false
-              })
-            }
-          })
-        }
       } else {
         this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
       }
@@ -902,12 +889,12 @@ export default class BarilgaSuurinGazar extends Component{
 
     ModifyButton(){
       if(this.state.modify_button_active){
-        if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        if(this.inspire_roles[0].PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: false})
       }
       else{
-        if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+        if(this.inspire_roles[0].PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        if(this.inspire_roles[0].PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: true,  remove_button_active: false})
       }
       this.drawE.setActive(false);
@@ -916,8 +903,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     LineButton(){
-      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.inspire_roles[0].PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.inspire_roles[0].PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
@@ -927,8 +914,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PointButton(){
-      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.inspire_roles[0].PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.inspire_roles[0].PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
@@ -938,8 +925,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PolygonButton(){
-      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.inspire_roles[0].PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      if(this.inspire_roles[0].PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
@@ -1365,7 +1352,8 @@ export default class BarilgaSuurinGazar extends Component{
                           pid = {this.props.match.params.pid}
                           fid = {this.props.match.params.fid}
                           geojson = {this.state.geojson}
-                          roles = {this.state.roles}
+                          roles = {this.inspire_roles[0]}
+                          property_ids = {this.property_ids}
                           gid = {this.state.selectedFeature_ID}
                           togle_islaod = {this.state.togle_islaod}
                           null_form_isload = {this.state.null_form_isload}

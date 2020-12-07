@@ -74,12 +74,12 @@ def get_convert_display_name(perm_list):
             roles['update_id'] = perm.get('ins_id')
 
         if perm.get('kind') == 5:
-            roles['PERM_APPROVE'] = True
-            roles['approve_id'] = perm.get('ins_id')
-
-        if perm.get('kind') == 6:
             roles['PERM_REVOKE'] = True
             roles['revoke_id'] = perm.get('ins_id')
+
+        if perm.get('kind') == 6:
+            roles['PERM_APPROVE'] = True
+            roles['approve_id'] = perm.get('ins_id')
 
     return roles
 
@@ -87,7 +87,7 @@ def get_convert_display_name(perm_list):
 def get_property_data_display(property_id, feature_id, role_model, inspire_model):
 
     if role_model.__class__.__name__ == 'EmpRole':
-        perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('gov_perm_inspire_id'), kind=F('perm_kind')))
 
     if role_model.__class__.__name__ == 'GovPerm':
         perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))

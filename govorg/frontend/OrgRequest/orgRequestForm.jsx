@@ -46,6 +46,7 @@ export default class OrgRequestForm extends Component {
                 })
                this.setState({org_request, is_loading: false, choices, modules, themes: this.themes, packages: this.packages, features: this.features})
             }
+            else this.setState({is_loading:false})
         })
     }
 

@@ -74,14 +74,20 @@ function update(data, pid, fid) {
     return fetch(`${prefix}/${pid}/${fid}/save/`, opts).then(handleResponse)
 }
 
-function detail(gid, fid) {
-    const opts = getGetOptions()
+function detail(gid, fid, property_ids) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({property_ids}),
+    }
 
     return fetch(`${prefix}/${gid}/${fid}/detail/`, opts).then(handleResponse)
 }
 
-function detailNone(tid, pid, fid) {
-    const opts = getGetOptions()
+function detailNone(tid, pid, fid, property_ids) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({property_ids}),
+    }
 
     return fetch(`${prefix}/${tid}/${pid}/${fid}/detail/`, opts).then(handleResponse)
 }

@@ -13,35 +13,71 @@ from govorg.backend.utils import (
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
+    EmpPerm,
+    EmpPermInspire
 )
 
-def _org_role(org):
 
-    gov_perm = get_object_or_404(GovPerm, org=org)
 
-    feature_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
-    package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
-    theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
-
+def _emp_role(org, user, is_superuser):
     properties = []
     property_of_feature = {}
+    gov_perm = []
+    perm_kind = False
+    feature_ids = []
+    feature_ids_list = []
+    package_features = []
+    themes = []
+    gov_perm = get_object_or_404(GovPerm, org=org)
+    if is_superuser:
 
-    for feature_id in feature_ids:
-        property_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
+        feature_ids_list = list(GovPermInspire.objects.filter(gov_perm=gov_perm).distinct('feature_id', 'perm_kind').exclude(feature_id__isnull=True).values_list('feature_id', 'perm_kind'))
+        
+        if feature_ids_list:
+            for i in range(len(feature_ids_list)):
+                if feature_ids_list[i][1] == 6 or feature_ids_list[i][1] == 1:
+                    perm_kind = True
+                    feature_ids.append(feature_ids_list[i][0])
+        package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
+        theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
+        if feature_ids:
+            for feature_id in feature_ids:
+                property_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
 
-        property_of_feature[feature_id] = property_ids
-        for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire))
+                property_of_feature[feature_id] = property_ids
+                for property_id in property_ids:
+                    properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire))
+    else:
 
-    package_features = [
-        get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
-        for package_id in package_ids
-    ]
+        employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
+        emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
 
-    themes = [
-        get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
-        for theme_id in theme_ids
-    ]
+        feature_ids_list = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id).distinct('feature_id', 'perm_kind').exclude(feature_id__isnull=True).values_list('feature_id', 'perm_kind'))
+       
+        if feature_ids_list:
+            for i in range(len(feature_ids_list)):
+                if feature_ids_list[i][1] == 6 or feature_ids_list[i][1] == 1:
+                    perm_kind = True
+                    feature_ids.append(feature_ids_list[i][0])
+        
+        if feature_ids:
+            package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
+            theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
+            for feature_id in feature_ids:
+                property_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
+                property_of_feature[feature_id] = property_ids
+                for property_id in property_ids:
+                    properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire))
+    if feature_ids:
+        package_features = [
+            get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
+            for package_id in package_ids
+        ]
+
+        themes = [
+            get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
+            for theme_id in theme_ids
+        ]
 
     return {
         'gov_perm_id': gov_perm.id,
@@ -96,6 +132,7 @@ def _get_packages(org, theme_id):
 
 def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
+    is_superuser = request.user.is_superuser
     perms = []
     org_inspire = []
     roles_inspire = InspirePerm.objects.filter(org=org, perm_view=True)
@@ -130,7 +167,7 @@ def frontend(request):
             "org_level":org.level,
             'perms':perms,
             'org_inspire':org_inspire,
-            'org_role':_org_role(org),
+            'org_role':_emp_role(org, request.user, is_superuser),
         },
     }
     return render(request, 'org/index.html', context)
