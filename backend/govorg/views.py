@@ -11,6 +11,7 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from .models import GovOrg
 from django.contrib.postgres.search import SearchVector
+from django.utils.timezone import localtime, now
 
 
 def _get_govorg_display(govorg):
@@ -133,6 +134,7 @@ def устгах(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
     govorg.deleted_by = request.user
+    govorg.deleted_at = localtime(now())
     govorg.save()
 
     rsp = {
