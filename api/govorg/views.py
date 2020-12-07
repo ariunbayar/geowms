@@ -26,29 +26,22 @@ def proxy(request, token):
         'User-Agent': 'geo 1.0',
     }
     system = get_object_or_404(System, token=token)
-
-    # wms = get_object_or_404(WMS, pk=pk)
     conf_geoserver = geoserver.get_connection_conf()
+
+    if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
+        raise Http404
+
     base_url = 'http://{host}:{port}/geoserver/ows'.format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
     )
-    print(base_url)
-    print(base_url)
-
-    # if not wms.is_active: 
-    #     raise Http404
-
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
-
-    # allowed_layers = [layer.code for layer in system.wms_layers.filter(wms=wms)]
-    allowed_layers = [layer.code for layer in system.wms_layers.all()]
+    allowed_layers = [layer.code for layer in system.wms_layers.all() if layer.wms.is_active]
     if request.GET.get('REQUEST') == 'GetCapabilities':
         content = filter_layers(content, allowed_layers)
-
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url)
 

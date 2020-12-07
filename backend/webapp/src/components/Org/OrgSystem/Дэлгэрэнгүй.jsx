@@ -12,8 +12,10 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             govorg: {},
             govorg_wms_list: [],
-            public_url: ''
+            public_url: '',
+            copy_url_is: false
         }
+        this.copyToClipboard = this.copyToClipboard.bind(this)
     }
 
     componentDidMount() {
@@ -36,6 +38,20 @@ export class Дэлгэрэнгүй extends Component {
             })
     }
 
+    copyToClipboard(){
+        this.setState({copy_url_is: true})
+        const { public_url } = this.state
+        var textField = document.createElement('textarea')
+        textField.innerText = public_url
+        document.body.appendChild(textField)
+        textField.select()
+        document.execCommand('copy')
+        textField.remove()
+        setTimeout(() => {
+            this.setState({copy_url_is: false})
+        }, 1000);
+    }
+
     render() {
 
         const {name, token, website} = this.state.govorg
@@ -56,11 +72,23 @@ export class Дэлгэрэнгүй extends Component {
                         <h4>{name}</h4>
                         <p><strong>Token</strong>: {token} </p>
                         {website && <p><strong>Вебсайт</strong>: {website} </p>}
-                        <input type="text" className="form-control" disabled value={this.state.public_url}/>
+                        <div className="input-group">
+                            <input type="text" className="form-control col-6" disabled value={this.state.public_url}/>
+                            <span className="input-group-btn">
+                            {this.state.copy_url_is ?
+                            <button className="btn btn-outline-success ml-1" type="button" onClick={this.copyToClipboard}>
+                                <i class="fa fa-check" aria-hidden="true"></i> Амжилттай хууллаа
+                            </button>:
+                            <button className="btn btn-outline-primary ml-1" type="button" onClick={this.copyToClipboard}>
+                                <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                            </button>
+                            }
+                            </span>
+                        </div>
                     </div>
 
                     {this.state.govorg_wms_list.map((wms) =>
-                        <div className="col-md-12 mb-4" key={wms.id}>
+                        <div className="col-md-12 mb-4 ml-5" key={wms.id}>
                             <h4> {wms.name} </h4>
                             <ul>
                                 {wms.layer_list.map((layer, idx) =>
