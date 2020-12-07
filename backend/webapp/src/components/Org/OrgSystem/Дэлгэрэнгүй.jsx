@@ -12,6 +12,7 @@ export class Дэлгэрэнгүй extends Component {
         this.state = {
             govorg: {},
             govorg_wms_list: [],
+            public_url: ''
         }
     }
 
@@ -19,7 +20,7 @@ export class Дэлгэрэнгүй extends Component {
 
         service
             .detail(this.props.match.params.system_id)
-            .then(({govorg}) => {
+            .then(({govorg, public_url}) => {
                 const govorg_wms_list =
                     govorg.wms_list
                         .map((wms) => {
@@ -31,7 +32,7 @@ export class Дэлгэрэнгүй extends Component {
                             }
                         })
                         .filter((wms) => wms.layer_list.length)
-                this.setState({govorg, govorg_wms_list})
+                this.setState({govorg, govorg_wms_list, public_url})
             })
     }
 
@@ -54,13 +55,13 @@ export class Дэлгэрэнгүй extends Component {
                     <div className="col-md-12 mb-4">
                         <h4>{name}</h4>
                         <p><strong>Token</strong>: {token} </p>
-                        {website && <p><strong>Вебсайт</strong>: {website} </p>}   
+                        {website && <p><strong>Вебсайт</strong>: {website} </p>}
+                        <input type="text" className="form-control" disabled value={this.state.public_url}/>
                     </div>
 
                     {this.state.govorg_wms_list.map((wms) =>
                         <div className="col-md-12 mb-4" key={wms.id}>
                             <h4> {wms.name} </h4>
-                            <input type="text" className="form-control" disabled value={wms.public_url}/>
                             <ul>
                                 {wms.layer_list.map((layer, idx) =>
                                     <li key={idx}>
