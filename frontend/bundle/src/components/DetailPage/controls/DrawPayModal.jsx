@@ -46,7 +46,6 @@ class ModalComponent extends Component{
             user_number,
             feature_info_list,
         }
-        console.log(feature_info_list);
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
