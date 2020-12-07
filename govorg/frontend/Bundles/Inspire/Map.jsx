@@ -167,7 +167,7 @@ export default class BarilgaSuurinGazar extends Component{
                 if (property.roles['PERM_APPROVE']) perm_approve = true
                 if (property.roles['PERM_REVOKE']) perm_revoke = true
                 this.property_ids.push({
-                  'propert_id': property.id, 
+                  'property_id': property.id, 
                   'roles': {
                     'PERM_VIEW': property.roles['PERM_REVOKE'] ? true : false,
                     'PERM_UPDATE': property.roles['PERM_UPDATE'] ? true : false
@@ -759,12 +759,12 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    requestRemove() {
+    requestRemove(values) {
       const tid = this.state.tid
       const fid = this.state.fid
       const pid = this.state.pid
       const selectedFeature_ID = this.state.selectedFeature_ID
-      service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
+      service.createDel(tid, pid, fid, selectedFeature_ID, values).then(({ success }) => {
         if (success) {
           this.props.refreshCount()
           this.addNotif('success', 'Устгах хүсэлт үүслээ', 'check')
@@ -782,24 +782,7 @@ export default class BarilgaSuurinGazar extends Component{
       const features = vectorLayer.getSource().getFeatures();
 
       if(selectedFeature_ID){
-          // if(this.inspire_roles.PERM_APPROVE){
-            //ene hesegt remove hiihde change set-ruu hadgalah estoin 
             this.setState({ togle_islaod: false })
-          // }
-          // else{
-          //   service.remove(pid, fid, selectedFeature_ID).then(({ success, info }) => {
-          //     if (success) {
-          //       this.addNotif('success', info, 'check')
-          //       this.setState({featureID_list: [], selectedFeature_ID: null})
-          //       if (features != null && features.length > 0) {
-          //         features.map((x) => {
-          //           const id = x.getProperties()['id']
-          //           id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
-          //         })
-          //       }
-          //     }
-          //   })
-          // }
       }
       else
       {
@@ -825,7 +808,7 @@ export default class BarilgaSuurinGazar extends Component{
                     true,
                     "Тийм",
                     `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
-                    null,
+                    null, 
                     null,
                     "Үгүй"
               )
@@ -846,9 +829,6 @@ export default class BarilgaSuurinGazar extends Component{
       if (!is_not_mongolia) {
         const id = this.state.selectedFeature_ID
         const { changedFeature, changedJson } = this.state
-        console.log(changedJson);
-        console.log(changedJson);
-        console.log(changedJson);
         this.feature = ''
         if (changedJson) {
           this.feature = changedJson
@@ -858,17 +838,17 @@ export default class BarilgaSuurinGazar extends Component{
         const json = JSON.parse(this.feature)
         const datas = json.geometry
         this.setState({ is_loading:true })
-          service.createUpd(tid, pid, fid, values, datas, id).then(({success}) => {
-            if(success){
-              this.addNotif('success', 'Хүсэлтийг үүсгэлээ', 'check')
-              this.props.refreshCount()
-              this.setState({is_loading:false})
-            }
-            else {
-              this.addNotif('danger', 'Хүсэлт үүсгэхэд алдаа гарсан байна', 'times')
-              this.setState({is_loading:false})
-            }
-          })
+        service.createUpd(tid, pid, fid, values, datas, id).then(({success}) => {
+          if(success){
+            this.addNotif('success', 'Хүсэлтийг үүсгэлээ', 'check')
+            this.props.refreshCount()
+            this.setState({is_loading:false})
+          }
+          else {
+            this.addNotif('danger', 'Хүсэлт үүсгэхэд алдаа гарсан байна', 'times')
+            this.setState({is_loading:false})
+          }
+        })
       } else {
         this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
       }

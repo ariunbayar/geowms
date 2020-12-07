@@ -134,10 +134,10 @@ function createUpd(tid, pid, fid, form_json, geo_json, old_geo_id) {
     return fetch(`${prefix}/createUpd/`, opts).then(handleResponse)
 }
 
-function createDel(tid, pid, fid, old_geo_id) {
+function createDel(tid, pid, fid, old_geo_id, values) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({tid, pid, fid, old_geo_id}),
+        body: JSON.stringify({tid, pid, fid, old_geo_id, values}),
     }
     return fetch(`${prefix}/createDel/`, opts).then(handleResponse)
 }

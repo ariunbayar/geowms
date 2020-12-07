@@ -443,22 +443,23 @@ def detail(request, payload, pk, fid):
     data = list(data)
     org_propties_front = []
     properties = [_get_property(ob) for ob in data]
-    for org_prop in org_properties:
+    if org_properties:
         for inspire_prop in properties:
-            if org_prop['property_id'] == inspire_prop['property_id']:
-                org_propties_front.append({
-                    'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
-                    'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
-                    'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
-                    'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
-                    'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
-                    'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
-                    'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
-                    'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
-                    'data': inspire_prop['data'] if inspire_prop['data'] else '',
-                    'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
-                    'role': org_prop['roles'],
-                })
+            for prop_id in org_properties:
+                if prop_id['property_id'] == inspire_prop['property_id']:
+                    org_propties_front.append({
+                        'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
+                        'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
+                        'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
+                        'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
+                        'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
+                        'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
+                        'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
+                        'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
+                        'data': inspire_prop['data'] if inspire_prop['data'] else '',
+                        'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
+                        'role': prop_id['roles'],
+                    })
     rsp = {
         'success': True,
         'datas': org_propties_front
@@ -491,7 +492,7 @@ def detailNone(request,payload, tid, pid, fid):
     if org_properties:
         for data in datas:
             for prop_id in org_properties:
-                if prop_id['propert_id'] == data['property_id']:
+                if prop_id['property_id'] == data['property_id']:
                     org_propties_front.append({
                         'property_name':data['property_name'] if data['property_name'] else '' ,
                         'property_id':data['property_id'] if data['property_id'] else '',
@@ -680,6 +681,7 @@ def createDel(request, payload):
     pid = payload.get('pid')
     fid = payload.get('fid')
     old_geo_id = payload.get('old_geo_id')
+    form_json = payload.get('values')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
