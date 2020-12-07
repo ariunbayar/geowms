@@ -28,7 +28,7 @@ class ModalComponent extends Component{
         this.setState({payLoad: true, handlePaymentIsLoad:true})
 
         const {description, user_name, user_email, user_number} = this.state
-        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price} = this.props
+        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price, feature_info_list} = this.props
 
         const values = {
             price: total_price,
@@ -43,7 +43,8 @@ class ModalComponent extends Component{
             area_type: area.type,
             user_name,
             user_email,
-            user_number
+            user_number,
+            feature_info_list,
         }
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
@@ -203,9 +204,9 @@ export class DrawPayModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user) {
+    showModal(is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user, feature_info_list) {
         this.toggleControl(true)
-        this.renderComponent({is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user})
+        this.renderComponent({is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user, feature_info_list})
     }
 
 }

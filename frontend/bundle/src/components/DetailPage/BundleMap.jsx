@@ -605,6 +605,7 @@ export default class BundleMap extends Component {
                                             }
                                         })
                                         obj['layer_code'] = code
+                                        obj['layer_id'] = id
                                         return obj
                                     })
                                     list.push({[code]: info})
@@ -649,7 +650,7 @@ export default class BundleMap extends Component {
             .then(({ success, total_price, is_user }) => {
                 if (success) {
                     const is_loading = false
-                    this.controls.drawModal.showModal(is_loading, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info, area, total_price, is_user)
+                    this.controls.drawModal.showModal(is_loading, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info, area, total_price, is_user, feature_info_list)
                 }
             })
     }
