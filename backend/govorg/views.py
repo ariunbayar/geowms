@@ -132,7 +132,8 @@ def шинэ_токен(request, pk):
 def устгах(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk)
-    govorg.delete()
+    govorg.deleted_by = request.user
+    govorg.save()
 
     rsp = {
         'success': True,
@@ -147,7 +148,7 @@ def устгах(request, pk):
 def тоо(request, pk):
 
     rsp = {
-        'count': GovOrg.objects.filter(org_id=pk).count(),
+        'count': GovOrg.objects.filter(org_id=pk, deleted_by=None).count(),
     }
 
     return JsonResponse(rsp)
@@ -165,8 +166,10 @@ def govorgList(request, payload):
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'id'
+    if not query:
+        query = ''
     govorg_list = GovOrg.objects.all().annotate(search=SearchVector(
-        'name')).filter(search__contains=query, org_id = org_id).order_by(sort_name)
+        'name')).filter(search__contains=query, org_id = org_id, deleted_by=None).order_by(sort_name)
 
     total_items = Paginator(govorg_list, per_page)
     items_page = total_items.page(page)
