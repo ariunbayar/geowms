@@ -101,10 +101,10 @@ function paymentDraw(values) {
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
 }
 
-function paymentCalcPrice(area, layer_length, feature_info_list) {
+function paymentCalcPrice(area, layer_list, feature_info_list) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({ area, layer_length, feature_info_list })
+        body: JSON.stringify({ area, layer_list, feature_info_list })
     }
     return fetch('/payment/calc-price/', requestOptions).then(handleResponse)
 }

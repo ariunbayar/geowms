@@ -381,12 +381,7 @@ def download_zip(request, pk):
     return response
 
 
-def _data_type_configs(data_type_id):
-    property_len = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).count()
-    return property_len
-
-
-def _get_all_property_count(feature_id):
+def _lfeature_config(feature_id):
     all_count = 0
     f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
     for f_config in f_configs:
@@ -409,13 +404,36 @@ def _get_all_property_count(feature_id):
     return all_count
 
 
-def _calc_per_price(area, area_type, layer_length, all_len_property):
+def _data_type_configs(data_type_id):
+    property_len = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).count()
+    return property_len
+
+
+def _get_key_and_compare(dict, item):
+    for key in dict.keys():
+        if key == item:
+            return key
+
+
+def _get_all_property_count(layer_list, feature_info_list):
+    count = 0
+    for code in layer_list:
+        for feature in feature_info_list:
+            key = _get_key_and_compare(feature, code)
+            if key:
+                for info in feature[key]:
+                    fconfig_count = _lfeature_config(info['feature_id'])
+                    count += fconfig_count
+    return count
+
+
+def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer):
     amount = None
     if area_type == 'km':
         amount = Payment.POLYGON_PER_KM_AMOUNT
     if area_type == 'm':
         amount = Payment.POLYGON_PER_M_AMOUNT
-    price = ((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length
+    price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
     return price
 
 
@@ -423,7 +441,7 @@ def _calc_per_price(area, area_type, layer_length, all_len_property):
 @ajax_required
 def calcPrice(request, payload):
     area = payload.get('area')
-    layer_length = payload.get("layer_length")
+    layer_list = payload.get("layer_list")
     feature_info_list = payload.get("feature_info_list")
     area_type = area['type']
     area = area['output']
@@ -434,8 +452,8 @@ def calcPrice(request, payload):
     else:
         is_user = False
 
-    all_len_property = _get_all_property_count(feature_info_list[0]['feature_id'])
-    total_price = _calc_per_price(area, area_type, layer_length, all_len_property)
+    all_len_property = _get_all_property_count(layer_list, feature_info_list)
+    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list))
 
     rsp = {
         'success': True,
