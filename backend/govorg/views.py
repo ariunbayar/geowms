@@ -148,7 +148,7 @@ def устгах(request, pk):
 def тоо(request, pk):
 
     rsp = {
-        'count': GovOrg.objects.filter(org_id=pk, deleted_by=None).count(),
+        'count': GovOrg.objects.filter(org_id=pk, deleted_by__isnull=True).count(),
     }
 
     return JsonResponse(rsp)
@@ -169,7 +169,7 @@ def govorgList(request, payload):
     if not query:
         query = ''
     govorg_list = GovOrg.objects.all().annotate(search=SearchVector(
-        'name')).filter(search__contains=query, org_id = org_id, deleted_by=None).order_by(sort_name)
+        'name')).filter(search__contains=query, org_id = org_id, deleted_by__isnull=True).order_by(sort_name)
 
     total_items = Paginator(govorg_list, per_page)
     items_page = total_items.page(page)
