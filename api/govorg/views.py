@@ -11,38 +11,39 @@ from api.utils import filter_layers, replace_src_url
 from backend.govorg.models import GovOrg as System
 from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
+import main.geoserver as geoserver
 
-
-def _get_service_url(request, token, wms):
-    url = reverse('api:service:proxy', args=[token, wms.pk])
+def _get_service_url(request, token):
+    url = reverse('api:service:proxy', args=[token])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
 
 @require_GET
-def proxy(request, token, pk):
+def proxy(request, token):
 
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     system = get_object_or_404(System, token=token)
-    wms = get_object_or_404(WMS, pk=pk)
-    base_url = wms.url
+    conf_geoserver = geoserver.get_connection_conf()
 
-    if not wms.is_active: 
+    if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
 
+    base_url = 'http://{host}:{port}/geoserver/ows'.format(
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port'],
+    )
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
-
-    allowed_layers = [layer.code for layer in system.wms_layers.filter(wms=wms)]
+    allowed_layers = [layer.code for layer in system.wms_layers.all() if layer.wms.is_active]
     if request.GET.get('REQUEST') == 'GetCapabilities':
         content = filter_layers(content, allowed_layers)
-
-        service_url = _get_service_url(request, token, wms)
-        content = replace_src_url(content, wms.url, service_url)
+        service_url = _get_service_url(request, token)
+        content = replace_src_url(content, base_url, service_url)
 
     qs_request = queryargs.get('REQUEST', 'no request')
 
@@ -52,7 +53,6 @@ def proxy(request, token, pk):
         rsp_status= rsp.status_code,
         rsp_size= len(rsp.content),
         system_id= system.id,
-        wms_id=pk,
     )
 
     content_type = rsp.headers.get('content-type')
