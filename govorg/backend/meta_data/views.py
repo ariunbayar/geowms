@@ -8,7 +8,8 @@ from django.http import JsonResponse
 from backend.inspire.models import MGeoDatas, LFeatures, LPackages, LThemes
 
 
-def _get_meta_data_display(metadata):
+def _get_meta_data_display(metadata, is_show_choice):
+    show_action = 'show_choice'
     return {
             'id': metadata.id,
             'org_name': metadata.org_name,
@@ -16,8 +17,8 @@ def _get_meta_data_display(metadata):
             'distributor_org': metadata.distributor_org,
             'owner_org': metadata.owner_org,
             'keywords': metadata.keywords,
-            'category': metadata.category,
-            'status': metadata.status,
+            'category': metadata.get_category_display() if is_show_choice == show_action else metadata.category,
+            'status': metadata.get_status_display() if is_show_choice == show_action else metadata.status,
             'language': metadata.language,
             'abstract': metadata.abstract,
             'title': metadata.title,
@@ -59,6 +60,7 @@ def _update_or_create(pk, data, user):
     meta_data.abstract = data.get('abstract')
     meta_data.title = data.get('title')
     meta_data.schema = data.get('schema')
+    meta_data.uuid = data.get('uuid')
     meta_data.updated_by = user
     meta_data.save()
 
@@ -70,7 +72,7 @@ def _update_or_create(pk, data, user):
 def all(request):
 
     meta_data_list = [
-        _get_meta_data_display(metadata)
+        _get_meta_data_display(metadata, 'show_choice')
         for metadata in MetaData.objects.all()
     ]
 
@@ -123,7 +125,7 @@ def edit(request, payload, pk):
 
 @require_GET
 @ajax_required
-def detail(request, pk):
+def detail(request, pk, is_show_choice):
 
     meta_data = get_object_or_404(MetaData, pk=pk)
     geo_data_list = [
@@ -133,7 +135,7 @@ def detail(request, pk):
 
     rsp = {
         'success': True,
-        'meta_data': _get_meta_data_display(meta_data),
+        'meta_data': _get_meta_data_display(meta_data, is_show_choice),
         'geo_data_list': geo_data_list,
     }
 

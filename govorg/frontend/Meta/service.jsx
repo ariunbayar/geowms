@@ -16,11 +16,11 @@ function getAll() {
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
-function getDetail(id) {
+function getDetail(id, is_show_choice) {
     const requestOptions = {
         ...getGetOptions()
     }
-    return fetch(`${prefix}/${id}/detail/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${id}/${is_show_choice}/detail/`, requestOptions).then(handleResponse)
 }
 
 function metaDelete(id) {
