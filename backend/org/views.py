@@ -90,7 +90,7 @@ def _get_roles(org_id, module_id, module, module_root_id):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def Inspireroles(request, level, pk):
+def inspire_roles(request, level, pk):
 
     data = []
     org = get_object_or_404(Org, pk=pk, level=level)
@@ -529,7 +529,7 @@ def detail(request, level, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employeeList(request,payload, level, pk):
+def employee_list(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
     page = payload.get('page')
@@ -573,7 +573,7 @@ def employeeList(request,payload, level, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def rolesAdd(request, payload, level, pk):
+def roles_add(request, payload, level, pk):
     form_datas = payload.get("form_values")
     org = get_object_or_404(Org, pk=pk, level=level)
     def role_update(roles, table_name, root_id, id):
@@ -624,7 +624,7 @@ def rolesAdd(request, payload, level, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def countOrg(request):
+def count_org(request):
     rsp = {
         'gov_count':{
             'level1': Org.objects.filter(level=1).count(),
@@ -639,7 +639,7 @@ def countOrg(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def permGetList(request, payload):
+def perm_get_list(request, payload):
     query = payload.get('query')
     page = payload.get('page')
     per_page = payload.get('perpage')
@@ -679,7 +679,7 @@ def permGetList(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def createPerm(request, payload):
+def create_perm(request, payload):
     values = payload.get('values')
     name_check = GovRole.objects.filter(name=values['name'])
     if name_check:
@@ -698,7 +698,7 @@ def createPerm(request, payload):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def getInspireRoles(request, pk):
+def get_inspire_roles(request, pk):
     roles = []
     data = []
     roles = []
@@ -922,7 +922,7 @@ def _get_feature_property_gov(feature_id, govRole):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def saveInspireRoles(request, payload, pk):
+def save_inspire_roles(request, payload, pk):
 
     values = payload.get('values')
     govRole = get_object_or_404(GovRole, pk=pk)
@@ -988,7 +988,7 @@ def saveInspireRoles(request, payload, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def getGovRoles(request, level, pk):
+def get_gov_roles(request, level, pk):
     data = []
     roles = []
     org = get_object_or_404(Org, pk=pk, level=level)
@@ -1221,7 +1221,7 @@ def _get_feature_property(feature_id, gov_perm):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def saveGovRoles(request, payload, level, pk):
+def save_gov_roles(request, payload, level, pk):
     values = payload.get('values')
     org = get_object_or_404(Org, pk=pk, level=level)
     gov_perm = GovPerm.objects.filter(org=org).first()
