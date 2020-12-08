@@ -79,7 +79,7 @@ def _get_govorg_detail_display(request, govorg):
 @user_passes_test(lambda u: u.is_superuser)
 def дэлгэрэнгүй(request, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk)
+    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
         'public_url': request.build_absolute_uri(reverse('api:service:proxy', args=[govorg.token])),
@@ -94,7 +94,7 @@ def дэлгэрэнгүй(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk)
+    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
 
     govorg.name = payload.get('name')
     govorg.website = payload.get('website')
@@ -116,7 +116,7 @@ def хадгалах(request, payload, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def шинэ_токен(request, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk)
+    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
     govorg.token = _generate_govorg_token()
     govorg.save()
 
@@ -132,7 +132,7 @@ def шинэ_токен(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def устгах(request, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk)
+    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
     govorg.deleted_by = request.user
     govorg.deleted_at = localtime(now())
     govorg.save()

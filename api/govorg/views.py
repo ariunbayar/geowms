@@ -25,7 +25,7 @@ def proxy(request, token):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    system = get_object_or_404(System, token=token)
+    system = get_object_or_404(System, token=token, deleted_by__isnull=True)
     conf_geoserver = geoserver.get_connection_conf()
 
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
