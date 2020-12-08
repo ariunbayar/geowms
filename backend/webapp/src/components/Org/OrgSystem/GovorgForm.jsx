@@ -109,7 +109,7 @@ export class GovorgForm extends Component {
     }
 
     render() {
-        const {name, token} = this.state.govorg
+        const {name, token, website} = this.state.govorg
         return (
 
             <div className="my-4">
@@ -125,7 +125,10 @@ export class GovorgForm extends Component {
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
-                            initialValues={{name:this.state.govorg.name || ''}}
+                            initialValues={{
+                                name: this.state.govorg.name || '',
+                                website: this.state.govorg.website || '',
+                            }}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -151,14 +154,26 @@ export class GovorgForm extends Component {
                                             </label>
 
                                             <Field
-                                                className={'form-control ' + (errors.name ? 'is-invalid' : '')}
+                                                className={'form-control mb-2' + (errors.name ? 'is-invalid' : '')}
                                                 placeholder="Системүүдийн нэр"
                                                 name='name'
                                                 id="id_name"
                                                 type="text"
                                             />
-
                                             <ErrorMessage name="name" component="div" className="invalid-feedback"/>
+
+                                            <label htmlFor="id_website">
+                                                Домэйнээр хязгаарлах:
+                                            </label>
+                                            <Field
+                                                className={'form-control my-1' + (errors.website ? 'is-invalid' : '')}
+                                                placeholder="Байршуулах вэбсайт"
+                                                name='website'
+                                                id="id_website"
+                                                type="text"
+                                            />
+                                            <ErrorMessage name="website" component="div" className="invalid-feedback"/>
+                                            <small className="text-muted">жишээ нь: https://domain.mn</small>
                                         </div>
 
                                         <div></div>
@@ -185,24 +200,26 @@ export class GovorgForm extends Component {
                         </Formik>
                     </div>
                     <div className="col-md-8">
-                     {this.state.wms_list.map((wms) =>
-                        <div className="col-md-12 mb-4" key={wms.id}>
+                     {this.state.wms_list.map((wms, wms_index) =>
+                        <div className="col-md-12" id="accordion1" key={wms_index}>
+                            <div className="row">
+                                <div className="col-md-8 arrow-tree">
+                                    <a className="btn btn-link shadow-none collapsed"
+                                        data-toggle="collapse"
+                                        data-target={`#collapse-${wms_index}`}
+                                        aria-expanded="true"
+                                        aria-controls="collapse-1"
+                                    >
                                     {wms.is_active ?
-                                        <div className="row">
-                                            <div className="col-md-12">
-                                                <i className="fa fa-check-circle" style={{color:"green"}} aria-hidden="false"></i>
-                                                <a> <strong>{wms.name}</strong> {wms.public_url}</a>
-                                            </div>
-                                        </div> :
-                                        <div className="row">
-                                            <div className="col-md-12">
-                                                 <i className="fa fa-times-circle" style={{color:"#FF4748"}}></i>
-                                                 <del><a> &nbsp;<strong>{wms.name}</strong>{wms.public_url}</a></del>
-                                            </div>
-                                        </div>
+                                    <i className="fa fa-check-circle" style={{color:"green"}} aria-hidden="false"></i>:
+                                    <i className="fa fa-times-circle" style={{color:"#FF4748"}}></i>
                                     }
-                            {wms.layer_list.map((layer, idx) =>
-                                <div key={idx}>
+                                    <strong> {wms.name}</strong> {wms.public_url}
+                                    </a>
+                                </div>
+                            </div>
+                            {wms.is_active && wms.layer_list.map((layer, idx) =>
+                                <div key={idx}  id={`collapse-${wms_index}`} className="ml-5 collapse" data-parent="#accordion1">
                                     <label>
                                         <input type="checkbox"
                                             value={layer.id}
@@ -214,7 +231,6 @@ export class GovorgForm extends Component {
                                 </div>
                             )}
                         </div>
-
                     )}
                     </div>
                 </div>

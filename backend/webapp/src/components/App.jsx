@@ -19,6 +19,7 @@ import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
 import {OrgRole} from './OrgRole'
 import {Error500} from './Error500'
+import { PasswordChange } from './Prifile/PasswordChange'
 
 export default class App extends Component {
 
@@ -112,6 +113,7 @@ export default class App extends Component {
               <Route path={"/back/тохиргоо/"} component={ConfigPage} />
               <Route path={"/back/error500/"} component={Error500} />
               <Route path={"/back/дэд-сан/"} component={BundlePage} />
+              <Route path={"/back/admin/password/change/"} component={PasswordChange} />
             </Switch>
           </div>
         </BrowserRouter>

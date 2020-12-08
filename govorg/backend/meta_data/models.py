@@ -16,7 +16,7 @@ class MetaData(models.Model):
     ]
 
     geo_datas                       = models.ManyToManyField('backend_inspire.MGeoDatas', through='MetaDataGeom', verbose_name='Геометр өгөгдлүүд')
-    org_name                        = models.CharField(max_length=50, verbose_name='Гүйцэтгэгч байгууллага')
+    org_name                        = models.CharField(max_length=50, verbose_name='Бэлдсэн байгууллага')
     customer_org                    = models.CharField(max_length=50, verbose_name='Захиалагч байгууллага')
     distributor_org                 = models.CharField(max_length=50, verbose_name='Түгээгч байгууллага')
     owner_org                       = models.CharField(max_length=50, verbose_name='Гүйцэтгэгч байгууллага')
