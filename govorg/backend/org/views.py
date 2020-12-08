@@ -23,7 +23,6 @@ def _emp_role(org, user, is_superuser):
     properties = []
     property_of_feature = {}
     gov_perm = []
-    perm_kind = False
     feature_ids = []
     feature_ids_list = []
     package_features = []
@@ -32,12 +31,12 @@ def _emp_role(org, user, is_superuser):
     if is_superuser:
 
         feature_ids_list = list(GovPermInspire.objects.filter(gov_perm=gov_perm).distinct('feature_id', 'perm_kind').exclude(feature_id__isnull=True).values_list('feature_id', 'perm_kind'))
-        
         if feature_ids_list:
             for i in range(len(feature_ids_list)):
                 if feature_ids_list[i][1] == 6 or feature_ids_list[i][1] == 1:
-                    perm_kind = True
-                    feature_ids.append(feature_ids_list[i][0])
+                    if feature_ids_list[i][0] not in feature_ids:
+                        feature_ids.append(feature_ids_list[i][0])
+
         package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
         theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
         if feature_ids:
@@ -57,8 +56,8 @@ def _emp_role(org, user, is_superuser):
         if feature_ids_list:
             for i in range(len(feature_ids_list)):
                 if feature_ids_list[i][1] == 6 or feature_ids_list[i][1] == 1:
-                    perm_kind = True
-                    feature_ids.append(feature_ids_list[i][0])
+                    if feature_ids_list[i][0] not in feature_ids:
+                        feature_ids.append(feature_ids_list[i][0])
         
         if feature_ids:
             package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))

@@ -140,11 +140,11 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        // if (this.state.is_loading || values.length == 0) {
-        //     return (
-        //         <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
-        //     )
-        // }
+        if (this.state.is_loading) {
+            return (
+                <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
+            )
+        }
         return (
             <div className='overflow-auto card-body'>
                 {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
