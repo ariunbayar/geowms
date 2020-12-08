@@ -479,7 +479,7 @@ def requestApprove(request, payload, pk):
 @ajax_required
 def getCount(request):
     try:
-        if request.user:
+        if request.user.is_superuser:
             count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
 
         else:
