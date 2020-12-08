@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='changerequest',
             name='kind',
-            field=models.PositiveIntegerField(choices=[(1, 'ҮҮССЭН'), (2, 'ЗАССАН'), (3, 'УСТГАСАН'), (5, 'ЦУЦЛАХ'), (4, 'ШУУД')], db_index=True, null=True),
+            field=models.PositiveIntegerField(choices=[(1, 'ҮҮССЭН'), (2, 'ЗАССАН'), (3, 'УСТГАСАН'), (4, 'ШУУД'), (5, 'ЦУЦЛАСАН')], db_index=True, null=True),
         ),
     ]

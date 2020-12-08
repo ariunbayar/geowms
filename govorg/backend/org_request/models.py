@@ -25,7 +25,7 @@ class ChangeRequest(models.Model):
         (KIND_CREATE, 'ҮҮССЭН'),
         (KIND_DELETE, 'УСТГАСАН'),
         (KIND_UPDATE, 'ЗАССАН'),
-        (KIND_REVOKE, 'ЦУЦЛАХ'),
+        (KIND_REVOKE, 'ЦУЦЛАСАН'),
         (KIND_DIRECT, 'ШУУД'),
     )
 
