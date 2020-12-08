@@ -109,13 +109,13 @@ def login(request):
             if user is not None:
                 if user.is_active:
                     org = Employee.objects.filter(user=user)
-                    if org:
-                        auth.login(request, user)
+                    auth.login(request, user)
+                    if user.is_superuser:
+                        return redirect(settings.LOGIN_REDIRECT_ADMIN_URL)
+                    elif org:
                         return redirect(settings.LOGIN_REDIRECT_ORG_URL)
                     else:
-                        auth.login(request, user)
                         return redirect(settings.LOGIN_REDIRECT_URL)
-                    auth.login(request, user)
                     return redirect(settings.LOGIN_REDIRECT_URL)
                 else:
                     messages.warning(request, 'Таны хаяг идэвхгүй байна.')
