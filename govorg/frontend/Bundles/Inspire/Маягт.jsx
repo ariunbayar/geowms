@@ -255,7 +255,7 @@ export default class Маягт extends Component {
                                           className='form-control'
                                           placeholder="Тушаалын дугаар"
                                       />
-                                      <ErrorMessage name="order_no" component="span"/>
+                                      <ErrorMessage className="text-danger" name="order_no" component="span"/>
                                     </div>
                                 </div>
                                 <div className="row my-3 ">
@@ -269,7 +269,7 @@ export default class Маягт extends Component {
                                           placeholder="Тушаал гарсан огноо"
                                           type="date"
                                       />
-                                      <ErrorMessage name="order_at" component="span"/>
+                                      <ErrorMessage className="text-danger" name="order_at" component="span"/>
                                     </div>
                                 </div>
                                 <div>

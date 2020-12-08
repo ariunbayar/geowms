@@ -98,33 +98,28 @@ export class MetaEdit extends Component {
             .setEdit(id, this.values, geom_ids)
             .then(({success}) => {
                 if (success) {
-                    this.setState({ handleSaveIsLoad: false, modal_open: true })
-                    this.setState({ modal_alert_status: 'open'})
+                    this.setState({ handleSaveIsLoad: false, modal_open: true, modal_alert_status: 'open' })
                 }
             })
     }
 
     modalClose() {
-        const org_level = this.props.match.params.level
-        this.setState({ handleSaveIsLoad: false })
-        this.props.history.push(`/gov/meta/`)
-        this.setState({ modal_alert_status: "closed" })
+        this.setState({ modal_alert_status: "closed", handleSaveIsLoad: false, modal_open: false })
         clearTimeout(this.state.timer)
+        this.props.history.push(`/gov/meta/`)
     }
 
     modalCloseTime() {
-        const org_level = this.props.match.params.level
         this.state.timer = setTimeout(() => {
-            this.setState({ handleSaveIsLoad: false })
+            this.setState({ modal_alert_status: "closed", handleSaveIsLoad: false, modal_open: false })
             this.props.history.push(`/gov/meta/`)
-            this.setState({ modal_alert_status: "closed" })
         }, 2000)
     }
 
     componentDidMount() {
         const { id } = this.state
         service
-            .getDetail(id)
+            .getDetail(id, 'edit')
             .then(({success, meta_data, geo_data_list}) => {
                 if (success) {
                     const data_field = Object.keys(meta_data)

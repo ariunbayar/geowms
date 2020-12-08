@@ -716,6 +716,7 @@ def get_colName_type(view_name, data):
 def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
+    layer_name = 'gp_layer_' + table_name
     ds_name = ws_name
     layer_title = feature.feature_name
     wms_url = geoserver.get_wms_url(ws_name)
@@ -740,8 +741,6 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
                 ds_name,
                 )
             if create_ds.status_code == 201:
-
-                layer_name = 'gp_layer_' + table_name
 
                 check_layer = geoserver.getDataStoreLayer(
                     ws_name,
@@ -807,8 +806,6 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
                 )
             if create_ds.status_code == 201:
 
-                layer_name = 'gp_layer_' + table_name
-
                 check_layer = geoserver.getDataStoreLayer(
                     ws_name,
                     ds_name,
@@ -861,8 +858,6 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
                         return {"success": False, 'info': 'layer_remove'}
 
         else:
-            layer_name = 'gp_layer_' + table_name
-
             geom_att, extends = get_colName_type(table_name, 'geo_data')
             if extends:
                 srs = extends[0]['find_srid']

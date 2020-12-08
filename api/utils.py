@@ -32,8 +32,9 @@ def filter_layers(content, allowed_layers):
         for layer_raw in layer_matches:
             layer_root = ElementTree.fromstring(layer_raw)
             layer_name = _el(layer_root, 'Name')
-            if layer_name.text in allowed_layers:
-                content_mid_clean += '\n' + layer_raw
+            for allowed_layer in allowed_layers:
+                if allowed_layer in layer_name.text:
+                    content_mid_clean += '\n' + layer_raw
 
         content = '{}\n{}\n{}'.format(
                 content_start.strip(),
