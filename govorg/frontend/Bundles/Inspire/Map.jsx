@@ -188,7 +188,7 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.sidebar)
       }
       if(roles[2]) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-      if(roles[2]) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
+      if(roles[4]) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
 
@@ -998,8 +998,7 @@ export default class BarilgaSuurinGazar extends Component{
       else{
         if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
         if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({modify_button_active: true,  remove_button_active: false})
-        this.setState({modify_button_active: true,  cancel_button_active: false})
+        this.setState({modify_button_active: true,  remove_button_active: false, cancel_button_active: false})
       }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
@@ -1009,8 +1008,7 @@ export default class BarilgaSuurinGazar extends Component{
     LineButton(){
       if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false})
-      this.setState({modify_button_active: false,  cancel_button_active: false})
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -1021,8 +1019,7 @@ export default class BarilgaSuurinGazar extends Component{
     PointButton(){
       if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false})
-      this.setState({modify_button_active: false,  cancel_button_active: false})
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -1033,8 +1030,7 @@ export default class BarilgaSuurinGazar extends Component{
     PolygonButton(){
       if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false})
-      this.setState({modify_button_active: false,  cancel_button_active: false})
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
       this.drawE.setActive(true);
