@@ -40,21 +40,19 @@ export class Password extends Component {
     }
 
     modalClose(){
-        this.setState({handleSubmitIsLoad:false})
+        this.setState({ handleSubmitIsLoad: false, modal_alert_status: "closed" })
         if (this.state.msg) {
-            this.props.history.push( `/gov/profile/`)
+            window.location.href = "/logout"
         }
         if(this.state.error) {
             this.setState({ error: '' })
         }
-        this.setState({modal_alert_status: "closed"})
     }
 
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
-            this.setState({handleSubmitIsLoad:false})
-            this.props.history.push( `/gov/profile/`)
-            this.setState({modal_alert_status: "closed"})
+            this.setState({ handleSubmitIsLoad: false, modal_alert_status: "closed" })
+            window.location.href = "/logout"
         }, 2000)
     }
 
@@ -90,7 +88,7 @@ export class Password extends Component {
                             </div>
                             <div className="form-row">
                                 <div className="form-group col-md-4">
-                                    <label htmlFor="re_password">Шинэ нууц үг:</label>
+                                    <label htmlFor="new_password">Шинэ нууц үг:</label>
                                     <Field
                                         name="new_password"
                                         type="password"
