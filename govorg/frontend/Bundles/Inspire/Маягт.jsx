@@ -140,7 +140,7 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        if (this.state.is_loading) {
+        if (this.state.is_loading || values.length==0) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
@@ -180,7 +180,7 @@ export default class Маягт extends Component {
                             <div>
                                 {values.form_values && values.form_values.length > 0 ? (
                                 values.form_values.map((friend, index) => (
-                                    friend.role.PERM_VIEW ?
+                                    friend.role.PERM_VIEW || friend.role.PERM_UPDATE ?
                                     <div key={index} className="row my-3 ">
                                         <div className="col-md-3">
                                             <label className="col-form-label">{friend.property_code ? friend.property_code : ''}</label>

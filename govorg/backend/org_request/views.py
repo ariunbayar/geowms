@@ -121,7 +121,6 @@ def _get_org_request(ob, user):
     form_json = []
     inspire_perm = []
     current_geo_json = []
-    user = get_object_or_404(User,  username=user)
     org = get_object_or_404(Org, employee__user=user)
     
     feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
@@ -137,7 +136,8 @@ def _get_org_request(ob, user):
 
 
     else:
-        emp_perm = get_object_or_404(EmpPerm, employee_id=ob.employee_id).first()
+        employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
+        emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
         inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
         
 
@@ -191,9 +191,13 @@ def _get_org_request(ob, user):
 @ajax_required
 def getChangeAll(request):
     org_request = []
-    employee = Employee.objects.filter(user=request.user).first()
-    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id)
     user = request.user
+    if user.is_superuser:
+        org_request_list = ChangeRequest.objects.filter()
+    else:
+        employee = Employee.objects.filter(user=request.user).first()
+        org_request_list = ChangeRequest.objects.filter(employee_id=employee.id)
+    
     if org_request_list:
         org_request = [_get_org_request(ob, user) for ob in org_request_list]
         if org_request[0] != '':
@@ -276,7 +280,12 @@ def getAll(request):
 
     org_request = []
     user = request.user
-    org_request_list = ChangeRequest.objects.all().order_by('-created_at')
+    if user.is_superuser:
+        org_request_list = ChangeRequest.objects.all()
+    else:
+        employee = Employee.objects.filter(user=request.user).first()
+        org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by('-created_at')
+    
     if org_request_list:
         org_request = [_get_org_request(ob, user) for ob in org_request_list]
         choices = _getChoices(request.user)
