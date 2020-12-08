@@ -431,13 +431,18 @@ def org_remove(request, payload, level):
     org = get_object_or_404(Org, pk=org_id, level=level)
     org_users = Employee.objects.filter(org=org_id)
     gov_perm = GovPerm.objects.filter(org=org)
+    inspire_perm = InspirePerm.objects.filter(org=org)
     for org_user in org_users:
         user = User.objects.filter(pk=org_user.user_id)
         org_user.delete()
         user.delete()
     org_govorgs = GovOrg.objects.filter(org=org)
     for org_govorg in org_govorgs:
-        org_govorg.delete()
+        org_govorg.org = None
+        org_govorg.deleted_by = request.user
+        org_govorg.deleted_at = localtime(now())
+        org_govorg.save()
+    inspire_perm.delete()
     org.orgrole_set.all().delete()
     gov_perm.delete()
     org.delete()
