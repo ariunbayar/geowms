@@ -97,7 +97,7 @@ urlpatterns = [
 
         path('meta-data/', include(([
             path('', meta_data_views.all),
-            path('<int:pk>/detail/', meta_data_views.detail),
+            path('<int:pk>/<str:is_show_choice>/detail/', meta_data_views.detail),
             path('<int:pk>/delete/', meta_data_views.delete),
             path('<int:pk>/edit/', meta_data_views.edit),
             path('create/', meta_data_views.create),

@@ -823,27 +823,27 @@ def _get_package_features_gove(package_id, govRole):
             })
             if perm_all == perm_view and perm_all != 0:
                 p_perm_view = p_perm_view + 1
-            elif 0 < perm_view and perm_all != 0:
+            elif 0 < perm_view and perm_all != 0 and perm_view < perm_all:
                 p_perm_view = p_perm_view + 0.5
             if perm_all == perm_create and perm_all != 0:
                 p_perm_create = p_perm_create + 1
-            elif 0 < perm_create and perm_all != 0:
+            elif 0 < perm_create and perm_all != 0 and perm_create < perm_all:
                 p_perm_create = p_perm_create + 0.5
             if perm_all == perm_remove and perm_all != 0:
                 p_perm_remove = p_perm_remove + 1
-            elif 0 < perm_remove and perm_all != 0:
+            elif 0 < perm_remove and perm_all != 0 and perm_remove < perm_all:
                 p_perm_remove = p_perm_remove + 0.5
             if perm_all == perm_update and perm_all != 0:
                 p_perm_update = p_perm_update + 1
-            elif 0 < perm_update and perm_all != 0:
+            elif 0 < perm_update and perm_all != 0 and perm_update < perm_all:
                 p_perm_update = p_perm_update + 0.5
             if perm_all == perm_approve and perm_all != 0:
                 p_perm_approve = p_perm_approve + 1
-            elif 0 < perm_approve and perm_all != 0:
-                p_perm_remove = p_perm_remove + 0.5
+            elif 0 < perm_approve and perm_all != 0 and perm_approve < perm_all:
+                p_perm_approve = p_perm_approve + 0.5
             if perm_all == perm_revoke and perm_all != 0:
                 p_perm_revoke = p_perm_revoke + 1
-            elif 0 < perm_revoke and perm_all != 0:
+            elif 0 < perm_revoke and perm_all != 0 and perm_revoke < perm_all:
                 p_perm_revoke = p_perm_revoke + 0.5
             if perm_all == 0:
                 p_perm_all = p_perm_all - 1
@@ -887,35 +887,35 @@ def _get_feature_property_gov(feature_id, govRole):
                     'perm_approve': 0,
                     'perm_revoke': 0,
                 }
-                for gov_role_inspire in GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id):
+                for gov_role_inspire in GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, data_type_id=data_type.data_type_id):
                     if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
-                        if gov_role_inspire.perm_kind == 1:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_VIEW:
                             perm_view = perm_view + 1
                             property_obj['perm_view'] = property_obj['perm_view'] + 1
-                        if gov_role_inspire.perm_kind == 2:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_CREATE:
                             perm_create = perm_create + 1
                             property_obj['perm_create'] = property_obj['perm_create'] + 1
-                        if gov_role_inspire.perm_kind == 3:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_REMOVE:
                             perm_remove = perm_remove + 1
                             property_obj['perm_remove'] = property_obj['perm_remove'] + 1
-                        if gov_role_inspire.perm_kind == 4:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_UPDATE:
                             perm_update = perm_update + 1
                             property_obj['perm_update'] = property_obj['perm_update'] + 1
-                        if gov_role_inspire.perm_kind == 5:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_APPROVE:
                             perm_approve = perm_approve + 1
                             property_obj['perm_approve'] = property_obj['perm_approve'] + 1
-                        if gov_role_inspire.perm_kind == 6:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_REVOKE:
                             perm_revoke = perm_revoke + 1
                             property_obj['perm_revoke'] = property_obj['perm_revoke'] + 1
                 data_type_obj['properties'].append(property_obj)
             data_type_list.append(data_type_obj)
 
-    perm_view = perm_view + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=1).count()
-    perm_create = perm_create + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=2).count()
-    perm_remove = perm_remove + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=3).count()
-    perm_update = perm_update + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=4).count()
-    perm_approve = perm_approve + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=5).count()
-    perm_revoke = perm_revoke + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=6).count()
+    perm_view = perm_view + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_VIEW).count()
+    perm_create = perm_create + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_CREATE).count()
+    perm_remove = perm_remove + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_REMOVE).count()
+    perm_update = perm_update + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_UPDATE).count()
+    perm_approve = perm_approve + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_APPROVE).count()
+    perm_revoke = perm_revoke + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_REVOKE).count()
     return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
 
 
@@ -1118,30 +1118,31 @@ def _get_package_features(package_id, gov_perm):
             })
             if perm_all == perm_view and perm_all != 0:
                 p_perm_view = p_perm_view + 1
-            elif 0 < perm_view and perm_all != 0:
+            elif 0 < perm_view and perm_all != 0 and perm_view < perm_all:
                 p_perm_view = p_perm_view + 0.5
             if perm_all == perm_create and perm_all != 0:
                 p_perm_create = p_perm_create + 1
-            elif 0 < perm_create and perm_all != 0:
+            elif 0 < perm_create and perm_all != 0 and perm_create < perm_all:
                 p_perm_create = p_perm_create + 0.5
             if perm_all == perm_remove and perm_all != 0:
                 p_perm_remove = p_perm_remove + 1
-            elif 0 < perm_remove and perm_all != 0:
+            elif 0 < perm_remove and perm_all != 0 and perm_remove < perm_all:
                 p_perm_remove = p_perm_remove + 0.5
             if perm_all == perm_update and perm_all != 0:
                 p_perm_update = p_perm_update + 1
-            elif 0 < perm_update and perm_all != 0:
+            elif 0 < perm_update and perm_all != 0 and perm_update < perm_all:
                 p_perm_update = p_perm_update + 0.5
             if perm_all == perm_approve and perm_all != 0:
                 p_perm_approve = p_perm_approve + 1
-            elif 0 < perm_approve and perm_all != 0:
-                p_perm_remove = p_perm_remove + 0.5
+            elif 0 < perm_approve and perm_all != 0 and perm_approve < perm_all:
+                p_perm_approve = p_perm_approve + 0.5
             if perm_all == perm_revoke and perm_all != 0:
                 p_perm_revoke = p_perm_revoke + 1
-            elif 0 < perm_revoke and perm_all != 0:
+            elif 0 < perm_revoke and perm_all != 0 and perm_revoke < perm_all:
                 p_perm_revoke = p_perm_revoke + 0.5
             if perm_all == 0:
                 p_perm_all = p_perm_all - 1
+
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke
 
 
@@ -1184,36 +1185,36 @@ def _get_feature_property(feature_id, gov_perm):
                 }
 
                 if gov_perm:
-                    for gov_role_inspire in GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id):
+                    for gov_role_inspire in GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, data_type_id=data_type.data_type_id):
                         if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
-                            if gov_role_inspire.perm_kind == 1:
+                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_VIEW:
                                 perm_view = perm_view + 1
                                 property_obj['perm_view'] = property_obj['perm_view'] + 1
-                            if gov_role_inspire.perm_kind == 2:
+                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_CREATE:
                                 perm_create = perm_create + 1
                                 property_obj['perm_create'] = property_obj['perm_create'] + 1
-                            if gov_role_inspire.perm_kind == 3:
+                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_REMOVE:
                                 perm_remove = perm_remove + 1
                                 property_obj['perm_remove'] = property_obj['perm_remove'] + 1
-                            if gov_role_inspire.perm_kind == 4:
+                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_UPDATE:
                                 perm_update = perm_update + 1
                                 property_obj['perm_update'] = property_obj['perm_update'] + 1
-                            if gov_role_inspire.perm_kind == 5:
+                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_APPROVE:
                                 perm_approve = perm_approve + 1
                                 property_obj['perm_approve'] = property_obj['perm_approve'] + 1
-                            if gov_role_inspire.perm_kind == 6:
+                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_REVOKE:
                                 perm_revoke = perm_revoke + 1
                                 property_obj['perm_revoke'] = property_obj['perm_revoke'] + 1
                     data_type_obj['properties'].append(property_obj)
             data_type_list.append(data_type_obj)
 
     if gov_perm:
-        perm_view = perm_view + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=1).count()
-        perm_create = perm_create + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=2).count()
-        perm_remove = perm_remove + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=3).count()
-        perm_update = perm_update + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=4).count()
-        perm_approve = perm_approve + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=5).count()
-        perm_revoke = perm_revoke + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=6).count()
+        perm_view = perm_view + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_VIEW).count()
+        perm_create = perm_create + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_CREATE).count()
+        perm_remove = perm_remove + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_REMOVE).count()
+        perm_update = perm_update + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_UPDATE).count()
+        perm_approve = perm_approve + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_APPROVE).count()
+        perm_revoke = perm_revoke + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_REVOKE).count()
 
     return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
 

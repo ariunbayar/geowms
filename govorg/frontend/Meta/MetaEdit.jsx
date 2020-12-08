@@ -124,7 +124,7 @@ export class MetaEdit extends Component {
     componentDidMount() {
         const { id } = this.state
         service
-            .getDetail(id)
+            .getDetail(id, 'edit')
             .then(({success, meta_data, geo_data_list}) => {
                 if (success) {
                     const data_field = Object.keys(meta_data)
