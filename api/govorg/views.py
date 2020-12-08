@@ -13,7 +13,7 @@ from backend.wms.models import WMS, WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Employee
 from geoportal_app.models import User
-from backend.inspire.models import LThemes, LPackages, LFeatures
+from backend.inspire.models import LThemes, LPackages, LFeatures, EmpPerm, EmpPermInspire
 from django.contrib import auth
 from django.db import connections
 import main.geoserver as geoserver
@@ -142,8 +142,8 @@ def qgis_submit(request, token):
 
 
 def _get_wms_name(employee):
-    gov_perm = GovPerm.objects.filter(org=employee.org).first()
-    feature_ids = GovPermInspire.objects.filter(gov_perm=gov_perm, geom=True, perm_kind=4).values_list('feature_id', flat=True)
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_UPDATE).values_list('feature_id', flat=True)
     view_names = ViewNames.objects.filter(feature_id__in=feature_ids)
     allowed_layers = []
     if view_names:
