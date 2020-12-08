@@ -681,7 +681,7 @@ def createDel(request, payload):
     pid = payload.get('pid')
     fid = payload.get('fid')
     old_geo_id = payload.get('old_geo_id')
-    form_json = payload.get('values')
+    form_json = payload.get('form_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 

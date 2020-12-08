@@ -16,7 +16,8 @@ export const service = {
     orgAll,
     rolesAdd,
     inspireRoles,
-    getInspireRoles
+    getBaseLayers,
+    formOptions,
 }
 
 
@@ -112,9 +113,9 @@ function orgList(page, perpage, query, org_level, sort_name) {
     return fetch(`${prefix}/level-${org_level}/org-list/`, opts).then(handleResponse)
 }
 
-function orgAll(level,id){
+function orgAll(level, id) {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/level-${level}/${id}/`, requestOptions).then(handleResponse)
+    return fetch(`/back/api/org/level-${level}/${id}/`, requestOptions).then(handleResponse)
 }
 
 function employee_list(page, perpage, query, level, org_id) {
@@ -133,9 +134,12 @@ function rolesAdd(level, org_id, values) {
     return fetch(`${prefix}/level-${level}/${org_id}/roles-add/`, opts).then(handleResponse)
 }
 
-function getInspireRoles() {
-    const opts = {
-        ...getGetOptions(),
-    }
-    return fetch(`/back/api/org/get-role-name/`, opts).then(handleResponse)
+function formOptions() {
+    const opts = getGetOptions()
+    return fetch(`/back/api/org/form-options/`, opts).then(handleResponse)
+}
+
+function getBaseLayers() {
+    const opts = getGetOptions()
+    return fetch('/суурь-давхарга/', opts).then(handleResponse)
 }
