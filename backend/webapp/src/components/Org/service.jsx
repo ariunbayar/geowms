@@ -134,11 +134,8 @@ function rolesAdd(level, org_id, values) {
     return fetch(`${prefix}/level-${level}/${org_id}/roles-add/`, opts).then(handleResponse)
 }
 
-function formOptions(values) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify(values),
-    }
+function formOptions() {
+    const opts = getGetOptions()
     return fetch(`/back/api/org/form-options/`, opts).then(handleResponse)
 }
 

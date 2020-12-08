@@ -358,7 +358,6 @@ def employee_remove(request, payload, level, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def org_add(request, payload, level):
-
     org_name = payload.get('org_name')
     upadte_level = payload.get('upadte_level')
     role_id = payload.get('role_id')
@@ -367,9 +366,13 @@ def org_add(request, payload, level):
     geo_id = payload.get('geo_id')
     objs = []
     if org_id:
-        Org.objects.filter(id=org_id).update(name=org_name, level=upadte_level, geo_id=geo_id)
+        org = get_object_or_404(Org, pk=org_id)
+        org.name = org_name
+        org.level = upadte_level
+        org.geo_id = geo_id
+        org.save()
         if int(role_id) > -1:
-            gov_perm_role_check = GovPerm.objects.filter(org_id=org_id).first()
+            gov_perm_role_check = GovPerm.objects.filter(org=org).first()
             if gov_perm_role_check.gov_role_id != role_id or not gov_perm_role_check.gov_role.id:
                 gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
                 GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
@@ -389,19 +392,27 @@ def org_add(request, payload, level):
                 GovPermInspire.objects.bulk_create(objs)
             return JsonResponse({'success': True})
         else:
-            gov_perm = GovPerm.objects.filter(org_id=org_id).first()
+            gov_perm = GovPerm.objects.filter(org=org).first()
             if gov_perm:
                 GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
-
                 GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
             return JsonResponse({'success': True})
     else:
         gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
         if org_role_filter:
-            gov_perm = GovPerm.objects.create(org=org, gov_role=org_role_filter, created_by=request.user, updated_by=request.user)
+            gov_perm = GovPerm.objects.create(
+                org=org,
+                gov_role=org_role_filter,
+                created_by=request.user,
+                updated_by=request.user
+            )
         else:
-            gov_perm = GovPerm.objects.create(org=org, created_by=request.user, updated_by=request.user)
+            gov_perm = GovPerm.objects.create(
+                org=org,
+                created_by=request.user,
+                updated_by=request.user
+            )
         if gov_role_inspire_all:
             for gov_role_inspire in gov_role_inspire_all:
                 objs.append(GovPermInspire(
@@ -424,7 +435,6 @@ def org_add(request, payload, level):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def org_remove(request, payload, level):
-
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
     org_users = Employee.objects.filter(org=org_id)
@@ -436,8 +446,8 @@ def org_remove(request, payload, level):
     for org_govorg in org_govorgs:
         org_govorg.delete()
     org.orgrole_set.all().delete()
-    govPerm = GovPerm.objects.filter(org_id=org_id)
-    govPerm.delete()
+    gov_perm = GovPerm.objects.filter(org_id=org_id)
+    gov_perm.delete()
     org.delete()
     return JsonResponse({'success': True})
 
@@ -494,30 +504,22 @@ def org_list(request, payload, level):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def detail(request, level, pk):
-
     org = get_object_or_404(Org, pk=pk, level=level)
-
     org_roles = GovPerm.objects.filter(org=org).first()
     org_role = -1
+    geo_id = org.geo_id
     if org_roles:
         if org_roles.gov_role:
             org_role = org_roles.gov_role.id
-
-    if pk:
-        geo_id = Org.objects.filter(id=pk).first().geo_id
-    else:
-        geo_id = None
-
-    org.geo_id = geo_id  # TODO set org.geo_id as MultiPolygon geom, not LineString
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
-
     orgs_display = [{
         'id': org.id,
         'name': org.name,
         'level': org.level,
         'level_display': org.get_level_display(),
-        'allowed_geom': geom.json,
+        'allowed_geom': geom.json if geom else None,
         'org_role': org_role,
+        'geo_id': geo_id,
     }]
 
     return JsonResponse({
@@ -746,7 +748,7 @@ def _get_theme_packages_gov(theme_id, govRole):
     t_perm_revoke = 0
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
-        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoce = _get_package_features_gove(package.package_id, govRole)
+        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features_gove(package.package_id, govRole)
         package_data.append({
                 'id': package.package_id,
                 'code': package.package_code,
@@ -1284,22 +1286,16 @@ def _get_roles_display():
     ]
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def form_options(request, payload):
+def form_options(request):
 
-    org_id = payload.get('org_id')
-    org = get_object_or_404(Org, pk=org_id)
-
-    geo_id = org.geo_id
     admin_levels = utils.get_administrative_levels()
     roles = _get_roles_display()
-
     rsp = {
         'success': True,
-        'secondOrder': admin_levels,
-        'geo_id': geo_id,
+        'secondOrders': admin_levels,
         'roles': roles,
     }
 

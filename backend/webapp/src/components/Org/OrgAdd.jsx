@@ -17,11 +17,11 @@ export class OrgAdd extends Component {
             modal_alert_status: "closed",
             timer: null,
             roles: [],
-            secondOrder: [],
+            secondOrders: [],
             secondOrder_value: -1,
-            thirthOrder: [],
+            thirthOrders: [],
             thirthOrder_value: -1,
-            fourthOrder: [],
+            fourthOrders: [],
             fourthOrder_value: -1,
             geo_id: null,
         }
@@ -31,17 +31,16 @@ export class OrgAdd extends Component {
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.formOptions = this.formOptions.bind(this)
-        this.handle2ndOrder = this.handle2ndOrder.bind(this)
-        this.handle3rdOrder = this.handle3rdOrder.bind(this)
-        this.handle4thOrder = this.handle4thOrder.bind(this)
+        this.handle2ndOrderChange = this.handle2ndOrderChange.bind(this)
+        this.handle3rdOrderChange = this.handle3rdOrderChange.bind(this)
+        this.handle4thOrderChange = this.handle4thOrderChange.bind(this)
     }
 
     componentDidMount() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         this.setState({upadte_level: org_level})
-        this.handleGetAll(org_level,org_id)
-        this.formOptions(org_level, org_id)
+        this.handleGetAll(org_level, org_id)
     }
 
     handleGetAll(org_level, org_id){
@@ -51,9 +50,14 @@ export class OrgAdd extends Component {
                     orgs.map(org => this.setState({
                         org_name: org.name,
                         org_role: org.org_role,
+                        geo_id: org.geo_id
                     }))
+                    this.formOptions()
                 }
             })
+        }
+        else {
+            this.formOptions()
         }
     }
 
@@ -61,33 +65,33 @@ export class OrgAdd extends Component {
         this.setState({[org_name]: e.target.value})
     }
 
-    formOptions(org_level, org_id) {
-        const values = {org_level, org_id}
-        service.formOptions(values).then(({success, secondOrder, geo_id, roles}) => {
+    formOptions() {
+        service.formOptions().then(({success, secondOrders, roles}) => {
             if (success) {
-                this.setState({secondOrder, geo_id, roles})
+                this.setState({secondOrders, roles})
+                const geo_id = this.state.geo_id
                 if (geo_id) {
                     var find_text = ''
                     for (var i = 0; i < geo_id.length; i++){
                         find_text += geo_id[i]
                         if (i === 4) {
-                            secondOrder.map((value) => {
+                            secondOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
-                                    this.handle2ndOrder(value['name'])
+                                    this.handle2ndOrderChange(value['geo_id'])
                                 }
                             })
                         }
                         if (i === 6) {
-                            this.state.thirthOrder.map((value) => {
+                            this.state.thirthOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
-                                    this.handle3rdOrder(value['name'])
+                                    this.handle3rdOrderChange(value['geo_id'])
                                 }
                             })
                         }
                         if (i === 8) {
-                            this.state.fourthOrder.map((value) => {
+                            this.state.fourthOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
-                                    this.handle4thOrder(value['name'])
+                                    this.handle4thOrderChange(value['geo_id'])
                                 }
                             })
                         }
@@ -97,42 +101,43 @@ export class OrgAdd extends Component {
         })
     }
 
-    handle2ndOrder(value) {
-        const { secondOrder } = this.state
+    handle2ndOrderChange(value) {
+        const { secondOrders } = this.state
         if (value !== '-1') {
-            secondOrder.map((province) => {
-                if (province['name'] === value){
+            secondOrders.map((province) => {
+                if (province['geo_id'] === value){
                     this.setState({
-                        thirthOrder: province['children'],
+                        thirthOrders: province['children'],
                         geo_id: province['geo_id'],
                     })
                 }
             })
         } else {
             this.setState({
-                thirthOrder: [],
+                thirthOrders: [],
                 thirthOrder_value: '-1',
+                geo_id: null,
             })
         }
         this.setState({
             secondOrder_value: value,
             thirthOrder_value: '-1',
-            fourthOrder: [],
+            fourthOrders: [],
             fourthOrder_value: '-1',
         })
     }
 
-    handle3rdOrder(value) {
-        const { thirthOrder } = this.state
+    handle3rdOrderChange(value) {
+        const { thirthOrders } = this.state
         if (value === '-1') {
-            this.setState({ fourthOrder: [], fourthOrder_value: '-1'})
-            this.handle2ndOrder(this.state.secondOrder_value)
+            this.setState({ fourthOrders: [], fourthOrder_value: '-1'})
+            this.handle2ndOrderChange(this.state.secondOrder_value)
         } else {
-            thirthOrder.map((soum) => {
-                if (soum['name'] === value){
+            thirthOrders.map((thirthOrder) => {
+                if (thirthOrder['geo_id'] === value){
                     this.setState({
-                        fourthOrder: soum['children'],
-                        geo_id: soum['geo_id']
+                        fourthOrders: thirthOrder['children'],
+                        geo_id: thirthOrder['geo_id']
                     })
                 }
             })
@@ -140,15 +145,15 @@ export class OrgAdd extends Component {
         this.setState({ thirthOrder_value: value, fourthOrder_value: '-1'})
     }
 
-    handle4thOrder(value) {
+    handle4thOrderChange(value) {
         if (value !== '-1') {
-            this.state.fourthOrder.map((team) => {
-                if (team['name'] === value){
+            this.state.fourthOrders.map((team) => {
+                if (team['geo_id'] === value){
                     this.setState({geo_id: team['geo_id']})
                 }
             })
         } else {
-            this.handle3rdOrder(this.state.thirthOrder_value)
+            this.handle3rdOrderChange(this.state.thirthOrder_value)
         }
         this.setState({fourthOrder_value: value})
     }
@@ -244,11 +249,11 @@ export class OrgAdd extends Component {
                                 <tbody>
                                     <tr>
                                         <th style={{width:"38%"}}>Аймаг/ Хот</th>
-                                        <td style={{widtd:"60%"}}>
-                                            <select className='form-control' value={this.state.secondOrder_value} onChange={(e) => this.handle2ndOrder(e.target.value)}>
+                                        <td style={{width:"60%"}}>
+                                            <select className='form-control' value={this.state.secondOrder_value} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
                                                 <option value='-1'>--- Аймаг/Хот сонгоно уу ---</option>
-                                                {this.state.secondOrder.map((data, idx) =>
-                                                    <option key={idx} value={data['name']} >{data['name']}</option>
+                                                {this.state.secondOrders.map((data, idx) =>
+                                                    <option key={idx} value={data['geo_id']} >{data['name']}</option>
                                                 )}
                                             </select>
                                         </td>
@@ -256,10 +261,10 @@ export class OrgAdd extends Component {
                                     <tr>
                                         <th>Сум/ Дүүрэг</th>
                                         <td>
-                                            <select className='form-control' value={this.state.thirthOrder_value} onChange={(e) => this.handle3rdOrder(e.target.value)}>
+                                            <select className='form-control' value={this.state.thirthOrder_value} onChange={(e) => this.handle3rdOrderChange(e.target.value)}>
                                                 <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
-                                                {this.state.thirthOrder.map((data, idx) =>
-                                                    <option key={idx} value={data['name']}>{data['name']}</option>
+                                                {this.state.thirthOrders.map((data, idx) =>
+                                                    <option key={idx} value={data['geo_id']}>{data['name']}</option>
                                                 )}
                                             </select>
                                         </td>
@@ -267,10 +272,10 @@ export class OrgAdd extends Component {
                                     <tr>
                                         <th>Баг/ Хороо</th>
                                         <td>
-                                            <select className='form-control' value={this.state.fourthOrder_value} onChange={(e) => this.handle4thOrder(e.target.value)}>
+                                            <select className='form-control' value={this.state.fourthOrder_value} onChange={(e) => this.handle4thOrderChange(e.target.value)}>
                                                 <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
-                                                {this.state.fourthOrder.map((data, idx) =>
-                                                    <option key={idx} value={data['name']}>{data['name']}</option>
+                                                {this.state.fourthOrders.map((data, idx) =>
+                                                    <option key={idx} value={data['geo_id']}>{data['name']}</option>
                                                 )}
                                             </select>
                                         </td>
