@@ -94,13 +94,13 @@ function employeeRemove(pk) {
     return fetch(`${prefix}/employee-remove-${pk}/`, opts).then(handleResponse)
 }
 
-function employee_update(org_level, org_id, paylaod) {
+function employee_update(pk, paylaod) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(paylaod),
     }
 
-    return fetch(`${prefix}/level-${org_level}/${org_id}/employee-update/`, opts).then(handleResponse)
+    return fetch(`${prefix}/employee-update-${pk}/`, opts).then(handleResponse)
 }
 
 function orgList(page, perpage, query, org_level, sort_name) {

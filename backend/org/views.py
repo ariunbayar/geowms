@@ -275,8 +275,7 @@ def employeeDetail(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_update(request, payload, level, pk):
-    user_id = payload.get('id')
+def employeeUpdate(request, payload, pk):
     position = payload.get('position')
     first_name = payload.get('first_name')
     last_name = payload.get('last_name')
@@ -285,7 +284,7 @@ def employee_update(request, payload, level, pk):
     register = payload.get('register')
     is_admin = payload.get('is_admin')
     password = payload.get('password')
-    user = get_object_or_404(User, pk=user_id)
+    user = get_object_or_404(User, pk=pk)
     errors = {}
     if user.email != email:
         if User.objects.filter(email=email).first():
@@ -297,7 +296,7 @@ def employee_update(request, payload, level, pk):
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
-    User.objects.filter(pk=user_id).update(
+    User.objects.filter(pk=pk).update(
                             first_name=first_name,
                             last_name=last_name,
                             email=email,
@@ -305,10 +304,10 @@ def employee_update(request, payload, level, pk):
                             register=register.upper()
                         )
     if password:
-        user = User.objects.filter(pk=user_id).first()
+        user = User.objects.filter(pk=pk).first()
         user.set_password(password)
         user.save()
-    Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
+    Employee.objects.filter(pk=pk).update(position=position, is_admin=is_admin)
 
     return JsonResponse({'success': True, 'errors': errors})
 
