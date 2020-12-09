@@ -438,7 +438,7 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const { isMeta } = this.state
         if (!isMeta) {
-          this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
+          if (!this.state.remove_button_active || !this.state.cancel_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
           const selectedFeature_ID = event.selected[0].getProperties()['id']
@@ -812,48 +812,42 @@ export default class BarilgaSuurinGazar extends Component{
     requestCancel(order_at, number, form_json) {
       const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
       const geo_json = this.writeFeat(geom_for_revoke)
-      service.cancel(pid, fid, tid, selectedFeature_ID, geo_json, form_json, number, order_at).then(({ success }) => {
+
+      const parsed_geojson = JSON.parse(geo_json)
+      const geometry = JSON.stringify(parsed_geojson.geometry)
+
+      const vectorLayer = this.vectorLayer
+      const features = vectorLayer.getSource().getFeatures();
+
+      service.cancel(pid, fid, tid, selectedFeature_ID, geometry, form_json, number, order_at).then(({ success, info }) => {
         if (success) {
-          this.props.refreshCount()
-          this.addNotif('success', 'Цуцлах хүсэлт үүслээ', 'check')
+          this.addNotif('success', info, 'check')
           this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
+          this.props.refreshCount()
+          if (features != null && features.length > 0) {
+            features.map((x) => {
+              const id = x.getProperties()['id']
+              id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
+            })
+          }
         }
       })
     }
 
     cancel(order_at, number, form_json){
       const vector = this.vector
-      const vectorLayer = this.vectorLayer
-      const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
-      const geo_json = this.writeFeat(geom_for_revoke)
+      const {selectedFeature_ID} = this.state
 
       const features_new = vector.getSource().getFeatures();
-      const features = vectorLayer.getSource().getFeatures();
 
       if(selectedFeature_ID){
-          if(this.state.roles[6]){
-            this.setState({ togle_islaod: false })
-          }
-          else{
-            service.cancel(pid, fid, tid, selectedFeature_ID, geo_json, form_json, number, order_at).then(({ success, info }) => {
-              if (success) {
-                this.addNotif('success', info, 'check')
-                this.setState({featureID_list: [], selectedFeature_ID: null})
-                if (features != null && features.length > 0) {
-                  features.map((x) => {
-                    const id = x.getProperties()['id']
-                    id == selectedFeature_ID && vectorLayer.getSource().removeFeature(x)
-                  })
-                }
-              }
-            })
-          }
+        this.requestCancel(order_at, number, form_json)
       }
       else
       {
         if (features_new != null && features_new.length > 0) {
           features_new.map((x) => {
-            var id = x.getProperties()['id']
+            const id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
           this.addNotif('success', "Шинээр үүссэн мэдээллийг цуцлав.", 'check')
