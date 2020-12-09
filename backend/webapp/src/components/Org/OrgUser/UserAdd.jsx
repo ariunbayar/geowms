@@ -72,7 +72,7 @@ export class UserAdd extends Component {
                 setSubmitting(false)
             }
             else{
-                service.employee_update(org_emp, values).then(({ success, errors }) => {
+                service.employeeUpdate(org_emp, values).then(({ success, errors }) => {
                     if (success) {
                         this.setState({modal_alert_status: "open"})
                         setStatus('saved')

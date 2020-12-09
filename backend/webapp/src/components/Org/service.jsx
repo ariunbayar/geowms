@@ -9,7 +9,7 @@ export const service = {
     employeeAdd,
     employeeRemove,
     employeeDetail,
-    employee_update,
+    employeeUpdate,
     sistemCount,
     employee_list,
     orgList,
@@ -94,7 +94,7 @@ function employeeRemove(pk) {
     return fetch(`${prefix}/employee-remove-${pk}/`, opts).then(handleResponse)
 }
 
-function employee_update(pk, paylaod) {
+function employeeUpdate(pk, paylaod) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(paylaod),
