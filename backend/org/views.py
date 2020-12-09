@@ -24,7 +24,6 @@ from backend.inspire.models import GovPermInspire
 from geoportal_app.models import User
 from main.decorators import ajax_required
 from main import utils
-import re
 
 from .models import Org, OrgRole, Employee, InspirePerm
 
@@ -251,11 +250,9 @@ def roles_save(request, payload, level, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_more(request, level, pk, emp):
+def employeeDetail(request, pk):
 
-    org = get_object_or_404(Org, pk=pk, level=level)
-
-    user = get_object_or_404(User, employee__org=org, pk=emp)
+    user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
     employees_display = {
         'id': user.id,
@@ -287,29 +284,39 @@ def employee_update(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
-    get_object_or_404(User, pk=user_id)
+    password = payload.get('password')
+    user = get_object_or_404(User, pk=user_id)
     errors = {}
-    if not re.findall(r'^[^\u0000-\u007F]+[^\u0000-\u007F]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+$',register):
+    if user.email != email:
+        if User.objects.filter(email=email).first():
+            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+    if not utils.is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    if not utils.is_register(register):
         errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     if errors:
-        return JsonResponse({'errors': errors})
-    else:
-        User.objects.filter(pk=user_id).update(
-                                first_name=first_name,
-                                last_name=last_name,
-                                email=email,
-                                gender=gender,
-                                register=register
-                            )
-        Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
+        return JsonResponse({'success': False, 'errors': errors})
 
-        return JsonResponse({'success': True})
+    User.objects.filter(pk=user_id).update(
+                            first_name=first_name,
+                            last_name=last_name,
+                            email=email,
+                            gender=gender,
+                            register=register.upper()
+                        )
+    if password:
+        user = User.objects.filter(pk=user_id).first()
+        user.set_password(password)
+        user.save()
+    Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
+
+    return JsonResponse({'success': True, 'errors': errors})
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_add(request, payload, level, pk):
+def employeeAdd(request, payload, level, pk):
 
     username = payload.get('username')
     position = payload.get('position')
@@ -325,38 +332,42 @@ def employee_add(request, payload, level, pk):
         errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
     if User.objects.filter(email=email).first():
         errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-    if not re.findall(r'^[^\u0000-\u007F]+[^\u0000-\u007F]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+$',register):
+    if not utils.is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    if not utils.is_register(register):
         errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     if errors:
-        return JsonResponse({'errors': errors})
+        return JsonResponse({'success': False, 'errors': errors})
+    if level == 4:
+        is_superuser = True
     else:
-        if level == 4:
-            is_superuser = True
-        else:
-            is_superuser = False
+        is_superuser = False
 
-        user = User.objects.create(
-            is_superuser=is_superuser, username=username,
-            first_name=first_name, last_name=last_name,
-            email=email, gender=gender, register=register
-        )
-        user.roles.add(2)
-        user.set_password(password)
-        user.save()
+    user = User.objects.create(
+        is_superuser=is_superuser,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        gender=gender,
+        register=register.upper()
+    )
+    user.roles.add(2)
+    user.set_password(password)
+    user.save()
 
-        Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
+    Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
 
-        return JsonResponse({'success': True})
+    return JsonResponse({'success': True, 'errors': errors})
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_remove(request, payload, level, pk):
+def employeeRemove(request, pk):
 
-    user_id = payload.get('user_id')
-    employee = get_list_or_404(Employee, user_id=user_id)
-    employee.delete()
+    user = get_object_or_404(User, id=pk)
+    Employee.objects.filter(user=user).first().delete()
 
     return JsonResponse({'success': True})
 
@@ -552,6 +563,8 @@ def employee_list(request,payload, level, pk):
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'last_name'
+    if not query:
+        query = ''
     emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
         'last_name',
         'first_name',

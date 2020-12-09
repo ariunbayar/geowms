@@ -489,3 +489,17 @@ def get_geom(geo_id, geom_type=None, srid=4326):
         raise Exception(msg)
 
     return geom
+
+
+def is_register(register):
+    if re.findall(r'[аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОөӨпПрРсСтТуУүҮфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ]{2}[0-9]{8}',register):
+        return True
+    else:
+        return False
+
+
+def is_email(email):
+    if re.findall(r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b',email):
+        return True
+    else:
+        return False

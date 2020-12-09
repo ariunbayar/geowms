@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react"
 import { service } from "../service"
 import ModalAlert from "../../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {validationSchemaUpdate, validationSchemaCreate} from './validationSchema'
+import {validationSchema} from './validationSchema'
 
 export class UserAdd extends Component {
 
@@ -11,16 +11,16 @@ export class UserAdd extends Component {
         super(props)
         this.state = {
             form_values: {
-                id: 0,
+                id: null,
                 username: '',
-                first_name: '123',
-                last_name: '123',
-                position: '123',
+                first_name: '',
+                last_name: '',
+                position: '',
                 email: '',
-                gender: 'Эрэгтэй',
-                register:'ыы12312312',
-                password:'123',
-                re_password:'123',
+                gender: '',
+                register:'',
+                password:'',
+                re_password:'',
                 is_admin: false,
             },
             modal_alert_status: "closed",
@@ -32,19 +32,18 @@ export class UserAdd extends Component {
         this.validateRegister = this.validateRegister.bind(this)
         this.validateEmail = this.validateEmail.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.validatePassword = this.validatePassword.bind(this)
     }
 
     componentDidMount() {
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
         if(org_emp){
-            this.handleGetAll(org_level, org_id, org_emp)
+            this.handleGetAll(org_emp)
         }
     }
 
-    handleGetAll(org_level, org_id, org_emp){
-        service.employeeMore(org_level, org_id, org_emp).then(({ success, employee }) => {
+    handleGetAll(org_emp){
+        service.employeeDetail(org_emp).then(({ success, employee }) => {
             if (success) {
                 this.setState({form_values: {
                     id: employee.id,
@@ -54,10 +53,8 @@ export class UserAdd extends Component {
                     email: employee.email,
                     gender: employee.gender,
                     register:employee.register,
-                    password:employee.password,
-                    re_password:employee.re_password,
                     position: employee.position,
-                    is_admin: employee.is_admin
+                    is_admin: employee.is_admin,
                 }})
             }
         })
@@ -69,18 +66,24 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
         if(org_emp){
-            service.employee_update(org_level, org_id, values).then(({ success, errors }) => {
-                if (errors) {
-                    setErrors(errors)
-                    setSubmitting(false)
-                }
-                if (success) {
-                    this.setState({modal_alert_status: "open"})
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.modalCloseTime()
-                }
-            })
+            if(values.re_password !== values.password)
+            {
+                setErrors({'re_password': 'Нууц үг адил биш байна.'})
+                setSubmitting(false)
+            }
+            else{
+                service.employee_update(org_level, org_id, values).then(({ success, errors }) => {
+                    if (success) {
+                        this.setState({modal_alert_status: "open"})
+                        setStatus('saved')
+                        setSubmitting(false)
+                        this.modalCloseTime()
+                    }else{
+                        setErrors(errors)
+                        setSubmitting(false)
+                    }
+                })
+            }
         }
         else{
             if(values.re_password !== values.password)
@@ -89,16 +92,16 @@ export class UserAdd extends Component {
                 setSubmitting(false)
             }
             else{
-                service.employee_add(org_level, org_id, values).then(({ success, errors }) => {
-                    if (errors) {
-                        setErrors(errors)
-                        setSubmitting(false)
-                    }
+                service.employeeAdd(org_level, org_id, values).then(({ success, errors }) => {
                     if (success) {
                         this.setState({modal_alert_status: "open"})
                         setStatus('saved')
                         setSubmitting(false)
                         this.modalCloseTime()
+                    }
+                    else{
+                        setErrors(errors)
+                        setSubmitting(false)
                     }
                 })
             }
@@ -119,7 +122,7 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
-        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
+        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
     }
 
     validateEmail(value) {
@@ -132,14 +135,22 @@ export class UserAdd extends Component {
 
     validateRegister(value) {
         let error;
-        if (!/^[^\u0000-\u007F]+[^\u0000-\u007F]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+$/i.test(value)) {
+        if (!/[аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОөӨпПрРсСтТуУүҮфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ]{2}[0-9]{8}/.test(value)) {
           error = 'Регистер дугаараа зөв оруулна уу.';
         }
         return error;
     }
 
-    render() {
+    validatePassword(value) {
         const org_emp = this.props.match.params.emp
+        let error;
+        if (!value) {
+            if(!org_emp) error = 'Хоосон байна утга оруулна уу..'
+        }
+        return error;
+    }
+
+    render() {
         const {form_values} = this.state
         return (
             <div className="col-6 my-4">
@@ -149,7 +160,7 @@ export class UserAdd extends Component {
                         <Formik
                             enableReinitialize
                             initialValues={form_values}
-                            validationSchema={org_emp ? validationSchemaUpdate : validationSchemaCreate}
+                            validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
                         {({
@@ -160,7 +171,6 @@ export class UserAdd extends Component {
                             return (
                                 <Form className="col-12">
                                     <div>
-                                        {!org_emp &&
                                         <div className="form-row">
                                             <div className="form-group col-md-8">
                                                 <div class="position-relative has-icon-right">
@@ -176,7 +186,6 @@ export class UserAdd extends Component {
                                                 </div>
                                             </div>
                                         </div>
-                                        }
                                         <div className="form-row">
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="first_name">Овог:</label>
@@ -256,32 +265,30 @@ export class UserAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            {!org_emp &&
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="password">Нууц үг:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.password ? 'is-invalid' : '')}
                                                     name='password'
+                                                    validate={this.validatePassword}
                                                     id="id_password"
                                                     type="password"
                                                     placeholder="Нууц үг"
                                                 />
                                                 <ErrorMessage name="password" component="div" className="text-danger"/>
                                             </div>
-                                            }
-                                            {!org_emp &&
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="re_password">Нууц үг дахин оруулах:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.re_password ? 'is-invalid' : '')}
                                                     name='re_password'
+                                                    validate={this.validatePassword}
                                                     id="id_re_password"
                                                     type="password"
                                                     placeholder="Нууц үг дахин оруулах"
                                                 />
                                                 <ErrorMessage name="re_password" component="div" className="text-danger"/>
                                             </div>
-                                            }
                                         </div>
                                         <div className='form-row'>
                                             <div className="form-group col-md-8">
