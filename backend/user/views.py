@@ -8,6 +8,7 @@ from django.contrib.postgres.search import SearchVector
 from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
+from backend.org.models import Employee
 
 
 
@@ -72,7 +73,9 @@ def all(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def userCount(request):
 
-    user_count = User.objects.all().count()
+    
+    employee_ids = Employee.objects.all().values_list('user_id', flat=True) 
+    user_count = User.objects.exclude(pk__in=employee_ids).count()
     rsp = {
         'user_count': user_count,
     }
@@ -142,9 +145,11 @@ def paginatedList(request, payload):
     page = payload.get('page')
     per_page = payload.get('per_page')
     sort_name = payload.get('sort_name')
+    
     if not sort_name:
         sort_name = 'id'
-    user_list = User.objects.all().annotate(search=SearchVector(
+    employee_ids = Employee.objects.all().values_list('user_id', flat=True) 
+    user_list = User.objects.exclude(pk__in=employee_ids).annotate(search=SearchVector(
             'last_name',
             'first_name',
             'email',
