@@ -23,9 +23,6 @@ export class UserAdd extends Component {
                 re_password:'123',
                 is_admin: false,
             },
-            usernameError: false,
-            emailErrorMessege: '',
-            handleSaveIsLoad:false,
             modal_alert_status: "closed",
             timer: null,
         }
@@ -71,7 +68,6 @@ export class UserAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
-        this.setState({handleSaveIsLoad: true})
         if(org_emp){
             service.employee_update(org_level, org_id, values).then(({ success, errors }) => {
                 if (errors) {
@@ -114,7 +110,6 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
-            this.setState({handleSaveIsLoad:false})
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
         }, 2000)
     }
@@ -124,7 +119,6 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
-        this.setState({handleSaveIsLoad:false})
         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
     }
 
@@ -160,14 +154,7 @@ export class UserAdd extends Component {
                         >
                         {({
                             errors,
-                            status,
-                            touched,
                             isSubmitting,
-                            setFieldValue,
-                            handleBlur,
-                            values,
-                            isValid,
-                            dirty,
                         }) => {
                             const has_error = Object.keys(errors).length > 0
                             return (
@@ -239,7 +226,6 @@ export class UserAdd extends Component {
                                                     placeholder="E-Mail"
                                                 />
                                                 <ErrorMessage name="email" component="div" className="text-danger"/>
-                                                {this.state.emailErrorMessege.length > 0 && <a name="email" className="text-danger">{this.state.emailErrorMessege}</a>}
                                             </div>
                                         </div>
                                         <div className="form-row">
