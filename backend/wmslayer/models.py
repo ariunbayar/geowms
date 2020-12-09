@@ -12,8 +12,6 @@ class WMSLayer(models.Model):
     name = models.CharField(max_length=200)
     title = models.CharField(max_length=200, null=True)
     code = models.CharField(max_length=200)
-    legend_url = models.URLField(max_length=1000, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sort_order = models.PositiveIntegerField()

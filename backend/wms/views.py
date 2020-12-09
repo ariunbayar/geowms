@@ -158,13 +158,12 @@ def layerAdd(request, payload):
     layer_name = payload.get('id')
     layer_code = payload.get('code')
 
-    legend_url = payload.get('legendURL')
     wms = get_object_or_404(WMS, pk=wmsId)
     wms_layer = WMSLayer.objects.filter(code=layer_code, wms_id=wms.id)
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0, legend_url=legend_url)
+        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
         return JsonResponse({'success': True})
 
 
@@ -176,7 +175,6 @@ def layerRemove(request, payload):
     wmsId = payload.get('wmsId')
     layer_name = payload.get('id')
     wms_layer = get_object_or_404(WMSLayer, code=layer_name, wms=wmsId)
-    WMSLayer.objects.filter(code=layer_name, wms=wmsId).update(legend_url=None)
     BundleLayer.objects.filter(layer=wms_layer).delete()
     PaymentLayer.objects.filter(wms_layer=wms_layer).delete()
     wms_layer.delete()
@@ -220,8 +218,6 @@ def update(request, payload):
             with transaction.atomic():
                 form.save()
                 wms = form.instance
-                for layer_choice in layer_choices:
-                    WMSLayer.objects.filter(wms=wms, name=layer_choice.get('name'), code=layer_choice.get('code')).update(legend_url=layer_choice['legendurl'])
             rsp = { 'success': True }
         else:
             rsp = { 'success': False }
