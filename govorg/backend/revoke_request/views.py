@@ -3,6 +3,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 import json
+import pytz
 
 from main.decorators import ajax_required
 from main.utils import refreshMaterializedView
@@ -10,6 +11,10 @@ from main.utils import refreshMaterializedView
 from backend.inspire.models import MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography, LThemes, LPackages, LFeatures
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Org, Employee
+
+from datetime import datetime
+from django.conf import settings
+from django.utils.timezone import make_aware
 
 
 def _convert_text_json(data):
@@ -57,6 +62,13 @@ def all(request):
     return JsonResponse(rsp)
 
 
+def _date_to_timezone(input_date):
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
+    settings.TIME_ZONE  # 'UTC'
+    output_date = make_aware(naive_time)
+    return output_date
+
+
 def _set_change_request(employee, payload):
 
     theme_id = payload.get('tid')
@@ -79,7 +91,7 @@ def _set_change_request(employee, payload):
     changeRequest.kind = ChangeRequest.KIND_REVOKE
     changeRequest.form_json = form_json
     changeRequest.geo_json = geo_json
-    changeRequest.order_at = order_at
+    changeRequest.order_at = _date_to_timezone(order_at)
     changeRequest.order_no = order_no
     changeRequest.save()
 
