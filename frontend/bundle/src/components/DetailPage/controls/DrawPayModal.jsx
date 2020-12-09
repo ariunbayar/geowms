@@ -17,6 +17,8 @@ class ModalComponent extends Component{
             user_email: '',
             user_number: '',
             handlePaymentIsLoad: false,
+            types: ['.shp', '.jpeg', '.png', '.tiff'],
+            selected_type: '',
         }
 
         this.handlePayment = this.handlePayment.bind(this)
@@ -56,7 +58,7 @@ class ModalComponent extends Component{
     }
 
     render() {
-        const {user_name, user_email, user_number} = this.state
+        const {user_name, user_email, user_number, types} = this.state
         const { layer_info, is_loading, area, total_price, is_user } = this.props
 
         return (
@@ -141,6 +143,14 @@ class ModalComponent extends Component{
                                 </div>
                             }
                             <div className="modal-footer">
+                                <div className="form-group float-right">
+                                    <select className="form-control" onChange={(e) => this.setState({ selected_type: e.target.value })}>
+                                        <option value="">--- Ямар төрлөөр авахаа сонгоно уу ---</option>
+                                        {types.map((type, idx) =>
+                                            <option key={idx} value={type}>{type}</option>
+                                        )}
+                                    </select>
+                                </div>
                                 <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
                                 <div className="form-group">
                                     {this.state.handlePaymentIsLoad ?
