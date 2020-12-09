@@ -24,7 +24,6 @@ from backend.inspire.models import GovPermInspire
 from geoportal_app.models import User
 from main.decorators import ajax_required
 from main import utils
-import re
 
 from .models import Org, OrgRole, Employee, InspirePerm
 
@@ -254,25 +253,26 @@ def roles_save(request, payload, level, pk):
 def employee_more(request, level, pk, emp):
 
     org = get_object_or_404(Org, pk=pk, level=level)
+    employees_display = []
 
-    user = get_object_or_404(User, employee__org=org, pk=emp)
-    employee = Employee.objects.filter(user=user).first()
-    employees_display = {
-        'id': user.id,
-        'last_name': user.last_name,
-        'username': user.username,
-        'first_name': user.first_name,
-        'email': user.email,
-        'register': user.register,
-        'gender': user.gender,
-        'is_active': user.is_active,
-        'is_sso': user.is_sso,
-        'position': employee.position,
-        'is_admin': employee.is_admin,
-        'created_at': employee.created_at.strftime('%Y-%m-%d'),
-        'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
-    }
-    return JsonResponse({'success': True, 'employee': employees_display})
+    for employe in User.objects.filter(employee__org=org, pk=emp):
+        emp_oj = Employee.objects.filter(user=employe).first()
+        employees_display.append({
+            'id': employe.id,
+            'last_name': employe.last_name,
+            'username': employe.username,
+            'first_name': employe.first_name,
+            'email': employe.email,
+            'register': employe.register,
+            'gender': employe.gender,
+            'is_active': employe.is_active,
+            'is_sso': employe.is_sso,
+            'position': emp_oj.position,
+            'is_admin': emp_oj.is_admin,
+            'created_at': emp_oj.created_at.strftime('%Y-%m-%d'),
+            'updated_at': emp_oj.updated_at.strftime('%Y-%m-%d'),
+        })
+    return JsonResponse({'employee': employees_display})
 
 
 @require_POST
@@ -287,23 +287,20 @@ def employee_update(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
-    get_object_or_404(User, pk=user_id)
-    errors = {}
-    if not re.findall(r'^[^\u0000-\u007F]+[^\u0000-\u007F]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+$',register):
-        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
-    if errors:
-        return JsonResponse({'errors': errors})
-    else:
-        User.objects.filter(pk=user_id).update(
-                                first_name=first_name,
-                                last_name=last_name,
-                                email=email,
-                                gender=gender,
-                                register=register
-                            )
-        Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
 
-        return JsonResponse({'success': True})
+    get_object_or_404(User, pk=user_id)
+
+    User.objects.filter(pk=user_id).update(
+                            first_name=first_name,
+                            last_name=last_name,
+                            email=email,
+                            gender=gender,
+                            register=register
+                        )
+
+    Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
+
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -320,15 +317,11 @@ def employee_add(request, payload, level, pk):
     register = payload.get('register')
     password = payload.get('password')
     is_admin = payload.get('is_admin')
-    errors = {}
-    if User.objects.filter(username=username).first():
-        errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
-    if User.objects.filter(email=email).first():
-        errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-    if not re.findall(r'^[^\u0000-\u007F]+[^\u0000-\u007F]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+$',register):
-        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
-    if errors:
-        return JsonResponse({'errors': errors})
+
+    user = User.objects.filter(username=username).first()
+    if user:
+        return JsonResponse({'user_name': True})
+
     else:
         if level == 4:
             is_superuser = True
