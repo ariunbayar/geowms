@@ -1,8 +1,8 @@
-import React, { Component } from "react"
-import { NavLink } from "react-router-dom"
+import React, { Component, Fragment } from "react"
 import { service } from "../service"
-import { set } from "ol/transform"
 import ModalAlert from "../../ModalAlert"
+import {Formik, Field, Form, ErrorMessage} from 'formik'
+import {validationSchemaUpdate, validationSchemaCreate} from './validationSchema'
 
 export class UserAdd extends Component {
 
@@ -10,51 +10,32 @@ export class UserAdd extends Component {
 
         super(props)
         this.state = {
-            id: 0,
-            username: '',
+            form_values: {
+                id: 0,
+                username: '',
+                first_name: '123',
+                last_name: '123',
+                position: '123',
+                email: '',
+                gender: 'Эрэгтэй',
+                register:'ыы12312312',
+                password:'123',
+                re_password:'123',
+                is_admin: false,
+            },
             usernameError: false,
-            usernameErrorMessege: '',
-
-            first_name: '',
-            first_nameError: false,
-
-            last_name: '',
-            last_nameError: false,
-
-            email: '',
             emailErrorMessege: '',
-            emailError: false,
-
-            gender: 'Эрэгтэй',
-
-            register:'',
-            registerError:false,
-            registerErrorMessege:'',
-
-            password:'',
-            passwordError:false,
-            passwordErrorMessege:'',
-
-            re_password:'',
-            re_passwordError:'',
-            position: '',
-            positionError: false,
-
             handleSaveIsLoad:false,
             modal_alert_status: "closed",
             timer: null,
-
-            is_admin: false,
         }
 
-        this.handleSave = this.handleSave.bind(this)
-        this.handleChange = this.handleChange.bind(this)
-        this.handleChangeReg = this.handleChangeReg.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
-        this.handleFormCheck = this.handleFormCheck.bind(this)
+        this.validateRegister = this.validateRegister.bind(this)
+        this.validateEmail = this.validateEmail.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
     }
-
 
     componentDidMount() {
         const org_level = this.props.match.params.level
@@ -65,146 +46,66 @@ export class UserAdd extends Component {
         }
     }
 
-    componentDidUpdate(prevState) {
-
-    }
     handleGetAll(org_level, org_id, org_emp){
-        service.employeeMore(org_level, org_id, org_emp).then(({ employee }) => {
-            if (employee) {
-                {employee.map((employee) =>
-                    this.setState({
-                        id:employee.id,
-                        username: employee.username,
-                        first_name: employee.first_name,
-                        last_name: employee.last_name,
-                        email: employee.email,
-                        gender: employee.gender,
-                        register:employee.register,
-                        password:employee.password,
-                        re_password:employee.re_password,
-                        position: employee.position,
-                        is_admin: employee.is_admin
-                    })
-                )}
-
+        service.employeeMore(org_level, org_id, org_emp).then(({ success, employee }) => {
+            if (success) {
+                this.setState({form_values: {
+                    id: employee.id,
+                    username: employee.username,
+                    first_name: employee.first_name,
+                    last_name: employee.last_name,
+                    email: employee.email,
+                    gender: employee.gender,
+                    register:employee.register,
+                    password:employee.password,
+                    re_password:employee.re_password,
+                    position: employee.position,
+                    is_admin: employee.is_admin
+                }})
             }
         })
     }
 
+    handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
 
-    handleSave() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
-        const paylaod = this.state
-        if(org_emp){
-            service.employee_update(org_level, org_id, paylaod).then(({ success }) => {
-                if (success) {
-                    this.setState({modal_alert_status: "open"})
-                    this.modalCloseTime()
-                }
-            })
-        }
-        else{
-            service.employee_add(org_level, org_id, paylaod).then(({ success, user_name }) => {
-                if (user_name) {
-                    this.setState({usernameError: true, usernameErrorMessege: "Ийм нэр аль хэдийн үүссэн байна.", handleSaveIsLoad: false})
-                }
-                if (success) {
-                    this.setState({modal_alert_status: "open"})
-                    this.modalCloseTime()
-                }
-            })
-        }
-
-
-    }
-    handleFormCheck() {
         this.setState({handleSaveIsLoad: true})
-        const org_emp = this.props.match.params.emp
-        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        const { username, first_name, last_name,  email,  register,  password,  re_password , position} = this.state
-        var fromState = true
-        this.setState({ usernameError: false, first_nameError:false,last_nameError:false, usernameErrorMessege: '', emailErrorMessege: '',
-                    emailError:false, registerError:false, passwordError:false,registerError:false, positionError:false, passwordErrorMessege: ''})
-
-        if(!org_emp)
-        {
-            if(!username){
-                this.setState({usernameError: true, usernameErrorMessege: "Хоосон байна."})
-                fromState = false
-            }
-            if(!password) {
-                fromState = false
-                this.setState({passwordError: true})
-            }
-
-            if(!re_password) {
-                fromState = false
-                this.setState({re_passwordError: true})
-            }
-            if(password !== re_password){
-                fromState = false
-                this.setState({passwordErrorMessege: "Нууц үг хоорондоо ижил байх ёстой."})
-
-            }
-        }
-        if(!position){
-            this.setState({positionError: true})
-            fromState = false
-        }
-
-        if(!first_name){
-            this.setState({first_nameError: true})
-            fromState = false
-        }
-        if(!last_name) {
-            this.setState({last_nameError: true})
-
-        }
-        if(!email) {
-            this.setState({emailError: true} )
-            fromState = false
-        }
-        if(re.test(email))
-        {
-            this.setState({emailErrorMessege:''})
+        if(org_emp){
+            service.employee_update(org_level, org_id, values).then(({ success, errors }) => {
+                if (errors) {
+                    setErrors(errors)
+                    setSubmitting(false)
+                }
+                if (success) {
+                    this.setState({modal_alert_status: "open"})
+                    setStatus('saved')
+                    setSubmitting(false)
+                    this.modalCloseTime()
+                }
+            })
         }
         else{
-            fromState = false
-            this.setState({emailErrorMessege:"Имэйл хаяг буруу байна."})
-        }
-
-        if(!register) {
-            fromState = false
-            this.setState({registerError: true})
-        }
-
-
-        if(fromState)
-        {
-            this.handleSave()
-        }
-        else{
-            this.setState({handleSaveIsLoad: false})
-        }
-
-    }
-
-    handleChange(field, e) {
-        if(e.target.value.length < 255)
-        {
-            this.setState({ [field]: e.target.value })
-            this.setState({[field + 'Error']: false})
-
-        }
-    }
-    handleChangeReg(field, e) {
-        if(e.target.value.length < 11)
-        {
-            this.setState({ [field]: e.target.value })
-
+            if(values.re_password !== values.password)
+            {
+                setErrors({'re_password': 'Нууц үг адил биш байна.'})
+                setSubmitting(false)
+            }
+            else{
+                service.employee_add(org_level, org_id, values).then(({ success, errors }) => {
+                    if (errors) {
+                        setErrors(errors)
+                        setSubmitting(false)
+                    }
+                    if (success) {
+                        this.setState({modal_alert_status: "open"})
+                        setStatus('saved')
+                        setSubmitting(false)
+                        this.modalCloseTime()
+                    }
+                })
+            }
         }
     }
 
@@ -227,195 +128,207 @@ export class UserAdd extends Component {
         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
     }
 
+    validateEmail(value) {
+        let error;
+        if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
+          error = 'Зөв e-mail хаяг оруулна уу.';
+        }
+        return error;
+    }
+
+    validateRegister(value) {
+        let error;
+        if (!/^[^\u0000-\u007F]+[^\u0000-\u007F]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+[0-9]+$/i.test(value)) {
+          error = 'Регистер дугаараа зөв оруулна уу.';
+        }
+        return error;
+    }
 
     render() {
         const org_emp = this.props.match.params.emp
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
+        const {form_values} = this.state
         return (
             <div className="col-6 my-4">
                 <div className="row">
                     <div className="col-md-12">
                         <div className="row">
-                            <div className="col-12">
-                                {!org_emp &&
-                                <div className="form-row">
-                                    <div className="form-group col-md-8">
-                                        <label htmlFor="id_name">Нэвтрэх нэр:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="username"
-                                            placeholder="Нэвтрэх нэр"
-                                            onChange={(e) => this.handleChange('username', e)}
-                                            value={this.state.username}
-                                        />
-                                        {this.state.usernameErrorMessege && <a className="text-danger">{this.state.usernameErrorMessege}</a>}
-                                    </div>
-                                </div>
-                                }
-                                <div className="form-row">
-
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="last_name">Овог:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="last_name"
-                                            placeholder="Овог"
-                                            onChange={(e) => this.handleChange('last_name', e)}
-                                            value={this.state.last_name}
-                                        />
-                                        {this.state.last_nameError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="first_name">Нэр:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="first_name"
-                                            placeholder="Нэр"
-                                            onChange={(e) => this.handleChange('first_name', e)}
-                                            value={this.state.first_name}
-                                        />
-                                        {this.state.first_nameError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group col-md-8">
-                                        <label htmlFor="position">Албан тушаал:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="position"
-                                            placeholder="Албан тушаал"
-                                            onChange={(e) => this.handleChange('position', e)}
-                                            value={this.state.position}
-                                        />
-                                        {this.state.positionError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-                                </div>
-                                <div className='form-group'>
-                                    <div className="icheck-primary">
-                                        <input
-                                            id='is_admin'
-                                            type="checkbox"
-                                            checked={this.state.is_admin}
-                                            onChange={(e) => this.setState({is_admin: e.target.checked})}
-                                        />
-                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
-                                    </div>
-                                </div>
-                                <div className="form-row">
-
-                                    <div className="form-group col-md-8">
-                                        <label htmlFor="email">E-Mail</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="email"
-                                            placeholder="E-Mail"
-                                            onChange={(e) => this.handleChange('email', e)}
-                                            value={this.state.email}
-                                        />
-                                        {this.state.emailError && <li><a className="text-danger">Хоосон байна.</a></li>}
-                                        {this.state.emailErrorMessege && <li><a className="text-danger">{this.state.emailErrorMessege}</a></li>}
-
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-
-                                    <div className="form-group col-md-8">
-                                        <label htmlFor="gender">Хүйс:</label>
-                                        <select className="form-control" id="gender" value={this.state.gender} onChange={(e) => this.handleChange('gender', e)}>
-                                            <option>Эрэгтэй</option>
-                                            <option>Эмэгтэй</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-8">
-                                        <label htmlFor="register">Регистер:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="register"
-                                            placeholder="Регистер"
-                                            onChange={(e) => this.handleChangeReg('register', e)}
-                                            value={this.state.register}
-                                        />
-                                        {this.state.registerError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    {!org_emp &&
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="password">Нууц үг:</label>
-                                        <input
-                                            type="password"
-                                            className="form-control"
-                                            id="password"
-                                            placeholder="Нууц үг"
-                                            onChange={(e) => this.handleChange('password', e)}
-                                            value={this.state.password}
-                                        />
-                                        {this.state.passwordError && <a className="text-danger">Хоосон байна.</a>}
-
-                                    </div>
-                                    }
-
-                                    {!org_emp &&
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="re_password">Нууц үг дахин оруулах:</label>
-                                        <input
-                                            type="password"
-                                            className="form-control"
-                                            id="re_password"
-                                            placeholder="Нууц үг дахин оруулах"
-                                            onChange={(e) => this.handleChange('re_password', e)}
-                                            value={this.state.re_password}
-                                        />
-                                        <ul>
-                                        {this.state.re_passwordError && <li><a className="text-danger">Хоосон байна.</a></li>}
-                                        {this.state.passwordErrorMessege && <li><a className="text-danger">{this.state.passwordErrorMessege}</a></li>}
-                                        </ul>
-                                    </div>
-                                    }
-
-                                </div>
-                                <div className="form-group">
-                                    {this.state.handleSaveIsLoad ?
-                                        <>
-                                            <button className="btn gp-btn-primary">
-                                                <a className="spinner-border text-light" role="status">
-                                                    <span className="sr-only">Loading...</span>
-                                                </a>
-                                                <span> Шалгаж байна. </span>
+                        <Formik
+                            enableReinitialize
+                            initialValues={form_values}
+                            validationSchema={org_emp ? validationSchemaUpdate : validationSchemaCreate}
+                            onSubmit={this.handleSubmit}
+                        >
+                        {({
+                            errors,
+                            status,
+                            touched,
+                            isSubmitting,
+                            setFieldValue,
+                            handleBlur,
+                            values,
+                            isValid,
+                            dirty,
+                        }) => {
+                            const has_error = Object.keys(errors).length > 0
+                            return (
+                                <Form className="col-12">
+                                    <div>
+                                        {!org_emp &&
+                                        <div className="form-row">
+                                            <div className="form-group col-md-8">
+                                                <div class="position-relative has-icon-right">
+                                                    <label htmlFor="id_name" >Нэвтрэх нэр:</label>
+                                                    <Field
+                                                        className={'form-control ' + (errors.username ? 'is-invalid' : '')}
+                                                        name='username'
+                                                        id="id_username"
+                                                        type="text"
+                                                        placeholder="Нэвтрэх нэр"
+                                                    />
+                                                    <ErrorMessage name="username" component="div" className="text-danger"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        }
+                                        <div className="form-row">
+                                            <div className="form-group col-md-4">
+                                                <label htmlFor="first_name">Овог:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
+                                                    name='last_name'
+                                                    id="id_last_name"
+                                                    type="text"
+                                                    placeholder="Овог"
+                                                />
+                                                <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-group col-md-4">
+                                                <label htmlFor="first_name">Нэр:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
+                                                    name='first_name'
+                                                    id="id_first_name"
+                                                    type="text"
+                                                    placeholder="Нэр"
+                                                />
+                                                <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-8">
+                                                <label htmlFor="position">Албан тушаал:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.position ? 'is-invalid' : '')}
+                                                    name='position'
+                                                    id="id_position"
+                                                    type="text"
+                                                    placeholder="Албан тушаал"
+                                                />
+                                                <ErrorMessage name="position" component="div" className="text-danger"/>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-8">
+                                                <label htmlFor="email">E-Mail</label>
+                                                <Field
+                                                    validate={this.validateEmail}
+                                                    className={'form-control ' + (errors.email ? 'is-invalid' : '')}
+                                                    name='email'
+                                                    id="id_email"
+                                                    type="text"
+                                                    placeholder="E-Mail"
+                                                />
+                                                <ErrorMessage name="email" component="div" className="text-danger"/>
+                                                {this.state.emailErrorMessege.length > 0 && <a name="email" className="text-danger">{this.state.emailErrorMessege}</a>}
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-8">
+                                                <label htmlFor="gender">Хүйс:</label>
+                                                <Fragment>
+                                                    <Field name="gender" as="select" className="form-control"
+                                                    className={'form-control ' + (errors.gender ? 'is-invalid' : '')}>
+                                                        <option>Эрэгтэй</option>
+                                                        <option>Эмэгтэй</option>
+                                                    </Field>
+                                                    <ErrorMessage name="gender" component="div" className="text-dange"/>
+                                                </Fragment>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-8">
+                                                <label htmlFor="register">Регистер:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.register ? 'is-invalid' : '')}
+                                                    name='register'
+                                                    validate={this.validateRegister}
+                                                    id="id_register"
+                                                    type="text"
+                                                    placeholder="Регистер"
+                                                />
+                                                <ErrorMessage name="register" component="div" className="text-danger"/>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            {!org_emp &&
+                                            <div className="form-group col-md-4">
+                                                <label htmlFor="password">Нууц үг:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.password ? 'is-invalid' : '')}
+                                                    name='password'
+                                                    id="id_password"
+                                                    type="password"
+                                                    placeholder="Нууц үг"
+                                                />
+                                                <ErrorMessage name="password" component="div" className="text-danger"/>
+                                            </div>
+                                            }
+                                            {!org_emp &&
+                                            <div className="form-group col-md-4">
+                                                <label htmlFor="re_password">Нууц үг дахин оруулах:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.re_password ? 'is-invalid' : '')}
+                                                    name='re_password'
+                                                    id="id_re_password"
+                                                    type="password"
+                                                    placeholder="Нууц үг дахин оруулах"
+                                                />
+                                                <ErrorMessage name="re_password" component="div" className="text-danger"/>
+                                            </div>
+                                            }
+                                        </div>
+                                        <div className='form-row'>
+                                            <div className="form-group col-md-8">
+                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_admin'
+                                                    id="id_is_admin"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                            </div>
+                                        </div>
+                                        <div className="form-group">
+                                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
+                                                {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                                {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                                {!isSubmitting && 'Нэмэх' }
                                             </button>
-                                            <ModalAlert
-                                                modalAction={() => this.modalClose()}
-                                                status={this.state.modal_alert_status}
-                                                title="Амжилттай хадгаллаа"
-                                                model_type_icon = "success"
-                                            />
-                                        </>
-                                        :
-                                        <button className="btn gp-btn-primary" onClick={this.handleFormCheck} >
-                                            Хадгалах
-                                        </button>
-                                    }
-                                </div>
-                            </div>
+                                        </div>
+                                    </div>
+                                </Form>
+                                )}}
+                            </Formik>
                         </div>
                     </div>
                 </div>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon = "success"
+                />
             </div>
         )
     }
