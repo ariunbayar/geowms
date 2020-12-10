@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 from backend.org.models import Org, Employee
 from django.conf import settings
 
-# Create your models here.
+
 class LCodeListConfigs(models.Model):
     class Meta:
         db_table = 'l_code_list_configs'

@@ -13,19 +13,25 @@ from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
 import main.geoserver as geoserver
 
-def _get_service_url(request, token):
-    url = reverse('api:service:proxy', args=[token])
+def _get_service_url_all(request, token):
+    url = reverse('api:service:proxy-all', args=[token])
+    absolute_url = request.build_absolute_uri(url)
+    return absolute_url
+
+
+def _get_service_url(request, token, wms):
+    url = reverse('api:service:proxy', args=[token, wms.pk])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
 
 @require_GET
-def proxy(request, token):
+def proxyAll(request, token):
 
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    system = get_object_or_404(System, token=token)
+    system = get_object_or_404(System, token=token, deleted_by__isnull=True)
     conf_geoserver = geoserver.get_connection_conf()
 
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
@@ -42,7 +48,7 @@ def proxy(request, token):
     allowed_layers = [layer.code for layer in system.wms_layers.all() if layer.wms.is_active]
     if request.GET.get('REQUEST') == 'GetCapabilities':
         content = filter_layers(content, allowed_layers)
-        service_url = _get_service_url(request, token)
+        service_url = _get_service_url_all(request, token)
         content = replace_src_url(content, base_url, service_url)
 
     qs_request = queryargs.get('REQUEST', 'no request')
@@ -53,6 +59,52 @@ def proxy(request, token):
         rsp_status= rsp.status_code,
         rsp_size= len(rsp.content),
         system_id= system.id,
+    )
+
+    content_type = rsp.headers.get('content-type')
+    rsp = HttpResponse(content, content_type=content_type)
+
+    if system.website:
+        rsp['Access-Control-Allow-Origin'] = system.website
+    else:
+        rsp['Access-Control-Allow-Origin'] = '*'
+
+    return rsp
+
+
+@require_GET
+def proxy(request, token, pk):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    system = get_object_or_404(System, token=token)
+    wms = get_object_or_404(WMS, pk=pk)
+    base_url = wms.url
+
+    if not wms.is_active:
+        raise Http404
+
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    content = rsp.content
+
+    allowed_layers = [layer.code for layer in system.wms_layers.filter(wms=wms)]
+    if request.GET.get('REQUEST') == 'GetCapabilities':
+        content = filter_layers(content, allowed_layers)
+
+        service_url = _get_service_url(request, token, wms)
+        content = replace_src_url(content, wms.url, service_url)
+
+    qs_request = queryargs.get('REQUEST', 'no request')
+    WMSLog.objects.create(
+        qs_all= dict(queryargs),
+        qs_request= qs_request,
+        rsp_status= rsp.status_code,
+        rsp_size= len(rsp.content),
+        system_id= system.id,
+        wms_id=pk,
     )
 
     content_type = rsp.headers.get('content-type')
