@@ -26,7 +26,7 @@ def _get_service_url(request, bundle, wms):
 
 @require_GET
 def proxy(request, bundle_id, wms_id):
-
+    print(bundle_id, wms_id)
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }

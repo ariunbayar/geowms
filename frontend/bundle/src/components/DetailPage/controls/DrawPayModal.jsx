@@ -17,7 +17,7 @@ class ModalComponent extends Component{
             user_email: '',
             user_number: '',
             handlePaymentIsLoad: false,
-            types: ['shp', 'jpeg', 'png', 'tiff'],
+            types: ['shp', 'jpeg', 'png', 'tiff', 'pdf'],
             selected_type: '',
         }
 
