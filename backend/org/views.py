@@ -346,19 +346,15 @@ def employee_update(request, payload, pk):
     errors = _employee_validation(payload, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-
-    User.objects.filter(pk=pk).update(
-                            first_name=first_name,
-                            last_name=last_name,
-                            email=email,
-                            gender=gender,
-                            register=register.upper(),
-                            username=username
-                        )
+    user.first_name=first_name
+    user.last_name=last_name
+    user.email=email
+    user.gender=gender
+    user.register=register.upper()
+    user.username=username
     if password:
-        user = User.objects.filter(pk=pk).first()
         user.set_password(password)
-        user.save()
+    user.save()
     Employee.objects.filter(pk=pk).update(position=position, is_admin=is_admin)
 
     return JsonResponse({'success': True, 'errors': errors})
@@ -525,7 +521,7 @@ def org_remove(request, payload, level):
 def org_list(request, payload, level):
 
     page = payload.get('page')
-    query = payload.get('query', '')
+    query = payload.get('query') or ''
     per_page = payload.get('perpage')
     level = payload.get('org_level')
     orgs_display = []
@@ -599,7 +595,7 @@ def employee_list(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
     page = payload.get('page')
-    query = payload.get('query', '')
+    query = payload.get('query') or ''
     per_page = payload.get('perpage')
     sort_name = payload.get('sort_name')
     if not sort_name:
