@@ -29,8 +29,6 @@ export class UserAdd extends Component {
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
-        this.validateRegister = this.validateRegister.bind(this)
-        this.validateEmail = this.validateEmail.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
         this.validatePassword = this.validatePassword.bind(this)
     }
@@ -125,22 +123,6 @@ export class UserAdd extends Component {
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
     }
 
-    validateEmail(value) {
-        let error;
-        if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-          error = 'Зөв e-mail хаяг оруулна уу.';
-        }
-        return error;
-    }
-
-    validateRegister(value) {
-        let error;
-        if (!/[аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОөӨпПрРсСтТуУүҮфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ]{2}[0-9]{8}/.test(value)) {
-          error = 'Регистер дугаараа зөв оруулна уу.';
-        }
-        return error;
-    }
-
     validatePassword(value) {
         const org_emp = this.props.match.params.emp
         let error;
@@ -173,7 +155,7 @@ export class UserAdd extends Component {
                                     <div>
                                         <div className="form-row">
                                             <div className="form-group col-md-8">
-                                                <div class="position-relative has-icon-right">
+                                                <div className="position-relative has-icon-right">
                                                     <label htmlFor="id_name" >Нэвтрэх нэр:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.username ? 'is-invalid' : '')}
@@ -227,7 +209,6 @@ export class UserAdd extends Component {
                                             <div className="form-group col-md-8">
                                                 <label htmlFor="email">E-Mail</label>
                                                 <Field
-                                                    validate={this.validateEmail}
                                                     className={'form-control ' + (errors.email ? 'is-invalid' : '')}
                                                     name='email'
                                                     id="id_email"
@@ -256,7 +237,6 @@ export class UserAdd extends Component {
                                                 <Field
                                                     className={'form-control ' + (errors.register ? 'is-invalid' : '')}
                                                     name='register'
-                                                    validate={this.validateRegister}
                                                     id="id_register"
                                                     type="text"
                                                     placeholder="Регистер"

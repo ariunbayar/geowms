@@ -250,7 +250,7 @@ def roles_save(request, payload, level, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employeeDetail(request, pk):
+def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
@@ -272,10 +272,68 @@ def employeeDetail(request, pk):
     return JsonResponse({'success': True, 'employee': employees_display})
 
 
+def _employee_validation(payload, user):
+    username = payload.get('username')
+    position = payload.get('position')
+    first_name = payload.get('first_name')
+    last_name = payload.get('last_name')
+    email = payload.get('email')
+    gender = payload.get('gender')
+    register = payload.get('register')
+    errors = {}
+    if not username:
+        errors['username'] = 'Хоосон байна утга оруулна уу.'
+    elif len(username) > 150:
+        errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
+    if not position:
+        errors['position'] = 'Хоосон байна утга оруулна уу.'
+    elif len(position) > 250:
+        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
+    if not first_name:
+        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(first_name) > 30:
+        errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
+    if not last_name:
+        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(last_name) > 150:
+        errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
+    if not email:
+        errors['email'] = 'Хоосон байна утга оруулна уу.'
+    elif len(email) > 254:
+        errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
+    if not gender:
+        errors['gender'] = 'Хоосон байна утга оруулна уу.'
+    elif len(gender) > 100:
+        errors['gender'] = '100-с илүүгүй урттай утга оруулна уу!'
+    if not register:
+        errors['register'] = 'Хоосон байна утга оруулна уу.'
+    if user:
+        if user.email != email:
+            if User.objects.filter(email=email).first():
+                errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+        if user.username != username:
+            if User.objects.filter(username=username).first():
+                errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
+    else:
+        if User.objects.filter(email=email).first():
+            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+        if User.objects.filter(username=username).first():
+            errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
+    if not utils.is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    if len(register) ==  10:
+        if not utils.is_register(register):
+            errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    else:
+        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employeeUpdate(request, payload, pk):
+def employee_update(request, payload, pk):
+    username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
     last_name = payload.get('last_name')
@@ -285,14 +343,7 @@ def employeeUpdate(request, payload, pk):
     is_admin = payload.get('is_admin')
     password = payload.get('password')
     user = get_object_or_404(User, pk=pk)
-    errors = {}
-    if user.email != email:
-        if User.objects.filter(email=email).first():
-            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-    if not utils.is_email(email):
-        errors['email'] = 'Email хаяг алдаатай байна.'
-    if not utils.is_register(register):
-        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    errors = _employee_validation(payload, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -301,7 +352,8 @@ def employeeUpdate(request, payload, pk):
                             last_name=last_name,
                             email=email,
                             gender=gender,
-                            register=register.upper()
+                            register=register.upper(),
+                            username=username
                         )
     if password:
         user = User.objects.filter(pk=pk).first()
@@ -315,7 +367,7 @@ def employeeUpdate(request, payload, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employeeAdd(request, payload, level, pk):
+def employee_add(request, payload, level, pk):
 
     username = payload.get('username')
     position = payload.get('position')
@@ -327,14 +379,7 @@ def employeeAdd(request, payload, level, pk):
     password = payload.get('password')
     is_admin = payload.get('is_admin')
     errors = {}
-    if User.objects.filter(username=username).first():
-        errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
-    if User.objects.filter(email=email).first():
-        errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-    if not utils.is_email(email):
-        errors['email'] = 'Email хаяг алдаатай байна.'
-    if not utils.is_register(register):
-        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    errors = _employee_validation(payload, None)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
     if level == 4:
@@ -363,7 +408,7 @@ def employeeAdd(request, payload, level, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employeeRemove(request, pk):
+def employee_remove(request, pk):
 
     user = get_object_or_404(User, id=pk)
     Employee.objects.filter(user=user).first().delete()
@@ -480,7 +525,7 @@ def org_remove(request, payload, level):
 def org_list(request, payload, level):
 
     page = payload.get('page')
-    query = payload.get('query')
+    query = payload.get('query', '')
     per_page = payload.get('perpage')
     level = payload.get('org_level')
     orgs_display = []
@@ -488,9 +533,6 @@ def org_list(request, payload, level):
 
     if not sort_name:
         sort_name = 'id'
-    if not query:
-        query = ''
-
     qs = Org.objects.filter(level=level)
     qs = qs.annotate(num_employees=Count('employee'))
     qs = qs.annotate(num_systems=Count('govorg'))
@@ -557,13 +599,11 @@ def employee_list(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
     page = payload.get('page')
-    query = payload.get('query')
+    query = payload.get('query', '')
     per_page = payload.get('perpage')
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'last_name'
-    if not query:
-        query = ''
     emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
         'last_name',
         'first_name',

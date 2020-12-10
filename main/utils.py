@@ -492,14 +492,10 @@ def get_geom(geo_id, geom_type=None, srid=4326):
 
 
 def is_register(register):
-    if re.findall(r'[аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОөӨпПрРсСтТуУүҮфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ]{2}[0-9]{8}',register):
-        return True
-    else:
-        return False
+    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    return re.search(re_register, register.upper()) is not None
 
 
 def is_email(email):
-    if re.findall(r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b',email):
-        return True
-    else:
-        return False
+    re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
+    return re.search(re_email, email) is not None
