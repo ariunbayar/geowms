@@ -52,46 +52,35 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown" href="#">
-                        <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
+                            <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
                         </a>
+
                         {% if user.is_authenticated %}
-                            {% if user.is_superuser %}
+
                             <ul class="dropdown-menu dropdown-menu-right">
                                 <li class="dropdown-item user-details">
                                     <a href="javaScript:void();">
-                                    <div class="media">
-                                        <div class="avatar"><img class="align-self-start mr-3" src="{% static "assets/image/user.png" %}" alt="user avatar"></img></div>
-                                        <div class="media-body">
-                                            <h6 class="mt-2 user-title">{{user.username}}</h6>
-                                            <p class="user-subtitle">{{user.email}}</p>
+                                        <div class="media">
+                                            <div class="avatar"><img class="align-self-start mr-3" src="{% static "assets/image/user.png" %}" alt="user avatar"></img></div>
+                                            <div class="media-body">
+                                                {% if user.is_superuser %}
+                                                    <h6 class="mt-2 user-title">{{user.username}}</h6>
+                                                    <p class="user-subtitle">{{user.email}}</p>
+                                                {% else %}
+                                                    <h6 class="mt-2 user-title">{{user.last_name}}</h6>
+                                                    <p class="user-subtitle">{{user.first_name}}</p>
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                    </div>
                                     </a>
-                                    </li>
+                                </li>
+
                                 <li class="dropdown-divider"></li>
                                 <li class="dropdown-item"><a href="/gov/profile/" class="text-dark"><i class="icon-wallet mr-2"></i>ПРОФАЙЛ</a></li>
                                 <li class="dropdown-divider"></li>
                                 <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i>ГАРАХ</a></li>
                             </ul>
-                            {% else %}
-                            <ul class="dropdown-menu dropdown-menu-right">
-                                <li class="dropdown-item user-details">
-                                    <a href="javaScript:void();">
-                                    <div class="media">
-                                        <div class="avatar"><img class="align-self-start mr-3" src="https://via.placeholder.com/110X110" alt="user avatar"></img></div>
-                                        <div class="media-body">
-                                            <h6 class="mt-2 user-title">{{user.last_name}}</h6>
-                                            <p class="user-subtitle">{{user.first_name}}</p>
-                                        </div>
-                                    </div>
-                                    </a>
-                                </li>
-                                <li class="dropdown-divider"></li>
-                                <li class="dropdown-item"><a href="{% url "profile:history" %}" class="text-dark"><i class="icon-wallet mr-2"></i> Account</a></li>
-                                <li class="dropdown-divider"></li>
-                                <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i> ГАРАХ</a></li>
-                            </ul>
-                            {% endif %}
+
                         {% else %}
                             <li class="dropdown-item"><a href="{% url "secure:login" %}"><i class="icon-power mr-2"></i>УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a></li>
                         {% endif %}
