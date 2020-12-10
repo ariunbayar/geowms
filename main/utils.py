@@ -489,3 +489,13 @@ def get_geom(geo_id, geom_type=None, srid=4326):
         raise Exception(msg)
 
     return geom
+
+
+def is_register(register):
+    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    return re.search(re_register, register.upper()) is not None
+
+
+def is_email(email):
+    re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
+    return re.search(re_email, email) is not None
