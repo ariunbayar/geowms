@@ -25,11 +25,11 @@ function purchaseAll(purchase_id){
     return fetch('/back/payment/purchase-all/', requestOptions).then(handleResponse)
 }
 
-function downloadPurchase(id) {
+function downloadPurchase(id, download_type) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`/payment/api/download-purchase/${id}/`, requestOptions).then(handleResponse)
+    return fetch(`/payment/api/download-purchase/${id}/${download_type}/`, requestOptions).then(handleResponse)
 }
 
 function paymentTest(id) {

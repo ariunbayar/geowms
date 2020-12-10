@@ -27,6 +27,13 @@ export class PolygonPurchase extends Component {
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
+        this.downloadPurchase = this.downloadPurchase.bind(this)
+    }
+
+    downloadPurchase(id) {
+        service.downloadPurchase(id, this.props.match.params.type).then(rsp => {
+            console.log(rsp);
+        })
     }
 
     componentDidMount(){
@@ -36,6 +43,9 @@ export class PolygonPurchase extends Component {
               items.map(( items ) =>
                   this.setState({items})
               )
+              if(!items[0].export_file) {
+                this.downloadPurchase(id)
+              }
               this.setState({polygon, layers})
             }
             else {

@@ -143,29 +143,6 @@ def purchaseDraw(request, payload):
     })
 
 
-def get_all_file_paths(directory):
-
-    file_paths = []
-
-    for root, directories, files in os.walk(directory):
-        for filename in files:
-            filepath = os.path.join(root, filename)
-            file_paths.append(filepath)
-
-    return file_paths
-
-
-def get_all_file_remove(directory):
-
-    file_paths = []
-
-    for root, directories, files in os.walk(directory):
-        for filename in files:
-            if filename != 'export.zip':
-                filepath = os.path.join(root, filename)
-                os.remove(filepath)
-
-
 def _lfeatureconfig(feature_id, table_name, path, saved_fields):
     feature_configs_name = []
     f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
@@ -373,6 +350,43 @@ def _create_shp_file(payment, layer, polygon):
         print(e)
 
 
+def get_all_file_paths(directory):
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+
+    return file_paths
+
+
+def get_all_file_remove(directory):
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            if filename != 'export.zip':
+                filepath = os.path.join(root, filename)
+                os.remove(filepath)
+
+
+def _file_to_zip(payment_id, folder_name):
+    try:
+        path = os.path.join(settings.FILES_ROOT, folder_name, payment_id)
+        file_paths = get_all_file_paths(path)
+        zip_path = os.path.join(path, 'export.zip')
+        with ZipFile(zip_path,'w') as zip:
+            for file in file_paths:
+                zip.write(file, os.path.basename(file))
+
+        get_all_file_remove(path)
+    except Exception as e:
+        print(e)
+
+
 def _export_shp(payment):
 
     try:
@@ -382,15 +396,7 @@ def _export_shp(payment):
         for layer in layers:
             _create_shp_file(payment, layer.wms_layer, polygon)
 
-        path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-
-        file_paths = get_all_file_paths(path)
-        zip_path = os.path.join(path, 'export.zip')
-        with ZipFile(zip_path,'w') as zip:
-            for file in file_paths:
-                zip.write(file, os.path.basename(file))
-
-        get_all_file_remove(path)
+        _file_to_zip(str(payment.id), 'shape')
         payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
         payment.save()
 
@@ -401,16 +407,34 @@ def _export_shp(payment):
         return False
 
 
+def _export_image(payment, download_type):
+    print("export ", download_type)
+    
+    return True
+
+
+def _export_pdf(pdf):
+    print("export tiff")
+    return True
+
+
 @require_GET
 @ajax_required
 @login_required
-def download_purchase(request, pk):
+def download_purchase(request, pk, download_type):
+    Payment.objects.filter(user=request.user, pk=pk).update(is_success=True) # arilgah code
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
-
     if payment.export_file:
         is_created = True
     else:
-        is_created = _export_shp(payment)
+        if download_type == 'shp':
+            is_created = _export_shp(payment)
+
+        if download_type == 'jpeg' and download_type == 'png' and download_type == 'tiff':
+            is_created = _export_image(payment, download_type)
+
+        if download_type == 'pdf':
+            is_created = _export_pdf(payment)
 
         if is_created:
 

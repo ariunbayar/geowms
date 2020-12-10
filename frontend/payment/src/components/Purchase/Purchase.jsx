@@ -26,9 +26,6 @@ export class Purchase extends Component {
 
     componentDidMount(){
         const purchase_id = this.props.match.params.id
-        service.downloadPurchase(purchase_id).then(rsp => {
-            console.log(rsp);
-        })
         service.purchaseAll(purchase_id).then(({ success, purchase_all, point_data, msg }) => {
                     if(success){
                         if (purchase_all) {

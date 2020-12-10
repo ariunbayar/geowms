@@ -17,7 +17,7 @@ class ModalComponent extends Component{
             user_email: '',
             user_number: '',
             handlePaymentIsLoad: false,
-            types: ['.shp', '.jpeg', '.png', '.tiff'],
+            types: ['shp', 'jpeg', 'png', 'tiff'],
             selected_type: '',
         }
 
@@ -29,7 +29,7 @@ class ModalComponent extends Component{
 
         this.setState({payLoad: true, handlePaymentIsLoad:true})
 
-        const {description, user_name, user_email, user_number} = this.state
+        const {description, user_name, user_email, user_number, selected_type} = this.state
         const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price, feature_info_list} = this.props
 
         const values = {
@@ -51,7 +51,7 @@ class ModalComponent extends Component{
 
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
-                window.location.href = `/payment/purchase/polygon/${payment_id}/`;
+                window.location.href = `/payment/purchase/polygon/${payment_id}/${selected_type}/`;
             }
         })
 
@@ -143,14 +143,17 @@ class ModalComponent extends Component{
                                 </div>
                             }
                             <div className="modal-footer">
-                                <div className="form-group float-right">
-                                    <select className="form-control" onChange={(e) => this.setState({ selected_type: e.target.value })}>
-                                        <option value="">--- Ямар төрлөөр авахаа сонгоно уу ---</option>
-                                        {types.map((type, idx) =>
-                                            <option key={idx} value={type}>{type}</option>
-                                        )}
-                                    </select>
-                                </div>
+                                {
+                                    !is_loading &&
+                                    <div className="form-group float-right">
+                                        <select className="form-control" onChange={(e) => this.setState({ selected_type: e.target.value })}>
+                                            <option value="">--- Ямар төрлөөр авахаа сонгоно уу ---</option>
+                                            {types.map((type, idx) =>
+                                                <option key={idx} value={type}>.{type}</option>
+                                            )}
+                                        </select>
+                                    </div>
+                                }
                                 <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
                                 <div className="form-group">
                                     {this.state.handlePaymentIsLoad ?
