@@ -16,7 +16,6 @@ class SidebarComponent extends Component {
     }
 
     render() {
-        console.log(this.props.map_wms_list)
         return (
             <div>
                 <span>Давхаргууд</span>
