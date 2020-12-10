@@ -7,6 +7,7 @@ app_name = 'api'
 urlpatterns = [
     path('service/', include(([
         path('WMS/<int:bundle_id>/<int:wms_id>/', public_views.proxy, name='wms_proxy'),
+        path('<str:token>/all/', govorg_views.proxyAll, name='proxy-all'),
         path('<str:token>/<int:pk>/', govorg_views.proxy, name='proxy'),
         path('qgis-submit/', govorg_views.qgis_submit, name='qgis_submit'),
     ], 'service'))),

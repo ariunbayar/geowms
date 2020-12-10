@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class GovOrg(models.Model):
@@ -8,6 +9,7 @@ class GovOrg(models.Model):
         db_table = 'govorg'
     org = models.ForeignKey('backend_org.Org', on_delete=models.PROTECT, null=True)
     name = models.CharField(max_length=250)
+    website = models.CharField(max_length=250, null=True)
     token = models.CharField(max_length=250, db_index=True)
 
     wms_layers = models.ManyToManyField(
@@ -18,6 +20,8 @@ class GovOrg(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
+    deleted_at = models.DateTimeField(null=True)
 
 
 class GovOrgWMSLayer(models.Model):

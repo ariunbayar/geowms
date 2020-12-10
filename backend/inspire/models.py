@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 from backend.org.models import Org, Employee
 from django.conf import settings
 
-# Create your models here.
+
 class LCodeListConfigs(models.Model):
     class Meta:
         db_table = 'l_code_list_configs'
@@ -98,21 +98,22 @@ class LFeatureConfigs(models.Model):
 
 
 class LFeatures(models.Model):
+
     class Meta:
         db_table = 'l_features'
         managed = False
 
     feature_id = models.AutoField(primary_key=True)
-    feature_code = models.CharField(max_length=255)
-    feature_name = models.CharField(max_length=255)
-    feature_name_eng = models.CharField(max_length=255)
-    package_id = models.IntegerField()
-    order_no = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
+    feature_code = models.CharField(max_length=255, null=True)
+    feature_name = models.CharField(max_length=255, null=True)
+    feature_name_eng = models.CharField(max_length=255, null=True)
+    package_id = models.IntegerField(null=True)
+    order_no = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    created_by = models.IntegerField(null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class LPackages(models.Model):
@@ -121,16 +122,16 @@ class LPackages(models.Model):
         managed = False
 
     package_id = models.AutoField(primary_key=True)
-    package_code = models.CharField(max_length=255)
-    package_name = models.CharField(max_length=255)
-    package_name_eng = models.CharField(max_length=255)
-    theme_id = models.IntegerField()
-    order_no = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
+    package_code = models.CharField(max_length=255, null=True)
+    package_name = models.CharField(max_length=255, null=True)
+    package_name_eng = models.CharField(max_length=255, null=True)
+    theme_id = models.IntegerField(null=True)
+    order_no = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    created_by = models.IntegerField(null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class LProperties(models.Model):
@@ -159,16 +160,16 @@ class LThemes(models.Model):
         managed = False
 
     theme_id = models.AutoField(primary_key=True)
-    theme_code = models.CharField(max_length=255)
-    theme_name = models.CharField(max_length=255)
-    theme_name_eng = models.CharField(max_length=255)
-    top_theme_id = models.IntegerField()
-    order_no = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
+    theme_code = models.CharField(max_length=255, null=True)
+    theme_name = models.CharField(max_length=255, null=True)
+    theme_name_eng = models.CharField(max_length=255, null=True)
+    top_theme_id = models.IntegerField(null=True)
+    order_no = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    created_by = models.IntegerField(null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class LValueTypes(models.Model):
@@ -321,7 +322,6 @@ class GovPerm(models.Model):
         db_table = 'perm_gov_perm'
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True, null=True)
-    geo_id = models.CharField(max_length=100)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
@@ -373,6 +373,7 @@ class GovRoleInspire(models.Model):
     gov_role = models.ForeignKey(GovRole, on_delete=models.CASCADE, db_index=True)
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
     feature_id = models.IntegerField()
+    data_type_id = models.IntegerField(null=True)
     property_id = models.IntegerField(null=True)
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
@@ -405,6 +406,7 @@ class GovPermInspire(models.Model):
     gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True)
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
     feature_id = models.IntegerField()
+    data_type_id = models.IntegerField(null=True)
     property_id = models.IntegerField(null=True)
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
@@ -437,6 +439,7 @@ class EmpRoleInspire(models.Model):
 
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
     feature_id = models.IntegerField()
+    data_type_id = models.IntegerField(null=True)
     property_id = models.IntegerField(null=True)
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
@@ -469,6 +472,7 @@ class EmpPermInspire(models.Model):
     emp_perm = models.ForeignKey(EmpPerm, on_delete=models.CASCADE, db_index=True)
     perm_kind = models.PositiveIntegerField(choices=PERM_KIND_CHOICES, db_index=True)
     feature_id = models.IntegerField()
+    data_type_id = models.IntegerField(null=True)
     property_id = models.IntegerField(null=True)
     geom = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
