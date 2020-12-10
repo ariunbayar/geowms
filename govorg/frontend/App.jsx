@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import { System } from "./System"
 import { Meta } from './Meta'
-import { Profile } from './Profile'
+import { Password } from './User/Password'
+import { Profile } from './User/Profile'
 
 import InsPerms from './Role/Role/GovPerms'
 import Gov from './Role/Gov/index'
@@ -186,6 +187,7 @@ export class App extends Component {
                             <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
+                            <Route exact path="/gov/profile/password/" component={Password} />
                         </Switch>
                     </div>
                 </div>
