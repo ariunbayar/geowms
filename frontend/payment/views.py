@@ -523,6 +523,7 @@ def _create_pdf(payment, download_type, payment_id, layer_code, infos):
             self.set_font('Arial', '', 8)
             self.cell(10, 10, date.today().strftime("%Y-%m-%d"))
             self.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+            self.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'logo-2.png'), 180, 8, 15)
             self.set_font('DejaVu', '', 15)
             title = "Хэсэгчлэн худалдан авалт"
             self.cell(50)
@@ -572,6 +573,8 @@ def _export_pdf(payment, download_type):
     payment.save()
     return True
 
+payment = get_object_or_404(Payment, pk=170, user=535)
+_export_pdf(payment, 'pdf')
 
 @require_GET
 @ajax_required
