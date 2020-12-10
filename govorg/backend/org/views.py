@@ -18,7 +18,7 @@ from backend.inspire.models import (
 
 
 
-def _emp_role(org, user, is_superuser):
+def _emp_role(org, user):
     properties = []
     property_of_feature = {}
     gov_perm = []
@@ -27,7 +27,8 @@ def _emp_role(org, user, is_superuser):
     package_features = []
     themes = []
     gov_perm = get_object_or_404(GovPerm, org=org)
-    if is_superuser:
+    employee = Employee.objects.filter(user=user).first()
+    if employee.is_admin:
 
         feature_ids_list = list(GovPermInspire.objects.filter(gov_perm=gov_perm).distinct('feature_id', 'perm_kind').exclude(feature_id__isnull=True).values_list('feature_id', 'perm_kind'))
         if feature_ids_list:
@@ -130,7 +131,6 @@ def _get_packages(org, theme_id):
 
 def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
-    is_superuser = request.user.is_superuser
     perms = []
     org_inspire = []
     roles_inspire = InspirePerm.objects.filter(org=org, perm_view=True)
@@ -165,7 +165,7 @@ def frontend(request):
             "org_level":org.level,
             'perms':perms,
             'org_inspire':org_inspire,
-            'org_role':_emp_role(org, request.user, is_superuser),
+            'org_role':_emp_role(org, request.user),
         },
     }
     return render(request, 'org/index.html', context)

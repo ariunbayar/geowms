@@ -114,14 +114,15 @@ def _get_state_and_kind(type_of, module):
     return data
 
 
-def _get_org_request(ob, user):
+def _get_org_request(ob, employee):
 
     geo_json = []
     old_geo_data = []
     form_json = []
     inspire_perm = []
     current_geo_json = []
-    org = get_object_or_404(Org, employee__user=user)
+    user = User.objects.filter(employee__id=employee.id).first()
+    org = get_object_or_404(Org, employee__id=employee.id)
     
     feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
     package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
@@ -130,13 +131,12 @@ def _get_org_request(ob, user):
     state = _get_state_and_kind(ob.state,ob.STATE_CHOICES)
     kind = _get_state_and_kind(ob.kind,ob.KIND_CHOICES)
 
-    if user.is_superuser:
+    if employee.is_admin:
         gov_perm = get_object_or_404(GovPerm, org=org)
         inspire_perm = GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=ob.feature_id, perm_kind=6)
 
 
     else:
-        employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
         emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
         inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
         
@@ -191,15 +191,14 @@ def _get_org_request(ob, user):
 @ajax_required
 def getChangeAll(request):
     org_request = []
-    user = request.user
-    if user.is_superuser:
-        org_request_list = ChangeRequest.objects.filter()
+    employee = get_object_or_404(Employee, user=request.user)
+    if employee.is_admin:
+        org_request_list = ChangeRequest.objects.all()
     else:
-        employee = Employee.objects.filter(user=request.user).first()
         org_request_list = ChangeRequest.objects.filter(employee_id=employee.id)
     
     if org_request_list:
-        org_request = [_get_org_request(ob, user) for ob in org_request_list]
+        org_request = [_get_org_request(ob, employee) for ob in org_request_list]
         if org_request[0] != '':
             rsp = {
                 'success':True,
@@ -279,15 +278,14 @@ def _getChoices(user):
 def getAll(request):
 
     org_request = []
-    user = request.user
-    if user.is_superuser:
+    employee = get_object_or_404(Employee, user=request.user)
+    if employee.is_admin:
         org_request_list = ChangeRequest.objects.all()
     else:
-        employee = Employee.objects.filter(user=request.user).first()
         org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by('-created_at')
     
     if org_request_list:
-        org_request = [_get_org_request(ob, user) for ob in org_request_list]
+        org_request = [_get_org_request(ob, employee) for ob in org_request_list]
         choices = _getChoices(request.user)
         if org_request[0] != '':
             rsp = {
@@ -488,13 +486,12 @@ def requestApprove(request, payload, pk):
 @ajax_required
 def getCount(request):
     try:
-        if request.user.is_superuser:
+        employee = get_object_or_404(Employee, user=request.user)
+        if employee.is_admin:
             count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
 
         else:
-            employee = Employee.objects.filter(user = request.user).first()
-            if employee:
-                count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW, employee_id=employee.id).count()
+            count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW, employee_id=employee.id).count()
 
         rsp = {
             'success': True,
@@ -518,7 +515,8 @@ def search(request, payload):
     theme = payload.get('theme')
     package = payload.get('packag')
     feature = payload.get('feature')
-    user = request.user
+    employee = get_object_or_404(Employee, user=request.user)
+
     if state:
         search['state'] = state
     if kind:
@@ -531,7 +529,7 @@ def search(request, payload):
         search['feature_id'] = feature
     try:
         datas = ChangeRequest.objects.filter(**search)
-        data_list = [_get_org_request(data, user) for data in datas]
+        data_list = [_get_org_request(data, employee) for data in datas]
         rsp = {
             'success': True,
             'org_request': data_list
