@@ -7,6 +7,8 @@ def user_davhtsal(apps, schema_editor):
 
     User = apps.get_model('geoportal_app', 'User')
     for user in User.objects.all():
+        if not user.email:
+            continue
         user_ids = User.objects.filter(email=user.email).values_list('id')
         if len(user_ids) > 1:
             raise Exception('Дараах хэрэглэгчийн email хаяг давхцаж байана.\n'
