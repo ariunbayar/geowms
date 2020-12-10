@@ -350,8 +350,6 @@ def employee_remove(request, payload, level, pk):
     user_id = payload.get('user_id')
     employee = get_object_or_404(Employee, user_id=user_id)
     employee.delete()
-    user = get_object_or_404(User, pk=user_id)
-    user.delete()
 
     return JsonResponse({'success': True})
 
@@ -546,16 +544,20 @@ def employee_list(request,payload, level, pk):
     per_page = payload.get('perpage')
     sort_name = payload.get('sort_name')
 
-    if not query:
-        query = ''
     if not sort_name:
         sort_name = 'last_name'
 
-    emp_list = User.objects.filter(employee__org=org).annotate(search=SearchVector(
+    qs = User.objects
+    qs = qs.filter(employee__org=org)
+    qs = qs.annotate(search=SearchVector(
         'last_name',
         'first_name',
         'email')
-    ).filter(search__contains=query).order_by(sort_name)
+        )
+    if query:
+        qs = qs.filter(search__contains=query)
+    qs = qs.order_by(sort_name)
+    emp_list = qs
 
     total_items = Paginator(emp_list, per_page)
     items_page = total_items.page(page)
