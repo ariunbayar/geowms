@@ -145,16 +145,25 @@ def paginatedList(request, payload):
     page = payload.get('page')
     per_page = payload.get('per_page')
     sort_name = payload.get('sort_name')
-    
+
     if not sort_name:
         sort_name = 'id'
+
     employee_ids = Employee.objects.all().values_list('user_id', flat=True) 
-    user_list = User.objects.exclude(pk__in=employee_ids).annotate(search=SearchVector(
-            'last_name',
-            'first_name',
-            'email',
-            'gender')
-    ).filter(search__contains=query).order_by(sort_name)
+
+    qs = User.objects
+    qs = qs.exclude(pk__in=employee_ids)
+    qs = qs.annotate(search=SearchVector(
+        'last_name',
+        'first_name',
+        'email',
+        'gender')
+        )
+
+    if query:
+        qs = qs.filter(search__contains=query)
+    qs = qs.order_by(sort_name)
+    user_list = qs
 
     total_items = Paginator(user_list, per_page)
     items_page = total_items.page(page)
