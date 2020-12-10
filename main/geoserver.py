@@ -320,14 +320,3 @@ def get_wms_url(wms_name):
     )
 
     return wms_url
-
-def get_legend_url(wms_id, layer_name):
-
-    legend_url =  (
-        'https://nsdi.gov.mn/back/wms/WMS/{wms_id}/?'
-        'service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'
-    ).format(
-        wms_id=wms_id,
-        layer=layer_name,
-    )
-    return legend_url

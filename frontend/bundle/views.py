@@ -77,7 +77,6 @@ def wms_layers(request, pk):
                 'id': ob.pk,
                 'name': ob.name,
                 'code': ob.code,
-                'legendURL': ob.legend_url,
                 'feature_price': ob.feature_price,
                 'geodb_schema': ob.geodb_schema,
                 'geodb_table': ob.geodb_table,

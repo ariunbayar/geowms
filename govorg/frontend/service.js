@@ -7,6 +7,8 @@ export const service = {
     tableListBarilgaSuurinGazar,
     tableListDedButets,
     getCount,
+    detail,
+    updatePassword,
 }
 
 function tableListTeevriinSuljee() {
@@ -40,4 +42,20 @@ function getCount() {
     }
 
     return fetch(`/gov/api/org-request/getCount/`, requestOptions).then(handleResponse)
+}
+
+function detail() {
+    const opts = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`/profile/api/info/`, opts).then(handleResponse)
+}
+
+function updatePassword(new_password, old_password, re_password) {
+    const requestOptions = {
+        ...getPostOptions(),
+          body: JSON.stringify({ new_password, old_password, re_password }),
+    }
+    return fetch(`/profile/api/update-password/`, requestOptions).then(handleResponse)
 }
