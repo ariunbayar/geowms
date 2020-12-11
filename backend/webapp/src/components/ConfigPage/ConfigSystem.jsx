@@ -168,7 +168,6 @@ export default class ConfigSystem extends Component {
                         }}
                     </Formik>
                 </div>
-
             </div>
         )
     }

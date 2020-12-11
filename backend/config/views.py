@@ -248,12 +248,12 @@ def system_configs(request):
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
-    print(configs)
+
     rsp = {
         **default_values,
         **{conf.name: conf.value for conf in configs},
     }
-    print(rsp)
+
     return JsonResponse(rsp)
 
 
