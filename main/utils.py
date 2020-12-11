@@ -502,7 +502,7 @@ def is_email(email):
     return re.search(re_email, email) is not None
 
 # Зөвхөн нэг config мэдээллийг буцаана
-# оролт config name array
+# оролт config one name
 def get_config(config_name):
 
     default_values = {config_name: ''}
