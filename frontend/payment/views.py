@@ -1,5 +1,8 @@
 from zipfile import ZipFile
 import os
+import io
+import PIL.Image as Image
+import urllib.request
 import uuid
 import subprocess
 
@@ -406,12 +409,64 @@ def _export_shp(payment):
         print(e)
         return False
 
+def _create_image_file(payment, layer, polygon, download_type):
+    geoserver_layer = layer.wms_layer.code
+
+    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+
+    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+
+    if x1 > x2:
+        save_x = x1
+        x1 = x2
+        x2 = save_x
+    if y1 > y2:
+        save_y = y1
+        y1 = y2
+        y2 = save_y
+
+    path = os.path.join(settings.FILES_ROOT, 'image', str(payment.id))
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    file_ext = '.' + download_type
+    filename = os.path.join(path, str(geoserver_layer) + file_ext)
+
+    url = layer.wms_layer.wms.url
+    url_service = 'SERVICE=WMS'
+    url_version = 'VERSION=1.1.0'
+    url_request = 'REQUEST=GetMap'
+    url_format = 'FORMAT=image/' + download_type
+    url_transparent = 'TRANSPARENT=true'
+    url_width = 'WIDTH=464'
+    url_height = 'HEIGHT=768'
+    url_layers = 'LAYERS=' + geoserver_layer
+    url_bbox = 'BBOX=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',urn:ogc:def:crs:EPSG:4326'
+
+    fullurl = url + '?' + url_service + '&' + url_version + '&' + url_request + '&' + url_format + '&' + url_transparent + '&' + url_width + '&' + url_height + '&' + url_bbox + '&' + url_layers
+
+    with urllib.request.urlopen(fullurl) as response:
+        image_byte = response.read()
+    bytes = bytearray(image_byte)
+    image = Image.open(io.BytesIO(bytes))
+    image.save(os.path.join(settings.FILES_ROOT, 'image', str(payment.id), geoserver_layer + file_ext))
 
 def _export_image(payment, download_type):
-    print("export ", download_type)
-    
-    return True
 
+    try:
+        layers = PaymentLayer.objects.filter(payment=payment)
+        polygon = PaymentPolygon.objects.filter(payment=payment).first()
+
+        for layer in layers:
+            _create_image_file(payment, layer, polygon, download_type)
+
+        _file_to_zip(str(payment.id), 'image')
+        payment.export_file = 'image/' + str(payment.id) + '/export.zip'
+        payment.save()
+        return True
+
+    except Exception as e:
+        print(e)
+        return False
 
 def _export_pdf(pdf):
     print("export tiff")
@@ -430,7 +485,7 @@ def download_purchase(request, pk, download_type):
         if download_type == 'shp':
             is_created = _export_shp(payment)
 
-        if download_type == 'jpeg' and download_type == 'png' and download_type == 'tiff':
+        if download_type == 'jpeg' or download_type == 'png' or download_type == 'tiff':
             is_created = _export_image(payment, download_type)
 
         if download_type == 'pdf':
