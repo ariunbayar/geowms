@@ -55,6 +55,7 @@ def systemList(request, payload):
 
 
 def _get_system_detail_display(request, system):
+
     wms_list = [
         {
             'id': wms.id,
