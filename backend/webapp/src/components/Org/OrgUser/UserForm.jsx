@@ -59,10 +59,8 @@ export class UserForm extends Component {
     }
 
     handleGovorgDelete(id) {
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
         const { load, searchQuery } = this.state
-        service.employee_remove(org_level, org_id, id).then(({ success }) => {
+        service.employeeRemove(id).then(({ success }) => {
             if (success) {
                 var a = load
                 a ++

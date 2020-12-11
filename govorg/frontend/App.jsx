@@ -4,7 +4,8 @@ import Employee from './Employee/EmployeeForm'
 import GovRole from './GovRole/'
 import { System } from "./System"
 import { Meta } from './Meta'
-import { Profile } from './Profile'
+import { Password } from './User/Password'
+import { Profile } from './User/Profile'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -169,6 +170,7 @@ export class App extends Component {
                             <Route exact path="/gov/role/" component={GovRole} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
+                            <Route exact path="/gov/profile/password/" component={Password} />
                         </Switch>
                     </div>
                 </div>
