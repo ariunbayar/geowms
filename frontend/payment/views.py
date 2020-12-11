@@ -619,7 +619,9 @@ def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder
             pdf.ln(5)
         pdf.ln(5)
 
-    pdf.image(os.path.join(settings.FILES_ROOT, folder_name, str(payment_id), image_name), 0, 0, 0)
+    pdf.add_page()
+    pdf.image(os.path.join(settings.FILES_ROOT, folder_name, str(payment_id), image_name), x=20, y=20, w=0, h=0)
+
     pdf.output(path_with_file_name, 'F')
     return path_with_file_name
 
