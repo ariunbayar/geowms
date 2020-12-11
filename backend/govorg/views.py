@@ -81,11 +81,11 @@ def _get_govorg_detail_display(request, govorg):
 def дэлгэрэнгүй(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-    system_ip = utils.get_config('system_ip')
+    system_local_base_url = utils.get_config('system_local_base_url')
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
         'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
-        'prvite_url': system_ip + reverse('api:service:local_system_proxy', args=[govorg.token]),
+        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
         'success': True,
     }
 

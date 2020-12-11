@@ -508,7 +508,7 @@ def get_config(config_name):
     default_values = {config_name: ''}
     configs = Config.objects.filter(name__in=default_values.keys()).first()
 
-    return configs.value
+    return configs.value if configs else ''
 
 # оролт config name array
 # Олон config мэдээллийг буцаана obj буцаана

@@ -6,7 +6,7 @@ import {service} from './service'
 
 
 const validationSchema = Yup.object().shape({
-    system_ip: Yup.string(),
+    system_local_base_url: Yup.string(),
 })
 
 
@@ -18,7 +18,7 @@ export default class ConfigSystem extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                system_ip:'',
+                system_local_base_url:'',
             },
             values: {},
         }
@@ -116,10 +116,10 @@ export default class ConfigSystem extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="id_system_ip">IP ADDRESS / DOMAIN NAME</label>
+                                                <label htmlFor="id_system_local_base_url">IP ADDRESS / DOMAIN NAME</label>
                                                 <Field
-                                                    name="system_ip"
-                                                    id="id_system_ip"
+                                                    name="system_local_base_url"
+                                                    id="id_system_local_base_url"
                                                     type="text"
                                                     className="form-control"
                                                 />

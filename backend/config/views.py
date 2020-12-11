@@ -244,7 +244,7 @@ def geoserver_configs_save(request, payload):
 def system_configs(request):
 
     default_values = {
-        'system_ip': '',
+        'system_local_base_url': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -263,7 +263,7 @@ def system_configs(request):
 def system_configs_save(request, payload):
 
     config_names = (
-        'system_ip',
+        'system_local_base_url',
     )
 
     for config_name in config_names:
