@@ -84,8 +84,8 @@ def дэлгэрэнгүй(request, pk):
     system_ip = utils.get_config('system_ip')
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
-        'public_url': request.build_absolute_uri(reverse('api:service:proxy-all', args=[govorg.token])),
-        'prvite_url': system_ip + reverse('api:service:proxy-all', args=[govorg.token]),
+        'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
+        'prvite_url': system_ip + reverse('api:service:local_system_proxy', args=[govorg.token]),
         'success': True,
     }
 

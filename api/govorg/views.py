@@ -16,7 +16,7 @@ from django.shortcuts import redirect
 
 
 def _get_service_url_all(request, token):
-    url = reverse('api:service:proxy-all', args=[token])
+    url = reverse('api:service:system_proxy', args=[token])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
