@@ -12,6 +12,7 @@ from backend.wmslayer.models import WMSLayer
 from .models import GovOrg
 from django.contrib.postgres.search import SearchVector
 from django.utils.timezone import localtime, now
+from main import utils
 
 
 def _get_govorg_display(govorg):
@@ -64,7 +65,6 @@ def _get_govorg_detail_display(request, govorg):
             'is_active': wms.is_active,
             'url': wms.url,
             'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
-            'public_url': request.build_absolute_uri(reverse('api:service:proxy', args=[govorg.token, wms.pk]))
         }
         for wms in WMS.objects.all()
     ]
@@ -81,9 +81,11 @@ def _get_govorg_detail_display(request, govorg):
 def дэлгэрэнгүй(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    system_ip = utils.get_config('system_ip')
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
         'public_url': request.build_absolute_uri(reverse('api:service:proxy-all', args=[govorg.token])),
+        'prvite_url': system_ip + reverse('api:service:proxy-all', args=[govorg.token]),
         'success': True,
     }
 

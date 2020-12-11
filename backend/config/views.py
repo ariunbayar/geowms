@@ -236,3 +236,42 @@ def geoserver_configs_save(request, payload):
         )
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def system_configs(request):
+
+    default_values = {
+        'system_ip': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+    print(configs)
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+    print(rsp)
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def system_configs_save(request, payload):
+
+    config_names = (
+        'system_ip',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
