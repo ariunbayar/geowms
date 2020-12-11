@@ -392,7 +392,11 @@ def _file_to_zip(payment_id, folder_name):
         zip_path = os.path.join(path, 'export.zip')
         with ZipFile(zip_path,'w') as zip:
             for file in file_paths:
-                zip.write(file, os.path.basename(file))
+                if folder_name == 'pdf':
+                    if not '.jpeg' in str(file):
+                        zip.write(file, os.path.basename(file))
+                else:
+                    zip.write(file, os.path.basename(file))
 
         get_all_file_remove(path)
     except Exception as e:
@@ -418,7 +422,8 @@ def _export_shp(payment):
         print(e)
         return False
 
-def _create_image_file(payment, layer, polygon, download_type):
+
+def _create_image_file(payment, layer, polygon, download_type, folder_name):
     geoserver_layer = layer.wms_layer.code
 
     x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
@@ -434,9 +439,10 @@ def _create_image_file(payment, layer, polygon, download_type):
         y1 = y2
         y2 = save_y
 
-    path = os.path.join(settings.FILES_ROOT, 'image', str(payment.id))
+    path = os.path.join(settings.FILES_ROOT, folder_name, str(payment.id))
     if not os.path.isdir(path):
         os.mkdir(path)
+
     file_ext = '.' + download_type
     filename = os.path.join(path, str(geoserver_layer) + file_ext)
 
@@ -455,21 +461,24 @@ def _create_image_file(payment, layer, polygon, download_type):
 
     with urllib.request.urlopen(fullurl) as response:
         image_byte = response.read()
+
     bytes = bytearray(image_byte)
     image = Image.open(io.BytesIO(bytes))
-    image.save(os.path.join(settings.FILES_ROOT, 'image', str(payment.id), geoserver_layer + file_ext))
+    image.save(os.path.join(settings.FILES_ROOT, folder_name, str(payment.id), geoserver_layer + file_ext))
+    return True
 
 def _export_image(payment, download_type):
 
     try:
         layers = PaymentLayer.objects.filter(payment=payment)
         polygon = PaymentPolygon.objects.filter(payment=payment).first()
+        folder_name = 'image'
 
         for layer in layers:
-            _create_image_file(payment, layer, polygon, download_type)
+            _create_image_file(payment, layer, polygon, download_type, folder_name)
 
-        _file_to_zip(str(payment.id), 'image')
-        payment.export_file = 'image/' + str(payment.id) + '/export.zip'
+        _file_to_zip(str(payment.id), folder_name)
+        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
         payment.save()
         return True
 
@@ -570,7 +579,7 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
     return infos
 
 
-def _create_pdf(payment, download_type, payment_id, layer_code, infos):
+def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name):
     path_with_file_name = os.path.join(settings.FILES_ROOT, download_type, str(payment_id), str(layer_code) + '.' + download_type)
 
     class PDF(FPDF):
@@ -609,6 +618,8 @@ def _create_pdf(payment, download_type, payment_id, layer_code, infos):
             pdf.cell(10, 8, value)
             pdf.ln(5)
         pdf.ln(5)
+
+    pdf.image(os.path.join(settings.FILES_ROOT, folder_name, str(payment_id), image_name), 0, 0, 0)
     pdf.output(path_with_file_name, 'F')
     return path_with_file_name
 
@@ -618,10 +629,16 @@ def _export_pdf(payment, download_type):
     polygon = PaymentPolygon.objects.filter(payment=payment).first()
     payment_id = payment.id
 
+    image_ext = 'jpeg'
+    folder_name = download_type
+
     for layer in layers:
         infos = _get_pdf_info_from_inspire(payment, layer, polygon)
         _create_folder_payment_id(download_type, payment_id)
-        path = _create_pdf(payment, download_type, payment_id, layer.wms_layer.code, infos)
+        is_created_image = _create_image_file(payment, layer, polygon, image_ext, folder_name)
+        if is_created_image:
+            image_name = layer.wms_layer.code + '.' + image_ext
+            path = _create_pdf(download_type, payment_id, layer.wms_layer.code, infos, image_name, folder_name)
 
     _file_to_zip(str(payment.id), download_type)
     payment.export_file = download_type + '/' + str(payment.id) + '/export.zip'
