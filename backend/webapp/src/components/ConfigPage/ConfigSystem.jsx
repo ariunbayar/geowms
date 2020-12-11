@@ -83,7 +83,7 @@ export default class ConfigSystem extends Component {
             <div className="card">
 
                 <div className="card-header">
-                    Систем API тохиргоо
+                    Байгууллагын систем сервис
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
                             <i className="fa fa-edit"></i>
@@ -116,12 +116,13 @@ export default class ConfigSystem extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="id_system_local_base_url">IP ADDRESS / DOMAIN NAME</label>
+                                                <label htmlFor="id_system_local_base_url">Base url</label>
                                                 <Field
                                                     name="system_local_base_url"
                                                     id="id_system_local_base_url"
                                                     type="text"
                                                     className="form-control"
+                                                    placeholder="http://x.x.x.x"
                                                 />
                                             </div>
                                         </div>
