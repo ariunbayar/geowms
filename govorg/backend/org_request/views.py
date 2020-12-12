@@ -550,7 +550,7 @@ def search(request, payload):
 
 @require_POST
 @ajax_required
-def controlToApprove(request, payload):
+def control_to_approve(request, payload):
     form_json = payload.get("values")
     change_request_id = payload.get("change_request_id")
     order_at = form_json['order_at']

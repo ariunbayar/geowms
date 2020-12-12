@@ -38,7 +38,7 @@ class WMSLog(models.Model):
         ordering = ('-created_at',)
 
     system = models.ForeignKey('backend_govorg.GovOrg', on_delete=models.PROTECT, null=True)
-    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
     wms = models.ForeignKey('backend_wms.WMS', on_delete=models.PROTECT, null=True)
 
     qs_all = models.TextField(null=True)

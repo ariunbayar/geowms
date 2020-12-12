@@ -275,7 +275,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 attributes=''.join(attributes_hoho),
             )
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
-    print(rsp.text)
+
     return rsp
 
 

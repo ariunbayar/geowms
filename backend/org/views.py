@@ -395,8 +395,8 @@ def employee_add(request, payload, level, pk):
     user.roles.add(2)
     user.set_password(password)
     user.save()
-
-    Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
+    token = utils._generate_employee_unique_token()
+    Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin, token=token)
 
     return JsonResponse({'success': True, 'errors': errors})
 

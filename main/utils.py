@@ -22,6 +22,7 @@ from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 from backend.config.models import Config
+from backend.org.models import Employee
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -522,3 +523,10 @@ def get_configs(config_names):
     }
 
     return rsp
+
+
+def _generate_employee_unique_token():
+    token = uuid.uuid4().hex[:32]
+    if Employee.objects.filter(token=token).first():
+        _generate_employee_unique_token()
+    return token
