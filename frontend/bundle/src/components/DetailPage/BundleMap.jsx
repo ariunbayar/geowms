@@ -644,14 +644,8 @@ export default class BundleMap extends Component {
                 layer_list.push(layer.code)
             })
         })
-        service
-            .paymentCalcPrice(area, layer_list, feature_info_list)
-            .then(({ success, total_price, is_user }) => {
-                if (success) {
-                    const is_loading = false
-                    this.controls.drawModal.showModal(is_loading, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info, area, total_price, is_user, feature_info_list)
-                }
-            })
+        const is_loading = false
+        this.controls.drawModal.showModal(is_loading, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info, area, feature_info_list, layer_list)
     }
 
     toggleDrawRemove(){

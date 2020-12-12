@@ -10,7 +10,7 @@ class ModalComponent extends Component{
         super(props)
 
         this.state = {
-            price: 3000,
+            total_price: 0,
             description: 'Газрын бүрхэвч, газар ашиглалт',
             payLoad: false,
             user_name: '',
@@ -19,21 +19,43 @@ class ModalComponent extends Component{
             handlePaymentIsLoad: false,
             types: ['shp', 'jpeg', 'png', 'tiff', 'pdf'],
             selected_type: '',
+            is_user: true,
         }
 
         this.handlePayment = this.handlePayment.bind(this)
+        this.onChangeType = this.onChangeType.bind(this)
+        this.closeModal = this.closeModal.bind(this)
 
+    }
+
+    onChangeType(e){
+        const {area, layer_list, feature_info_list} = this.props
+        const selected_type = e.target.value
+        this.setState({ selected_type })
+        service
+        .paymentCalcPrice(area, layer_list, feature_info_list, selected_type)
+        .then(({ success, total_price, is_user }) => {
+            if (success) {
+                this.setState({total_price, is_user})
+            }
+        })
+    }
+
+    closeModal(){
+        this.setState({ total_price: 0, selected_type: '' })
+        this.props.handleClose()
     }
 
     handlePayment(){
 
         this.setState({payLoad: true, handlePaymentIsLoad:true})
 
-        const {description, user_name, user_email, user_number, selected_type} = this.state
-        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, total_price, feature_info_list} = this.props
+        const {description, user_name, user_email, user_number, selected_type, total_price} = this.state
+        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, feature_info_list} = this.props
 
         const values = {
             price: total_price,
+            // total_price: NULL,
             description,
             coodrinatLeftTop,
             coodrinatRightBottom,
@@ -58,15 +80,15 @@ class ModalComponent extends Component{
     }
 
     render() {
-        const {user_name, user_email, user_number, types} = this.state
-        const { layer_info, is_loading, area, total_price, is_user } = this.props
+        const {user_name, user_email, user_number, types, total_price, is_user} = this.state
+        const { layer_info, is_loading, area } = this.props
 
         return (
             <div>
                 <div className="show d-block modal bd-example-modal-lg" tabIndex="-1" role="dialog" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
                         <div className="modal-content">
-                            <div className="modal-header" onClick={this.props.handleClose}>
+                            <div className="modal-header" onClick={() => this.closeModal()}>
                                 <h5 className="modal-title">Худалдан авалтын мэдээлэл</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
@@ -84,6 +106,15 @@ class ModalComponent extends Component{
                                     <div className="container">
                                         <div className="row">
                                             <div className="col-md-6">
+                                                <div className="form-group">
+                                                    <label htmlFor="recipient-name" className="col-form-label">Татаж авах төрөл:</label>
+                                                    <select className="form-control" onChange={(e) => this.onChangeType(e)}  >
+                                                        <option value="">--- Ямар төрлөөр авахаа сонгоно уу ---</option>
+                                                        {types.map((type, idx) =>
+                                                            <option key={idx} value={type}>.{type}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
                                                 <div className="form-group">
                                                     <label htmlFor="recipient-name" className="col-form-label">Худалдан авах талбайн хэмжээ:</label>
                                                     <span className="form-control" id="size">{area.output}{area.type}<sup>2</sup></span>
@@ -143,18 +174,7 @@ class ModalComponent extends Component{
                                 </div>
                             }
                             <div className="modal-footer">
-                                {
-                                    !is_loading &&
-                                    <div className="form-group float-right">
-                                        <select className="form-control" onChange={(e) => this.setState({ selected_type: e.target.value })}>
-                                            <option value="">--- Ямар төрлөөр авахаа сонгоно уу ---</option>
-                                            {types.map((type, idx) =>
-                                                <option key={idx} value={type}>.{type}</option>
-                                            )}
-                                        </select>
-                                    </div>
-                                }
-                                <button type="button" onClick={this.props.handleClose} className="btn btn-secondary">Буцах</button>
+                                <button type="button" onClick={() => this.closeModal()} className="btn btn-secondary">Буцах</button>
                                 <div className="form-group">
                                     {this.state.handlePaymentIsLoad ?
                                         <>
@@ -166,7 +186,7 @@ class ModalComponent extends Component{
                                             </button>
                                         </>
                                         :
-                                        <button type="button" className="btn gp-btn-primary" onClick={this.handlePayment} >
+                                        <button disabled={this.state.selected_type.length < 1} type="button" className="btn gp-btn-primary" onClick={this.handlePayment} >
                                             Худалдаж авах
                                         </button>
                                     }
@@ -217,9 +237,9 @@ export class DrawPayModal extends Control {
         ReactDOM.hydrate(<ModalComponent {...props}/>, this.element)
     }
 
-    showModal(is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user, feature_info_list) {
+    showModal(is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, feature_info_list, layer_list) {
         this.toggleControl(true)
-        this.renderComponent({is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, total_price, is_user, feature_info_list})
+        this.renderComponent({is_loading, coodrinatLeftTop, coodrinatRightBottom, layer_info, area, feature_info_list, layer_list})
     }
 
 }
