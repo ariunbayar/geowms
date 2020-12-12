@@ -6,7 +6,6 @@ import {unByKey} from 'ol/Observable'
 import {transform as transformCoordinate} from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import {getArea, getLength} from 'ol/sphere';
-import {getCenter} from 'ol/extent';
 import {toLonLat} from 'ol/proj';
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
@@ -15,7 +14,6 @@ import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
 import {Point} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
-import OSM from 'ol/source/OSM'
 import {format as coordinateFormat} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 

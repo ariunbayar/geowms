@@ -423,6 +423,21 @@ def _export_shp(payment):
         return False
 
 
+def _get_size_from_extent(x1, y1, x2, y2):
+    y = y2 - y1
+    x = x2 - x1
+    if y > x:
+        width = 480
+        height = 720
+        orientation = 'Portrait'
+    if x > y:
+        width = 720
+        height = 480
+        orientation = 'Landscape'
+
+    return {'height': str(height), 'width': str(width), 'orientation': orientation}
+
+
 def _create_image_file(payment, layer, polygon, download_type, folder_name):
     geoserver_layer = layer.wms_layer.code
 
@@ -439,6 +454,8 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
         y1 = y2
         y2 = save_y
 
+    size = _get_size_from_extent(x1, y1, x2, y2)
+
     path = os.path.join(settings.FILES_ROOT, folder_name, str(payment.id))
     if not os.path.isdir(path):
         os.mkdir(path)
@@ -452,8 +469,8 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
     url_request = 'REQUEST=GetMap'
     url_format = 'FORMAT=image/' + download_type
     url_transparent = 'TRANSPARENT=true'
-    url_width = 'WIDTH=464'
-    url_height = 'HEIGHT=768'
+    url_width = 'WIDTH=' + size['width']
+    url_height = 'HEIGHT=' + size['height']
     url_layers = 'LAYERS=' + geoserver_layer
     url_bbox = 'BBOX=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',urn:ogc:def:crs:EPSG:4326'
 
@@ -465,7 +482,7 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
     bytes = bytearray(image_byte)
     image = Image.open(io.BytesIO(bytes))
     image.save(os.path.join(settings.FILES_ROOT, folder_name, str(payment.id), geoserver_layer + file_ext))
-    return True
+    return {'success': True, 'orientation': size['orientation']}
 
 def _export_image(payment, download_type):
 
@@ -579,7 +596,7 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
     return infos
 
 
-def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name):
+def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
     path_with_file_name = os.path.join(settings.FILES_ROOT, download_type, str(payment_id), str(layer_code) + '.' + download_type)
 
     class PDF(FPDF):
@@ -587,11 +604,11 @@ def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder
             self.set_font('Arial', '', 8)
             self.cell(10, 10, date.today().strftime("%Y-%m-%d"))
             self.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
-            self.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'logo-2.png'), 180, 8, 15)
             self.set_font('DejaVu', '', 15)
             title = "Хэсэгчлэн худалдан авалт"
-            self.cell(50)
-            self.cell(20, 10, title, 0, 2, 'D')
+            self.cell(0, 10, title, 0, 2, 'C')
+            self.set_x(-30)
+            self.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'logo-2.png'), y=5, w=25, h=20)
             self.ln(5)
 
         def footer(self):
@@ -619,8 +636,8 @@ def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder
             pdf.ln(5)
         pdf.ln(5)
 
-    pdf.add_page()
-    pdf.image(os.path.join(settings.FILES_ROOT, folder_name, str(payment_id), image_name), x=20, y=20, w=0, h=0)
+    pdf.add_page(orientation=orientation)
+    pdf.image(os.path.join(settings.FILES_ROOT, folder_name, str(payment_id), image_name), x=20, y=28, w=0, h=0)
 
     pdf.output(path_with_file_name, 'F')
     return path_with_file_name
@@ -638,9 +655,9 @@ def _export_pdf(payment, download_type):
         infos = _get_pdf_info_from_inspire(payment, layer, polygon)
         _create_folder_payment_id(download_type, payment_id)
         is_created_image = _create_image_file(payment, layer, polygon, image_ext, folder_name)
-        if is_created_image:
+        if is_created_image['success']:
             image_name = layer.wms_layer.code + '.' + image_ext
-            path = _create_pdf(download_type, payment_id, layer.wms_layer.code, infos, image_name, folder_name)
+            path = _create_pdf(download_type, payment_id, layer.wms_layer.code, infos, image_name, folder_name, is_created_image['orientation'])
 
     _file_to_zip(str(payment.id), download_type)
     payment.export_file = download_type + '/' + str(payment.id) + '/export.zip'
