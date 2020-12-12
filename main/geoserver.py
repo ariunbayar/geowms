@@ -320,7 +320,6 @@ def get_wms_url(wms_name):
     )
 
     return wms_url
-<<<<<<< HEAD
 
 
 def get_legend_url(wms_id, layer_name):
@@ -333,5 +332,3 @@ def get_legend_url(wms_id, layer_name):
         layer=layer_name,
     )
     return legend_url
-=======
->>>>>>> e56ed4788f7c515f7536c6be11b7adc78c898b66
