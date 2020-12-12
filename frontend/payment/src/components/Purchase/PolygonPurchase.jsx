@@ -67,7 +67,7 @@ export class PolygonPurchase extends Component {
 
     }
 
-    handleTest(){
+    handleTest(){ // testlej uzehed ene func hergte
       const id = this.state.payment_id
       service.paymentTest(id).then(({ success }) => {
           if (success) {
@@ -161,11 +161,6 @@ export class PolygonPurchase extends Component {
                         <div className="col-md-4">
                             <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                                 <h4 className="text-succes p-3">QPAY ээр төлбөр төлөх</h4>
-                            </button>
-                        </div>
-                        <div className="col-md-4">
-                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleTest()}>
-                                <h4 className="text-succes p-3">Тест төлбөр</h4>
                             </button>
                         </div>
                     </div>

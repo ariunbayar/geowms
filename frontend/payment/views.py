@@ -702,7 +702,7 @@ def download_purchase(request, pk, download_type):
 @require_GET
 @ajax_required
 @login_required
-def test_payment(request, pk):
+def test_payment(request, pk): # test hiij uzehed ene view heregtei
 
     payment = Payment.objects.filter(pk=pk, user=request.user).update(is_success=True)
 
