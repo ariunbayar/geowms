@@ -63,6 +63,7 @@ def proxy(request, token, pk=None):
         rsp_size=len(rsp.content),
         system_id=system.id,
     )
+
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
 
