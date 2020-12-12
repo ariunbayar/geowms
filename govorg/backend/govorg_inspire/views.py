@@ -730,7 +730,7 @@ def createUpd(request, payload):
     geo_json = payload.get('geo_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
-    print(form_json)
+
     if not form_json:
         form_json = ''
     if not geo_json:
