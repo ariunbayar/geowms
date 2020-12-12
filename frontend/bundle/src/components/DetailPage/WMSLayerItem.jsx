@@ -11,7 +11,8 @@ export default class WMSLayerItem extends Component {
             code: props.layer.code,
             tile: props.layer.tile,
             is_visible: props.layer.defaultCheck,
-            legendURL: props.layer.legendURL,
+            legend: props.layer.legend,
+
         }
 
         this.toggle = this.toggle.bind(this)
@@ -26,7 +27,7 @@ export default class WMSLayerItem extends Component {
 
     render() {
 
-        const { name, code, is_visible, legendURL } = this.state
+        const { name, code, is_visible, legend } = this.state
         return (
             <li>
                 <label>
@@ -39,13 +40,11 @@ export default class WMSLayerItem extends Component {
                     <label className="custom-control-label" htmlFor={code}>{name}</label>
                     </div>
                 </label>
-                {legendURL != "null" &&
-                    <ul>
-                        <li>
-                            <img className="img" src={legendURL}/>
-                        </li>
-                    </ul>
-                }
+                <ul>
+                    <li>
+                        <img className="img" src={legend}/>
+                    </li>
+                </ul>
             </li>
         )
     }

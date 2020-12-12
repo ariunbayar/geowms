@@ -151,10 +151,9 @@ export class WMSForm extends Component {
         const wmsId = this.state.id
         const layerName = layer.name
         const layerCode = layer.code
-        const legendURL = layer.legendurl
         if (e.target.checked) {
 
-            service.layerAdd(layerName, wmsId, legendURL, layerCode).then(({ success }) => {
+            service.layerAdd(layerName, wmsId, layerCode).then(({ success }) => {
                 if (success) {
                     this.addNotif('success', 'Амжилттай нэмлээ', 'check')
                     this.handleWmsLayerRefresh()

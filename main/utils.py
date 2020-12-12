@@ -21,6 +21,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from backend.config.models import Config
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -489,3 +490,35 @@ def get_geom(geo_id, geom_type=None, srid=4326):
         raise Exception(msg)
 
     return geom
+
+
+def is_register(register):
+    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    return re.search(re_register, register.upper()) is not None
+
+
+def is_email(email):
+    re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
+    return re.search(re_email, email) is not None
+
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_config(config_name):
+
+    default_values = {config_name: ''}
+    configs = Config.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
+# оролт config name array
+# Олон config мэдээллийг буцаана obj буцаана
+def get_configs(config_names):
+
+    default_values = {conf: '' for conf in config_names}
+    configs = Config.objects.filter(name__in=default_values.keys())
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return rsp
