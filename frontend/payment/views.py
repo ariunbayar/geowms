@@ -859,13 +859,17 @@ def _get_all_property_count(layer_list, feature_info_list):
     return count
 
 
-def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer):
+def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer, selected_type):
     amount = None
+    price = None
     if area_type == 'km':
         amount = Payment.POLYGON_PER_KM_AMOUNT
     if area_type == 'm':
         amount = Payment.POLYGON_PER_M_AMOUNT
-    price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
+    if selected_type == 'shp' or selected_type == 'pdf':
+        price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
+    if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
+        price = ((area * amount) * layer_length) * len_object_in_layer
     return price
 
 
@@ -877,7 +881,7 @@ def calcPrice(request, payload):
     feature_info_list = payload.get("feature_info_list")
     area_type = area['type']
     area = area['output']
-
+    selected_type = payload.get('selected_type')
     is_user = request.user
     if str(is_user) != 'AnonymousUser':
         is_user = True
@@ -885,7 +889,7 @@ def calcPrice(request, payload):
         is_user = False
 
     all_len_property = _get_all_property_count(layer_list, feature_info_list)
-    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list))
+    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
 
     rsp = {
         'success': True,
