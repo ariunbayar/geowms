@@ -1,17 +1,27 @@
-import uuid
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
 import base64
+import functools
 import re
 import unicodedata
+import uuid
+
+from django.apps import apps
+from django.contrib.gis.db.models.functions import Transform
+from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
-from geoportal_app.models import UserValidationEmail
+
+from main.inspire import InspireProperty
+from main.inspire import InspireCodeList
+from main.inspire import InspireDataType
+from main.inspire import InspireFeature
+from backend.config.models import Config
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -234,7 +244,8 @@ def send_approve_email(user):
 
     token = _generate_user_token()
 
-    UserValidationEmail.objects.create(
+    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
+    UserValidationEmail .objects.create(
         user=user,
         token=token,
         valid_before=timezone.now() + timedelta(days=90)
@@ -247,5 +258,267 @@ def send_approve_email(user):
 
     send_mail(subject, msg, from_email, to_email, fail_silently=False)
 
-
     return True
+
+
+def get_administrative_levels():
+
+    """
+    Returns a nested structure:
+    ```
+        [
+            {
+                'geo_id': 'au_62',
+                'name': 'Өвөрхангай',
+                'children': [
+                    {
+                        'geo_id': 'au_6255',
+                        'name': 'Хужирт',
+                        'children': [
+                            {'geo_id': 'au_625551', 'name': '1-р баг'},
+                            {'geo_id': 'au_625553', 'name': '2-р баг'}
+                        ]
+                    },
+                    {
+                        'geo_id': 'au_6234',
+                        'name': 'Өлзийт',
+                        'children': [
+                            {'geo_id': 'au_623451', 'name': '1-р баг'},
+                            {'geo_id': 'au_623453', 'name': '2-р баг'},
+                            {'geo_id': 'au_623455', 'name': '3-р баг'},
+                            {'geo_id': 'au_623457', 'name': '4-р баг'}
+                        ]
+                    }
+                ]
+            },
+            {
+                'geo_id': 'au_46',
+                'name': 'Өмнөговь',
+                'children': [
+                    {
+                        'geo_id': 'au_4607',
+                        'name': 'Баян-Овоо',
+                        'children': [
+                            {'geo_id': 'au_460751', 'name': '1-р баг'},
+                            {'geo_id': 'au_460753', 'name': '2-р баг'},
+                            {'geo_id': 'au_460755', 'name': '3-р баг'}
+                        ]
+                    },
+                    {
+                       'geo_id': 'au_4604',
+                        'name': 'Баяндалай',
+                        'children': [
+                            {'geo_id': 'au_460451', 'name': '1-р баг'},
+                            {'geo_id': 'au_460453', 'name': '2-р баг'},
+                            {'geo_id': 'au_460455', 'name': '3-р баг'}
+                        ]
+                    }
+                ],
+            }
+        ]
+    ```
+    """
+
+    i_code_list_2nd_order = InspireCodeList('2ndOrder\n')
+    i_code_list_3rd_order = InspireCodeList('3rdOrder\n')
+    i_code_list_4th_order = InspireCodeList('4thOrder\n')
+
+    def _get_code_names(national_codes):
+
+        table_au_au_ab = InspireFeature('au-au-ab')
+
+        i_data_type_administrative_boundary = InspireDataType('AdministrativeBoundary')
+        i_property_name = InspireProperty('name')
+
+        table_au_au_ab.filter({'geo_id': national_codes})
+        table_au_au_ab.select({
+            'geo_id': True,
+            i_data_type_administrative_boundary: {i_property_name},
+        })
+
+        for item in table_au_au_ab.fetch():
+            code = item['geo_id']
+            name = item[i_data_type_administrative_boundary][i_property_name]
+            yield code, name
+
+    def _get_au_items():
+        table_au_au_au = InspireFeature('au-au-au')
+
+        table_au_au_au.filter(
+            {
+                InspireDataType('AdministrativeUnit'): {
+                    InspireProperty('NationalLevel'): [
+                        i_code_list_2nd_order,
+                        i_code_list_3rd_order,
+                        i_code_list_4th_order,
+                    ],
+                }
+            }
+        )
+
+        table_au_au_au.select(
+            {
+                'geo_id': True,
+                InspireDataType('AdministrativeUnit'): [
+                    InspireProperty('NationalLevel'),
+                    InspireProperty('nationalCode'),
+                ],
+            },
+        )
+
+        for row in table_au_au_au.fetch():
+            geo_id = row['geo_id']
+            level = row[InspireDataType('AdministrativeUnit')][InspireProperty('NationalLevel')]
+            code = row[InspireDataType('AdministrativeUnit')][InspireProperty('nationalCode')]
+            yield geo_id, level, code
+
+    # build flat data
+
+    items = {
+        '#root': {
+            'children': list()
+        }
+    }
+
+    for geo_id, level, code in _get_au_items():
+        items[code] = {
+            'geo_id': geo_id,
+            'level': level,
+            'code': code,
+            'name': '',
+            'children': list(),
+        }
+
+    codes = list(items.keys())
+    for code, name in _get_code_names(codes):
+        items[code]['name'] = name
+
+    # makes nested structure to items['#root']['children']
+
+    def _get_parent_code(level, code):
+        if level == i_code_list_4th_order.code_list_id:
+            return code[:4]
+        if level == i_code_list_3rd_order.code_list_id:
+            return code[:2]
+        if level == i_code_list_2nd_order.code_list_id:
+            return '#root'
+        raise Exception
+
+    warning_message = ''
+
+    for code, item in items.items():
+
+        if code == '#root':
+            continue
+
+        code_parent = _get_parent_code(item['level'], code)
+
+        if code_parent not in items:
+            warning_message += '[WARNING] Missing {} for {} - {}\n'.format(code_parent, code, item['name'])
+            continue
+
+        children = items[code_parent]['children']
+        children.append(item)
+
+    if warning_message:
+        Error500 = apps.get_model('backend_config', 'Error500')
+        Error500.objects.create(
+            request_scheme='system',
+            request_url='main.utils.get_administrative_levels',
+            request_method='system',
+            request_headers='{}',
+            request_data='{}',
+            description=warning_message,
+        )
+
+    # cleanup temporary keys: level, code. children for leaf nodes
+
+    def _is_leaf_node(level):
+        return level == i_code_list_4th_order.code_list_id
+
+    for code, item in items.items():
+        if code != '#root':
+            if _is_leaf_node(item['level']):
+                del item['children']
+            del item['level']
+            del item['code']
+
+    # sort children
+
+    def _sort_children_recursively(items):
+        for item in items:
+            children = item.get('children')
+            if children:
+                item['children'] = _sort_children_recursively(children)
+        return sorted(items, key=lambda v: v['name'])
+
+    root = _sort_children_recursively(items['#root']['children'])
+
+    return root
+
+
+def get_geom(geo_id, geom_type=None, srid=4326):
+
+    if not geo_id:
+        return None
+
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+
+    qs = MGeoDatas.objects
+    qs = qs.annotate(geo_data_transformed=Transform('geo_data', srid))
+    qs = qs.filter(geo_id=geo_id)
+    geom_info = qs.first()
+
+    if not geom_info:
+        return None
+
+    geom = geom_info.geo_data_transformed
+
+    if not isinstance(geom, GEOSGeometry):
+        msg = (
+            'MGeoDatas.geo_data<{geo_id}> нь геометр төрлийн утга байх ёстой.'
+        ).format(
+            geo_id=geo_id,
+        )
+        raise Exception(msg)
+
+    if geom_type and geom.geom_type != geom_type:
+        msg = (
+            'MGeoDatas.geo_data<{}> нь {} төрлийн '
+            'утга байх ёстой боловч {} байна.'
+        ).format(geo_id, geom_type, geom.geom_type)
+        raise Exception(msg)
+
+    return geom
+
+
+def is_register(register):
+    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    return re.search(re_register, register.upper()) is not None
+
+
+def is_email(email):
+    re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
+    return re.search(re_email, email) is not None
+
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_config(config_name):
+
+    default_values = {config_name: ''}
+    configs = Config.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
+# оролт config name array
+# Олон config мэдээллийг буцаана obj буцаана
+def get_configs(config_names):
+
+    default_values = {conf: '' for conf in config_names}
+    configs = Config.objects.filter(name__in=default_values.keys())
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return rsp

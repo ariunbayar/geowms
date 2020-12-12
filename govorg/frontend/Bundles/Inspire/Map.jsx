@@ -712,12 +712,12 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    requestRemove() {
+    requestRemove(values) {
       const tid = this.state.tid
       const fid = this.state.fid
       const pid = this.state.pid
       const selectedFeature_ID = this.state.selectedFeature_ID
-      service.createDel(tid, pid, fid, selectedFeature_ID).then(({ success }) => {
+      service.createDel(tid, pid, fid, selectedFeature_ID, values).then(({ success }) => {
         if (success) {
           this.props.refreshCount()
           this.addNotif('success', 'Устгах хүсэлт үүслээ', 'check')
@@ -1003,7 +1003,8 @@ export default class BarilgaSuurinGazar extends Component{
       wms_map_list.map((wms, idx) => {
         wms_map_list[idx].layers.map((layer,idx) => {
           map.addLayer(layer.tile)
-          layer.tile.setVisible(false)
+          layer.defaultCheck == 0 && layer.tile.setVisible(false)
+          layer['legend'] = layer.tile.getSource().getLegendUrl()
         })
       })
       const vectorLayer = this.vectorLayer

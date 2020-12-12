@@ -18,7 +18,7 @@ export class MetaDetail extends Component {
     componentDidMount() {
         const { id } = this.props.match.params
         service
-            .getDetail(id)
+            .getDetail(id, 'show_choice')
             .then(({success, meta_data, geo_data_list}) => {
                 if (success) {
                     const data_field = Object.keys(meta_data)
