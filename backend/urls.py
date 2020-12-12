@@ -123,6 +123,8 @@ urlpatterns = [
         path('site/save/', config_views.site_configs_save),
         path('geoserver/', config_views.geoserver_configs),
         path('geoserver/save/', config_views.geoserver_configs_save),
+        path('system/', config_views.system_configs),
+        path('system/save/', config_views.system_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([
