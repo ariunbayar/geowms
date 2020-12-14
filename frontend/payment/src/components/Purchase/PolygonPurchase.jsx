@@ -67,18 +67,6 @@ export class PolygonPurchase extends Component {
 
     }
 
-    handleTest(){ // testlej uzehed ene func hergte
-      const id = this.state.payment_id
-      service.paymentTest(id).then(({ success }) => {
-          if (success) {
-            this.setState(prevState => ({
-                is_modal_info_open: !prevState.is_modal_info_open,
-            }))
-            service.downloadPurchase(id)
-          }
-      })
-    }
-
     handleModalApproveClose(){
       const purchase_id = this.props.match.params.id
       this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
@@ -147,7 +135,7 @@ export class PolygonPurchase extends Component {
                         </tbody>
                     </table>
                     <div className="row text-center">
-                        <div className="col-md-4">
+                        <div className="col-md-6">
                             <button style={{width:'80%'}}
                                 className="btn gp-btn-primary text-center btn-lg mt-3"
                                 disabled
@@ -158,7 +146,7 @@ export class PolygonPurchase extends Component {
                                 <h4 className="text-succes p-3">{alert_msg}</h4>
                             </button>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-6">
                             <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                                 <h4 className="text-succes p-3">QPAY ээр төлбөр төлөх</h4>
                             </button>

@@ -81,13 +81,13 @@ def dictionaryResponse(request):
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
-def _calc_layer_amount(area, area_type):
+def _calc_layer_amount(area, area_type, len_object_in_layer):
     amount = 0
     if area_type == 'm':
         amount = Payment.POLYGON_PER_M_AMOUNT
     if area_type == 'km':
         amount = Payment.POLYGON_PER_KM_AMOUNT
-    amount = area * amount
+    amount = (area * amount) * len_object_in_layer
     return amount
 
 
@@ -135,11 +135,10 @@ def purchaseDraw(request, payload):
         payment_polygon.save()
 
         for layer in layers:
-            layer_amount = _calc_layer_amount(area, area_type)
             payment_layer = PaymentLayer()
             payment_layer.payment = payment
             payment_layer.wms_layer = layer
-            payment_layer.amount = layer_amount
+            payment_layer.amount = _calc_layer_amount(area, area_type, len(feature_info_list))
             payment_layer.save()
 
     return JsonResponse({
@@ -669,9 +668,9 @@ def _export_pdf(payment, download_type):
 @ajax_required
 @login_required
 def download_purchase(request, pk, download_type):
-    Payment.objects.filter(user=request.user, pk=pk).update(is_success=True) # arilgah code
-    payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
     is_created = False
+    payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
+
     if payment.export_file:
         is_created = True
     else:
@@ -694,20 +693,6 @@ def download_purchase(request, pk, download_type):
 
     rsp = {
         'success': is_created,
-    }
-
-    return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@login_required
-def test_payment(request, pk): # test hiij uzehed ene view heregtei
-
-    payment = Payment.objects.filter(pk=pk, user=request.user).update(is_success=True)
-
-    rsp = {
-        'success': True,
     }
 
     return JsonResponse(rsp)
