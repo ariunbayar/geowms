@@ -74,14 +74,15 @@ INSTALLED_APPS = [
     # GovOrg apps
 
     'govorg.backend.org.apps.OrgConfig',
-    'govorg.backend.bundle.apps.BundleConfig',
-    'govorg.backend.employee.apps.EmployeeConfig',
+    'govorg.backend.role.role.apps.RoleConfig',
+    'govorg.backend.role.employee.apps.RoleEmployeeConfig',
     'govorg.backend.system.apps.SystemConfig',
     'govorg.backend.govorg_inspire.apps.InspireConfig',
     'govorg.backend.org_request.apps.OrgRequestConfig',
     'govorg.backend.zipcode.apps.ZipcodeConfig',
     'govorg.backend.forms.apps.FormsConfig',
     'govorg.backend.meta_data.apps.MetaDataConfig',
+    'govorg.backend.secure.apps.SecureConfig',
 ]
 
 USER_AGENTS_CACHE = 'default'
@@ -169,6 +170,7 @@ LOGIN_REDIRECT_ORG_URL = 'org:frontend'
 LOGIN_REDIRECT_ADMIN_URL = 'backend:webapp'
 LOGIN_REDIRECT_URL_MOBILE = 'mobile:all'
 LOGOUT_REDIRECT_URL = 'bundle:all'
+LOGOUT_GOV_REDIRECT_URL = 'gov_secure:login'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 9175040 #70mb
 

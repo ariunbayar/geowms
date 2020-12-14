@@ -1,24 +1,42 @@
 from django.urls import re_path, path, include
 
 from govorg.backend.org import views as org_views
-from govorg.backend.bundle import views as bundle_views
-from govorg.backend.employee import views as employee_views
+from govorg.backend.role.employee import views as role_employee_views
+from govorg.backend.role.role import views as role_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
 from govorg.backend.zipcode import views as zipcode_views
 from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
+from govorg.backend.secure import views as secure_views
 
 urlpatterns = [
     path('api/', include(([
 
-        path('employee/', include(([
-        path('', employee_views.employees, name='employees'),
-        ], 'employee'))),
+        path('role/', include(([
+            path('employee/', include(([
+                path('', role_employee_views.list),
+                path('create/', role_employee_views.create),
+                path('<int:pk>/update/', role_employee_views.update),
+                path('<int:pk>/detail/', role_employee_views.detail),
+                path('<int:pk>/delete/', role_employee_views.delete),
+            ], 'employee'))),
+            path('', include(([
+                path('', role_views.list),
+                path('create/', role_views.create),
+                path('<int:pk>/update/', role_views.update),
+                path('<int:pk>/detail/', role_views.detail),
+                path('<int:pk>/delete/', role_views.delete),
+            ], 'role'))),
+        ], 'role'))),
+
         path('system/', system_views.systemList, name='system'),
         path('system/user-token/', system_views.userToken, name='user-token'),
-        path('bundle/', bundle_views.bundle, name='bundle'),
+        path('system/', include(([
+            path('', system_views.systemList, name='system'),
+            path('<int:pk>/detail/', system_views.detail, name='detail'),
+        ], 'system'))),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
             path('<int:pid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),
@@ -108,6 +126,12 @@ urlpatterns = [
         ], 'meta-data'))),
 
     ], 'back_org'))),
+
+    path('secure/', include(([
+        path('login/', secure_views.login, name='login'),
+        path('approve/<str:token>/', secure_views.approve, name='approve'),
+        path('logout/', secure_views.logout, name='logout'),
+    ], 'gov_secure'))),
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),
