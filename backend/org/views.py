@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import get_list_or_404
@@ -528,11 +528,13 @@ def org_list(request, payload, level):
 
     if not sort_name:
         sort_name = 'id'
+
     qs = Org.objects.filter(level=level)
     qs = qs.annotate(num_employees=Count('employee'))
     qs = qs.annotate(num_systems=Count('govorg'))
-    qs = qs.annotate(search=SearchVector('name'))
-    qs = qs.filter(search__contains=query)
+    if query:
+        qs = qs.annotate(search=SearchVector('name'))
+        qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
     qs = qs.order_by(sort_name)
 
     total_items = Paginator(qs, per_page)
