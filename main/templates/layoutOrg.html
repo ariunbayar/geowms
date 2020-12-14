@@ -54,7 +54,6 @@
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown" href="#">
                             <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
                         </a>
-
                         {% if user.is_authenticated %}
                             {% if user.is_superuser %}
                             <ul class="dropdown-menu dropdown-menu-right">
@@ -97,8 +96,8 @@
                                 <li class="dropdown-item"><a href="/gov/profile/" class="text-dark"><i class="icon-wallet mr-2"></i>ПРОФАЙЛ</a></li>
                                 <li class="dropdown-divider"></li>
                                 <li class="dropdown-item"><a href="{% url "gov_secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i> ГАРАХ</a></li>
+                                <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i>ГАРАХ</a></li>
                             </ul>
-
                         {% else %}
                             <li class="dropdown-item"><a href="{% url "secure:login" %}"><i class="icon-power mr-2"></i>УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a></li>
                         {% endif %}
