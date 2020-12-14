@@ -107,8 +107,7 @@ def create(request, payload):
     roles = payload.get('roles')
 
     org = get_object_or_404(Org, employee__user=request.user)
-    emp_role = get_object_or_404(EmpRole, pk=payload.get('emp_role_id'))
-
+    emp_role = EmpRole.objects.filter(pk=payload.get('emp_role_id')).first()
     with transaction.atomic():
 
         user = User()
@@ -121,11 +120,15 @@ def create(request, payload):
 
         emp_perm = EmpPerm()
         emp_perm.employee = employee
-        emp_perm.emp_role = emp_role
+
+        if emp_role:
+            emp_perm.emp_role = emp_role
+
         emp_perm.save()
 
-        for role in roles:
-            _set_emp_perm_ins_data(emp_perm, role, request.user)
+        if roles:
+            for role in roles:
+                _set_emp_perm_ins_data(emp_perm, role, request.user)
 
         send_approve_email(user)
 
