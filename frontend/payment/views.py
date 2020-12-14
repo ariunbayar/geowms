@@ -217,6 +217,7 @@ def _value_types(value_type_id, property_id):
             })
     return value_type_names
 
+
 def _get_datas_model(theme_code):
     if theme_code == 'hg':
         return MDatasHydrography
@@ -481,7 +482,9 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
     bytes = bytearray(image_byte)
     image = Image.open(io.BytesIO(bytes))
     image.save(os.path.join(settings.FILES_ROOT, folder_name, str(payment.id), geoserver_layer + file_ext))
+
     return {'success': True, 'orientation': size['orientation']}
+
 
 def _export_image(payment, download_type):
 
@@ -501,6 +504,7 @@ def _export_image(payment, download_type):
     except Exception as e:
         print(e)
         return False
+
 
 def _get_Feature_info_from_url(polygon, layer):
     info = []
@@ -883,9 +887,11 @@ def calcPrice(request, payload):
     area = payload.get('area')
     layer_list = payload.get("layer_list")
     feature_info_list = payload.get("feature_info_list")
+    selected_type = payload.get('selected_type')
+
     area_type = area['type']
     area = area['output']
-    selected_type = payload.get('selected_type')
+
     is_user = request.user
     if str(is_user) != 'AnonymousUser':
         is_user = True
@@ -900,4 +906,5 @@ def calcPrice(request, payload):
         'total_price': total_price,
         'is_user': is_user,
     }
+
     return JsonResponse(rsp)
