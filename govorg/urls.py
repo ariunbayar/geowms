@@ -31,7 +31,6 @@ urlpatterns = [
             ], 'role'))),
         ], 'role'))),
 
-        path('system/', system_views.systemList, name='system'),
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),

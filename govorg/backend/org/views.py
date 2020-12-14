@@ -77,7 +77,7 @@ def _emp_role(org, user):
             get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
             for theme_id in theme_ids
         ]
-
+        
     return {
         'gov_perm_id': gov_perm.id,
         'themes': themes,
