@@ -11,8 +11,8 @@ export class Detail extends Component {
         this.too = 0;
 
         this.state = {
-            govorg: {},
-            govorg_wms_list: [],
+            system: {},
+            system_wms_list: [],
             public_url: '',
             copy_url_is: false,
             prvite_url: ''
@@ -35,19 +35,19 @@ export class Detail extends Component {
     componentDidMount() {
         service
             .detail(this.props.match.params.system_id)
-            .then(({govorg, public_url, prvite_url}) => {
-                const govorg_wms_list =
-                    govorg.wms_list
+            .then(({system, public_url, prvite_url}) => {
+                const system_wms_list =
+                    system.wms_list
                         .map((wms) => {
                             return {
                                 ...wms,
                                 layer_list: wms.layer_list.filter((layer) => {
-                                    return govorg.layers.indexOf(layer.id) > -1
+                                    return system.layers.indexOf(layer.id) > -1
                                 })
                             }
                         })
                         .filter((wms) => wms.layer_list.length)
-                this.setState({govorg, govorg_wms_list, public_url, prvite_url})
+                this.setState({system, system_wms_list, public_url, prvite_url})
             })
     }
 
@@ -63,9 +63,8 @@ export class Detail extends Component {
 
     render() {
 
-        const {name, token, website} = this.state.govorg
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
+        const {name, token, website} = this.state.system
+
         return (
             <div className="card">
                 <div className="card-body">
@@ -86,7 +85,7 @@ export class Detail extends Component {
                                 <input type="text" className="form-control col-6" disabled value={this.state.prvite_url}/>
                                 <span className="input-group-btn">
                                 <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.prvite_url)}>
-                                    <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                                 </button>
                                 </span>
                             </div>
@@ -95,13 +94,13 @@ export class Detail extends Component {
                                 <input type="text" className="form-control col-6" disabled value={this.state.public_url}/>
                                 <span className="input-group-btn">
                                 <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
-                                    <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                                 </button>
                                 </span>
                             </div>
                         </div>
 
-                        {this.state.govorg_wms_list.map((wms) =>
+                        {this.state.system_wms_list.map((wms) =>
                             <div className="col-md-12 mb-4 ml-5" key={wms.id}>
                                 <h5> {wms.name} </h5>
                                 <ul>
