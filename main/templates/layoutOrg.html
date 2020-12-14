@@ -98,9 +98,10 @@
                                 <li class="dropdown-item"><a href="{% url "gov_secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i> ГАРАХ</a></li>
                                 <li class="dropdown-item"><a href="{% url "secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i>ГАРАХ</a></li>
                             </ul>
+                            {% endif %}
                         {% else %}
                             <li class="dropdown-item"><a href="{% url "secure:login" %}"><i class="icon-power mr-2"></i>УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a></li>
-                        {% endif %}
+                            {% endif %}
                     </li>
                 </ul>
             </nav>
