@@ -80,7 +80,6 @@ def get_convert_display_name(perm_list):
         if perm.get('kind') == 6:
             roles['PERM_APPROVE'] = True
             roles['approve_id'] = perm.get('ins_id')
-
     return roles
 
 
