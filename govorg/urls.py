@@ -16,7 +16,10 @@ urlpatterns = [
         path('employee/', include(([
         path('', employee_views.employees, name='employees'),
         ], 'employee'))),
-        path('system/', system_views.systemList, name='system'),
+        path('system/', include(([
+            path('', system_views.systemList, name='system'),
+            path('<int:pk>/detail/', system_views.detail, name='detail'),
+        ], 'system'))),
         path('bundle/', bundle_views.bundle, name='bundle'),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
