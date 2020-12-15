@@ -21,6 +21,7 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
+from backend.inspire.models import EmpPerm
 from geoportal_app.models import User
 from main.decorators import ajax_required
 from main import utils
@@ -396,7 +397,16 @@ def employee_add(request, payload, level, pk):
     user.set_password(password)
     user.save()
 
-    Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
+    emp = Employee()
+    emp.position = position
+    emp.org_id = pk
+    emp.user_id = user.id
+    emp.is_admin = is_admin
+    emp.save()
+
+    emp_perm = EmpPerm()
+    emp_perm.employee = emp
+    emp_perm.save()
 
     return JsonResponse({'success': True, 'errors': errors})
 
