@@ -311,17 +311,19 @@ export class UserAdd extends Component {
                                         <label htmlFor='is_admin'>Байгууллагын админ</label>
                                     </div>
                                 </div>
-                                <div className='form-group'>
-                                    <div className="icheck-primary">
-                                        <input
-                                            id='is_super'
-                                            type="checkbox"
-                                            checked={this.state.is_super}
-                                            onChange={(e) => this.setState({is_super: e.target.checked})}
-                                        />
-                                        <label htmlFor='is_super'>Системийн админ</label>
+                                {
+                                   org_level == 4 &&  <div className='form-group'>
+                                        <div className="icheck-primary">
+                                            <input
+                                                id='is_super'
+                                                type="checkbox"
+                                                checked={this.state.is_super}
+                                                onChange={(e) => this.setState({is_super: e.target.checked})}
+                                            />
+                                            <label htmlFor='is_super'>Системийн админ</label>
+                                        </div>
                                     </div>
-                                </div>
+                                }
                                 <div className="form-row">
 
                                     <div className="form-group col-md-8">
