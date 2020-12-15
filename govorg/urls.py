@@ -32,6 +32,10 @@ urlpatterns = [
         ], 'role'))),
 
         path('system/', system_views.systemList, name='system'),
+        path('system/', include(([
+            path('', system_views.systemList, name='system'),
+            path('<int:pk>/detail/', system_views.detail, name='detail'),
+        ], 'system'))),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
             path('<int:pid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),

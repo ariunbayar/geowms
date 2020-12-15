@@ -21,12 +21,6 @@ export class Form extends Component {
     }
 
     componentDidMount() {
-        const perpage = this.state.systemPerPage
-        const query = this.state.searchQuery
-        Promise.all([
-            service.paginatedList(this.state.currentPage, perpage, query),
-            service.detail(this.state.currentPage),
-        ])
 
     }
 
