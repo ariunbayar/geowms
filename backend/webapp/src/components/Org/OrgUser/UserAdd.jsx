@@ -45,6 +45,7 @@ export class UserAdd extends Component {
             timer: null,
 
             is_admin: false,
+            is_super: false,
         }
 
         this.handleSave = this.handleSave.bind(this)
@@ -83,7 +84,8 @@ export class UserAdd extends Component {
                         password:employee.password,
                         re_password:employee.re_password,
                         position: employee.position,
-                        is_admin: employee.is_admin
+                        is_admin: employee.is_admin,
+                        is_super:employee.is_super
                     })
                 )}
 
@@ -307,6 +309,17 @@ export class UserAdd extends Component {
                                             onChange={(e) => this.setState({is_admin: e.target.checked})}
                                         />
                                         <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div className="icheck-primary">
+                                        <input
+                                            id='is_super'
+                                            type="checkbox"
+                                            checked={this.state.is_super}
+                                            onChange={(e) => this.setState({is_super: e.target.checked})}
+                                        />
+                                        <label htmlFor='is_super'>Системийн админ</label>
                                     </div>
                                 </div>
                                 <div className="form-row">

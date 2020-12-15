@@ -269,6 +269,7 @@ def employee_more(request, level, pk, emp):
             'is_sso': employe.is_sso,
             'position': emp_oj.position,
             'is_admin': emp_oj.is_admin,
+            'is_super': employe.is_superuser,
             'created_at': emp_oj.created_at.strftime('%Y-%m-%d'),
             'updated_at': emp_oj.updated_at.strftime('%Y-%m-%d'),
         })
@@ -287,6 +288,7 @@ def employee_update(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
+    is_super = payload.get('is_super')
 
     get_object_or_404(User, pk=user_id)
 
@@ -295,7 +297,8 @@ def employee_update(request, payload, level, pk):
                             last_name=last_name,
                             email=email,
                             gender=gender,
-                            register=register
+                            register=register,
+                            is_superuser=is_super
                         )
 
     Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
@@ -317,19 +320,15 @@ def employee_add(request, payload, level, pk):
     register = payload.get('register')
     password = payload.get('password')
     is_admin = payload.get('is_admin')
-
+    is_super = payload.get('is_super')
     user = User.objects.filter(username=username).first()
     if user:
         return JsonResponse({'user_name': True})
 
     else:
-        if level == 4:
-            is_superuser = True
-        else:
-            is_superuser = False
 
         user = User.objects.create(
-            is_superuser=is_superuser, username=username,
+            is_superuser=is_super, username=username,
             first_name=first_name, last_name=last_name,
             email=email, gender=gender, register=register
         )
