@@ -372,7 +372,6 @@ def employee_add(request, payload, level, pk):
     email = payload.get('email')
     gender = payload.get('gender')
     register = payload.get('register')
-    password = payload.get('password')
     is_admin = payload.get('is_admin')
     errors = {}
     errors = _employee_validation(payload, None)
@@ -393,8 +392,8 @@ def employee_add(request, payload, level, pk):
         register=register.upper()
     )
     user.roles.add(2)
-    user.set_password(password)
     user.save()
+    utils.send_approve_email(user)
 
     Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
 

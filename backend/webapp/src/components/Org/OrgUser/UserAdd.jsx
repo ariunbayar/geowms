@@ -124,16 +124,16 @@ export class UserAdd extends Component {
     }
 
     validatePassword(value) {
-        const org_emp = this.props.match.params.emp
         let error;
         if (!value) {
-            if(!org_emp) error = 'Хоосон байна утга оруулна уу..'
+            error = 'Хоосон байна утга оруулна уу..'
         }
         return error;
     }
 
     render() {
         const {form_values} = this.state
+        const org_emp = this.props.match.params.emp
         return (
             <div className="col-6 my-4">
                 <div className="row">
@@ -244,6 +244,7 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="register" component="div" className="text-danger"/>
                                             </div>
                                         </div>
+                                        {org_emp &&
                                         <div className="form-row">
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="password">Нууц үг:</label>
@@ -270,6 +271,7 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="re_password" component="div" className="text-danger"/>
                                             </div>
                                         </div>
+                                        }
                                         <div className='form-row'>
                                             <div className="form-group col-md-8">
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>

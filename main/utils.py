@@ -234,7 +234,11 @@ def refreshMaterializedView(fid):
 
 
 def _generate_user_token():
-    return uuid.uuid4().hex[:32]
+    token = uuid.uuid4().hex[:32]
+    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
+    if UserValidationEmail.objects.filter(token=token).first():
+        _generate_user_token()
+    return token
 
 
 def send_approve_email(user):
