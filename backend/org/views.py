@@ -264,34 +264,13 @@ def employee_detail(request, pk):
         'gender': user.gender,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
-        'is_super': user.is_superuser,
         'position': employee.position,
         'is_admin': employee.is_admin,
+        'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
     return JsonResponse({'success': True, 'employee': employees_display})
-
-
-    for employe in User.objects.filter(employee__org=org, pk=emp):
-        emp_oj = Employee.objects.filter(user=employe).first()
-        employees_display.append({
-            'id': employe.id,
-            'last_name': employe.last_name,
-            'username': employe.username,
-            'first_name': employe.first_name,
-            'email': employe.email,
-            'register': employe.register,
-            'gender': employe.gender,
-            'is_active': employe.is_active,
-            'is_sso': employe.is_sso,
-            'position': emp_oj.position,
-            'is_admin': emp_oj.is_admin,
-            'is_super': employe.is_superuser,
-            'created_at': emp_oj.created_at.strftime('%Y-%m-%d'),
-            'updated_at': emp_oj.updated_at.strftime('%Y-%m-%d'),
-        })
-    return JsonResponse({'employee': employees_display})
 
   
 def _employee_validation(payload, user):
@@ -354,7 +333,7 @@ def _employee_validation(payload, user):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_update(request, payload, pk):
+def employee_update(request, payload, pk, level):
     username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -363,19 +342,26 @@ def employee_update(request, payload, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
+    password = payload.get('password')
     is_super = payload.get('is_super')
 
     user = get_object_or_404(User, pk=pk)
     errors = _employee_validation(payload, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-    user.first_name=first_name
-    user.last_name=last_name
-    user.email=email
-    user.gender=gender
-    user.register=register.upper()
-    user.username=username
-    user.is_superuser=is_super
+    
+    if level == 4:
+        is_super = is_super
+    else:
+        is_super = False
+
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.gender = gender
+    user.register = register.upper()
+    user.username = username
+    user.is_superuser = is_super
     if password:
         user.set_password(password)
     user.save()
@@ -401,6 +387,12 @@ def employee_add(request, payload, level, pk):
     is_super = payload.get('is_super')
     errors = {}
     errors = _employee_validation(payload, None)
+
+    if level == 4:
+        is_super = is_super
+    else:
+        is_super = False
+
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 

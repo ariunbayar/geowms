@@ -22,7 +22,7 @@ export class UserAdd extends Component {
                 password:'',
                 re_password:'',
                 is_admin: false,
-                is_super:false
+                is_super: false,
             },
             modal_alert_status: "closed",
             timer: null,
@@ -72,7 +72,7 @@ export class UserAdd extends Component {
                 setSubmitting(false)
             }
             else{
-                service.employeeUpdate(org_emp, values).then(({ success, errors }) => {
+                service.employeeUpdate(org_emp, org_level, values).then(({ success, errors }) => {
                     if (success) {
                         this.setState({modal_alert_status: "open"})
                         setStatus('saved')
