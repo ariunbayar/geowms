@@ -669,7 +669,6 @@ def _export_pdf(payment, download_type):
 
 
 @require_GET
-@ajax_required
 @login_required
 def download_purchase(request, pk, download_type):
     is_created = False

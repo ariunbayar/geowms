@@ -11,10 +11,11 @@ export class Detail extends Component {
         this.too = 0;
 
         this.state = {
-            govorg: {},
-            govorg_wms_list: [],
+            system: {},
+            system_wms_list: [],
             public_url: '',
-            copy_url_is: false
+            copy_url_is: false,
+            prvite_url: ''
         }
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.addNotif = this.addNotif.bind(this)
@@ -34,25 +35,25 @@ export class Detail extends Component {
     componentDidMount() {
         service
             .detail(this.props.match.params.system_id)
-            .then(({govorg, public_url}) => {
-                const govorg_wms_list =
-                    govorg.wms_list
+            .then(({system, public_url, prvite_url}) => {
+                const system_wms_list =
+                    system.wms_list
                         .map((wms) => {
                             return {
                                 ...wms,
                                 layer_list: wms.layer_list.filter((layer) => {
-                                    return govorg.layers.indexOf(layer.id) > -1
+                                    return system.layers.indexOf(layer.id) > -1
                                 })
                             }
                         })
                         .filter((wms) => wms.layer_list.length)
-                this.setState({govorg, govorg_wms_list, public_url})
+                this.setState({system, system_wms_list, public_url, prvite_url})
             })
     }
 
-    copyToClipboard(public_url){
+    copyToClipboard(url){
         var textField = document.createElement('textarea')
-        textField.innerText = public_url
+        textField.innerText = url
         document.body.appendChild(textField)
         textField.select()
         document.execCommand('copy')
@@ -62,9 +63,8 @@ export class Detail extends Component {
 
     render() {
 
-        const {name, token, website} = this.state.govorg
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
+        const {name, token, website} = this.state.system
+
         return (
             <div className="card">
                 <div className="card-body">
@@ -76,33 +76,33 @@ export class Detail extends Component {
                         </div>
                     </div>
                     <div className="row">
-
                         <div className="col-md-12 mb-4">
-                            <h4>{name}</h4>
+                            <h5>{name}</h5>
                             <p><strong>Token</strong>: {token} </p>
                             {website && <p><strong>Вебсайт</strong>: {website} </p>}
-                            <h4> Багц </h4>
+                            <h5> Төрийн сүлжээ </h5>
+                            <div className="input-group">
+                                <input type="text" className="form-control col-6" disabled value={this.state.prvite_url}/>
+                                <span className="input-group-btn">
+                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.prvite_url)}>
+                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                </button>
+                                </span>
+                            </div>
+                            <h5 className="mt-3"> Интернэт сүлжээ </h5>
                             <div className="input-group">
                                 <input type="text" className="form-control col-6" disabled value={this.state.public_url}/>
                                 <span className="input-group-btn">
                                 <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
-                                    <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                                 </button>
                                 </span>
                             </div>
                         </div>
 
-                        {this.state.govorg_wms_list.map((wms) =>
+                        {this.state.system_wms_list.map((wms) =>
                             <div className="col-md-12 mb-4 ml-5" key={wms.id}>
-                                <h4> {wms.name} </h4>
-                                <div className="input-group">
-                                    <input type="text" className="form-control col-6" disabled value={wms.public_url}/>
-                                    <span className="input-group-btn">
-                                    <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(wms.public_url)}>
-                                        <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
-                                    </button>
-                                    </span>
-                                </div>
+                                <h5> {wms.name} </h5>
                                 <ul>
                                     {wms.layer_list.map((layer, idx) =>
                                         <li key={idx}>

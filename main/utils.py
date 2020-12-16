@@ -21,6 +21,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from backend.config.models import Config
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -251,7 +252,8 @@ def send_approve_email(user):
     )
 
     subject = 'Геопортал хэрэглэгч баталгаажуулах'
-    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://192.168.10.92/gov/user/approve/{token}/'.format(token=token)
+    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://{host_name}/gov/secure/approve/{token}/'.format(token=token, host_name=settings.EMAIL_HOST_NAME)
+    from_email = settings.EMAIL_HOST_USER
     to_email = [user.email]
 
     send_email(subject, msg, to_email)
@@ -504,3 +506,25 @@ def is_register(register):
 def is_email(email):
     re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
     return re.search(re_email, email) is not None
+
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_config(config_name):
+
+    default_values = {config_name: ''}
+    configs = Config.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
+# оролт config name array
+# Олон config мэдээллийг буцаана obj буцаана
+def get_configs(config_names):
+
+    default_values = {conf: '' for conf in config_names}
+    configs = Config.objects.filter(name__in=default_values.keys())
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return rsp

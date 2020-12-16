@@ -5,6 +5,7 @@ import DiskSize from './DiskSize'
 import VersionInfo from './VersionInfo'
 import ConfigGeoserver from './ConfigGeoserver'
 import ConfigSite from './ConfigSite'
+import ConfigSystem from './ConfigSystem'
 
 
 export class ConfigPage extends Component {
@@ -24,6 +25,9 @@ export class ConfigPage extends Component {
                 <div className="row">
                     <div className="col-lg-4">
                         <ConfigGeoserver/>
+                    </div>
+                    <div className="col-lg-4">
+                        <ConfigSystem/>
                     </div>
                 </div>
             </div>

@@ -19,5 +19,5 @@ function detail(id) {
         ...getGetOptions(),
     }
 
-    return fetch(`/back/api/систем/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
+    return fetch(`/gov/api/system/${id}/detail/`, opts).then(handleResponse)
 }
