@@ -264,6 +264,7 @@ def employee_detail(request, pk):
         'gender': user.gender,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
+        'is_super': user.is_superuser,
         'position': employee.position,
         'is_admin': employee.is_admin,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
@@ -293,7 +294,7 @@ def employee_detail(request, pk):
     return JsonResponse({'employee': employees_display})
 
   
-  def _employee_validation(payload, user):
+def _employee_validation(payload, user):
     username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -397,19 +398,19 @@ def employee_add(request, payload, level, pk):
     register = payload.get('register')
     password = payload.get('password')
     is_admin = payload.get('is_admin')
+    is_super = payload.get('is_super')
     errors = {}
     errors = _employee_validation(payload, None)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
     user = User.objects.create(
-        is_superuser=is_superuser,
         username=username,
         first_name=first_name,
         last_name=last_name,
         email=email,
         gender=gender,
-        is_superuser=is_super
+        is_superuser=is_super,
         register=register.upper()
     )
     user.roles.add(2)

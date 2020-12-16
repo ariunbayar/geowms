@@ -136,6 +136,7 @@ export class UserAdd extends Component {
 
     render() {
         const {form_values} = this.state
+        const org_level = this.props.match.params.level
         return (
             <div className="col-6 my-4">
                 <div className="row">
@@ -284,18 +285,20 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
                                         </div>
-                                        <div className='form-row'>
-                                            <div className="form-group col-md-8">
-                                                <label htmlFor='is_super'>Системийн админ</label>
-                                                <Field
-                                                    className="ml-2"
-                                                    name='is_super'
-                                                    id="id_is_super"
-                                                    type="checkbox"
-                                                />
-                                                <ErrorMessage name="is_super" component="div" className="text-danger"/>
+                                        {org_level ==4 &&
+                                            <div className='form-row'>
+                                                <div className="form-group col-md-8">
+                                                    <label htmlFor='is_super'>Системийн админ</label>
+                                                    <Field
+                                                        className="ml-2"
+                                                        name='is_super'
+                                                        id="id_is_super"
+                                                        type="checkbox"
+                                                    />
+                                                    <ErrorMessage name="is_super" component="div" className="text-danger"/>
+                                                </div>
                                             </div>
-                                        </div>
+                                        }
                                         <div className="form-group">
                                             <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
