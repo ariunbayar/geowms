@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 
-import { Form } from './Form'
+import { Password } from './Password'
 
 export class Profile extends Component {
 
@@ -12,7 +12,7 @@ export class Profile extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path="/gov/profile/" component={Form} />
+                <Route exact path="/gov/profile/" component={Password} />
             </Switch>
         )
     }

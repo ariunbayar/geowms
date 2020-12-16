@@ -6,10 +6,10 @@ export const service = {
     org_remove,
     roles,
     rolesSave,
-    employee_add,
-    employee_remove,
-    employeeMore,
-    employee_update,
+    employeeAdd,
+    employeeRemove,
+    employeeDetail,
+    employeeUpdate,
     sistemCount,
     employee_list,
     orgList,
@@ -73,12 +73,12 @@ function rolesSave(level, org_id, org_roles) {
     return fetch(`${prefix}/level-${level}/${org_id}/roles-save/`, opts).then(handleResponse)
 }
 
-function employeeMore(level, org_id, org_emp) {
+function employeeDetail(pk) {
     const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/level-${level}/${org_id}/employee-more-${org_emp}/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/employee-detail-${pk}/`, requestOptions).then(handleResponse)
 }
 
-function employee_add(org_level, org_id, payload) {
+function employeeAdd(org_level, org_id, payload) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(payload),
@@ -87,22 +87,20 @@ function employee_add(org_level, org_id, payload) {
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-add/`, opts).then(handleResponse)
 }
 
-function employee_remove(org_level, org_id, user_id) {
+function employeeRemove(pk) {
     const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({user_id}),
+        ...getGetOptions(),
     }
-
-    return fetch(`${prefix}/level-${org_level}/${org_id}/employee-remove/`, opts).then(handleResponse)
+    return fetch(`${prefix}/employee-remove-${pk}/`, opts).then(handleResponse)
 }
 
-function employee_update(org_level, org_id, paylaod) {
+function employeeUpdate(pk, paylaod) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify(paylaod),
     }
 
-    return fetch(`${prefix}/level-${org_level}/${org_id}/employee-update/`, opts).then(handleResponse)
+    return fetch(`${prefix}/employee-update-${pk}/`, opts).then(handleResponse)
 }
 
 function orgList(page, perpage, query, org_level, sort_name) {

@@ -250,10 +250,27 @@ def roles_save(request, payload, level, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_more(request, level, pk, emp):
+def employee_detail(request, pk):
 
-    org = get_object_or_404(Org, pk=pk, level=level)
-    employees_display = []
+    user = get_object_or_404(User, pk=pk)
+    employee = Employee.objects.filter(user=user).first()
+    employees_display = {
+        'id': user.id,
+        'last_name': user.last_name,
+        'username': user.username,
+        'first_name': user.first_name,
+        'email': user.email,
+        'register': user.register,
+        'gender': user.gender,
+        'is_active': user.is_active,
+        'is_sso': user.is_sso,
+        'position': employee.position,
+        'is_admin': employee.is_admin,
+        'created_at': employee.created_at.strftime('%Y-%m-%d'),
+        'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+    }
+    return JsonResponse({'success': True, 'employee': employees_display})
+
 
     for employe in User.objects.filter(employee__org=org, pk=emp):
         emp_oj = Employee.objects.filter(user=employe).first()
@@ -275,12 +292,69 @@ def employee_more(request, level, pk, emp):
         })
     return JsonResponse({'employee': employees_display})
 
+  
+  def _employee_validation(payload, user):
+    username = payload.get('username')
+    position = payload.get('position')
+    first_name = payload.get('first_name')
+    last_name = payload.get('last_name')
+    email = payload.get('email')
+    gender = payload.get('gender')
+    register = payload.get('register')
+    errors = {}
+    if not username:
+        errors['username'] = 'Хоосон байна утга оруулна уу.'
+    elif len(username) > 150:
+        errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
+    if not position:
+        errors['position'] = 'Хоосон байна утга оруулна уу.'
+    elif len(position) > 250:
+        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
+    if not first_name:
+        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(first_name) > 30:
+        errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
+    if not last_name:
+        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(last_name) > 150:
+        errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
+    if not email:
+        errors['email'] = 'Хоосон байна утга оруулна уу.'
+    elif len(email) > 254:
+        errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
+    if not gender:
+        errors['gender'] = 'Хоосон байна утга оруулна уу.'
+    elif len(gender) > 100:
+        errors['gender'] = '100-с илүүгүй урттай утга оруулна уу!'
+    if not register:
+        errors['register'] = 'Хоосон байна утга оруулна уу.'
+    if user:
+        if user.email != email:
+            if User.objects.filter(email=email).first():
+                errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+        if user.username != username:
+            if User.objects.filter(username=username).first():
+                errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
+    else:
+        if User.objects.filter(email=email).first():
+            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+        if User.objects.filter(username=username).first():
+            errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
+    if not utils.is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    if len(register) ==  10:
+        if not utils.is_register(register):
+            errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    else:
+        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    return errors
+
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_update(request, payload, level, pk):
-    user_id = payload.get('id')
+def employee_update(request, payload, pk):
+    username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
     last_name = payload.get('last_name')
@@ -290,20 +364,23 @@ def employee_update(request, payload, level, pk):
     is_admin = payload.get('is_admin')
     is_super = payload.get('is_super')
 
-    get_object_or_404(User, pk=user_id)
+    user = get_object_or_404(User, pk=pk)
+    errors = _employee_validation(payload, user)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+    user.first_name=first_name
+    user.last_name=last_name
+    user.email=email
+    user.gender=gender
+    user.register=register.upper()
+    user.username=username
+    user.is_superuser=is_super
+    if password:
+        user.set_password(password)
+    user.save()
+    Employee.objects.filter(pk=pk).update(position=position, is_admin=is_admin)
 
-    User.objects.filter(pk=user_id).update(
-                            first_name=first_name,
-                            last_name=last_name,
-                            email=email,
-                            gender=gender,
-                            register=register,
-                            is_superuser=is_super
-                        )
-
-    Employee.objects.filter(user_id=user_id).update(position=position, is_admin=is_admin)
-
-    return JsonResponse({'success': True})
+    return JsonResponse({'success': True, 'errors': errors})
 
 
 @require_POST
@@ -320,36 +397,37 @@ def employee_add(request, payload, level, pk):
     register = payload.get('register')
     password = payload.get('password')
     is_admin = payload.get('is_admin')
-    is_super = payload.get('is_super')
-    user = User.objects.filter(username=username).first()
-    if user:
-        return JsonResponse({'user_name': True})
+    errors = {}
+    errors = _employee_validation(payload, None)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
 
-    else:
+    user = User.objects.create(
+        is_superuser=is_superuser,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        gender=gender,
+        is_superuser=is_super
+        register=register.upper()
+    )
+    user.roles.add(2)
+    user.set_password(password)
+    user.save()
 
-        user = User.objects.create(
-            is_superuser=is_super, username=username,
-            first_name=first_name, last_name=last_name,
-            email=email, gender=gender, register=register
-        )
-        user.roles.add(2)
-        user.set_password(password)
-        user.save()
+    Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
 
-        Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
-
-        return JsonResponse({'success': True})
+    return JsonResponse({'success': True, 'errors': errors})
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_remove(request, payload, level, pk):
+def employee_remove(request, pk):
 
-    user_id = payload.get('user_id')
-    employee = get_object_or_404(Employee, user_id=user_id)
-    employee.delete()
-
+    user = get_object_or_404(User, id=pk)
+    Employee.objects.filter(user=user).first().delete()
     return JsonResponse({'success': True})
 
 
@@ -462,7 +540,7 @@ def org_remove(request, payload, level):
 def org_list(request, payload, level):
 
     page = payload.get('page')
-    query = payload.get('query')
+    query = payload.get('query') or ''
     per_page = payload.get('perpage')
     level = payload.get('org_level')
     orgs_display = []
@@ -470,9 +548,6 @@ def org_list(request, payload, level):
 
     if not sort_name:
         sort_name = 'id'
-    if not query:
-        query = ''
-
     qs = Org.objects.filter(level=level)
     qs = qs.annotate(num_employees=Count('employee'))
     qs = qs.annotate(num_systems=Count('govorg'))
@@ -539,7 +614,7 @@ def employee_list(request,payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
     page = payload.get('page')
-    query = payload.get('query')
+    query = payload.get('query') or ''
     per_page = payload.get('perpage')
     sort_name = payload.get('sort_name')
 

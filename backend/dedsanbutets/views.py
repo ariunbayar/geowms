@@ -907,14 +907,12 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
         wms_id = wms.id
         wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
         if not wms_layer:
-            legend_url = geoserver.get_legend_url(wms_id, layer_name)
             wms_layer = WMSLayer.objects.create(
                             name=layer_title,
                             code=layer_name,
                             wms=wms,
                             title=layer_title,
                             feature_price=0,
-                            legend_url=legend_url
                         )
 
         bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()

@@ -172,9 +172,10 @@ export default class BundleMap extends Component {
         })
         this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
-            wms.layers.map((layer, idx) =>
+            wms.layers.map((layer, idx) => {
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
-            )
+                layer['legend'] = layer.tile.getSource().getLegendUrl()
+            })
         )
 
         const {base_layers, base_layer_controls} =
