@@ -31,7 +31,8 @@ class SearchBarComponent extends Component {
             point_id: '',
             error_msg: '',
             aimag: [],
-            sum: []
+            sum: [],
+            feature_ids: []
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
@@ -79,6 +80,7 @@ class SearchBarComponent extends Component {
             }, 2222);
         })
     }
+
     handleSubmitCoordinateName(event) {
         event.preventDefault()
         service.searchPoint(this.state.point_id).then(({info, success}) => {
@@ -117,14 +119,13 @@ class SearchBarComponent extends Component {
             const aiamg_data = this.state.aimag[aimag_id]
             var aimag_name = aiamg_data[2]
 
-
             var array = [aiamg_data[0], aiamg_data[1]]
             this.props.handleSetCenter(array, 7.555)
 
-
             service.getSum(aimag_name).then(({info, success}) => {
                 if(success){
-                    this.setState({sum: info})
+                    this.props.showOnlyArea(aimag_name, array)
+                    this.setState({ sum: info, aimag_name })
                 }
                 else{
                     this.setState({error_msg: info})
@@ -134,16 +135,16 @@ class SearchBarComponent extends Component {
             })
         }
     }
+
     handleInputSum(e){
         if(e.target.value){
             this.setState({sumid: e.target.value})
             const sum_id = e.target.value
             const sum_data = this.state.sum[sum_id]
 
-
             var array = [sum_data[0], sum_data[1]]
             this.props.handleSetCenter(array, 10.555)
-
+            this.props.showOnlyArea(this.state.aimag_name, array, sum_data[2])
         }
     }
 
@@ -188,7 +189,11 @@ class SearchBarComponent extends Component {
                         </div>
                         <div className="input-group mb-3">
                             <div>
-                                <button className="btn gp-btn-primary" type="submit"><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
+                                <button className="btn gp-btn-primary" onClick={() => {
+                                    this.setState({ aimagid: -1, sumid: -1 })
+                                    this.props.resetShowArea()
+                                    }}
+                                ><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
                             </div>
                         </div>
                     </div>
@@ -363,9 +368,8 @@ export class SearchBar extends Control {
         ReactDOM.hydrate(<SearchBarComponent {...props}/>, this.element)
     }
 
-    showSideBar( handleSetCenter, islaod) {
+    showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea) {
         this.toggleControl(islaod)
-        this.renderComponent({ handleSetCenter})
+        this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea })
     }
-
 }
