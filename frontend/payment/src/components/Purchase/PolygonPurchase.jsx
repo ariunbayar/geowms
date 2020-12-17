@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
 import Modal from '../../../../../src/components/Modal/InfoModal'
+import ShowModal from '../../../../../src/components/Modal/ShowModal'
 
 export class PolygonPurchase extends Component {
 
@@ -20,6 +21,7 @@ export class PolygonPurchase extends Component {
             purchase_all: [],
             qpay_modal_is: false,
             is_modal_info_open: false,
+            is_modal_open: false,
             alert_toggle: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
@@ -67,6 +69,10 @@ export class PolygonPurchase extends Component {
 
     }
 
+    handleModal(){
+        this.setState({ is_modal_open: true })
+    }
+
     handleModalApproveClose(){
       const purchase_id = this.props.match.params.id
       this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
@@ -92,7 +98,7 @@ export class PolygonPurchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, qpay_modal_is, alert_msg, alert_toggle, is_modal_info_open } = this.state
+        const { purchase, purchase_all, qpay_modal_is, alert_msg, alert_toggle, is_modal_info_open, is_modal_open } = this.state
         const { items, polygon, layers} = this.state
         return (
         <div className="container my-4">
@@ -147,10 +153,20 @@ export class PolygonPurchase extends Component {
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
-                                <h4 className="text-succes p-3">QPAY ээр төлбөр төлөх</h4>
+                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModal()}>
+                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
+                        {
+                        is_modal_open &&
+                            <ShowModal
+                                modalShow = {() => this.handleQpay()}
+                                modalClose = {() => this.backToForm()}
+                                text='QPay-ээр төлбөр төлөхөд 500 төгрөгний шимтгэл авна.'
+                                title="Анхааруулга"
+                                status={this.state.status}
+                            />
+                        }
                     </div>
                 </div>
             </div>

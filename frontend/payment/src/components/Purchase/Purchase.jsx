@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
+import Modal from '../../../../../src/components/Modal/ShowModal'
 
 export class Purchase extends Component {
 
@@ -16,6 +17,7 @@ export class Purchase extends Component {
             names: [],
             check_error: false,
             error_msg: '',
+            is_modal_open: false,
             alert_toggle: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
@@ -59,6 +61,10 @@ export class Purchase extends Component {
 
     }
 
+    handleModal(){
+        this.setState({ is_modal_open: true })
+    }
+
     handleQpay(){
         this.setState(prevState => ({
             qpay_modal_is: !prevState.qpay_modal_is,
@@ -79,7 +85,7 @@ export class Purchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, alert_toggle } = this.state
+        const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, alert_toggle, is_modal_open } = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -142,10 +148,20 @@ export class Purchase extends Component {
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
-                                <h4 className="text-succes p-3">QPAY ээр төлбөр төлөх</h4>
+                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModal()}>
+                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
+                        {
+                        is_modal_open &&
+                            <Modal
+                                modalShow = {() => this.handleQpay()}
+                                modalClose = {() => this.backToForm()}
+                                text='QPay-ээр төлбөр төлөхөд 500 төгрөгний шимтгэл авна.'
+                                title="Анхааруулга"
+                                status={this.state.status}
+                            />
+                        }
                     </div>
                 </div>
             </div>
