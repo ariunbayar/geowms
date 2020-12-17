@@ -39,6 +39,8 @@ export default class BundleMap extends Component {
     constructor(props) {
         super(props)
         this.sendFeatureInfo = []
+        this.is_not_visible_layers = []
+        this.saved_aimag_name = ''
         this.state = {
             projection: 'EPSG:3857',
             is_user: false,
@@ -91,6 +93,9 @@ export default class BundleMap extends Component {
         this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
         this.formatArea = this.formatArea.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
+        this.getOnlyFeature = this.getOnlyFeature.bind(this)
+        this.resetFilteredOnlyFeature = this.resetFilteredOnlyFeature.bind(this)
+        this.allLayerVisible = this.allLayerVisible.bind(this)
     }
 
     initMarker() {
@@ -180,6 +185,7 @@ export default class BundleMap extends Component {
                                     'FORMAT': 'image/png',
                                 }
                             }),
+                            code: layer.code
                         })
                     }
                 }),
@@ -193,6 +199,7 @@ export default class BundleMap extends Component {
             })
         )
 
+        const base_layer_name = 'base_layer'
         const {base_layers, base_layer_controls} =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
@@ -205,6 +212,7 @@ export default class BundleMap extends Component {
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
                             }),
+                            name: base_layer_name,
                         })
                     }
 
@@ -217,6 +225,7 @@ export default class BundleMap extends Component {
                                     'FORMAT': 'image/png',
                                 }
                             }),
+                            name: base_layer_name,
                         })
                     }
 
@@ -237,6 +246,7 @@ export default class BundleMap extends Component {
                 }
             )
 
+        const vector_layer_name = 'vector_layer'
         const vector_layer = new VectorLayer({
             source: new VectorSource(),
             style: new Style({
@@ -247,14 +257,17 @@ export default class BundleMap extends Component {
                 fill: new Fill({
                     color: 'rgba(100, 255, 0, 0.3)'
                 })
-            })
+            }),
+            name: vector_layer_name,
         })
         this.setState({vector_layer})
 
+        const maker_layer_name = 'marker_layer'
         const marker_layer = new VectorLayer({
             source: new VectorSource({
                 features: [this.marker.feature],
-            })
+            }),
+            name: maker_layer_name,
         })
 
         const map = new Map({
@@ -382,101 +395,197 @@ export default class BundleMap extends Component {
         return this.object
     }
 
+    allLayerVisible() {
+        this.map.getLayers().getArray().forEach((layer) => {
+            if(layer.get('filter') && layer.get('filter') == this.state.filtered_layer_name) {
+                layer.setVisible(false)
+                this.map.removeLayer(layer.getSource())
+            }
+            if(layer.get('code')) {
+                if(layer.getVisible()) {
+                    this.is_not_visible_layers.push(layer.get('code'))
+                    layer.setVisible(false)
+                }
+            }
+        })
+    }
+
+    resetFilteredOnlyFeature() {
+        this.map.getLayers().forEach((layer) => {
+            if(layer) {
+                this.is_not_visible_layers.map((visible_layer_code) => {
+                    if(layer.get('code') == visible_layer_code) {
+                        layer.setVisible(true)
+                    }
+                    if(layer.get('filter') == this.state.filtered_layer_name){
+                        this.map.removeLayer(layer.getSource())
+                    }
+                })
+            }
+        })
+        this.setState({ filtered_wms: undefined })
+        this.is_not_visible_layers = []
+    }
+
+    getOnlyFeature(aimag_name, coordinate, sum_name) {
+        this.allLayerVisible()
+        var filtered_layer_name
+        const filtered_wms = this.state.map_wms_list.map(({layers}) => {
+            var cql_filter = ''
+            return {
+                layers: this.is_not_visible_layers.map((layer_code) => {
+                    var filtered_layer
+                    var filtered_tile
+                    layers.map((layer) => {
+                        if (layer_code == layer.code) {
+                            filtered_layer = layer
+                            const main_url = layer.tile.getSource().urls[0]
+                            if (sum_name) {
+                                cql_filter = "aimag='" + aimag_name + "' AND sum='" + sum_name + "'"
+                                filtered_layer_name = aimag_name + '_' + sum_name
+                            } else {
+                                cql_filter = "aimag='" + aimag_name + "'"
+                                filtered_layer_name = aimag_name
+                            }
+                            const tile = new Tile ({
+                                source: new TileWMS({
+                                    projection: this.state.projection,
+                                    url: main_url,
+                                    params: {
+                                        'LAYERS': layer.code,
+                                        //'FORMAT': 'image/svg+xml',
+                                        'FORMAT': 'image/png',
+                                        "cql_filter": cql_filter,
+                                    }
+                                }),
+                                filter: filtered_layer_name
+                            })
+                            if(tile) {
+                                this.map.addLayer(tile)
+                                filtered_tile = tile
+                            }
+                        }
+                    })
+                    return {
+                        layer: filtered_layer,
+                        tile: filtered_tile
+                    }
+                }),
+            }
+        })
+        this.setState({filtered_wms, filtered_layer_name})
+        this.showFeaturesAt(coordinate)
+    }
+
+    getWMSArray() {
+        this.array = []
+        if (this.state.filtered_wms) {
+            this.array = this.state.filtered_wms
+        } else {
+            this.array = this.state.map_wms_list
+        }
+        return this.array
+    }
+
     showFeaturesAt(coordinate) {
         this.sendFeatureInfo = []
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
         this.setState({pay_modal_check: false})
-        this.state.map_wms_list.map(({layers}) => {
-            layers.map(({tile, feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                if (tile.getVisible() != true) {
-                    return
-                }
+        const wms_array = this.getWMSArray()
+        wms_array.map(({layers}) => {
+            if(layers) {
+                layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                    if (tile) {
+                        if (tile.getVisible() != true) {
+                            return
+                        }
 
-                const wms_source = tile.getSource()
-                const url = wms_source.getFeatureInfoUrl(
-                    coordinate,
-                    resolution,
-                    projection,
-                    {
-                        //'INFO_FORMAT': 'text/xml'
-                        //'INFO_FORMAT': 'text/html'
-                        'INFO_FORMAT': 'application/vnd.ogc.gml',
-                    }
-                )
-
-                if (url) {
-                    if(!this.state.is_draw_open){
-                    }
-                    fetch(url)
-                        .then((response) => response.text())
-                        .then((text) => {
-                            const parser = new WMSGetFeatureInfo()
-                            const features = parser.readFeatures(text)
-                            if (features.length > 0) {
-                                features.map((feature, idx) => {
-                                    if(feature.getGeometry().getType().includes('Polygon')) {
-                                        const source = new VectorSource({
-                                            features: features
-                                        });
-                                        this.selectSource = source
-                                        this.state.vector_layer.setSource(this.selectSource)
-                                    }
-                                })
+                        const wms_source = tile.getSource()
+                        const url = wms_source.getFeatureInfoUrl(
+                            coordinate,
+                            resolution,
+                            projection,
+                            {
+                                //'INFO_FORMAT': 'text/xml'
+                                //'INFO_FORMAT': 'text/html'
+                                'INFO_FORMAT': 'application/vnd.ogc.gml',
                             }
-                            const feature_info = features.map((feature) => {
-                                const geometry_name = feature.getGeometryName()
-                                const values =
-                                    feature.getKeys()
-                                    .filter((key) => key != geometry_name)
-                                    .map((key) => [key, feature.get(key)])
-                                return [feature.getId(), values]
-                            })
+                        )
+                        if (url) {
                             if(!this.state.is_draw_open){
-                                if(feature_info.length > 0) {
-                                    if(this.sendFeatureInfo.length > 0) {
-                                        this.sendFeatureInfo.map((feat, idx) => {
-                                            if (feat[0].field_name !== feature_info[0][0]) {
+                            }
+                            fetch(url)
+                                .then((response) => response.text())
+                                .then((text) => {
+                                    const parser = new WMSGetFeatureInfo()
+                                    const features = parser.readFeatures(text)
+                                    if (features.length > 0) {
+                                        features.map((feature, idx) => {
+                                            if(feature.getGeometry().getType().includes('Polygon')) {
+                                                const source = new VectorSource({
+                                                    features: features
+                                                });
+                                                this.selectSource = source
+                                                this.state.vector_layer.setSource(this.selectSource)
+                                            }
+                                        })
+                                    }
+                                    const feature_info = features.map((feature) => {
+                                        const geometry_name = feature.getGeometryName()
+                                        const values =
+                                            feature.getKeys()
+                                            .filter((key) => key != geometry_name)
+                                            .map((key) => [key, feature.get(key)])
+                                        return [feature.getId(), values]
+                                    })
+                                    if(!this.state.is_draw_open){
+                                        if(feature_info.length > 0) {
+                                            if(this.sendFeatureInfo.length > 0) {
+                                                this.sendFeatureInfo.map((feat, idx) => {
+                                                    if (feat[0].field_name !== feature_info[0][0]) {
+                                                        const object = this.listToJson(feature_info, geodb_table)
+                                                        this.sendFeatureInfo.push(object)
+                                                    }
+                                                })
+                                            } if (this.sendFeatureInfo.length == 0) {
                                                 const object = this.listToJson(feature_info, geodb_table)
                                                 this.sendFeatureInfo.push(object)
                                             }
-                                        })
-                                    } if (this.sendFeatureInfo.length == 0) {
-                                        const object = this.listToJson(feature_info, geodb_table)
-                                        this.sendFeatureInfo.push(object)
+                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                            if(geodb_table == 'mpoint_view'){
+                                                this.state.vector_layer.setSource(null)
+                                            }
+                                        }
+                                        else {
+                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                        }
+                                        // if(geodb_table == 'mpoint_view'){
+                                        //     if(feature_info.length > 0){
+                                        //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
+                                        //         this.setState({pay_modal_check: true})
+                                        //         this.state.vector_layer.setSource(null)
+                                        //     }
+                                        //     // else{
+                                        //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
+                                        //     // }
+                                        // }
+                                        // else{
+                                        //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
+                                        //         this.state.vector_layer.setSource(source)
+                                        //         // this.controls.modal.showModal(feature_info, true)
+                                        //     }
+                                        // }
                                     }
-                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
-                                    if(geodb_table == 'mpoint_view'){
-                                        this.state.vector_layer.setSource(null)
-                                    }
-                                }
-                                else {
-                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
-                                }
-                                // if(geodb_table == 'mpoint_view'){
-                                //     if(feature_info.length > 0){
-                                //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
-                                //         this.setState({pay_modal_check: true})
-                                //         this.state.vector_layer.setSource(null)
-                                //     }
-                                //     // else{
-                                //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
-                                //     // }
-                                // }
-                                // else{
-                                //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                //         this.state.vector_layer.setSource(source)
-                                //         // this.controls.modal.showModal(feature_info, true)
-                                //     }
-                                // }
-                            }
-                        })
-                } else {
-                    /* TODO */
-                    console.log('no feature url', wms_source);
-                }
-            })
+                                })
+                        } else {
+                            /* TODO */
+                            console.log('no feature url', wms_source);
+                        }
+                    }
+                })
+            }
         })
         this.sendFeatureInfo = []
     }
@@ -522,7 +631,7 @@ export default class BundleMap extends Component {
         if(this.state.is_search_sidebar_open){
             this.controls.searchbar.showSideBar(null, true)
         }else{
-            this.controls.searchbar.showSideBar(this.handleSetCenter, false)
+            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature)
         }
     }
 
@@ -542,14 +651,15 @@ export default class BundleMap extends Component {
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
         const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
-        const { bundle, map_wms_list } = this.state //http://127.0.0.1:8080/geoserver/gp_bu/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=gp_bu:gp_layer_building_view&bbox=100.4464067,46.2854066,100.4489819,46.2870236,EPSG:4326
+        const { bundle } = this.state //http://127.0.0.1:8080/geoserver/gp_bu/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=gp_bu:gp_layer_building_view&bbox=100.4464067,46.2854066,100.4489819,46.2870236,EPSG:4326
+        const wms_array = this.getWMSArray()
         const layer_info = {
             bundle: { id: bundle.id },
-            wms_list: map_wms_list.reduce((acc, { name, layers }) => {
+            wms_list: wms_array.reduce((acc, { name, layers }) => {
                 const wms = {
                     name,
                     layers: layers.reduce((acc, { id, code, name, tile }) => {
-                        if (tile.getVisible())
+                        if(tile) if (tile.getVisible())
                             acc.push({ id, name, code })
                         return acc
                     }, []),
@@ -567,52 +677,54 @@ export default class BundleMap extends Component {
         const extent2 = toLonLat([x2, y2])
         const full_extent = extent.toString() + ',' + extent2.toString()
         var list = []
-        map_wms_list.map(({ name, layers }, l_idx) => {
+        wms_array.map(({ name, layers }, l_idx) => {
             layers.map(({ id, code, tile }, idx) => {
-                if (tile.getVisible()) {
-                    const main_url = tile.getSource().urls[0]
-                    if(main_url) {
-                        const url =
-                            main_url.slice(0, -1) +
-                            '?service=WFS' +
-                            '&version=1.1.0' +
-                            '&request=GetFeature' +
-                            '&typeName=' + code +
-                            '&bbox=' + full_extent + ',' + this.state.projection_display
-                        fetch(url)
-                            .then((rsp) => rsp.text())
-                            .then((text) => {
-                                const parser = new WMSGetFeatureInfo()
-                                const features = parser.readFeatures(text)
-                                const feature_info = features.map((feature) => {
-                                    const geometry_name = feature.getGeometryName()
-                                    const values =
-                                        feature.getKeys()
-                                            .filter((key) => key != geometry_name)
-                                            .map((key) => [key, feature.get(key)])
-                                    const list_id = feature.getId().split('.')
-                                    const id = list_id[list_id.length - 1]
-                                    return [id, values]
-                                })
-                                if(feature_info.length > 0) {
-                                    const info = feature_info.map((feature, idx) => {
-                                        var obj = new Object()
-                                        obj['geom_id'] = feature[0]
-                                        feature[1].map((info, idx) => {
-                                            if(info[0] == 'feature_id') {
-                                                obj['feature_id'] = info[1]
-                                            }
-                                        })
-                                        obj['layer_code'] = code
-                                        obj['layer_id'] = id
-                                        return obj
+                if(tile) {
+                    if (tile.getVisible()) {
+                        const main_url = tile.getSource().urls[0]
+                        if(main_url) {
+                            const url =
+                                main_url.slice(0, -1) +
+                                '?service=WFS' +
+                                '&version=1.1.0' +
+                                '&request=GetFeature' +
+                                '&typeName=' + code +
+                                '&bbox=' + full_extent + ',' + this.state.projection_display
+                            fetch(url)
+                                .then((rsp) => rsp.text())
+                                .then((text) => {
+                                    const parser = new WMSGetFeatureInfo()
+                                    const features = parser.readFeatures(text)
+                                    const feature_info = features.map((feature) => {
+                                        const geometry_name = feature.getGeometryName()
+                                        const values =
+                                            feature.getKeys()
+                                                .filter((key) => key != geometry_name)
+                                                .map((key) => [key, feature.get(key)])
+                                        const list_id = feature.getId().split('.')
+                                        const id = list_id[list_id.length - 1]
+                                        return [id, values]
                                     })
-                                    list.push({[code]: info})
-                                    if(l_idx == map_wms_list.length - 1 && layers.length - 1 == idx) {
-                                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                                    if(feature_info.length > 0) {
+                                        const info = feature_info.map((feature, idx) => {
+                                            var obj = new Object()
+                                            obj['geom_id'] = feature[0]
+                                            feature[1].map((info, idx) => {
+                                                if(info[0] == 'feature_id') {
+                                                    obj['feature_id'] = info[1]
+                                                }
+                                            })
+                                            obj['layer_code'] = code
+                                            obj['layer_id'] = id
+                                            return obj
+                                        })
+                                        list.push({[code]: info})
+                                        if(l_idx == wms_array.length - 1 && layers.length - 1 == idx) {
+                                            this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                                        }
                                     }
-                                }
-                        })
+                            })
+                        }
                     }
                 }
             })
