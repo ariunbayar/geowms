@@ -206,20 +206,12 @@ class SearchBarComponent extends Component {
                         </div>
                         <div className="input-group mb-3">
                             <div>
-<<<<<<< HEAD
-                                <button className="btn gp-btn-primary" onClick={() => {
-                                    this.setState({ aimagid: -1, sumid: -1 })
-                                    this.props.resetShowArea()
-                                    }}
-                                ><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
-=======
                                 <button
                                     className="btn gp-btn-primary"
                                     type="submit"
                                 >
                                     <i className="fa fa-trash mr-1"></i>Цэвэрлэх
                                 </button>
->>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
                             </div>
                         </div>
                     </div>

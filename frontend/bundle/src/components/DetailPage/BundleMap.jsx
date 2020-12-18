@@ -421,16 +421,12 @@ export default class BundleMap extends Component {
         this.is_not_visible_layers = []
     }
 
-<<<<<<< HEAD
-    getOnlyFeature(aimag_name, coordinate, sum_name) {
-=======
     getKiloFromScale(scale) {
         return scale / 1000
     }
 
     getOnlyFeature(aimag_name, coordinate, sum_name, scale) {
         this.onClickCloser()
->>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
         this.allLayerVisible()
         var filtered_layer_name
         const filtered_wms = this.state.map_wms_list.map(({layers}) => {
@@ -443,12 +439,6 @@ export default class BundleMap extends Component {
                         if (layer_code == layer.code) {
                             filtered_layer = layer
                             const main_url = layer.tile.getSource().urls[0]
-<<<<<<< HEAD
-                            if (sum_name) {
-                                cql_filter = "aimag='" + aimag_name + "' AND sum='" + sum_name + "'"
-                                filtered_layer_name = aimag_name + '_' + sum_name
-                            } else {
-=======
                             if (!aimag_name && coordinate) {
                                 const kilometers = this.getKiloFromScale(scale)
                                 cql_filter = "DWITHIN(geom,Point(" + coordinate[0] + " " + coordinate[1] + ")," + kilometers + ",kilometers)"
@@ -459,7 +449,6 @@ export default class BundleMap extends Component {
                                 filtered_layer_name = aimag_name + '_' + sum_name
                             }
                             else if (aimag_name && !sum_name) {
->>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
                                 cql_filter = "aimag='" + aimag_name + "'"
                                 filtered_layer_name = aimag_name
                             }
@@ -490,11 +479,7 @@ export default class BundleMap extends Component {
             }
         })
         this.setState({filtered_wms, filtered_layer_name})
-<<<<<<< HEAD
-        this.showFeaturesAt(coordinate)
-=======
         const map_coord = fromLonLat([coordinate[1], coordinate[0]])
->>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
     }
 
     getWMSArray() {
