@@ -6,6 +6,7 @@ import VersionInfo from './VersionInfo'
 import ConfigGeoserver from './ConfigGeoserver'
 import ConfigSite from './ConfigSite'
 import ConfigSystem from './ConfigSystem'
+import ConfigEmail from './ConfigEmail'
 
 
 export class ConfigPage extends Component {
@@ -25,9 +26,10 @@ export class ConfigPage extends Component {
                 <div className="row">
                     <div className="col-lg-4">
                         <ConfigGeoserver/>
+                        <ConfigSystem/>
                     </div>
                     <div className="col-lg-4">
-                        <ConfigSystem/>
+                        <ConfigEmail/>
                     </div>
                 </div>
             </div>
