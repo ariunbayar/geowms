@@ -11,8 +11,8 @@ def user_davhtsal(apps, schema_editor):
             continue
         user_ids = User.objects.filter(email=user.email).values_list('id')
         if len(user_ids) > 1:
-            raise Exception('Дараах хэрэглэгчийн email хаяг давхцаж байна.\n'
-            'Email хаягаа солих юмуу тухайн хэрэглэгчийг устга.' + str(user_ids) +
+            raise Exception('Дараах хэрэглэгчийн email хаяг давхцаж байана.\n'
+            'E-Mail хаягаа солих юмуу тухайн хэрэглйигчийнг устга.' + str(user_ids) +
             '\ndelete FROM public.geoportal_app_user where id = \n'
             'delete FROM public.backend_org_employee where user_id = \n'
             'delete FROM public.geoportal_app_user_roles where user_id = \n'
