@@ -341,7 +341,7 @@ def employee_update(request, payload, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
-    password = payload.get('password')
+    re_password_mail = payload.get('re_password_mail')
     user = get_object_or_404(User, pk=pk)
     errors = _employee_validation(payload, user)
     if errors:
@@ -352,9 +352,11 @@ def employee_update(request, payload, pk):
     user.gender=gender
     user.register=register.upper()
     user.username=username
-    if password:
-        user.set_password(password)
     user.save()
+    if re_password_mail:
+        subject = 'Геопортал нууц үг солих'
+        text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+        utils.send_approve_email(user, subject, text)
     Employee.objects.filter(user_id=pk).update(position=position, is_admin=is_admin)
 
     return JsonResponse({'success': True, 'errors': errors})
@@ -372,7 +374,6 @@ def employee_add(request, payload, level, pk):
     email = payload.get('email')
     gender = payload.get('gender')
     register = payload.get('register')
-    password = payload.get('password')
     is_admin = payload.get('is_admin')
     errors = {}
     errors = _employee_validation(payload, None)
@@ -393,8 +394,8 @@ def employee_add(request, payload, level, pk):
         register=register.upper()
     )
     user.roles.add(2)
-    user.set_password(password)
     user.save()
+    utils.send_approve_email(user)
 
     Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
 
