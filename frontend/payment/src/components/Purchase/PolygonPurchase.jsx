@@ -85,12 +85,13 @@ export class PolygonPurchase extends Component {
 
     handleQpay(){
         this.setState(prevState => ({
+            is_modal_open: false,
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
 
     qPayClose(){
-        this.setState({qpay_modal_is: false})
+        this.setState({qpay_modal_is: false, is_modal_info_open: true})
     }
 
     alertOver(){

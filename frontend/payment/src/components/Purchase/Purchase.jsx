@@ -19,6 +19,7 @@ export class Purchase extends Component {
             error_msg: '',
             is_modal_open: false,
             alert_toggle: false,
+            is_modal_info_open: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
         this.qPayClose = this.qPayClose.bind(this)
@@ -26,6 +27,7 @@ export class Purchase extends Component {
         this.alertOut = this.alertOut.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
     }
 
     componentDidMount(){
@@ -78,8 +80,13 @@ export class Purchase extends Component {
         }))
     }
 
+    handleModalApproveClose(){
+        const purchase_id = this.props.match.params.id
+        this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+    }
+
     qPayClose(){
-        this.setState({ qpay_modal_is: false })
+        this.setState({ qpay_modal_is: false, is_modal_info_open: true })
     }
 
     alertOver(){
@@ -92,7 +99,7 @@ export class Purchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, alert_toggle, is_modal_open } = this.state
+        const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, is_modal_info_open, alert_toggle, is_modal_open } = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -183,6 +190,16 @@ export class Purchase extends Component {
                 </div>
             </div>
             <div className={this.state.qpay_modal_is ? 'modal-backdrop fade show' : 'd-none'}></div>
+            {
+             is_modal_info_open &&
+                <Modal
+                    modalClose = {() => this.handleModalApproveClose()}
+                    text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
+                    title="Худалдан авалтын мэдээлэл"
+                    status={this.state.status}
+                    actionNameDelete="зөвшөөрөх"
+                />
+            }
         </div>
         )
     }
