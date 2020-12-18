@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
-import ShowModal from '../../../../../src/components/Modal/ShowModal'
+import Modal from '../../../../../src/components/Modal/InfoModal'
 
 export class Purchase extends Component {
 
@@ -64,7 +64,7 @@ export class Purchase extends Component {
     }
 
     handleModalOpen(){
-        this.setState({ is_modal_open: !this.state.is_modal_open })
+        this.setState({ is_modal_open: true })
     }
 
     handleModalClose(){
@@ -73,12 +73,13 @@ export class Purchase extends Component {
 
     handleQpay(){
         this.setState(prevState => ({
+            is_modal_open: false,
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
 
     qPayClose(){
-        this.setState({qpay_modal_is: false})
+        this.setState({ qpay_modal_is: false })
     }
 
     alertOver(){
@@ -159,11 +160,12 @@ export class Purchase extends Component {
                             </button>
                         </div>
                         { is_modal_open &&
-                            <ShowModal
-                                modalShow = {() => this.handleQpay()}
-                                modalClose = {this.handleModalClose}
+                            <Modal
+                                modalAction={() => this.handleQpay()}
+                                modalClose={this.handleModalClose}
                                 text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
                                 title="Анхааруулга"
+                                actionNameBack="Үргэлжлүүлэх"
                                 status={this.state.status}
                             />
                         }

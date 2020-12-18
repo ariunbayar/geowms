@@ -19,6 +19,7 @@ class SearchBarComponent extends Component {
             bairlal_one_zoom: 7.3376399772248575,
             bairlal_two_zoom: 7.3376399772248575,
             tseg_dugaar_zoom: 7.3376399772248575,
+            bairlal_scale: 5000000,
             zoom3: 10,
             aimagid: -1,
             sumid: -1,
@@ -41,20 +42,25 @@ class SearchBarComponent extends Component {
         this.handleSubmitCoordinateGradus = this.handleSubmitCoordinateGradus.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.handleInputSum = this.handleInputSum.bind(this)
+        this.resetButton = this.resetButton.bind(this)
+        this.setCenterOfMap = this.setCenterOfMap.bind(this)
     }
 
-    handleSubmitCoordinate(event) {
+    handleSubmitCoordinate(event, place) {
         event.preventDefault()
         // const coord = helpers.parseCoordinateString(this.state.coordinate)
         var array = [this.state.coordinatey, this.state.coordinatex]
         this.props.handleSetCenter(array, this.state.bairlal_one_zoom)
+        if (place) {
+            this.props.showOnlyArea(undefined, array, undefined, this.state.bairlal_scale)
+        }
     }
 
     handleSubmitClear(event) {
         event.preventDefault()
         this.setState({sumid: -1, aimagid: -1})
-        var array = [103.525827, 46.723984]
-        this.props.handleSetCenter(array, 5.041301562246971)
+        this.setCenterOfMap()
+        this.props.resetShowArea()
     }
 
     componentDidMount(){
@@ -148,6 +154,17 @@ class SearchBarComponent extends Component {
         }
     }
 
+    setCenterOfMap() {
+        var array = [103.525827, 46.723984]
+        this.props.handleSetCenter(array, 5.041301562246971)
+    }
+
+    resetButton() {
+        this.setState({ bairlal_one_zoom: 7.3376399772248575, bairlal_scale: 5000000 })
+        this.setCenterOfMap()
+        this.props.resetShowArea()
+    }
+
     render() {
         const {error_msg} = this.state
         return (
@@ -189,11 +206,20 @@ class SearchBarComponent extends Component {
                         </div>
                         <div className="input-group mb-3">
                             <div>
+<<<<<<< HEAD
                                 <button className="btn gp-btn-primary" onClick={() => {
                                     this.setState({ aimagid: -1, sumid: -1 })
                                     this.props.resetShowArea()
                                     }}
                                 ><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
+=======
+                                <button
+                                    className="btn gp-btn-primary"
+                                    type="submit"
+                                >
+                                    <i className="fa fa-trash mr-1"></i>Цэвэрлэх
+                                </button>
+>>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
                             </div>
                         </div>
                     </div>
@@ -213,7 +239,7 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="tseg_dugaar_zoom" as="select"
-                                onChange={(e) => this.setState({tseg_dugaar_zoom: e.target.value}) }
+                                onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value }) }
                                 value={this.state.tseg_dugaar_zoom}
                                 className='form-control'>
                                 <option value='2.9903484967519145'>5000000</option>
@@ -234,24 +260,24 @@ class SearchBarComponent extends Component {
                 </form>
 
 
-                <form onSubmit={this.handleSubmitCoordinate} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
+                <form onSubmit={(e) => this.handleSubmitCoordinate(e, 'place')} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
                         <div className="input-group mb-3">
                             <input type="text" className="form-control" placeholder="Өргөрөг"
-                                name="coordinate"
+                                name="Өргөрөг"
                                 onChange={(e) => this.setState({coordinatex: e.target.value}) }
                                 value={this.state.coordinate}
                             />
                             <input type="text" className="form-control" placeholder="Уртраг"
-                                name="coordinate"
+                                name="Уртраг"
                                 onChange={(e) => this.setState({coordinatey: e.target.value}) }
                                 value={this.state.coordinate}
                             />
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="bairlal_one_zoom" as="select"
-                                onChange={(e) => this.setState({bairlal_one_zoom: e.target.value}) }
+                                onChange={(e) => this.setState({ bairlal_one_zoom: e.target.value, bairlal_scale: e.target.options[e.target.selectedIndex].text }) }
                                 value={this.state.bairlal_one_zoom}
                                 className='form-control'>
                                 <option value='2.9903484967519145'>5000000</option>
@@ -263,9 +289,14 @@ class SearchBarComponent extends Component {
                                 <option value='12.194931800954776'>5000</option>
                                 <option value='14.383305008368451'>1000</option>
                         </select>
-                        <div className="input-group mb-3">
-                            <div>
-                                <button className="btn gp-btn-primary my-3" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
+                        <div className="mb-3">
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <button className="btn gp-btn-primary my-3" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
+                                </div>
+                                <div className="col-md-6 d-flex flex-row-reverse">
+                                    <button className="btn gp-btn-primary my-3" type="button" onClick={this.resetButton}><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -3,7 +3,7 @@ import React, { Component, Fragment } from "react"
 import 'ol/ol.css'
 import {Map, View, Feature, Overlay, Observable } from 'ol'
 import {unByKey} from 'ol/Observable'
-import {transform as transformCoordinate} from 'ol/proj'
+import {fromLonLat, transform as transformCoordinate} from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import {getArea, getLength} from 'ol/sphere';
 import {toLonLat} from 'ol/proj';
@@ -335,7 +335,6 @@ export default class BundleMap extends Component {
             },
             autoPanMargin: 65,
             offset: [15, -150],
-            positioning: 'top-right'
         });
 
         map.addOverlay(overlay)
@@ -351,19 +350,14 @@ export default class BundleMap extends Component {
 
             const coordinate = event.coordinate
             this.marker.point.setCoordinates(coordinate)
-            const overlay = this.overlay
 
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
             this.setState({coordinate_clicked})
-            overlay.setPosition(coordinate)
             this.showFeaturesAt(coordinate)
         }
-        // Nov-15: commented for UX
-        //this.showFeaturesAt(event.coordinate)
-
     }
 
     listToJson(feature_info, geodb_table){
@@ -427,7 +421,16 @@ export default class BundleMap extends Component {
         this.is_not_visible_layers = []
     }
 
+<<<<<<< HEAD
     getOnlyFeature(aimag_name, coordinate, sum_name) {
+=======
+    getKiloFromScale(scale) {
+        return scale / 1000
+    }
+
+    getOnlyFeature(aimag_name, coordinate, sum_name, scale) {
+        this.onClickCloser()
+>>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
         this.allLayerVisible()
         var filtered_layer_name
         const filtered_wms = this.state.map_wms_list.map(({layers}) => {
@@ -440,10 +443,23 @@ export default class BundleMap extends Component {
                         if (layer_code == layer.code) {
                             filtered_layer = layer
                             const main_url = layer.tile.getSource().urls[0]
+<<<<<<< HEAD
                             if (sum_name) {
                                 cql_filter = "aimag='" + aimag_name + "' AND sum='" + sum_name + "'"
                                 filtered_layer_name = aimag_name + '_' + sum_name
                             } else {
+=======
+                            if (!aimag_name && coordinate) {
+                                const kilometers = this.getKiloFromScale(scale)
+                                cql_filter = "DWITHIN(geom,Point(" + coordinate[0] + " " + coordinate[1] + ")," + kilometers + ",kilometers)"
+                                filtered_layer_name = coordinate[0] + "," + coordinate[1]
+                            }
+                            else if (aimag_name && sum_name) {
+                                cql_filter = "aimag='" + aimag_name + "' AND sum='" + sum_name + "'"
+                                filtered_layer_name = aimag_name + '_' + sum_name
+                            }
+                            else if (aimag_name && !sum_name) {
+>>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
                                 cql_filter = "aimag='" + aimag_name + "'"
                                 filtered_layer_name = aimag_name
                             }
@@ -474,7 +490,11 @@ export default class BundleMap extends Component {
             }
         })
         this.setState({filtered_wms, filtered_layer_name})
+<<<<<<< HEAD
         this.showFeaturesAt(coordinate)
+=======
+        const map_coord = fromLonLat([coordinate[1], coordinate[0]])
+>>>>>>> 57898d3909b0ecca7990d99193a10327776ee0a4
     }
 
     getWMSArray() {
@@ -488,6 +508,9 @@ export default class BundleMap extends Component {
     }
 
     showFeaturesAt(coordinate) {
+        const overlay = this.overlay
+        overlay.setPosition(coordinate)
+
         this.sendFeatureInfo = []
         const view = this.map.getView()
         const projection = view.getProjection()

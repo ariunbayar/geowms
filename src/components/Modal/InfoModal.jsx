@@ -85,8 +85,7 @@ export default class Modal extends Component {
                                 {this.props.text}
                             </div>
                             <div className="modal-footer" style={{border: 'none'}}>
-                                <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
-                                    <i className="fa fa-times"></i>
+                                <button type="button" onClick={() => this.handleProceed()} className="btn btn-primary waves-effect waves-light">
                                     {this.props.actionNameBack ? this.props.actionNameBack : '  Хаах'}
                                 </button>
 
@@ -98,5 +97,4 @@ export default class Modal extends Component {
             </Fragment>
         )
     }
-
 }

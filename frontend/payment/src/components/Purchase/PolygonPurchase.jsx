@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
 import Modal from '../../../../../src/components/Modal/InfoModal'
-import ShowModal from '../../../../../src/components/Modal/ShowModal'
 
 export class PolygonPurchase extends Component {
 
@@ -164,11 +163,12 @@ export class PolygonPurchase extends Component {
                             </button>
                         </div>
                         { is_modal_open &&
-                            <ShowModal
-                                modalShow = {() => this.handleQpay()}
-                                modalClose = {this.handleModalClose}
+                            <Modal
+                                modalAction={() => this.handleQpay()}
+                                modalClose={this.handleModalClose}
                                 text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
                                 title="Анхааруулга"
+                                actionNameBack="Үргэлжлүүлэх"
                                 status={this.state.status}
                             />
                         }
