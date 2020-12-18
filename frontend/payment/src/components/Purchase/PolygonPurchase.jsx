@@ -20,6 +20,7 @@ export class PolygonPurchase extends Component {
             purchase_all: [],
             qpay_modal_is: false,
             is_modal_info_open: false,
+            is_modal_open: false,
             alert_toggle: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
@@ -28,6 +29,8 @@ export class PolygonPurchase extends Component {
         this.alertOut = this.alertOut.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
         this.downloadPurchase = this.downloadPurchase.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
     }
 
     downloadPurchase(id) {
@@ -67,6 +70,14 @@ export class PolygonPurchase extends Component {
 
     }
 
+    handleModalOpen(){
+        this.setState({ is_modal_open: !this.state.is_modal_open })
+    }
+
+    handleModalClose(){
+        this.setState({is_modal_open: false})
+    }
+
     handleModalApproveClose(){
       const purchase_id = this.props.match.params.id
       this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
@@ -74,12 +85,13 @@ export class PolygonPurchase extends Component {
 
     handleQpay(){
         this.setState(prevState => ({
+            is_modal_open: false,
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
 
     qPayClose(){
-        this.setState({qpay_modal_is: false})
+        this.setState({qpay_modal_is: false, is_modal_info_open: true})
     }
 
     alertOver(){
@@ -92,7 +104,7 @@ export class PolygonPurchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, qpay_modal_is, alert_msg, alert_toggle, is_modal_info_open } = this.state
+        const { purchase, purchase_all, qpay_modal_is, alert_msg, alert_toggle, is_modal_info_open, is_modal_open } = this.state
         const { items, polygon, layers} = this.state
         return (
         <div className="container my-4">
@@ -147,10 +159,20 @@ export class PolygonPurchase extends Component {
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
-                                <h4 className="text-succes p-3">QPAY ээр төлбөр төлөх</h4>
+                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
+                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
+                        { is_modal_open &&
+                            <Modal
+                                modalAction={() => this.handleQpay()}
+                                modalClose={this.handleModalClose}
+                                text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
+                                title="Анхааруулга"
+                                actionNameBack="Үргэлжлүүлэх"
+                                status={this.state.status}
+                            />
+                        }
                     </div>
                 </div>
             </div>
@@ -158,7 +180,7 @@ export class PolygonPurchase extends Component {
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} handleClose={this.qPayClose} history={this.props.history.push} price={items.total} ></QPay>
-                        <button className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
+                        <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
                         </button>
                     </div>

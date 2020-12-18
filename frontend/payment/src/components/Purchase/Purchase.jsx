@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
+import Modal from '../../../../../src/components/Modal/InfoModal'
 
 export class Purchase extends Component {
 
@@ -16,12 +17,17 @@ export class Purchase extends Component {
             names: [],
             check_error: false,
             error_msg: '',
+            is_modal_open: false,
             alert_toggle: false,
+            is_modal_info_open: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
         this.qPayClose = this.qPayClose.bind(this)
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
     }
 
     componentDidMount(){
@@ -59,14 +65,28 @@ export class Purchase extends Component {
 
     }
 
+    handleModalOpen(){
+        this.setState({ is_modal_open: true })
+    }
+
+    handleModalClose(){
+        this.setState({is_modal_open: false})
+    }
+
     handleQpay(){
         this.setState(prevState => ({
+            is_modal_open: false,
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
 
+    handleModalApproveClose(){
+        const purchase_id = this.props.match.params.id
+        this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+    }
+
     qPayClose(){
-        this.setState({qpay_modal_is: false})
+        this.setState({ qpay_modal_is: false, is_modal_info_open: true })
     }
 
     alertOver(){
@@ -79,7 +99,7 @@ export class Purchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, alert_toggle } = this.state
+        const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, is_modal_info_open, alert_toggle, is_modal_open } = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -142,10 +162,20 @@ export class Purchase extends Component {
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
-                                <h4 className="text-succes p-3">QPAY ээр төлбөр төлөх</h4>
+                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
+                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
+                        { is_modal_open &&
+                            <Modal
+                                modalAction={() => this.handleQpay()}
+                                modalClose={this.handleModalClose}
+                                text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
+                                title="Анхааруулга"
+                                actionNameBack="Үргэлжлүүлэх"
+                                status={this.state.status}
+                            />
+                        }
                     </div>
                 </div>
             </div>
@@ -153,13 +183,23 @@ export class Purchase extends Component {
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} handleClose={this.qPayClose} history={this.props.history.push} price={purchase_all.total_amount} ></QPay>
-                        <button className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
+                        <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
                         </button>
                     </div>
                 </div>
             </div>
             <div className={this.state.qpay_modal_is ? 'modal-backdrop fade show' : 'd-none'}></div>
+            {
+             is_modal_info_open &&
+                <Modal
+                    modalClose = {() => this.handleModalApproveClose()}
+                    text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
+                    title="Худалдан авалтын мэдээлэл"
+                    status={this.state.status}
+                    actionNameDelete="зөвшөөрөх"
+                />
+            }
         </div>
         )
     }
