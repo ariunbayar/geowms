@@ -88,7 +88,7 @@ export default class  ShowModal extends Component {
             <Fragment>
                 <div className={className}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content animated" style={{border: 'none', borderRadius: "7px"}}>
+                        <div className="modal-content">
                             <div className="col-md-12 offset-md-12 float-right my-1">
                                 <button type="button" className="close mt-2 mr-2" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
@@ -100,11 +100,8 @@ export default class  ShowModal extends Component {
                             <div className="modal-body text-wrap ml-2 mr-2 text-center">
                                 {this.props.text}
                             </div>
-                            <div className="modal-footer" style={{border: 'none'}}>
-                                <button type="button" onClick={() => this.handleShow()} className="btn btn-primary waves-effect waves-light">
-                                    {this.props.actionNameBack ? this.props.actionNameBack : 'Үргэлжлүүлэх'}
-                                </button>
-
+                            <div className="modal-footer">
+                                <button type="button" onClick={() => this.handleShow()} className="btn btn-primary waves-effect waves-light">Үргэлжлүүлэх</button>
                             </div>
                         </div>
                     </div>

@@ -30,6 +30,8 @@ export class PolygonPurchase extends Component {
         this.alertOut = this.alertOut.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
         this.downloadPurchase = this.downloadPurchase.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
     }
 
     downloadPurchase(id) {
@@ -69,8 +71,12 @@ export class PolygonPurchase extends Component {
 
     }
 
-    handleModal(){
-        this.setState({ is_modal_open: true })
+    handleModalOpen(){
+        this.setState({ is_modal_open: !this.state.is_modal_open })
+    }
+
+    handleModalClose(){
+        this.setState({is_modal_open: false})
     }
 
     handleModalApproveClose(){
@@ -153,16 +159,15 @@ export class PolygonPurchase extends Component {
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModal()}>
+                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
                                 <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
-                        {
-                        is_modal_open &&
+                        { is_modal_open &&
                             <ShowModal
                                 modalShow = {() => this.handleQpay()}
-                                modalClose = {() => this.backToForm()}
-                                text='QPay-ээр төлбөр төлөхөд 500 төгрөгний шимтгэл авна.'
+                                modalClose = {this.handleModalClose}
+                                text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
                                 title="Анхааруулга"
                                 status={this.state.status}
                             />
@@ -174,7 +179,7 @@ export class PolygonPurchase extends Component {
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} handleClose={this.qPayClose} history={this.props.history.push} price={items.total} ></QPay>
-                        <button className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
+                        <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
                         </button>
                     </div>
