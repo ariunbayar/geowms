@@ -234,19 +234,14 @@ def refreshMaterializedView(fid):
 
 
 def _generate_user_token():
-    token = uuid.uuid4().hex[:32]
-    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
-    if UserValidationEmail.objects.filter(token=token).first():
-        _generate_user_token()
-    return token
+    return uuid.uuid4().hex[:32]
 
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
 
 
-def send_approve_email(user):
-
+def send_approve_email(user, subject=None, text=None):
     if not user.email:
         return False
 
@@ -259,8 +254,11 @@ def send_approve_email(user):
         valid_before=timezone.now() + timedelta(days=90)
     )
     host_name = get_config('EMAIL_HOST_NAME')
-    subject = 'Геопортал хэрэглэгч баталгаажуулах'
-    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://{host_name}/gov/secure/approve/{token}/'.format(token=token, host_name=host_name)
+    if not subject:
+        subject = 'Геопортал хэрэглэгч баталгаажуулах'
+    if not text:
+        text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
+    msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
     connection = get_connection(
