@@ -355,7 +355,7 @@ def employee_update(request, payload, pk):
     if password:
         user.set_password(password)
     user.save()
-    Employee.objects.filter(pk=pk).update(position=position, is_admin=is_admin)
+    Employee.objects.filter(user_id=pk).update(position=position, is_admin=is_admin)
 
     return JsonResponse({'success': True, 'errors': errors})
 

@@ -110,7 +110,6 @@ export class UserAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
         }, 2000)
     }
@@ -118,8 +117,6 @@ export class UserAdd extends Component {
     modalClose(){
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
     }
 

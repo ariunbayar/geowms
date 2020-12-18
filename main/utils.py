@@ -15,7 +15,7 @@ from backend.dedsanbutets.models import ViewNames
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
-from django.core.mail import send_mail
+from django.core.mail import send_mail, get_connection
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -241,6 +241,10 @@ def _generate_user_token():
     return token
 
 
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1", "True")
+
+
 def send_approve_email(user):
 
     if not user.email:
@@ -254,13 +258,21 @@ def send_approve_email(user):
         token=token,
         valid_before=timezone.now() + timedelta(days=90)
     )
-
+    host_name = get_config('EMAIL_HOST_NAME')
     subject = 'Геопортал хэрэглэгч баталгаажуулах'
-    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://{host_name}/gov/secure/approve/{token}/'.format(token=token, host_name=settings.EMAIL_HOST_NAME)
-    from_email = settings.EMAIL_HOST_USER
+    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://{host_name}/gov/secure/approve/{token}/'.format(token=token, host_name=host_name)
+    from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
-
-    send_mail(subject, msg, from_email, to_email, fail_silently=False)
+    connection = get_connection(
+        username=from_email,
+        password=get_config('EMAIL_HOST_PASSWORD'),
+        port=get_config('EMAIL_PORT'),
+        host=get_config('EMAIL_HOST'),
+        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_ssl=False,
+        fail_silently=False,
+    )
+    send_mail(subject, msg, from_email, to_email, connection=connection)
 
     return True
 
