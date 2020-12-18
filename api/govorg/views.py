@@ -11,8 +11,10 @@ from api.utils import filter_layers, replace_src_url
 from backend.govorg.models import GovOrg as System
 from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
+from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
 import main.geoserver as geoserver
-
+from backend.org.models import Employee
+from backend.dedsanbutets.models import ViewNames
 
 def _get_service_url(request, token):
     url = reverse('api:service:system_proxy', args=[token])
@@ -84,3 +86,40 @@ def qgis_submit(request):
 
     except Exception:
         return JsonResponse({'success': False})
+
+
+def _get_layer_name(employee):
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_VIEW).values_list('feature_id', flat=True).distinct('feature_id')
+    allowed_layers = ViewNames.objects.filter(feature_id__in=feature_ids).values_list("view_name", flat=True)
+    allowed_layers = ['gp_layer_' + allowed_layer for allowed_layer in allowed_layers]
+    return allowed_layers
+
+
+@require_GET
+def emp_perm_proxy(request):
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    employee = get_object_or_404(Employee, user=request.user)
+    allowed_layers = _get_layer_name(employee)
+    conf_geoserver = geoserver.get_connection_conf()
+    base_url = 'http://{host}:{port}/geoserver/ows'.format(
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port'],
+    )
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    content = rsp.content
+
+    if request.GET.get('REQUEST') == 'GetCapabilities':
+        if request.GET.get('SERVICE') == 'WMS':
+            content = filter_layers(content, allowed_layers)
+        else:
+            raise Exception()
+
+    content_type = rsp.headers.get('content-type')
+    rsp = HttpResponse(content, content_type=content_type)
+
+    return rsp

@@ -10,9 +10,9 @@ from geojson import Feature, FeatureCollection
 
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, MDatasGeographical, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, MDatasGeographical, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography, EmpPerm, EmpPermInspire
 from govorg.backend.org_request.models import ChangeRequest
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 
@@ -30,6 +30,10 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
+from backend.dedsanbutets.models import ViewNames
+from backend.wmslayer.models import WMSLayer
+from geoportal_app.models import User
+from itertools import groupby
 
 from main.utils import (
     gis_delete,
@@ -221,27 +225,25 @@ def geom_type(request, pid, fid):
 
 @require_GET
 @ajax_required
-def rows(request, pid, fid):
-    cursor = connections['default'].cursor()
-    sql = """
-        SELECT
-            geo_id as id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
-        FROM
-            m_geo_datas
-        WHERE
-            feature_id = {fid}
-        order by created_on desc
-        limit {limit}
-    """.format(
-        fid=fid,
-        limit=4000
-    )
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
+def get_wms_layer(request, tid, pid, fid):
+    bundle_obj = Bundle.objects.filter(ltheme_id=tid).first()
+    view_name_ob = ViewNames.objects.filter(feature_id=fid).first()
     rsp = {
-        'rows': rows,
+        'success': False,
+        'name': '',
+        'url': '',
+        'code': '',
     }
+    if view_name_ob:
+        wms_layer = WMSLayer.objects.filter(code__contains=view_name_ob.view_name).first()
+        url = reverse('api:service:wms_proxy', args=(bundle_obj.id ,wms_layer.wms.pk))
+        if wms_layer:
+            rsp = {
+                'success': True,
+                'name': wms_layer.wms.name,
+                'url': request.build_absolute_uri(url),
+                'code': wms_layer.code,
+            }
     return JsonResponse(rsp)
 
 

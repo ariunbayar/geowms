@@ -1,8 +1,25 @@
 import {handleResponse, getGetOptions, getPostOptions} from '../../components/helpers/service'
 
+class Capabilities {
+
+    constructor(xml_raw) {
+        this.xml = (new DOMParser()).parseFromString(xml_raw, "text/xml")
+    }
+
+    getLayers() {
+        const nodes = this.xml.querySelectorAll('WMS_Capabilities > Capability Layer')
+        return [...nodes].map((layer) => {
+            return {
+                name: layer.querySelector('Title').innerHTML,
+                code: layer.querySelector('Name').innerHTML,
+            }
+        })
+    }
+}
+
 export const service = {
     geom,
-    rows,
+    getWmsLayer,
     remove,
     save,
     detail,
@@ -23,6 +40,7 @@ export const service = {
     getMetaFields,
     createMeta,
     deleteMeta,
+    getLayers
 }
 
 const prefix = '/gov/api/inspire'
@@ -38,9 +56,9 @@ function getRole(pid, fid) {
     return fetch(`${prefix}/${pid}/${fid}/getRoles/`, requestOptions).then(handleResponse)
 }
 
-function rows(pid, fid) {
+function getWmsLayer(tid, pid, fid) {
     const requestOptions = getGetOptions()
-    return fetch(`${prefix}/${pid}/${fid}/rows/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${tid}/${pid}/${fid}/get-wms-layer/`, requestOptions).then(handleResponse)
 }
 
 function geomType(pid, fid) {
@@ -185,4 +203,25 @@ function deleteMeta(pk) {
         ...getGetOptions(),
     }
     return fetch(`${meta_prefix}/${pk}/delete/`, requestOptions).then(handleResponse)
+}
+
+function getLayers(emp_perm_prefix) {
+
+    return new Promise((resolve, reject) => {
+        const requestOptions = {
+            method: 'GET',
+        }
+        const url = emp_perm_prefix + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities'
+        fetch(url, requestOptions)
+            .then(rsp => rsp.blob())
+            .then(data => {
+                const reader = new FileReader()
+                reader.onloadend = () => {
+                    const layers = (new Capabilities(reader.result)).getLayers()
+                    resolve(layers)
+                }
+                reader.readAsText(data)
+            })
+            .catch(reject)
+    })
 }

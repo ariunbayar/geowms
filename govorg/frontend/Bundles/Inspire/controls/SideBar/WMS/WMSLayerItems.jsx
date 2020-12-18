@@ -14,16 +14,14 @@ export default class WMSLayerItems extends Component {
 
     render() {
         return (
-            <ul style={{listStyle: 'none'}}>
+            <div className="row">
                 {this.state.layers.map((layer, idx) =>
                     <WMSLayerItem
                         layer={layer}
                         key={idx}
-                        is_visible={this.props.is_visible}
-                        toggle={this.props.toggle}
                     />
                 )}
-            </ul>
+            </div>
         )
     }
 
