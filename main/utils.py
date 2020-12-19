@@ -536,3 +536,44 @@ def get_configs(config_names):
     }
 
     return rsp
+
+
+def _generate_handred_token():
+    tokens = [uuid.uuid4().hex[:32] for i in range(0,100)]
+    return tokens
+
+
+def _array_split(array, text):
+    split_array = []
+    for i in array:
+        if not text == i:
+            split_array.append(i)
+    return split_array
+
+
+def generate_token(kind):
+    KindToken = apps.get_model('backend_tokens', 'KindToken')
+    token_obj = KindToken.objects.filter(kind=kind, is_used=False).first()
+    if token_obj:
+        token_obj.is_used = True
+        token = token_obj.token
+        token_obj.save()
+    else:
+        tokens = _generate_handred_token()
+        tokens_search_all = KindToken.objects.filter(token__in=tokens, kind=kind).values_list('token', flat=True)
+        for tokens_search in tokens_search_all:
+            tokens = _array_split(tokens, tokens_search)
+        kind_token_obs = []
+        for token in tokens:
+            kind_token_obs.append(KindToken(
+                kind=kind,
+                token=token,
+                is_used=False
+            ))
+        KindToken.objects.bulk_create(kind_token_obs)
+        token_obj = KindToken.objects.filter(kind=kind, is_used=False).first()
+        token_obj.is_used = True
+        token = token_obj.token
+        token_obj.save()
+
+    return token
