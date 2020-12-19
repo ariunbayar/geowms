@@ -10,15 +10,19 @@ class PopUpCmp extends Component {
     constructor(props) {
 
         super(props)
-        this.allfields = []
         this.state = {
             startNumber: null,
             totalNumner: null,
             is_prev: false,
             is_plus: true,
+            data: [],
+            mode: '',
+            id: '',
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
+        this.checkModeAndCode = this.checkModeAndCode.bind(this)
+        this.openCartSide = this.openCartSide.bind(this)
     }
 
     componentDidMount() {
@@ -30,7 +34,8 @@ class PopUpCmp extends Component {
         const { datas } = this.props
         if(pP.datas !== datas) {
             const startNumber = 1
-            this.setState({ datas, fields: this.allfields, startNumber, is_plus: true, is_prev: false })
+            this.setState({ startNumber, is_plus: true, is_prev: false })
+            this.checkModeAndCode(startNumber, datas)
         }
     }
 
@@ -43,12 +48,12 @@ class PopUpCmp extends Component {
         } else {
             this.setState({ is_plus: true, is_prev: true })
         }
-        this.checkMode(plus)
+        this.checkModeAndCode(plus, datas)
         this.setState({ startNumber: plus })
     }
 
     prevTab() {
-        const { startNumber } = this.state
+        const { startNumber, datas } = this.state
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
         if (minus == 1) {
@@ -56,15 +61,28 @@ class PopUpCmp extends Component {
         }else {
             this.setState({ is_plus: true, is_prev: true })
         }
-        this.checkMode(minus)
+        this.checkModeAndCode(minus, datas)
         this.setState({ startNumber: minus })
     }
 
-    checkMode(number) {
-        const { datas } = this.state
-        const last = datas[number - 1].length - 1
-        const mode = datas[number - 1][last]['mode']
+    checkModeAndCode(number, datas) {
+        const mode = datas[number - 1][1]
+        const code = datas[number - 1][2]
+        const id = datas[number - 1][0][1][1]
+        if (id[0] == 'point_id') {
+            this.setState({ id: id[1] })
+        }
+        this.setNowData(number, datas, mode, code)
         this.props.setSource(mode)
+    }
+
+    setNowData(number, datas, mode) {
+        const data = datas[number - 1]
+        this.setState({ data, mode, datas })
+    }
+
+    openCartSide() {
+        this.props.cartButton(true, this.state.data, this.state.code, this.state.id)
     }
 
     render() {
@@ -94,36 +112,41 @@ class PopUpCmp extends Component {
                                 :
                                 "Сонгоогүй байна"
                             }
-                            {!datas && <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
-                                <i className="fa fa-times" aria-hidden="true"></i>
-                            </div>}
+                            {!datas &&
+                                <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
+                                    <i className="fa fa-times" aria-hidden="true"></i>
+                                </div>
+                            }
                         </div>
                     </div>
                     <div className="ol-popup-contet">
-                        {datas && datas.length > 0 && datas.map((data, idx) =>
-                                    data.map((info, ix) =>
-                                        idx + 1 == startNumber &&
-                                        (info.field_name == 'name' ?
-                                        <b key={ix}>
-                                            {info.value}
-                                        </b> : null)
-                        ))}
+                        {datas && datas.map((layer, idx)=>
+                            idx + 1 == startNumber &&
+                            layer[0].map((values, v_idx) =>
+                                v_idx == 1 &&
+                                values.map((value, val_idx) =>
+                                value[0] == 'point_name' ?
+                                <b key={val_idx}>{value[1]}</b>
+                                : null
+                        )))}
                         <hr className="m-1 border border-secondary rounded"/>
                         <table className="table borderless no-padding">
                             <tbody>
                                 {
                                     datas && datas.length > 0
                                     ?
-                                        datas.map((data, idx) =>
-                                            data.map((info, ix) =>
-                                                (idx + 1 == startNumber &&
-                                                    ix != 0 &&
-                                                <tr style={{fontSize: '12px'}} key={ix}>
-                                                    <th>{info.mn_name}</th>
-                                                    <td>{info.value}</td>
+                                        datas.map((layer, idx)=>
+                                        (idx + 1 == startNumber &&
+                                        layer[0].map((values, v_idx) =>
+                                            v_idx == 1 &&
+                                            values.map((value, val_idx) =>
+                                                value[0] !== 'point_name' &&
+                                                <tr style={{fontSize: '12px'}} key={val_idx}>
+                                                    <th>{value[0]}</th>
+                                                    <td>{value[1]}</td>
                                                 </tr>
-                                            ))
-                                        )
+                                            )
+                                        )))
                                     :
                                     <tr>
                                         <th>Мэдээлэл байхгүй байна</th>
@@ -132,6 +155,20 @@ class PopUpCmp extends Component {
                             </tbody>
                         </table>
                     </div>
+                    {
+                        this.state.mode == 'mpoint_view'
+                        ?
+                            <div>
+                                <button
+                                    className="btn btn-lg gp-btn-primary my-3 mx-3"
+                                    onClick={() => this.openCartSide()}
+                                >
+                                    Сагсанд нэмэх
+                                </button>
+                            </div>
+                        :
+                            null
+                    }
                     <div className="ol-popup-arrow">
 
                     </div>
@@ -186,9 +223,9 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource) {
+    getData(isload, datas, close, setSource, cartButton, code) {
+        // const datanud = [[["Полигонометрийн_сүлжээний_цэг.55",[["objectid","null"],["point_id","45546"],["point_name","holymoly"],["pid","PDF45546"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","Өвөрхангай"],["sum","Богд"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","5"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"], [["Полигонометрийн_сүлжээний_цэг.58",[["objectid","null"],["point_id","489489"],["point_name","holyshit"],["pid","45245245"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","thhh"],["sum","dsadsadsa"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","2"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"]]
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource})
+        this.renderComponent({datas, close, setSource, cartButton, code})
     }
-
 }

@@ -123,9 +123,9 @@ export default class BundleMap extends Component {
       this.setState({'is_modal_info_open': false})
     }
 
-    cartButton(is_cart, content,  code){
+    cartButton(is_cart, content, code, point_id){
         if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code)
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code, point_id)
         }
     }
 
@@ -553,21 +553,28 @@ export default class BundleMap extends Component {
                                             if(this.sendFeatureInfo.length > 0) {
                                                 this.sendFeatureInfo.map((feat, idx) => {
                                                     if (feat[0].field_name !== feature_info[0][0]) {
-                                                        const object = this.listToJson(feature_info, geodb_table)
-                                                        this.sendFeatureInfo.push(object)
+                                                        // const object = this.listToJson(feature_info, geodb_table)
+                                                        feature_info.push(geodb_table)
+                                                        feature_info.push(code)
+                                                        this.sendFeatureInfo.push(feature_info)
                                                     }
                                                 })
                                             } if (this.sendFeatureInfo.length == 0) {
-                                                const object = this.listToJson(feature_info, geodb_table)
-                                                this.sendFeatureInfo.push(object)
+                                                // const object = this.listToJson(feature_info, geodb_table)
+                                                feature_info.push(geodb_table)
+                                                feature_info.push(code)
+                                                this.sendFeatureInfo.push(feature_info)
                                             }
-                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
-                                            if(geodb_table == 'mpoint_view'){
+                                            if(geodb_table == 'mpoint_view') {
                                                 this.state.vector_layer.setSource(null)
+                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
+                                            }
+                                            else {
+                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
                                             }
                                         }
                                         else {
-                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
                                         }
                                         // if(geodb_table == 'mpoint_view'){
                                         //     if(feature_info.length > 0){

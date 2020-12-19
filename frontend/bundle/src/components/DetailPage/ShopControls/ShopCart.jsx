@@ -48,7 +48,7 @@ export class Cart extends Component{
                 {
                     name = 'Нэр байхгүй байна'
                 }
-                var arr1 = [this.props.content[0][1][0]]
+                var arr1 = [this.props.content[0][1][1]]
                 var json = [{ 'name': name, 'id': arr1[0][1] }]
                 this.setState({ data: json, is_button: false, })
             }
@@ -56,7 +56,7 @@ export class Cart extends Component{
     }
 
     componentDidUpdate(pP, pS){
-        if(pP.coordinate !== this.props.coordinate){
+        if(pP.point_id !== this.props.point_id) {
             if(this.props.torf == true){
                 if(this.props.content.length !== 0){
                     var arr = [this.props.content[0][1][2]]
@@ -67,7 +67,7 @@ export class Cart extends Component{
                     {
                         name = 'Нэр байхгүй байна'
                     }
-                    var arr1 = [this.props.content[0][1][0]]
+                    var arr1 = [this.props.content[0][1][1]]
                     var json = [{ 'name': name ,'id': arr1[0][1] }]
                     const found = this.state.data.filter(element => {
                         return element.id == json[0].id
@@ -86,10 +86,10 @@ export class Cart extends Component{
                     }
                 }
             }
-        }
-        if(pS.data !== this.state.data){
-            if(this.state.data.length == 0){
-                this.setState({ is_button: true })
+            if(pS.data !== this.state.data){
+                if(this.state.data.length == 0){
+                    this.setState({ is_button: true })
+                }
             }
         }
     }
@@ -173,7 +173,7 @@ export class Cart extends Component{
                 this.div.push(
                     <div className="rounded bg-light card-baraa row shadow-sm bg-white"  key={key}>
                         <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.id)}></i></div>
-                        <div className="col-md-10 name"><b>{idx}. Цэгийн нэр: </b>{data.name}</div>
+                        <span className="col-md-10 name"><b>{idx}. Цэгийн нэр: </b>{data.name}</span>
                     </div>
                 )
             })
@@ -197,9 +197,7 @@ export class Cart extends Component{
                 <div>
                 <div className="cart-button">
                     <div className="card-count">
-                        <span classname="cart-count-span text-success">
-                            {data.length}
-                        </span>
+                        {data.length}
                     </div>
                     <div className="card-icon">
                         <i className="fa fa-shopping-cart" aria-hidden="true"></i>
@@ -222,7 +220,7 @@ export class Cart extends Component{
                         null
                     }
                     {this.state.is_purchase ?
-                        <button className="btn gp-btn-primary" disabled>
+                        <button className="btn gp-btn-primary my-4" disabled>
                             <div className="spinner-border" role="status">
                                 <span className="sr-only"></span>
                             </div>
@@ -270,7 +268,7 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, x, y, content, code) {
-        this.renderComponent({coordinate, torf, x, y, content, code})
+    showModal(coordinate, torf, x, y, content, code, point_id) {
+        this.renderComponent({coordinate, torf, x, y, content, code, point_id})
     }
 }
