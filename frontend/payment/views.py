@@ -5,6 +5,7 @@ import PIL.Image as Image
 import urllib.request
 import uuid
 import json
+import math
 import subprocess
 from fpdf import FPDF
 from datetime import date
@@ -315,10 +316,11 @@ def _update_and_add_column_with_value(path, file_name):
     return True
 
 
-def _create_folder_payment_id(type, payment_id):
-    path = os.path.join(settings.FILES_ROOT, type, str(payment_id))
+def _create_folder_payment_id(folder_name, payment_id):
+    path = os.path.join(settings.FILES_ROOT, folder_name, str(payment_id))
     if not os.path.isdir(path):
         os.mkdir(path)
+    return path
 
 
 def _create_shp_file(payment, layer, polygon):
@@ -329,7 +331,7 @@ def _create_shp_file(payment, layer, polygon):
 
     try:
         file_type = 'ESRI SHAPEFILE'
-        _create_folder_payment_id('shape', payment.id)
+        path = _create_folder_payment_id('shape', payment.id)
         file_ext = '.shp'
         filename = os.path.join(path, str(layer.code) + file_ext)
 
@@ -456,9 +458,8 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
 
     size = _get_size_from_extent(x1, y1, x2, y2)
 
-    path = os.path.join(settings.FILES_ROOT, folder_name, str(payment.id))
-    if not os.path.isdir(path):
-        os.mkdir(path)
+
+    path = _create_folder_payment_id(folder_name, payment.id)
 
     file_ext = '.' + download_type
     filename = os.path.join(path, str(geoserver_layer) + file_ext)
@@ -597,6 +598,189 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
         })
         prev_feature_id = feature_id
     return infos
+
+def _table_json():
+    table_col = [
+        {
+            'width': 10,
+            'head_name': 'Д/д',
+            'body_name': '',
+        },
+        {
+            'width': 30,
+            'head_name': 'Аймгийн нэр',
+            'body_name': 'aimag',
+        },
+        {
+            'width': 30,
+            'head_name': 'Сумын нэр',
+            'body_name': 'sum',
+        },
+        {
+            'width': 30,
+            'head_name': 'Цэгийн дугаар',
+            'body_name': 'point_id',
+        },
+        {
+            'width': 30,
+            'head_name': 'Өргөрөг',
+            'body_name': 'sheet2',
+        },
+        {
+            'width': 30,
+            'head_name': 'Уртраг',
+            'body_name': 'sheet3',
+        },
+        {
+            'width': 30,
+            'head_name': 'N_UTM',
+            'body_name': 'n_utm',
+        },
+        {
+            'width': 30,
+            'head_name': 'E_UTM',
+            'body_name': 'e_utm',
+        },
+        {
+            'width': 20,
+            'head_name': 'Өндөр',
+            'body_name': 'ondor',
+        },
+    ]
+    return table_col
+
+
+def _lat_long_to_utm_only_point(lat, longuete):
+    from django.contrib.gis.geos import Point
+    data = [lat, longuete]
+    geom = Point(data, srid=4326)
+    transformed = geom.transform(3857, clone=True)
+    return [str("%.6f" % transformed.coords[0]), str("%.6f" % transformed.coords[1])]
+
+
+def _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pdf):
+    this_columns = []
+    max_height = 0
+    for row in range(0, len(table_col)):
+        if row != 0:
+            cell_width = table_col[row]['width']
+            cell_text = str(point_infos[idx][table_col[row]['body_name']])
+            zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
+            if zuruu >= 1:
+                max_height = cell_height * (zuruu + 1)
+    if max_height < cell_height:
+        max_height = cell_height
+    return max_height
+
+
+def _create_lavlagaa_file(point_infos, path):
+    table_col = _table_json()
+    class PDF(FPDF):
+        def footer(self):
+            self.set_y(-15)
+            self.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+            self.set_font(font_name, '', 8)
+            self.set_x(-40)
+            self.cell(0, 8, 'Геопортал', 0, 0, 'C')
+
+        def table_header(self):
+            pdf.cell(30)
+
+            pdf.set_font(font_name, '', 11)
+            for col in range(0, len(table_col)):
+                pdf.cell(table_col[col]['width'], 10, str(table_col[col]['head_name']), 1, 0, 'C')
+
+            pdf.ln()
+
+    pdf = PDF()
+    pdf.add_page(orientation='Landscape')
+    pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
+    org_name = 'Мэдээлэл холбоо технологийн их сургууль'
+    class_name = 'Өндрийн сүлжээний цэг'
+    font_name = 'DejaVu'
+
+    pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font(font_name, '', 15)
+    pdf.cell(0, 8, org_name, 0, 2, 'C')
+    pdf.set_font(font_name, '', 5)
+    pdf.cell(0, 2, '( ААН-ын нэр )', 0, 2, 'C')
+
+    pdf.ln(10)
+
+    pdf.set_font(font_name, '', 15)
+    pdf.cell(0, 8, class_name, 0, 2, 'C')
+    pdf.set_font(font_name, '', 5)
+    pdf.cell(0, 4, '( мэдээллийн утга )', 0, 2, 'C')
+
+    pdf.ln(5)
+
+    pdf.set_font('Arial', '', 10)
+    pdf.set_x(-40)
+    pdf.cell(10, 10, date.today().strftime("%Y-%m-%d"))
+
+    pdf.ln(20)
+    pdf.table_header()
+
+    end_y = 0
+    for idx in range(0, len(point_infos)):
+        pdf.cell(30)
+        pdf.set_font(font_name, '', 9)
+        current_x = pdf.get_x()
+        current_y = pdf.get_y()
+        cell_height = 5
+        calc_cell_height = _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pdf)
+        for row in range(0, len(table_col)):
+            cell_width = table_col[row]['width']
+            if row == 0:
+                pdf.cell(cell_width, calc_cell_height, str(idx + 1), 1, 0, 'L')
+                end_y = pdf.get_y()
+            else:
+                before_cell_width = table_col[row - 1]['width']
+                current_x = current_x + before_cell_width
+                pdf.set_xy(current_x, current_y)
+                cell_text = str(point_infos[idx][table_col[row]['body_name']])
+                zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
+                if zuruu >= 1:
+                    pdf.multi_cell(cell_width, cell_height, cell_text, 1, 'L', False)
+                else:
+                    pdf.cell(cell_width, calc_cell_height, cell_text, 1, 0, 'L', False)
+            if pdf.get_y() > end_y:
+                end_y = pdf.get_y()
+        pdf.set_y(end_y)
+        if calc_cell_height == cell_height:
+            pdf.ln()
+
+    file_name = 'lavlagaa'
+    file_ext = 'doc'
+    pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
+
+
+def _create_lavlagaa_infos(payment):
+    point_infos = []
+    # payment = Payment.objects.filter(id=95).first()
+    points = PaymentPoint.objects.filter(payment=payment)
+    class_names = []
+    for point in points:
+        if point.pdf_id:
+            mpoints = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id)
+            for mpoint in mpoints:
+                lat = mpoint.sheet2
+                longuete = mpoint.sheet3
+                utm = _lat_long_to_utm_only_point(lat, longuete)
+                point_infos.append({
+                    'point_id': mpoint.point_id,
+                    'ondor': mpoint.ondor,
+                    'aimag': mpoint.aimag,
+                    'sum': mpoint.sum,
+                    'sheet2': lat,
+                    'sheet3': longuete,
+                    'n_utm': utm[0],
+                    'e_utm': utm[1],
+                    't_type': mpoint.t_type,
+                })
+    folder_name = 'tseg-personal-file'
+    path = _create_folder_payment_id(folder_name, payment.id)
+    _create_lavlagaa_file(point_infos, path)
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
