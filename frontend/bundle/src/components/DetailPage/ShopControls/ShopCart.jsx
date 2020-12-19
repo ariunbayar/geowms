@@ -57,10 +57,10 @@ export class Cart extends Component{
 
     componentDidUpdate(pP, pS){
         if(pP.point_id !== this.props.point_id) {
-            if(this.props.torf == true){
-                if(this.props.content.length !== 0){
+            if(this.props.torf == true) {
+                if(this.props.content.length !== 0) {
                     var arr = [this.props.content[0][1][2]]
-                    if(arr[0][1]){
+                    if(arr[0][1]) {
                         name = arr[0][1]
                     }
                     else
@@ -72,13 +72,13 @@ export class Cart extends Component{
                     const found = this.state.data.filter(element => {
                         return element.id == json[0].id
                     }).length > 0
-                    if(!found){
+                    if(!found) {
                         this.setState({
                             data: this.state.data.concat(json),
                             is_button: false,
                         })
                     }
-                    else{
+                    else {
                         this.setState({ alert_msg: "Адилхан цэг байна !", success: false })
                         setTimeout(() => {
                             this.setState({ alert_msg: '', success: false})
@@ -86,10 +86,10 @@ export class Cart extends Component{
                     }
                 }
             }
-            if(pS.data !== this.state.data){
-                if(this.state.data.length == 0){
-                    this.setState({ is_button: true })
-                }
+        }
+        if(pS.data !== this.state.data) {
+            if(this.state.data.length == 0){
+                this.setState({ is_button: true })
             }
         }
     }
