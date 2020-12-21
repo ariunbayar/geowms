@@ -66,14 +66,16 @@ class PopUpCmp extends Component {
     }
 
     checkModeAndCode(number, datas) {
-        const mode = datas[number - 1][1]
-        const code = datas[number - 1][2]
-        const id = datas[number - 1][0][1][1]
-        if (id[0] == 'point_id') {
-            this.setState({ id: id[1] })
+        if (datas.length > 0) {
+            const mode = datas[number - 1][1]
+            const code = datas[number - 1][2]
+            const id = datas[number - 1][0][1][1]
+            if (id[0] == 'point_id') {
+                this.setState({ id: id[1] })
+            }
+            this.setNowData(number, datas, mode, code)
+            this.props.setSource(mode)
         }
-        this.setNowData(number, datas, mode, code)
-        this.props.setSource(mode)
     }
 
     setNowData(number, datas, mode) {

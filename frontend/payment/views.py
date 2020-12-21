@@ -901,8 +901,8 @@ def _create_lavlagaa_infos(payment):
             path = _create_folder_payment_id(folder_name, payment.id)
             _create_lavlagaa_file(class_name, path)
 
-payment = Payment.objects.filter(id=95).first()
-_create_lavlagaa_infos(payment)
+# payment = Payment.objects.filter(id=95).first()
+# _create_lavlagaa_infos(payment)
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
