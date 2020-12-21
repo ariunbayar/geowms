@@ -58,7 +58,7 @@ def _get_key_and_compare(dict, item):
     for key in dict.keys():
         if key == item:
             value = key
-            return value
+    return value
 
 
 @require_POST
