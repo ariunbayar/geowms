@@ -19,7 +19,7 @@ export class EmployeeDetail extends Component {
             is_admin: false,
             emp_role_id: null,
             perms: {},
-
+            role_name: '',
             handleSaveIsLoad: false,
             modal_alert_status: "closed",
             timer: null,
@@ -56,15 +56,18 @@ export class EmployeeDetail extends Component {
         const { role_id } = this.state
         service
             .getDetailEmployee(role_id)
-            .then(rsp => {
-                if(rsp.success) {
-                    Object.keys(rsp).map((key) => {
-                        if(key !== 'success') {
-                            this.setState({ [key]: rsp[key] })
-                        }
+            .then(({form_values, perms, role_id, role_name, success}) => {
+                if(success) {
+                    this.setState({
+                        first_name: form_values.first_name,
+                        last_name: form_values.last_name,
+                        email: form_values.email,
+                        position: form_values.position,
+                        is_admin: form_values.is_admin,
+                        perms,
                     })
                 }
-                this.getRole(rsp.role_id)
+                this.getRole(role_id)
             })
     }
 
