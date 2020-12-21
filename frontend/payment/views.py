@@ -755,7 +755,7 @@ def _create_lavlagaa_file(class_infos, path):
             pdf.ln()
 
     file_name = class_infos['t_type'] + "_" + class_infos['org_name']
-    file_ext = 'doc'
+    file_ext = 'pdf'
     pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
 
 
@@ -774,7 +774,7 @@ def _list_items(point_info):
 
 
 def _append_to_item_with_check(class_names, point_info, before_org_name, pdf):
-    org_name = _get_org_name_from_file(point_info['pdf_id'])
+    org_name = _get_info_from_file('org_name', None, point_info['pdf_id'])
     for class_name in class_names:
         if class_name['t_type'] == point_info['t_type'] and org_name == class_name['org_name']:
             if class_name['pdf_id'] != pdf:
@@ -790,24 +790,12 @@ def _append_to_item_with_check(class_names, point_info, before_org_name, pdf):
     return class_names
 
 
-def _get_org_name_from_file(pdf_id):
-    pid = 5
-    org_name = 6
-    found_org_name = None
-    with open('datas.csv', 'rt') as f:
-        contents = csv.reader(f)
-        for content in contents:
-            if str(content[pid]) == str(pdf_id):
-                found_org_name = str(content[org_name])
-    return found_org_name
-
-
 def _class_name_eer_angilah(point_infos):
     class_names = []
     t_type = ''
     before_org_name = None
     for point_info in point_infos:
-        org_name = _get_org_name_from_file(point_info['pdf_id'])
+        org_name = _get_info_from_file('org_name', None, point_info['pdf_id'])
         if not class_names and org_name != before_org_name:
             class_names.append({
                 't_type': point_info['t_type'],
@@ -823,14 +811,18 @@ def _class_name_eer_angilah(point_infos):
     return class_names
 
 
-def _get_info_from_file(mpoint, pdf_id):
+def _get_info_from_file(get_type, mpoint, pdf_id):
     pid = 5
+    org_name = 6
     found_item = None
-    with open('datas.csv', 'rt') as f:
+    with open(os.path.join(settings.FILES_ROOT, 'tseg_g106_datas.csv'), 'rt') as f:
         contents = csv.reader(f)
         for content in contents:
             if str(content[pid]) == str(pdf_id):
-                found_item = _get_items(content, mpoint)
+                if get_type == 'org_name':
+                    found_item = str(content[org_name])
+                else:
+                    found_item = _get_items(content, mpoint)
     return found_item
 
 
@@ -859,6 +851,7 @@ def _get_items(content, mpoint):
     }
     return point_info
 
+
 def _create_lavlagaa_infos(payment):
     point_infos = []
     # payment = Payment.objects.filter(id=95).first()
@@ -867,7 +860,7 @@ def _create_lavlagaa_infos(payment):
         if point.pdf_id:
             mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
             if mpoint:
-                info = _get_info_from_file(mpoint, point.pdf_id)
+                info = _get_info_from_file(None, mpoint, point.pdf_id)
                 if info:
                     point_infos.append(info)
     folder_name = 'tseg-personal-file'
