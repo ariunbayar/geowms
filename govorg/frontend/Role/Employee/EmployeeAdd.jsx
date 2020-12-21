@@ -3,6 +3,8 @@ import { NavLink } from "react-router-dom"
 import ModalAlert from '../../components/helpers/ModalAlert';
 import { service } from './service'
 import InsPerms from '../Role/GovPerms'
+import {Formik, Field, Form, ErrorMessage} from 'formik'
+import {validationSchema} from './validationSchema'
 
 export class EmployeeAdd extends Component {
 
@@ -13,16 +15,18 @@ export class EmployeeAdd extends Component {
         this.role=[]
         this.remove_perms=[]
         this.state = {
-            first_name: '',
-            last_name: '',
-            email: '',
-            position: '',
-            is_admin: false,
+            form_values: {
+                id: null,
+                first_name: '',
+                last_name: '',
+                email: '',
+                position: '',
+                is_admin: false,
+            },
             role_list: [],
             emp_role_id: null,
             roles: {},
 
-            handleSaveIsLoad: false,
             modal_alert_status: "closed",
             timer: null,
             prefix: '/gov/perm/employee/',
@@ -34,34 +38,24 @@ export class EmployeeAdd extends Component {
         this.getRolesForOption = this.getRolesForOption.bind(this)
         this.getRole = this.getRole.bind(this)
         this.getValue = this.getValue.bind(this)
+
     }
 
-    handleSave() {
-        const { first_name, last_name, email, position, is_admin, emp_role_id } = this.state
-        this.setState({ handleSaveIsLoad: true })
+    handleSave(values, { setStatus, setSubmitting, setErrors }) {
+        const { emp_role_id } = this.state
         service
-            .createEmployee(first_name, last_name, email, position, is_admin, emp_role_id, this.perms)
-            .then(({ success }) => {
+            .createEmployee(values.first_name, values.last_name, values.email, values.position, values.is_admin, emp_role_id, this.perms)
+            .then(({ success, errors }) => {
                 if(success) {
                     this.setState({ modal_alert_status: 'open'})
+                    setStatus('saved')
+                    setSubmitting(false)
                     this.modalCloseTime()
+                }else{
+                    setErrors(errors)
+                    setSubmitting(false)
                 }
             })
-    }
-
-    modalClose() {
-        this.setState({ handleSaveIsLoad: false })
-        this.props.history.push(this.state.prefix)
-        this.setState({ modal_alert_status: "closed" })
-        clearTimeout(this.state.timer)
-    }
-
-    modalCloseTime() {
-        setTimeout(() => {
-            this.setState({ handleSaveIsLoad: false })
-            this.props.history.push(this.state.prefix)
-            this.setState({ modal_alert_status: "closed" })
-        }, 2000)
     }
 
     componentDidMount() {
@@ -115,8 +109,21 @@ export class EmployeeAdd extends Component {
         }
     }
 
+    modalClose() {
+        this.props.history.push(this.state.prefix)
+        this.setState({ modal_alert_status: "closed" })
+        clearTimeout(this.state.timer)
+    }
+
+    modalCloseTime() {
+        setTimeout(() => {
+            this.props.history.push(this.state.prefix)
+            this.setState({ modal_alert_status: "closed" })
+        }, 2000)
+    }
+
     render() {
-        const { first_name, last_name, email, position, is_admin, role_list, roles, prefix, is_inspire_role } = this.state
+        const { role_list, roles, prefix, is_inspire_role, form_values } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -129,103 +136,97 @@ export class EmployeeAdd extends Component {
                             </NavLink>
                         </div>
                     <div className="row">
-
                         <div className="form-group col-md-12">
-                            <div className="row">
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="first_name">Овог:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="first_name"
-                                        placeholder="Овог"
-                                        onChange={(e) => this.setState({ first_name: e.target.value })}
-                                        value={first_name}
-                                    />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="last_name">Нэр:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="last_name"
-                                        placeholder="Нэр"
-                                        onChange={(e) => this.setState({ last_name: e.target.value })}
-                                        value={last_name}
-                                    />
-                                </div>
-
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="email">Цахим хаяг:</label>
-                                    <input
-                                        type="mail"
-                                        className="form-control"
-                                        placeholder="Цахим хаяг"
-                                        id="email"
-                                        onChange={(e) => this.setState({ email: e.target.value })}
-                                        value={email}
-                                    />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="position">Албан тушаал:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Албан тушаал"
-                                        id="position"
-                                        onChange={(e) => this.setState({ position: e.target.value })}
-                                        value={position}
-                                    />
-                                </div>
-
-                                <div className="form-group col-md-6">
-                                    <div className="icheck-primary">
-                                        <input
-                                            type="checkbox"
-                                            id="is_admin"
-                                            checked={is_admin}
-                                            onChange={(e) => this.setState({ is_admin: e.target.checked })}
+                        <Formik
+                            enableReinitialize
+                            initialValues={form_values}
+                            validationSchema={validationSchema}
+                            onSubmit={this.handleSave}
+                        >
+                        {({
+                            errors,
+                            isSubmitting,
+                        }) => {
+                            const has_error = Object.keys(errors).length > 0
+                            return (
+                                <Form className="row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="last_name">Овог:</label>
+                                        <Field
+                                            className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
+                                            name='last_name'
+                                            id="id_last_name"
+                                            type="text"
+                                            placeholder="Овог"
                                         />
-                                        <label htmlFor="is_admin">&nbsp;Админ</label>
+                                        <ErrorMessage name="last_name" component="div" className="text-danger"/>
                                     </div>
-                                </div>
-                                <div className="form-group col-md-12">
-                                    <label htmlFor="choose_role">Role: </label>
-                                    <select className="form-control" id="choose_role" onChange={(e) => this.getRole(e.target.value)}>
-                                        <option value="">--- Role сонгоно уу ---</option>
-                                        {role_list.length > 0 && role_list.map((role, idx) =>
-                                            <option key={idx} value={role.role_id}>{role.role_name}</option>
-                                        )}
-                                    </select>
-                                </div>
-                            </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="first_name">Нэр:</label>
+                                        <Field
+                                            className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
+                                            name='first_name'
+                                            id="id_first_name"
+                                            type="text"
+                                            placeholder="Нэр"
+                                        />
+                                        <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="email">Цахим хаяг:</label>
+                                        <Field
+                                            className={'form-control ' + (errors.email ? 'is-invalid' : '')}
+                                            name='email'
+                                            id="id_email"
+                                            type="text"
+                                            placeholder="E-Mail"
+                                        />
+                                        <ErrorMessage name="email" component="div" className="text-danger"/>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="position">Албан тушаал:</label>
+                                        <Field
+                                            className={'form-control ' + (errors.position ? 'is-invalid' : '')}
+                                            name='position'
+                                            id="id_position"
+                                            type="text"
+                                            placeholder="Албан тушаал"
+                                        />
+                                        <ErrorMessage name="position" component="div" className="text-danger"/>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <div className="icheck-primary">
+                                            <Field
+                                                className="ml-2"
+                                                name='is_admin'
+                                                id="is_admin"
+                                                type="checkbox"
+                                            />
+                                            <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                            <label htmlFor='is_admin'>&nbsp;Админ</label>
+                                        </div>
+                                    </div>
+                                    <div className="form-group col-md-12">
+                                        <label htmlFor="choose_role">Role: </label>
+                                        <select className="form-control" id="choose_role" onChange={(e) => this.getRole(e.target.value)}>
+                                            <option value="">--- Role сонгоно уу ---</option>
+                                            {role_list.length > 0 && role_list.map((role, idx) =>
+                                                <option key={idx} value={role.role_id}>{role.role_name}</option>
+                                            )}
+                                        </select>
+                                    </div>
+                                    <div className="form-group col-3">
+                                        <button type="submit" className="btn btn-block gp-btn-primary" disabled={isSubmitting}>
+                                            {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                            {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                            {!isSubmitting && 'Нэмэх' }
+                                        </button>
+                                    </div>
+                                    </Form>
+                                )}}
+                            </Formik>
                         </div>
                     </div>
-                    <br />
-
-                    <div className="form-group">
-                        {this.state.handleSaveIsLoad ?
-                            <>
-                                <button className="btn btn-block gp-btn-primary">
-                                    <a className="spinner-border text-light" role="status">
-                                        <span className="sr-only">Loading...</span>
-                                    </a>
-                                    <span> Шалгаж байна. </span>
-                                </button>
-                                <ModalAlert
-                                    modalAction={() => this.modalClose()}
-                                    status={this.state.modal_alert_status}
-                                    title="Амжилттай хадгаллаа"
-                                    model_type_icon="success"
-                                />
-                            </>
-                            :
-                            <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
-                                Хадгалах
-                            </button>
-                        }
-                    </div>
-
                     <br />
                     <div>
                         {
@@ -243,6 +244,12 @@ export class EmployeeAdd extends Component {
                         }
                     </div>
                 </div>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon="success"
+                />
             </div>
         )
     }
