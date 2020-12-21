@@ -21,10 +21,10 @@ function getListEmployee() {
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
-function createEmployee(first_name, last_name, email, position, is_admin, emp_role_id, roles) {
+function createEmployee(payload, emp_role_id, roles) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ first_name, last_name, email, position, is_admin, emp_role_id, roles })
+        body: JSON.stringify({ payload, emp_role_id, roles })
     }
 
     return fetch(`${prefix}/create/`, requestOptions).then(handleResponse)
