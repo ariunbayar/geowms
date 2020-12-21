@@ -275,3 +275,52 @@ def system_configs_save(request, payload):
         )
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def email_configs(request):
+
+    default_values = {
+        'EMAIL_USE_TLS': '',
+        'EMAIL_HOST': '',
+        'EMAIL_HOST_NAME': '',
+        'EMAIL_HOST_USER': '',
+        'EMAIL_HOST_PASSWORD': '',
+        'EMAIL_PORT': ''
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def email_configs_save(request, payload):
+
+    config_names = (
+        'EMAIL_USE_TLS',
+        'EMAIL_HOST',
+        'EMAIL_HOST_NAME',
+        'EMAIL_HOST_USER',
+        'EMAIL_HOST_PASSWORD',
+        'EMAIL_PORT'
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
