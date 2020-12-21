@@ -1,4 +1,4 @@
-,aimag,sum,town,point_name,PID,mountCoLtd,centerID,Y,X,H_Baltic,B_gradWGS84,B_minWGS84,B_secWGS84,L_gradWGS84,L_minWGS84,L_secWGS84,N_UTM,E_UTM
+,aimag,sum,town,point_name,PID,org_name,centerID,B_degree,L_degree,ondor,B_gradWGS84,B_minWGS84,B_secWGS84,L_gradWGS84,L_minWGS84,L_secWGS84,N_UTM,E_UTM
 1,Архангай ,Батцэнгэл,,PL-231,GPS65100002,"""Топсүрвэй"" ХХК",PL-231,47.7913888888889,101.976944444444,1427.339,47,47,29.748,101,58,37.997,5297430.255,722970.643
 2,Архангай ,Батцэнгэл,,PL-061,GPS65100003,"""Топсүрвэй"" ХХК",PL-061,47.7916666666667,101.968888888889,1427.827,47,47,30.76,101,58,8.1808,5297437.643,722349.211
 3,Архангай ,Батцэнгэл,,РL-172,GPS65100004,"""Топсүрвэй"" ХХК",РL-172,47.8025,101.9975,1435.168,47,48,9.5009,101,59,51.066,5298716.139,724442.992

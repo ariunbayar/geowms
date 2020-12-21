@@ -10,6 +10,7 @@ import subprocess
 from fpdf import FPDF
 from datetime import date
 import urllib.request
+import glob
 
 from django.conf import settings
 from django.db import transaction
@@ -774,7 +775,7 @@ def _list_items(point_info):
 
 
 def _append_to_item_with_check(class_names, point_info, before_org_name, pdf):
-    org_name = _get_info_from_file('org_name', None, point_info['pdf_id'])
+    org_name = point_info['org_name']
     for class_name in class_names:
         if class_name['t_type'] == point_info['t_type'] and org_name == class_name['org_name']:
             if class_name['pdf_id'] != pdf:
@@ -795,7 +796,7 @@ def _class_name_eer_angilah(point_infos):
     t_type = ''
     before_org_name = None
     for point_info in point_infos:
-        org_name = _get_info_from_file('org_name', None, point_info['pdf_id'])
+        org_name = point_info['org_name']
         if not class_names and org_name != before_org_name:
             class_names.append({
                 't_type': point_info['t_type'],
@@ -808,46 +809,78 @@ def _class_name_eer_angilah(point_infos):
             class_names = _append_to_item_with_check(class_names, point_info, before_org_name, point_info['pdf_id'])
         t_type = point_info['t_type']
         before_org_name = org_name
+    print(class_names)
     return class_names
 
 
+def _get_attribute_name_from_file(content):
+    att = {}
+    for idx in range(0, len(content)):
+        if content[idx].lower() == 'aimag':
+            att['aimag'] = idx
+        if content[idx].lower() == 'sum':
+            att['sum_name'] = idx
+        if content[idx].lower() == 'point_name':
+            att['point_name'] = idx
+        if content[idx].lower() == 'pid':
+            att['pid'] = idx
+        if content[idx].lower() == 'l_degree':
+            att['x'] = idx
+        if content[idx].lower() == 'b_degree':
+            att['y'] = idx
+        if content[idx].lower() == 'ondor':
+            att['ondor'] = idx
+        if content[idx].lower() == 'n_utm':
+            att['n_utm'] = idx
+        if content[idx].lower() == 'e_utm':
+            att['e_utm'] = idx
+        if content[idx].lower() == 'org_name':
+            att['org_name'] = idx
+    return att
+
+
 def _get_info_from_file(get_type, mpoint, pdf_id):
-    pid = 5
-    org_name = 6
-    found_item = None
-    with open(os.path.join(settings.FILES_ROOT, 'tseg_g106_datas.csv'), 'rt') as f:
-        contents = csv.reader(f)
-        for content in contents:
-            if str(content[pid]) == str(pdf_id):
-                if get_type == 'org_name':
-                    found_item = str(content[org_name])
+    found_items = []
+    file_list = [f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))]
+    for a_file in file_list:
+        print(a_file)
+        with open(a_file, 'rt') as f:
+            contents = csv.reader(f)
+            contents = list(contents)
+            for idx in range(0, len(contents)):
+                if idx == 0:
+                    att_names = _get_attribute_name_from_file(contents[idx])
                 else:
-                    found_item = _get_items(content, mpoint)
-    return found_item
+                    content = contents[idx]
+                    # check_pdf_path = '/home/odk/Desktop/pdfs/tseg-personal-file'
+                    if str(content[att_names['pid']]) == str(pdf_id):
+                        if not get_type:
+                            found_items.append(_get_items(content, mpoint, att_names))
+    return found_items
 
 
-def _get_items(content, mpoint):
-    aimag = 1
-    sum_name = 2
-    point_name = 4
-    pid = 5
-    x = 8
-    y = 9
-    ondor = 10
-    n_utm = 17
-    e_utm = 18
+def _check_key(object, key):
+    is_true = False
+    for obj_key in object.keys():
+        if obj_key == key:
+            is_true = True
+    return is_true
+
+
+def _get_items(content, mpoint, att_names):
     point_info = {
-        'point_id': content[point_name],
-        'ondor': content[ondor],
-        'aimag': content[aimag],
-        'sum': content[sum_name],
-        'sheet2': content[x],
-        'sheet3': content[y],
-        'n_utm': content[n_utm],
-        'e_utm': content[e_utm],
+        'point_id': content[att_names['point_name']],
+        'ondor': content[att_names['ondor']],
+        'aimag': content[att_names['aimag']],
+        'sum': content[att_names['sum_name']],
+        'sheet2': content[att_names['x']],
+        'sheet3': content[att_names['y']],
+        'n_utm': content[att_names['n_utm']],
+        'e_utm': content[att_names['e_utm']],
         't_type': mpoint.t_type,
         'class_name': mpoint.point_class_name,
-        'pdf_id': content[pid]
+        'pdf_id': content[att_names['pid']],
+        'org_name': content[att_names['org_name']] if _check_key(att_names, 'org_name') else 'Геопортал',
     }
     return point_info
 
@@ -858,11 +891,13 @@ def _create_lavlagaa_infos(payment):
     points = PaymentPoint.objects.filter(payment=payment)
     for point in points:
         if point.pdf_id:
+            print(point.pdf_id)
             mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
             if mpoint:
-                info = _get_info_from_file(None, mpoint, point.pdf_id)
-                if info:
+                infos = _get_info_from_file(None, mpoint, point.pdf_id)
+                for info in infos:
                     point_infos.append(info)
+                print(point_infos)
     folder_name = 'tseg-personal-file'
     class_names = _class_name_eer_angilah(point_infos)
     for class_name in class_names:
