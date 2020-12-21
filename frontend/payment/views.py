@@ -1008,93 +1008,73 @@ def download_purchase(request, pk, download_type):
     return JsonResponse(rsp)
 
 
+def _get_uniq_id(payment):
+    check_id = True
+    while check_id:
+        uniq_id = uuid.uuid4()
+        if not payment:
+            check_id = False if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0 else True
+        else:
+            check_id = False if payment.geo_unique_number == uniq_id else True
+    return uniq_id
+
+
 @require_POST
 @ajax_required
 @login_required
 def purchaseFromCart(request, payload):
-
-    datas = payload.get('data')
-    code = payload.get('code')
-    check_id = True
-    while check_id:
-        uniq_id = uuid.uuid4()
-        if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0:
-            check_id = False
-        else:
-            check_id = True
-
-    user_id = request.user.id
-    userList = User.objects.filter(id=user_id)
-    for user in userList:
-        userID = user.id
-    amount = 1
-    total_amount = 0
     try:
+        datas = payload.get('datas')
+        uniq_id = _get_uniq_id(None)
+        user_id = request.user.id
+        total_amount = 0
         payment = Payment.objects.create(
-            geo_unique_number = uniq_id,
-            bank_unique_number = ' ',
-            description = 'Цэг худалдаж авах хүсэлт',
-            user_id = userID,
+            geo_unique_number=uniq_id,
+            bank_unique_number=' ',
+            description='Цэг худалдаж авах хүсэлт',
+            user_id=user_id,
             kind=2,
-            total_amount=0,
+            total_amount=total_amount,
             export_kind=1,
             is_success = False,
             message = 'Цэг худалдаж авах хүсэлт',
             code = '',
         )
         pay_id = payment.id
-        check_id = True
-        while check_id:
-            uniq_id = uuid.uuid4()
-            if payment.geo_unique_number == uniq_id:
-                check_id = True
-            else:
-                check_id = False
-        total_amount = 0
         for data in datas:
-            dId = data['id']
-            if pay_id > 0:
-                mpoint = Mpoint_view.objects.using('postgis_db').filter(id=dId).first()
-                amount=0
-                if dId:
-                    wms_layer = WMSLayer.objects.filter(code=code).first()
-                    if wms_layer:
-                        amount = wms_layer.feature_price
+            amount = 0
+            point_id = data['id']
 
-                total_amount = total_amount + amount
-                pdf_id = ''
+            if point_id:
+                mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id=point_id).first()
+                wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                amount = wms_layer.feature_price
+
+                total_amount += amount
                 point_name = 'Нэр алга'
+                pdf_id = "хоосон"
                 if mpoint:
-                    if mpoint.pid:
-                        pdf_id = mpoint.pid
-                    if mpoint.point_name:
-                        point_name = mpoint.point_name
-                point = PaymentPoint.objects.create(
-                    payment_id = pay_id,
-                    point_id = dId,
-                    point_name = point_name,
-                    amount = amount,
-                    pdf_id = pdf_id,
+                    point_name = mpoint.point_name if mpoint.point_name else point_name
+                    pdf_id = mpoint.pid if mpoint.pid else pdf_id
+                PaymentPoint.objects.create(
+                    payment_id=pay_id,
+                    point_id=point_id,
+                    point_name=point_name,
+                    amount=amount,
+                    pdf_id=pdf_id,
                 )
-            else:
-                rsp = {
-                    'success': False,
-                    'msg': "Амжилтгүй"
-                }
-                return JsonResponse(rsp)
+
         Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
+        rsp = {
+            'success': True,
+            'msg': 'Амжилттай боллоо',
+            'payment_id': pay_id
+        }
     except Exception:
         rsp = {
             'success': False,
-            'msg': 'Алдаа гарсан байна'
+            'msg': 'Уучлаарай алдаа гарсан байна',
         }
-        return JsonResponse(rsp)
-
-    rsp = {
-        'success': True,
-        'msg': 'Амжилттай боллоо',
-        'payment': pay_id
-    }
     return JsonResponse(rsp)
 
 

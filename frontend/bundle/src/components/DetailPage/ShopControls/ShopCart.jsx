@@ -34,48 +34,46 @@ export class Cart extends Component{
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
         this.moreItems = this.moreItems.bind(this)
         this.undoItems = this.undoItems.bind(this)
+        this.make_list = this.make_list.bind(this)
     }
 
     componentDidMount(){
-        const {coordinate, torf, content} = this.props
-        if(torf == true){
-            if(content.length !== 0){
-                var arr = [this.props.content[0][1][2]]
-                if(arr[0][1]){
+        this.make_list()
+    }
+
+    componentDidUpdate(pP, pS){
+        if(pP.point_id !== this.props.point_id) {
+            this.make_list()
+        }
+        if(pS.data !== this.state.data) {
+            if(this.state.data.length == 0){
+                this.setState({ is_button: true })
+            }
+        }
+    }
+
+    make_list() {
+        const {coordinate, torf, content, code} = this.props
+        if(torf == true) {
+            if(content.length !== 0) {
+                var arr = [content[0][1][2]]
+                if(arr[0][1]) {
                     name = arr[0][1]
                 }
                 else
                 {
                     name = 'Нэр байхгүй байна'
                 }
-                var arr1 = [this.props.content[0][1][1]]
-                var json = [{ 'name': name, 'id': arr1[0][1] }]
-                this.setState({ data: json, is_button: false, })
-            }
-        }
-    }
-
-    componentDidUpdate(pP, pS){
-        if(pP.point_id !== this.props.point_id) {
-            if(this.props.torf == true) {
-                if(this.props.content.length !== 0) {
-                    var arr = [this.props.content[0][1][2]]
-                    if(arr[0][1]) {
-                        name = arr[0][1]
-                    }
-                    else
-                    {
-                        name = 'Нэр байхгүй байна'
-                    }
-                    var arr1 = [this.props.content[0][1][1]]
-                    var json = [{ 'name': name ,'id': arr1[0][1] }]
+                var arr1 = [content[0][1][1]]
+                var json = [{ 'name': name ,'id': arr1[0][1], 'code': code }]
+                if (this.state.data.length > 0) {
                     const found = this.state.data.filter(element => {
                         return element.id == json[0].id
                     }).length > 0
                     if(!found) {
                         this.setState({
                             data: this.state.data.concat(json),
-                            is_button: false,
+                            is_button: false
                         })
                     }
                     else {
@@ -85,11 +83,12 @@ export class Cart extends Component{
                         }, 2000);
                     }
                 }
-            }
-        }
-        if(pS.data !== this.state.data) {
-            if(this.state.data.length == 0){
-                this.setState({ is_button: true })
+                else {
+                    this.setState({
+                        data: json,
+                        is_button: false
+                    })
+                }
             }
         }
     }
@@ -117,14 +116,14 @@ export class Cart extends Component{
     checkDataForPurchase(){
         this.setState({ is_purchase: true })
         if(this.state.data.length > 0){
-            service.purchaseFromCart(this.state.data, this.props.code)
-                .then(({success, msg, payment}) => {
+            service.purchaseFromCart(this.state.data)
+                .then(({success, msg, payment_id}) => {
                     if(success){
                         this.setState({ alert_msg: msg, success })
                         setTimeout(() => {
-                            //this.props.history(`/payment/purchase/${payment}/`)
+                            //this.props.history(`/payment/purchase/${payment_id}/`)
                             this.setState({ data: [], is_purchase: false, is_button: true })
-                            window.location.href=`/payment/purchase/${payment}/`;
+                            window.location.href=`/payment/purchase/${payment_id}/`;
                         }, 1000);
                     }
                     if(!success){

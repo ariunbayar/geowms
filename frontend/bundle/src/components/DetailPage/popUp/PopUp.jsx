@@ -18,6 +18,7 @@ class PopUpCmp extends Component {
             data: [],
             mode: '',
             id: '',
+            code: '',
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -30,7 +31,7 @@ class PopUpCmp extends Component {
         if (this.props.sendElem) this.props.sendElem(this.element)
     }
 
-    componentDidUpdate(pP) {
+    componentDidUpdate(pP, pS) {
         const { datas } = this.props
         if(pP.datas !== datas) {
             const startNumber = 1
@@ -78,9 +79,9 @@ class PopUpCmp extends Component {
         }
     }
 
-    setNowData(number, datas, mode) {
+    setNowData(number, datas, mode, code) {
         const data = datas[number - 1]
-        this.setState({ data, mode, datas })
+        this.setState({ data, mode, datas, code })
     }
 
     openCartSide() {
