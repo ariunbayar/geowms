@@ -4,6 +4,7 @@ from django.db import models
 class KindToken(models.Model):
 
     class Meta:
+        db_table = 'kind_token'
         unique_together = ('kind', 'token')
 
     KIND_VALIDATION_EMAIL = 1

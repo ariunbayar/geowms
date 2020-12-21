@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'backend.dedsanbutets.apps.DedsanbutetsConfig',
     'backend.inspire.apps.InspireConfig',
     'backend.geoserver.apps.GeoserverConfig',
-    'backend.tokens.apps.TokensConfig',
+    'backend.token.apps.TokenConfig',
 
     # API apps
 
