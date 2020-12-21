@@ -41,6 +41,7 @@ geoportal_app/media/tseg-personal-img/*
 geoportal_app/media/tseg-personal/*
 !geoportal_app/media/tseg-personal/.keep
 geoportal_app/files/payment/*
+!geoportal_app/files/payment/tseg_g106_datas.csv
 !geoportal_app/files/payment/shape
 geoportal_app/files/payment/shape/*
 !geoportal_app/files/payment/pdf

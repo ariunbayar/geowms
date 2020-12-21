@@ -40,6 +40,7 @@ from main.decorators import ajax_required
 from main.utils import send_email
 
 from django.contrib.gis.gdal import DataSource
+import csv
 
 
 def index(request):
@@ -650,13 +651,6 @@ def _table_json():
     return table_col
 
 
-def _lat_long_to_utm_only_point(lat, longuete):
-    from django.contrib.gis.geos import Point
-    data = [lat, longuete]
-    geom = Point(data, srid=4326)
-    transformed = geom.transform(3857, clone=True)
-    return [str("%.6f" % transformed.coords[0]), str("%.6f" % transformed.coords[1])]
-
 
 def _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pdf):
     this_columns = []
@@ -673,8 +667,18 @@ def _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pd
     return max_height
 
 
-def _create_lavlagaa_file(point_infos, path):
+def _remove_white_spaces(class_name):
+    updated_class_name = ''
+    class_per_name = class_name.split(" ")
+    for per_name in class_per_name:
+        if per_name:
+            updated_class_name += per_name + ' '
+    return updated_class_name[:-1]
+
+
+def _create_lavlagaa_file(class_infos, path):
     table_col = _table_json()
+    point_infos = class_infos['infos']
     class PDF(FPDF):
         def footer(self):
             self.set_y(-15)
@@ -695,8 +699,8 @@ def _create_lavlagaa_file(point_infos, path):
     pdf = PDF()
     pdf.add_page(orientation='Landscape')
     pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
-    org_name = 'Мэдээлэл холбоо технологийн их сургууль'
-    class_name = 'Өндрийн сүлжээний цэг'
+    org_name = class_infos['org_name']
+    class_name = _remove_white_spaces(class_infos['class_name'])
     font_name = 'DejaVu'
 
     pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
@@ -750,37 +754,124 @@ def _create_lavlagaa_file(point_infos, path):
         if calc_cell_height == cell_height:
             pdf.ln()
 
-    file_name = 'lavlagaa'
-    file_ext = 'doc'
+    file_name = class_infos['t_type'] + "_" + class_infos['org_name']
+    file_ext = 'pdf'
     pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
+
+
+def _list_items(point_info):
+    infos = {
+        'point_id': point_info['point_id'],
+        'ondor': point_info['ondor'],
+        'aimag': point_info['aimag'],
+        'sum': point_info['sum'],
+        'sheet2': point_info['sheet2'],
+        'sheet3': point_info['sheet3'],
+        'n_utm': point_info['n_utm'],
+        'e_utm': point_info['e_utm']
+    }
+    return infos
+
+
+def _append_to_item_with_check(class_names, point_info, before_org_name, pdf):
+    org_name = _get_info_from_file('org_name', None, point_info['pdf_id'])
+    for class_name in class_names:
+        if class_name['t_type'] == point_info['t_type'] and org_name == class_name['org_name']:
+            if class_name['pdf_id'] != pdf:
+                class_name['infos'].append(_list_items(point_info))
+        else:
+            class_names.append({
+                't_type': point_info['t_type'],
+                'org_name': org_name,
+                'class_name': point_info['class_name'],
+                'pdf_id': point_info['pdf_id'],
+                'infos': [_list_items(point_info)]
+            })
+    return class_names
+
+
+def _class_name_eer_angilah(point_infos):
+    class_names = []
+    t_type = ''
+    before_org_name = None
+    for point_info in point_infos:
+        org_name = _get_info_from_file('org_name', None, point_info['pdf_id'])
+        if not class_names and org_name != before_org_name:
+            class_names.append({
+                't_type': point_info['t_type'],
+                'org_name': org_name,
+                'class_name': point_info['class_name'],
+                'pdf_id': point_info['pdf_id'],
+                'infos': [_list_items(point_info)]
+            })
+        else:
+            class_names = _append_to_item_with_check(class_names, point_info, before_org_name, point_info['pdf_id'])
+        t_type = point_info['t_type']
+        before_org_name = org_name
+    return class_names
+
+
+def _get_info_from_file(get_type, mpoint, pdf_id):
+    pid = 5
+    org_name = 6
+    found_item = None
+    with open(os.path.join(settings.FILES_ROOT, 'tseg_g106_datas.csv'), 'rt') as f:
+        contents = csv.reader(f)
+        for content in contents:
+            if str(content[pid]) == str(pdf_id):
+                if get_type == 'org_name':
+                    found_item = str(content[org_name])
+                else:
+                    found_item = _get_items(content, mpoint)
+    return found_item
+
+
+def _get_items(content, mpoint):
+    aimag = 1
+    sum_name = 2
+    point_name = 4
+    pid = 5
+    x = 8
+    y = 9
+    ondor = 10
+    n_utm = 17
+    e_utm = 18
+    point_info = {
+        'point_id': content[point_name],
+        'ondor': content[ondor],
+        'aimag': content[aimag],
+        'sum': content[sum_name],
+        'sheet2': content[x],
+        'sheet3': content[y],
+        'n_utm': content[n_utm],
+        'e_utm': content[e_utm],
+        't_type': mpoint.t_type,
+        'class_name': mpoint.point_class_name,
+        'pdf_id': content[pid]
+    }
+    return point_info
 
 
 def _create_lavlagaa_infos(payment):
     point_infos = []
     # payment = Payment.objects.filter(id=95).first()
     points = PaymentPoint.objects.filter(payment=payment)
-    class_names = []
     for point in points:
         if point.pdf_id:
-            mpoints = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id)
-            for mpoint in mpoints:
-                lat = mpoint.sheet2
-                longuete = mpoint.sheet3
-                utm = _lat_long_to_utm_only_point(lat, longuete)
-                point_infos.append({
-                    'point_id': mpoint.point_id,
-                    'ondor': mpoint.ondor,
-                    'aimag': mpoint.aimag,
-                    'sum': mpoint.sum,
-                    'sheet2': lat,
-                    'sheet3': longuete,
-                    'n_utm': utm[0],
-                    'e_utm': utm[1],
-                    't_type': mpoint.t_type,
-                })
+            mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
+            if mpoint:
+                info = _get_info_from_file(None, mpoint, point.pdf_id)
+                if info:
+                    point_infos.append(info)
     folder_name = 'tseg-personal-file'
-    path = _create_folder_payment_id(folder_name, payment.id)
-    _create_lavlagaa_file(point_infos, path)
+    class_names = _class_name_eer_angilah(point_infos)
+    for class_name in class_names:
+        if class_name['org_name']:
+            path = _create_folder_payment_id(folder_name, payment.id)
+            _create_lavlagaa_file(class_name, path)
+
+payment = Payment.objects.filter(id=95).first()
+_create_lavlagaa_infos(payment)
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
