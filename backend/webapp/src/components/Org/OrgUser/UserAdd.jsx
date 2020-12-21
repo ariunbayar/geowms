@@ -19,9 +19,8 @@ export class UserAdd extends Component {
                 email: '',
                 gender: '',
                 register:'',
-                password:'',
-                re_password:'',
                 is_admin: false,
+                re_password_mail: false
             },
             modal_alert_status: "closed",
             timer: null,
@@ -30,7 +29,6 @@ export class UserAdd extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
-        this.validatePassword = this.validatePassword.bind(this)
     }
 
     componentDidMount() {
@@ -64,45 +62,31 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
         if(org_emp){
-            if(values.re_password !== values.password)
-            {
-                setErrors({'re_password': 'Нууц үг адил биш байна.'})
-                setSubmitting(false)
-            }
-            else{
-                service.employeeUpdate(org_emp, values).then(({ success, errors }) => {
-                    if (success) {
-                        this.setState({modal_alert_status: "open"})
-                        setStatus('saved')
-                        setSubmitting(false)
-                        this.modalCloseTime()
-                    }else{
-                        setErrors(errors)
-                        setSubmitting(false)
-                    }
-                })
-            }
+            service.employeeUpdate(org_emp, values).then(({ success, errors }) => {
+                if (success) {
+                    this.setState({modal_alert_status: "open"})
+                    setStatus('saved')
+                    setSubmitting(false)
+                    this.modalCloseTime()
+                }else{
+                    setErrors(errors)
+                    setSubmitting(false)
+                }
+            })
         }
         else{
-            if(values.re_password !== values.password)
-            {
-                setErrors({'re_password': 'Нууц үг адил биш байна.'})
-                setSubmitting(false)
-            }
-            else{
-                service.employeeAdd(org_level, org_id, values).then(({ success, errors }) => {
-                    if (success) {
-                        this.setState({modal_alert_status: "open"})
-                        setStatus('saved')
-                        setSubmitting(false)
-                        this.modalCloseTime()
-                    }
-                    else{
-                        setErrors(errors)
-                        setSubmitting(false)
-                    }
-                })
-            }
+            service.employeeAdd(org_level, org_id, values).then(({ success, errors }) => {
+                if (success) {
+                    this.setState({modal_alert_status: "open"})
+                    setStatus('saved')
+                    setSubmitting(false)
+                    this.modalCloseTime()
+                }
+                else{
+                    setErrors(errors)
+                    setSubmitting(false)
+                }
+            })
         }
     }
 
@@ -110,7 +94,6 @@ export class UserAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
         }, 2000)
     }
@@ -118,22 +101,12 @@ export class UserAdd extends Component {
     modalClose(){
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
-    }
-
-    validatePassword(value) {
-        const org_emp = this.props.match.params.emp
-        let error;
-        if (!value) {
-            if(!org_emp) error = 'Хоосон байна утга оруулна уу..'
-        }
-        return error;
     }
 
     render() {
         const {form_values} = this.state
+        const org_emp = this.props.match.params.emp
         return (
             <div className="col-6 my-4">
                 <div className="row">
@@ -244,35 +217,23 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="register" component="div" className="text-danger"/>
                                             </div>
                                         </div>
+                                        {org_emp &&
                                         <div className="form-row">
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="password">Нууц үг:</label>
+                                           <div className="form-group col-md-8">
+                                                <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
                                                 <Field
-                                                    className={'form-control ' + (errors.password ? 'is-invalid' : '')}
-                                                    name='password'
-                                                    validate={this.validatePassword}
-                                                    id="id_password"
-                                                    type="password"
-                                                    placeholder="Нууц үг"
+                                                    className="ml-2"
+                                                    name='re_password_mail'
+                                                    id="id_re_password_mail"
+                                                    type="checkbox"
                                                 />
-                                                <ErrorMessage name="password" component="div" className="text-danger"/>
-                                            </div>
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="re_password">Нууц үг дахин оруулах:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.re_password ? 'is-invalid' : '')}
-                                                    name='re_password'
-                                                    validate={this.validatePassword}
-                                                    id="id_re_password"
-                                                    type="password"
-                                                    placeholder="Нууц үг дахин оруулах"
-                                                />
-                                                <ErrorMessage name="re_password" component="div" className="text-danger"/>
+                                                <ErrorMessage name="re_password_mail" component="div" className="text-danger"/>
                                             </div>
                                         </div>
+                                        }
                                         <div className='form-row'>
                                             <div className="form-group col-md-8">
-                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                <label htmlFor='id_is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
                                                     name='is_admin'
