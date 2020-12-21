@@ -6,7 +6,7 @@ from django.db import transaction
 from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
-from main.utils import send_approve_email
+from main.utils import send_approve_email, is_email
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
@@ -24,6 +24,7 @@ from govorg.backend.utils import (
     get_property_data_display,
     get_convert_perm_kind,
 )
+
 
 
 def _get_employee_display_data(employee):
@@ -95,6 +96,40 @@ def _set_emp_perm_ins_data(emp_perm, perm, user):
     emp_perm_inspire.save()
 
 
+def _employee_validation(payload, user):
+    position = payload.get('position')
+    first_name = payload.get('first_name')
+    last_name = payload.get('last_name')
+    email = payload.get('email')
+    errors = {}
+    if not position:
+        errors['position'] = 'Хоосон байна утга оруулна уу.'
+    elif len(position) > 250:
+        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
+    if not first_name:
+        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(first_name) > 30:
+        errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
+    if not last_name:
+        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(last_name) > 150:
+        errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
+    if not email:
+        errors['email'] = 'Хоосон байна утга оруулна уу.'
+    elif len(email) > 254:
+        errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
+    if user:
+        if user.email != email:
+            if User.objects.filter(email=email).first():
+                errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+    else:
+        if User.objects.filter(email=email).first():
+            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+    if not is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    return errors
+
+
 @require_POST
 @ajax_required
 def create(request, payload):
@@ -107,7 +142,10 @@ def create(request, payload):
     roles = payload.get('roles')
 
     org = get_object_or_404(Org, employee__user=request.user)
-    emp_role = get_object_or_404(EmpRole, pk=payload.get('emp_role_id'))
+    errors = _employee_validation(payload, None)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+    emp_role = EmpRole.objects.filter(pk=payload.get('emp_role_id')).first()
 
     with transaction.atomic():
 
@@ -129,9 +167,9 @@ def create(request, payload):
 
         send_approve_email(user)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'errors': {}})
 
-    return JsonResponse({'success': False})
+    return JsonResponse({'success': False, 'errors': {}})
 
 
 def _delete_old_emp_role(old_emp_role):
@@ -158,6 +196,10 @@ def update(request, payload, pk):
     remove_perms = payload.get('remove_perm')
 
     employee = get_object_or_404(Employee, pk=pk)
+    errors = _employee_validation(payload, employee.user)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
     new_emp_role = get_object_or_404(EmpRole, pk=emp_role_id)
     old_emp_role = emp_perm.emp_role
@@ -230,13 +272,12 @@ def detail(request, pk):
     employee_detail = _get_employee_display_data(employee)
 
     rsp = {
-        **employee_detail,
+        'form_values': employee_detail,
         'role_name': emp_role.name,
         'role_id': emp_role.id,
         'perms': _get_emp_perm_data_display(emp_perm),
         'success': True,
     }
-
     return JsonResponse(rsp)
 
 

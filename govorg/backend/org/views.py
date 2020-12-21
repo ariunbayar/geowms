@@ -3,6 +3,7 @@ from backend.org.models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
 from django.shortcuts import get_object_or_404
 from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas
+from django.contrib.auth.decorators import login_required
 
 from govorg.backend.utils import (
     get_package_features_data_display,
@@ -94,6 +95,7 @@ def _get_packages(org, theme_id):
     return packages
 
 
+@login_required(login_url='/gov/secure/login/')
 def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
     perms = []

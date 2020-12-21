@@ -125,6 +125,8 @@ urlpatterns = [
         path('geoserver/save/', config_views.geoserver_configs_save),
         path('system/', config_views.system_configs),
         path('system/save/', config_views.system_configs_save),
+        path('email/', config_views.email_configs),
+        path('email/save/', config_views.email_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([
