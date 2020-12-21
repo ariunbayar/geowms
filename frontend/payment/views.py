@@ -22,7 +22,7 @@ from django.views.decorators.http import require_POST, require_GET
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
-from govorg.backend.forms.models import Mpoint_view, Mpoint2, Mpoint3, Mpoint4, Mpoint5, Mpoint6, Mpoint7, Mpoint8, Mpoint9, Mpoint10, Mpoint1
+from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
 from backend.inspire.models import (
     LThemes, LFeatureConfigs,
