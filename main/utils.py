@@ -15,12 +15,13 @@ from backend.dedsanbutets.models import ViewNames
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
-from django.core.mail import send_mail
+from django.core.mail import send_mail, get_connection
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from backend.config.models import Config
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -236,8 +237,11 @@ def _generate_user_token():
     return uuid.uuid4().hex[:32]
 
 
-def send_approve_email(user):
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1", "True")
 
+
+def send_approve_email(user, subject=None, text=None):
     if not user.email:
         return False
 
@@ -249,13 +253,24 @@ def send_approve_email(user):
         token=token,
         valid_before=timezone.now() + timedelta(days=90)
     )
-
-    subject = 'Геопортал хэрэглэгч баталгаажуулах'
-    msg = 'Дараах холбоос дээр дарж баталгаажуулна уу! http://192.168.10.92/gov/user/approve/{token}/'.format(token=token)
-    from_email = settings.EMAIL_HOST_USER
+    host_name = get_config('EMAIL_HOST_NAME')
+    if not subject:
+        subject = 'Геопортал хэрэглэгч баталгаажуулах'
+    if not text:
+        text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
+    msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+    from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
-
-    send_mail(subject, msg, from_email, to_email, fail_silently=False)
+    connection = get_connection(
+        username=from_email,
+        password=get_config('EMAIL_HOST_PASSWORD'),
+        port=get_config('EMAIL_PORT'),
+        host=get_config('EMAIL_HOST'),
+        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_ssl=False,
+        fail_silently=False,
+    )
+    send_mail(subject, msg, from_email, to_email, connection=connection)
 
     return True
 
@@ -489,3 +504,35 @@ def get_geom(geo_id, geom_type=None, srid=4326):
         raise Exception(msg)
 
     return geom
+
+
+def is_register(register):
+    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    return re.search(re_register, register.upper()) is not None
+
+
+def is_email(email):
+    re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
+    return re.search(re_email, email) is not None
+
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_config(config_name):
+
+    default_values = {config_name: ''}
+    configs = Config.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
+# оролт config name array
+# Олон config мэдээллийг буцаана obj буцаана
+def get_configs(config_names):
+
+    default_values = {conf: '' for conf in config_names}
+    configs = Config.objects.filter(name__in=default_values.keys())
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return rsp

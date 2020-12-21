@@ -13,15 +13,15 @@ from backend.wms.models import WMS, WMSLog
 from backend.changeset.models import ChangeSet
 import main.geoserver as geoserver
 
+
 def _get_service_url(request, token):
-    url = reverse('api:service:proxy', args=[token])
+    url = reverse('api:service:system_proxy', args=[token])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
 
 @require_GET
-def proxy(request, token):
-
+def proxy(request, token, pk=None):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }

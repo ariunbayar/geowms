@@ -1,0 +1,46 @@
+.switch-radio {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.slider-point {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider-pointer {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+.slider-point.slider-point-round {
+    border-radius: 34px;
+  }
+
+.slider-point.slider-point-round:before {
+    border-radius: 50%;
+}
+
+.slider-pointer.slider-point-round {
+    border-radius: 34px;
+  }
+
+.slider-pointer.slider-point-round:before {
+    border-radius: 50%;
+}

@@ -1087,7 +1087,8 @@ export default class BarilgaSuurinGazar extends Component{
       wms_map_list.map((wms, idx) => {
         wms_map_list[idx].layers.map((layer,idx) => {
           map.addLayer(layer.tile)
-          layer.tile.setVisible(false)
+          layer.defaultCheck == 0 && layer.tile.setVisible(false)
+          layer['legend'] = layer.tile.getSource().getLegendUrl()
         })
       })
       const vectorLayer = this.vectorLayer
