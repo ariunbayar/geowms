@@ -53,6 +53,14 @@ def index(request):
     return render(request, 'payment/index.html', context)
 
 
+def _get_key_and_compare(dict, item):
+    value = ''
+    for key in dict.keys():
+        if key == item:
+            value = key
+            return value
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -809,7 +817,6 @@ def _class_name_eer_angilah(point_infos):
             class_names = _append_to_item_with_check(class_names, point_info, before_org_name, point_info['pdf_id'])
         t_type = point_info['t_type']
         before_org_name = org_name
-    print(class_names)
     return class_names
 
 
@@ -843,7 +850,6 @@ def _get_info_from_file(get_type, mpoint, pdf_id):
     found_items = []
     file_list = [f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))]
     for a_file in file_list:
-        print(a_file)
         with open(a_file, 'rt') as f:
             contents = csv.reader(f)
             contents = list(contents)
@@ -859,14 +865,6 @@ def _get_info_from_file(get_type, mpoint, pdf_id):
     return found_items
 
 
-def _check_key(object, key):
-    is_true = False
-    for obj_key in object.keys():
-        if obj_key == key:
-            is_true = True
-    return is_true
-
-
 def _get_items(content, mpoint, att_names):
     point_info = {
         'point_id': content[att_names['point_name']],
@@ -880,7 +878,7 @@ def _get_items(content, mpoint, att_names):
         't_type': mpoint.t_type,
         'class_name': mpoint.point_class_name,
         'pdf_id': content[att_names['pid']],
-        'org_name': content[att_names['org_name']] if _check_key(att_names, 'org_name') else 'Геопортал',
+        'org_name': content[att_names['org_name']] if _get_key_and_compare(att_names, 'org_name') else 'Геопортал',
     }
     return point_info
 
@@ -891,13 +889,11 @@ def _create_lavlagaa_infos(payment):
     points = PaymentPoint.objects.filter(payment=payment)
     for point in points:
         if point.pdf_id:
-            print(point.pdf_id)
             mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
             if mpoint:
                 infos = _get_info_from_file(None, mpoint, point.pdf_id)
                 for info in infos:
                     point_infos.append(info)
-                print(point_infos)
     folder_name = 'tseg-personal-file'
     class_names = _class_name_eer_angilah(point_infos)
     for class_name in class_names:
@@ -1157,12 +1153,6 @@ def _lfeature_config_count(feature_id):
 def _data_type_configs_count(data_type_id):
     property_len = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).count()
     return property_len
-
-
-def _get_key_and_compare(dict, item):
-    for key in dict.keys():
-        if key == item:
-            return key
 
 
 def _get_all_property_count(layer_list, feature_info_list):
