@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
 class KindToken(models.Model):
 
     class Meta:
