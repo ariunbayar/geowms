@@ -226,24 +226,18 @@ def geom_type(request, pid, fid):
 @require_GET
 @ajax_required
 def get_wms_layer(request, tid, pid, fid):
-    bundle_obj = Bundle.objects.filter(ltheme_id=tid).first()
     view_name_ob = ViewNames.objects.filter(feature_id=fid).first()
     rsp = {
         'success': False,
-        'name': '',
         'url': '',
         'code': '',
     }
     if view_name_ob:
-        wms_layer = WMSLayer.objects.filter(code__contains=view_name_ob.view_name).first()
-        url = reverse('api:service:wms_proxy', args=(bundle_obj.id ,wms_layer.wms.pk))
-        if wms_layer:
-            rsp = {
-                'success': True,
-                'name': wms_layer.wms.name,
-                'url': request.build_absolute_uri(url),
-                'code': wms_layer.code,
-            }
+        rsp = {
+            'success': True,
+            'url': request.build_absolute_uri(reverse('api:service:emp-perm-proxy')),
+            'code': 'gp_layer_' + view_name_ob.view_name,
+        }
     return JsonResponse(rsp)
 
 

@@ -83,7 +83,7 @@ export default class BarilgaSuurinGazar extends Component{
           draw_is_active: false,
           wms_layer: {},
           layer_choices: [],
-          emp_perm_prefix: '/api/service/emp/perm/'
+          emp_perm_prefix: ''
       }
 
       this.controls = {
@@ -199,6 +199,7 @@ export default class BarilgaSuurinGazar extends Component{
     loadData(){
 
       const wms_layer = this.state.wms_layer
+      this.setState({emp_perm_prefix: wms_layer.url})
       const map_wms = {
         tile: new Tile({
         source: new TileWMS({
