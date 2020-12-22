@@ -609,6 +609,7 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
         prev_feature_id = feature_id
     return infos
 
+
 def _table_json():
     table_col = [
         {
@@ -658,7 +659,6 @@ def _table_json():
         },
     ]
     return table_col
-
 
 
 def _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pdf):
