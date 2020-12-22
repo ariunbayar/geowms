@@ -177,19 +177,24 @@ def tsegAdd(request):
 
 def _get_tseg_detail(payment):
     points = []
-    pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
-    for point in pay_point:
-        mpoint = Mpoint_view.objects.using('postgis_db').filter(id=point.point_id).first()
-        if mpoint.pid:
+    pay_points = PaymentPoint.objects.filter(payment=payment)
+    for point in pay_points:
+        mpoints = {}
+        mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
+        if mpoint:
             pdf = mpoint.pid
+            mpoints['aimag'] = mpoint.aimag
+            mpoints['sum'] = mpoint.sum
+            mpoints['undur'] = mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
         else:
-            pdf = 'файл байхгүй байна'
+            pdf = False
         points.append({
             'name': point.point_name,
             'amount': point.amount,
-            'file_name': pdf
+            'file_name': pdf,
+            'mpoint': mpoints
         })
-    return {'points': points, 'mpoint': mpoint}
+    return points
 
 
 def _get_polygon_detail(payment):
@@ -216,7 +221,7 @@ def _get_layer_detail(payment):
     return layer_list
 
 
-def _get_detail_items(payment, mpoint):
+def _get_detail_items(payment):
     items = []
     items.append({
         'description': payment.description,
@@ -228,12 +233,6 @@ def _get_detail_items(payment, mpoint):
         'total': payment.total_amount,
         'export_file': payment.export_file,
     })
-    if mpoint:
-         items.append({
-            'mpoint_aimag': mpoint.aimag,
-            'mpoint_sum': mpoint.sum,
-            'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
-        })
     return items
 
 
@@ -246,7 +245,7 @@ def getDetail(requist, pk):
     if payment:
         if payment.export_kind == Payment.EXPORT_KIND_POINT:
             points = _get_tseg_detail(payment)
-            items = _get_detail_items(payment, points['mpoint'])
+            items = _get_detail_items(payment)
             rsp = {
                 'success': True,
                 'items': items,
@@ -255,7 +254,7 @@ def getDetail(requist, pk):
         if payment.export_kind == Payment.EXPORT_KIND_POLYGON:
             polygon = _get_polygon_detail(payment)
             layers = _get_layer_detail(payment)
-            items = _get_detail_items(payment, None)
+            items = _get_detail_items(payment)
             rsp = {
                 'success': True,
                 'polygon': polygon,
