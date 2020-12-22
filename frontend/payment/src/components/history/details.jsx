@@ -177,17 +177,18 @@ export class Details extends Component {
                                                     <td colSpan={items.is_success ? "5" : "4"}>{items.created_at}</td>
                                                 </tr>
                                                 {
-                                                    items.is_success ?
-                                                    <tr className="text-center">
-                                                        <th colSpan="2">
-                                                            Лавлагаа
-                                                        </th>
-                                                        <td colSpan={items.is_success ? "5" : "4"}>
-                                                            <a className="text-info" href={`/payment/download-pdf/${items.export_file}/`}>
-                                                                Лавлагааг татах
-                                                            </a>
-                                                        </td>
-                                                    </tr>
+                                                    items.is_success && items.export_file
+                                                    ?
+                                                        <tr className="text-center">
+                                                            <th colSpan="2">
+                                                                Лавлагаа
+                                                            </th>
+                                                            <td colSpan={items.is_success ? "5" : "4"}>
+                                                                <a className="text-info" href={`/payment/download-pdf/${items.export_file}/`}>
+                                                                    Лавлагааг татах
+                                                                </a>
+                                                            </td>
+                                                        </tr>
                                                     :
                                                     null
                                                 }

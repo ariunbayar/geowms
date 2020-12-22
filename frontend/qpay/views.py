@@ -27,17 +27,25 @@ def create(request, payload):
         qpay.authenticate()
         data = qpay.create()
     except Exception:
-        rsp={
+        rsp = {
             'success': False,
             'msg': "Алдаа гарсан тул дахин оролдоно уу"
         }
-        return JsonResponse(rsp)
     json_data = data.json()
     if data.status_code == 200:
-        return JsonResponse({'qPay_QRimage': json_data['qPay_QRimage'], "error_message": '', 'success': False})
+        rsp = {
+            'qPay_QRimage': json_data['qPay_QRimage'],
+            "error_message": '',
+            'success': False,
+        }
     else:
         if json_data['name'] == 'INVOICE_PAID':
-            return JsonResponse({'qPay_QRimage': '', "error_message": json_data['message'], 'success': True})
+            rsp = {
+                'qPay_QRimage': '',
+                "error_message": json_data['message'],
+                'success': True,
+            }
+    return JsonResponse(rsp)
 
 
 @require_POST
