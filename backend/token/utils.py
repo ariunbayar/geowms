@@ -70,7 +70,12 @@ class TokenGeneratorSystem(TokenGenerator):
         super().__init__(kind)
 
 
+class TokenGeneratorUserValidationEmail(TokenGenerator):
+    def __init__(self):
+        kind = self.model.KIND_VALIDATION_EMAIL
+        super().__init__(kind)
+
+
 # TODO TokenGenerator for following:
-# KIND_VALIDATION_EMAIL = 1
 # KIND_RESET_PASSWORD = 2
 # KIND_GIS_EMPLOYEE_TOKEN = 3
