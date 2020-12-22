@@ -885,7 +885,6 @@ def _get_items(content, mpoint, att_names):
 
 def _create_lavlagaa_infos(payment):
     point_infos = []
-    # payment = Payment.objects.filter(id=95).first()
     points = PaymentPoint.objects.filter(payment=payment)
     for point in points:
         if point.pdf_id:
@@ -901,8 +900,10 @@ def _create_lavlagaa_infos(payment):
             path = _create_folder_payment_id(folder_name, payment.id)
             _create_lavlagaa_file(class_name, path)
 
-# payment = Payment.objects.filter(id=95).first()
-# _create_lavlagaa_infos(payment)
+    _file_to_zip(str(payment.id), folder_name)
+    payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+    payment.save()
+    return True
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
@@ -992,6 +993,9 @@ def download_purchase(request, pk, download_type):
 
         if download_type == 'pdf':
             is_created = _export_pdf(payment, download_type)
+
+        if download_type == 'point':
+            is_created = _create_lavlagaa_infos(payment)
 
         if is_created:
 

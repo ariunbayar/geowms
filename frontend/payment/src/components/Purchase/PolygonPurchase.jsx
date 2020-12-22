@@ -34,9 +34,11 @@ export class PolygonPurchase extends Component {
     }
 
     downloadPurchase(id) {
-        service.downloadPurchase(id, this.props.match.params.type).then(rsp => {
-            console.log(rsp);
-        })
+        service
+            .downloadPurchase(id, this.props.match.params.type)
+            .then(rsp => {
+                console.log(rsp);
+            })
     }
 
     componentDidMount(){
@@ -46,10 +48,7 @@ export class PolygonPurchase extends Component {
               items.map(( items ) =>
                   this.setState({items})
               )
-              if(!items[0].export_file) {
-                this.downloadPurchase(id)
-              }
-              this.setState({polygon, layers})
+              this.setState({ polygon, layers })
             }
             else {
                 this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
@@ -80,6 +79,9 @@ export class PolygonPurchase extends Component {
 
     handleModalApproveClose(){
       const purchase_id = this.props.match.params.id
+      if(!this.state.items.export_file) {
+        this.downloadPurchase(purchase_id)
+      }
       this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 
@@ -113,28 +115,31 @@ export class PolygonPurchase extends Component {
                     <div className="mb-3 h5">Лавлах</div>
                     <table className="table table-bordered">
                         <tbody>
-                            <tr>
-                                <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup"><i className="fa fa-map mr-2 mr-2" aria-hidden="true"></i>Худалдан авалтын мэдээлэл</th>
+                            <tr className="text-center">
+                                <th colSpan="2" scope="rowgroup">
+                                    <i className="fa fa-map mr-2 mr-2" aria-hidden="true"></i>
+                                    Худалдан авалтын мэдээлэл
+                                </th>
                             </tr>
 
-                            <tr>
-                              <th style={{textAlign: "center"}} scope="">
+                            <tr className="text-center">
+                              <th>
                                   Бүтээгдэхүүний нэр
                               </th>
-                              <th style={{textAlign: "center"}} scope="">
+                              <th>
                                   Үнэ
                               </th>
                             </tr>
                             {
                               layers.map((value, key) =>
-                              <tr key={key}>
-                                <td>
-                                    {value.name}
-                                </td>
-                                <td>
-                                    {value.amount}₮
-                                </td>
-                             </tr>
+                                <tr key={key}>
+                                    <td>
+                                        {value.name}
+                                    </td>
+                                    <td>
+                                        {value.amount}₮
+                                    </td>
+                                </tr>
                             )}
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Гүйлгээний дугаар</td>

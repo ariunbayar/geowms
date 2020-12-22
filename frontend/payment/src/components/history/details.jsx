@@ -184,7 +184,7 @@ export class Details extends Component {
                                                                 Лавлагаа
                                                             </th>
                                                             <td colSpan={items.is_success ? "5" : "4"}>
-                                                                <a className="text-info" href={`/payment/download-pdf/${items.export_file}/`}>
+                                                                <a className="text-info" href={`/payment/download-zip/${payment_id}/`}>
                                                                     Лавлагааг татах
                                                                 </a>
                                                             </td>

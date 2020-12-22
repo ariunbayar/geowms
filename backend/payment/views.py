@@ -107,6 +107,7 @@ def purchaseAll(request, payload):
             'failed_at': payment.failed_at,
             'bank_unique_number': payment.bank_unique_number,
             'success_at': payment.success_at,
+            'export_file': payment.export_file,
             'user_id': user.username,
             'total_amount': payment.total_amount,
             'card_number': payment.card_number,
