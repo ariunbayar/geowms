@@ -8,19 +8,17 @@ class TokenGenerator():
     NUM_NEW_TOKENS = 100
 
     def __init__(self, kind):
-        self._qs = None
-        self._model = None
         self.kind = kind
 
     @property
     def model(self):
-        if not self._model:
-            self._model = apps.get_model('backend_tokens', 'KindToken')
+        if not hasattr(self, '_model'):
+            self._model = apps.get_model('backend_token', 'KindToken')
         return self._model
 
     @property
     def qs(self):
-        if not self._qs:
+        if not hasattr(self, '_qs'):
             self._qs = self.model.objects.filter(kind=self.kind)
         return self._qs
 
@@ -64,3 +62,15 @@ class TokenGenerator():
         token.save()
 
         return token.token
+
+
+class TokenGeneratorSystem(TokenGenerator):
+    def __init__(self):
+        kind = self.model.KIND_GIS_SYSTEM_TOKEN
+        super().__init__(kind)
+
+
+# TODO TokenGenerator for following:
+# KIND_VALIDATION_EMAIL = 1
+# KIND_RESET_PASSWORD = 2
+# KIND_GIS_EMPLOYEE_TOKEN = 3
