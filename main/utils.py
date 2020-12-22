@@ -5,7 +5,6 @@ import base64
 import functools
 import re
 import unicodedata
-import uuid
 
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
@@ -22,6 +21,7 @@ from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 from backend.config.models import Config
+from backend.token.utils import TokenGeneratorUserValidationEmail
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -233,22 +233,19 @@ def refreshMaterializedView(fid):
         return True
 
 
-def _generate_user_token():
-    return uuid.uuid4().hex[:32]
-
-
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
 
 
 def send_approve_email(user, subject=None, text=None):
+
     if not user.email:
         return False
 
-    token = _generate_user_token()
+    token = TokenGeneratorUserValidationEmail().get()
 
     UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
-    UserValidationEmail .objects.create(
+    UserValidationEmail.objects.create(
         user=user,
         token=token,
         valid_before=timezone.now() + timedelta(days=90)
