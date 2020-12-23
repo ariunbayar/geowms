@@ -28,22 +28,35 @@ export class Cart extends Component{
             alert_msg: '',
             max_size: 8,
             first_number: 0,
+            is_again: false,
         }
 
         this.removeList = this.removeList.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
         this.moreItems = this.moreItems.bind(this)
         this.undoItems = this.undoItems.bind(this)
-        this.make_list = this.make_list.bind(this)
+        this.makeList = this.makeList.bind(this)
     }
 
     componentDidMount(){
-        this.make_list()
+        this.makeList()
     }
 
     componentDidUpdate(pP, pS){
         if(pP.point_id !== this.props.point_id) {
-            this.make_list()
+            this.makeList()
+        }
+        if(pP.point_id === this.props.point_id && this.props.is_again_clicked) {
+            if (this.state.data.length > 0) {
+                const found = this.state.data.filter(element => {
+                    return element.id == this.props.point_id
+                }).length > 0
+                if (!found) {
+                    this.makeList()
+                }
+            } else {
+                this.makeList()
+            }
         }
         if(pS.data !== this.state.data) {
             if(this.state.data.length == 0){
@@ -52,10 +65,11 @@ export class Cart extends Component{
         }
     }
 
-    make_list() {
+    makeList() {
         const {coordinate, torf, content, code} = this.props
         if(torf == true) {
             if(content.length !== 0) {
+                var name
                 var arr = [content[0][1][2]]
                 if(arr[0][1]) {
                     name = arr[0][1]
@@ -73,7 +87,7 @@ export class Cart extends Component{
                     if(!found) {
                         this.setState({
                             data: this.state.data.concat(json),
-                            is_button: false
+                            is_button: false,
                         })
                     }
                     else {
@@ -86,14 +100,14 @@ export class Cart extends Component{
                 else {
                     this.setState({
                         data: json,
-                        is_button: false
+                        is_button: false,
                     })
                 }
             }
         }
     }
 
-    removeList(coordinate){
+    removeList(point_id){
         const {data} = this.state
         if(data.length == 1){
             this.setState({
@@ -101,10 +115,10 @@ export class Cart extends Component{
             })
         }
         if(data.length > 1){
-            const isBelowThreshold = (coordinateFromArray) => coordinateFromArray = coordinate;
+            const isBelowThreshold = (point_idFromArray) => point_idromArray = point_id;
             if(data.every(isBelowThreshold)){
                 var array = data.filter((item) =>{
-                    return item.id !== coordinate
+                    return item.id !== point_id
                 })
                 this.setState({
                     data: array,
@@ -267,7 +281,7 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, x, y, content, code, point_id) {
-        this.renderComponent({coordinate, torf, x, y, content, code, point_id})
+    showModal(coordinate, torf, x, y, content, code, point_id, is_again_clicked) {
+        this.renderComponent({coordinate, torf, x, y, content, code, point_id, is_again_clicked})
     }
 }
