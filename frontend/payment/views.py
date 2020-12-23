@@ -16,6 +16,7 @@ from django.conf import settings
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geos import Point
 from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404, reverse
 from django.shortcuts import render
@@ -59,6 +60,12 @@ def _get_key_and_compare(dict, item):
         if key == item:
             value = key
     return value
+
+
+def _lat_long_to_utm(lat, longi):
+    point = Point([lat, longi], srid=4326)
+    utm = point.transform(3857, clone=True)
+    return utm.coords
 
 
 @require_POST
@@ -745,18 +752,20 @@ def _create_lavlagaa_file(class_infos, path):
         for row in range(0, len(table_col)):
             cell_width = table_col[row]['width']
             if row == 0:
-                pdf.cell(cell_width, calc_cell_height, str(idx + 1), 1, 0, 'L')
+                pdf.cell(cell_width, calc_cell_height, str(idx + 1), 1, 0, 'C')
                 end_y = pdf.get_y()
             else:
                 before_cell_width = table_col[row - 1]['width']
                 current_x = current_x + before_cell_width
                 pdf.set_xy(current_x, current_y)
                 cell_text = str(point_infos[idx][table_col[row]['body_name']])
+
                 zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
                 if zuruu >= 1:
-                    pdf.multi_cell(cell_width, cell_height, cell_text, 1, 'L', False)
+                    pdf.multi_cell(cell_width, cell_height, cell_text, 1, 'C', False)
                 else:
-                    pdf.cell(cell_width, calc_cell_height, cell_text, 1, 0, 'L', False)
+                    pdf.cell(cell_width, calc_cell_height, cell_text, 1, 0, 'C', False)
+
             if pdf.get_y() > end_y:
                 end_y = pdf.get_y()
         pdf.set_y(end_y)
@@ -861,11 +870,11 @@ def _get_info_from_file(get_type, mpoint, pdf_id):
                     # check_pdf_path = '/home/odk/Desktop/pdfs/tseg-personal-file'
                     if str(content[att_names['pid']]) == str(pdf_id):
                         if not get_type:
-                            found_items.append(_get_items(content, mpoint, att_names))
+                            found_items.append(_get_items_with_file(content, mpoint, att_names))
     return found_items
 
 
-def _get_items(content, mpoint, att_names):
+def _get_items_with_file(content, mpoint, att_names):
     point_info = {
         'point_id': content[att_names['point_name']],
         'ondor': content[att_names['ondor']],
@@ -883,6 +892,25 @@ def _get_items(content, mpoint, att_names):
     return point_info
 
 
+def _get_item_from_mpoint_view(mpoint):
+    utm = _lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
+    point_info = {
+        'point_id': mpoint.point_name,
+        'ondor': mpoint.ondor,
+        'aimag': mpoint.aimag,
+        'sum': mpoint.sum,
+        'sheet2': mpoint.sheet2,
+        'sheet3': mpoint.sheet3,
+        'n_utm': utm[0],
+        'e_utm': utm[1],
+        't_type': mpoint.t_type,
+        'class_name': mpoint.point_class_name,
+        'pdf_id': mpoint.pid,
+        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
+    }
+    return point_info
+
+
 def _create_lavlagaa_infos(payment):
     point_infos = []
     points = PaymentPoint.objects.filter(payment=payment)
@@ -891,8 +919,13 @@ def _create_lavlagaa_infos(payment):
             mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
             if mpoint:
                 infos = _get_info_from_file(None, mpoint, point.pdf_id)
-                for info in infos:
+                if infos:
+                    for info in infos:
+                        point_infos.append(info)
+                else:
+                    info = _get_item_from_mpoint_view(mpoint)
                     point_infos.append(info)
+
     folder_name = 'tseg-personal-file'
     class_names = _class_name_eer_angilah(point_infos)
     for class_name in class_names:
@@ -1192,3 +1225,27 @@ def calcPrice(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+def _check_pdf_from_folder(pdf_id):
+    file_paths = []
+    file_ext = 'pdf'
+    pdf_full_name = pdf_id + "." + file_ext
+    path = os.path.join(settings.FILES_ROOT, 'tseg-personal-file')
+
+    for root, directories, files in os.walk(path):
+        for filename in files:
+            if filename == pdf_full_name:
+                filepath = os.path.join(root, filename)
+                file_paths.append(filepath)
+
+    return file_paths
+
+
+def _check_pdf_from_mpoint_view(pdf_id):
+    mpoints = []
+    mpoints = Mpoint_view.objects.using("postgis_db").filter(pid=pdf_id)
+    for mpoint in mpoints:
+        mpoint.append(pdf_id)
+
+    return mpoints
