@@ -1202,6 +1202,7 @@ def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_
 
 @require_POST
 @ajax_required
+@login_required
 def calcPrice(request, payload):
     area = payload.get('area')
     layer_list = payload.get("layer_list")
@@ -1240,6 +1241,7 @@ def _check_pdf_from_mpoint_view(pdf_id):
 
 @require_POST
 @ajax_required
+@login_required
 def checkButtonEnable(request, payload):
     is_enable = False
     pdf_id = payload.get('pdf_id')
