@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, Http404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 
 from main.decorators import ajax_required
 from geoportal_app.models import User
@@ -89,7 +90,7 @@ def purchase(request, payload):
 
 @require_POST
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
 def purchaseAll(request, payload):
     purchase_id = payload.get('purchase_id')
     payment = Payment.objects.filter(pk=purchase_id).first()

@@ -76,20 +76,19 @@ class PopUpCmp extends Component {
         if (datas.length > 0) {
             const mode = datas[number - 1][1]
             const code = datas[number - 1][2]
-            const name = datas[number - 1][0][1][2]
-            const id = datas[number - 1][0][1][1]
-            const pid = datas[number - 1][0][1][3]
-            if (id[0] == 'point_id') {
-                this.setState({ id: id[1] })
-            }
-            if (name[0] == 'point_name') {
-                this.setState({ name: name[1] })
-            }
-            if (pid[0] == 'pid') {
-                if (mode == 'mpoint_view'){
-                    this.checkButtonEnable(pid[1])
+            const values = datas[number - 1][0][1]
+            const geom_name = datas[number - 1][0][0]
+            values.map((value, idx) => {
+                if (value[0] == 'point_id') {
+                    this.setState({ id: value[1] })
                 }
-            }
+                if (value[0] == 'point_name') {
+                    this.setState({ id: value[1] })
+                }
+                if (value[0] == 'pid' && mode == 'mpoint_view') {
+                    this.checkButtonEnable(value[1])
+                }
+            })
             this.setNowData(number, datas, mode, code)
             this.props.setSource(mode)
         }
@@ -207,7 +206,7 @@ class PopUpCmp extends Component {
                     </div>
 
                     {
-                        this.state.is_purchase && this.state.mode == 'mpoint_view'
+                        this.state.is_purchase
                         ?
                             <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
                                 <div className="spinner-border" role="status">
@@ -216,26 +215,26 @@ class PopUpCmp extends Component {
                                 {} Хүлээнэ үү..
                             </button>
                         :
-                            <button
-                                className="btn btn-xs btn-primary my-2 mx-1"
-                                onClick={() => this.checkDataForPurchase()}
-                                disabled={!this.state.is_enable}
-                            >
-                                Худалдаж авах
-                            </button>
-                    }
-                    {
                         this.state.mode == 'mpoint_view'
                         ?
-                            <button
-                                className="btn btn-xs btn-primary my-2 mx-1"
-                                onClick={() => this.openCartSide()}
-                                disabled={!this.state.is_enable}
-                            >
-                                Сагсанд нэмэх
-                            </button>
+                            <div className="btn-group flex-wrap d-flex justify-content-center">
+                                <button
+                                    className="btn btn-xs btn-primary my-2 mx-1"
+                                    onClick={() => this.checkDataForPurchase()}
+                                    disabled={is_enable ? "" : "disabled"}
+                                >
+                                    Худалдаж авах
+                                </button>
+                                <button
+                                    className="btn btn-xs btn-primary my-2 mx-1"
+                                    onClick={() => this.openCartSide()}
+                                    // disabled={is_enable ? "" : "disabled"}
+                                >
+                                    Сагсанд нэмэх
+                                </button>
+                            </div>
                         :
-                            null
+                        null
                     }
                     <div className="ol-popup-arrow">
 

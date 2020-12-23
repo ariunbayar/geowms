@@ -52,9 +52,10 @@ urlpatterns = [
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
         path('api/download-purchase/<int:pk>/<str:download_type>/', payment_views.download_purchase, name="download_purchase"),
         path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
-        path('download-pdf/<str:pk>/', payment_views.download_pdf, name='download-pdf'),
+        path('download-pdf/<int:pk>/<str:pdf_id>/', payment_views.download_pdf, name='download-pdf'),
         path('download-zip/<int:pk>/', payment_views.download_zip, name='download-zip'),
         path('calc-price/', payment_views.calcPrice, name='calculate-price'),
+        path('test-pay/<int:id>/', payment_views.testPay, name='test-pay'),
         path('check-enable/', payment_views.checkButtonEnable, name='check-button-enable'),
     ], 'payment'))),
 

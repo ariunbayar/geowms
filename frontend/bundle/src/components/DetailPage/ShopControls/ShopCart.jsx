@@ -58,27 +58,36 @@ export class Cart extends Component{
     }
 
     makeList() {
-        const {coordinate, torf, content, code} = this.props
+        const {coordinate, torf, content, code, point_id} = this.props
         if(torf == true) {
             if(content.length !== 0) {
-                var name
-                var arr = [content[0][1][2]]
-                if(arr[0][1]) {
-                    name = arr[0][1]
+                var name = 'Нэр байхгүй байна'
+                var pdf_id = 'pdf байхгүй'
+                var geom_name = content[0][0]
+                content[0][1].map((value, idx) => {
+                    if (value[0] == 'point_name') {
+                        name = value[1]
+                    }
+                    if (value[0] == 'pid') {
+                        pdf_id = value[1]
+                    }
+                })
+                var json = {
+                    'name': name,
+                    'id': point_id,
+                    'code': code,
+                    'geom_name': geom_name,
+                    'pdf_id': pdf_id,
                 }
-                else
-                {
-                    name = 'Нэр байхгүй байна'
-                }
-                var arr1 = [content[0][1][1]]
-                var json = [{ 'name': name ,'id': arr1[0][1], 'code': code }]
                 if (this.state.data.length > 0) {
                     const found = this.state.data.filter(element => {
-                        return element.id == json[0].id
+                        return element.geom_name == json.geom_name
                     }).length > 0
                     if(!found) {
+                        const data = this.state.data
+                        data.push(json)
                         this.setState({
-                            data: this.state.data.concat(json),
+                            data,
                             is_button: false,
                         })
                     }
@@ -91,7 +100,7 @@ export class Cart extends Component{
                 }
                 else {
                     this.setState({
-                        data: json,
+                        data: [json],
                         is_button: false,
                     })
                 }
@@ -99,7 +108,7 @@ export class Cart extends Component{
         }
     }
 
-    removeList(point_id){
+    removeList(geom_name){
         const {data} = this.state
         if(data.length == 1){
             this.setState({
@@ -107,10 +116,10 @@ export class Cart extends Component{
             })
         }
         if(data.length > 1){
-            const isBelowThreshold = (point_idFromArray) => point_idromArray = point_id;
+            const isBelowThreshold = (geom_nameFromArray) => geom_nameromArray = geom_name;
             if(data.every(isBelowThreshold)){
                 var array = data.filter((item) =>{
-                    return item.id !== point_id
+                    return item.geom_name !== geom_name
                 })
                 this.setState({
                     data: array,
@@ -138,7 +147,8 @@ export class Cart extends Component{
                             this.setState({ alert_msg: '' })
                         }, 2000);
                     }
-                }).catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
+                })
+                // .catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
         }
         else{
             this.setState({ alert_msg: "Уучлаарай сагс хоосон байна" })
@@ -171,13 +181,14 @@ export class Cart extends Component{
     render(){
         const {coordinate, torf, data, is_button, alert_msg, success, max_size, first_number, undoItem } = this.state
         const {x, y} = this.props
+        console.log(data);
         if(data.length > 0){
             this.div = []
             data.slice(first_number, max_size).map((data, key) => {
                 var idx = key + 1 + first_number
                 this.div.push(
                     <div className="rounded bg-light card-baraa row shadow-sm bg-white"  key={key}>
-                        <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.id)}></i></div>
+                        <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.geom_name)}></i></div>
                         <span className="col-md-10 name"><b>{idx}. Цэгийн нэр: </b>{data.name}</span>
                     </div>
                 )
@@ -234,7 +245,7 @@ export class Cart extends Component{
                         <button
                             className="btn gp-btn-primary pay-button my-4"
                             onClick={() => this.checkDataForPurchase()}
-                            disabled = {is_button}
+                            disabled={is_button}
                         >
                             Худалдаж авах
                         </button>

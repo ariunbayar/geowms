@@ -922,7 +922,7 @@ def _create_lavlagaa_infos(payment):
     points = PaymentPoint.objects.filter(payment=payment)
     for point in points:
         if point.pdf_id:
-            mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=point.pdf_id).first()
+            mpoint = Mpoint_view.objects.using('postgis_db').filter(point_name=point.point_name, pid=point.pdf_id).first()
             if mpoint:
                 infos = _get_info_from_file(None, mpoint, point.pdf_id)
                 if infos:
@@ -931,17 +931,17 @@ def _create_lavlagaa_infos(payment):
                 else:
                     info = _get_item_from_mpoint_view(mpoint)
                     point_infos.append(info)
-
     folder_name = 'tseg-personal-file'
     class_names = _class_name_eer_angilah(point_infos)
-    for class_name in class_names:
-        if class_name['org_name']:
-            path = _create_folder_payment_id(folder_name, payment.id)
-            _create_lavlagaa_file(class_name, path)
+    if class_names:
+        for class_name in class_names:
+            if class_name['org_name']:
+                path = _create_folder_payment_id(folder_name, payment.id)
+                _create_lavlagaa_file(class_name, path)
 
-    _file_to_zip(str(payment.id), folder_name)
-    payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
-    payment.save()
+        _file_to_zip(str(payment.id), folder_name)
+        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+        payment.save()
     return True
 
 
@@ -1089,25 +1089,21 @@ def purchaseFromCart(request, payload):
             point_id = data['id']
 
             if point_id:
-                mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id=point_id).first()
                 wms_layer = get_object_or_404(WMSLayer, code=data['code'])
-                amount = wms_layer.feature_price
 
+                amount = wms_layer.feature_price
                 total_amount += amount
-                point_name = 'Нэр алга'
-                pdf_id = "хоосон"
-                if mpoint:
-                    point_name = mpoint.point_name if mpoint.point_name else point_name
-                    pdf_id = mpoint.pid if mpoint.pid else pdf_id
+
                 PaymentPoint.objects.create(
                     payment_id=pay_id,
                     point_id=point_id,
-                    point_name=point_name,
+                    point_name=data['name'],
                     amount=amount,
-                    pdf_id=pdf_id,
+                    pdf_id=data['pdf_id'],
                 )
 
         Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
+
         rsp = {
             'success': True,
             'msg': 'Амжилттай боллоо',
@@ -1123,19 +1119,16 @@ def purchaseFromCart(request, payload):
 
 @require_GET
 @login_required
-def download_pdf(request, pk):
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=pk).first()
-    if mpoint:
-        point = PaymentPoint.objects.filter(point_id=mpoint.id).first()
-        if point:
-            payment = get_object_or_404(Payment, user=request.user, id=point.payment_id, is_success=True)
-            # generate the file
-            file_name = pk + '.pdf'
-            src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
-            response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
-            return response
-        else:
-            raise Http404
+def download_pdf(request, pk, pdf_id):
+    has_pdf = _check_pdf_in_folder(pdf_id)
+    if len(has_pdf) > 0:
+        payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
+        point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
+        # generate the file
+        file_name = pdf_id + '.pdf'
+        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
+        return response
     else:
         raise Http404
 
@@ -1266,10 +1259,10 @@ def checkButtonEnable(request, payload):
     is_enable = False
     pdf_id = payload.get('pdf_id')
 
-    infos = _get_info_from_file('check', None, pdf_id)
-    has_pdf = _check_pdf_in_folder('G0003')
-    if has_pdf:
-        if len(infos) > 0:
+    has_csv = _get_info_from_file('check', None, pdf_id)
+    has_pdf = _check_pdf_in_folder(pdf_id)
+    if len(has_pdf) > 0:
+        if len(has_csv) > 0:
             is_enable = True
         else:
             infos = _check_pdf_from_mpoint_view(pdf_id)
@@ -1279,6 +1272,19 @@ def checkButtonEnable(request, payload):
     rsp = {
         'success': True,
         'is_enable': is_enable
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required
+def testPay(request, id):
+    payment = Payment.objects.filter(id=id).update(is_success=True)
+
+    rsp = {
+        'success': True,
     }
 
     return JsonResponse(rsp)

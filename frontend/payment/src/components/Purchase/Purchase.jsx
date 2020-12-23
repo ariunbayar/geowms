@@ -112,6 +112,14 @@ export class Purchase extends Component {
         this.setState({  alert_toggle: false, alert_msg: "Монгол Банкаар төлбөр төлөх" })
     }
 
+    testPay() {
+        const purchase_id = this.props.match.params.id
+        service
+            .testPay(purchase_id).then(rsp => {
+                this.handleModalApproveClose()
+            })
+    }
+
     render() {
         const purchase_id = this.props.match.params.id
         const { purchase, purchase_all, point_data, names, error_msg, check_error, qpay_modal_is, alert_msg, is_modal_info_open, alert_toggle, is_modal_open } = this.state
@@ -189,6 +197,11 @@ export class Purchase extends Component {
                                 status={this.state.status}
                             />
                         }
+                    </div>
+                    <div className="col-md-6">
+                        <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.testPay()}>
+                            <h4 className="text-succes p-3">Тестээр авах</h4>
+                        </button>
                     </div>
                 </div>
             </div>

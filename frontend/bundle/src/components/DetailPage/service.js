@@ -110,10 +110,12 @@ function paymentCalcPrice(area, layer_list, feature_info_list, selected_type) {
     return fetch('/payment/calc-price/', requestOptions).then(handleResponse)
 }
 
-function purchaseFromCart(datas){
+function purchaseFromCart(datas) {
+    console.log(JSON.stringify({ datas }));
+    console.log(JSON.stringify(datas));
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({datas})
+        body: JSON.stringify({ datas })
     }
     return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
 }

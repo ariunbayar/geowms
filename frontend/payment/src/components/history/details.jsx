@@ -155,7 +155,7 @@ export class Details extends Component {
                                                                     ?
                                                                         <td scope="">
                                                                             {value.file_name &&
-                                                                                <a className="text-info" href={`/payment/download-pdf/${value.file_name}/`}>
+                                                                                <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value.file_name}/`}>
                                                                                     файл
                                                                                 </a>
                                                                             }
@@ -264,43 +264,46 @@ export class Details extends Component {
                                 : null
                             }
                         </div>
-                        <div className="row py-3">
-                            <div className="col-md-6 py-0 my-3">
-                                <div id="payment">
-                                    <h5 className="mb-3">Гүйлгээний төлөв</h5>
-                                    <ul className="list-unstyled">
-                                        <li className="f-nav-item mb-2">
-                                            Гүйлгээний дугаар | {items.geo_unique_number}
-                                        </li>
-                                        <li className="f-nav-item mb-2">
-                                            НИЙТ МӨНГӨН ДҮН | {items.total}₮
-                                        </li>
-                                        <li className="f-nav-item mb-2">
-                                            Үр дүн | {items.is_success ? <span className="text-success">Амжилттай</span> : <span className="text-danger">Амжилтгүй</span>}
-                                        </li>
-                                    </ul>
-                                </div>
-                                <button className="btn btn-primary" onClick={() => {
-                                    const mywindow = window.open('', 'PRINT', 'height=400, width=600');
-                                    mywindow.document.write('<html><body>');
-                                    mywindow.document.write(document.getElementById("container").innerHTML)
-                                    mywindow.document.write(document.getElementById("payment").innerHTML)
-                                    mywindow.document.write('</body></html>');
-                                    mywindow.document.close()
-                                    mywindow.focus()
-                                    mywindow.print()
-                                    mywindow.close();
-                                }}>Хэвлэх</button>
-                            </div>
-                            {
-                                !items.is_success ?
+                        {
+                            !is_loading &&
+                            <div className="row py-3">
                                 <div className="col-md-6 py-0 my-3">
-                                    <h5 className="mb-3">QR Code </h5>
-                                    <img src="/static/assets/image/lavlakh.png"></img>
+                                    <div id="payment">
+                                        <h5 className="mb-3">Гүйлгээний төлөв</h5>
+                                        <ul className="list-unstyled">
+                                            <li className="f-nav-item mb-2">
+                                                Гүйлгээний дугаар | {items.geo_unique_number}
+                                            </li>
+                                            <li className="f-nav-item mb-2">
+                                                НИЙТ МӨНГӨН ДҮН | {items.total}₮
+                                            </li>
+                                            <li className="f-nav-item mb-2">
+                                                Үр дүн | {items.is_success ? <span className="text-success">Амжилттай</span> : <span className="text-danger">Амжилтгүй</span>}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <button className="btn btn-primary" onClick={() => {
+                                        const mywindow = window.open('', 'PRINT', 'height=400, width=600');
+                                        mywindow.document.write('<html><body>');
+                                        mywindow.document.write(document.getElementById("container").innerHTML)
+                                        mywindow.document.write(document.getElementById("payment").innerHTML)
+                                        mywindow.document.write('</body></html>');
+                                        mywindow.document.close()
+                                        mywindow.focus()
+                                        mywindow.print()
+                                        mywindow.close();
+                                    }}>Хэвлэх</button>
                                 </div>
-                                : null
-                            }
-                        </div>
+                                {
+                                    !items.is_success ?
+                                    <div className="col-md-6 py-0 my-3">
+                                        <h5 className="mb-3">QR Code </h5>
+                                        <img src="/static/assets/image/lavlakh.png"></img>
+                                    </div>
+                                    : null
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

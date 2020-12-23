@@ -7,6 +7,7 @@ export const service = {
     getDetails,
     paymentTest,
     paginatedList,
+    testPay,
 }
 
 
@@ -16,6 +17,10 @@ function payment(purchase_all){
     return fetch(`/payment/dictionaryRequest/`, requestOptions).then(handleResponse)
 }
 
+function testPay(id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`/payment/test-pay/${id}/`, requestOptions).then(handleResponse)
+}
 
 function purchaseAll(purchase_id){
     const requestOptions = {
