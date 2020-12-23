@@ -1,9 +1,7 @@
 import React, { Component, Fragment } from "react"
 import {service} from '../service'
-import {Overlay} from 'ol'
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
-import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
 
 class PopUpCmp extends Component {
 

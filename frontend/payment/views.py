@@ -1,31 +1,36 @@
-from zipfile import ZipFile
 import os
 import io
-import PIL.Image as Image
 import urllib.request
 import uuid
 import json
 import math
 import subprocess
-from fpdf import FPDF
-from datetime import date
 import urllib.request
 import glob
+import csv
+import PIL.Image as Image
 
 from django.conf import settings
 from django.db import transaction
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
-from django.http import JsonResponse, FileResponse, Http404
+from django.contrib.gis.gdal import DataSource
 from django.shortcuts import get_object_or_404, get_list_or_404, reverse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
+from django.http import JsonResponse, FileResponse, Http404
+
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
+
+from geoportal_app.models import User
 from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
+from backend.wmslayer.models import WMSLayer
+from backend.bundle.models import Bundle
 from backend.inspire.models import (
     LThemes, LFeatureConfigs,
     LDataTypeConfigs, LProperties,
@@ -35,14 +40,13 @@ from backend.inspire.models import (
     MDatasBuilding, MDatasGeographical,
     MDatasGeographical, MDatasCadastral,
 )
-from geoportal_app.models import User
-from backend.wmslayer.models import WMSLayer
-from backend.bundle.models import Bundle
+
 from main.decorators import ajax_required
 from main.utils import send_email
 
-from django.contrib.gis.gdal import DataSource
-import csv
+from fpdf import FPDF
+from datetime import date
+from zipfile import ZipFile
 
 
 def index(request):

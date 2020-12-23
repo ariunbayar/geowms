@@ -2,14 +2,6 @@ import React, {Component} from "react"
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
 import {service} from '../service'
-import { toStringHDMS } from "ol/coordinate"
-import Corner from "ol/extent/Corner"
-import { array } from "yup"
-import { CompilationStatus } from "webpack-build-notifier/dist/types"
-import OverlayPositioning from "ol/OverlayPositioning"
-import { set } from "ol/transform"
-import { withRouter } from 'react-router-dom';
-import { identityTransform } from "ol/proj"
 
 export class Cart extends Component{
 
