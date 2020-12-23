@@ -1227,21 +1227,6 @@ def calcPrice(request, payload):
     return JsonResponse(rsp)
 
 
-def _check_pdf_from_folder(pdf_id):
-    file_paths = []
-    file_ext = 'pdf'
-    pdf_full_name = pdf_id + "." + file_ext
-    path = os.path.join(settings.FILES_ROOT, 'tseg-personal-file')
-
-    for root, directories, files in os.walk(path):
-        for filename in files:
-            if filename == pdf_full_name:
-                filepath = os.path.join(root, filename)
-                file_paths.append(filepath)
-
-    return file_paths
-
-
 def _check_pdf_from_mpoint_view(pdf_id):
     mpoints = []
     mpoints = Mpoint_view.objects.using("postgis_db").filter(pid=pdf_id)
