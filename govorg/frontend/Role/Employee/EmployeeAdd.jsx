@@ -95,10 +95,10 @@ export class EmployeeAdd extends Component {
         }
     }
 
-    handleSubmit(values, { setStatus, setSubmitting, setErrors }){
+    handleSubmit(user_detail, { setStatus, setSubmitting, setErrors }){
         const { emp_role_id } = this.state
         service
-            .createEmployee(values, emp_role_id, this.perms)
+            .createEmployee(user_detail, emp_role_id, this.perms)
             .then(({ success, errors, info }) => {
                 if(success) {
                     setStatus('saved')
@@ -276,8 +276,23 @@ export class EmployeeAdd extends Component {
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
                                         </div>
+                                        <div>
+                                            {
+                                                roles !== {} && is_inspire_role
+                                                ?
+                                                    <InsPerms
+                                                        action_type="editable"
+                                                        is_employee={true}
+                                                        getValue={this.getValue}
+                                                        dontDid={true}
+                                                        org_roles={org_roles}
+                                                        role={roles}
+                                                    />
+                                                : null
+                                            }
+                                        </div>
                                         <div className="form-group">
-                                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
+                                            <button type="submit" className="btn btn-primary btn-block waves-effect waves-light m-1" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                 {!isSubmitting && 'Хадгалах' }
@@ -287,21 +302,6 @@ export class EmployeeAdd extends Component {
                                 </Form>
                             )}}
                         </Formik>
-                    </div>
-                    <div>
-                        {
-                            roles !== {} && is_inspire_role
-                            ?
-                                <InsPerms
-                                    action_type="editable"
-                                    is_employee={true}
-                                    getValue={this.getValue}
-                                    dontDid={true}
-                                    org_roles={org_roles}
-                                    role={roles}
-                                />
-                            : null
-                        }
                     </div>
                 </div>
                 <ModalAlert
