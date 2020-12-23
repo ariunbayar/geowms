@@ -603,7 +603,6 @@ export default class BundleMap extends Component {
             }
         })
         this.sendFeatureInfo = []
-        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
     }
 
     setSourceInPopUp(mode) {
