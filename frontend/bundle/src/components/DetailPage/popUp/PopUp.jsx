@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react"
-
+import {service} from '../service'
 import {Overlay} from 'ol'
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
@@ -16,14 +16,20 @@ class PopUpCmp extends Component {
             is_prev: false,
             is_plus: true,
             data: [],
+            datas: '',
             mode: '',
+            name: '',
             id: '',
             code: '',
+            is_purchase: false,
+            is_enable: false,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
         this.openCartSide = this.openCartSide.bind(this)
+        this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
+        this.checkButtonEnable = this.checkButtonEnable.bind(this)
     }
 
     componentDidMount() {
@@ -70,9 +76,19 @@ class PopUpCmp extends Component {
         if (datas.length > 0) {
             const mode = datas[number - 1][1]
             const code = datas[number - 1][2]
+            const name = datas[number - 1][0][1][2]
             const id = datas[number - 1][0][1][1]
+            const pid = datas[number - 1][0][1][3]
             if (id[0] == 'point_id') {
                 this.setState({ id: id[1] })
+            }
+            if (name[0] == 'point_name') {
+                this.setState({ name: name[1] })
+            }
+            if (pid[0] == 'pid') {
+                if (mode == 'mpoint_view'){
+                    this.checkButtonEnable(pid[1])
+                }
             }
             this.setNowData(number, datas, mode, code)
             this.props.setSource(mode)
@@ -84,12 +100,38 @@ class PopUpCmp extends Component {
         this.setState({ data, mode, datas, code })
     }
 
+    checkButtonEnable(pdf_id){
+        service.checkButtonEnable(pdf_id)
+            .then(({is_enable, success}) => {
+                if(success){
+                    this.setState({ is_enable })
+                }
+            })
+    }
+
     openCartSide() {
         this.props.cartButton(true, this.state.data, this.state.code, this.state.id)
     }
 
+
+    checkDataForPurchase(){
+        this.setState({ is_purchase: true })
+        var data = [{ 'name': this.state.name ,'id': this.state.id, 'code': this.state.code }]
+        if(this.state.data.length > 0){
+            service.purchaseFromCart(data)
+                .then(({success, msg, payment_id}) => {
+                    if(success){
+                        setTimeout(() => {
+                            this.setState({ data: [], is_purchase: false })
+                            window.location.href=`/payment/purchase/${payment_id}/`;
+                        }, 1000);
+                    }
+                })
+        }
+    }
+
     render() {
-        const { datas, startNumber, is_prev, is_plus } = this.state
+        const { datas, startNumber, is_prev, is_plus, is_enable } = this.state
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -158,17 +200,35 @@ class PopUpCmp extends Component {
                             </tbody>
                         </table>
                     </div>
+
+                    {
+                        this.state.is_purchase && this.state.mode == 'mpoint_view'
+                        ?
+                            <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
+                                <div className="spinner-border" role="status">
+                                    <span className="sr-only"></span>
+                                </div>
+                                {} Хүлээнэ үү..
+                            </button>
+                        :
+                            <button
+                                className="btn btn-xs btn-primary my-2 mx-1"
+                                onClick={() => this.checkDataForPurchase()}
+                                disabled={!this.state.is_enable}
+                            >
+                                Худалдаж авах
+                            </button>
+                    }
                     {
                         this.state.mode == 'mpoint_view'
                         ?
-                            <div>
-                                <button
-                                    className="btn btn-lg gp-btn-primary my-3 mx-3"
-                                    onClick={() => this.openCartSide()}
-                                >
-                                    Сагсанд нэмэх
-                                </button>
-                            </div>
+                            <button
+                                className="btn btn-xs btn-primary my-2 mx-1"
+                                onClick={() => this.openCartSide()}
+                                disabled={!this.state.is_enable}
+                            >
+                                Сагсанд нэмэх
+                            </button>
                         :
                             null
                     }
@@ -227,7 +287,7 @@ export class PopUp extends Control {
     }
 
     getData(isload, datas, close, setSource, cartButton, code) {
-        // const datanud = [[["Полигонометрийн_сүлжээний_цэг.55",[["objectid","null"],["point_id","45546"],["point_name","holymoly"],["pid","PDF45546"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","Өвөрхангай"],["sum","Богд"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","5"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"], [["Полигонометрийн_сүлжээний_цэг.58",[["objectid","null"],["point_id","489489"],["point_name","holyshit"],["pid","45245245"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","thhh"],["sum","dsadsadsa"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","2"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"]]
+        // const datanud = [[["Полигонометрийн_сүлжээний_цэг.55",[["objectid","null"],["point_id","45546"],["point_name","holymoly"],["pid","GPS65100002"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","Өвөрхангай"],["sum","Богд"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","5"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"], [["Полигонометрийн_сүлжээний_цэг.58",[["objectid","null"],["point_id","489489"],["point_name","holyshit"],["pid","45245245"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","thhh"],["sum","dsadsadsa"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","2"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"]]
         this.toggleControl(isload)
         this.renderComponent({datas, close, setSource, cartButton, code})
     }

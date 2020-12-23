@@ -11,6 +11,7 @@ export const service = {
     getAimags,
     getSum,
     isUser,
+    checkButtonEnable,
 }
 
 function getCookie(name) {
@@ -138,4 +139,12 @@ function getSum(aimag_name) {
         body: JSON.stringify({aimag_name})
     }
     return fetch('/api/sum/', requestOptions).then(handleResponse)
+}
+
+function checkButtonEnable(pdf_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({pdf_id})
+    }
+    return fetch('/payment/check-enable/', requestOptions).then(handleResponse)
 }
