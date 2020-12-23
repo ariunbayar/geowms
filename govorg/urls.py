@@ -32,7 +32,6 @@ urlpatterns = [
         ], 'role'))),
 
         path('system/', system_views.systemList, name='system'),
-        path('system/user-token/', system_views.userToken, name='user-token'),
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
@@ -54,6 +53,7 @@ urlpatterns = [
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
             path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
+            path('qgis-url/', govorg_inspire_views.get_qgis_url),
         ], 'inspire'))),
 
         path('org-request/', include(([

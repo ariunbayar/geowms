@@ -56,19 +56,6 @@ def systemList(request, payload):
     return JsonResponse(rsp)
 
 
-@require_GET
-@ajax_required
-def userToken(request):
-
-    emp = get_object_or_404(Employee, user=request.user)
-    rsp = {
-        'success': True,
-        'token': emp.token,
-    }
-
-    return JsonResponse(rsp)
-
-
 def _get_system_detail_display(request, system):
 
     wms_list = [

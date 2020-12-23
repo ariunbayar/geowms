@@ -3,7 +3,6 @@ import {handleResponse, getPostOptions, getGetOptions} from '../components/helpe
 export const service = {
     paginatedList,
     detail,
-    getToken
 };
 
 function paginatedList(page, per_page, query) {
@@ -21,11 +20,4 @@ function detail(id) {
     }
 
     return fetch(`/gov/api/system/${id}/detail/`, opts).then(handleResponse)
-}
-
-function getToken() {
-    const opts = {
-        ...getGetOptions(),
-    }
-    return fetch(`/gov/api/system/user-token/`, opts).then(handleResponse)
 }

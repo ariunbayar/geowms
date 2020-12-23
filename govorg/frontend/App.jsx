@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import { System } from "./System"
-import { QgisSystem } from "./System/QgisSystem"
 import { Meta } from './Meta'
 import { Password } from './User/Password'
 import { Profile } from './User/Profile'
@@ -88,16 +87,7 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Role"></MenuItem>
                             </ul>
                         </MenuItem>
-                        <MenuItem
-                            icon="gp-text-primary fa fa-assistive-listening-systems"
-                            url="/gov/system/"
-                            text="Систем"
-                        >
-                            <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/system/" text="Систем"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/qgis-system/" text="QGis систем"></MenuItem>
-                            </ul>
-                        </MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
                         <MenuItem
                             icon="gp-text-primary fa fa-plug"
@@ -177,7 +167,6 @@ export class App extends Component {
                                 <Route path="/gov/tuuhen-ov/" component={() => <TuuhenOv perms={this.state.tuuhen_ov} />} /> : null
                             }
                             <Route path="/gov/system/" component={System} />
-                            <Route path="/gov/qgis-system/" component={QgisSystem} />
                             <Route path="/gov/meta/" component={Meta} />
 
                             <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />

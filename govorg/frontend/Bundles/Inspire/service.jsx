@@ -23,6 +23,7 @@ export const service = {
     getMetaFields,
     createMeta,
     deleteMeta,
+    qgisGetUrl
 }
 
 const prefix = '/gov/api/inspire'
@@ -185,4 +186,9 @@ function deleteMeta(pk) {
         ...getGetOptions(),
     }
     return fetch(`${meta_prefix}/${pk}/delete/`, requestOptions).then(handleResponse)
+}
+
+function qgisGetUrl() {
+    const requestOptions = getGetOptions()
+    return fetch(`${prefix}/qgis-url/`, requestOptions).then(handleResponse)
 }

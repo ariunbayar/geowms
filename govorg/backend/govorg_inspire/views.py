@@ -22,7 +22,7 @@ from django.core.files.storage import FileSystemStorage
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter, WKBReader, fromstr
 from backend.org.models import Org, Employee, InspirePerm
 
@@ -39,7 +39,8 @@ from main.utils import (
     gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
-    refreshMaterializedView
+    refreshMaterializedView,
+    get_config
 )
 
 
@@ -1055,4 +1056,18 @@ def FileUploadSaveData(request, tid, fid):
             'success': False,
             'info': return_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
         }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_qgis_url(request):
+    emp = get_object_or_404(Employee, user=request.user)
+    qgis_local_base_url = get_config('qgis_local_base_url')
+    rsp = {
+        'success': True,
+        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
     return JsonResponse(rsp)
