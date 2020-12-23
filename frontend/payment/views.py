@@ -871,6 +871,8 @@ def _get_info_from_file(get_type, mpoint, pdf_id):
                     if str(content[att_names['pid']]) == str(pdf_id):
                         if not get_type:
                             found_items.append(_get_items_with_file(content, mpoint, att_names))
+                        if get_type == 'check':
+                            found_items.append(pdf_id)
     return found_items
 
 
@@ -1234,3 +1236,25 @@ def _check_pdf_from_mpoint_view(pdf_id):
         mpoint.append(pdf_id)
 
     return mpoints
+
+
+@require_POST
+@ajax_required
+def checkButtonEnable(request, payload):
+    is_enable = False
+    pdf_id = payload.get('pdf_id')
+
+    infos = _get_info_from_file('check', None, pdf_id)
+    if len(infos) > 0:
+        is_enable = True
+    else:
+        infos = _check_pdf_from_mpoint_view(pdf_id)
+        if len(infos) > 0:
+            is_enable = True
+
+    rsp = {
+        'success': True,
+        'is_enable': is_enable
+    }
+
+    return JsonResponse(rsp)

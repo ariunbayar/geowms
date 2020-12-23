@@ -123,9 +123,9 @@ export default class BundleMap extends Component {
       this.setState({'is_modal_info_open': false})
     }
 
-    cartButton(is_cart, content, code, point_id){
+    cartButton(is_cart, content, code, point_id, is_again_clicked){
         if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code, point_id)
+            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code, point_id, is_again_clicked)
         }
     }
 
