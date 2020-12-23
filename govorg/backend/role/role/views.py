@@ -153,8 +153,7 @@ def _get_emp_roles_data_display(emp_role):
         property_of_feature[feature_id] = property_ids
         properties.append(get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True))
         for property_id in property_ids:
-            if property_id != 'geom':
-                properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire, False))
+            properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire, False))
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)

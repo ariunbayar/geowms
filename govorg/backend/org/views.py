@@ -29,12 +29,10 @@ def _org_role(org):
 
     for feature_id in feature_ids:
         property_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
-        property_ids.append('geom')
         property_of_feature[feature_id] = property_ids
         properties.append(get_property_data_display(None, feature_id, gov_perm, GovPermInspire, True))
         for property_id in property_ids:
-            if property_id != 'geom':
-                properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire, False))
+            properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire, False))
 
     package_features = [
         get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
