@@ -68,7 +68,10 @@ def _set_emp_role_inspire_data(emp_role, role, user):
     emp_role_inspire.created_by = user
     emp_role_inspire.emp_role = emp_role
     emp_role_inspire.feature_id = role.get('feature_id')
-    emp_role_inspire.property_id = role.get('property_id')
+    if role.get('property_id') == 'geom':
+        emp_role_inspire.geom = True
+    else:
+        emp_role_inspire.property_id = role.get('property_id')
     emp_role_inspire.perm_kind = get_convert_perm_kind(EmpRoleInspire, role.get('perm_kind'))
     emp_role_inspire.save()
 
@@ -147,10 +150,11 @@ def _get_emp_roles_data_display(emp_role):
 
     for feature_id in feature_ids:
         property_ids = EmpRoleInspire.objects.filter(emp_role=emp_role, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True)
-
         property_of_feature[feature_id] = property_ids
+        properties.append(get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True))
         for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire))
+            if property_id != 'geom':
+                properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire, False))
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)

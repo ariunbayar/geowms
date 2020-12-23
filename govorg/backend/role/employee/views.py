@@ -91,7 +91,10 @@ def _set_emp_perm_ins_data(emp_perm, perm, user):
     emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
     emp_perm_inspire.created_by = user
     emp_perm_inspire.feature_id = perm.get('feature_id')
-    emp_perm_inspire.property_id = perm.get('property_id')
+    if perm.get('property_id') == 'geom':
+        emp_perm_inspire.geom = True
+    else:
+        emp_perm_inspire.property_id = perm.get('property_id')
     emp_perm_inspire.perm_kind = get_convert_perm_kind(EmpPermInspire, perm.get('perm_kind'))
     emp_perm_inspire.save()
 
