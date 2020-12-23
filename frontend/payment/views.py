@@ -1243,6 +1243,22 @@ def _check_pdf_from_mpoint_view(pdf_id):
     return mpoints
 
 
+def _check_pdf_in_folder(pdf_id):
+    file_ext = 'pdf'
+    path = os.path.join(settings.FILES_ROOT, 'tseg-personal-file')
+    pdf_full_name = pdf_id + "." + file_ext
+    file_paths = []
+
+    for root, directories, files in os.walk(path):
+        for filename in files:
+            if filename == pdf_full_name:
+                filepath = os.path.join(root, filename)
+                file_paths.append(filepath)
+                break
+
+    return file_paths
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1251,12 +1267,14 @@ def checkButtonEnable(request, payload):
     pdf_id = payload.get('pdf_id')
 
     infos = _get_info_from_file('check', None, pdf_id)
-    if len(infos) > 0:
-        is_enable = True
-    else:
-        infos = _check_pdf_from_mpoint_view(pdf_id)
+    has_pdf = _check_pdf_in_folder('G0003')
+    if has_pdf:
         if len(infos) > 0:
             is_enable = True
+        else:
+            infos = _check_pdf_from_mpoint_view(pdf_id)
+            if len(infos) > 0:
+                is_enable = True
 
     rsp = {
         'success': True,

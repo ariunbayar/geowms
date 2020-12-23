@@ -59,11 +59,9 @@ export default class ListTable extends Component {
                 <td>
                     {tseg_id}
                 </td>
-                <td>
-                {perm_view && perm_create && perm_remove ? <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
+                {perm_view && perm_create && perm_remove ? <td> <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                </NavLink> : null}
-                </td>
+                </NavLink> </td> : null}
                 {perm_approve ? <td>
                 <button href="#" className="btn gp-btn-primary" aria-hidden="true" onClick={this.handleModalSuccessOpen}>
                     Баталгаажуулах
