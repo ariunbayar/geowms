@@ -55,10 +55,6 @@ def logout(request):
         return redirect(settings.LOGOUT_GOV_REDIRECT_URL)
 
 
-def _generate_user_token():
-    return uuid.uuid4().hex[:32]
-
-
 def _get_approve_user(user_valid, user, password):
 
     user.set_password(password)
@@ -82,7 +78,7 @@ def approve(request, token):
         re_password = request.POST.get('re_password')
 
         if password != re_password:
-            messages.warning(request, 'Нууц үг давтана оруулхад алдаа гарлаа.')
+            messages.warning(request, 'Нууц үг давтан оруулахад алдаа гарлаа.')
             return redirect('gov_secure:approve')
 
         if user_valid.is_active and not user_valid.is_approve:
@@ -104,13 +100,6 @@ def approve(request, token):
         user = user_valid.user
         user.set_password(password)
         user.save()
-
-        UserValidationEmail.objects.create(
-            user=user,
-            token=_generate_user_token(),
-            valid_before=timezone.now() + timedelta(days=90),
-            is_approve=True,
-        )
 
         return redirect('gov_secure:login')
 
