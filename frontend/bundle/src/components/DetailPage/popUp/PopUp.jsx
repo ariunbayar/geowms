@@ -10,6 +10,7 @@ class PopUpCmp extends Component {
     constructor(props) {
 
         super(props)
+        this.click_count = 0
         this.state = {
             startNumber: null,
             totalNumner: null,
@@ -73,6 +74,7 @@ class PopUpCmp extends Component {
     }
 
     checkModeAndCode(number, datas) {
+        this.click_count = 0
         if (datas.length > 0) {
             const mode = datas[number - 1][1]
             const code = datas[number - 1][2]
@@ -110,7 +112,12 @@ class PopUpCmp extends Component {
     }
 
     openCartSide() {
-        this.props.cartButton(true, this.state.data, this.state.code, this.state.id)
+        this.click_count ++
+        var is_again_clicked = false
+        if (this.click_count > 1) {
+            is_again_clicked = true
+        }
+        this.props.cartButton(true, this.state.data, this.state.code, this.state.id, is_again_clicked)
     }
 
 
