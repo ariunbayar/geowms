@@ -83,7 +83,7 @@ export default class ConfigSystem extends Component {
             <div className="card">
 
                 <div className="card-header">
-                    QGIS систем сервис
+                    QGIS сервис
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
                             <i className="fa fa-edit"></i>
