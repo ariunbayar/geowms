@@ -424,9 +424,8 @@ export class EmployeeEdit extends Component {
                                     name='is_admin'
                                     id="id_is_admin"
                                     type="checkbox"
-                                    value={is_admin}
                                     checked={is_admin}
-                                    onChange={(e) => this.handleChange('is_admin', e.target.value)}
+                                    onChange={(e) => this.handleChange('is_admin', e.target.checked)}
                                 />
                             </div>
                         </div>
