@@ -91,7 +91,10 @@ def _set_emp_perm_ins_data(emp_perm, perm, user):
     emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
     emp_perm_inspire.created_by = user
     emp_perm_inspire.feature_id = perm.get('feature_id')
-    emp_perm_inspire.property_id = perm.get('property_id')
+    if perm.get('property_id') == 'geom':
+        emp_perm_inspire.geom = True
+    else:
+        emp_perm_inspire.property_id = perm.get('property_id')
     emp_perm_inspire.perm_kind = get_convert_perm_kind(EmpPermInspire, perm.get('perm_kind'))
     emp_perm_inspire.save()
 
@@ -241,8 +244,9 @@ def _get_emp_perm_data_display(emp_perm):
         property_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True)
 
         property_of_feature[feature_id] = property_ids
+        properties.append(get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True))
         for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire))
+            properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire, False))
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
