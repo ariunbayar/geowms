@@ -12,7 +12,7 @@ export const service = {
     geomAdd,
     geomType,
     getRole,
-    detailNone,
+    detailCreate,
     create,
     createUpd,
     createDel,
@@ -33,9 +33,9 @@ function geom() {
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
-function getRole(pid, fid) {
+function getRole(fid) {
     const requestOptions = getGetOptions()
-    return fetch(`${prefix}/${pid}/${fid}/getRoles/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${fid}/getRoles/`, requestOptions).then(handleResponse)
 }
 
 function rows(pid, fid) {
@@ -74,22 +74,14 @@ function update(data, pid, fid) {
     return fetch(`${prefix}/${pid}/${fid}/save/`, opts).then(handleResponse)
 }
 
-function detail(gid, fid, property_ids) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({property_ids}),
-    }
-
-    return fetch(`${prefix}/${gid}/${fid}/detail/`, opts).then(handleResponse)
+function detail(gid, fid, tid) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${gid}/${tid}/${fid}/detailUpdate/`, opts).then(handleResponse)
 }
 
-function detailNone(tid, pid, fid, property_ids) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({property_ids}),
-    }
-
-    return fetch(`${prefix}/${tid}/${pid}/${fid}/detail/`, opts).then(handleResponse)
+function detailCreate(tid, pid, fid) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${tid}/${pid}/${fid}/detailCreate/`, opts).then(handleResponse)
 }
 
 function sendFeature(data, oid, id) {

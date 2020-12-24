@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
+import datetime
 import random
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
@@ -118,7 +119,6 @@ def _get_org_request(ob, employee):
 
     geo_json = []
     old_geo_data = []
-    form_json = []
     inspire_perm = []
     current_geo_json = []
     user = User.objects.filter(employee__id=employee.id).first()
@@ -131,14 +131,8 @@ def _get_org_request(ob, employee):
     state = _get_state_and_kind(ob.state,ob.STATE_CHOICES)
     kind = _get_state_and_kind(ob.kind,ob.KIND_CHOICES)
 
-    if employee.is_admin:
-        gov_perm = get_object_or_404(GovPerm, org=org)
-        inspire_perm = GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=ob.feature_id, perm_kind=6)
-
-
-    else:
-        emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
-        inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
+    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
+    inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
         
 
     if inspire_perm:
@@ -191,11 +185,10 @@ def _get_org_request(ob, employee):
 @ajax_required
 def getChangeAll(request):
     org_request = []
-    employee = get_object_or_404(Employee, user=request.user)
-    if employee.is_admin:
-        org_request_list = ChangeRequest.objects.all()
-    else:
-        org_request_list = ChangeRequest.objects.filter(employee_id=employee.id)
+    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, user=request.user, org_id=org.id)
+
+    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id)
     
     if org_request_list:
         org_request = [_get_org_request(ob, employee) for ob in org_request_list]
@@ -273,35 +266,35 @@ def _getChoices(user):
 
     return {'choices': choices, 'modules': modules}
 
+
 @require_GET
 @ajax_required
 def getAll(request):
-
     org_request = []
-    employee = get_object_or_404(Employee, user=request.user)
-    if employee.is_admin:
-        org_request_list = ChangeRequest.objects.all()
-    else:
-        org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by('-created_at')
-    
-    if org_request_list:
-        org_request = [_get_org_request(ob, employee) for ob in org_request_list]
-        choices = _getChoices(request.user)
-        if org_request[0] != '':
-            rsp = {
-                'success':True,
-                'org_request': org_request,
-                'choices': choices['choices'],
-                'modules': choices['modules'],
-            }
+    org = get_object_or_404(Org, employee__user=request.user)
+    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE)
+    if perm_approve:
+        org_request_list = ChangeRequest.objects.filter(employee__org_id=org.id).order_by('-created_at')
+        if org_request_list:
+            org_request = [_get_org_request(ob, employee) for ob in org_request_list]
+            choices = _getChoices(request.user)
+            if org_request[0] != '':
+                rsp = {
+                    'success':True,
+                    'org_request': org_request,
+                    'choices': choices['choices'],
+                    'modules': choices['modules'],
+                }
 
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success':False,
-            }
+                return JsonResponse(rsp)
+            else:
+                rsp = {
+                    'success':False,
+                }
 
-            return JsonResponse(rsp)
+                return JsonResponse(rsp)
     else:
         rsp = {
                 'success':False,
@@ -372,18 +365,61 @@ def _get_ids(fid, pid):
     return rows
 
 
+
+def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve_type):
+    value_date = datetime.datetime.now()
+    value_number = None
+    value_text = ''
+    for i in form_json:
+        ids = _get_ids(feature_id, i['property_id'])
+        fid = ids[0]['feature_config_id']
+        did = ids[0]['data_type_id']
+        if  i['value_type'] == 'number':
+            value_number = i.get('data') or None
+        elif i['value_type'] == 'date':
+            if i['data']:
+                value_date = i['data']+' '+'00:00:00+0000'
+                value_date = value_date
+        else:
+            value_text = i.get('data') or ''
+
+        if approve_type == 'create':
+            geo_data_model.objects.create(
+                geo_id = geo_id,
+                feature_config_id=fid,
+                data_type_id = did,
+                property_id = i['property_id'],
+                value_text = value_text,
+                value_number = value_number,
+                value_date = value_date
+            )
+        else:
+            geo_data_model.objects.filter(pk=i['pk']).update(
+                value_text = value_text,
+                value_number = value_number,
+                value_date = value_date
+        )
+
 @require_POST
 @ajax_required
 def requestApprove(request, payload, pk):
 
+    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, org_id=org.id, user__username=request.user)
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
     values = payload.get("values")
-    request_object  = ChangeRequest.objects.filter(id=pk)
-    if request_object:
+    feature_id = values['feature_id']
+    theme_code = values["theme_code"]
+    form_json = values['form_json']
+    geo_data_model = _get_model_name(theme_code)
+
+    perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
+    request_object  = ChangeRequest.objects.filter(id=pk, employee__org_id=org.id)
+
+    if request_object and perm_approve:
         old_geo_id = values['old_geo_id']
-        feature_id = values['feature_id']
         old_geo_json = values["old_geo_json"]
-        theme_code = values["theme_code"]
-        form_json = values['form_json']
         geo_json = values['geo_json']
         count = random.randint(106942, 996942)
         new_geo_id = str(count)+'geo'
@@ -394,7 +430,9 @@ def requestApprove(request, payload, pk):
                 geo_json = old_geo_json['geometry']
                 geo_json = str(geo_json).replace("\'", "\"")
                 geom = GEOSGeometry(geo_json)
+                approve_type = 'update'
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
+                _create_mdatas_object(form_json, geo_data_model, feature_id, old_geo_id, approve_type)
                 ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
                 view_check = refreshMaterializedView(feature_id)
                 rsp = {
@@ -404,7 +442,7 @@ def requestApprove(request, payload, pk):
             else:
                 data = MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id)
                 data.delete()
-                geo_data_model = _get_model_name(theme_code).objects.filter(geo_id=old_geo_id)
+                geo_data_model = geo_data_model.objects.filter(geo_id=old_geo_id)
                 geo_data_model.delete()
                 ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
                 view_check = refreshMaterializedView(feature_id)
@@ -431,43 +469,9 @@ def requestApprove(request, payload, pk):
                     feature_id=feature_id,
                     geo_data=geom
                     )
+            approve_type = 'create'
+            _create_mdatas_object(form_json, geo_data_model, feature_id, new_geo_id, approve_type)
 
-            geo_data_model = _get_model_name(theme_code)
-            value_data = None
-            for i in form_json['form_values']:
-                ids = _get_ids(feature_id, i['property_id'])
-                fid = ids[0]['feature_config_id']
-                did = ids[0]['data_type_id']
-                if  i['value_type_id'] == 'number':
-                    if i['data']:
-                        value_data = i['data']
-                    geo_data_model.objects.create(
-                        geo_id = new_geo_id,
-                        feature_config_id=fid,
-                        data_type_id = did,
-                        property_id = i['property_id'],
-                        value_number = value_data
-                    )
-                elif i['value_type_id'] == 'date':
-                    if i['data']:
-                        value_data = i['data']+' '+'06:00:00+0800'
-                    geo_data_model.objects.create(
-                        geo_id = new_geo_id,
-                        feature_config_id=fid,
-                        data_type_id = did,
-                        property_id = i['property_id'],
-                        value_date = value_data
-                    )
-                else:
-                    if i['data']:
-                        value_data = i['data']
-                    geo_data_model.objects.create(
-                        geo_id = new_geo_id,
-                        feature_config_id=fid,
-                        data_type_id = did,
-                        property_id = i['property_id'],
-                        value_text = value_data
-                    )
             ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
             view_check = refreshMaterializedView(feature_id)
             rsp = {
@@ -486,13 +490,14 @@ def requestApprove(request, payload, pk):
 @ajax_required
 def getCount(request):
     try:
-        employee = get_object_or_404(Employee, user=request.user)
-        if employee.is_admin:
-            count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
+        count = None
+        org = get_object_or_404(Org, employee__user=request.user)
+        employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+        perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE, geom=True)
 
-        else:
-            count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW, employee_id=employee.id).count()
-
+        if perm_approve:
+            count = ChangeRequest.objects.filter(employee__org_id=org.id, state=ChangeRequest.STATE_NEW).count()
         rsp = {
             'success': True,
             'count': count
@@ -515,8 +520,12 @@ def search(request, payload):
     theme = payload.get('theme')
     package = payload.get('packag')
     feature = payload.get('feature')
-    employee = get_object_or_404(Employee, user=request.user)
 
+    org = get_object_or_404(Org, employee__user=request.user)
+    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    
+    
     if state:
         search['state'] = state
     if kind:
@@ -528,8 +537,10 @@ def search(request, payload):
     if feature:
         search['feature_id'] = feature
     try:
-        datas = ChangeRequest.objects.filter(**search)
-        data_list = [_get_org_request(data, employee) for data in datas]
+        perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE)
+        if perm_approve:
+            datas = ChangeRequest.objects.filter(**search, employee__org_id=org.id)
+            data_list = [_get_org_request(data, employee) for data in datas]
         rsp = {
             'success': True,
             'org_request': data_list

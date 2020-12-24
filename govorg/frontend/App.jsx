@@ -67,7 +67,7 @@ export class App extends Component {
             tseg_burtgel,
         } = this.state
 
-        const { org_role } = this.props.org
+        const { emp_role, org_role } = this.props.org
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -115,7 +115,7 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
-                                       Object.keys(org_role).length >0  && Object.keys(org_role.themes).length >0 ? org_role.themes.map((theme, idx)=>
+                                       Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
                                         <MenuItem
                                             key={idx}
                                             icon="gp-text-primary fa fa-circle-o"
@@ -124,7 +124,7 @@ export class App extends Component {
                                         >
                                             <ul className="sidebar-submenu">
                                                 {
-                                                    Object.keys(org_role.package_features).length >0 ? org_role.package_features.map((pack, idy) =>
+                                                    Object.keys(emp_role.package_features).length >0 ? emp_role.package_features.map((pack, idy) =>
                                                     theme.id == pack.parent_id ?
                                                         <MenuItem
                                                             key={idy}
@@ -177,7 +177,7 @@ export class App extends Component {
 
                             <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
                             <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} property={org_role.property} refreshCount={() => this.requestCount()} />} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
 
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={OrgRequest} />

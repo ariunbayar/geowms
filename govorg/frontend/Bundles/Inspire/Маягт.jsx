@@ -14,7 +14,6 @@ export default class Маягт extends Component {
             tid: props.tid,
             pid: props.pid,
             fid: props.fid,
-            property_ids: props.property_ids,
             values: {},
             geojson: {},
             order_at: '',
@@ -30,12 +29,15 @@ export default class Маягт extends Component {
     onSubmit(values, { setStatus, setSubmitting }) {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list } = this.props
             if(null_form_isload){
-                service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
+                service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
                     if (success) {
                         this.setState({is_loading: true})
                         this.props.requestRefreshCount()
                         this.addNotif('success', 'Property хадгалалаа', 'check')
                     }
+                    else{
+                        this.addNotif('danger', info, 'warning')
+                      }
                 })
             }
             else if (modifyend_selected_feature_check || update_geom_from_list) {
@@ -56,8 +58,8 @@ export default class Маягт extends Component {
     }
 
     handleUpdate(gid){
-        const {fid, property_ids} = this.state
-        service.detail(gid, fid, property_ids).then(({success, datas}) => {
+        const {fid, tid} = this.state
+        service.detail(gid, fid, tid).then(({success, datas}) => {
             if(success){
                 this.setState({
                     values:datas,
@@ -68,8 +70,7 @@ export default class Маягт extends Component {
     }
 
     handleCreate(){
-
-        service.detailNone(this.state.tid, this.state.pid, this.state.fid, this.state.property_ids).then(({success, datas}) => {
+        service.detailCreate(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
             if(success){
                 this.setState({
                     values:datas,
@@ -140,7 +141,7 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        if (this.state.is_loading || values.length==0) {
+        if (this.state.is_loading) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
@@ -180,7 +181,6 @@ export default class Маягт extends Component {
                             <div>
                                 {values.form_values && values.form_values.length > 0 ? (
                                 values.form_values.map((friend, index) => (
-                                    friend.role.PERM_VIEW || friend.role.PERM_UPDATE ?
                                     <div key={index} className="row my-3 ">
                                         <div className="col-md-3">
                                             <label className="col-form-label">{friend.property_code ? friend.property_code : ''}</label>
@@ -188,7 +188,7 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role.PERM_UPDATE ? false : true}>
+                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.roles.PERM_UPDATE ? false : true}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
@@ -205,7 +205,7 @@ export default class Маягт extends Component {
                                                 name={`form_values.${index}.data`|| ""}
                                                 as="select"
                                                 className='form-control'
-                                                disabled={friend.role.PERM_UPDATE ? false : true}
+                                                disabled={friend.roles.PERM_UPDATE ? false : true}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -214,7 +214,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
-                                                    disabled={friend.role.PERM_UPDATE ? false : true}
+                                                    disabled={friend.roles.PERM_UPDATE ? false : true}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                     />
@@ -223,7 +223,6 @@ export default class Маягт extends Component {
                                             </div>
                                         }
                                     </div>
-                                : null 
                                 ))
                                 ) : ( null
                                 )}
