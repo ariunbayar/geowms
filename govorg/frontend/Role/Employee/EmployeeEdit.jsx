@@ -25,11 +25,12 @@ export class EmployeeEdit extends Component {
                 gender: '',
                 register: '',
                 is_admin: false,
-                choose_role: '',
             },
 
             roles: {},
             perms: {},
+            role_id: '',
+            old_role_id: null,
             is_inspire_role: false,
             prefix: '/gov/perm/employee/',
             id: this.props.match.params.id,
@@ -67,7 +68,7 @@ export class EmployeeEdit extends Component {
             .getDetailEmployee(id)
             .then(({ success, employee_detail, role_id, perms }) => {
                 if (success) {
-                    this.setState({form_values:{
+                    this.setState({ perms, role_id, old_role_id: role_id,  form_values:{
                             username: employee_detail.username,
                             last_name: employee_detail.last_name,
                             first_name: employee_detail.first_name,
@@ -76,7 +77,6 @@ export class EmployeeEdit extends Component {
                             gender: employee_detail.gender,
                             register: employee_detail.register,
                             is_admin: employee_detail.is_admin,
-                            choose_role: role_id,
                         }
                     })
                     this.getRolesForOption()
@@ -96,7 +96,8 @@ export class EmployeeEdit extends Component {
     }
 
     getRole(role_id) {
-        this.perms=[]
+        this.perms = []
+        this.emp_perms = []
         this.setState({role_id, is_inspire_role: false })
         if(role_id) {
             service
@@ -178,8 +179,7 @@ export class EmployeeEdit extends Component {
         const gender = form_values.gender
         const register = form_values.register
         const is_admin = form_values.is_admin
-        const role_id = form_values.choose_role
-        const {id} = this.state
+        const {id, role_id} = this.state
 
         this.checkRoleAndPerm()
         service
@@ -230,7 +230,7 @@ export class EmployeeEdit extends Component {
     }
 
     render() {
-        const {form_values, roles, role_list, prefix, is_inspire_role } = this.state
+        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -349,13 +349,12 @@ export class EmployeeEdit extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="choose_role">Role: </label>
-                                                <select className={'form-control ' + (errors.choose_role ? 'is-invalid' : '')} id="choose_role" name='choose_role' value={form_values.choose_role} onChange={(e) => this.getRole(e.target.value)}>
+                                                <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
                                                     <option value="">--- Role сонгоно уу ---</option>
                                                     {role_list.length > 0 && role_list.map((role, idx) =>
                                                         <option key={idx} value={role.role_id}>{role.role_name}</option>
                                                     )}
                                                 </select>
-                                                <ErrorMessage name="choose_role" component="div" className="text-danger"/>
                                             </div>
                                         </div>
                                         <div className='form-row'>
@@ -381,6 +380,7 @@ export class EmployeeEdit extends Component {
                                                         dontDid={true}
                                                         org_roles={org_roles}
                                                         role={roles}
+                                                        emp_perms={old_role_id == role_id ? perms : null}
                                                     />
                                                 : null
                                             }
