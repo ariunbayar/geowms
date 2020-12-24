@@ -266,12 +266,13 @@ def employee_detail(request, pk):
         'is_sso': user.is_sso,
         'position': employee.position,
         'is_admin': employee.is_admin,
+        'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
     return JsonResponse({'success': True, 'employee': employees_display})
 
-
+  
 def _employee_validation(payload, user):
     username = payload.get('username')
     position = payload.get('position')
@@ -332,7 +333,7 @@ def _employee_validation(payload, user):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_update(request, payload, pk):
+def employee_update(request, payload, pk, level):
     username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -341,17 +342,28 @@ def employee_update(request, payload, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
+    password = payload.get('password')
+    is_super = payload.get('is_super')
     re_password_mail = payload.get('re_password_mail')
     user = get_object_or_404(User, pk=pk)
     errors = _employee_validation(payload, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-    user.first_name=first_name
-    user.last_name=last_name
-    user.email=email
-    user.gender=gender
-    user.register=register.upper()
-    user.username=username
+    
+    if level == 4:
+        is_super = is_super
+    else:
+        is_super = False
+
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.gender = gender
+    user.register = register.upper()
+    user.username = username
+    user.is_superuser = is_super
+    if password:
+        user.set_password(password)
     user.save()
     if re_password_mail:
         subject = 'Геопортал нууц үг солих'
@@ -375,22 +387,25 @@ def employee_add(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
+    is_super = payload.get('is_super')
     errors = {}
     errors = _employee_validation(payload, None)
+
+    if level == 4:
+        is_super = is_super
+    else:
+        is_super = False
+
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-    if level == 4:
-        is_superuser = True
-    else:
-        is_superuser = False
 
     user = User.objects.create(
-        is_superuser=is_superuser,
         username=username,
         first_name=first_name,
         last_name=last_name,
         email=email,
         gender=gender,
+        is_superuser=is_super,
         register=register.upper()
     )
     user.roles.add(2)

@@ -20,6 +20,7 @@ export class UserAdd extends Component {
                 gender: '',
                 register:'',
                 is_admin: false,
+                is_super: false,
                 re_password_mail: false
             },
             modal_alert_status: "closed",
@@ -51,6 +52,7 @@ export class UserAdd extends Component {
                     register:employee.register,
                     position: employee.position,
                     is_admin: employee.is_admin,
+                    is_super:employee.is_super
                 }})
             }
         })
@@ -62,17 +64,25 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
         if(org_emp){
-            service.employeeUpdate(org_emp, values).then(({ success, errors }) => {
-                if (success) {
-                    this.setState({modal_alert_status: "open"})
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.modalCloseTime()
-                }else{
-                    setErrors(errors)
-                    setSubmitting(false)
-                }
-            })
+            if(values.re_password !== values.password)
+            {
+                setErrors({'re_password': 'Нууц үг адил биш байна.'})
+                setSubmitting(false)
+            }
+            else{
+                service.employeeUpdate(org_emp, org_level, values).then(({ success, errors }) => {
+                    if (success) {
+                        this.setState({modal_alert_status: "open"})
+                        setStatus('saved')
+                        setSubmitting(false)
+                        this.modalCloseTime()
+                    }else{
+                        setErrors(errors)
+                        setSubmitting(false)
+                    }
+                })
+            }
+
         }
         else{
             service.employeeAdd(org_level, org_id, values).then(({ success, errors }) => {
@@ -106,6 +116,7 @@ export class UserAdd extends Component {
 
     render() {
         const {form_values} = this.state
+        const org_level = this.props.match.params.level
         const org_emp = this.props.match.params.emp
         return (
             <div className="col-6 my-4">
@@ -243,6 +254,20 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
                                         </div>
+                                        {org_level ==4 &&
+                                            <div className='form-row'>
+                                                <div className="form-group col-md-8">
+                                                    <label htmlFor='is_super'>Системийн админ</label>
+                                                    <Field
+                                                        className="ml-2"
+                                                        name='is_super'
+                                                        id="id_is_super"
+                                                        type="checkbox"
+                                                    />
+                                                    <ErrorMessage name="is_super" component="div" className="text-danger"/>
+                                                </div>
+                                            </div>
+                                        }
                                         <div className="form-group">
                                             <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
