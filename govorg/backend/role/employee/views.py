@@ -319,15 +319,18 @@ def detail(request, pk):
     if emp_perm:
         emp_role = emp_perm.emp_role
         role_id = emp_role.id
+        role_name = emp_role.name
         perms = _get_emp_perm_display(emp_perm)
     else:
         role_id = ''
+        role_name = ''
         perms = None
 
     rsp = {
         'success': True,
         'employee_detail': employee_detail,
         'role_id': role_id,
+        'role_name': role_name,
         'perms': perms,
 
     }
