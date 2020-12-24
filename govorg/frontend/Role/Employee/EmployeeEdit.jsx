@@ -36,6 +36,7 @@ export class EmployeeEdit extends Component {
             },
 
             roles: {},
+            perms: {},
             is_inspire_role: false,
             prefix: '/gov/perm/employee/',
             id: this.props.match.params.id,
@@ -73,12 +74,12 @@ export class EmployeeEdit extends Component {
         const { id } = this.state
         service
             .getDetailEmployee(id)
-            .then(({ success, employee_detail, role_id }) => {
+            .then(({ success, employee_detail, role_id, perms }) => {
                 if (success) {
                     Object.keys(employee_detail).map((key) => {
                         this.setState({[key]: employee_detail[key]})
                     })
-                    this.setState({role_id})
+                    this.setState({role_id, perms})
                     this.getRolesForOption()
                 }
             })
@@ -96,6 +97,7 @@ export class EmployeeEdit extends Component {
     }
 
     getRole(role_id) {
+        this.perms=[]
         this.setState({role_id, is_inspire_role: false })
         if(role_id) {
             service
@@ -275,7 +277,7 @@ export class EmployeeEdit extends Component {
 
     render() {
         const { org_roles } = this.props
-        const {username, first_name, last_name, position, email, gender, register, is_admin, role_list, role_id, errors, roles, is_inspire_role, prefix, isSubmitting} = this.state
+        const {username, first_name, last_name, position, email, gender, register, is_admin, role_list, role_id, errors, roles, is_inspire_role, prefix, isSubmitting, perms} = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -424,8 +426,9 @@ export class EmployeeEdit extends Component {
                                     name='is_admin'
                                     id="id_is_admin"
                                     type="checkbox"
+                                    value={is_admin}
                                     checked={is_admin}
-                                    onChange={(e) => this.handleChange('is_admin', e.target.checked)}
+                                    onChange={(e) => this.handleChange('is_admin', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -440,6 +443,7 @@ export class EmployeeEdit extends Component {
                                         dontDid={true}
                                         org_roles={org_roles}
                                         role={roles}
+                                        emp_perms={perms}
                                     />
                                 : null
                             }

@@ -88,26 +88,21 @@ def _set_emp_perm_ins(emp_perm, perm, user):
 
     emp_perm_inspire = EmpPermInspire()
 
-    gov_perm_inspire = get_object_or_404(
-        GovPermInspire,
-        feature_id = feature_id,
-        property_id = property_id,
-        perm_kind = perm_kind
-    )
+    if property_id == 'geom':
+        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
+        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
+        emp_perm_inspire.geom = True
+    else:
+        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
+        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
+        emp_perm_inspire.property_id = property_id
 
-    if perm.get('emp_role_ins_id'):
-        emp_role_inspire = get_object_or_404(EmpRoleInspire, pk=perm.get('emp_role_ins_id'))
-        emp_perm_inspire.emp_role_inspire = emp_role_inspire
-
+    emp_perm_inspire.emp_role_inspire = emp_role_inspire
+    emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
     emp_perm_inspire.emp_perm = emp_perm
     emp_perm_inspire.feature_id = feature_id
     emp_perm_inspire.created_by = user
     emp_perm_inspire.updated_by = user
-    emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
-    if property_id == 'geom':
-        emp_perm_inspire.geom = True
-    else:
-        emp_perm_inspire.property_id = property_id
     emp_perm_inspire.perm_kind = perm_kind
     emp_perm_inspire.save()
 
@@ -212,10 +207,8 @@ def create(request, payload):
     })
 
 
-def _delete_old_emp_role(old_emp_role):
-
-    emp_role_inspire_list = EmpRoleInspire.objects.filter(emp_role=old_emp_role)
-    EmpPermInspire.objects.filter(emp_role_inspire__in=emp_role_inspire_list).delete()
+def _delete_old_emp_role(emp_perm):
+    EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
 
 
 def _delete_remove_perm(remove_perms):
@@ -239,7 +232,7 @@ def update(request, payload, pk):
         if emp_perm:
             old_emp_role = emp_perm.emp_role
             if new_emp_role != old_emp_role:
-                _delete_old_emp_role(old_emp_role)
+                _delete_old_emp_role(emp_perm)
                 emp_perm.emp_role = new_emp_role
                 emp_perm.save()
         else:
@@ -254,7 +247,6 @@ def update(request, payload, pk):
 
         if remove_perms:
             _delete_remove_perm(remove_perms)
-
         if add_perms:
             for perm in add_perms:
                 _set_emp_perm_ins(emp_perm, perm, request.user)

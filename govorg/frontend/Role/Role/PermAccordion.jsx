@@ -50,9 +50,9 @@ export class PermSwitches extends Component {
         const { radio_switch_class_name } = this.state
 
         return (
-            <div className="col-2">
+            <div className="col-2 pr-0 pl-0">
                 <div className="form-group text-center">
-                    <label className="col-lg-12" htmlFor={index}>{name}</label>
+                    <label className="col-lg-12" htmlFor={index} style={{fontSize:"8px"}}>{name}</label>
                     <div className={`${radio_switch_class_name} col-lg-12`}>
                         <span id={index} className={`slider-point slider-point-round`} >
                             <div className="slider-pointer slider-point-round"></div>
@@ -88,7 +88,7 @@ export class PermAcc extends Component {
         return (
             <div className="card-header" id={`${index}-${type}`}>
                 <div className="row">
-                    <div className="col-4">
+                    <div className="col-3">
                         <h5 className="mb-0 mt-4">
                             <i className={`fa ` +
                                 (is_open && (type == 'theme' && (t_name == r_name)) ||
@@ -114,7 +114,7 @@ export class PermAcc extends Component {
                             </span>
                         </h5>
                     </div>
-                    <div className="col-8">
+                    <div className="col-9">
                         <div className="row">
                             {perms.map((perm, p_idx) =>
                                 <PermSwitches key={p_idx}
