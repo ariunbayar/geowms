@@ -88,6 +88,7 @@ def get_convert_display_name(perm_list):
 
 
 def get_property_data_display(property_id, feature_id, role_model, inspire_model, geom):
+    perm_list = []
     if role_model.__class__.__name__ == 'EmpRole':
         if not geom:
             perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))

@@ -73,7 +73,7 @@ def _emp_role(org, user):
                 property_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
                 property_of_feature[feature_id] = property_ids
                 for property_id in property_ids:
-                    properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire))
+                    properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire, False))
 
             package_features = [
                 get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)

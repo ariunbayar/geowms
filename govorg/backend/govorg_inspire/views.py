@@ -51,6 +51,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
+from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
 
 from main.utils import (
     gis_delete,
@@ -641,27 +642,21 @@ def _is_geom_included(geojson, org_geo_id):
 
     geom_type = str(geojson['type'])
     coordinate_syntax = ''
-
-    if geom_type == 'Polygon' or geom_type == 'LineString':
+    if geom_type == 'Polygon' or geom_type == 'Linestring':
         geom_coordinates = geojson['coordinates'][0]
         for i in range(len(geom_coordinates)):
             coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
-        coordinate_syntax = coordinate_syntax[:-1]
-        
+        coordinate_syntax  = "(({coordinate_syntax}))".format(coordinate_syntax=coordinate_syntax[:-1])
+
     elif geom_type == 'Point':
         coordinate_syntax = str(geojson['coordinates'][0]) + ' ' + str(geojson['coordinates'][1])
-        cursor = connections['default'].cursor()
+        coordinate_syntax = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax)
 
     elif geom_type == 'MultiPolygon':
         geom_coordinates = geojson['coordinates'][0][0]
-        print("geom_coordinates")
-        print("geom_coordinates")
-        print("geom_coordinates")
-        print("geom_coordinates")
-        print("geom_coordinates", geom_coordinates)
         for i in range(len(geom_coordinates)):
             coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
-        coordinate_syntax = coordinate_syntax[:-1]
+        coordinate_syntax = "((({coordinate_syntax})))".format(coordinate_syntax=coordinate_syntax[:-1])
 
     cursor = connections['default'].cursor()
     sql = """
@@ -672,18 +667,17 @@ def _is_geom_included(geojson, org_geo_id):
                 WHERE geo_id = '{org_geo_id}'
             )),
             ((
-                select ST_ASText('{geom_type}((({coordinate_syntax})))')
+                select ST_ASText('{geom_type}{coordinate_syntax}')
             ))
         )
     """.format(
-        geom_type = geom_type,
+        geom_type = geom_type,  
         org_geo_id = org_geo_id,
         coordinate_syntax = coordinate_syntax
     )
     cursor.execute(sql)
     is_included = cursor.fetchone()[0]
     return is_included
-
 
 
 def _check_form_json(fid, form_json, employee):
@@ -756,7 +750,7 @@ def create(request, payload):
         else:
             rsp =  {
                 'success': False,
-                'info': "Хсэлт алдаатаЙ байна",
+                'info': "Хүсэлт алдаатаЙ байна",
             }
     else:
         rsp = {
@@ -786,9 +780,11 @@ def createDel(request, payload):
     
     if perm_kind:
         
-        # is_included = _is_geom_included(geo_json, org.geo_id)
+        geo_data = _get_geom(old_geo_id, fid)
+        geo_data = _convert_text_json(geo_data[0]["geom"])
+        geo_json = _get_geoJson(geo_data)
+        is_included = _is_geom_included(geo_json['geometry'], org.geo_id)
         if is_included:
-
             ChangeRequest.objects.create(
                     old_geo_id = old_geo_id,
                     new_geo_id = None,
@@ -810,7 +806,7 @@ def createDel(request, payload):
         else:
             rsp =  {
                 'success': False,
-                'info': "Хсэлт алдаатаЙ байна",
+                'info': "Хүсэлт алдаатаЙ байна",
             }
     else:
         rsp = {
@@ -847,26 +843,33 @@ def createUpd(request, payload):
         form_json = _check_form_json(fid, form_json, employee)
         if not form_json:
             form_json = ''
+        _is_included = _is_geom_included(geo_json, org.geo_id)
+  
+        if _is_included:    
+            ChangeRequest.objects.create(
+                    old_geo_id = old_geo_id,
+                    new_geo_id = None,
+                    theme_id = tid,
+                    package_id = pid,
+                    feature_id = fid,
+                    employee = employee,
+                    state = ChangeRequest.STATE_NEW,
+                    kind = ChangeRequest.KIND_DELETE,
+                    form_json = form_json,
+                    geo_json = geo_json,
+                    order_at=order_at,
+                    order_no=order_no,
+            )
 
-        ChangeRequest.objects.create(
-                old_geo_id = old_geo_id,
-                new_geo_id = None,
-                theme_id = tid,
-                package_id = pid,
-                feature_id = fid,
-                employee = employee,
-                state = ChangeRequest.STATE_NEW,
-                kind = ChangeRequest.KIND_DELETE,
-                form_json = form_json,
-                geo_json = geo_json,
-                order_at=order_at,
-                order_no=order_no,
-        )
-
-        rsp = {
-            'success': True,
-            'info': "Хүсэлт амжилттай үүслээ",
-        }
+            rsp = {
+                'success': True,
+                'info': "Хүсэлт амжилттай үүслээ",
+            }
+        else:
+            rsp =  {
+                'success': False,
+                'info': "Хүсэлт алдаатаЙ байна",
+            }
     else:
         rsp = {
             'success': False,
