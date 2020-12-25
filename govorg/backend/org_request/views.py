@@ -539,12 +539,12 @@ def control_to_approve(request, payload):
     change_request_id = payload.get("change_request_id")
     order_no = form_json['order_no']
     order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
-    chenge_request = get_object_or_404(ChangeRequest, id=change_request_id)
-    chenge_request.order_no=order_no
-    chenge_request.order_at=order_at
-    chenge_request.form_json=form_json
-    chenge_request.state=ChangeRequest.STATE_NEW
-    chenge_request.save()
+    change_request = get_object_or_404(ChangeRequest, id=change_request_id)
+    change_request.order_no = order_no
+    change_request.order_at = order_at
+    change_request.form_json = form_json
+    change_request.state = ChangeRequest.STATE_NEW
+    change_request.save()
     rsp = {
         'success': True,
     }
