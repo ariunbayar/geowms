@@ -227,14 +227,19 @@ def update(request, payload, pk):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     if role_id:
         new_emp_role = get_object_or_404(EmpRole, pk=role_id)
+    else:
+        new_emp_role = None
 
     with transaction.atomic():
         if emp_perm:
             old_emp_role = emp_perm.emp_role
             if new_emp_role != old_emp_role:
                 _delete_old_emp_role(emp_perm)
-                emp_perm.emp_role = new_emp_role
-                emp_perm.save()
+                if new_emp_role != None:
+                    emp_perm.emp_role = new_emp_role
+                    emp_perm.save()
+                else:
+                    emp_perm.delete()
         else:
             user = get_object_or_404(User, employee=employee)
             emp_perm = EmpPerm()
