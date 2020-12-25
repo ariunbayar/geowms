@@ -494,12 +494,32 @@ def request_approve(request, payload, pk):
     return JsonResponse(rsp)
 
 
+def _get_employees(request):
+    org = get_object_or_404(Employee, user=request.user).org
+    employees = Employee.objects.filter(org=org)
+    return employees
+
+
 @require_GET
 @ajax_required
 def get_count(request):
     try:
-        count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
-        revoke_count = ChangeRequest.objects.filter(kind=ChangeRequest.KIND_REVOKE, state=ChangeRequest.STATE_APPROVE).count()
+        employees = _get_employees(request)
+        count = 0
+        revoke_count = 0
+
+        for employee in employees:
+            count += ChangeRequest.objects.filter(
+                state=ChangeRequest.STATE_NEW,
+                employee=employee
+            ).count()
+
+            revoke_count += ChangeRequest.objects.filter(
+                kind=ChangeRequest.KIND_REVOKE,
+                state=ChangeRequest.STATE_APPROVE,
+                employee=employee
+            ).count()
+
         rsp = {
             'success': True,
             'count': count,
