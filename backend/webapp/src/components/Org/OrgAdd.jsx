@@ -24,6 +24,7 @@ export class OrgAdd extends Component {
             fourthOrders: [],
             fourthOrder_value: -1,
             geo_id: null,
+            firstOrder_geom: '',
         }
 
         this.handleUserSearch = this.handleUserSearch.bind(this)
@@ -66,9 +67,9 @@ export class OrgAdd extends Component {
     }
 
     formOptions() {
-        service.formOptions().then(({success, secondOrders, roles}) => {
+        service.formOptions().then(({success, secondOrders, roles, firstOrder_geom}) => {
             if (success) {
-                this.setState({secondOrders, roles})
+                this.setState({secondOrders, roles, firstOrder_geom})
                 const geo_id = this.state.geo_id
                 if (geo_id) {
                     var find_text = ''
@@ -116,7 +117,7 @@ export class OrgAdd extends Component {
             this.setState({
                 thirthOrders: [],
                 thirthOrder_value: '-1',
-                geo_id: null,
+                geo_id: firstOrder_geom,
             })
         }
         this.setState({
@@ -163,6 +164,7 @@ export class OrgAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {org_name, upadte_level, geo_id, org_role} = this.state
+        console.log(geo_id);
         const values = {
             org_name: org_name,
             id: org_id,
@@ -170,10 +172,10 @@ export class OrgAdd extends Component {
             role_id: org_role,
             geo_id: geo_id,
         }
-        service.org_add(org_level, values).then(({ success }) => {
-            success && this.setState({modal_alert_status: "open"})
-            this.modalCloseTime()
-        })
+        // service.org_add(org_level, values).then(({ success }) => {
+        //     success && this.setState({modal_alert_status: "open"})
+        //     this.modalCloseTime()
+        // })
     }
 
     modalClose(){
@@ -251,7 +253,7 @@ export class OrgAdd extends Component {
                                         <th style={{width:"38%"}}>Аймаг/ Хот</th>
                                         <td style={{width:"60%"}}>
                                             <select className='form-control' value={this.state.secondOrder_value} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
-                                                <option value='-1'>--- Аймаг/Хот сонгоно уу ---</option>
+                                                <option value='-1'>--- Улсын хэмжээнд ---</option>
                                                 {this.state.secondOrders.map((data, idx) =>
                                                     <option key={idx} value={data['geo_id']} >{data['name']}</option>
                                                 )}
