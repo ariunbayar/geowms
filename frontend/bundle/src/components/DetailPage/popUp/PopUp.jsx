@@ -20,6 +20,8 @@ class PopUpCmp extends Component {
             name: '',
             id: '',
             code: '',
+            geom_name: '',
+            pdf_id:'',
             is_purchase: false,
             is_enable: false,
         }
@@ -120,7 +122,7 @@ class PopUpCmp extends Component {
 
     checkDataForPurchase(){
         this.setState({ is_purchase: true })
-        var data = [{ 'name': this.state.name ,'id': this.state.id, 'code': this.state.code }]
+        var data = [{ 'name': this.state.name,'id': this.state.id, 'code': this.state.code, 'geom_name': this.state.geom_name, 'pdf_id': this.state.pdf_id }]
         if(this.state.data.length > 0){
             service.purchaseFromCart(data)
                 .then(({success, msg, payment_id}) => {
@@ -228,7 +230,7 @@ class PopUpCmp extends Component {
                                 <button
                                     className="btn btn-xs btn-primary my-2 mx-1"
                                     onClick={() => this.openCartSide()}
-                                    // disabled={is_enable ? "" : "disabled"}
+                                    disabled={is_enable ? "" : "disabled"}
                                 >
                                     Сагсанд нэмэх
                                 </button>
