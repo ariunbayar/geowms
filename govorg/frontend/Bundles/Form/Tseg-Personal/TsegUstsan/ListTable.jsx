@@ -70,7 +70,7 @@ export default class ListTable extends Component {
                     <Modal
                         modalClose={this.handleModalSuccessClose}
                         modalAction={this.props.handleTsegSuccess}
-                        text={`Та "${name}" цэгийг устгахдаа итгэлтэй байна уу?`}
+                        text={`Та "${tseg_id}" цэгийг устгахдаа итгэлтэй байна уу?`}
                         title="Баталгаажуулах уу?"
                         actionNameBack="    Үгүй"
                         actionNameDelete="  Тийм"
