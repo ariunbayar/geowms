@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# User_Login documentation build configuration file, created by
+# UserSubmit documentation build configuration file, created by
 # sphinx-quickstart on Sun Feb 12 17:11:03 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -178,7 +178,7 @@ htmlhelp_basename = 'TemplateClassdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'User_Login.tex', u'User_Login Documentation',
+  ('index', 'UserSubmit.tex', u'UserSubmit Documentation',
    u'Utility Solution', 'manual'),
 ]
 
@@ -211,6 +211,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'TemplateClass', u'User_Login Documentation',
+    ('index', 'TemplateClass', u'UserSubmit Documentation',
      [u'Utility Solution'], 1)
 ]

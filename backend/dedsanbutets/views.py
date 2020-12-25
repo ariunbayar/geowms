@@ -918,7 +918,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
         bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
         bundle_id = theme.bundle.id
         if not  bundle_layer:
-            BundleLayer.objects.create( 
+            BundleLayer.objects.create(
                 bundle_id=bundle_id,
                 layer_id=wms_layer.id
             )
@@ -933,7 +933,7 @@ def createView(ids, table_name, model_name, data_type_ids, feature_config_id):
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
-            SELECT d.geo_id, d.geo_data, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
+            SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
             FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text

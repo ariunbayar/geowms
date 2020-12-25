@@ -6,6 +6,8 @@ from django.db import transaction
 from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
+from main.utils import send_approve_email, is_email
+from backend.token.utils import TokenGeneratorEmployee
 from main import utils
 from backend.inspire.models import (
     GovPerm,
@@ -183,6 +185,7 @@ def create(request, payload):
         employee = Employee()
         employee.org = org
         employee.user = user
+        employee.token = TokenGeneratorEmployee().get()
         _set_employee(employee, user_detail)
 
         if emp_role_id:

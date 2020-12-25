@@ -38,6 +38,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('backend_token', '0002_auto_20201221_2030'),
+        ('geoportal_app', '0018_user_davhtsal_error'),
+        ('backend_govorg', '0008_auto_20201208_1234'),
     ]
 
     operations = [

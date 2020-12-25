@@ -41,7 +41,11 @@ export class ChangeRequestTable extends Component {
           created_at,
           kind,
           order_at,
-          order_no
+          order_no,
+          feature_id,
+          theme_id,
+          old_geo_id,
+          change_request_id
         } = this.props.values
         return (
             <tr>
@@ -65,7 +69,8 @@ export class ChangeRequestTable extends Component {
                 </td>
                 {state==1 ? <td className="text-priamry">ШИНЭ</td>:
                 state==2 ? <td className="text-danger">ТАТГАЛЗСАН</td>:
-                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>: null
+                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
+                state==4 ? <td className="gp-text-primary">ХЯНАХ</td>: null
                 }
 
                 {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
@@ -73,10 +78,10 @@ export class ChangeRequestTable extends Component {
                 kind==3 ? <td className="text-danger">УСТГАСАН</td>: null
                 }
                 {
-                state ==1 ?
+                state ==1 || state ==4 ?
                     <td>
                     <button className="btn btn-primary" onClick={this.handleRequestOpen}>
-                        ДЭЛГЭРЭНГҮЙ
+                       {state == 1 ?  'ДЭЛГЭРЭНГҮЙ' : 'ХЯНАХ'}
                     </button>
                     {is_model_request_open &&
                         <ChangeRequestModal
@@ -86,6 +91,11 @@ export class ChangeRequestTable extends Component {
                             title="Илгээсэн хүсэлт"
                             kind={kind}
                             id = {id}
+                            state = {state}
+                            feature_id = {feature_id}
+                            theme_id = {theme_id}
+                            old_geo_id = {old_geo_id}
+                            change_request_id = {change_request_id}
                             getAll={this.props.getAll}
                         />
                     }
