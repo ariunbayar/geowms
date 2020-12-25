@@ -60,7 +60,13 @@ export default class BarilgaSuurinGazar extends Component{
           pid: props.match.params.pid,
           fid: props.match.params.fid,
           rows: [],
-          roles:[],
+          roles: [],
+          button_ids: [
+            'side', 'remove', 'qgis',
+            'polygon', 'point', 'modify',
+            'meta', 'form', 'upload',
+            'shapeDraw', 'cancel', 'add'
+          ],
           is_loading:true,
           featureID: null,
           featureID_list: [],
@@ -146,6 +152,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.callModalWithMeta = this.callModalWithMeta.bind(this)
       this.hideMetaList = this.hideMetaList.bind(this)
       this.hideShowList = this.hideShowList.bind(this)
+      this.setInActiveButtonStyle = this.setInActiveButtonStyle.bind(this)
       this.getTypeFunction = this.getTypeFunction.bind(this)
 
     }
@@ -655,6 +662,19 @@ export default class BarilgaSuurinGazar extends Component{
         }
     }
 
+    setInActiveButtonStyle(active_id) {
+      document.getElementById('⚙-toggle-' + active_id + '-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+      const { button_ids } = this.state
+      button_ids.map((in_active, idx) => {
+        if (in_active != active_id) {
+          const element = document.getElementById('⚙-toggle-' + in_active + '-id')
+          if (element) {
+            element.style.backgroundColor = 'rgba(0,60,136,0.5)'
+          }
+        }
+      })
+    }
+
     snap(vector){
       const snap = new Snap({
         source: vector.getSource(),
@@ -698,23 +718,22 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     RemoveButton() {
+      this.setInActiveButtonStyle('remove')
       this.hideMetaList()
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
       if(this.state.remove_button_active)
       {
-        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({ remove_button_active: false })
       }
       else
       {
-        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        if(this.state.selectedFeature_ID) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({ remove_button_active: true, modify_button_active: false })
+        this.setState({ remove_button_active: true, modify_button_active: false, cancel_button_active: false })
       }
     }
 
     FormButton(){
+      this.setInActiveButtonStyle('form')
       this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))
     }
 
@@ -792,17 +811,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.hideMetaList()
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
-      if(this.state.cancel_button_active)
-      {
-        document.getElementById('⚙-toggle-cancel-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({ cancel_button_active: false })
-      }
-      else
-      {
-        document.getElementById('⚙-toggle-cancel-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        if(this.state.selectedFeature_ID) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({ cancel_button_active: true, modify_button_active: false })
-      }
+      this.setState({ cancel_button_active: true, modify_button_active: false })
+      this.setInActiveButtonStyle('cancel')
     }
 
     cancelModal(values){
@@ -869,6 +879,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(form_values) {
+      this.setInActiveButtonStyle('add')
       this.hideMetaList()
       const {modifyend_selected_feature_ID, modifyend_selected_feature_check, update_geom_from_list, build_name } = this.state
       if(modifyend_selected_feature_ID){
@@ -997,14 +1008,12 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     ModifyButton(){
+      this.setInActiveButtonStyle('modify')
       if(this.state.modify_button_active){
-        if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: false})
       }
-      else{
-        if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({modify_button_active: true,  remove_button_active: false, cancel_button_active: false})
+      else {
+        this.setState({modify_button_active: true, remove_button_active: false, cancel_button_active: false})
       }
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
@@ -1012,9 +1021,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     LineButton(){
-      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
+      this.setInActiveButtonStyle('line')
+      this.setState({modify_button_active: false, remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -1023,8 +1031,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PointButton(){
-      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setInActiveButtonStyle('point')
       this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
@@ -1034,8 +1041,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PolygonButton(){
-      if(this.state.roles[3]) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(this.state.roles[2]) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
+      this.setInActiveButtonStyle('polygon')
       this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
@@ -1045,6 +1051,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     MetaButton() {
+      this.setInActiveButtonStyle('meta')
       this.drawE.getActive()
       this.drawE.setActive(false);
       this.modifyE.setActive(false);
@@ -1054,12 +1061,13 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     showUploadBtn(){
+      this.setInActiveButtonStyle('upload')
       this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid)
       this.setState({ showUpload: true })
     }
 
     showQgisBtn(){
-
+      this.setInActiveButtonStyle('qgis')
       this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
     }
 
@@ -1073,6 +1081,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SideBarBtn(){
+      this.setInActiveButtonStyle('side')
       const bundle_id = 7
       service.loadWMSLayers(bundle_id).then(({wms_list}) => {
         this.WmsTile(wms_list)
@@ -1213,6 +1222,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     DrawButton() {
+      this.setInActiveButtonStyle('shapeDraw')
       const dragBox = new DragBox({
         condition: platformModifierKeyOnly,
       });

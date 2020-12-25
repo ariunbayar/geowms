@@ -18,6 +18,7 @@ export class DrawButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Дүрс зурах')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-shapeDraw-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
