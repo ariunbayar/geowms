@@ -144,7 +144,7 @@ def qgis_submit(request, token):
 
 def _get_layer_name(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_UPDATE).values_list('feature_id', flat=True)
+    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).values_list('feature_id', flat=True)
     allowed_layers = ViewNames.objects.filter(feature_id__in=feature_ids).values_list("view_name", flat=True)
     allowed_layers = ['gp_layer_' + allowed_layer for allowed_layer in allowed_layers]
     return allowed_layers
