@@ -22,7 +22,7 @@ class PopUpCmp extends Component {
             code: '',
             geom_name: '',
             pdf_id:'',
-            is_purchase: true,
+            is_purchase: false,
             is_enable: false,
         }
         this.plusTab = this.plusTab.bind(this)
