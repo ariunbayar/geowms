@@ -97,6 +97,8 @@ export class OrgAdd extends Component {
                             })
                         }
                     }
+                } else {
+                    this.setState({geo_id: firstOrder_geom})
                 }
             }
         })
@@ -164,7 +166,6 @@ export class OrgAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {org_name, upadte_level, geo_id, org_role} = this.state
-        console.log(geo_id);
         const values = {
             org_name: org_name,
             id: org_id,
@@ -172,10 +173,10 @@ export class OrgAdd extends Component {
             role_id: org_role,
             geo_id: geo_id,
         }
-        // service.org_add(org_level, values).then(({ success }) => {
-        //     success && this.setState({modal_alert_status: "open"})
-        //     this.modalCloseTime()
-        // })
+        service.org_add(org_level, values).then(({ success }) => {
+            success && this.setState({modal_alert_status: "open"})
+            this.modalCloseTime()
+        })
     }
 
     modalClose(){
