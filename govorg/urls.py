@@ -58,7 +58,7 @@ urlpatterns = [
 
         path('org-request/', include(([
             path('', org_request_views.getAll, name="all"),
-            path('change-request/', org_request_views.getChangeAll, name="change-request"),
+            path('change-request/', org_request_views.get_change_all, name="change-request"),
             path('control-to-approve/', org_request_views.control_to_approve, name="control-to-approve"),
             path('control-to-remove/', org_request_views.controlToRemove, name="control-to-remove"),
             path('<int:pk>/delete/', org_request_views.requestDelete, name="delete"),

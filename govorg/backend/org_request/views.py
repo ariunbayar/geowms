@@ -213,9 +213,9 @@ def _get_org_request(ob):
 
 @require_GET
 @ajax_required
-def getChangeAll(request):
+def get_change_all(request):
     org_request = []
-    org_request_list = ChangeRequest.objects.all()
+    org_request_list = ChangeRequest.objects.all().order_by("-created_at")
     if org_request_list:
         org_request = [_get_org_request(ob) for ob in org_request_list]
         if org_request[0] != '':
@@ -223,20 +223,16 @@ def getChangeAll(request):
                 'success':True,
                 'org_request': org_request,
             }
-
-            return JsonResponse(rsp)
         else:
             rsp = {
                 'success':False,
             }
-
-            return JsonResponse(rsp)
     else:
         rsp = {
                 'success':False,
             }
 
-        return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
 
 def _get_features(org, package_id):
