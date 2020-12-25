@@ -319,83 +319,76 @@ export default class InsPerms extends Component {
             <div className="row">
                 <div className="col-md-6 p-0">
                     <div className="col">
-                        <div className="card">
-                            <div className="card-body">
-                                <div className="accordion" id="accordion">
-                                        {themes.length > 0 && themes.map((theme, t_idx) =>
-                                            <div className={`card ` + (theme.is_role ? is_role_border : theme.is_employee_perm ? is_emp_border : '')} key={t_idx}>
-                                                <PermAcc
-                                                    id={theme.id}
-                                                    name={theme.name}
-                                                    index={t_idx}
-                                                    type="theme"
-                                                    sendId={this.getId}
-                                                    total_length={theme.all_child}
-                                                    now_length={theme.perm_child_ids.length}
-                                                    is_open={is_open}
-                                                    t_name={t_name}
-                                                />
-                                            </div>
-                                        )}
-                                </div>
-                            </div>
+                        <div className="accordion my-0" id="accordion">
+                                {themes.length > 0 && themes.map((theme, t_idx) =>
+                                    <div className={`card mb-0 ` + (theme.is_role ? is_role_border : theme.is_employee_perm ? is_emp_border : '')} key={t_idx}>
+                                        <PermAcc
+                                            id={theme.id}
+                                            name={theme.name}
+                                            index={t_idx}
+                                            type="theme"
+                                            sendId={this.getId}
+                                            total_length={theme.all_child}
+                                            now_length={theme.perm_child_ids.length}
+                                            is_open={is_open}
+                                            t_name={t_name}
+                                        />
+                                    </div>
+                                )}
                         </div>
                     </div>
+                    <hr></hr>
                     <div className="col">
-                        <div className="card">
-                            <div className="card-body">
-                                <div className="accordion" id="accordion-2">
-                                    {
-                                    prevTid !== tid && package_features.length > 0 ?
-                                    package_features.map((pack, p_idx) =>
-                                        pack.parent_id == tid &&
-                                        <div className={`card ` + (pack.is_role ? is_role_border : pack.is_employee_perm ? is_emp_border : '')} key={p_idx}>
-                                            <PermAcc key={p_idx}
-                                                id={pack.id}
-                                                name={pack.name}
-                                                index={p_idx}
-                                                type="package"
-                                                sendId={this.getId}
-                                                is_open={is_open}
-                                                total_length={pack.all_child}
-                                                now_length={pack.features.length}
-                                                p_name={p_name}
-                                                t_name={t_name}
-                                                cancelOpen={this.cancelOpen}
-                                            />
-                                            <div id={`acc-${p_idx}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
-                                                <div className="card-body">
-                                                    <div className="accordion" id="accordion-3">
-                                                        {pack.features.map((feature, f_idx) =>
-                                                        <div className={(feature.is_role ? is_role_border : feature.is_employee_perm ? is_emp_border : '')} key={f_idx}>
-                                                            {feature.parent_id == pid &&
-                                                                <PermAcc
-                                                                    id={feature.id}
-                                                                    name={feature.name}
-                                                                    index={f_idx}
-                                                                    type="feature"
-                                                                    sendId={this.getId}
-                                                                    total_length={feature.all_child}
-                                                                    now_length={feature.perm_child_ids.length}
-                                                                    small={'text-lowercase'}
-                                                                    is_open={is_open}
-                                                                    t_name={t_name}
-                                                                    p_name={p_name}
-                                                                    f_name={f_name}
-                                                                />
-                                                            }
-                                                        </div>
-                                                        )}
-                                                    </div>
+                        <div className="accordion" id="accordion-2">
+                            {
+                            prevTid !== tid && package_features.length > 0 ?
+                            package_features.map((pack, p_idx) =>
+                                pack.parent_id == tid &&
+                                <div className={`card ` + (pack.is_role ? is_role_border : pack.is_employee_perm ? is_emp_border : '')} key={p_idx}>
+                                    <PermAcc key={p_idx}
+                                        id={pack.id}
+                                        name={pack.name}
+                                        index={p_idx}
+                                        type="package"
+                                        sendId={this.getId}
+                                        is_open={is_open}
+                                        total_length={pack.all_child}
+                                        now_length={pack.features.length}
+                                        p_name={p_name}
+                                        t_name={t_name}
+                                        cancelOpen={this.cancelOpen}
+                                    />
+                                    <div id={`acc-${p_idx}-package`} className="collapse" aria-labelledby='accordion-2' data-parent="#accordion-2">
+                                        <div className="card-body">
+                                            <div className="accordion" id="accordion-3">
+                                                {pack.features.map((feature, f_idx) =>
+                                                <div className={(feature.is_role ? is_role_border : feature.is_employee_perm ? is_emp_border : '')} key={f_idx}>
+                                                    {feature.parent_id == pid &&
+                                                        <PermAcc
+                                                            id={feature.id}
+                                                            name={feature.name}
+                                                            index={f_idx}
+                                                            type="feature"
+                                                            sendId={this.getId}
+                                                            total_length={feature.all_child}
+                                                            now_length={feature.perm_child_ids.length}
+                                                            small={'text-lowercase'}
+                                                            is_open={is_open}
+                                                            t_name={t_name}
+                                                            p_name={p_name}
+                                                            f_name={f_name}
+                                                        />
+                                                    }
                                                 </div>
+                                                )}
                                             </div>
                                         </div>
-                                    )
-                                    :
-                                    <h5>Сонгоогүй байна</h5>
-                                   }
+                                    </div>
                                 </div>
-                            </div>
+                            )
+                            :
+                            <h5>Сонгоогүй байна</h5>
+                            }
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,7 @@ from backend.org.models import Org, Employee
 from main.decorators import ajax_required
 from main.utils import send_approve_email, is_email
 from backend.token.utils import TokenGeneratorEmployee
+from main import utils
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
@@ -27,18 +28,20 @@ from govorg.backend.utils import (
 )
 
 
-
-def _get_employee_display_data(employee):
+def _get_employee_display(employee):
 
     user = employee.user
 
     return {
+        'username': user.username,
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
+        'gender': user.gender,
+        'register': user.register,
     }
 
 
@@ -50,7 +53,7 @@ def list(request):
     employees = Employee.objects.filter(org=org)
 
     employee_list = [
-        _get_employee_display_data(employee)
+        _get_employee_display(employee)
         for employee in employees
     ]
 
@@ -62,50 +65,62 @@ def list(request):
     return JsonResponse(rsp)
 
 
-def _set_user_data(user, first_name, last_name, email):
+def _set_user(user, user_detail):
 
-    user.first_name = first_name
-    user.last_name = last_name
-    user.username = email
-    user.email = email
+    user.username = user_detail['username']
+    user.first_name = user_detail['first_name']
+    user.last_name = user_detail['first_name']
+    user.email = user_detail['email']
+    user.gender = user_detail['gender']
+    user.register = user_detail['register']
     user.save()
 
+def _set_employee(employee, user_detail):
 
-def _set_employee_data(employee, position, is_admin):
-
-    employee.position = position
-    employee.is_admin = is_admin
+    employee.position = user_detail['position']
+    employee.is_admin = user_detail['is_admin']
     employee.save()
 
 
-def _set_emp_perm_ins_data(emp_perm, perm, user):
+def _set_emp_perm_ins(emp_perm, perm, user):
+
+    feature_id = perm.get('feature_id')
+    property_id = perm.get('property_id')
+    perm_kind = get_convert_perm_kind(EmpPermInspire, perm.get('perm_kind'))
 
     emp_perm_inspire = EmpPermInspire()
 
-    gov_perm_inspire = get_object_or_404(GovPermInspire, pk=perm.get('gov_perm_ins_id'))
-
-    if perm.get('emp_role_ins_id'):
-        emp_role_inspire = get_object_or_404(EmpRoleInspire, pk=perm.get('emp_role_ins_id'))
-        emp_perm_inspire.emp_role_inspire = emp_role_inspire
-
-    emp_perm_inspire.emp_perm = emp_perm
-    emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
-    emp_perm_inspire.created_by = user
-    emp_perm_inspire.feature_id = perm.get('feature_id')
-    if perm.get('property_id') == 'geom':
+    if property_id == 'geom':
+        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
+        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
         emp_perm_inspire.geom = True
     else:
-        emp_perm_inspire.property_id = perm.get('property_id')
-    emp_perm_inspire.perm_kind = get_convert_perm_kind(EmpPermInspire, perm.get('perm_kind'))
+        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
+        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
+        emp_perm_inspire.property_id = property_id
+
+    emp_perm_inspire.emp_role_inspire = emp_role_inspire
+    emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
+    emp_perm_inspire.emp_perm = emp_perm
+    emp_perm_inspire.feature_id = feature_id
+    emp_perm_inspire.created_by = user
+    emp_perm_inspire.updated_by = user
+    emp_perm_inspire.perm_kind = perm_kind
     emp_perm_inspire.save()
 
 
-def _employee_validation(payload, user):
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
+def _employee_validation(user, user_detail):
     errors = {}
+    username = user_detail['username']
+    last_name = user_detail['last_name']
+    first_name = user_detail['first_name']
+    position = user_detail['position']
+    email = user_detail['email']
+    register = user_detail['register']
+    if not username:
+        errors['username'] = 'Хоосон байна утга оруулна уу.'
+    elif len(username) > 150:
+        errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу.'
     elif len(position) > 250:
@@ -122,65 +137,81 @@ def _employee_validation(payload, user):
         errors['email'] = 'Хоосон байна утга оруулна уу.'
     elif len(email) > 254:
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
+    if not register:
+        errors['register'] = 'Хоосон байна утга оруулна уу.'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():
                 errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+        if user.username != username:
+            if User.objects.filter(username=username).first():
+                errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
     else:
         if User.objects.filter(email=email).first():
             errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-    if not is_email(email):
+        if User.objects.filter(username=username).first():
+            errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
+    if not utils.is_email(email):
         errors['email'] = 'Email хаяг алдаатай байна.'
+    if len(register) ==  10:
+        if not utils.is_register(register):
+            errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
+    else:
+        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     return errors
-
 
 @require_POST
 @ajax_required
 def create(request, payload):
 
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    position = payload.get('position')
-    is_admin = payload.get('is_admin')
+    user_detail = payload.get('user_detail')
     roles = payload.get('roles')
-
+    emp_role_id = payload.get('emp_role_id')
     org = get_object_or_404(Org, employee__user=request.user)
-    errors = _employee_validation(payload, None)
+    user = get_object_or_404(User, employee__user=request.user)
+
+    errors = _employee_validation(user, user_detail)
     if errors:
-        return JsonResponse({'success': False, 'errors': errors})
-    emp_role = EmpRole.objects.filter(pk=payload.get('emp_role_id')).first()
+        return JsonResponse({
+            'success': False,
+            'errors': errors
+        })
 
     with transaction.atomic():
 
         user = User()
-        _set_user_data(user, first_name, last_name, email)
+        _set_user(user, user_detail)
 
         employee = Employee()
         employee.org = org
         employee.user = user
         employee.token = TokenGeneratorEmployee().get()
-        _set_employee_data(employee, position, is_admin)
+        _set_employee(employee, user_detail)
 
-        emp_perm = EmpPerm()
-        emp_perm.employee = employee
-        emp_perm.emp_role = emp_role
-        emp_perm.save()
+        if emp_role_id:
+            emp_perm = EmpPerm()
+            emp_perm.created_by = user
+            emp_perm.emp_role_id = emp_role_id
+            emp_perm.employee_id = employee.id
+            emp_perm.updated_by = user
+            emp_perm.save()
 
-        for role in roles:
-            _set_emp_perm_ins_data(emp_perm, role, request.user)
+            for role in roles:
+                _set_emp_perm_ins(emp_perm, role, request.user)
+        utils.send_approve_email(user)
 
-        send_approve_email(user)
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+        })
+    return JsonResponse({
+        'success': False,
+        'info': 'Хадгалахад алдаа гарлаа'
+    })
 
-        return JsonResponse({'success': True, 'errors': {}})
 
-    return JsonResponse({'success': False, 'errors': {}})
-
-
-def _delete_old_emp_role(old_emp_role):
-
-    emp_role_inspire_list = EmpRoleInspire.objects.filter(emp_role=old_emp_role)
-    EmpPermInspire.objects.filter(emp_role_inspire__in=emp_role_inspire_list).delete()
+def _delete_old_emp_role(emp_perm):
+    EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
 
 
 def _delete_remove_perm(remove_perms):
@@ -191,49 +222,53 @@ def _delete_remove_perm(remove_perms):
 @ajax_required
 def update(request, payload, pk):
 
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    position = payload.get('position')
-    is_admin = payload.get('is_admin')
-    emp_role_id = payload.get('emp_role_id')
+    role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
     remove_perms = payload.get('remove_perm')
-
     employee = get_object_or_404(Employee, pk=pk)
-    errors = _employee_validation(payload, employee.user)
-    if errors:
-        return JsonResponse({'success': False, 'errors': errors})
-
-    emp_perm = get_object_or_404(EmpPerm, employee=employee)
-    new_emp_role = get_object_or_404(EmpRole, pk=emp_role_id)
-    old_emp_role = emp_perm.emp_role
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    new_emp_role = EmpRole.objects.filter(id=role_id).first()
 
     with transaction.atomic():
-        if new_emp_role != old_emp_role:
-            _delete_old_emp_role(old_emp_role)
-            emp_perm.emp_role = new_emp_role
+        if emp_perm:
+            old_emp_role = emp_perm.emp_role
+            if new_emp_role != old_emp_role:
+                _delete_old_emp_role(emp_perm)
+                emp_perm.emp_role = new_emp_role
+                emp_perm.save()
+        else:
+            user = get_object_or_404(User, employee=employee)
+            emp_perm = EmpPerm()
+            emp_perm.created_by = user
+            emp_perm.emp_role_id = role_id
+            emp_perm.employee_id = employee.id
+            emp_perm.updated_by = user
             emp_perm.save()
+
 
         if remove_perms:
             _delete_remove_perm(remove_perms)
-
         if add_perms:
             for perm in add_perms:
-                _set_emp_perm_ins_data(emp_perm, perm, request.user)
+                _set_emp_perm_ins(emp_perm, perm, request.user)
 
         user = employee.user
-        _set_user_data(user, first_name, last_name, email)
+        _set_user(user, payload)
 
         employee = employee
-        _set_employee_data(employee, position, is_admin)
+        _set_employee(employee, payload)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+        })
+    return JsonResponse({
+        'success': False,
+        'info': 'Хадгалахад алдаа гарлаа'
+    })
 
-    return JsonResponse({'success': False})
 
-
-def _get_emp_perm_data_display(emp_perm):
+def _get_emp_perm_display(emp_perm):
 
     feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm).distinct('feature_id').values_list('feature_id', flat=True)
     package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
@@ -272,18 +307,28 @@ def _get_emp_perm_data_display(emp_perm):
 def detail(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
-    emp_perm = get_object_or_404(EmpPerm, employee=employee)
-    emp_role = emp_perm.emp_role
+    employee_detail = _get_employee_display(employee)
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
-    employee_detail = _get_employee_display_data(employee)
+    role_id = ''
+    role_name = ''
+    perms = None
+    if emp_perm:
+        if emp_perm.emp_role:
+            emp_role = emp_perm.emp_role
+            role_id = emp_role.id
+            role_name = emp_role.name
+            perms = _get_emp_perm_display(emp_perm)
 
     rsp = {
-        'form_values': employee_detail,
-        'role_name': emp_role.name,
-        'role_id': emp_role.id,
-        'perms': _get_emp_perm_data_display(emp_perm),
         'success': True,
+        'employee_detail': employee_detail,
+        'role_id': role_id,
+        'role_name': role_name,
+        'perms': perms,
+
     }
+
     return JsonResponse(rsp)
 
 
