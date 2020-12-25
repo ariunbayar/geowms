@@ -22,32 +22,34 @@ def _org_role(org):
 
     properties = []
     property_of_feature = {}
-    gov_perm = GovPerm.objects.filter(org=org).first().id
+    themes = []
+    package_features = []
+    gov_perm = GovPerm.objects.filter(org=org).first()
+    if gov_perm:
+        feature_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm.id).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
 
-    feature_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
+        package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
+        theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
+        
+        for feature_id in feature_ids:
+            property_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
+            property_of_feature[feature_id] = property_ids
+            properties.append(get_property_data_display(None, feature_id, gov_perm, GovPermInspire, True))
+            for property_id in property_ids:
+                properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire, False))
 
-    package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
-    theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
-    
-    for feature_id in feature_ids:
-        property_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
-        property_of_feature[feature_id] = property_ids
-        properties.append(get_property_data_display(None, feature_id, gov_perm, GovPermInspire, True))
-        for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire, False))
+        package_features = [
+            get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
+            for package_id in package_ids
+        ]   
 
-    package_features = [
-        get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
-        for package_id in package_ids
-    ]   
-
-    themes = [
-        get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
-        for theme_id in theme_ids
-    ]
+        themes = [
+            get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
+            for theme_id in theme_ids
+        ]
         
     return {
-        'gov_perm_id': gov_perm,
+        'gov_perm_id': gov_perm.id if gov_perm else '',
         'themes': themes,
         'package_features': package_features,
         'property': properties,
