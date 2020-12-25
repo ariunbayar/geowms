@@ -22,7 +22,7 @@ from django.core.files.storage import FileSystemStorage
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter, WKBReader, fromstr
 from backend.org.models import Org, Employee, InspirePerm
 
@@ -39,7 +39,8 @@ from main.utils import (
     gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
-    refreshMaterializedView
+    refreshMaterializedView,
+    get_config
 )
 
 
@@ -346,7 +347,7 @@ def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
 
-def _get_property(ob):
+def _get_property(ob, theme_id):
     data = None
     value_type = ''
     data_list = []
@@ -378,7 +379,7 @@ def _get_property(ob):
     if data:
         data = data[0]
     return {
-        'building_id':ob['building_id'],
+        theme_id:ob[theme_id],
         'geo_id':ob['geo_id'],
         'property_name':ob['property_name'],
         'property_id':ob['property_id'],
@@ -412,54 +413,67 @@ def _get_type(value_type_id):
     return value_type
 
 
+def get_theme_name(theme_code):
+    if theme_code == 'au':
+        return 'm_datas_boundary', 'boundary_id'
+    elif theme_code == 'bu':
+        return 'm_datas_building', 'building_id'
+    elif theme_code == 'cp':
+        return 'm_datas_cadastral', 'cadastral_id'
+    elif theme_code == 'gn':
+        return 'm_datas_geographical', 'geographical_id'
+    elif theme_code == 'hg':
+        return 'm_datas_hydrography', 'hydrography_id'
+    else: None, None
+
+
 @require_GET
 @ajax_required
-def detail(request, pk, fid):
+def detail(request, pk, tid, fid):
+    theme = get_object_or_404(LThemes, theme_id=tid)
+    theme_name, theme_id = get_theme_name(theme.theme_code)
     org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
     find_cursor = connections['default'].cursor()
-    find_cursor.execute('''
-    select
-        datas.building_id,
-        datas.geo_id,
-        l.property_name,
-        l.property_code,
-        l.property_definition,
-        l.value_type_id,
-        datas.property_id,
-        datas.value_text,
-        datas.value_number,
-        datas.value_date,
-        datas.code_list_id
-    from l_properties l
-    inner join m_datas_building datas on
-        l.property_id = datas.property_id
-    where
-        datas.geo_id = %s
-    order by property_name asc
-    '''
-    , [pk])
+    quuery = '''
+        select
+            datas.{theme_id},
+            datas.geo_id,
+            l.property_name,
+            l.property_code,
+            l.property_definition,
+            l.value_type_id,
+            datas.property_id,
+            datas.value_text,
+            datas.value_number,
+            datas.value_date,
+            datas.code_list_id
+        from l_properties l
+        inner join {theme_name} datas on
+            l.property_id = datas.property_id
+        where
+            datas.geo_id = %s
+        order by property_name asc
+    '''.format(theme_name=theme_name, theme_id=theme_id)
+    find_cursor.execute(quuery, [pk])
 
     data = dict_fetchall(find_cursor)
     data = list(data)
     org_propties_front = []
-    properties = [_get_property(ob) for ob in data]
-    for org_prop in org_properties:
-        for inspire_prop in properties:
-            if org_prop.module_id == inspire_prop['property_id']:
-                org_propties_front.append({
-                    'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
-                    'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
-                    'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
-                    'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
-                    'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
-                    'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
-                    'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
-                    'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
-                    'data': inspire_prop['data'] if inspire_prop['data'] else '',
-                    'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
-                    'role': '1' if org_prop.perm_update else '0',
-                })
+    properties = [_get_property(ob, theme_id) for ob in data]
+    for inspire_prop in properties:
+        org_propties_front.append({
+            theme_id:inspire_prop[theme_id] if inspire_prop[theme_id] else '',
+            'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
+            'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
+            'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
+            'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
+            'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
+            'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
+            'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
+            'data': inspire_prop['data'] if inspire_prop['data'] else '',
+            'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
+            'role': '0',
+        })
     rsp = {
         'success': True,
         'datas': org_propties_front
@@ -1041,4 +1055,18 @@ def FileUploadSaveData(request, tid, fid):
             'success': False,
             'info': return_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
         }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_qgis_url(request):
+    emp = get_object_or_404(Employee, user=request.user)
+    qgis_local_base_url = get_config('qgis_local_base_url')
+    rsp = {
+        'success': True,
+        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
     return JsonResponse(rsp)

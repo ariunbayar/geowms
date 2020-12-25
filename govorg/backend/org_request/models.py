@@ -8,11 +8,13 @@ class ChangeRequest(models.Model):
     STATE_NEW = 1
     STATE_REJECT = 2
     STATE_APPROVE = 3
+    STATE_CONTROL = 4
 
     STATE_CHOICES = (
         (STATE_NEW, 'ШИНЭ'),
         (STATE_REJECT, 'ТАТГАЛЗСАН'),
         (STATE_APPROVE, 'ЗӨВШӨӨРСӨН'),
+        (STATE_CONTROL, 'ХЯНАХ')
     )
 
     KIND_CREATE = 1

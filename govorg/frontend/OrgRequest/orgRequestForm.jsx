@@ -229,6 +229,8 @@ export default class OrgRequestForm extends Component {
                                 <tbody>
                                     {
                                         org_request.length > 0 ? org_request.map((req, idx) =>
+
+                                            req.state != 4 &&
                                             <OrgRequestTable
                                                 key={idx}
                                                 idx={idx}

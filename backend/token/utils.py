@@ -76,6 +76,11 @@ class TokenGeneratorUserValidationEmail(TokenGenerator):
         super().__init__(kind)
 
 
+class TokenGeneratorEmployee(TokenGenerator):
+    def __init__(self):
+        kind = self.model.KIND_GIS_EMPLOYEE_TOKEN
+        super().__init__(kind)
+
+
 # TODO TokenGenerator for following:
 # KIND_RESET_PASSWORD = 2
-# KIND_GIS_EMPLOYEE_TOKEN = 3
