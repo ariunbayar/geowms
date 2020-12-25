@@ -81,7 +81,8 @@ export default class Маягт extends Component {
 
     handleUpdate(gid){
         const fid = this.state.fid
-        service.detail(gid, fid).then(({success, datas}) => {
+        const tid = this.state.tid
+        service.detail(gid, tid, fid).then(({success, datas}) => {
             if(success){
                 this.setState({
                     values:datas,

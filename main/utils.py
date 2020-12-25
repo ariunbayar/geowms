@@ -2,17 +2,14 @@ from PIL import Image
 from collections import namedtuple
 from io import BytesIO
 import base64
-import functools
 import re
 import unicodedata
-import uuid
 
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
-from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
@@ -22,6 +19,7 @@ from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 from backend.config.models import Config
+from backend.token.utils import TokenGeneratorUserValidationEmail
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -233,22 +231,19 @@ def refreshMaterializedView(fid):
         return True
 
 
-def _generate_user_token():
-    return uuid.uuid4().hex[:32]
-
-
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
 
 
 def send_approve_email(user, subject=None, text=None):
+
     if not user.email:
         return False
 
-    token = _generate_user_token()
+    token = TokenGeneratorUserValidationEmail().get()
 
     UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
-    UserValidationEmail .objects.create(
+    UserValidationEmail.objects.create(
         user=user,
         token=token,
         valid_before=timezone.now() + timedelta(days=90)
@@ -515,6 +510,7 @@ def is_email(email):
     re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
     return re.search(re_email, email) is not None
 
+
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
 def get_config(config_name):
@@ -523,6 +519,7 @@ def get_config(config_name):
     configs = Config.objects.filter(name__in=default_values.keys()).first()
 
     return configs.value if configs else ''
+
 
 # оролт config name array
 # Олон config мэдээллийг буцаана obj буцаана

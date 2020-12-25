@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -21,7 +22,10 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
+from backend.token.utils import TokenGeneratorEmployee
+
 from geoportal_app.models import User
+
 from main.decorators import ajax_required
 from main import utils
 
@@ -266,6 +270,7 @@ def employee_detail(request, pk):
         'is_sso': user.is_sso,
         'position': employee.position,
         'is_admin': employee.is_admin,
+        'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
@@ -332,7 +337,7 @@ def _employee_validation(payload, user):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_update(request, payload, pk):
+def employee_update(request, payload, pk, level):
     username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -341,17 +346,28 @@ def employee_update(request, payload, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
+    password = payload.get('password')
+    is_super = payload.get('is_super')
     re_password_mail = payload.get('re_password_mail')
     user = get_object_or_404(User, pk=pk)
     errors = _employee_validation(payload, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-    user.first_name=first_name
-    user.last_name=last_name
-    user.email=email
-    user.gender=gender
-    user.register=register.upper()
-    user.username=username
+
+    if level == 4:
+        is_super = is_super
+    else:
+        is_super = False
+
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.gender = gender
+    user.register = register.upper()
+    user.username = username
+    user.is_superuser = is_super
+    if password:
+        user.set_password(password)
     user.save()
     if re_password_mail:
         subject = 'Геопортал нууц үг солих'
@@ -367,6 +383,8 @@ def employee_update(request, payload, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
 
+    org = get_object_or_404(Org, pk=pk, level=level)
+
     username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -375,29 +393,39 @@ def employee_add(request, payload, level, pk):
     gender = payload.get('gender')
     register = payload.get('register')
     is_admin = payload.get('is_admin')
+    is_super = payload.get('is_super')
+
     errors = {}
     errors = _employee_validation(payload, None)
+
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-    if level == 4:
-        is_superuser = True
-    else:
-        is_superuser = False
 
-    user = User.objects.create(
-        is_superuser=is_superuser,
-        username=username,
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        gender=gender,
-        register=register.upper()
-    )
-    user.roles.add(2)
-    user.save()
-    utils.send_approve_email(user)
+    with transaction.atomic():
 
-    Employee.objects.create(position=position, org_id=pk, user_id=user.id, is_admin=is_admin)
+        user = User()
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.gender = gender
+        user.is_superuser = is_super if org.level == 4 else False
+        user.register = register.upper()
+        user.save()
+
+        user.roles.add(2)
+        user.save()
+
+        employee = Employee()
+        employee.position = position
+        employee.org = org
+        employee.user_id = user.id
+        employee.is_admin = is_admin
+
+        employee.token = TokenGeneratorEmployee().get()
+        employee.save()
+
+        utils.send_approve_email(user)
 
     return JsonResponse({'success': True, 'errors': errors})
 

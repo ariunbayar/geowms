@@ -27,6 +27,8 @@ import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {MetaBarButton} from './controls/MetaData/MetaBarButton'
 import {MetaList} from './controls/MetaData/MetaList'
 import {CancelBarButton} from './controls/Cancel/CancelBarButton'
+import {QgisButton} from './controls/QgisLink/QgisButton'
+import {QgisModal} from './controls/QgisLink/QgisPopUp'
 
 import {CoordList} from './controls/CoordinateList/CordList'
 
@@ -84,11 +86,14 @@ export default class BarilgaSuurinGazar extends Component{
           pointFeature: null,
           is_not_mongolia: false,
           update_geom_from_list: false,
+          wms_url: '',
+          wfs_url: ''
       }
 
       this.controls = {
         modal: new Modal(),
         upload: new UploadBtn(),
+        qgis: new QgisModal(),
         sidebar: new Sidebar(),
         metaList: new MetaList(),
         coordList: new CoordList(),
@@ -123,6 +128,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.snap = this.snap.bind(this)
       this.createGeom = this.createGeom.bind(this)
       this.showUploadBtn = this.showUploadBtn.bind(this)
+      this.showQgisBtn = this.showQgisBtn.bind(this)
+      this.closeQgisBtn = this.closeQgisBtn.bind(this)
       this.closeUploadBtn = this.closeUploadBtn.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
       this.WmsTile = this.WmsTile.bind(this)
@@ -145,9 +152,12 @@ export default class BarilgaSuurinGazar extends Component{
 
     componentDidMount(){
       const {pid, fid} = this.state
+      service.qgisGetUrl().then(({wms_url, wfs_url}) => {
+        this.setState({ wms_url, wfs_url })
+      })
       service.geomType(pid, fid).then(({type}) => {
           this.setState({ type })
-        })
+      })
       this.loadRows()
       this.loadMap()
     }
@@ -184,6 +194,7 @@ export default class BarilgaSuurinGazar extends Component{
         else map.addControl(new SaveBtn({SaveBtn: this.SaveBtn}))
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
+        map.addControl(this.controls.qgis)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
       }
@@ -191,6 +202,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(roles[4]) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
+      map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
 
       if(roles[3]){
         map.addControl(this.controls.coordList)
@@ -1044,6 +1056,15 @@ export default class BarilgaSuurinGazar extends Component{
     showUploadBtn(){
       this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid)
       this.setState({ showUpload: true })
+    }
+
+    showQgisBtn(){
+
+      this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
+    }
+
+    closeQgisBtn(){
+      this.controls.qgis.showUpload(false)
     }
 
     closeUploadBtn(){
