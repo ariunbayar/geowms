@@ -87,29 +87,39 @@ def get_convert_display_name(perm_list):
     return roles
 
 
-def get_property_data_display(property_id, feature_id, role_model, inspire_model):
-    perm_list = []
+def get_property_data_display(property_id, feature_id, role_model, inspire_model, geom):
     if role_model.__class__.__name__ == 'EmpRole':
-        perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('gov_perm_inspire_id'), kind=F('perm_kind')))
-
+        if not geom:
+            perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        else:
+            perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
     if role_model.__class__.__name__ == 'GovPerm':
-        perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-
+        if not geom:
+            perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        else:
+            perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
     if role_model.__class__.__name__ == 'EmpPerm':
-        perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-
-    property = get_object_or_404(LProperties, property_id=property_id)
-
-
+        if not geom:
+            perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        else:
+            perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
     roles = get_convert_display_name(perm_list)
+    if not geom:
+        property = get_object_or_404(LProperties, property_id=property_id)
 
-    return {
-          'id': property.property_id,
-          'name': property.property_name,
-          'name': property.property_name,
-          'parent_id': feature_id,
-          'roles': roles
-        }
+        return {
+            'id': property.property_id,
+            'name': property.property_name,
+            'parent_id': feature_id,
+            'roles': roles
+            }
+    else:
+        return {
+            'id': 'geom',
+            'name': 'geom',
+            'parent_id': feature_id,
+            'roles': roles
+            }
 
 
 def get_all_child_feature(feature_id):
