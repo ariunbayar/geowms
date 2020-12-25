@@ -87,59 +87,56 @@ def _geojson_convert_3d_geojson(geojson):
 @require_POST
 @csrf_exempt
 def qgis_submit(request, token):
-    try:
-        update = request.POST.get('update')
-        delete = request.POST.get('delete')
-        employee = get_object_or_404(Employee, token=token)
-        update_lists = json.loads(update)
-        delete_lists = json.loads(delete)
-        objs = []
-        for update_item in update_lists:
-            feature_id = update_item['att']['feature_id']
-            if update_item['att']['inspire_id']:
-                geo_id = update_item['att']['inspire_id']
-            else:
-                geo_id = update_item['att']['geo_id']
-            package = LFeatures.objects.filter(feature_id=feature_id).first()
-            theme = LPackages.objects.filter(package_id=package.package_id).first()
-            objs.append(ChangeRequest(
-                old_geo_id=geo_id,
-                new_geo_id=None,
-                theme_id=theme.theme_id,
-                package_id=package.package_id,
-                feature_id=feature_id,
-                employee=employee,
-                state=ChangeRequest.STATE_CONTROL,
-                kind=ChangeRequest.KIND_DELETE,
-                form_json=None,
-                geo_json=_geojson_convert_3d_geojson(update_item['geom']),
-            ))
+    update = request.POST.get('update')
+    delete = request.POST.get('delete')
+    employee = get_object_or_404(Employee, token=token)
+    update_lists = json.loads(update)
+    delete_lists = json.loads(delete)
+    objs = []
+    for update_item in update_lists:
+        feature_id = update_item['att']['feature_id']
+        if update_item['att']['inspire_id']:
+            geo_id = update_item['att']['inspire_id']
+        else:
+            geo_id = update_item['att']['geo_id']
+        package = LFeatures.objects.filter(feature_id=feature_id).first()
+        theme = LPackages.objects.filter(package_id=package.package_id).first()
+        objs.append(ChangeRequest(
+            old_geo_id=geo_id,
+            new_geo_id=None,
+            theme_id=theme.theme_id,
+            package_id=package.package_id,
+            feature_id=feature_id,
+            employee=employee,
+            state=ChangeRequest.STATE_CONTROL,
+            kind=ChangeRequest.KIND_DELETE,
+            form_json=None,
+            geo_json=_geojson_convert_3d_geojson(update_item['geom']),
+        ))
 
-        for delete_item in delete_lists:
-            feature_id = delete_item['att']['feature_id']
-            if delete_item['att']['inspire_id']:
-                geo_id = delete_item['att']['inspire_id']
-            else:
-                geo_id = delete_item['att']['geo_id']
-            package = LFeatures.objects.filter(feature_id=feature_id).first()
-            theme = LPackages.objects.filter(package_id=package.package_id).first()
-            objs.append(ChangeRequest(
-                old_geo_id=geo_id,
-                new_geo_id=None,
-                theme_id=theme.theme_id,
-                package_id=package.package_id,
-                feature_id=feature_id,
-                employee=employee,
-                state=ChangeRequest.STATE_CONTROL,
-                kind=ChangeRequest.KIND_UPDATE,
-                form_json=None,
-                geo_json=_geojson_convert_3d_geojson(delete_item['geom']),
-            ))
-        ChangeRequest.objects.bulk_create(objs)
+    for delete_item in delete_lists:
+        feature_id = delete_item['att']['feature_id']
+        if delete_item['att']['inspire_id']:
+            geo_id = delete_item['att']['inspire_id']
+        else:
+            geo_id = delete_item['att']['geo_id']
+        package = LFeatures.objects.filter(feature_id=feature_id).first()
+        theme = LPackages.objects.filter(package_id=package.package_id).first()
+        objs.append(ChangeRequest(
+            old_geo_id=geo_id,
+            new_geo_id=None,
+            theme_id=theme.theme_id,
+            package_id=package.package_id,
+            feature_id=feature_id,
+            employee=employee,
+            state=ChangeRequest.STATE_CONTROL,
+            kind=ChangeRequest.KIND_UPDATE,
+            form_json=None,
+            geo_json=_geojson_convert_3d_geojson(delete_item['geom']),
+        ))
+    ChangeRequest.objects.bulk_create(objs)
 
-        return JsonResponse({'success': True})
-    except Exception:
-        return JsonResponse({'success': False})
+    return JsonResponse({'success': True})
 
 
 def _get_layer_name(employee):

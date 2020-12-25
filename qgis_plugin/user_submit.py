@@ -248,18 +248,21 @@ class UserSubmit:
         updates = []
         deletes = []
         for layer in active_layers:
-            data_source_uri = layer.dataProvider().dataSourceUri(expandAuthConfig=True)
-            wfs_url = re.search("(?P<url>http?://[^\s]+)", data_source_uri).group("url")[:-1]
-            if wfs_url.find('/api/service/') > 0 and wfs_url:
-                self.submit_url = wfs_url
-                layer_name = layer_name + layer.name() + ', '
-                changed_geom = layer.editBuffer()
-                fieldnames = [field.name() for field in layer.fields()]
-                projection = layer.crs().authid()
-                xform = QgsCoordinateTransform(QgsCoordinateReferenceSystem(projection), QgsCoordinateReferenceSystem("EPSG:4326"), QgsProject.instance())
-                if changed_geom:
-                    updates = self.get_update_items(layer, projection, xform, changed_geom, fieldnames)
-                    deletes = self.get_delete_items(layer, projection, xform, changed_geom, fieldnames)
+            data_source_uri = layer.dataProvider().dataSourceUri(expandAuthConfig=False)
+            match_result = re.search("(?P<url>https?://[^\s]+)", data_source_uri)
+            if match_result:
+                wfs_url = match_result.group("url")[:-1]
+                if wfs_url.find('/api/service/') > 0 and wfs_url:
+                    self.submit_url = wfs_url
+                    layer_name = layer_name + layer.name() + ', '
+                    changed_geom = layer.editBuffer()
+                    fieldnames = [field.name() for field in layer.fields()]
+                    projection = layer.crs().authid()
+                    xform = QgsCoordinateTransform(QgsCoordinateReferenceSystem(projection), QgsCoordinateReferenceSystem("EPSG:4326"), QgsProject.instance())
+                    if changed_geom:
+                        updates = self.get_update_items(layer, projection, xform, changed_geom, fieldnames)
+                        deletes = self.get_delete_items(layer, projection, xform, changed_geom, fieldnames)
 
         data = {'update': json.dumps(updates), 'delete': json.dumps(deletes)}
         self.submit(data, layer_name)
+
