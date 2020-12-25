@@ -22,7 +22,7 @@ class PopUpCmp extends Component {
             code: '',
             geom_name: '',
             pdf_id:'',
-            is_purchase: false,
+            is_purchase: true,
             is_enable: false,
         }
         this.plusTab = this.plusTab.bind(this)
@@ -210,12 +210,14 @@ class PopUpCmp extends Component {
                     {
                         this.state.is_purchase
                         ?
-                            <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
-                                <div className="spinner-border" role="status">
-                                    <span className="sr-only"></span>
-                                </div>
-                                {} Хүлээнэ үү..
-                            </button>
+                            <div className="btn-group flex-wrap d-flex justify-content-center">
+                                <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
+                                    <div className="spinner-border" role="status">
+                                        <span className="sr-only"></span>
+                                    </div>
+                                    {} Хүлээнэ үү..
+                                </button>
+                            </div>
                         :
                         this.state.mode == 'mpoint_view'
                         ?
