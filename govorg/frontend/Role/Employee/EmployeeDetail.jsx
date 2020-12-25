@@ -12,9 +12,12 @@ export class EmployeeDetail extends Component {
         this.role=[]
         this.remove_perms=[]
         this.state = {
+            username: '',
             first_name: '',
             last_name: '',
             email: '',
+            gender: '',
+            register: '',
             position: '',
             is_admin: false,
             emp_role_id: null,
@@ -56,14 +59,18 @@ export class EmployeeDetail extends Component {
         const { role_id } = this.state
         service
             .getDetailEmployee(role_id)
-            .then(({form_values, perms, role_id, role_name, success}) => {
+            .then(({employee_detail, perms, role_name, role_id, success}) => {
                 if(success) {
                     this.setState({
-                        first_name: form_values.first_name,
-                        last_name: form_values.last_name,
-                        email: form_values.email,
-                        position: form_values.position,
-                        is_admin: form_values.is_admin,
+                        username: employee_detail.username,
+                        first_name: employee_detail.first_name,
+                        last_name: employee_detail.last_name,
+                        email: employee_detail.email,
+                        position: employee_detail.position,
+                        is_admin: employee_detail.is_admin,
+                        gender: employee_detail.gender,
+                        register: employee_detail.register,
+                        role_name,
                         perms,
                     })
                 }
@@ -72,17 +79,19 @@ export class EmployeeDetail extends Component {
     }
 
     getRole(id) {
-        service
+        if (id) {
+            service
             .getRole(id)
             .then(({success, roles}) => {
                 if(success) {
                     this.setState({ roles, is_inspire_role: true })
                 }
             })
+        }
     }
 
     render() {
-        const { first_name, last_name, email, position, is_admin, perms, prefix, role_name, is_inspire_role, roles } = this.state
+        const { username, first_name, last_name, email, gender, register, position, is_admin, perms, prefix, role_name, is_inspire_role, roles } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -98,6 +107,17 @@ export class EmployeeDetail extends Component {
                         <div className="form-group col-md-12">
                             <div className="row">
                                 <div className="form-group col-md-6">
+                                    <label htmlFor="username">Нэвтрэх нэр:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="username"
+                                        placeholder="Овог"
+                                        disabled
+                                        value={username || ''}
+                                    />
+                                </div>
+                                <div className="form-group col-md-6">
                                     <label htmlFor="first_name">Овог:</label>
                                     <input
                                         type="text"
@@ -108,6 +128,7 @@ export class EmployeeDetail extends Component {
                                         value={first_name || ''}
                                     />
                                 </div>
+
                                 <div className="form-group col-md-6">
                                     <label htmlFor="last_name">Нэр:</label>
                                     <input
@@ -119,6 +140,18 @@ export class EmployeeDetail extends Component {
                                         value={last_name || ''}
                                     />
                                 </div>
+                                <div className="form-group col-md-6">
+                                    <label htmlFor="position">Албан тушаал:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Албан тушаал"
+                                        id="position"
+                                        disabled
+                                        value={position || ''}
+                                    />
+                                </div>
+
 
                                 <div className="form-group col-md-6">
                                     <label htmlFor="email">Цахим хаяг:</label>
@@ -132,14 +165,36 @@ export class EmployeeDetail extends Component {
                                     />
                                 </div>
                                 <div className="form-group col-md-6">
-                                    <label htmlFor="position">Албан тушаал:</label>
+                                    <label htmlFor="gender">Хүйс:</label>
                                     <input
                                         type="text"
                                         className="form-control"
-                                        placeholder="Албан тушаал"
-                                        id="position"
+                                        placeholder="Хүйс"
+                                        id="gender"
+                                        value={gender || ''}
                                         disabled
-                                        value={position || ''}
+                                    />
+                                </div>
+
+                                <div className="form-group col-md-6">
+                                    <label htmlFor="role">Role:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="role"
+                                        disabled
+                                        value={role_name || ''}
+                                    />
+                                </div>
+                                <div className="form-group col-md-6">
+                                    <label htmlFor="register">Регистер:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Регистер"
+                                        id="register"
+                                        disabled
+                                        value={register || ''}
                                     />
                                 </div>
 
@@ -157,17 +212,6 @@ export class EmployeeDetail extends Component {
                                         }
                                         aria-hidden="true"
                                     ></i>
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="role">Role:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Role"
-                                        id="role"
-                                        disabled
-                                        value={role_name || ''}
-                                    />
                                 </div>
                             </div>
                         </div>
