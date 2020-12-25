@@ -413,16 +413,16 @@ def _get_type(value_type_id):
     return value_type
 
 
-def get_theme_name(tid):
-    if tid == 'au':
+def get_theme_name(theme_code):
+    if theme_code == 'au':
         return 'm_datas_boundary', 'boundary_id'
-    elif tid == 'bu':
+    elif theme_code == 'bu':
         return 'm_datas_building', 'building_id'
-    elif tid == 'cp':
+    elif theme_code == 'cp':
         return 'm_datas_cadastral', 'cadastral_id'
-    elif tid == 'gn':
+    elif theme_code == 'gn':
         return 'm_datas_geographical', 'geographical_id'
-    elif tid == 'hg':
+    elif theme_code == 'hg':
         return 'm_datas_hydrography', 'hydrography_id'
     else: None, None
 

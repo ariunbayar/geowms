@@ -13,7 +13,8 @@ from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
 from geoportal_app.models import User
 from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography
-
+from django.contrib.auth.decorators import login_required
+import datetime
 
 from main.utils import (
     gis_delete,
@@ -188,6 +189,7 @@ def _get_org_request(ob):
             geo_json = FeatureCollection([geo_json])
 
         return {
+            'change_request_id':ob.id,
             'old_geo_id':ob.old_geo_id,
             'new_geo_id':ob.new_geo_id,
             'id':ob.id,
@@ -322,7 +324,7 @@ def getAll(request):
 
 @require_GET
 @ajax_required
-def requestDelete(request, pk):
+def request_delete(request, pk):
 
     get_object_or_404(ChangeRequest, id=pk)
     change_request = ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_REJECT)
@@ -384,7 +386,7 @@ def _get_ids(fid, pid):
 
 @require_POST
 @ajax_required
-def requestApprove(request, payload, pk):
+def request_approve(request, payload, pk):
 
     values = payload.get("values")
     request_object  = ChangeRequest.objects.filter(id=pk)
@@ -494,7 +496,7 @@ def requestApprove(request, payload, pk):
 
 @require_GET
 @ajax_required
-def getCount(request):
+def get_count(request):
     try:
         count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).count()
         rsp = {
@@ -546,26 +548,28 @@ def search(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def control_to_approve(request, payload):
     form_json = payload.get("values")
     change_request_id = payload.get("change_request_id")
-    order_at = form_json['order_at']
     order_no = form_json['order_no']
+    order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
     get_object_or_404(ChangeRequest, id=change_request_id)
     ChangeRequest.objects.filter(id=change_request_id).update(order_no=order_no, order_at=order_at, form_json=form_json, state=1)
     rsp = {
-            'success': True,
+        'success': True,
     }
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
-def controlToRemove(request, payload):
+@login_required(login_url='/gov/secure/login/')
+def control_to_remove(request, payload):
     change_request_id = payload.get("change_request_id")
     get_object_or_404(ChangeRequest, id=change_request_id)
     ChangeRequest.objects.filter(id=change_request_id).delete()
     rsp = {
-            'success': True,
+        'success': True,
     }
     return JsonResponse(rsp)
