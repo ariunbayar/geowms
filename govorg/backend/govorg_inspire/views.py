@@ -689,7 +689,7 @@ def _check_form_json(fid, form_json, employee):
             for propert in form_json['form_values']:
                 if role.get('property_id') == propert.get('property_id'):
                     request_json.append({
-                        'pk':propert.get('pk'),
+                        'pk':propert.get('pk') or '',
                         'property_name': propert.get('property_id') or '',
                         'property_id': propert.get('property_id'),
                         'property_code': propert.get('property_code') or '',
@@ -843,6 +843,7 @@ def createUpd(request, payload):
         form_json = _check_form_json(fid, form_json, employee)
         if not form_json:
             form_json = ''
+            
         _is_included = _is_geom_included(geo_json, org.geo_id)
   
         if _is_included:    
