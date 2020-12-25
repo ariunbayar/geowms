@@ -111,36 +111,30 @@ def _get_org_request(ob, employee):
 
     geo_json = []
     old_geo_data = []
-    inspire_perm = []
     current_geo_json = []
     feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
     package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
+    if ob.old_geo_id:
+        old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
+        if old_geo_data:
+            if ob.geo_json:
+                geo_json = _convert_text_json(ob.geo_json)
+                current_geo_json = _get_geoJson(geo_json)
+                old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+                old_geo_data = _get_geoJson(old_geo_data)
+                geo_json = FeatureCollection([geo_json, old_geo_data])
 
-    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
-    inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
-
-    if inspire_perm:
-        if ob.old_geo_id:
-            old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
-            if old_geo_data:
-                if ob.geo_json:
-                    geo_json = _convert_text_json(ob.geo_json)
-                    current_geo_json = _get_geoJson(geo_json)
+            else:
+                if old_geo_data:
                     old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
-                    old_geo_data = _get_geoJson(old_geo_data)
-                    geo_json = FeatureCollection([geo_json, old_geo_data])
+                    geo_json = _get_geoJson(old_geo_data)
+                    geo_json = FeatureCollection([geo_json])
 
-                else:
-                    if old_geo_data:
-                        old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
-                        geo_json = _get_geoJson(old_geo_data)
-                        geo_json = FeatureCollection([geo_json])
-
-        else:
-            geo_json = _convert_text_json(ob.geo_json)
-            geo_json = _get_geoJson(geo_json)
-            geo_json = FeatureCollection([geo_json])
+    else:
+        geo_json = _convert_text_json(ob.geo_json)
+        geo_json = _get_geoJson(geo_json)
+        geo_json = FeatureCollection([geo_json])
 
     return {
         'change_request_id':ob.id,
@@ -172,8 +166,7 @@ def _get_org_request(ob, employee):
 @ajax_required
 def get_change_all(request):
     org_request = []
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = get_object_or_404(Employee, user=request.user, org_id=org.id)
+    employee = get_object_or_404(Employee, user=request.user)
     org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by("-created_at")
 
     if org_request_list:
@@ -256,27 +249,31 @@ def getAll(request):
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE)
-    if perm_approve:
-        org_request_list = ChangeRequest.objects.filter(employee__org_id=org.id).order_by('-created_at')
+    emp_features = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
+    emp_feature = []
+    if emp_features:
+        for feature in emp_features:
+            if feature not in emp_feature:
+                emp_feature.append(feature)
+
+        org_request_list = ChangeRequest.objects.filter(employee__org_id=org.id).filter(feature_id__in=emp_feature).order_by('-created_at')
         if org_request_list:
             org_request = [_get_org_request(ob, employee) for ob in org_request_list]
             choices = _getChoices(request.user)
-            if org_request[0] != '':
-                rsp = {
-                    'success':True,
-                    'org_request': org_request,
-                    'choices': choices['choices'],
-                    'modules': choices['modules'],
-                }
+            rsp = {
+                'success':True,
+                'org_request': org_request,
+                'choices': choices['choices'],
+                'modules': choices['modules'],
+            }
 
-                return JsonResponse(rsp)
-            else:
-                rsp = {
-                    'success':False,
-                }
+            return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success':False,
+            }
 
-                return JsonResponse(rsp)
+            return JsonResponse(rsp)
     else:
         rsp = {
                 'success':False,
@@ -289,12 +286,23 @@ def getAll(request):
 @ajax_required
 def request_delete(request, pk):
 
-    get_object_or_404(ChangeRequest, id=pk)
-    change_request = ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_REJECT)
+    employee = get_object_or_404(Employee, user__username=request.user)
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    r_reject = get_object_or_404(ChangeRequest, pk=pk)
 
-    rsp = {
-        'success': True,
-    }
+    perm_reject = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_REVOKE, feature_id=r_reject.feature_id)
+
+    if perm_reject:
+        r_reject.state = ChangeRequest.STATE_REJECT
+        r_reject.save()
+        rsp = {
+            'success': True,
+        }
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Батлах эрхгүй байна'
+        }
 
     return JsonResponse(rsp)
 
@@ -386,8 +394,8 @@ def request_approve(request, payload, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     employee = get_object_or_404(Employee, org_id=org.id, user__username=request.user)
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-
+    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
+    r_approve = get_object_or_404(ChangeRequest, pk=pk)
     values = payload.get("values")
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
@@ -395,9 +403,8 @@ def request_approve(request, payload, pk):
     geo_data_model = _get_model_name(theme_code)
 
     perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
-    request_object  = ChangeRequest.objects.filter(id=pk, employee__org_id=org.id)
 
-    if request_object and perm_approve:
+    if perm_approve:
         old_geo_id = values['old_geo_id']
         old_geo_json = values["old_geo_json"]
         geo_json = values['geo_json']
@@ -413,22 +420,13 @@ def request_approve(request, payload, pk):
                 approve_type = 'update'
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
                 _create_mdatas_object(form_json, geo_data_model, feature_id, old_geo_id, approve_type)
-                ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
-                view_check = refreshMaterializedView(feature_id)
-                rsp = {
-                    'success': True,
-                }
 
             else:
                 data = MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id)
                 data.delete()
                 geo_data_model = geo_data_model.objects.filter(geo_id=old_geo_id)
                 geo_data_model.delete()
-                ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
-                view_check = refreshMaterializedView(feature_id)
-                rsp = {
-                    'success': True,
-                }
+
         else:
             geom = []
             geo_json = geo_json['features'][0]['geometry']
@@ -451,16 +449,17 @@ def request_approve(request, payload, pk):
                     )
             approve_type = 'create'
             _create_mdatas_object(form_json, geo_data_model, feature_id, new_geo_id, approve_type)
-
-            ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_APPROVE)
-            view_check = refreshMaterializedView(feature_id)
-            rsp = {
-                'success': True,
-            }
+        
+        refreshMaterializedView(feature_id)
+        r_approve.state = ChangeRequest.STATE_APPROVE
+        r_approve.save()
+        rsp = {
+            'success': True
+        }
 
     else:
         rsp = {
-            'success': False,
+            'success': False
         }
 
     return JsonResponse(rsp)
@@ -474,10 +473,14 @@ def get_count(request):
         org = get_object_or_404(Org, employee__user=request.user)
         employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
         emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-        perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE, geom=True)
+        emp_features = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
+        emp_feature = []
+        if emp_features:
+            for feature in emp_features:
+                if feature not in emp_feature:
+                    emp_feature.append(feature)
 
-        if perm_approve:
-            count = ChangeRequest.objects.filter(employee__org_id=org.id, state=ChangeRequest.STATE_NEW).count()
+            count = ChangeRequest.objects.filter(employee__org_id=org.id, state=ChangeRequest.STATE_NEW).filter(feature_id__in=emp_feature).count()
         rsp = {
             'success': True,
             'count': count
@@ -501,8 +504,7 @@ def search(request, payload):
     package = payload.get('packag')
     feature = payload.get('feature')
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+    employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     if state:
         search['state'] = state
@@ -515,9 +517,14 @@ def search(request, payload):
     if feature:
         search['feature_id'] = feature
     try:
-        perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE)
-        if perm_approve:
-            datas = ChangeRequest.objects.filter(**search, employee__org_id=org.id)
+        emp_features = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
+        emp_feature = []
+        if emp_features:
+            for feature in emp_features:
+                if feature not in emp_feature:
+                    emp_feature.append(feature)
+
+            datas = ChangeRequest.objects.filter(**search, employee__org_id=employee.org.id).filter(feature_id__in=emp_feature)
             data_list = [_get_org_request(data, employee) for data in datas]
         rsp = {
             'success': True,

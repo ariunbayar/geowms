@@ -66,8 +66,7 @@ def _emp_role(org, user):
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     if emp_perm:
-        feature_ids = list(EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_VIEW))).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
-
+        feature_ids = list(EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_VIEW) | Q(perm_kind=EmpPermInspire.PERM_APPROVE))).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
         if feature_ids:
             package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
             theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))

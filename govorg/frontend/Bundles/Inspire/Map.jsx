@@ -871,7 +871,6 @@ export default class BarilgaSuurinGazar extends Component{
 
     LineButton(){
       const roles = this.state.roles
-      console.log(roles)
       if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
       this.setState({modify_button_active: false,  remove_button_active: false})

@@ -150,8 +150,7 @@ def getRoles(request, fid):
 
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+    employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
 
@@ -424,7 +423,7 @@ def _get_property(ob, roles, lproperties):
         'roles': property_roles
     }
 
-def _get_emp_roles(employee, fid):
+def _get_emp_property_roles(employee, fid):
 
     property_ids = []
     property_details = []
@@ -466,9 +465,8 @@ def _get_emp_roles(employee, fid):
 def detail(request, gid, fid, tid):
     property_ids = []
     properties = []
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
-    property_ids, property_details = _get_emp_roles(employee, fid)
+    employee = get_object_or_404(Employee, user__username=request.user)
+    property_ids, property_details = _get_emp_property_roles(employee, fid)
     theme_code = LThemes.objects.filter(theme_id=tid).first().theme_code
     model = get_theme_name(theme_code)
     if property_ids:
@@ -496,9 +494,8 @@ def detailCreate(request, tid, pid, fid):
         'value_date':'',
         'value_number':''
         }
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
-    property_ids, property_roles = _get_emp_roles(employee, fid)
+    employee = get_object_or_404(Employee, user__username=request.user)
+    property_ids, property_roles = _get_emp_property_roles(employee, fid)
 
     if property_ids:
         for prop in property_ids:
@@ -635,27 +632,40 @@ def geomAdd(request, payload, fid):
     return JsonResponse(rsp)
 
 
-
 def _is_geom_included(geojson, org_geo_id):
-
     geom_type = str(geojson['type'])
+    geom_coordinates = geojson['coordinates']
     coordinate_syntax = ''
-    if geom_type == 'Polygon' or geom_type == 'LineString':
-        geom_coordinates = geojson['coordinates'][0]
-        for i in range(len(geom_coordinates)):
-            coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
-        coordinate_syntax  = "(({coordinate_syntax}))".format(coordinate_syntax=coordinate_syntax[:-1])
 
+    if geom_type == 'Polygon' or geom_type == 'MultiLineString':
+        for i in range(len(geom_coordinates)):
+            for j in range(len(geom_coordinates[i])):
+                for k in range(len(geom_coordinates[i][j])):
+                    coordinate_syntax += str(geom_coordinates[i][j][k]) + ' ' 
+                coordinate_syntax += ','
+        coordinate_syntax  = "(({coordinate_syntax}))".format(coordinate_syntax=coordinate_syntax[:-1])
+        
+        
     elif geom_type == 'Point':
-        coordinate_syntax = str(geojson['coordinates'][0]) + ' ' + str(geojson['coordinates'][1])
-        coordinate_syntax = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax)
+        coordinate_syntax += str(geom_coordinates[0][0]) + ' ' + str(geom_coordinates[0][1])
+        coordinate_syntax  = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax[:-1])
+
+    elif geom_type == 'LineString' or geom_type == 'MultiPoint':
+        for i in range(len(geom_coordinates)):
+            for j in range(len(geom_coordinates)):
+                coordinate_syntax += str(geom_coordinates[i][j]) + ' '
+            coordinate_syntax += ','
+        coordinate_syntax  = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax[:-1])
 
     elif geom_type == 'MultiPolygon':
-        geom_coordinates = geojson['coordinates'][0][0]
         for i in range(len(geom_coordinates)):
-            coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
-        coordinate_syntax = "((({coordinate_syntax})))".format(coordinate_syntax=coordinate_syntax[:-1])
-
+            for j in range(len(geom_coordinates[i])):
+                for k in range(len(geom_coordinates[i][j])):
+                    for n in range(len(geom_coordinates[i][j][k])):
+                        coordinate_syntax += str(geom_coordinates[i][j][k][n]) + ' ' 
+                    coordinate_syntax += ','
+        coordinate_syntax  = "((({coordinate_syntax})))".format(coordinate_syntax=coordinate_syntax[:-1])
+    
     cursor = connections['default'].cursor()
     sql = """
         select ST_Contains(
@@ -681,7 +691,7 @@ def _is_geom_included(geojson, org_geo_id):
 def _check_form_json(fid, form_json, employee):
 
     request_json = []
-    property_ids, roles = _get_emp_roles(employee, fid)
+    property_ids, roles = _get_emp_property_roles(employee, fid)
     if form_json and roles:
         for role in roles:
             for propert in form_json['form_values']:
@@ -714,17 +724,16 @@ def create(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
-    emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
-    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_CREATE)))
+    employee = get_object_or_404(Employee, user__username=request.user)
+    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
+    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_APPROVE) | Q(perm_kind=EmpPermInspire.PERM_CREATE)))
 
     if perm_kind:
 
         form_json = _check_form_json(fid, form_json, employee)
         if not form_json:
             form_json = ''
-        is_included = _is_geom_included(geo_json, org.geo_id)
+        is_included = _is_geom_included(geo_json, employee.org.geo_id)
 
         if is_included:
             ChangeRequest.objects.create(
@@ -771,16 +780,15 @@ def createDel(request, payload):
     order_at = form_json.get('order_at')
 
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+    employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
-    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_REMOVE)))
+    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_APPROVE) | Q(perm_kind=EmpPermInspire.PERM_REMOVE)))
 
     if perm_kind:
         geo_data = _get_geom(old_geo_id, fid)
         geo_data = _convert_text_json(geo_data[0]["geom"])
         geo_json = _get_geoJson(geo_data)
-        is_included = _is_geom_included(geo_json['geometry'], org.geo_id)
+        is_included = _is_geom_included(geo_json['geometry'], employee.org.geo_id)
         if is_included:
             ChangeRequest.objects.create(
                     old_geo_id = old_geo_id,
@@ -827,20 +835,20 @@ def createUpd(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
+    employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
 
     if not geo_json:
         geo_json = ''
 
-    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_UPDATE)))
+    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_APPROVE) | Q(perm_kind=EmpPermInspire.PERM_UPDATE)))
 
     if perm_kind:
         form_json = _check_form_json(fid, form_json, employee)
         if not form_json:
             form_json = ''
-        _is_included = _is_geom_included(geo_json, org.geo_id)
+        _is_included = _is_geom_included(geo_json, employee.org.geo_id)
+
         if _is_included:
             ChangeRequest.objects.create(
                     old_geo_id = old_geo_id,
