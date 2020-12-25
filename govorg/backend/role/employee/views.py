@@ -219,27 +219,20 @@ def _delete_remove_perm(remove_perms):
 @ajax_required
 def update(request, payload, pk):
 
-    role_id = payload.get('role_id')
+    role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
     remove_perms = payload.get('remove_perm')
-
     employee = get_object_or_404(Employee, pk=pk)
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    if role_id:
-        new_emp_role = get_object_or_404(EmpRole, pk=role_id)
-    else:
-        new_emp_role = None
+    new_emp_role = EmpRole.objects.filter(id=role_id).first()
 
     with transaction.atomic():
         if emp_perm:
             old_emp_role = emp_perm.emp_role
             if new_emp_role != old_emp_role:
                 _delete_old_emp_role(emp_perm)
-                if new_emp_role != None:
-                    emp_perm.emp_role = new_emp_role
-                    emp_perm.save()
-                else:
-                    emp_perm.delete()
+                emp_perm.emp_role = new_emp_role
+                emp_perm.save()
         else:
             user = get_object_or_404(User, employee=employee)
             emp_perm = EmpPerm()
@@ -313,15 +306,16 @@ def detail(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     employee_detail = _get_employee_display(employee)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    role_id = ''
+    role_name = ''
+    perms = None
     if emp_perm:
-        emp_role = emp_perm.emp_role
-        role_id = emp_role.id
-        role_name = emp_role.name
-        perms = _get_emp_perm_display(emp_perm)
-    else:
-        role_id = ''
-        role_name = ''
-        perms = None
+        if emp_perm.emp_role:
+            emp_role = emp_perm.emp_role
+            role_id = emp_role.id
+            role_name = emp_role.name
+            perms = _get_emp_perm_display(emp_perm)
 
     rsp = {
         'success': True,

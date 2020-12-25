@@ -344,7 +344,7 @@ class EmpPerm(models.Model):
     class Meta:
         db_table = 'perm_emp_perm'
     employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
-    emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True)
+    emp_role = models.ForeignKey(EmpRole, on_delete=models.CASCADE, db_index=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
