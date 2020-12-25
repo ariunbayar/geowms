@@ -531,6 +531,7 @@ def findGeomField(fields):
     return geom_field
 
 
+
 @require_POST
 @ajax_required
 def updateGeom(request, payload, fid):
@@ -635,6 +636,56 @@ def geomAdd(request, payload, fid):
     return JsonResponse(rsp)
 
 
+
+def _is_geom_included(geojson, org_geo_id):
+
+    geom_type = str(geojson['type'])
+    coordinate_syntax = ''
+
+    if geom_type == 'Polygon' or geom_type == 'LineString':
+        geom_coordinates = geojson['coordinates'][0]
+        for i in range(len(geom_coordinates)):
+            coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
+        coordinate_syntax = coordinate_syntax[:-1]
+        
+    elif geom_type == 'Point':
+        coordinate_syntax = str(geojson['coordinates'][0]) + ' ' + str(geojson['coordinates'][1])
+        cursor = connections['default'].cursor()
+
+    elif geom_type == 'MultiPolygon':
+        geom_coordinates = geojson['coordinates'][0][0]
+        print("geom_coordinates")
+        print("geom_coordinates")
+        print("geom_coordinates")
+        print("geom_coordinates")
+        print("geom_coordinates", geom_coordinates)
+        for i in range(len(geom_coordinates)):
+            coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
+        coordinate_syntax = coordinate_syntax[:-1]
+
+    cursor = connections['default'].cursor()
+    sql = """
+        select ST_Contains(
+            ((
+                SELECT ST_ASText(ST_Transform(geo_data,4326))
+                FROM m_geo_datas
+                WHERE geo_id = '{org_geo_id}'
+            )),
+            ((
+                select ST_ASText('{geom_type}((({coordinate_syntax})))')
+            ))
+        )
+    """.format(
+        geom_type = geom_type,
+        org_geo_id = org_geo_id,
+        coordinate_syntax = coordinate_syntax
+    )
+    cursor.execute(sql)
+    is_included = cursor.fetchone()[0]
+    return is_included
+
+
+
 def _check_form_json(fid, form_json, employee):
 
     request_json = []
@@ -674,32 +725,39 @@ def create(request, payload):
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
-
     perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_CREATE)))
     
     if perm_kind:
+
         form_json = _check_form_json(fid, form_json, employee)
         if not form_json:
             form_json = ''
+        is_included = _is_geom_included(geo_json, org.geo_id)
 
-        ChangeRequest.objects.create(
-                old_geo_id = None,
-                new_geo_id = None,
-                theme_id = tid,
-                package_id = pid,
-                feature_id = fid,
-                employee = employee,
-                state = ChangeRequest.STATE_NEW,
-                kind = ChangeRequest.KIND_CREATE,
-                form_json = form_json,
-                geo_json = geo_json,
-                order_at=order_at,
-                order_no=order_no,
-        )
-        rsp = {
-            'success': True,
-            'info': "Хүсэлт амжилттай үүслээ",
-        }
+        if is_included:
+            ChangeRequest.objects.create(
+                    old_geo_id = None,
+                    new_geo_id = None,
+                    theme_id = tid,
+                    package_id = pid,
+                    feature_id = fid,
+                    employee = employee,
+                    state = ChangeRequest.STATE_NEW,
+                    kind = ChangeRequest.KIND_CREATE,
+                    form_json = form_json,
+                    geo_json = geo_json,
+                    order_at=order_at,
+                    order_no=order_no,
+            )
+            rsp = {
+                'success': True,
+                'info': "Хүсэлт амжилттай үүслээ",
+            }
+        else:
+            rsp =  {
+                'success': False,
+                'info': "Хсэлт алдаатаЙ байна",
+            }
     else:
         rsp = {
             'success': False,
@@ -719,31 +777,41 @@ def createDel(request, payload):
     form_json = payload.get('form_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
-        
+
+
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
     perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_REMOVE)))
     
     if perm_kind:
-        ChangeRequest.objects.create(
-                old_geo_id = old_geo_id,
-                new_geo_id = None,
-                theme_id = tid,
-                package_id = pid,
-                feature_id = fid,
-                employee = employee,
-                state = ChangeRequest.STATE_NEW,
-                kind = ChangeRequest.KIND_UPDATE,
-                form_json = None,
-                geo_json = None,
-                order_at=order_at,
-                order_no=order_no,
-        )
-        rsp = {
-            'success': True,
-            'info': "Хүсэлт амжилттай үүслээ",
-        }
+        
+        # is_included = _is_geom_included(geo_json, org.geo_id)
+        if is_included:
+
+            ChangeRequest.objects.create(
+                    old_geo_id = old_geo_id,
+                    new_geo_id = None,
+                    theme_id = tid,
+                    package_id = pid,
+                    feature_id = fid,
+                    employee = employee,
+                    state = ChangeRequest.STATE_NEW,
+                    kind = ChangeRequest.KIND_UPDATE,
+                    form_json = None,
+                    geo_json = None,
+                    order_at=order_at,
+                    order_no=order_no,
+            )
+            rsp = {
+                'success': True,
+                'info': "Хүсэлт амжилттай үүслээ",
+            }
+        else:
+            rsp =  {
+                'success': False,
+                'info': "Хсэлт алдаатаЙ байна",
+            }
     else:
         rsp = {
             'success': False,
@@ -772,6 +840,7 @@ def createUpd(request, payload):
 
     if not geo_json:
         geo_json = ''
+
     perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_UPDATE)))
     
     if perm_kind:

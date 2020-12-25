@@ -63,26 +63,27 @@ def _emp_role(org, user):
 
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    feature_ids = list(EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_VIEW))).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
+    if emp_perm:
+        feature_ids = list(EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_VIEW))).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
 
-    if feature_ids:
-        package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
-        theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
-        for feature_id in feature_ids:
-            property_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
-            property_of_feature[feature_id] = property_ids
-            for property_id in property_ids:
-                properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire))
+        if feature_ids:
+            package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
+            theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
+            for feature_id in feature_ids:
+                property_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
+                property_of_feature[feature_id] = property_ids
+                for property_id in property_ids:
+                    properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire))
 
-        package_features = [
-            get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
-            for package_id in package_ids
-        ]
+            package_features = [
+                get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
+                for package_id in package_ids
+            ]
 
-        themes = [
-            get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
-            for theme_id in theme_ids
-        ]
+            themes = [
+                get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
+                for theme_id in theme_ids
+            ]
     return {
         'themes': themes,
         'package_features': package_features,
