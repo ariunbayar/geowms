@@ -2,7 +2,7 @@ import {handleResponse, getPostOptions, getGetOptions} from '../components/helpe
 
 export const service = {
     paginatedList,
-    detail
+    detail,
 };
 
 function paginatedList(page, per_page, query) {

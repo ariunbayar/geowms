@@ -2,7 +2,6 @@ from PIL import Image
 from collections import namedtuple
 from io import BytesIO
 import base64
-import functools
 import re
 import unicodedata
 
@@ -11,7 +10,6 @@ from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
-from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
@@ -512,6 +510,7 @@ def is_email(email):
     re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
     return re.search(re_email, email) is not None
 
+
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
 def get_config(config_name):
@@ -520,6 +519,7 @@ def get_config(config_name):
     configs = Config.objects.filter(name__in=default_values.keys()).first()
 
     return configs.value if configs else ''
+
 
 # оролт config name array
 # Олон config мэдээллийг буцаана obj буцаана

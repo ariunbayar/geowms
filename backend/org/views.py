@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import get_list_or_404
@@ -22,7 +23,9 @@ from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPerm
+from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
+
 from main.decorators import ajax_required
 from main import utils
 
@@ -273,7 +276,7 @@ def employee_detail(request, pk):
     }
     return JsonResponse({'success': True, 'employee': employees_display})
 
-  
+
 def _employee_validation(payload, user):
     username = payload.get('username')
     position = payload.get('position')
@@ -350,7 +353,7 @@ def employee_update(request, payload, pk, level):
     errors = _employee_validation(payload, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-    
+
     if level == 4:
         is_super = is_super
     else:
@@ -380,6 +383,8 @@ def employee_update(request, payload, pk, level):
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
 
+    org = get_object_or_404(Org, pk=pk, level=level)
+
     username = payload.get('username')
     position = payload.get('position')
     first_name = payload.get('first_name')
@@ -389,40 +394,36 @@ def employee_add(request, payload, level, pk):
     register = payload.get('register')
     is_admin = payload.get('is_admin')
     is_super = payload.get('is_super')
+
     errors = {}
     errors = _employee_validation(payload, None)
-
-    if level == 4:
-        is_super = is_super
-    else:
-        is_super = False
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
-    user = User.objects.create(
-        username=username,
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        gender=gender,
-        is_superuser=is_super,
-        register=register.upper()
-    )
-    user.roles.add(2)
-    user.save()
-    utils.send_approve_email(user)
+    with transaction.atomic():
 
-    emp = Employee()
-    emp.position = position
-    emp.org_id = pk
-    emp.user_id = user.id
-    emp.is_admin = is_admin
-    emp.save()
+        user = User()
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.gender = gender
+        user.is_superuser = is_super if org.level == 4 else False
+        user.register = register.upper()
+        user.save()
+        user.roles.add(2)
+        user.save()
 
-    emp_perm = EmpPerm()
-    emp_perm.employee = emp
-    emp_perm.save()
+        employee = Employee()
+        employee.position = position
+        employee.org = org
+        employee.user_id = user.id
+        employee.is_admin = is_admin
+        employee.token = TokenGeneratorEmployee().get()
+        employee.save()
+
+        utils.send_approve_email(user)
 
     return JsonResponse({'success': True, 'errors': errors})
 

@@ -15,23 +15,23 @@ from django.db.models import Q
 
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import (
-    LThemes, 
-    LPackages, 
-    LFeatures, 
-    MDatasBoundary, 
-    MDatasGeographical, 
+    LThemes,
+    LPackages,
+    LFeatures,
+    MDatasBoundary,
+    MDatasGeographical,
     MDatasCadastral,
-    LDataTypeConfigs, 
-    LFeatureConfigs, 
-    LDataTypes, 
-    LProperties, 
-    LValueTypes, 
-    LCodeListConfigs, 
-    LCodeLists, 
-    MGeoDatas, 
-    MDatasBuilding, 
-    MDatasHydrography, 
-    EmpPerm, 
+    LDataTypeConfigs,
+    LFeatureConfigs,
+    LDataTypes,
+    LProperties,
+    LValueTypes,
+    LCodeListConfigs,
+    LCodeLists,
+    MGeoDatas,
+    MDatasBuilding,
+    MDatasHydrography,
+    EmpPerm,
     EmpPermInspire
     )
 from govorg.backend.org_request.models import ChangeRequest
@@ -43,7 +43,7 @@ from django.core.files.storage import FileSystemStorage
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter, WKBReader, fromstr
 from backend.org.models import Org, Employee, InspirePerm
 
@@ -61,7 +61,8 @@ from main.utils import (
     gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
-    refreshMaterializedView
+    refreshMaterializedView,
+    get_config
 )
 
 
@@ -146,14 +147,14 @@ def changeset_all(request):
 @require_GET
 @ajax_required
 def getRoles(request, fid):
-    
+
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-    
+
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
-    
+
     for perm_kind in perm_kinds:
         if perm_kind == EmpPermInspire.PERM_VIEW:
             inspire_roles['PERM_VIEW'] = True
@@ -436,7 +437,6 @@ def _get_emp_roles(employee, fid):
         for prop in property_perms:
             if prop.get('property_id') not in property_ids:
                 property_ids.append(prop.get('property_id'))
-            
         for property_id in property_ids:
             for prop in property_perms:
                 if property_id == prop['property_id']:
@@ -466,18 +466,16 @@ def _get_emp_roles(employee, fid):
 def detail(request, gid, fid, tid):
     property_ids = []
     properties = []
-
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     property_ids, property_details = _get_emp_roles(employee, fid)
     theme_code = LThemes.objects.filter(theme_id=tid).first().theme_code
-    model = _MDatasName(theme_code)
+    model = get_theme_name(theme_code)
     if property_ids:
         mdatas = model.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'pk')
         for prop in mdatas:
             lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
             properties.append(_get_property(prop, property_details, lproperty))
-
     rsp = {
         'success': True,
         'datas': properties
@@ -671,7 +669,7 @@ def _is_geom_included(geojson, org_geo_id):
             ))
         )
     """.format(
-        geom_type = geom_type,  
+        geom_type = geom_type,
         org_geo_id = org_geo_id,
         coordinate_syntax = coordinate_syntax
     )
@@ -715,12 +713,12 @@ def create(request, payload):
     geo_json = payload.get('geo_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
-    
+
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
     perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_CREATE)))
-    
+
     if perm_kind:
 
         form_json = _check_form_json(fid, form_json, employee)
@@ -777,9 +775,8 @@ def createDel(request, payload):
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
     perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_REMOVE)))
-    
+
     if perm_kind:
-        
         geo_data = _get_geom(old_geo_id, fid)
         geo_data = _convert_text_json(geo_data[0]["geom"])
         geo_json = _get_geoJson(geo_data)
@@ -838,15 +835,13 @@ def createUpd(request, payload):
         geo_json = ''
 
     perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) and (Q(perm_kind=EmpPermInspire.PERM_APPROVE) or Q(perm_kind=EmpPermInspire.PERM_UPDATE)))
-    
+
     if perm_kind:
         form_json = _check_form_json(fid, form_json, employee)
         if not form_json:
             form_json = ''
-            
         _is_included = _is_geom_included(geo_json, org.geo_id)
-  
-        if _is_included:    
+        if _is_included:
             ChangeRequest.objects.create(
                     old_geo_id = old_geo_id,
                     new_geo_id = None,
@@ -894,7 +889,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     keys = ''
     feature_config_id = None
     savename = model_name
-    model_name = _MDatasName(model_name)
+    model_name = get_theme_name(model_name)
     code_value = None
     try:
         if not isinstance(model_name, str):
@@ -980,7 +975,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     return rsp
 
 
-def _MDatasName(model_name):
+def get_theme_name(model_name):
     if model_name == 'au':
         model_name = MDatasBoundary
     if model_name == 'bu':
@@ -1177,4 +1172,18 @@ def FileUploadSaveData(request, tid, fid):
             'success': False,
             'info': return_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
         }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_qgis_url(request):
+    emp = get_object_or_404(Employee, user=request.user)
+    qgis_local_base_url = get_config('qgis_local_base_url')
+    rsp = {
+        'success': True,
+        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
     return JsonResponse(rsp)

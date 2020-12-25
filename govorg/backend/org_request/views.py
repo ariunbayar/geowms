@@ -28,8 +28,8 @@ from backend.inspire.models import (
     GovPerm,
     GovPermInspire
 )
-
-
+from django.contrib.auth.decorators import login_required
+import datetime
 from main.utils import (
     gis_delete,
     gis_fetch_one,
@@ -113,14 +113,12 @@ def _get_org_request(ob, employee):
     old_geo_data = []
     inspire_perm = []
     current_geo_json = []
-    
     feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
     package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
 
     emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
     inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
-        
 
     if inspire_perm:
         if ob.old_geo_id:
@@ -145,6 +143,7 @@ def _get_org_request(ob, employee):
             geo_json = FeatureCollection([geo_json])
 
     return {
+        'change_request_id':ob.id,
         'old_geo_id':ob.old_geo_id,
         'new_geo_id':ob.new_geo_id,
         'id':ob.id,
@@ -168,15 +167,15 @@ def _get_org_request(ob, employee):
     }
 
 
+
 @require_GET
 @ajax_required
-def getChangeAll(request):
+def get_change_all(request):
     org_request = []
     org = get_object_or_404(Org, employee__user=request.user)
     employee = get_object_or_404(Employee, user=request.user, org_id=org.id)
+    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by("-created_at")
 
-    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id)
-    
     if org_request_list:
         org_request = [_get_org_request(ob, employee) for ob in org_request_list]
         if org_request[0] != '':
@@ -184,20 +183,16 @@ def getChangeAll(request):
                 'success':True,
                 'org_request': org_request,
             }
-
-            return JsonResponse(rsp)
         else:
             rsp = {
                 'success':False,
             }
-
-            return JsonResponse(rsp)
     else:
         rsp = {
                 'success':False,
             }
 
-        return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
 
 def _get_features(org, package_id):
@@ -292,7 +287,7 @@ def getAll(request):
 
 @require_GET
 @ajax_required
-def requestDelete(request, pk):
+def request_delete(request, pk):
 
     get_object_or_404(ChangeRequest, id=pk)
     change_request = ChangeRequest.objects.filter(id = pk).update(state=ChangeRequest.STATE_REJECT)
@@ -354,10 +349,10 @@ def _get_ids(fid, pid):
 
 
 def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve_type):
-    value_date = datetime.datetime.now()
     value_number = None
     value_text = ''
     for i in form_json:
+        value_date = None
         ids = _get_ids(feature_id, i['property_id'])
         fid = ids[0]['feature_config_id']
         did = ids[0]['data_type_id']
@@ -365,11 +360,9 @@ def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve
             value_number = i.get('data') or None
         elif i['value_type'] == 'date':
             if i['data']:
-                value_date = i['data']+' '+'00:00:00+0000'
-                value_date = value_date
+                value_date = i['data']
         else:
             value_text = i.get('data') or ''
-
         if approve_type == 'create':
             geo_data_model.objects.create(
                 geo_id = geo_id,
@@ -385,11 +378,11 @@ def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve
                 value_text = value_text,
                 value_number = value_number,
                 value_date = value_date
-        )
+            )
 
 @require_POST
 @ajax_required
-def requestApprove(request, payload, pk):
+def request_approve(request, payload, pk):
 
     org = get_object_or_404(Org, employee__user=request.user)
     employee = get_object_or_404(Employee, org_id=org.id, user__username=request.user)
@@ -475,7 +468,7 @@ def requestApprove(request, payload, pk):
 
 @require_GET
 @ajax_required
-def getCount(request):
+def get_count(request):
     try:
         count = None
         org = get_object_or_404(Org, employee__user=request.user)
@@ -511,8 +504,6 @@ def search(request, payload):
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    
-    
     if state:
         search['state'] = state
     if kind:
@@ -537,4 +528,37 @@ def search(request, payload):
             'success': False,
             'info': str(e)
         }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def control_to_approve(request, payload):
+    form_json = payload.get("values")
+    change_request_id = payload.get("change_request_id")
+    order_no = form_json['order_no']
+    order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
+    chenge_request = get_object_or_404(ChangeRequest, id=change_request_id)
+    chenge_request.order_no=order_no
+    chenge_request.order_at=order_at
+    chenge_request.form_json=form_json
+    chenge_request.state=ChangeRequest.STATE_NEW
+    chenge_request.save()
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def control_to_remove(request, payload):
+    change_request_id = payload.get("change_request_id")
+    get_object_or_404(ChangeRequest, id=change_request_id)
+    ChangeRequest.objects.filter(id=change_request_id).delete()
+    rsp = {
+        'success': True,
+    }
     return JsonResponse(rsp)
