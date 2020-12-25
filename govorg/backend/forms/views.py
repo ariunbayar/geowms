@@ -891,6 +891,18 @@ def tsegPersonal(request):
     if(len(point_id)<4):
         point_id.zfill(4)
 
+    if request.POST.get('date'):
+        date = request.POST.get('date')
+
+    y = float(request.POST.get('latlongy'))
+    x = float(request.POST.get('latlongx'))
+    geom = Point(x, y)
+    ondor = request.POST.get('ondor')
+    if request.POST.get('suljeenii_torol'):
+        point_class = int(request.POST.get('suljeenii_torol'))
+    else:
+        point_class = 0
+
     if pk:
         mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
         search_point_id = mpoints.point_id         #ene id-gaar TsegPersonal-s tuhain hereglegchiin medeelliig awna
@@ -898,18 +910,6 @@ def tsegPersonal(request):
         tseg_personal = TsegPersonal.objects.filter(id=search_point_id).first()
         if not tseg_personal:
             TsegPersonal.objects.create(id=pointName)
-
-        if request.POST.get('date'):
-            date = request.POST.get('date')
-
-        y = float(request.POST.get('latlongy'))
-        x = float(request.POST.get('latlongx'))
-        geom = Point(x, y)
-        ondor = request.POST.get('ondor')
-        if request.POST.get('suljeenii_torol'):
-            point_class = int(request.POST.get('suljeenii_torol'))
-        else:
-            point_class = 0
 
         if mpoints.t_type == 'g102':
             point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
@@ -962,12 +962,12 @@ def tsegPersonal(request):
         )
         TsegPersonal.objects.filter(id=search_point_id).update(
                     id= point_id,
-                    suljeenii_torol=request.POST.get('suljeenii_torol'),
-                    latlongx=request.POST.get('latlongx'),
-                    latlongy=request.POST.get('latlongy'),
-                    barishil_tuhai=request.POST.get('barishil_tuhai'),
-                    sudalga_or_shine=request.POST.get('sudalga_or_shine'),
-                    hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
+                    suljeenii_torol=point_class,
+                    latlongx=x,
+                    latlongy=y,
+                    barishil_tuhai=str(request.POST.get('barishil_tuhai')),
+                    sudalga_or_shine=str(request.POST.get('sudalga_or_shine')),
+                    hors_shinj_baidal=str(request.POST.get('hors_shinj_baidal')),
                     date=date, hotolson=request.POST.get('hotolson'),
                     alban_tushaal=request.POST.get('alban_tushaal'),
                     alban_baiguullga=request.POST.get('alban_baiguullga'),
@@ -1036,10 +1036,6 @@ def tsegPersonal(request):
             file2 = request.FILES['file2']
         if request.POST.get('date'):
             date = request.POST.get('date')
-        x = float(request.POST.get('latlongx'))
-        y = float(request.POST.get('latlongy'))
-        geom = Point(x, y)
-        ondor = request.POST.get('ondor')
         point_id = request.POST.get('toviin_dugaar')
         mpoint = Mpoint9.objects.using('postgis_db').create(
                     objectid='null',
@@ -1048,7 +1044,7 @@ def tsegPersonal(request):
                     point_name=request.POST.get('tesgiin_ner'),
                     ondor_type=ondor_type,
                     pid=for_db_pdf_name,
-                    point_class=request.POST.get('suljeenii_torol'),
+                    point_class=point_class,
                     mclass=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'),
                     sum=request.POST.get('sum_name'),
@@ -1061,9 +1057,9 @@ def tsegPersonal(request):
         )
         tsegPersenal = TsegPersonal.objects.create(
                     id=point_id,
-                    suljeenii_torol=request.POST.get('suljeenii_torol'),
-                    latlongx=request.POST.get('latlongx'),
-                    latlongy=request.POST.get('latlongy'),
+                    suljeenii_torol=point_class,
+                    latlongx=x,
+                    latlongy=y,
                     barishil_tuhai=request.POST.get('barishil_tuhai'),
                     sudalga_or_shine=request.POST.get('sudalga_or_shine'),
                     hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
@@ -1237,7 +1233,7 @@ def tsegUstsanSuccess(request, payload):
                     img_hoino = tseg_ustsan.img_hoino.url if tseg_ustsan.img_hoino else '',
                     img_omno = tseg_ustsan.img_omno.url if tseg_ustsan.img_omno else '',
             )
-    class_type = Mpoint_view.objects.using('postgis_db').filter(id=mpoint.id).first()
+    class_type = Mpoint_view.objects.using('postgis_db').filter(id=mpoint.id, point_id=tseg_ustsan.tseg_id).first()
     data = None
     if class_type.t_type == 'g102':
         data = Mpoint2.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
@@ -1256,7 +1252,7 @@ def tsegUstsanSuccess(request, payload):
     if class_type.t_type == 'g109':
         data = Mpoint9.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
     if data:
-        mpoint10 = Mpoint10.objects.using('postgis_db').create( id=data.id, objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=data.point_class, mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g110', geom=data.geom, ondor_type=data.ondor_type)
+        mpoint10 = Mpoint10.objects.using('postgis_db').create(objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=data.point_class, mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g110', geom=data.geom, ondor_type=data.ondor_type)
         if mpoint10:
             data.delete()
             tseg_ustsan.delete()

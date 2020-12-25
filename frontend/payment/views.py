@@ -1228,12 +1228,12 @@ def calcPrice(request, payload):
 
 
 def _check_pdf_from_mpoint_view(pdf_id):
-    mpoints = []
+    has_pdf = False
     mpoints = Mpoint_view.objects.using("postgis_db").filter(pid=pdf_id)
-    for mpoint in mpoints:
-        mpoint.append(pdf_id)
+    if mpoints:
+        has_pdf = True
 
-    return mpoints
+    return has_pdf
 
 
 def _check_pdf_in_folder(pdf_id):
@@ -1265,8 +1265,8 @@ def checkButtonEnable(request, payload):
         if len(has_csv) > 0:
             is_enable = True
         else:
-            infos = _check_pdf_from_mpoint_view(pdf_id)
-            if len(infos) > 0:
+            has_pdf_in_mpoint = _check_pdf_from_mpoint_view(pdf_id)
+            if has_pdf_in_mpoint:
                 is_enable = True
 
     rsp = {

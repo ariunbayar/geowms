@@ -1,21 +1,17 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
-const prefix = '/gov/api/tuuhen_ov'
-
 export const service = {
     tsegPersonal,
-    tsegUstsan,
     tsegPersonalList,
     tsegPersonalRemove,
-    tsegUstsanAll,
-    tseg_remove,
-    tsegustsanEdit,
     updateTseg,
     searchTseg,
     tsegPersonalSuccess,
     findSum,
     searchTsegName
 }
+
+const prefix = '/gov/api/tseg-personal'
 
 function tsegPersonalList(page, perpage, query){
 
@@ -24,7 +20,7 @@ function tsegPersonalList(page, perpage, query){
         body: JSON.stringify({ page, perpage, query }),
     }
 
-    return fetch(`${prefix}/tseg-personal/list/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/list/`, requestOptions).then(handleResponse)
 }
 
 function tsegPersonalRemove(id, t_type) {
@@ -33,7 +29,7 @@ function tsegPersonalRemove(id, t_type) {
         body: JSON.stringify({id, t_type}),
     }
 
-    return fetch(`${prefix}/tseg-personal/remove/`, opts).then(handleResponse)
+    return fetch(`${prefix}/remove/`, opts).then(handleResponse)
 }
 
 function tsegPersonal(form_datas) {
@@ -43,39 +39,7 @@ function tsegPersonal(form_datas) {
         body: form_datas,
     }
 
-    return fetch(`${prefix}/tseg-personal/`, opts).then(handleResponse)
-}
-
-function tsegUstsan(form_datas) {
-
-    const opts = {
-        ...getPostOptions(),
-        body: form_datas,
-    }
-    return fetch(`${prefix}/tseg-ustsan/`, opts).then(handleResponse)
-}
-
-function tsegUstsanAll(id) {
-    const opts = {
-        ...getGetOptions(id),
-    }
-    return fetch(`${prefix}/tseg-ustsan_all/`, opts).then(handleResponse)
-}
-
-function tseg_remove(id) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({id}),
-    }
-    return fetch(`${prefix}/tseg-ustsan-remove/`, opts).then(handleResponse)
-}
-
-function tsegustsanEdit(id) {
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({id}),
-    }
-    return fetch(`${prefix}/tseg-ustsan_edit/`, opts).then(handleResponse)
+    return fetch(`${prefix}/`, opts).then(handleResponse)
 }
 
 function updateTseg(id, t_type){
@@ -83,7 +47,7 @@ function updateTseg(id, t_type){
         ...getPostOptions(),
         body: JSON.stringify({id, t_type}),
     }
-    return fetch(`${prefix}/tseg-personal/update/`, opts).then(handleResponse)
+    return fetch(`${prefix}/update/`, opts).then(handleResponse)
 }
 
 function searchTseg(query){
@@ -91,7 +55,7 @@ function searchTseg(query){
         ...getPostOptions(),
         body: JSON.stringify({query}),
     }
-    return fetch(`${prefix}/tseg-personal/search/`, opts).then(handleResponse)
+    return fetch(`${prefix}/search/`, opts).then(handleResponse)
 }
 
 function tsegPersonalSuccess(point_type, objectid, point_class, t_type){
@@ -99,7 +63,7 @@ function tsegPersonalSuccess(point_type, objectid, point_class, t_type){
         ...getPostOptions(),
         body: JSON.stringify({point_type, objectid, point_class, t_type}),
     }
-    return fetch(`${prefix}/tseg-personal/batalgaajuulah/`, opts).then(handleResponse)
+    return fetch(`${prefix}/batalgaajuulah/`, opts).then(handleResponse)
 }
 
 function findSum(X, niitB) {
@@ -107,12 +71,13 @@ function findSum(X, niitB) {
         ...getPostOptions(),
         body: JSON.stringify({"x":niitB, "y":X})
     }
-    return fetch(`/back/tuuhen_ov/tseg-personal/findSum/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/findSum/`, requestOptions).then(handleResponse)
 }
+
 function searchTsegName(name, query){
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({name,query}),
     }
-    return fetch(`${prefix}/tseg-personal/searchName/`, opts).then(handleResponse)
+    return fetch(`${prefix}/searchName/`, opts).then(handleResponse)
 }

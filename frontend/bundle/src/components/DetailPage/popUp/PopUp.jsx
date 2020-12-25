@@ -85,27 +85,27 @@ class PopUpCmp extends Component {
                     this.setState({ id: value[1] })
                 }
                 if (value[0] == 'point_name') {
-                    this.setState({ id: value[1] })
+                    this.setState({ name: value[1] })
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     this.checkButtonEnable(value[1])
                 }
             })
-            this.setNowData(number, datas, mode, code)
+            this.setNowData(number, datas, mode, code, geom_name)
             this.props.setSource(mode)
         }
     }
 
-    setNowData(number, datas, mode, code) {
+    setNowData(number, datas, mode, code, geom_name) {
         const data = datas[number - 1]
-        this.setState({ data, mode, datas, code })
+        this.setState({ data, mode, datas, code, geom_name })
     }
 
     checkButtonEnable(pdf_id){
         service.checkButtonEnable(pdf_id)
             .then(({is_enable, success}) => {
                 if(success){
-                    this.setState({ is_enable })
+                    this.setState({ is_enable, pdf_id })
                 }
             })
     }
@@ -132,7 +132,7 @@ class PopUpCmp extends Component {
                             window.location.href=`/payment/purchase/${payment_id}/`;
                         }, 1000);
                     }
-                })
+                }).catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
         }
     }
 

@@ -148,7 +148,7 @@ export class Cart extends Component{
                         }, 2000);
                     }
                 })
-                // .catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
+                .catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
         }
         else{
             this.setState({ alert_msg: "Уучлаарай сагс хоосон байна" })
@@ -181,7 +181,6 @@ export class Cart extends Component{
     render(){
         const {coordinate, torf, data, is_button, alert_msg, success, max_size, first_number, undoItem } = this.state
         const {x, y} = this.props
-        console.log(data);
         if(data.length > 0){
             this.div = []
             data.slice(first_number, max_size).map((data, key) => {
