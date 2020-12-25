@@ -21,10 +21,10 @@ function getListEmployee() {
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
-function createEmployee(first_name, last_name, email, position, is_admin, emp_role_id, roles) {
+function createEmployee(user_detail, emp_role_id, roles) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ first_name, last_name, email, position, is_admin, emp_role_id, roles })
+        body: JSON.stringify({ user_detail, emp_role_id, roles })
     }
 
     return fetch(`${prefix}/create/`, requestOptions).then(handleResponse)
@@ -62,10 +62,10 @@ function deleteEmployee(id) {
     return fetch(`${prefix}/${id}/delete/`, requestOptions).then(handleResponse)
 }
 
-function updateEmployee(id, first_name, last_name, email, position, is_admin, emp_role_id, add_perm, remove_perm) {
+function updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, add_perm, remove_perm) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ first_name, last_name, email, position, is_admin, emp_role_id, add_perm, remove_perm })
+        body: JSON.stringify({ username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, add_perm, remove_perm })
     }
 
     return fetch(`${prefix}/${id}/update/`, requestOptions).then(handleResponse)

@@ -205,7 +205,20 @@ export class RoleEdit extends Component {
                         </div>
                     </div>
                     <br />
-
+                    <div>
+                        {
+                            is_continue &&
+                            <InsPerms
+                                action_type="editable"
+                                getValue={this.getValue}
+                                sendAllValue={this.getAllValue}
+                                dontDid={true}
+                                org_roles={org_roles}
+                                role={roles}
+                            />
+                        }
+                    </div>
+                    <br />
                     <div className="form-group">
                         {this.state.handleSaveIsLoad ?
                             <>
@@ -226,21 +239,6 @@ export class RoleEdit extends Component {
                             <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
                                 Хадгалах
                         </button>
-                        }
-                    </div>
-
-                    <br />
-                    <div>
-                        {
-                            is_continue &&
-                            <InsPerms
-                                action_type="editable"
-                                getValue={this.getValue}
-                                sendAllValue={this.getAllValue}
-                                dontDid={true}
-                                org_roles={org_roles}
-                                role={roles}
-                            />
                         }
                     </div>
                 </div>
