@@ -642,7 +642,7 @@ def _is_geom_included(geojson, org_geo_id):
 
     geom_type = str(geojson['type'])
     coordinate_syntax = ''
-    if geom_type == 'Polygon' or geom_type == 'Linestring':
+    if geom_type == 'Polygon' or geom_type == 'LineString':
         geom_coordinates = geojson['coordinates'][0]
         for i in range(len(geom_coordinates)):
             coordinate_syntax += str(geom_coordinates[i][0]) + ' ' + str(geom_coordinates[i][1]) + ','
@@ -832,7 +832,7 @@ def createUpd(request, payload):
 
     org = get_object_or_404(Org, employee__user=request.user)
     employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
-    emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
+    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
 
     if not geo_json:
         geo_json = ''

@@ -107,29 +107,16 @@ def _convert_text_json(data):
     return data
 
 
-def _get_state_and_kind(type_of, module):
-    data = ''
-    for i in module:
-        if i[0] == type_of:
-            data = i[0]
-    return data
-
-
 def _get_org_request(ob, employee):
 
     geo_json = []
     old_geo_data = []
     inspire_perm = []
     current_geo_json = []
-    user = User.objects.filter(employee__id=employee.id).first()
-    org = get_object_or_404(Org, employee__id=employee.id)
     
     feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
     package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
-
-    state = _get_state_and_kind(ob.state,ob.STATE_CHOICES)
-    kind = _get_state_and_kind(ob.kind,ob.KIND_CHOICES)
 
     emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
     inspire_perm = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=ob.feature_id, perm_kind=6)
@@ -169,13 +156,13 @@ def _get_org_request(ob, employee):
         'package_name':package_name,
         'feature_name':feature_name,
         'old_geo_json':current_geo_json,
-        'state':state,
-        'kind':kind,
+        'state':ob.state,
+        'kind':ob.kind,
         'form_json':_convert_text_json(ob.form_json) if ob.form_json else '',
         'geo_json':geo_json,
         'created_at':ob.created_at.strftime('%Y-%m-%d'),
-        'employee':user.first_name,
-        'org':org.name,
+        'employee':employee.user.first_name,
+        'org':employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
     }

@@ -18,7 +18,7 @@ from backend.inspire.models import (
     EmpPermInspire,
 )
 
-def _gov_role(org, user):
+def _org_role(org):
 
     properties = []
     property_of_feature = {}
@@ -114,7 +114,7 @@ def frontend(request):
             "org_name":org.name.upper(),
             "org_level":org.level,
             'perms':perms,
-            'org_role':_gov_role(org, request.user),
+            'org_role':_org_role(org),
             'emp_role':_emp_role(org, request.user),
         },
     }
