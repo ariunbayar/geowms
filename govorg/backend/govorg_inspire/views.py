@@ -412,16 +412,17 @@ def _get_type(value_type_id):
         value_type = 'option'
     return value_type
 
-def getThemeName(tid):
-    if tid == 1:
+
+def get_theme_name(tid):
+    if tid == 'au':
         return 'm_datas_boundary', 'boundary_id'
-    elif tid == 1:
+    elif tid == 'bu':
         return 'm_datas_building', 'building_id'
-    elif tid == 1:
+    elif tid == 'cp':
         return 'm_datas_cadastral', 'cadastral_id'
-    elif tid == 1:
+    elif tid == 'gn':
         return 'm_datas_geographical', 'geographical_id'
-    elif tid == 1:
+    elif tid == 'hg':
         return 'm_datas_hydrography', 'hydrography_id'
     else: None, None
 
@@ -429,9 +430,9 @@ def getThemeName(tid):
 @require_GET
 @ajax_required
 def detail(request, pk, tid, fid):
-    theme_name, theme_id = getThemeName(tid)
+    theme = get_object_or_404(LThemes, theme_id=tid)
+    theme_name, theme_id = get_theme_name(theme.theme_code)
     org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
     find_cursor = connections['default'].cursor()
     quuery = '''
         select
@@ -459,22 +460,20 @@ def detail(request, pk, tid, fid):
     data = list(data)
     org_propties_front = []
     properties = [_get_property(ob, theme_id) for ob in data]
-    for org_prop in org_properties:
-        for inspire_prop in properties:
-            if org_prop.module_id == inspire_prop['property_id']:
-                org_propties_front.append({
-                    theme_id:inspire_prop[theme_id] if inspire_prop[theme_id] else '',
-                    'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
-                    'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
-                    'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
-                    'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
-                    'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
-                    'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
-                    'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
-                    'data': inspire_prop['data'] if inspire_prop['data'] else '',
-                    'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
-                    'role': '1' if org_prop.perm_update else '0',
-                })
+    for inspire_prop in properties:
+        org_propties_front.append({
+            theme_id:inspire_prop[theme_id] if inspire_prop[theme_id] else '',
+            'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
+            'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
+            'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
+            'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
+            'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
+            'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
+            'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
+            'data': inspire_prop['data'] if inspire_prop['data'] else '',
+            'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
+            'role': '0',
+        })
     rsp = {
         'success': True,
         'datas': org_propties_front
