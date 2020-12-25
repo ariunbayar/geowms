@@ -60,7 +60,7 @@ def _emp_role(org, user):
     feature_ids = []
     package_features = []
     themes = []
-
+    
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     if emp_perm:

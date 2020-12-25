@@ -690,7 +690,7 @@ def _check_form_json(fid, form_json, employee):
                 if role.get('property_id') == propert.get('property_id'):
                     request_json.append({
                         'pk':propert.get('pk') or '',
-                        'property_name': propert.get('property_id') or '',
+                        'property_name': propert.get('property_name') or '',
                         'property_id': propert.get('property_id'),
                         'property_code': propert.get('property_code') or '',
                         'property_definition': propert.get('property_definition') or '',
