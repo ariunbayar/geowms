@@ -7,7 +7,6 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 from backend.govorg.models import GovOrg
-from backend.org.models import Employee
 from backend.wms.models import WMS
 from main import utils
 
