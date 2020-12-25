@@ -116,7 +116,7 @@ class PopUpCmp extends Component {
         if (this.click_count > 1) {
             is_again_clicked = true
         }
-        this.props.cartButton(true, this.state.data, this.state.code, this.state.id, is_again_clicked)
+        this.props.cartButton(true, this.state.data, this.state.code, this.state.id, is_again_clicked, this.state.geom_name)
     }
 
 

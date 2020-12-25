@@ -1086,9 +1086,9 @@ def purchaseFromCart(request, payload):
         pay_id = payment.id
         for data in datas:
             amount = 0
-            point_id = data['id']
+            pdf_id = data['pdf_id']
 
-            if point_id:
+            if pdf_id:
                 wms_layer = get_object_or_404(WMSLayer, code=data['code'])
 
                 amount = wms_layer.feature_price
@@ -1096,7 +1096,7 @@ def purchaseFromCart(request, payload):
 
                 PaymentPoint.objects.create(
                     payment_id=pay_id,
-                    point_id=point_id,
+                    point_id=data['id'],
                     point_name=data['name'],
                     amount=amount,
                     pdf_id=data['pdf_id'],

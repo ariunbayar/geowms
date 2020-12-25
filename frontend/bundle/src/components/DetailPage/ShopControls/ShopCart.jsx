@@ -35,7 +35,7 @@ export class Cart extends Component{
     }
 
     componentDidUpdate(pP, pS){
-        if(pP.point_id !== this.props.point_id) {
+        if(pP.geom_name !== this.props.geom_name) {
             this.makeList()
         }
         if(pP.point_id === this.props.point_id && this.props.is_again_clicked) {
@@ -58,12 +58,11 @@ export class Cart extends Component{
     }
 
     makeList() {
-        const {coordinate, torf, content, code, point_id} = this.props
+        const {coordinate, torf, content, code, point_id, geom_name} = this.props
         if(torf == true) {
             if(content.length !== 0) {
                 var name = 'Нэр байхгүй байна'
                 var pdf_id = 'pdf байхгүй'
-                var geom_name = content[0][0]
                 content[0][1].map((value, idx) => {
                     if (value[0] == 'point_name') {
                         name = value[1]
@@ -79,10 +78,12 @@ export class Cart extends Component{
                     'geom_name': geom_name,
                     'pdf_id': pdf_id,
                 }
+                console.log(this.state.data.length);
                 if (this.state.data.length > 0) {
                     const found = this.state.data.filter(element => {
                         return element.geom_name == json.geom_name
                     }).length > 0
+                    console.log(found);
                     if(!found) {
                         const data = this.state.data
                         data.push(json)
@@ -181,6 +182,7 @@ export class Cart extends Component{
     render(){
         const {coordinate, torf, data, is_button, alert_msg, success, max_size, first_number, undoItem } = this.state
         const {x, y} = this.props
+        console.log(data);
         if(data.length > 0){
             this.div = []
             data.slice(first_number, max_size).map((data, key) => {
@@ -283,7 +285,7 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, x, y, content, code, point_id, is_again_clicked) {
-        this.renderComponent({coordinate, torf, x, y, content, code, point_id, is_again_clicked})
+    showModal(coordinate, torf, x, y, content, code, point_id, is_again_clicked, geom_name) {
+        this.renderComponent({coordinate, torf, x, y, content, code, point_id, is_again_clicked, geom_name})
     }
 }
