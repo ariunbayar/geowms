@@ -714,7 +714,7 @@ def _check_form_json(fid, form_json, employee):
 
 @require_POST
 @ajax_required
-@login_required
+@login_required(login_url='/gov/secure/login/')
 def create(request, payload):
 
     tid = payload.get('tid')
@@ -780,7 +780,8 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
-def createDel(request, payload):
+@login_required(login_url='/gov/secure/login/')
+def remove(request, payload):
     tid = payload.get('tid')
     pid = payload.get('pid')
     fid = payload.get('fid')
@@ -834,7 +835,8 @@ def createDel(request, payload):
 
 @require_POST
 @ajax_required
-def createUpd(request, payload):
+@login_required(login_url='/gov/secure/login/')
+def update(request, payload):
 
     tid = payload.get('tid')
     pid = payload.get('pid')
