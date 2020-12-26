@@ -14,7 +14,7 @@ def employee_token_create(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_org', '0012_employee_token'),
+        ('backend_org', '0012_fix_perm_emp_perm'),
     ]
 
     operations = [
