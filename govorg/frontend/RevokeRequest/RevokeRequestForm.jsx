@@ -27,7 +27,6 @@ export default class RevokeRequestForm extends Component {
         service
         .getAll()
         .then(({success, revoke_requests}) => {
-            console.log(revoke_requests);
            if(success){
                this.setState({revoke_requests, is_loading: false})
             }
