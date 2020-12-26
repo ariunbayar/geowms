@@ -38,6 +38,8 @@ def _get_revoke_request_display(revoke_request):
             'org': revoke_request.employee.org.name,
             'form_json': _convert_text_json(revoke_request.form_json),
             'geo_json': revoke_request.geo_json,
+            'state': revoke_request.get_state_display(),
+            'kind': revoke_request.get_kind_display(),
         }
 
 
@@ -69,7 +71,7 @@ def _date_to_timezone(input_date):
     return output_date
 
 
-def _set_change_request(employee, payload):
+def _new_revoke_request(employee, payload):
 
     theme_id = payload.get('tid')
     package_id = payload.get('pid')
@@ -87,7 +89,7 @@ def _set_change_request(employee, payload):
     changeRequest.package_id = package_id
     changeRequest.feature_id = feature_id
     changeRequest.employee = employee
-    changeRequest.state = ChangeRequest.STATE_APPROVE
+    changeRequest.state = ChangeRequest.STATE_NEW
     changeRequest.kind = ChangeRequest.KIND_REVOKE
     changeRequest.form_json = form_json
     changeRequest.geo_json = geo_json
@@ -110,19 +112,41 @@ def _get_model_name(name):
         return MDatasCadastral
 
 
+def _change_revoke_request(id, state):
+    change_request = get_object_or_404(ChangeRequest, id=id)
+    change_request.state = state
+    change_request.save()
+    return change_request
+
+
+def _delete_geom_data(change_request):
+    MGeoDatas.objects.filter(geo_id=change_request.old_geo_id, feature_id=change_request.feature_id).delete()
+    theme_code=LThemes.objects.filter(theme_id=change_request.theme_id).first().theme_code
+    _get_model_name(theme_code).objects.filter(geo_id=change_request.old_geo_id).delete()
+    refreshMaterializedView(change_request.feature_id)
+
+
 @require_POST
 @ajax_required
-def revoke(request, payload):
-        employee = get_object_or_404(Employee, user=request.user)
+def revokeNew(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
 
-        theme_id = payload.get('tid')
-        feature_id = payload.get('fid')
-        old_geo_id = payload.get('old_geo_id')
+    _new_revoke_request(employee, payload)
 
-        _set_change_request(employee, payload)
+    return JsonResponse({ 'success':True })
 
-        MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).delete()
-        theme_code=LThemes.objects.filter(theme_id=theme_id).first().theme_code
-        _get_model_name(theme_code).objects.filter(geo_id=old_geo_id).delete()
-        refreshMaterializedView(feature_id)
-        return JsonResponse({ 'success':True })
+
+@require_POST
+@ajax_required
+def revokeState(request, payload):
+    state = payload.get('state')
+    pk = payload.get('id')
+
+    if state == 'reject':
+        _change_revoke_request(pk, ChangeRequest.STATE_REJECT)
+
+    if state == 'approve':
+        change_request = _change_revoke_request(pk, ChangeRequest.STATE_APPROVE)
+        _delete_geom_data(change_request)
+
+    return JsonResponse({ 'success': True })

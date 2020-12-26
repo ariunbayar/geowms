@@ -516,7 +516,6 @@ def get_count(request):
 
             revoke_count += ChangeRequest.objects.filter(
                 kind=ChangeRequest.KIND_REVOKE,
-                state=ChangeRequest.STATE_APPROVE,
                 employee=employee
             ).count()
 

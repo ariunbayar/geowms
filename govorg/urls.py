@@ -127,8 +127,9 @@ urlpatterns = [
         ], 'meta-data'))),
 
         path('revoke_request/', include(([
-            path('', revoke_request_views.all),
-            path('revoke/', revoke_request_views.revoke),
+            path('', revoke_request_views.all, name='all'),
+            path('revoke-new/', revoke_request_views.revokeNew, name='revoke-new'),
+            path('revoke-change-state/', revoke_request_views.revokeState, name='revoke-state'),
         ], 'revoke_request'))),
 
     ], 'back_org'))),

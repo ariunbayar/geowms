@@ -75,9 +75,9 @@ export class OrgRequestTable extends Component {
                     {created_at}
                 </td>
                 {state==1 ? <td className="text-priamry">ШИНЭ</td>:
-                state==2 ? <td className="text-danger">ЦУЦЛАСАН</td>:
                 state==2 ? <td className="text-danger">ТАТГАЛЗСАН</td>:
-                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>: null
+                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
+                state==4 ? <td className="text-success">ХЯНАХ</td>: null
                 }
 
                 {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
