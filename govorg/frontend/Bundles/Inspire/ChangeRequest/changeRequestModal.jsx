@@ -84,7 +84,7 @@ export default class ChangeRequestModal extends Component {
                                 <div className="row">
                                     {form_json &&
                                     <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
-                                        {form_json.form_values.map((prop, idx)=>
+                                        {form_json.map((prop, idx)=>
                                             <div key={idx} className="row my-3">
                                                 <div className="col-md-3">
                                                     <label className="col-form-label">{prop.property_code}</label>
@@ -95,8 +95,8 @@ export default class ChangeRequestModal extends Component {
                                                         className='form-control'
                                                         disabled={true}
                                                         placeholder={prop.property_name}
-                                                        value={prop.property_name}
-                                                        type="text"
+                                                        value={prop.data}
+                                                        type={prop.value_type}
                                                     />
                                                 <div  className="col-form-label " >{prop.property_definition}</div>
                                                 </div>

@@ -331,7 +331,7 @@ class GovPerm(models.Model):
 class EmpRole(models.Model):
     class Meta:
         db_table = 'perm_emp_role'
-    gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True)
+    gov_perm = models.ForeignKey(GovPerm, on_delete=models.CASCADE, db_index=True, null=True)
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=1000)
     updated_at = models.DateTimeField(auto_now=True)

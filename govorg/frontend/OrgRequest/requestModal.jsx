@@ -11,7 +11,8 @@ export default class RequestModal extends Component {
         this.state = {
             status: this.props.status || "initial",
             is_modal_approve_open:false,
-            is_modal_reject_open:false
+            is_modal_reject_open:false,
+            is_loading:this.props.is_loading
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -35,7 +36,7 @@ export default class RequestModal extends Component {
 
     handleModalApproveOpen(){
         this.setState({
-            is_modal_approve_open:true
+            is_modal_approve_open:true,
         })
     }
 
@@ -91,6 +92,9 @@ export default class RequestModal extends Component {
     }
 
     handleProceed() {
+        this.setState({
+            is_loading:true
+        })
         this.props.modalAction()
     }
 
@@ -110,7 +114,7 @@ export default class RequestModal extends Component {
         const form_json = this.props.form_json
         const id = this.props.id
         const kind = this.props.kind
-        const {is_modal_approve_open, is_modal_reject_open} = this.state
+        const {is_modal_approve_open, is_modal_reject_open, is_loading} = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
@@ -133,7 +137,7 @@ export default class RequestModal extends Component {
                                     {form_json &&
                                     <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
                                         {
-                                        form_json ? form_json.form_values.map((prop, idx)=>
+                                        form_json ? form_json.map((prop, idx)=>
                                             <div key={idx} className="row my-3">
                                                 <div className="col-md-3">
                                                     <label className="col-form-label">{prop.property_code}</label>
@@ -144,8 +148,8 @@ export default class RequestModal extends Component {
                                                         className='form-control'
                                                         disabled={true}
                                                         placeholder={prop.property_name}
-                                                        value={prop.property_name}
-                                                        type="text"
+                                                        value={prop.data}
+                                                        type={prop.value_type}
                                                     />
                                                 <div  className="col-form-label " >{prop.property_definition}</div>
                                                 </div>
@@ -196,6 +200,7 @@ export default class RequestModal extends Component {
                                         />
                                     }
                                 </div>
+                             {is_loading && <span className="text-center modal fade show d-block text-sp" style={{position:"fixed", top:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Хүсэлтийг шалгаж байна түр хүлээнэ үү... </span>}
                             </div>
                         </div>
                     </div>

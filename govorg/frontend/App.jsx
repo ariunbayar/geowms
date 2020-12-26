@@ -67,8 +67,7 @@ export class App extends Component {
             tseg_burtgel,
         } = this.state
 
-        const { org_role } = this.props.org
-        const org_inspire = this.props.org.org_inspire
+        const { emp_role, org_role } = this.props.org
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -114,42 +113,49 @@ export class App extends Component {
                                     </MenuItem>
                                 }
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
-                                {org_inspire.length > 0 ? org_inspire.map((theme, idx) =>
-                                    <MenuItem
-                                        key={idx}
-                                        icon="gp-text-primary fa fa-circle-o"
-                                        url={`/gov/org/map/${theme.id}`}
-                                        text={theme.name}
-                                    >
-                                        <ul className="sidebar-submenu">
-                                            {
-                                                theme.packages.length > 0 ? theme.packages.map((pack, idy) =>
-                                                    <MenuItem
-                                                        key={idy}
-                                                        icon="fa fa-circle-o gp-text-primary"
-                                                        url={`/gov/org/map/${theme.id}/${pack.id}`}
-                                                        text={pack.name}
-                                                    >
-                                                        <ul className="sidebar-submenu">
-                                                            {
-                                                                pack.features.length > 0 ? pack.features.map((feat, idz) =>
-                                                                    <MenuItem
-                                                                        key={idz}
-                                                                        icon="fa fa-circle-o gp-text-primary"
-                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
-                                                                        text={feat.name}
-                                                                        count={feat.count}
-                                                                    >
-                                                                    </MenuItem>
-                                                                ) : null
-                                                            }
-                                                        </ul>
-                                                    </MenuItem>
-                                                ) : null
-                                            }
-                                        </ul>
-                                    </MenuItem>
-                                ) : null}
+
+                                    {
+                                       Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
+                                        <MenuItem
+                                            key={idx}
+                                            icon="gp-text-primary fa fa-circle-o"
+                                            url={`/gov/org/map/${theme.id}`}
+                                            text={theme.name}
+                                        >
+                                            <ul className="sidebar-submenu">
+                                                {
+                                                    Object.keys(emp_role.package_features).length >0 ? emp_role.package_features.map((pack, idy) =>
+                                                    theme.id == pack.parent_id ?
+                                                        <MenuItem
+                                                            key={idy}
+                                                            icon="fa fa-circle-o gp-text-primary"
+                                                            url={`/gov/org/map/${theme.id}/${pack.id}`}
+                                                            text={pack.name}
+                                                        >
+                                                            <ul className="sidebar-submenu">
+                                                                {
+                                                                    Object.keys(pack.features).length >0 ? pack.features.map((feat, idz) =>
+                                                                        <MenuItem
+                                                                            key={idz}
+                                                                            icon="fa fa-circle-o gp-text-primary"
+                                                                            url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                            text={feat.name}
+                                                                            count={feat.count}
+                                                                        >
+                                                                        </MenuItem>
+                                                                    ):null
+                                                                }
+                                                            </ul>
+                                                        </MenuItem>
+                                                        : null
+                                                    ) : null
+                                                }
+                                            </ul>
+                                            </MenuItem>
+                                        ): null
+
+                                    }
+
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>

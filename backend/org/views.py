@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
 from django.db import transaction
-from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import get_list_or_404
@@ -22,8 +22,8 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
+from backend.inspire.models import EmpPerm
 from backend.token.utils import TokenGeneratorEmployee
-
 from geoportal_app.models import User
 
 from main.decorators import ajax_required
@@ -412,7 +412,6 @@ def employee_add(request, payload, level, pk):
         user.is_superuser = is_super if org.level == 4 else False
         user.register = register.upper()
         user.save()
-
         user.roles.add(2)
         user.save()
 
@@ -421,7 +420,6 @@ def employee_add(request, payload, level, pk):
         employee.org = org
         employee.user_id = user.id
         employee.is_admin = is_admin
-
         employee.token = TokenGeneratorEmployee().get()
         employee.save()
 
@@ -557,11 +555,13 @@ def org_list(request, payload, level):
 
     if not sort_name:
         sort_name = 'id'
+
     qs = Org.objects.filter(level=level)
     qs = qs.annotate(num_employees=Count('employee'))
     qs = qs.annotate(num_systems=Count('govorg'))
-    qs = qs.annotate(search=SearchVector('name'))
-    qs = qs.filter(search__contains=query)
+    if query:
+        qs = qs.annotate(search=SearchVector('name'))
+        qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
     qs = qs.order_by(sort_name)
 
     total_items = Paginator(qs, per_page)
