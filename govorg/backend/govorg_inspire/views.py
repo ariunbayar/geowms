@@ -11,7 +11,6 @@ from geojson import Feature, FeatureCollection
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
 
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import (
@@ -726,7 +725,8 @@ def create(request, payload):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
-    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_APPROVE) | Q(perm_kind=EmpPermInspire.PERM_CREATE)))
+    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True, perm_kind=EmpPermInspire.PERM_CREATE)
+
 
     if perm_kind:
 
@@ -782,7 +782,7 @@ def createDel(request, payload):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
-    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_APPROVE) | Q(perm_kind=EmpPermInspire.PERM_REMOVE)))
+    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True, perm_kind=EmpPermInspire.PERM_REMOVE)
 
     if perm_kind:
         geo_data = _get_geom(old_geo_id, fid)
@@ -841,7 +841,7 @@ def createUpd(request, payload):
     if not geo_json:
         geo_json = ''
 
-    perm_kind = EmpPermInspire.objects.filter(Q(emp_perm_id=emp_perm.id, feature_id=fid, geom=True) & (Q(perm_kind=EmpPermInspire.PERM_APPROVE) | Q(perm_kind=EmpPermInspire.PERM_UPDATE)))
+    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True, perm_kind=EmpPermInspire.PERM_UPDATE)
 
     if perm_kind:
         form_json = _check_form_json(fid, form_json, employee)
