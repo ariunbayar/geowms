@@ -824,14 +824,14 @@ export default class BarilgaSuurinGazar extends Component{
         const json = JSON.parse(this.feature)
         const datas = json.geometry
         this.setState({ is_loading:true })
-        service.createUpd(tid, pid, fid, values, datas, id).then(({success}) => {
+        service.createUpd(tid, pid, fid, values, datas, id).then(({success, info}) => {
           if(success){
-            this.addNotif('success', 'Хүсэлтийг үүсгэлээ', 'check')
+            this.addNotif('success', info, 'check')
             this.props.refreshCount()
             this.setState({is_loading:false})
           }
           else {
-            this.addNotif('danger', 'Хүсэлт үүсгэхэд алдаа гарсан байна', 'times')
+            this.addNotif('danger', info, 'times')
             this.setState({is_loading:false})
           }
         })

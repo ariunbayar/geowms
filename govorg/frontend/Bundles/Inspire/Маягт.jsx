@@ -37,7 +37,7 @@ export default class Маягт extends Component {
                     }
                     else{
                         this.addNotif('danger', info, 'warning')
-                      }
+                    }
                 })
             }
             else if (modifyend_selected_feature_check || update_geom_from_list) {

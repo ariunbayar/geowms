@@ -757,12 +757,12 @@ def create(request, payload):
         else:
             rsp =  {
                 'success': False,
-                'info': "Хүсэлт алдаатаЙ байна",
+                'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
             }
     else:
         rsp = {
             'success': False,
-            'info': "Хүсэлт амжилтгүй боллоо",
+            'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
         }
 
     return JsonResponse(rsp)
@@ -811,12 +811,12 @@ def createDel(request, payload):
         else:
             rsp =  {
                 'success': False,
-                'info': "Хүсэлт алдаатаЙ байна",
+                'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
             }
     else:
         rsp = {
             'success': False,
-            'info': "Хүсэлт амжилтгүй боллоо",
+            'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
         }
 
     return JsonResponse(rsp)
@@ -872,12 +872,12 @@ def createUpd(request, payload):
         else:
             rsp =  {
                 'success': False,
-                'info': "Хүсэлт алдаатаЙ байна",
+                'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
             }
     else:
         rsp = {
             'success': False,
-            'info': "Хүсэлт амжилтгүй боллоо",
+            'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
         }
 
     return JsonResponse(rsp)
