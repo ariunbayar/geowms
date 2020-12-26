@@ -25,7 +25,7 @@ def fix_perm_emp_perm(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_org', '0012_employee_token'),
+        ('backend_org', '0013_employee_create_token'),
         ('backend_inspire', '0008_auto_20201214_1651'),
     ]
 
