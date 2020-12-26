@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {service} from './service'
-
+import { RequestMap } from './Map'
 
 export class RevokeRequestTable extends Component {
 
@@ -11,32 +11,31 @@ export class RevokeRequestTable extends Component {
         }
         this.handleRequestOpen = this.handleRequestOpen.bind(this)
         this.handleRequestClose = this.handleRequestClose.bind(this)
-        this.handleRequestApprove = this.handleRequestApprove.bind(this)
-    }
-
-    componentDidMount(){
+        this.stateButton = this.stateButton.bind(this)
     }
 
     handleRequestOpen() {
-        this.setState({is_model_request_open: true})
+        this.setState({ is_model_request_open: true })
     }
 
     handleRequestClose() {
-        this.setState({is_model_request_open: false})
+        this.setState({ is_model_request_open: false })
     }
 
-    handleRequestApprove(id){
-        const values = this.props.values
-        service.requestApprove(id, values).then(({success})=>{
-            if(success){
-                this.props.getAll()
-                this.handleRequestClose()
-            }
-        })
+    stateButton(id, state) {
+        this.handleRequestClose()
+        this.props.setLoading()
+        service
+            .revokeState(id, state)
+            .then(({ success }) => {
+                if (success) {
+                    this.props.getAll()
+                }
+            })
     }
 
     render() {
-        const is_model_request_open = this.state.is_model_request_open
+        const { is_model_request_open } = this.state
         const idx = this.props.idx
         const {
             id,
@@ -53,13 +52,14 @@ export class RevokeRequestTable extends Component {
             created_at,
             kind,
             order_at,
+            old_geo_id,
             order_no
           } = this.props.values
         return (
             <tr>
-                <td>
+                <th>
                     {idx + 1}
-                </td>
+                </th>
                 <td>
                     {theme_name + '/'+ package_name + '/' +feature_name}
                 </td>
@@ -75,9 +75,27 @@ export class RevokeRequestTable extends Component {
                 <td>
                     {created_at}
                 </td>
+                <td className={state == 'ЗӨВШӨӨРСӨН' ? 'text-success' : state == 'ТАТГАЛЗСАН' ? 'text-danger' : null}>
+                    {state}
+                </td>
+                <td>
+                    <button className="btn gp-btn-primary" onClick={() => this.handleRequestOpen()}>Шийдвэрлэх</button>
+                    {
+                        is_model_request_open
+                        ?
+                            <RequestMap
+                                handleRequestClose={this.handleRequestClose}
+                                geoJson={geo_json}
+                                geom_name={old_geo_id}
+                                form_json={form_json}
+                                id={id}
+                                stateButton={this.stateButton}
+                            />
+                        :
+                            null
+                    }
+                </td>
             </tr>
         )
-
     }
-
 }
