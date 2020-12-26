@@ -256,7 +256,7 @@ def getAll(request):
             if feature not in emp_feature:
                 emp_feature.append(feature)
 
-        org_request_list = ChangeRequest.objects.filter(employee__org_id=org.id).filter(feature_id__in=emp_feature).order_by('-created_at')
+        org_request_list = ChangeRequest.objects.filter(feature_id__in=emp_feature).order_by('-created_at')
         if org_request_list:
             org_request = [_get_org_request(ob, employee) for ob in org_request_list]
             choices = _getChoices(request.user)
@@ -480,7 +480,7 @@ def get_count(request):
                 if feature not in emp_feature:
                     emp_feature.append(feature)
 
-            count = ChangeRequest.objects.filter(employee__org_id=org.id, state=ChangeRequest.STATE_NEW).filter(feature_id__in=emp_feature).count()
+            count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).filter(feature_id__in=emp_feature).count()
         rsp = {
             'success': True,
             'count': count
@@ -524,7 +524,7 @@ def search(request, payload):
                 if feature not in emp_feature:
                     emp_feature.append(feature)
 
-            datas = ChangeRequest.objects.filter(**search, employee__org_id=employee.org.id).filter(feature_id__in=emp_feature)
+            datas = ChangeRequest.objects.filter(**search).filter(feature_id__in=emp_feature)
             data_list = [_get_org_request(data, employee) for data in datas]
         rsp = {
             'success': True,

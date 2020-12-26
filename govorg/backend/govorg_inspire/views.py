@@ -632,56 +632,22 @@ def geomAdd(request, payload, fid):
 
 
 def _is_geom_included(geojson, org_geo_id):
-    geom_type = str(geojson['type'])
-    geom_coordinates = geojson['coordinates']
-    coordinate_syntax = ''
+    geojson = json.dumps(geojson)
 
-    if geom_type == 'Polygon' or geom_type == 'MultiLineString':
-        for i in range(len(geom_coordinates)):
-            for j in range(len(geom_coordinates[i])):
-                for k in range(len(geom_coordinates[i][j])):
-                    coordinate_syntax += str(geom_coordinates[i][j][k]) + ' ' 
-                coordinate_syntax += ','
-        coordinate_syntax  = "(({coordinate_syntax}))".format(coordinate_syntax=coordinate_syntax[:-1])
-        
-        
-    elif geom_type == 'Point':
-        coordinate_syntax += str(geom_coordinates[0]) + ' ' + str(geom_coordinates[1])
-        coordinate_syntax  = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax[:-1])
-
-    elif geom_type == 'LineString' or geom_type == 'MultiPoint':
-        for i in range(len(geom_coordinates)):
-            for j in range(len(geom_coordinates)):
-                coordinate_syntax += str(geom_coordinates[i][j]) + ' '
-            coordinate_syntax += ','
-        coordinate_syntax  = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax[:-1])
-
-    elif geom_type == 'MultiPolygon':
-        for i in range(len(geom_coordinates)):
-            for j in range(len(geom_coordinates[i])):
-                for k in range(len(geom_coordinates[i][j])):
-                    for n in range(len(geom_coordinates[i][j][k])):
-                        coordinate_syntax += str(geom_coordinates[i][j][k][n]) + ' ' 
-                    coordinate_syntax += ','
-        coordinate_syntax  = "((({coordinate_syntax})))".format(coordinate_syntax=coordinate_syntax[:-1])
     cursor = connections['default'].cursor()
     sql = """
         select ST_Contains(
             ((
-                SELECT ST_ASText(ST_Transform(geo_data,4326))
+                SELECT (ST_Transform(geo_data,4326))
                 FROM m_geo_datas
-                WHERE geo_id = '{org_geo_id}'
+                WHERE geo_id = %s
             )),
             ((
-                select ST_ASText('{geom_type}{coordinate_syntax}')
+                select ST_GeomFromGeoJSON(%s)
             ))
         )
-    """.format(
-        geom_type = geom_type,
-        org_geo_id = org_geo_id,
-        coordinate_syntax = coordinate_syntax
-    )
-    cursor.execute(sql)
+    """
+    cursor.execute(sql, [org_geo_id, geojson])
     is_included = cursor.fetchone()[0]
     return is_included
 
