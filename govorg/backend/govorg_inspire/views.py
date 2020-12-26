@@ -635,10 +635,6 @@ def _is_geom_included(geojson, org_geo_id):
     geom_type = str(geojson['type'])
     geom_coordinates = geojson['coordinates']
     coordinate_syntax = ''
-<<<<<<< HEAD
-=======
-
->>>>>>> 8d3f171b348f5143a06d1cb21a2c6e65b5e5528c
     if geom_type == 'Polygon' or geom_type == 'MultiLineString':
         for i in range(len(geom_coordinates)):
             for j in range(len(geom_coordinates[i])):
