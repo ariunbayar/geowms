@@ -632,6 +632,7 @@ def geomAdd(request, payload, fid):
 
 
 def _is_geom_included(geojson, org_geo_id):
+
     geojson = json.dumps(geojson)
 
     cursor = connections['default'].cursor()
@@ -673,7 +674,30 @@ def _check_form_json(fid, form_json, employee):
                         'roles': propert.get('roles') or ''
                     })
 
-    return request_json
+    return request_json if request_json else ''
+
+
+def _has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
+    success = True
+    info = ''
+
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm__employee=employee)
+    qs = qs.filter(feature_id=fid)
+    qs = qs.filter(geom=geom)
+    qs = qs.filter(perm_kind=perm_kind)
+
+    if not qs:
+        success = False
+        info = "Албан хаагчийн эрх олгогдоогүй байна."
+
+    if geo_json:
+        is_included = _is_geom_included(geo_json, employee.org.geo_id)
+        if not is_included:
+            success = False
+            info = "Байгууллагын эрх олгогдоогүй байна."
+
+    return success, info
 
 
 @require_POST
@@ -690,36 +714,11 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
-
-    qs = EmpPermInspire.objects
-    qs = qs.filter(emp_perm__employee=employee)
-    qs = qs.filter(feature_id=fid)
-    qs = qs.filter(geom=True)
-    qs = qs.filter(perm_kind=EmpPermInspire.PERM_CREATE)
-    perm_kind = qs
-
-    if not perm_kind:
-
-        rsp = {
-            'success': False,
-            'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
-        }
-        return JsonResponse(rsp)
-
-    is_included = _is_geom_included(geo_json, employee.org.geo_id)
-
-    if not is_included:
-        rsp =  {
-            'success': False,
-            'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
-        }
-
-        return JsonResponse(rsp)
+    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
 
     form_json = _check_form_json(fid, form_json, employee)
-    if not form_json:
-        form_json = ''
-
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -734,11 +733,11 @@ def create(request, payload):
             order_at=order_at,
             order_no=order_no,
     )
+
     rsp = {
         'success': True,
         'info': "Хүсэлт амжилттай үүслээ",
     }
-
     return JsonResponse(rsp)
 
 
@@ -754,46 +753,34 @@ def remove(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-
     employee = get_object_or_404(Employee, user__username=request.user)
-    emp_perm = get_object_or_404( EmpPerm,employee_id=employee.id)
-    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True, perm_kind=EmpPermInspire.PERM_REMOVE)
+    geo_data = _get_geom(old_geo_id, fid)
+    geo_data = _convert_text_json(geo_data[0]["geom"])
+    geo_json = _get_geoJson(geo_data)
+    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
-    if perm_kind:
-        geo_data = _get_geom(old_geo_id, fid)
-        geo_data = _convert_text_json(geo_data[0]["geom"])
-        geo_json = _get_geoJson(geo_data)
-        is_included = _is_geom_included(geo_json['geometry'], employee.org.geo_id)
-        if is_included:
-            ChangeRequest.objects.create(
-                    old_geo_id = old_geo_id,
-                    new_geo_id = None,
-                    theme_id = tid,
-                    package_id = pid,
-                    feature_id = fid,
-                    employee = employee,
-                    state = ChangeRequest.STATE_NEW,
-                    kind = ChangeRequest.KIND_UPDATE,
-                    form_json = None,
-                    geo_json = None,
-                    order_at=order_at,
-                    order_no=order_no,
-            )
-            rsp = {
-                'success': True,
-                'info': "Хүсэлт амжилттай үүслээ",
-            }
-        else:
-            rsp =  {
-                'success': False,
-                'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
-            }
-    else:
-        rsp = {
-            'success': False,
-            'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
-        }
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
 
+    ChangeRequest.objects.create(
+            old_geo_id = old_geo_id,
+            new_geo_id = None,
+            theme_id = tid,
+            package_id = pid,
+            feature_id = fid,
+            employee = employee,
+            state = ChangeRequest.STATE_NEW,
+            kind = ChangeRequest.KIND_UPDATE,
+            form_json = None,
+            geo_json = None,
+            order_at=order_at,
+            order_no=order_no,
+    )
+
+    rsp = {
+        'success': True,
+        'info': "Хүсэлт амжилттай үүслээ",
+    }
     return JsonResponse(rsp)
 
 
@@ -807,55 +794,35 @@ def update(request, payload):
     fid = payload.get('fid')
     old_geo_id = payload.get('old_geo_id')
     form_json = payload.get('form_json')
-    geo_json = payload.get('geo_json')
+    geo_json = payload.get('geo_json') or ''
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
-    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
+    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
 
-    if not geo_json:
-        geo_json = ''
+    form_json = _check_form_json(fid, form_json, employee)
+    ChangeRequest.objects.create(
+            old_geo_id = old_geo_id,
+            new_geo_id = None,
+            theme_id = tid,
+            package_id = pid,
+            feature_id = fid,
+            employee = employee,
+            state = ChangeRequest.STATE_NEW,
+            kind = ChangeRequest.KIND_DELETE,
+            form_json = form_json,
+            geo_json = geo_json,
+            order_at=order_at,
+            order_no=order_no,
+    )
 
-    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True, perm_kind=EmpPermInspire.PERM_UPDATE)
-
-    if perm_kind:
-        form_json = _check_form_json(fid, form_json, employee)
-        if not form_json:
-            form_json = ''
-        _is_included = _is_geom_included(geo_json, employee.org.geo_id)
-
-        if _is_included:
-            ChangeRequest.objects.create(
-                    old_geo_id = old_geo_id,
-                    new_geo_id = None,
-                    theme_id = tid,
-                    package_id = pid,
-                    feature_id = fid,
-                    employee = employee,
-                    state = ChangeRequest.STATE_NEW,
-                    kind = ChangeRequest.KIND_DELETE,
-                    form_json = form_json,
-                    geo_json = geo_json,
-                    order_at=order_at,
-                    order_no=order_no,
-            )
-
-            rsp = {
-                'success': True,
-                'info': "Хүсэлт амжилттай үүслээ",
-            }
-        else:
-            rsp =  {
-                'success': False,
-                'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
-            }
-    else:
-        rsp = {
-            'success': False,
-            'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
-        }
-
+    rsp = {
+        'success': True,
+        'info': "Хүсэлт амжилттай үүслээ",
+    }
     return JsonResponse(rsp)
 
 
