@@ -635,7 +635,6 @@ def _is_geom_included(geojson, org_geo_id):
     geom_type = str(geojson['type'])
     geom_coordinates = geojson['coordinates']
     coordinate_syntax = ''
-    print(geojson)
 
     if geom_type == 'Polygon' or geom_type == 'MultiLineString':
         for i in range(len(geom_coordinates)):
@@ -647,7 +646,7 @@ def _is_geom_included(geojson, org_geo_id):
         
         
     elif geom_type == 'Point':
-        coordinate_syntax += str(geom_coordinates[0][0]) + ' ' + str(geom_coordinates[0][1])
+        coordinate_syntax += str(geom_coordinates[0]) + ' ' + str(geom_coordinates[1])
         coordinate_syntax  = "({coordinate_syntax})".format(coordinate_syntax=coordinate_syntax[:-1])
 
     elif geom_type == 'LineString' or geom_type == 'MultiPoint':
@@ -665,7 +664,6 @@ def _is_geom_included(geojson, org_geo_id):
                         coordinate_syntax += str(geom_coordinates[i][j][k][n]) + ' ' 
                     coordinate_syntax += ','
         coordinate_syntax  = "((({coordinate_syntax})))".format(coordinate_syntax=coordinate_syntax[:-1])
-    print(coordinate_syntax)
     cursor = connections['default'].cursor()
     sql = """
         select ST_Contains(
