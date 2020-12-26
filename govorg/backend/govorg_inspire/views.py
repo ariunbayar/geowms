@@ -635,6 +635,7 @@ def _is_geom_included(geojson, org_geo_id):
     geom_type = str(geojson['type'])
     geom_coordinates = geojson['coordinates']
     coordinate_syntax = ''
+    print(geojson)
 
     if geom_type == 'Polygon' or geom_type == 'MultiLineString':
         for i in range(len(geom_coordinates)):
@@ -664,7 +665,7 @@ def _is_geom_included(geojson, org_geo_id):
                         coordinate_syntax += str(geom_coordinates[i][j][k][n]) + ' ' 
                     coordinate_syntax += ','
         coordinate_syntax  = "((({coordinate_syntax})))".format(coordinate_syntax=coordinate_syntax[:-1])
-    
+    print(coordinate_syntax)
     cursor = connections['default'].cursor()
     sql = """
         select ST_Contains(
@@ -713,6 +714,7 @@ def _check_form_json(fid, form_json, employee):
 
 @require_POST
 @ajax_required
+@login_required
 def create(request, payload):
 
     tid = payload.get('tid')
@@ -723,47 +725,55 @@ def create(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    employee = get_object_or_404(Employee, user__username=request.user)
-    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
-    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True, perm_kind=EmpPermInspire.PERM_CREATE)
+    employee = get_object_or_404(Employee, user=request.user)
 
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm__employee=employee)
+    qs = qs.filter(feature_id=fid)
+    qs = qs.filter(geom=True)
+    qs = qs.filter(perm_kind=EmpPermInspire.PERM_CREATE)
+    perm_kind = qs
 
-    if perm_kind:
+    if not perm_kind:
 
-        form_json = _check_form_json(fid, form_json, employee)
-        if not form_json:
-            form_json = ''
-        is_included = _is_geom_included(geo_json, employee.org.geo_id)
-
-        if is_included:
-            ChangeRequest.objects.create(
-                    old_geo_id = None,
-                    new_geo_id = None,
-                    theme_id = tid,
-                    package_id = pid,
-                    feature_id = fid,
-                    employee = employee,
-                    state = ChangeRequest.STATE_NEW,
-                    kind = ChangeRequest.KIND_CREATE,
-                    form_json = form_json,
-                    geo_json = geo_json,
-                    order_at=order_at,
-                    order_no=order_no,
-            )
-            rsp = {
-                'success': True,
-                'info': "Хүсэлт амжилттай үүслээ",
-            }
-        else:
-            rsp =  {
-                'success': False,
-                'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
-            }
-    else:
         rsp = {
             'success': False,
             'info': "Танд уг өөрчлөлтийг хийх эрх олгогдоогүй байна",
         }
+        return JsonResponse(rsp)
+
+    is_included = _is_geom_included(geo_json, employee.org.geo_id)
+
+    if not is_included:
+        rsp =  {
+            'success': False,
+            'info': "Таны өөрчлөлт байгууллагын хамрах хүрээнээс хэтэрсэн байна",
+        }
+
+        return JsonResponse(rsp)
+
+    form_json = _check_form_json(fid, form_json, employee)
+    if not form_json:
+        form_json = ''
+
+    ChangeRequest.objects.create(
+            old_geo_id = None,
+            new_geo_id = None,
+            theme_id = tid,
+            package_id = pid,
+            feature_id = fid,
+            employee = employee,
+            state = ChangeRequest.STATE_NEW,
+            kind = ChangeRequest.KIND_CREATE,
+            form_json = form_json,
+            geo_json = geo_json,
+            order_at=order_at,
+            order_no=order_no,
+    )
+    rsp = {
+        'success': True,
+        'info': "Хүсэлт амжилттай үүслээ",
+    }
 
     return JsonResponse(rsp)
 

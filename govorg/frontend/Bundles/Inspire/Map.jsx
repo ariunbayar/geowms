@@ -204,28 +204,6 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
-      if(roles.PERM_APPROVE){
-        if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
-        else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
-        else if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
-        else {
-          this.addNotif('warning', type, 'times')
-          map.addControl(new LineBarButton({LineButton: this.LineButton, 'null': true}))
-          map.addControl(new PointBarButton(({PointButton: this.PointButton, 'null': true})))
-          map.addControl(new PolygonBarButton(({PolygonButton: this.PolygonButton, 'null': true})))
-        }
-        map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
-        map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
-        map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
-        map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
-        map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
-        map.addControl(new FormBarButton({FormButton: this.FormButton}))
-        map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
-        map.addControl(this.controls.upload)
-        map.addControl(this.controls.metaList)
-        map.addControl(this.controls.sidebar)
-      }
-
       this.setState({ is_loading:false, roles})
     }
     loadData(){
