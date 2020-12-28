@@ -107,18 +107,6 @@ export class Detail extends Component {
                                     {wms.layer_list.map((layer, idx) =>
                                         <li key={idx}>
                                             {layer.title} ({layer.code})
-                                            <ul>
-                                                <li>
-                                                    <span>Төрийн сүлжээ</span>
-                                                    <a className="ml-5" href={`${this.state.prvite_url}${layer.json}`}>json</a>
-                                                    <a className="ml-2" href={`${this.state.prvite_url}${layer.gml}`}>gml</a>
-                                                </li>
-                                                <li>
-                                                    <span>Интернэт сүлжээ</span>
-                                                    <a className="ml-5" href={`${this.state.public_url}${layer.json}`}>json</a>
-                                                    <a className="ml-2" href={`${this.state.public_url}${layer.gml}`}>gml</a>
-                                                </li>
-                                            </ul>
                                         </li>
                                     )}
                                 </ul>
