@@ -10,15 +10,21 @@ export default class ChangeRequestModal extends Component {
         super(props)
         this.state = {
             status: this.props.status || "initial",
+            is_loading: false
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
+        this.handleIsload = this.handleIsload.bind(this)
     }
 
     componentDidMount() {
         if (this.state.status == "initial") {
             this.handleOpen()
         }
+    }
+
+    handleIsload(status){
+        this.setState({is_loading: status})
     }
 
 
@@ -107,7 +113,7 @@ export default class ChangeRequestModal extends Component {
                                     }
                                     {state == 4 &&
                                         <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
-                                            <Маягт handleClose={this.handleClose} tid={theme_id} fid={feature_id} gid={old_geo_id} change_request_id={change_request_id}></Маягт>
+                                            <Маягт handleIsload={this.handleIsload} handleClose={this.handleClose} tid={theme_id} fid={feature_id} gid={old_geo_id} change_request_id={change_request_id}></Маягт>
                                         </div>
                                     }
                                     <div className={form_json || state == 4 ? "col-md-6" : "col-md-12"}>
@@ -117,6 +123,11 @@ export default class ChangeRequestModal extends Component {
                             </div>
                         </div>
                     </div>
+                    {this.state.is_loading &&
+                    <div className="text-center d-block text-sp" style={{position:"fixed", top:"30%", left:"45%", backgroundColor: 'rgba(255, 255, 255, 0.4)'}}>
+                        <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Хүсэлтийг шалгаж байна түр хүлээнэ үү...
+                    </div>
+                    }
                 </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>

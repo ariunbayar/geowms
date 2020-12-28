@@ -22,7 +22,7 @@ function controlToApprove(values, change_request_id) {
         ...getPostOptions(),
         body: JSON.stringify({values, change_request_id}),
     }
-    return fetch(`/gov/api/org-request/control-to-approve/`, opts).then(handleResponse)
+    return fetch(`/gov/api/inspire/control-to-approve/`, opts).then(handleResponse)
 }
 
 function controlToRemove(change_request_id) {
@@ -30,5 +30,5 @@ function controlToRemove(change_request_id) {
         ...getPostOptions(),
         body: JSON.stringify({change_request_id}),
     }
-    return fetch(`/gov/api/org-request/control-to-remove/`, opts).then(handleResponse)
+    return fetch(`/gov/api/inspire/control-to-remove/`, opts).then(handleResponse)
 }
