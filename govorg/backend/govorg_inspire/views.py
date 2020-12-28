@@ -249,6 +249,7 @@ def geom_type(request, pid, fid):
 @ajax_required
 def get_wms_layer(request, tid, pid, fid):
     view_name_ob = ViewNames.objects.filter(feature_id=fid).first()
+    employee = get_object_or_404(Employee, user=request.user)
     rsp = {
         'success': False,
         'url': '',
@@ -257,7 +258,7 @@ def get_wms_layer(request, tid, pid, fid):
     if view_name_ob:
         rsp = {
             'success': True,
-            'url': request.build_absolute_uri(reverse('api:service:emp-perm-proxy')),
+            'url': request.build_absolute_uri(reverse('api:service:qgis-proxy', args=[employee.token])),
             'code': 'gp_layer_' + view_name_ob.view_name,
         }
     return JsonResponse(rsp)
