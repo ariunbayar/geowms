@@ -153,7 +153,16 @@ export class RoleAdd extends Component {
                         </div>
                     </div>
                     <br />
-
+                    <div>
+                        <InsPerms
+                            action_type="addable"
+                            getValue={this.getValue}
+                            sendAllValue={this.getAllValue}
+                            dontDid={true}
+                            org_roles={org_roles}
+                        />
+                    </div>
+                    <br />
                     <div className="form-group">
                         {this.state.handleSaveIsLoad ?
                             <>
@@ -175,17 +184,6 @@ export class RoleAdd extends Component {
                                 Хадгалах
                             </button>
                         }
-                    </div>
-
-                    <br />
-                    <div>
-                        <InsPerms
-                            action_type="addable"
-                            getValue={this.getValue}
-                            sendAllValue={this.getAllValue}
-                            dontDid={true}
-                            org_roles={org_roles}
-                        />
                     </div>
                 </div>
             </div>

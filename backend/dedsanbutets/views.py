@@ -918,7 +918,7 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
         bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
         bundle_id = theme.bundle.id
         if not  bundle_layer:
-            BundleLayer.objects.create( 
+            BundleLayer.objects.create(
                 bundle_id=bundle_id,
                 layer_id=wms_layer.id
             )

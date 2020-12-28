@@ -21,6 +21,7 @@ class Employee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_admin = models.BooleanField(default=False)
+    token = models.CharField(max_length=250, unique=True, null=True)
 
 
 class OrgRole(models.Model):

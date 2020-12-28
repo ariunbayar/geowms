@@ -31,11 +31,14 @@ class ModalComponent extends Component{
                                 </button>
                             </div>
                             <div className="d-flex justify-content-center">
-                            { this.props.model_type_icon == "danger" ?
-                                <i className="fa fa-times-circle fa-3x animated bounceIn text-danger" aria-hidden="true"></i>
-                                :
-                                <i className="fa fa-times-circle fa-3x animated bounceIn text-success" aria-hidden="true"></i>
-                            }
+                                { this.props.model_type_icon == "danger" ?
+                                    <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
+                                    :
+                                    this.props.model_type_icon == "warning" ?
+                                    <i className="fa fa-exclamation-circle fa-3x my-3 animated bounceIn text-warning" aria-hidden="true"></i>
+                                    :
+                                    <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
+                                }
                             </div>
                             <div className="d-flex justify-content-center my-3">
                                 <h5 >{this.props.title}</h5>

@@ -71,11 +71,47 @@ const system = {
 
 }
 
+const email = {
+
+    get: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/email/', requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify(values),
+        }
+        return fetch('/back/api/config/email/save/', opts).then(handleResponse)
+    },
+
+}
+
+const qgis = {
+
+    get: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/qgis/', requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify(values),
+        }
+        return fetch('/back/api/config/qgis/save/', opts).then(handleResponse)
+    },
+
+}
+
 export const service = {
     config: {
         geoserver: geoserver,
         site: site,
-        system: system
+        system: system,
+        email: email,
+        qgis: qgis
     },
     getDisk,
     getPostgeVersion,

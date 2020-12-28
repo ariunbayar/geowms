@@ -9,6 +9,7 @@ export class OrgRequestTable extends Component {
         super(props)
         this.state={
             is_model_request_open: false,
+            is_loading:false
         }
         this.handleRequestOpen = this.handleRequestOpen.bind(this)
         this.handleRequestClose = this.handleRequestClose.bind(this)
@@ -30,6 +31,9 @@ export class OrgRequestTable extends Component {
         const values = this.props.values
         service.requestApprove(id, values).then(({success})=>{
             if(success){
+                this.setState({
+                    is_loading:false
+                })
                 this.props.getAll()
                 this.handleRequestClose()
             }
@@ -98,6 +102,7 @@ export class OrgRequestTable extends Component {
                             geo_json = {geo_json}
                             title="Шийдвэрлэх"
                             kind={kind}
+                            is_loading={this.state.is_loading}
                             id = {id}
                             getAll={this.props.getAll}
                         />
