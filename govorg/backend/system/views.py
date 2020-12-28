@@ -55,6 +55,20 @@ def systemList(request, payload):
     return JsonResponse(rsp)
 
 
+def _get_wmslayer_set(wms):
+    layer_list = []
+    for wmslayer_set in wms.wmslayer_set.all():
+        layer_list.append({
+            'id': wmslayer_set.id,
+            'code': wmslayer_set.code,
+            'name': wmslayer_set.name,
+            'title': wmslayer_set.title,
+            'json': "?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson".format(code=wmslayer_set.code),
+            'gml': "?service=WFS&version=1.0.0&request=GetFeature&typeName={code}".format(code=wmslayer_set.code),
+        })
+    return layer_list
+
+
 def _get_system_detail_display(request, system):
 
     wms_list = [
@@ -63,7 +77,7 @@ def _get_system_detail_display(request, system):
             'name': wms.name,
             'is_active': wms.is_active,
             'url': wms.url,
-            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+            'layer_list': _get_wmslayer_set(wms),
         }
         for wms in WMS.objects.all()
     ]
