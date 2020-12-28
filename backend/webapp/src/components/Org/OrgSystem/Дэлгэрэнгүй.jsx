@@ -83,7 +83,7 @@ export class Дэлгэрэнгүй extends Component {
                             <input type="text" className="form-control col-6" disabled value={this.state.prvite_url}/>
                             <span className="input-group-btn">
                             <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.prvite_url)}>
-                                <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                             </button>
                             </span>
                         </div>
@@ -92,7 +92,7 @@ export class Дэлгэрэнгүй extends Component {
                             <input type="text" className="form-control col-6" disabled value={this.state.public_url}/>
                             <span className="input-group-btn">
                             <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
-                                <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                             </button>
                             </span>
                         </div>
@@ -104,6 +104,18 @@ export class Дэлгэрэнгүй extends Component {
                                 {wms.layer_list.map((layer, idx) =>
                                     <li key={idx}>
                                         {layer.title} ({layer.code})
+                                        <ul>
+                                            <li>
+                                                <span>Төрийн сүлжээ</span>
+                                                <a className="ml-5" href={`${this.state.prvite_url}${layer.json}`}>json</a>
+                                                <a className="ml-2" href={`${this.state.prvite_url}${layer.gml}`}>gml</a>
+                                            </li>
+                                            <li>
+                                                <span>Интернэт сүлжээ</span>
+                                                <a className="ml-5" href={`${this.state.public_url}${layer.json}`}>json</a>
+                                                <a className="ml-2" href={`${this.state.public_url}${layer.gml}`}>gml</a>
+                                            </li>
+                                        </ul>
                                     </li>
                                 )}
                             </ul>
