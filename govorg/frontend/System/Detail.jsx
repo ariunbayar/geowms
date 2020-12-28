@@ -101,7 +101,6 @@ export class Detail extends Component {
                                 </span>
                             </div>
                             }
-
                             {this.state.system_wms_list.map((wms) =>
                                 <div className="col-md-12 mb-2 ml-3" key={wms.id}>
                                     <h5> {wms.name} </h5>
@@ -118,7 +117,6 @@ export class Detail extends Component {
                                     </ul>
                                 </div>
                             )}
-
                         </div>
                     </div>
                 </div>

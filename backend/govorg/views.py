@@ -60,20 +60,6 @@ def хадгалах(request, payload, pk=None):
         return JsonResponse({'success': False, 'errors': form.errors})
 
 
-def _get_wmslayer_set(wms):
-    layer_list = []
-    for wmslayer_set in wms.wmslayer_set.all():
-        layer_list.append({
-            'id': wmslayer_set.id,
-            'code': wmslayer_set.code,
-            'name': wmslayer_set.name,
-            'title': wmslayer_set.title,
-            'json': "?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson".format(code=wmslayer_set.code),
-            'gml': "?service=WFS&version=1.0.0&request=GetFeature&typeName={code}".format(code=wmslayer_set.code),
-        })
-    return layer_list
-
-
 def _get_govorg_detail_display(request, govorg):
     wms_list = [
         {
@@ -81,7 +67,7 @@ def _get_govorg_detail_display(request, govorg):
             'name': wms.name,
             'is_active': wms.is_active,
             'url': wms.url,
-            'layer_list': _get_wmslayer_set(wms),
+            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
         }
         for wms in WMS.objects.all()
     ]
