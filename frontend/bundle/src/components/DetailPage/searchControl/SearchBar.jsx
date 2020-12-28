@@ -283,10 +283,10 @@ class SearchBarComponent extends Component {
                         </select>
                         <div className="mb-3">
                             <div className="row">
-                                <div className="col-md-6">
+                                <div className="col-md-5">
                                     <button className="btn gp-btn-primary my-3" type="submit"><i className="fa fa-search mr-1"></i>Хайх</button>
                                 </div>
-                                <div className="col-md-6 d-flex flex-row-reverse">
+                                <div className="col-md-7 d-flex flex-row-reverse">
                                     <button className="btn gp-btn-primary my-3" type="button" onClick={this.resetButton}><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
                                 </div>
                             </div>

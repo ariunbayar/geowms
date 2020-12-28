@@ -9,13 +9,14 @@ import {getArea, getLength} from 'ol/sphere';
 import {toLonLat} from 'ol/proj';
 import Tile from 'ol/layer/Tile'
 import {Vector as VectorLayer} from 'ol/layer'
-import {Vector as VectorSource} from 'ol/source'
+import {Vector, Vector as VectorSource} from 'ol/source'
 import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
-import {Point} from 'ol/geom'
+import {Point, Circle, Polygon} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import {format as coordinateFormat} from 'ol/coordinate';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
+import {fromCircle, fromExtent} from 'ol/geom/Polygon';
 
 import {СуурьДавхарга} from './controls/СуурьДавхарга'
 import {CoordinateCopy} from './controls/CoordinateCopy'
@@ -96,6 +97,10 @@ export default class BundleMap extends Component {
         this.getOnlyFeature = this.getOnlyFeature.bind(this)
         this.resetFilteredOnlyFeature = this.resetFilteredOnlyFeature.bind(this)
         this.allLayerVisible = this.allLayerVisible.bind(this)
+        this.addLayerToSearch = this.addLayerToSearch.bind(this)
+        this.drawBorderCircle = this.drawBorderCircle.bind(this)
+        this.removeCircle = this.removeCircle.bind(this)
+        this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
     }
 
     initMarker() {
@@ -140,6 +145,14 @@ export default class BundleMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
+
+        if (prevState.filtered_wms !== this.state.filtered_wms) {
+            this.setState({ filtered_wms: this.state.filtered_wms })
+        }
+
+        if (prevState.filtered_layer_name !== this.state.filtered_layer_name) {
+            this.setState({ filtered_layer_name: this.state.filtered_layer_name })
+        }
 
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
@@ -248,7 +261,7 @@ export default class BundleMap extends Component {
 
         const vector_layer_name = 'vector_layer'
         const vector_layer = new VectorLayer({
-            source: new VectorSource(),
+            source: new VectorSource({}),
             style: new Style({
                 stroke: new Stroke({
                     color: 'rgba(100, 255, 0, 1)',
@@ -389,22 +402,66 @@ export default class BundleMap extends Component {
         return this.object
     }
 
-    allLayerVisible() {
+    allLayerVisible(changed_layers) {
+        this.removeCircle()
         this.map.getLayers().getArray().forEach((layer) => {
             if(layer.get('filter') && layer.get('filter') == this.state.filtered_layer_name) {
                 layer.setVisible(false)
                 this.map.removeLayer(layer.getSource())
             }
-            if(layer.get('code')) {
-                if(layer.getVisible()) {
-                    this.is_not_visible_layers.push(layer.get('code'))
+            if(!changed_layers) {
+                if(layer.get('code')) {
+                    if(layer.getVisible()) {
+                        this.is_not_visible_layers.push(layer.get('code'))
+                        layer.setVisible(false)
+                    }
+                }
+            } else {
+                if(layer.get('code') && layer.getVisible()) {
                     layer.setVisible(false)
                 }
             }
         })
     }
 
+    removeCircle() {
+        this.map.getLayers().forEach((layer) => {
+            if(layer && layer.get('name') && layer.get('name') == 'border_circle') {
+                layer.setVisible(false)
+                this.map.removeLayer(layer)
+            }
+        })
+    }
+
+    addLayerToSearch(add_layers, layer_name, is_visible) {
+        if (this.state.filtered_wms) {
+            if (is_visible) {
+                add_layers.map(layer => {
+                    this.is_not_visible_layers.push(layer.code)
+                    layer.tile.setVisible(false)
+                })
+            }
+            else {
+                add_layers.map(layer => {
+                    const filtered = this.is_not_visible_layers.filter(layer_code => {
+                        return layer_code !== layer.code
+
+                    })
+                    this.is_not_visible_layers = filtered
+                    layer.tile.setVisible(false)
+                })
+            }
+            const { aimag_name, search_coordinate, sum_name, search_scale } = this.state
+            this.getOnlyFeature(aimag_name, search_coordinate, sum_name, search_scale, this.is_not_visible_layers)
+        } else {
+            add_layers.map(layer => {
+                layer.tile.setVisible(is_visible)
+            })
+        }
+    }
+
     resetFilteredOnlyFeature() {
+        this.removeCircle()
         this.map.getLayers().forEach((layer) => {
             if(layer) {
                 this.is_not_visible_layers.map((visible_layer_code) => {
@@ -425,13 +482,45 @@ export default class BundleMap extends Component {
         return scale / 1000
     }
 
-    getOnlyFeature(aimag_name, coordinate, sum_name, scale) {
+    fromLonLatToMapCoord(coordinate) {
+        return fromLonLat([coordinate[0], coordinate[1]]);
+    }
+
+    drawBorderCircle(coordinate, kilometers) {
+        const circle = new Circle(this.fromLonLatToMapCoord(coordinate), kilometers * 1000 * 1.5)
+        const style = new Style({
+            stroke: new Stroke({
+                color: 'blue',
+                width: 3
+            }),
+            fill: new Fill({
+                color: 'rgba(0, 0, 255, 0.1)'
+            })
+        })
+        const box = fromExtent(circle.getExtent())
+        const box_feature = new Feature(box)
+        box_feature.setStyle(style)
+        const source =  new VectorSource({
+            projection: this.state.projection_display,
+            features: [box_feature]
+        })
+        const layer = new VectorLayer({
+            source: source,
+            name: "border_circle"
+        })
+        this.map.addLayer(layer)
+
+    }
+
+    getOnlyFeature(aimag_name, coordinate, sum_name, scale, changed_layers) {
         this.onClickCloser()
-        this.allLayerVisible()
+        this.allLayerVisible(changed_layers)
+        if(changed_layers) this.is_not_visible_layers = changed_layers
         var filtered_layer_name
-        const filtered_wms = this.state.map_wms_list.map(({layers}) => {
+        const filtered_wms = this.state.map_wms_list.map(({name, layers}) => {
             var cql_filter = ''
             return {
+                name: name,
                 layers: this.is_not_visible_layers.map((layer_code) => {
                     var filtered_layer
                     var filtered_tile
@@ -465,6 +554,7 @@ export default class BundleMap extends Component {
                                 }),
                                 filter: filtered_layer_name
                             })
+                            if (!aimag_name && coordinate) this.drawBorderCircle(coordinate, this.getKiloFromScale(scale))
                             if(tile) {
                                 this.map.addLayer(tile)
                                 filtered_tile = tile
@@ -472,14 +562,16 @@ export default class BundleMap extends Component {
                         }
                     })
                     return {
-                        layer: filtered_layer,
+                        ...filtered_layer,
                         tile: filtered_tile
                     }
                 }),
             }
         })
-        this.setState({filtered_wms, filtered_layer_name})
-        const map_coord = fromLonLat([coordinate[1], coordinate[0]])
+        this.setState({filtered_wms, filtered_layer_name, aimag_name, search_coordinate: coordinate, sum_name, search_scale: scale})
+        if(!sum_name) {
+            this.showFeaturesAt(this.fromLonLatToMapCoord(coordinate))
+        }
     }
 
     getWMSArray() {
@@ -495,7 +587,7 @@ export default class BundleMap extends Component {
     showFeaturesAt(coordinate) {
         const overlay = this.overlay
         overlay.setPosition(coordinate)
-
+        this.is_empty = true
         this.sendFeatureInfo = []
         const view = this.map.getView()
         const projection = view.getProjection()
@@ -550,6 +642,7 @@ export default class BundleMap extends Component {
                                     })
                                     if(!this.state.is_draw_open){
                                         if(feature_info.length > 0) {
+                                            this.is_empty = false
                                             if(this.sendFeatureInfo.length > 0) {
                                                 this.sendFeatureInfo.map((feat, idx) => {
                                                     if (feat[0].field_name !== feature_info[0][0]) {
@@ -567,14 +660,14 @@ export default class BundleMap extends Component {
                                             }
                                             if(geodb_table == 'mpoint_view') {
                                                 this.state.vector_layer.setSource(null)
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
+                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty)
                                             }
                                             else {
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
+                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty)
                                             }
                                         }
                                         else {
-                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
+                                            this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty)
                                         }
                                         // if(geodb_table == 'mpoint_view'){
                                         //     if(feature_info.length > 0){
@@ -603,6 +696,7 @@ export default class BundleMap extends Component {
             }
         })
         this.sendFeatureInfo = []
+        this.is_empty = true
     }
 
     setSourceInPopUp(mode) {
@@ -621,6 +715,7 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord, zoom) {
+        this.removeCircle()
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
@@ -633,9 +728,9 @@ export default class BundleMap extends Component {
             is_sidebar_open: !prevState.is_sidebar_open,
         }))
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, true)
+            this.controls.sidebar.showSideBar(this.state.map_wms_list, true, this.addLayerToSearch)
         }else{
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, false)
+            this.controls.sidebar.showSideBar(this.state.map_wms_list, false, this.addLayerToSearch)
         }
     }
 
@@ -645,6 +740,7 @@ export default class BundleMap extends Component {
         }))
         if(this.state.is_search_sidebar_open){
             this.controls.searchbar.showSideBar(null, true)
+            this.resetFilteredOnlyFeature()
         }else{
             this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature)
         }
@@ -692,8 +788,8 @@ export default class BundleMap extends Component {
         const extent2 = toLonLat([x2, y2])
         const full_extent = extent.toString() + ',' + extent2.toString()
         var list = []
-        wms_array.map(({ name, layers }, l_idx) => {
-            layers.map(({ id, code, tile }, idx) => {
+        wms_array.map(({ name, layers }, w_idx) => {
+            layers.map(({ id, code, tile }, l_idx) => {
                 if(tile) {
                     if (tile.getVisible()) {
                         const main_url = tile.getSource().urls[0]
@@ -734,9 +830,9 @@ export default class BundleMap extends Component {
                                             return obj
                                         })
                                         list.push({[code]: info})
-                                        if(l_idx == wms_array.length - 1 && layers.length - 1 == idx) {
-                                            this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
-                                        }
+                                    }
+                                    if(w_idx == wms_array.length - 1 && layers.length - 1 == l_idx) {
+                                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
                                     }
                             })
                         }

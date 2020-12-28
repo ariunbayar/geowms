@@ -138,11 +138,12 @@ class PopUpCmp extends Component {
 
     render() {
         const { datas, startNumber, is_prev, is_plus, is_enable } = this.state
+        const { is_empty } = this.props
         return (
                 <div>
                     <div className="ol-popup-header">
                         <div className="ol-popup-header-content">
-                            {datas && datas.length > 0
+                            {!is_empty && datas && datas.length > 0
                                 ?
                                 <div className="ol-header-cont" role="group">
                                     {startNumber}
@@ -170,73 +171,82 @@ class PopUpCmp extends Component {
                             }
                         </div>
                     </div>
-                    <div className="ol-popup-contet">
-                        {datas && datas.map((layer, idx)=>
-                            idx + 1 == startNumber &&
-                            layer[0].map((values, v_idx) =>
-                                v_idx == 1 &&
-                                values.map((value, val_idx) =>
-                                value[0] == 'point_name' ?
-                                <b key={val_idx}>{value[1]}</b>
-                                : null
-                        )))}
-                        <hr className="m-1 border border-secondary rounded"/>
-                        <table className="table borderless no-padding">
-                            <tbody>
-                                {
-                                    datas && datas.length > 0
-                                    ?
-                                        datas.map((layer, idx)=>
-                                        (idx + 1 == startNumber &&
-                                        layer[0].map((values, v_idx) =>
-                                            v_idx == 1 &&
-                                            values.map((value, val_idx) =>
-                                                value[0] !== 'point_name' &&
-                                                <tr style={{fontSize: '12px'}} key={val_idx}>
-                                                    <th>{value[0]}</th>
-                                                    <td>{value[1]}</td>
-                                                </tr>
-                                            )
-                                        )))
-                                    :
-                                    <tr>
-                                        <th>Мэдээлэл байхгүй байна</th>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-
                     {
-                        this.state.is_purchase
+                        is_empty
                         ?
-                            <div className="btn-group flex-wrap d-flex justify-content-center">
-                                <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
-                                    <div className="spinner-border" role="status">
-                                        <span className="sr-only"></span>
-                                    </div>
-                                    {} Хүлээнэ үү..
-                                </button>
+                            <div className="ol-popup-contet text-center">
+                                <b>Хоосон газар сонгосон байна.</b>
                             </div>
                         :
-                        this.state.mode == 'mpoint_view'
-                        ?
-                            <div className="btn-group flex-wrap d-flex justify-content-center">
-                                <button
-                                    className="btn btn-xs btn-primary my-2 mx-1"
-                                    onClick={() => this.checkDataForPurchase()}
-                                    disabled={is_enable ? "" : "disabled"}
-                                >
-                                    Худалдаж авах
-                                </button>
-                                <button
-                                    className="btn btn-xs btn-primary my-2 mx-1"
-                                    onClick={() => this.openCartSide()}
-                                    disabled={is_enable ? "" : "disabled"}
-                                >
-                                    Сагсанд нэмэх
-                                </button>
+                            <div className="ol-popup-contet">
+                                {datas && datas.map((layer, idx) =>
+                                    idx + 1 == startNumber &&
+                                    layer[0].map((values, v_idx) =>
+                                        v_idx == 1 &&
+                                        values.map((value, val_idx) =>
+                                        value[0] == 'point_name' ?
+                                        <b key={val_idx}>{value[1]}</b>
+                                        : null
+                                )))}
+                                <hr className="m-1 border border-secondary rounded"/>
+                                <table className="table borderless no-padding">
+                                    <tbody>
+                                        {
+                                            datas && datas.length > 0
+                                            ?
+                                                datas.map((layer, idx) =>
+                                                (idx + 1 == startNumber &&
+                                                layer[0].map((values, v_idx) =>
+                                                    v_idx == 1 &&
+                                                    values.map((value, val_idx) =>
+                                                        value[0] !== 'point_name' &&
+                                                        <tr style={{fontSize: '12px'}} key={val_idx}>
+                                                            <th>{value[0]}</th>
+                                                            <td>{value[1]}</td>
+                                                        </tr>
+                                                    )
+                                                )))
+                                            :
+                                            <tr><th>Хоосон байна</th></tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
+                    }
+                    {
+                        !is_empty
+                        ?
+                            this.state.is_purchase
+                            ?
+                                <div className="btn-group flex-wrap d-flex justify-content-center">
+                                    <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
+                                        <div className="spinner-border" role="status">
+                                            <span className="sr-only"></span>
+                                        </div>
+                                        {} Хүлээнэ үү..
+                                    </button>
+                                </div>
+                            :
+                            this.state.mode == 'mpoint_view'
+                            ?
+                                <div className="btn-group flex-wrap d-flex justify-content-center">
+                                    <button
+                                        className="btn btn-xs btn-primary my-2 mx-1"
+                                        onClick={() => this.checkDataForPurchase()}
+                                        disabled={is_enable ? "" : "disabled"}
+                                    >
+                                        Худалдаж авах
+                                    </button>
+                                    <button
+                                        className="btn btn-xs btn-primary my-2 mx-1"
+                                        onClick={() => this.openCartSide()}
+                                        disabled={is_enable ? "" : "disabled"}
+                                    >
+                                        Сагсанд нэмэх
+                                    </button>
+                                </div>
+                            :
+                            null
                         :
                         null
                     }
@@ -294,9 +304,8 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, code) {
-        // const datanud = [[["Полигонометрийн_сүлжээний_цэг.55",[["objectid","null"],["point_id","45546"],["point_name","holymoly"],["pid","GPS65100002"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","Өвөрхангай"],["sum","Богд"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","5"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"], [["Полигонометрийн_сүлжээний_цэг.58",[["objectid","null"],["point_id","489489"],["point_name","holyshit"],["pid","45245245"],["mclass","1"],["ondor_type","Эллипсойдын өндрийн утга"],["center_typ",null],["aimag","thhh"],["sum","dsadsadsa"],["sheet1","L"],["sheet2","44.0000000000"],["sheet3","102.0000000000"],["t_type","g105"],["ondor","787.0"],["point_class_name","Полигонометрийн сүлжээний цэг"],["point_class","2"]]],"mpoint_view","Полигонометрийн_сүлжээний_цэг"]]
+    getData(isload, datas, close, setSource, cartButton, is_empty) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, code})
+        this.renderComponent({datas, close, setSource, cartButton, is_empty})
     }
 }
