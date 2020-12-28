@@ -10,12 +10,7 @@ from geojson import Feature, FeatureCollection
 
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
-<<<<<<< HEAD
 from django.shortcuts import get_object_or_404, reverse
-from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, MDatasGeographical, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography, EmpPerm, EmpPermInspire
-=======
-from django.shortcuts import get_object_or_404
 
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import (
@@ -38,7 +33,6 @@ from backend.inspire.models import (
     EmpPerm,
     EmpPermInspire
     )
->>>>>>> 29fdc0f923f7fb547784f20806c12407534baa64
 from govorg.backend.org_request.models import ChangeRequest
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 
@@ -56,14 +50,11 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
-<<<<<<< HEAD
 from backend.dedsanbutets.models import ViewNames
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import User
 from itertools import groupby
-=======
 from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
->>>>>>> 29fdc0f923f7fb547784f20806c12407534baa64
 
 from main.utils import (
     gis_delete,
