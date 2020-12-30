@@ -94,6 +94,9 @@ def create(request, payload):
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
+    role_name = EmpRole.objects.filter(name=name).first()
+    if role_name:
+        return JsonResponse({'success': False})
 
     with transaction.atomic():
 

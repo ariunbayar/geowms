@@ -8,9 +8,7 @@ import * as Yup from 'yup'
 
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()
-        .required('Эрхийн нэр оруулна уу !'),
-    role_description: Yup.string()
-        .required('Эрхийн тайлбар оруулна уу !'),   
+        .required('Role нэр оруулна уу !'),
 })
 
 export class RoleAdd extends Component {
@@ -39,8 +37,8 @@ export class RoleAdd extends Component {
         this.removeItemFromArray = this.removeItemFromArray.bind(this)
     }
 
-    handleSave(values, { setStatus, setSubmitting }) {
-        const {is_continue, gov_perm_id } = this.state
+    handleSave(values, {setErrors }) {
+        const {gov_perm_id } = this.state
         this.setState({ handleSaveIsLoad: true })
         service
             .createRole( gov_perm_id, values.role_name, values.role_description, this.perms)
@@ -48,6 +46,10 @@ export class RoleAdd extends Component {
                 if(success) {
                     this.setState({ modal_alert_status: 'open'})
                     this.modalCloseTime()
+                }
+                else{
+                    setErrors({'role_name': 'Эрхийн нэр давхцаж байна.'})
+                    this.setState({ handleSaveIsLoad: false })
                 }
             })
     }
@@ -123,7 +125,7 @@ export class RoleAdd extends Component {
     }
 
     render() {
-        const { is_continue, gov_perm_id, initial_values} = this.state
+        const {initial_values} = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -136,10 +138,10 @@ export class RoleAdd extends Component {
                         </NavLink>
                     </div>
                     <Formik
-                        initialValues={ initial_values }
+                        initialValues={initial_values}
                         enableReinitialize
-                        validationSchema={ validationSchema }
-                        onSubmit={ this.handleSave}
+                        validationSchema={validationSchema}
+                        onSubmit={this.handleSave}
                     >
                         {({
                             errors,
@@ -161,7 +163,7 @@ export class RoleAdd extends Component {
                                         <div className="form-group col-md-12">
                                             <div className="row">
                                                 <div className="form-group col-md-6">
-                                                    <label htmlFor="role_name" >Эрхийн нэр:</label>
+                                                    <label htmlFor="role_name">Role нэр:</label>
                                                         <Field
                                                             name="role_name"
                                                             id="id_role_name"
@@ -171,7 +173,7 @@ export class RoleAdd extends Component {
                                                         <ErrorMessage className="text-danger" name="role_name" component="span"/>
                                                 </div>
                                                 <div className="form-group col-md-6">
-                                                    <label htmlFor="role_description" >Эрхийн тайлбар:</label>
+                                                    <label htmlFor="role_description">Role тайлбар:</label>
                                                     <Field
                                                         name="role_description"
                                                         id="id_role_description"
