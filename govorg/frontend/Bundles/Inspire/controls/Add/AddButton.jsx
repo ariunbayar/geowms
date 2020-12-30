@@ -28,7 +28,7 @@ export class SaveBtn extends Control {
 
         element.addEventListener('click', (event) => {
             event.preventDefault()
-            options.SaveBtn()
+            options.SaveBtn('add')
         })
         element.appendChild(elementa)
 

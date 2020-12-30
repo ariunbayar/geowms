@@ -733,8 +733,13 @@ export default class BarilgaSuurinGazar extends Component{
       }
     }
 
-    FormButton(){
-      this.setInActiveButtonStyle('form')
+    FormButton(add){
+      if(add) {
+        this.setInActiveButtonStyle(add)
+      }
+      else {
+        this.setInActiveButtonStyle('form')
+      }
       this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))
     }
 
@@ -860,7 +865,6 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SaveBtn(form_values) {
-      this.setInActiveButtonStyle('add')
       this.hideMetaList()
       const {modifyend_selected_feature_ID, modifyend_selected_feature_check, update_geom_from_list, build_name } = this.state
       if(modifyend_selected_feature_ID){
@@ -871,7 +875,7 @@ export default class BarilgaSuurinGazar extends Component{
                     true,
                     "Тийм",
                     `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
-                    null, 
+                    null,
                     null,
                     "Үгүй"
               )
