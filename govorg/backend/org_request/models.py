@@ -27,8 +27,8 @@ class ChangeRequest(models.Model):
         (KIND_CREATE, 'ҮҮССЭН'),
         (KIND_DELETE, 'УСТГАСАН'),
         (KIND_UPDATE, 'ЗАССАН'),
-        (KIND_REVOKE, 'ЦУЦЛАСАН'),
         (KIND_DIRECT, 'ШУУД'),
+        (KIND_REVOKE, 'ЦУЦЛАСАН'),
     )
 
     old_geo_id = models.CharField(max_length=100, null=True)

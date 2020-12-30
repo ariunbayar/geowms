@@ -36,7 +36,7 @@ export class RevokeRequestTable extends Component {
 
     render() {
         const { is_model_request_open } = this.state
-        const idx = this.props.idx
+        const { idx } = this.props
         const {
             last_name,
             first_name,
@@ -49,11 +49,11 @@ export class RevokeRequestTable extends Component {
             old_geo_id,
             order_no,
             state
-          } = this.props.values
+        } = this.props.values
         return (
             <tr>
                 <td>
-                    {idx + 1}
+                    {idx}
                 </td>
                 <td>
                     {theme_name + '/'+ package_name + '/' +feature_name}

@@ -8,22 +8,19 @@ export default class RevokeRequestForm extends Component {
 
     constructor(props) {
         super(props)
-        this.state={
-            items:[],
+        this.state = {
+            items: [],
             is_loading: false,
-            searchQuery: '',
-            currentPage: 1,
-            revokePerPage: 20,
-            list_length:null,
+            search_query: '',
+            current_page: 1,
+            revoke_per_page: 20,
+            list_length: null,
             search_state: '',
-            currentPage: '',
         }
         this.setLoading = this.setLoading.bind(this)
         this.paginate = this.paginate.bind(this);
         this.handleState = this.handleState.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
-    }
-    componentDidMount(){
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -39,13 +36,12 @@ export default class RevokeRequestForm extends Component {
 
     paginate(page, query, state) {
         this.setLoading()
-        const perpage = this.state.revokePerPage
-        this.setState({ currentPage: page })
+        const { revoke_per_page } = this.state
+        this.setState({ current_page: page })
         return service
-            .paginatedList(page, perpage, query, state)
+            .paginatedList(page, revoke_per_page, query, state)
             .then(page => {
                 this.setState({ items: page.items, list_length: page.items.length, choices: page.choices, is_loading: false });
-                // console.log(page)
                 return page
             })
     }
@@ -56,21 +52,20 @@ export default class RevokeRequestForm extends Component {
             this.setState({ [field]: e.target.value })
             this.paginate(1, e.target.value, this.state.search_state)
         }
-        else
-        {
+        else {
             this.setState({ [field]: e.target.value })
             this.paginate(1, e.target.value, this.state.search_state)
         }
     }
 
-    handleState(state) {
-        this.setState({ search_state: state })
-        const { currentPage, searchQuery} = this.state
-        this.paginate(1, searchQuery, state)
+    handleState(search_state) {
+        this.setState({ search_state })
+        const { search_query} = this.state
+        this.paginate(1, search_query, search_state)
     }
 
     render() {
-        const { is_loading, items, choices, searchQuery, currentPage } = this.state
+        const { is_loading, items, choices, search_state, current_page, revoke_per_page } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -80,10 +75,10 @@ export default class RevokeRequestForm extends Component {
                                 <input
                                     type="text"
                                     className="form-control form-control-xs"
-                                    id="searchQuery"
+                                    id="search_query"
                                     placeholder="Тушаалын дугаараар хайх"
-                                    onChange={(e) => this.handleSearch('searchQuery', e)}
-                                    value={this.state.searchQuery}
+                                    onChange={(e) => this.handleSearch('search_query', e)}
+                                    value={this.state.search_query}
                                 />
                             </div>
                             <div className="col-md-6">
@@ -136,9 +131,9 @@ export default class RevokeRequestForm extends Component {
                                         items.map((req, idx) =>
                                             <RevokeRequestTable
                                                 key={idx}
-                                                idx={idx}
-                                                values = {req}
-                                                paginate = {this.paginate}
+                                                idx={(current_page * revoke_per_page) - revoke_per_page + idx + 1}
+                                                values={req}
+                                                paginate={this.paginate}
                                             />
                                         )
                                     }
@@ -147,8 +142,9 @@ export default class RevokeRequestForm extends Component {
                         </div>
                         <Pagination
                             paginate={this.paginate}
-                            searchQuery = { this.state.searchQuery }
-                            sort_name = {this.state.sort_name}
+                            search_query={this.state.search_query}
+                            sort_name={this.state.sort_name}
+                            search_state={search_state}
                         />
                     </div>
                 </div>

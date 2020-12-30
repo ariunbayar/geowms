@@ -17,7 +17,6 @@ from django.conf import settings
 from django.utils.timezone import make_aware
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
-from main import utils
 
 
 def _convert_text_json(data):
@@ -46,10 +45,19 @@ def _get_revoke_request_display(revoke_request):
         }
 
 
+def _get_choices_from_model(Model, field_name):
+    choices = []
+    for f in Model._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == field_name:
+                choices.append(f.choices)
+    return choices
+
+
 @require_POST
 @ajax_required
-def all(request, payload):
-    org = Org.objects.filter(employee__user=request.user).first()
+def revokePaginate(request, payload):
+    org = get_object_or_404(Org, employee__user=request.user)
 
     page = payload.get('page')
     per_page = payload.get('per_page')
@@ -57,23 +65,26 @@ def all(request, payload):
     sort_name = payload.get('sort_name')
     order_at = payload.get('order_at')
     state = payload.get('state')
-    search = {}
-    items=[]
-    choices = []
-
-    for f in ChangeRequest._meta.get_fields():
-        if hasattr(f, 'choices'):
-            if f.name == 'state':
-                choices.append(f.choices)
 
     if not sort_name:
         sort_name = 'id'
 
-    if state:
-        search['state'] = state
+    revoke_requests = ChangeRequest.objects.annotate(
+        search=SearchVector(
+            'order_no',
+            'employee__user__first_name',
+            'employee__user__last_name'
+        )
+    ).filter(
+        search__icontains=query,
+        employee__org=org,
+        kind=ChangeRequest.KIND_REVOKE
+    ).order_by(sort_name)
 
-    revoke_requests = ChangeRequest.objects.annotate(search=SearchVector(
-        'order_no', 'employee__user__first_name', 'employee__user__last_name')).filter(search__contains=query, employee__org=org, kind=ChangeRequest.KIND_REVOKE, **search).order_by(sort_name)
+    if state:
+        revoke_requests = revoke_requests.filter(
+            state=state
+        )
 
     total_items = Paginator(revoke_requests, per_page)
     items_page = total_items.page(page)
@@ -88,7 +99,7 @@ def all(request, payload):
         'page': page,
         'total_page': total_page,
         'success': True,
-        'choices': choices,
+        'choices': _get_choices_from_model(ChangeRequest, 'state'),
     }
 
     return JsonResponse(rsp)
