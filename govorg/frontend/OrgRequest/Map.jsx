@@ -147,40 +147,48 @@ export default class RequestMap extends Component {
         };
 
         const geojsonObject =  GeoJson
-        if(geojsonObject['features'][0]){
-          const vectorSourceNew = new VectorSource({
-            features: new GeoJSON().readFeatures(geojsonObject['features'][0], {
-              dataProjection: this.state.dataProjection,
-              featureProjection: this.state.featureProjection,
-            }),
-          });
+        if(geojsonObject['features'])
+        { 
+          if(geojsonObject['features'][0]){
+            if(Object.keys(geojsonObject['features'][0]).length>0)
+            {            
+              const vectorSourceNew = new VectorSource({
+                features: new GeoJSON().readFeatures(geojsonObject['features'][0], {
+                  dataProjection: this.state.dataProjection,
+                  featureProjection: this.state.featureProjection,
+                }),
+              });
 
-          const vectorLayerNew = new VectorLayer({
-            source: vectorSourceNew,
-            style: function (feature) {
-              return styles_new[feature.getGeometry().getType()];
+              const vectorLayerNew = new VectorLayer({
+                source: vectorSourceNew,
+                style: function (feature) {
+                  return styles_new[feature.getGeometry().getType()];
+                }
+              });
+              this.map.addLayer(vectorLayerNew)
             }
-          });
-          this.map.addLayer(vectorLayerNew)
-        }
+          }
 
-        if(geojsonObject['features'].length > 1){
+          if(geojsonObject['features'][1]){
+            if(Object.keys(geojsonObject['features'][1]).length>0)
+                {           
+                  const vectorSourceOld = new VectorSource({
+                    features: new GeoJSON().readFeatures(geojsonObject['features'][1], {
+                      dataProjection: this.state.dataProjection,
+                      featureProjection: this.state.featureProjection,
+                    }),
+                  });
 
-          const vectorSourceOld = new VectorSource({
-            features: new GeoJSON().readFeatures(geojsonObject['features'][1], {
-              dataProjection: this.state.dataProjection,
-              featureProjection: this.state.featureProjection,
-            }),
-          });
+                  const vectorLayerOld = new VectorLayer({
+                    source: vectorSourceOld,
+                    style: function (feature) {
+                      return styles_old[feature.getGeometry().getType()];
+                    }
+                  });
 
-          const vectorLayerOld = new VectorLayer({
-            source: vectorSourceOld,
-            style: function (feature) {
-              return styles_old[feature.getGeometry().getType()];
-            }
-          });
-
-          this.map.addLayer(vectorLayerOld)
+                  this.map.addLayer(vectorLayerOld)
+                }
+          }
         }
     }
 
