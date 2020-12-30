@@ -61,9 +61,9 @@ export class Pagination extends Component {
         page = Math.max(page, 1)
         page = Math.min(page, this.state.total_page)
         this.setState({is_loading: true})
-        if(this.props.org_level){
-            const level = this.props.org_level
-            this.props.paginate(page, query, level)
+        if(this.props.search_state){
+            const search_state = this.props.search_state
+            this.props.paginate(page, query, search_state)
             .then(({ page, total_page}) => {
                 this.setState({
                     page,

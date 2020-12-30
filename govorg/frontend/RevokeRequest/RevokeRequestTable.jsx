@@ -29,7 +29,7 @@ export class RevokeRequestTable extends Component {
             .revokeState(id, state)
             .then(({ success }) => {
                 if (success) {
-                    this.props.getAll()
+                    this.props.paginate(1, '')
                 }
             })
     }
@@ -38,33 +38,28 @@ export class RevokeRequestTable extends Component {
         const { is_model_request_open } = this.state
         const idx = this.props.idx
         const {
-            id,
             last_name,
             first_name,
             theme_name,
             package_name,
             feature_name,
-            state,
-            form_json,
-            geo_json,
-            employee,
             org,
             created_at,
-            kind,
             order_at,
             old_geo_id,
-            order_no
+            order_no,
+            state
           } = this.props.values
         return (
             <tr>
-                <th>
+                <td>
                     {idx + 1}
-                </th>
+                </td>
                 <td>
                     {theme_name + '/'+ package_name + '/' +feature_name}
                 </td>
                 <td>
-                    {org+'/'+last_name.charAt(0).toUpperCase() + '.' + first_name}
+                    {org+'/'+last_name.charAt(0).toUpperCase() + '.' + first_name.charAt(0).toUpperCase() + first_name.substring(1)}
                 </td>
                 <td>
                     {order_no}

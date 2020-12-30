@@ -15,6 +15,9 @@ from backend.org.models import Org, Employee
 from datetime import datetime
 from django.conf import settings
 from django.utils.timezone import make_aware
+from django.core.paginator import Paginator
+from django.contrib.postgres.search import SearchVector
+from main import utils
 
 
 def _convert_text_json(data):
@@ -29,36 +32,63 @@ def _get_revoke_request_display(revoke_request):
             'id': revoke_request.id,
             'old_geo_id': revoke_request.old_geo_id,
             'order_no': revoke_request.order_no,
-            'order_at': revoke_request.order_at.strftime('%Y-%m-%d'),
+            'order_at': revoke_request.order_at.strftime('%Y-%m-%d') if revoke_request.order_at else '',
             'theme_name': LThemes.objects.filter(theme_id=revoke_request.theme_id).first().theme_name,
             'package_name': LPackages.objects.filter(package_id=revoke_request.package_id).first().package_name,
             'feature_name': LFeatures.objects.filter(feature_id=revoke_request.feature_id).first().feature_name,
             'last_name': revoke_request.employee.user.last_name,
             'first_name': revoke_request.employee.user.first_name,
             'org': revoke_request.employee.org.name,
-            'form_json': _convert_text_json(revoke_request.form_json),
+            'form_json': _convert_text_json(revoke_request.form_json) if revoke_request.form_json else '',
             'geo_json': revoke_request.geo_json,
             'state': revoke_request.get_state_display(),
             'kind': revoke_request.get_kind_display(),
         }
 
 
-@require_GET
+@require_POST
 @ajax_required
-def all(request):
+def all(request, payload):
+    org = Org.objects.filter(employee__user=request.user).first()
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    page = payload.get('page')
+    per_page = payload.get('per_page')
+    query = payload.get('query') or ''
+    sort_name = payload.get('sort_name')
+    order_at = payload.get('order_at')
+    state = payload.get('state')
+    search = {}
+    items=[]
+    choices = []
 
-    revoke_requests = ChangeRequest.objects.filter(employee__org=org, kind=ChangeRequest.KIND_REVOKE)
+    for f in ChangeRequest._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == 'state':
+                choices.append(f.choices)
 
-    revoke_request_list = [
+    if not sort_name:
+        sort_name = 'id'
+
+    if state:
+        search['state'] = state
+
+    revoke_requests = ChangeRequest.objects.annotate(search=SearchVector(
+        'order_no', 'employee__user__first_name', 'employee__user__last_name')).filter(search__contains=query, employee__org=org, kind=ChangeRequest.KIND_REVOKE, **search).order_by(sort_name)
+
+    total_items = Paginator(revoke_requests, per_page)
+    items_page = total_items.page(page)
+    items = [
         _get_revoke_request_display(revoke_request)
-        for revoke_request in revoke_requests
+        for revoke_request  in items_page.object_list
     ]
+    total_page = total_items.num_pages
 
     rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
         'success': True,
-        'revoke_requests': revoke_request_list,
+        'choices': choices,
     }
 
     return JsonResponse(rsp)
