@@ -31,11 +31,11 @@ export default class Маягт extends Component {
         if(!this.props.cancel_button_active) {
             if(this.props.roles[6]) {
                     if(null_form_isload) {
-                        service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success }) => {
+                        service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
                             if (success) {
                                 this.setState({is_loading: true})
                                 this.props.requestRefreshCount()
-                                this.addNotif('success', 'Property хадгалалаа', 'check')
+                                this.addNotif('success', info, 'check')
                             }
                         })
                     }
@@ -46,11 +46,11 @@ export default class Маягт extends Component {
                         this.props.requestRemove(values)
                     }
                     else {
-                        service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success }) => {
+                        service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info }) => {
                             if (success) {
                                 this.setState({is_loading: true})
                                 this.props.requestRefreshCount()
-                                this.addNotif('success', 'Property хадгалалаа', 'check')
+                                this.addNotif('success', info, 'check')
                             }
                         })
                     }
@@ -93,8 +93,7 @@ export default class Маягт extends Component {
     }
 
     handleCreate(){
-
-        service.detailNone(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
+        service.detailCreate(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
             if(success){
                 this.setState({
                     values:datas,
@@ -113,7 +112,7 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
-                    if(this.props.roles[6]) this.props.SaveBtn()
+                    this.props.SaveBtn()
                     this.handleCreate()
                     this.setState({is_loading:true})
                 }
@@ -129,7 +128,7 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
-                    if(this.props.roles[6]) this.props.SaveBtn()
+                    this.props.SaveBtn()
                     this.handleCreate()
                     this.setState({is_loading:true})
                 }
@@ -165,8 +164,7 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        const { cancel_button_active } = this.props
-        if (this.state.is_loading || values.length == 0) {
+        if (this.state.is_loading) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
@@ -213,7 +211,7 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.role == 1 || cancel_button_active ? true : false}>
+                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.roles.PERM_UPDATE ? false : true}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
@@ -230,7 +228,7 @@ export default class Маягт extends Component {
                                                 name={`form_values.${index}.data`|| ""}
                                                 as="select"
                                                 className='form-control'
-                                                disabled={friend.role == 1 || cancel_button_active ? true : false}
+                                                disabled={friend.roles.PERM_UPDATE ? false : true}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -239,7 +237,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
-                                                    disabled={friend.role == 1 || cancel_button_active ? true : false}
+                                                    disabled={friend.roles.PERM_UPDATE ? false : true}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                     />
@@ -279,10 +277,7 @@ export default class Маягт extends Component {
                                     </div>
                                 </div>
                                 <div>
-                                    {this.props.roles[6] ?
-                                    <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>:
-                                    <button type="submit" className="btn btn-block gp-btn-primary">Хадгалах</button>
-                                    }
+                                    <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>
                                 </div>
                             </div>
                             )}

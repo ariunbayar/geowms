@@ -14,7 +14,7 @@ function getAll() {
 
 function detail(gid, tid, fid) {
     const opts = getGetOptions()
-    return fetch(`${prefix}/${gid}/${tid}/${fid}/detail/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${gid}/${tid}/${fid}/detailUpdate/`, opts).then(handleResponse)
 }
 
 function controlToApprove(values, change_request_id) {

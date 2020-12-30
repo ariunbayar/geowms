@@ -8,7 +8,19 @@ import pytz
 from main.decorators import ajax_required
 from main.utils import refreshMaterializedView
 
-from backend.inspire.models import MGeoDatas, MDatasBoundary, MDatasBuilding, MDatasCadastral, MDatasGeographical, MDatasHydrography, LThemes, LPackages, LFeatures
+from backend.inspire.models import (
+    MGeoDatas,
+    MDatasBoundary,
+    MDatasBuilding,
+    MDatasCadastral,
+    MDatasGeographical,
+    MDatasHydrography,
+    LThemes,
+    LPackages,
+    LFeatures,
+    EmpPermInspire,
+    EmpPerm,
+)
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Org, Employee
 
@@ -54,10 +66,29 @@ def _get_choices_from_model(Model, field_name):
     return choices
 
 
+def _get_employees(request):
+    org = get_object_or_404(Employee, user=request.user).org
+    employees = Employee.objects.filter(org=org)
+    return employees
+
+
+def _get_emp_features(employees, request):
+    employee = employees.filter(user=request.user).first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
+    emp_feature = []
+    if emp_features:
+        for feature in emp_features:
+            if feature not in emp_feature:
+                emp_feature.append(feature)
+    return emp_feature
+
+
 @require_POST
 @ajax_required
 def revokePaginate(request, payload):
-    org = get_object_or_404(Org, employee__user=request.user)
+    employees = _get_employees(request)
+    emp_features = _get_emp_features(employees, request)
 
     page = payload.get('page')
     per_page = payload.get('per_page')
@@ -77,8 +108,8 @@ def revokePaginate(request, payload):
         )
     ).filter(
         search__icontains=query,
-        employee__org=org,
-        kind=ChangeRequest.KIND_REVOKE
+        kind=ChangeRequest.KIND_REVOKE,
+        feature_id__in=emp_features,
     ).order_by(sort_name)
 
     if state:

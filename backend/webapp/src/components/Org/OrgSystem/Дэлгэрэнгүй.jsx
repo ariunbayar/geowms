@@ -83,7 +83,7 @@ export class Дэлгэрэнгүй extends Component {
                             <input type="text" className="form-control col-6" disabled value={this.state.prvite_url}/>
                             <span className="input-group-btn">
                             <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.prvite_url)}>
-                                <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                             </button>
                             </span>
                         </div>
@@ -92,7 +92,7 @@ export class Дэлгэрэнгүй extends Component {
                             <input type="text" className="form-control col-6" disabled value={this.state.public_url}/>
                             <span className="input-group-btn">
                             <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
-                                <i class="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                             </button>
                             </span>
                         </div>
