@@ -469,6 +469,7 @@ def org_add(request, payload, level):
                         perm_kind=gov_role_inspire.perm_kind,
                         feature_id=gov_role_inspire.feature_id,
                         property_id=gov_role_inspire.property_id,
+                        data_type_id=gov_role_inspire.data_type_id,
                         geom=gov_role_inspire.geom,
                         created_by=gov_role_inspire.created_by,
                         updated_by=gov_role_inspire.updated_by,
@@ -1106,21 +1107,21 @@ def get_gov_roles(request, level, pk):
                 'perm_approve': t_perm_approve,
                 'perm_revoke': t_perm_revoke,
             })
-        gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
-        if gov_perm_inspire_all:
-            for datas in gov_perm_inspire_all:
-                disable = False
-                if datas.gov_role_inspire:
-                    disable = True
-                roles.append({
-                        'perm_kind': datas.perm_kind,
-                        'feature_id': datas.feature_id,
-                        'data_type_id': datas.data_type_id,
-                        'property_id': datas.property_id,
-                        'geom': datas.geom,
-                        'disable': disable,
-                    })
 
+    gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
+    if gov_perm_inspire_all:
+        for datas in gov_perm_inspire_all:
+            disable = False
+            if datas.gov_role_inspire:
+                disable = True
+            roles.append({
+                    'perm_kind': datas.perm_kind,
+                    'feature_id': datas.feature_id,
+                    'data_type_id': datas.data_type_id,
+                    'property_id': datas.property_id,
+                    'geom': datas.geom,
+                    'disable': disable,
+                })
     return JsonResponse({
         'data': data,
         'roles': roles,
