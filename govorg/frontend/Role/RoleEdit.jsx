@@ -9,8 +9,6 @@ import * as Yup from 'yup'
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()
         .required('Эрхийн нэр оруулна уу !'),
-    role_description: Yup.string()
-        .required('Эрхийн тайлбар оруулна уу !'),   
 })
 
 
@@ -41,16 +39,21 @@ export class RoleEdit extends Component {
         this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
     }
 
-    handleSave(values, { setStatus, setSubmitting }) {
+    handleSave(values, { setStatus, setSubmitting, setErrors}) {
         const {gov_perm_id } = this.state
         const id = this.props.match.params.id
         this.setState({ handleSaveIsLoad: true })
         service
             .updateRole(id, gov_perm_id, values.role_name, values.role_description, this.remove_perms, this.perms)
-            .then(({success}) => {
+            .then(({success, info}) => {
                 if (success) {
-                    this.setState({ modal_alert_status: 'open' })
+                    this.setState({modal_alert_status: "open"})
+                    setStatus('saved')
+                    setSubmitting(false)
                     this.modalCloseTime()
+                }else{
+                    setErrors({'role_name': info})
+                    setSubmitting(false)
                 }
             })
     }
@@ -254,33 +257,24 @@ export class RoleEdit extends Component {
                                     </div>
                                     <br />
                                     <div className="form-group">
-                                        {this.state.handleSaveIsLoad ?
-                                            <>
-                                                <button className="btn btn-block gp-btn-primary">
-                                                    <a className="spinner-border text-light" role="status">
-                                                        <span className="sr-only">Loading...</span>
-                                                    </a>
-                                                    <span> Шалгаж байна. </span>
-                                                </button>
-                                                <ModalAlert
-                                                    modalAction={() => this.modalClose()}
-                                                    status={this.state.modal_alert_status}
-                                                    title="Амжилттай хадгаллаа"
-                                                    model_type_icon="success"
-                                                />
-                                            </>
-                                            :
-                                            <button type='submit' className="btn btn-block gp-btn-primary" disabled={Object.keys(errors).length >0} onClick={this.handleSave} >
-                                                Хадгалах
-                                            </button>
-                                        }
+                                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || Object.keys(errors).length >0}>
+                                            {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                            {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                            {!isSubmitting && 'Хадгалах' }
+                                        </button>
                                     </div>
                                 </Form>
                             )
                         }}
                     </Formik>
                 </div>
-
+                
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon = "success"
+                />
             </div>
         )
     }

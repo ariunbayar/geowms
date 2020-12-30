@@ -37,21 +37,19 @@ export class RoleAdd extends Component {
         this.removeItemFromArray = this.removeItemFromArray.bind(this)
     }
 
-    handleSave(values, {setErrors }) {
+    handleSave(values, { setStatus, setSubmitting, setErrors }) {
         const {gov_perm_id } = this.state
-        this.setState({ handleSaveIsLoad: true })
-        service
-            .createRole( gov_perm_id, values.role_name, values.role_description, this.perms)
-            .then(({success}) => {
-                if(success) {
-                    this.setState({ modal_alert_status: 'open'})
-                    this.modalCloseTime()
-                }
-                else{
-                    setErrors({'role_name': 'Эрхийн нэр давхцаж байна.'})
-                    this.setState({ handleSaveIsLoad: false })
-                }
-            })
+        service.createRole(gov_perm_id, values.role_name, values.role_description, this.perms).then(({ success}) => {
+            if (success) {
+                this.setState({modal_alert_status: "open"})
+                setStatus('saved')
+                setSubmitting(false)
+                this.modalCloseTime()
+            }else{
+                setErrors({'role_name': 'Role-ийн нэр давхцаж байна'})
+                setSubmitting(false)
+            }
+        })
     }
 
     modalClose() {
@@ -197,26 +195,11 @@ export class RoleAdd extends Component {
                                     </div>
                                     <br />
                                     <div className="form-group">
-                                        {this.state.handleSaveIsLoad ?
-                                            <>
-                                                <button className="btn btn-block gp-btn-primary">
-                                                    <a className="spinner-border text-light" role="status">
-                                                        <span className="sr-only">Loading...</span>
-                                                    </a>
-                                                    <span> Шалгаж байна. </span>
-                                                </button>
-                                                <ModalAlert
-                                                    modalAction={() => this.modalClose()}
-                                                    status={this.state.modal_alert_status}
-                                                    title="Амжилттай хадгаллаа"
-                                                    model_type_icon="success"
-                                                />
-                                            </>
-                                            :
-                                            <button type='submit' className="btn btn-block gp-btn-primary" disabled={Object.keys(errors).length >0} onClick={this.handleSave} >
-                                                Хадгалах
+                                            <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || Object.keys(errors).length >0}>
+                                                {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                                {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                                {!isSubmitting && 'Хадгалах' }
                                             </button>
-                                        }
                                     </div>
                                 </Form>
                             )
@@ -224,6 +207,12 @@ export class RoleAdd extends Component {
                     </Formik>
                 </div>
 
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon = "success"
+                />
             </div>
         )
     }

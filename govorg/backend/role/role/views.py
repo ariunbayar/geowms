@@ -125,6 +125,10 @@ def update(request, payload, pk):
     add_roles = payload.get('add_roles')
 
     emp_role = get_object_or_404(EmpRole, pk=pk)
+    if emp_role.name != name:
+        if EmpRole.objects.filter(name=name).first():
+            return JsonResponse({'success': False, 'info': 'Role-ийн нэр давхцаж байна.'})
+
     emp_role.updated_by = request.user
     emp_role.save()
 
@@ -139,7 +143,7 @@ def update(request, payload, pk):
             for role in add_roles:
                 _set_emp_role_inspire_data(emp_role, role, request.user)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'info':''})
 
 
 def _get_emp_roles_data_display(emp_role):
