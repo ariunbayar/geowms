@@ -38,12 +38,15 @@ export class RevokeRequestTable extends Component {
         const { is_model_request_open } = this.state
         const { idx } = this.props
         const {
+            id,
             last_name,
             first_name,
             theme_name,
             package_name,
             feature_name,
             org,
+            geo_json,
+            form_json,
             created_at,
             order_at,
             old_geo_id,
