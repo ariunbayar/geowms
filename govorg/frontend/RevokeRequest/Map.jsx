@@ -114,7 +114,15 @@ export class RequestMap extends Component {
               return styles_new[feature.getGeometry().getType()];
             }
           });
-          this.map.getView().fit(vectorSourceNew.getExtent(), {size: this.map.getSize(), padding: [25, 25, 25, 25], maxZoom: 18, duration: 2})
+          this.map.getView().fit(
+            vectorSourceNew.getExtent(),
+            {
+              size: this.map.getSize(),
+              padding: [25, 25, 25, 25],
+              maxZoom: 20,
+              // duration: 4000 // herwee hugatsaatai harahaar eniig heregleh
+            }
+          )
           this.map.addLayer(vectorLayerNew)
         }
     }
