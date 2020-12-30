@@ -87,16 +87,33 @@ def _delete_emp_role_inspire_data(emp_role, roles):
     return False
 
 
+def _role_name_validation(name, role):
+    errors = {}
+    check_name = False
+    if not name:
+        errors['role_name'] = 'Хоосон байна утга оруулна уу.'
+
+    if role:
+        if role.name != name:
+            check_name = True
+
+    if check_name or not role:
+        role_by_name = EmpRole.objects.filter(name=name).first()
+        if role_by_name:
+            errors['role_name'] = 'Нэр давхцаж байна !.'
+    return errors
+
+
 @require_POST
 @ajax_required
 def create(request, payload):
-
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
-    role_name = EmpRole.objects.filter(name=name).first()
-    if role_name:
-        return JsonResponse({'success': False})
+    errors = {}
+    errors = _role_name_validation(name, None)
+    if errors:
+        return JsonResponse({'success': False, 'errors':errors})
 
     with transaction.atomic():
 
@@ -110,9 +127,9 @@ def create(request, payload):
             for role in roles:
                 _set_emp_role_inspire_data(emp_role, role, request.user)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'errors': errors})
 
-    return JsonResponse({'success': False})
+    return JsonResponse({'success': False, 'errors': errors})
 
 
 @require_POST
@@ -125,9 +142,12 @@ def update(request, payload, pk):
     add_roles = payload.get('add_roles')
 
     emp_role = get_object_or_404(EmpRole, pk=pk)
-    if emp_role.name != name:
-        if EmpRole.objects.filter(name=name).first():
-            return JsonResponse({'success': False, 'info': 'Role-ийн нэр давхцаж байна.'})
+
+    errors = {}
+    errors = _role_name_validation(name, emp_role)
+
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
 
     emp_role.updated_by = request.user
     emp_role.save()
@@ -143,7 +163,7 @@ def update(request, payload, pk):
             for role in add_roles:
                 _set_emp_role_inspire_data(emp_role, role, request.user)
 
-        return JsonResponse({'success': True, 'info':''})
+        return JsonResponse({'success': True, 'errors': errors})
 
 
 def _get_emp_roles_data_display(emp_role):

@@ -8,7 +8,7 @@ import * as Yup from 'yup'
 
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()
-        .required('Эрхийн нэр оруулна уу !'),
+        .required('Нэр оруулна уу !'),
 })
 
 
@@ -45,14 +45,14 @@ export class RoleEdit extends Component {
         this.setState({ handleSaveIsLoad: true })
         service
             .updateRole(id, gov_perm_id, values.role_name, values.role_description, this.remove_perms, this.perms)
-            .then(({success, info}) => {
+            .then(({success, errors}) => {
                 if (success) {
                     this.setState({modal_alert_status: "open"})
                     setStatus('saved')
                     setSubmitting(false)
                     this.modalCloseTime()
                 }else{
-                    setErrors({'role_name': info})
+                    setErrors(errors)
                     setSubmitting(false)
                 }
             })
