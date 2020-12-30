@@ -55,7 +55,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.state = {
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857', 
+          featureProjection: 'EPSG:3857',
           tid: props.match.params.tid,
           pid: props.match.params.pid,
           fid: props.match.params.fid,
@@ -186,7 +186,6 @@ export default class BarilgaSuurinGazar extends Component{
       const { type } = this.state
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
-      console.log(roles);
       if(roles.PERM_CREATE){
         if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
         else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
@@ -220,6 +219,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       this.setState({ is_loading:false, roles})
     }
+
     loadData(){
 
         const rows = this.state.rows
