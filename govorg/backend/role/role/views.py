@@ -87,7 +87,8 @@ def _delete_emp_role_inspire_data(emp_role, roles):
     return False
 
 
-def _role_name_validation(name, role):
+def _role_name_validation(payload, role):
+    name = payload.get('role_name')
     errors = {}
     check_name = False
     if not name:
@@ -110,8 +111,7 @@ def create(request, payload):
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
-    errors = {}
-    errors = _role_name_validation(name, None)
+    errors = _role_name_validation(payload, None)
     if errors:
         return JsonResponse({'success': False, 'errors':errors})
 
@@ -143,8 +143,7 @@ def update(request, payload, pk):
 
     emp_role = get_object_or_404(EmpRole, pk=pk)
 
-    errors = {}
-    errors = _role_name_validation(name, emp_role)
+    errors = _role_name_validation(payload, emp_role)
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})

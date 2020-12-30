@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage} from 'formik'
 import ModalAlert from '../components/helpers/ModalAlert';
 import InsPerms from './Role/GovPerms'
 import { service } from './Role/service'
-import * as Yup from 'yup' 
+import * as Yup from 'yup'
 
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()

@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage} from 'formik'
 import ModalAlert from "../components/helpers/ModalAlert";
 import { service } from "./Role/service";
 import InsPerms from './Role/GovPerms'
-import * as Yup from 'yup' 
+import * as Yup from 'yup'
 
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()
@@ -173,7 +173,7 @@ export class RoleEdit extends Component {
             .then(({ success, role_id, role_name, role_description, roles }) => {
                 if (success) {
                     this.setState({ role_id, roles, is_continue: true, initial_values:{
-                        role_name, role_description, 
+                        role_name, role_description,
                     }
                     })
                 }
@@ -268,7 +268,6 @@ export class RoleEdit extends Component {
                         }}
                     </Formik>
                 </div>
-                
                 <ModalAlert
                     modalAction={() => this.modalClose()}
                     status={this.state.modal_alert_status}
