@@ -593,12 +593,14 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
                             value_type = 'number'
                         if value_type == 'single-select':
                             value_type = 'code_list_id'
+                        if value_type == 'link':
+                            value_type = 'text'
 
                     if 'code' in value_type:
                         filter_value = value_type
                     else:
                         filter_value = "value_" + value_type
-                    if getattr(mdata_value, filter_value):
+                    if hasattr(mdata_value, filter_value):
                         value = getattr(mdata_value, filter_value)
                     else:
                         value = None
@@ -1015,7 +1017,6 @@ def _export_pdf(payment, download_type):
 
 
 @require_GET
-@ajax_required
 @login_required
 def download_purchase(request, pk, download_type):
     is_created = False

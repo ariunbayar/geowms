@@ -1,6 +1,6 @@
 Plugin Builder Results
 
-Your plugin User_Login was created in:
+Your plugin UserSubmit was created in:
     /usr/share/qgis/python/plugins/user_login
 
 Your QGIS plugin directory is located at:

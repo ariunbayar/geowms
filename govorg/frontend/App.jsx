@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-import Employee from './Employee/EmployeeForm'
-import GovRole from './GovRole/'
 import { System } from "./System"
 import { Meta } from './Meta'
 import { Password } from './User/Password'
 import { Profile } from './User/Profile'
+
+import InsPerms from './Role/Role/GovPerms'
+import Gov from './Role/Gov/index'
+import { Employee } from './Role/Employee'
 
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
@@ -17,6 +19,7 @@ import ChangeRequest from './Bundles/Inspire/ChangeRequest'
 import { Help } from './Help'
 import { service } from "./service"
 import MenuItem from "../../src/components/MenuItem"
+import { Role } from './Role';
 
 export class App extends Component {
 
@@ -63,8 +66,8 @@ export class App extends Component {
             tuuhen_ov,
             tseg_burtgel,
         } = this.state
-        const org_inspire = this.props.org.org_inspire
 
+        const { emp_role, org_role } = this.props.org
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -77,11 +80,13 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Эрх">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/" text="Байгууллага"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/role/employees/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/org/" text="Байгууллага"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Role"></MenuItem>
                             </ul>
                         </MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/system/" text="Систем"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
                         <MenuItem
                             icon="gp-text-primary fa fa-plug"
@@ -108,42 +113,49 @@ export class App extends Component {
                                     </MenuItem>
                                 }
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
-                                {org_inspire.length > 0 ? org_inspire.map((theme, idx) =>
-                                    <MenuItem
-                                        key={idx}
-                                        icon="gp-text-primary fa fa-circle-o"
-                                        url={`/gov/org/map/${theme.id}`}
-                                        text={theme.name}
-                                    >
-                                        <ul className="sidebar-submenu">
-                                            {
-                                                theme.packages.length > 0 ? theme.packages.map((pack, idy) =>
-                                                    <MenuItem
-                                                        key={idy}
-                                                        icon="fa fa-circle-o gp-text-primary"
-                                                        url={`/gov/org/map/${theme.id}/${pack.id}`}
-                                                        text={pack.name}
-                                                    >
-                                                        <ul className="sidebar-submenu">
-                                                            {
-                                                                pack.features.length > 0 ? pack.features.map((feat, idz) =>
-                                                                    <MenuItem
-                                                                        key={idz}
-                                                                        icon="fa fa-circle-o gp-text-primary"
-                                                                        url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
-                                                                        text={feat.name}
-                                                                        count={feat.count}
-                                                                    >
-                                                                    </MenuItem>
-                                                                ) : null
-                                                            }
-                                                        </ul>
-                                                    </MenuItem>
-                                                ) : null
-                                            }
-                                        </ul>
-                                    </MenuItem>
-                                ) : null}
+
+                                    {
+                                       Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
+                                        <MenuItem
+                                            key={idx}
+                                            icon="gp-text-primary fa fa-circle-o"
+                                            url={`/gov/org/map/${theme.id}`}
+                                            text={theme.name}
+                                        >
+                                            <ul className="sidebar-submenu">
+                                                {
+                                                    Object.keys(emp_role.package_features).length >0 ? emp_role.package_features.map((pack, idy) =>
+                                                    theme.id == pack.parent_id ?
+                                                        <MenuItem
+                                                            key={idy}
+                                                            icon="fa fa-circle-o gp-text-primary"
+                                                            url={`/gov/org/map/${theme.id}/${pack.id}`}
+                                                            text={pack.name}
+                                                        >
+                                                            <ul className="sidebar-submenu">
+                                                                {
+                                                                    Object.keys(pack.features).length >0 ? pack.features.map((feat, idz) =>
+                                                                        <MenuItem
+                                                                            key={idz}
+                                                                            icon="fa fa-circle-o gp-text-primary"
+                                                                            url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                            text={feat.name}
+                                                                            count={feat.count}
+                                                                        >
+                                                                        </MenuItem>
+                                                                    ):null
+                                                                }
+                                                            </ul>
+                                                        </MenuItem>
+                                                        : null
+                                                    ) : null
+                                                }
+                                            </ul>
+                                            </MenuItem>
+                                        ): null
+
+                                    }
+
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>
@@ -162,12 +174,17 @@ export class App extends Component {
                             }
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/meta/" component={Meta} />
+
+                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
+                            <Route path="/gov/role/role/" component={Role} />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
+
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={OrgRequest} />
                             <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/role/employees/" component={Employee} />
-                            <Route exact path="/gov/role/" component={GovRole} />
+                            <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                            <Route exact path="/gov/perm/org/" component={Gov} />
+                            <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                             <Route exact path="/gov/profile/password/" component={Password} />

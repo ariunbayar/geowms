@@ -11,8 +11,28 @@ from geojson import Feature, FeatureCollection
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
+
 from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, MDatasGeographical, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding, MDatasHydrography
+from backend.inspire.models import (
+    LThemes,
+    LPackages,
+    LFeatures,
+    MDatasBoundary,
+    MDatasGeographical,
+    MDatasCadastral,
+    LDataTypeConfigs,
+    LFeatureConfigs,
+    LDataTypes,
+    LProperties,
+    LValueTypes,
+    LCodeListConfigs,
+    LCodeLists,
+    MGeoDatas,
+    MDatasBuilding,
+    MDatasHydrography,
+    EmpPerm,
+    EmpPermInspire
+    )
 from govorg.backend.org_request.models import ChangeRequest
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 
@@ -22,7 +42,7 @@ from django.core.files.storage import FileSystemStorage
 from backend.changeset.models import ChangeSet
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required, gov_bundle_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter, WKBReader, fromstr
 from backend.org.models import Org, Employee, InspirePerm
 
@@ -30,6 +50,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
+from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
 
 from main.utils import (
     gis_delete,
@@ -39,7 +60,8 @@ from main.utils import (
     gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
-    refreshMaterializedView
+    refreshMaterializedView,
+    get_config
 )
 
 
@@ -112,8 +134,6 @@ def _get_package(theme_id):
 @ajax_required
 def changeset_all(request):
 
-    feature = []
-    geoJson = []
     changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
     features = [_get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
     feature_collection = FeatureCollection(features)
@@ -125,32 +145,34 @@ def changeset_all(request):
 
 @require_GET
 @ajax_required
-def getRoles(request,pid, fid):
+def getRoles(request, fid):
 
-    inspire_roles = []
-    org = get_object_or_404(Org, employee__user=request.user)
-    org_roles = InspirePerm.objects.filter(org=org, module=3, module_root_id=pid, module_id=fid, perm_view=True).first()
-    if org_roles:
-        inspire_roles = [
-            org_roles.perm_view,
-            org_roles.perm_create,
-            org_roles.perm_remove,
-            org_roles.perm_update,
-            org_roles.perm_revoke,
-            org_roles.perm_review,
-            org_roles.perm_approve,
-        ]
+    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
-        rsp = {
-            'success': True,
-            'roles': inspire_roles,
-        }
-    else:
-        rsp = {
-            'success': False,
-        }
+    employee = get_object_or_404(Employee, user__username=request.user)
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
+
+    for perm_kind in perm_kinds:
+        if perm_kind == EmpPermInspire.PERM_VIEW:
+            inspire_roles['PERM_VIEW'] = True
+        elif perm_kind == EmpPermInspire.PERM_CREATE:
+            inspire_roles['PERM_CREATE'] = True
+        elif perm_kind == EmpPermInspire.PERM_REMOVE:
+            inspire_roles['PERM_REMOVE'] = True
+        elif perm_kind == EmpPermInspire.PERM_UPDATE:
+            inspire_roles['PERM_UPDATE'] = True
+        elif perm_kind == EmpPermInspire.PERM_APPROVE:
+            inspire_roles['PERM_APPROVE'] = True
+        elif perm_kind == EmpPermInspire.PERM_REVOKE:
+            inspire_roles['PERM_REVOKE'] = True
+    rsp = {
+        'roles':inspire_roles,
+        'success': True
+    }
 
     return JsonResponse(rsp)
+
 
 @require_GET
 @ajax_required
@@ -346,52 +368,6 @@ def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
 
-def _get_property(ob):
-    data = None
-    value_type = ''
-    data_list = []
-    if ob['value_type_id'] == 'number':
-        value_type = 'number'
-        data = ob.get('value_number'),
-    elif ob['value_type_id'] == 'double':
-        value_type = 'number'
-        data = ob.get('value_number'),
-    elif ob['value_type_id'] == 'multi-text':
-        value_type = 'text'
-        data = ob['value_text'],
-    elif ob['value_type_id'] == 'text':
-        value_type = 'text'
-        data = ob['value_text'],
-    elif ob['value_type_id'] == 'date':
-        value_type = 'date'
-        data = _datetime_display(ob['value_date']),
-    elif ob['value_type_id'] == 'link':
-        value_type = 'text'
-        data = ob['value_text'],
-    elif ob['value_type_id'] == 'boolean':
-        value_type = 'text'
-        data = ob['value_text'],
-    else:
-        value_type = 'option'
-        data = ob['code_list_id'],
-        data_list = _code_list_display(ob['property_id'])
-    if data:
-        data = data[0]
-    return {
-        'building_id':ob['building_id'],
-        'geo_id':ob['geo_id'],
-        'property_name':ob['property_name'],
-        'property_id':ob['property_id'],
-        'property_code':ob['property_code'],
-        'property_definition':ob['property_definition'],
-        'value_type_id':ob['value_type_id'],
-        'value_type':value_type,
-        'data':data if data else '',
-        'data_list': data_list,
-        'role':False
-    }
-
-
 def _get_type(value_type_id):
     if value_type_id == 'number':
         value_type = 'number'
@@ -411,101 +387,119 @@ def _get_type(value_type_id):
         value_type = 'option'
     return value_type
 
+def _get_property(ob, roles, lproperties):
+
+    data = ''
+    value_type = ''
+    data_list = []
+    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+    value_type = _get_type(lproperties.value_type_id)
+
+    if value_type == 'option':
+       data_list =  _code_list_display(lproperties.property_id)
+    elif value_type == 'text':
+        data = ob.get('value_text') or ''
+    elif value_type == 'number':
+        data = ob.get('value_number') or ''
+    else:
+        data = ob.get('value_date') or ''
+
+    for role in roles:
+        if role.get('property_id') == lproperties.property_id:
+            property_roles = role.get('roles')
+
+
+    return {
+        'pk':ob.get('pk'),
+        'property_name': lproperties.property_name,
+        'property_id': lproperties.property_id,
+        'property_code': lproperties.property_code,
+        'property_definition': lproperties.property_definition,
+        'value_type_id': lproperties.value_type_id,
+        'value_type': value_type,
+        'data': data,
+        'data_list': data_list,
+        'roles': property_roles
+    }
+
+def _get_emp_property_roles(employee, fid):
+
+    property_ids = []
+    property_details = []
+    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+    if property_perms:
+        for prop in property_perms:
+            if prop.get('property_id') not in property_ids:
+                property_ids.append(prop.get('property_id'))
+        for property_id in property_ids:
+            for prop in property_perms:
+                if property_id == prop['property_id']:
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
+                        property_roles['PERM_VIEW'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
+                        property_roles['PERM_CREATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
+                        property_roles['PERM_REMOVE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
+                        property_roles['PERM_UPDATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
+                        property_roles['PERM_APPROVE'] = True
+                    else:
+                        property_roles['PERM_REVOKE'] = True
+
+            property_details.append({
+                'property_id': property_id,
+                'roles':property_roles
+            })
+
+    return property_ids, property_details
+
 
 @require_GET
 @ajax_required
-def detail(request, pk, fid):
-    org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
-    find_cursor = connections['default'].cursor()
-    find_cursor.execute('''
-    select
-        datas.building_id,
-        datas.geo_id,
-        l.property_name,
-        l.property_code,
-        l.property_definition,
-        l.value_type_id,
-        datas.property_id,
-        datas.value_text,
-        datas.value_number,
-        datas.value_date,
-        datas.code_list_id
-    from l_properties l
-    inner join m_datas_building datas on
-        l.property_id = datas.property_id
-    where
-        datas.geo_id = %s
-    order by property_name asc
-    '''
-    , [pk])
-
-    data = dict_fetchall(find_cursor)
-    data = list(data)
-    org_propties_front = []
-    properties = [_get_property(ob) for ob in data]
-    for org_prop in org_properties:
-        for inspire_prop in properties:
-            if org_prop.module_id == inspire_prop['property_id']:
-                org_propties_front.append({
-                    'building_id':inspire_prop['building_id'] if inspire_prop['building_id'] else '',
-                    'geo_id':inspire_prop['geo_id'] if inspire_prop['geo_id'] else inspire_prop['geo_id'],
-                    'property_name':inspire_prop['property_name'] if inspire_prop['property_name'] else '',
-                    'property_id':inspire_prop['property_id'] if inspire_prop['property_id'] else '',
-                    'property_code':inspire_prop['property_code'] if inspire_prop['property_code'] else '',
-                    'property_definition':inspire_prop['property_definition'] if inspire_prop['property_definition'] else '',
-                    'value_type_id':inspire_prop['value_type_id'] if inspire_prop['value_type_id'] else '',
-                    'value_type':inspire_prop['value_type'] if inspire_prop['value_type'] else '',
-                    'data': inspire_prop['data'] if inspire_prop['data'] else '',
-                    'data_list':inspire_prop['data_list'] if inspire_prop['data_list'] else '',
-                    'role': '1' if org_prop.perm_update else '0',
-                })
+def detail(request, gid, fid, tid):
+    property_ids = []
+    properties = []
+    employee = get_object_or_404(Employee, user__username=request.user)
+    property_ids, property_details = _get_emp_property_roles(employee, fid)
+    theme_code = LThemes.objects.filter(theme_id=tid).first().theme_code
+    model = get_theme_name(theme_code)
+    if property_ids:
+        mdatas = model.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'pk')
+        for prop in mdatas:
+            lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
+            properties.append(_get_property(prop, property_details, lproperty))
     rsp = {
         'success': True,
-        'datas': org_propties_front
+        'datas': properties
     }
+
     return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
-def detailNone(request, tid, pid, fid):
-    org = get_object_or_404(Org, employee__user=request.user)
-    org_properties = InspirePerm.objects.filter(org=org, module=4, module_root_id=fid,perm_view=True)
-    find_cursor = connections['default'].cursor()
-    find_cursor.execute('''
-        select datas.feature_id, datas.feature_config_id, datas.data_type_id,datas.property_id, l.property_name, l.property_code,l.property_definition,l.value_type_id
-        from l_properties l
-        inner join (select l_feature_configs.feature_id, l_feature_configs.feature_config_id, l_feature_configs.data_type_id,l_data_type_configs.property_id
-        from l_feature_configs
-        inner join l_data_type_configs on l_data_type_configs.data_type_id = l_feature_configs.data_type_id
-        where l_feature_configs.feature_id = 38
-        ) datas
-        on datas.property_id = l.property_id
-    '''
-    , [fid])
-
-    data = dict_fetchall(find_cursor)
-    datas = list(data)
+def detailCreate(request, tid, pid, fid):
+    property_ids = []
+    property_roles = []
     org_propties_front = []
+    value_data = {
+        'pk':'',
+        'value_text':'',
+        'value_date':'',
+        'value_number':''
+        }
+    employee = get_object_or_404(Employee, user__username=request.user)
+    property_ids, property_roles = _get_emp_property_roles(employee, fid)
 
-
-    for data in datas:
-        org_propties_front.append({
-            'property_name':data['property_name'] if data['property_name'] else '' ,
-            'property_id':data['property_id'] if data['property_id'] else '',
-            'property_code':data['property_code'] if data['property_code'] else '',
-            'property_definition': data['property_definition'] if data['property_definition'] else '',
-            'value_type_id':data['value_type_id'] if data['value_type_id'] else '',
-            'feature_id' : data['feature_id'] if data['feature_id'] else '',
-            'theme_id' : tid,
-            'package_id' : pid,
-            'value_type' : _get_type(data['value_type_id']) if _get_type(data['value_type_id']) else '',
-            'data': '',
-            'data_list': _code_list_display(data['property_id']) if data['value_type_id'] == 'single-select' else '',
-            # 'role': not org_prop.perm_update
-        })
-
+    if property_ids:
+        for prop in property_ids:
+            lproperty = LProperties.objects.filter(property_id=prop).first()
+            org_propties_front.append(_get_property(value_data, property_roles, lproperty))
     rsp = {
         'success': True,
         'datas': org_propties_front
@@ -530,6 +524,7 @@ def findGeomField(fields):
         if field.atttypid == 'geometry':
             geom_field = field.attname
     return geom_field
+
 
 
 @require_POST
@@ -636,11 +631,80 @@ def geomAdd(request, payload, fid):
     return JsonResponse(rsp)
 
 
+def _is_geom_included(geojson, org_geo_id):
+
+    geojson = json.dumps(geojson)
+
+    cursor = connections['default'].cursor()
+    sql = """
+        select ST_Contains(
+            ((
+                SELECT (ST_Transform(geo_data,4326))
+                FROM m_geo_datas
+                WHERE geo_id = %s
+            )),
+            ((
+                select ST_GeomFromGeoJSON(%s)
+            ))
+        )
+    """
+    cursor.execute(sql, [org_geo_id, geojson])
+    is_included = cursor.fetchone()[0]
+    return is_included
+
+
+def _check_form_json(fid, form_json, employee):
+
+    request_json = []
+    property_ids, roles = _get_emp_property_roles(employee, fid)
+    if form_json and roles:
+        for role in roles:
+            for propert in form_json['form_values']:
+                if role.get('property_id') == propert.get('property_id'):
+                    request_json.append({
+                        'pk':propert.get('pk') or '',
+                        'property_name': propert.get('property_name') or '',
+                        'property_id': propert.get('property_id'),
+                        'property_code': propert.get('property_code') or '',
+                        'property_definition': propert.get('property_definition') or '',
+                        'value_type_id': propert.get('value_type_id') or '',
+                        'value_type': propert.get('value_type') or '',
+                        'data': propert.get('data') or '',
+                        'data_list': propert.get('data_list') or '',
+                        'roles': propert.get('roles') or ''
+                    })
+
+    return request_json if request_json else ''
+
+
+def _has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
+    success = True
+    info = ''
+
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm__employee=employee)
+    qs = qs.filter(feature_id=fid)
+    qs = qs.filter(geom=geom)
+    qs = qs.filter(perm_kind=perm_kind)
+
+    if not qs:
+        success = False
+        info = "Албан хаагчийн эрх олгогдоогүй байна."
+
+    if geo_json:
+        is_included = _is_geom_included(geo_json, employee.org.geo_id)
+        if not is_included:
+            success = False
+            info = "Байгууллагын эрх олгогдоогүй байна."
+
+    return success, info
+
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def create(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+
     tid = payload.get('tid')
     pid = payload.get('pid')
     fid = payload.get('fid')
@@ -649,6 +713,12 @@ def create(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
+    employee = get_object_or_404(Employee, user=request.user)
+    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
+
+    form_json = _check_form_json(fid, form_json, employee)
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -666,15 +736,15 @@ def create(request, payload):
 
     rsp = {
         'success': True,
-        'info': "Амжилттай",
+        'info': "Хүсэлт амжилттай үүслээ",
     }
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
-def createDel(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+@login_required(login_url='/gov/secure/login/')
+def remove(request, payload):
     tid = payload.get('tid')
     pid = payload.get('pid')
     fid = payload.get('fid')
@@ -682,6 +752,15 @@ def createDel(request, payload):
     form_json = payload.get('form_json')
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
+
+    employee = get_object_or_404(Employee, user__username=request.user)
+    geo_data = _get_geom(old_geo_id, fid)
+    geo_data = _convert_text_json(geo_data[0]["geom"])
+    geo_json = _get_geoJson(geo_data)
+    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
+
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
 
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
@@ -697,31 +776,34 @@ def createDel(request, payload):
             order_at=order_at,
             order_no=order_no,
     )
+
     rsp = {
         'success': True,
-        'info': "Амжилттай",
+        'info': "Хүсэлт амжилттай үүслээ",
     }
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
-def createUpd(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+@login_required(login_url='/gov/secure/login/')
+def update(request, payload):
+
     tid = payload.get('tid')
     pid = payload.get('pid')
     fid = payload.get('fid')
     old_geo_id = payload.get('old_geo_id')
     form_json = payload.get('form_json')
-    geo_json = payload.get('geo_json')
+    geo_json = payload.get('geo_json') or ''
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    if not form_json:
-        form_json = ''
-    if not geo_json:
-        geo_json = ''
+    employee = get_object_or_404(Employee, user__username=request.user)
+    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
 
+    form_json = _check_form_json(fid, form_json, employee)
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
             new_geo_id = None,
@@ -739,7 +821,7 @@ def createUpd(request, payload):
 
     rsp = {
         'success': True,
-        'info': "Амжилттай",
+        'info': "Хүсэлт амжилттай үүслээ",
     }
     return JsonResponse(rsp)
 
@@ -758,7 +840,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     keys = ''
     feature_config_id = None
     savename = model_name
-    model_name = _MDatasName(model_name)
+    model_name = get_theme_name(model_name)
     code_value = None
     try:
         if not isinstance(model_name, str):
@@ -844,7 +926,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     return rsp
 
 
-def _MDatasName(model_name):
+def get_theme_name(model_name):
     if model_name == 'au':
         model_name = MDatasBoundary
     if model_name == 'bu':
@@ -1041,4 +1123,18 @@ def FileUploadSaveData(request, tid, fid):
             'success': False,
             'info': return_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
         }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_qgis_url(request):
+    emp = get_object_or_404(Employee, user=request.user)
+    qgis_local_base_url = get_config('qgis_local_base_url')
+    rsp = {
+        'success': True,
+        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
     return JsonResponse(rsp)

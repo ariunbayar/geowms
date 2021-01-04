@@ -2,7 +2,7 @@ import {handleResponse, getPostOptions, getGetOptions} from '../components/helpe
 
 export const service = {
     paginatedList,
-    detail
+    detail,
 };
 
 function paginatedList(page, per_page, query) {
@@ -19,5 +19,5 @@ function detail(id) {
         ...getGetOptions(),
     }
 
-    return fetch(`/back/api/систем/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
+    return fetch(`/gov/api/system/${id}/detail/`, opts).then(handleResponse)
 }

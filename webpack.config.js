@@ -102,8 +102,8 @@ module.exports = {
     plugins: [
         new webpack.ProgressPlugin(),
         new CleanWebpackPlugin({
-            cleanStaleWebpackAssets: false,
-            cleanOnceBeforeBuildPatterns: ['geoportal_app/static/dist-dev/**/*'],
+            cleanStaleWebpackAssets: true,
+            cleanOnceBeforeBuildPatterns: ['static/dist_dev/**/*'],
         }),
         hhwp({
             chunks: ['backend/webapp'],

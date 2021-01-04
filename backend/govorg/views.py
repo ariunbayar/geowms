@@ -1,17 +1,21 @@
-import uuid
-
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.postgres.search import SearchVector
+from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
+from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_POST, require_GET
-from django.core.paginator import Paginator
 
-from main.decorators import ajax_required
+from backend.token.utils import TokenGeneratorSystem
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
+
+from main.decorators import ajax_required
+from main import utils
+
 from .models import GovOrg
-from django.contrib.postgres.search import SearchVector
-from django.utils.timezone import localtime, now
+from .forms import SystemForm
 
 
 def _get_govorg_display(govorg):
@@ -28,32 +32,32 @@ def _get_govorg_display(govorg):
     }
 
 
-def _generate_govorg_token():
-    return uuid.uuid4().hex[:32]
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def үүсгэх(request, payload):
-    org_id = payload.get('org_id')
-    website = payload.get('website')
+def хадгалах(request, payload, pk=None):
 
-    govorg = GovOrg.objects.create(
-        name=payload.get('name'),
-        token=_generate_govorg_token(),
-        org_id=org_id,
-        website=website
-    )
+    if pk:
+        system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+        form = SystemForm(payload, instance=system)
+    else:
+        form = SystemForm(payload)
 
-    layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
-    govorg.wms_layers.set(layers)
+    if form.is_valid():
 
-    rsp = {
-        'success': True,
-    }
+        with transaction.atomic():
 
-    return JsonResponse(rsp)
+            form.instance.token = TokenGeneratorSystem().get()
+            system = form.save()
+
+            layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
+            system.wms_layers.set(layers)
+
+        return JsonResponse({'success': True})
+
+    else:
+
+        return JsonResponse({'success': False, 'errors': form.errors})
 
 
 def _get_govorg_detail_display(request, govorg):
@@ -64,7 +68,6 @@ def _get_govorg_detail_display(request, govorg):
             'is_active': wms.is_active,
             'url': wms.url,
             'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
-            'public_url': request.build_absolute_uri(reverse('api:service:proxy', args=[govorg.token, wms.pk]))
         }
         for wms in WMS.objects.all()
     ]
@@ -81,31 +84,11 @@ def _get_govorg_detail_display(request, govorg):
 def дэлгэрэнгүй(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    system_local_base_url = utils.get_config('system_local_base_url')
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
-        'public_url': request.build_absolute_uri(reverse('api:service:proxy-all', args=[govorg.token])),
-        'success': True,
-    }
-
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def хадгалах(request, payload, pk):
-
-    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-
-    govorg.name = payload.get('name')
-    govorg.website = payload.get('website')
-    govorg.org_id = payload.get('org_id')
-    govorg.save()
-
-    layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
-    govorg.wms_layers.set(layers)
-
-    rsp = {
+        'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
+        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
         'success': True,
     }
 
@@ -118,7 +101,7 @@ def хадгалах(request, payload, pk):
 def шинэ_токен(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-    govorg.token = _generate_govorg_token()
+    govorg.token = TokenGeneratorSystem().get()
     govorg.save()
 
     rsp = {

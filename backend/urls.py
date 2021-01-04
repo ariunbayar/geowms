@@ -76,7 +76,7 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('employee-remove-<int:pk>/', org_views.employee_remove, name='employee-remove'),
         path('employee-detail-<int:pk>/', org_views.employee_detail, name='employee-detail'),
-        path('employee-update-<int:pk>/', org_views.employee_update, name='employee-update'),
+        path('level-<int:level>/employee-update-<int:pk>/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
         path('level-<int:level>/org-remove/', org_views.org_remove, name='org-remove'),
         path('level-<int:level>/<int:pk>/employeeList/', org_views.employee_list),
@@ -106,9 +106,9 @@ urlpatterns = [
     ], 'log'))),
 
     path('api/систем/', include(([
-        path('үүсгэх/', govorg_views.үүсгэх, name='үүсгэх'),
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
-        path('<int:pk>/хадгалах/', govorg_views.хадгалах, name='хадгалах'),
+        path('үүсгэх/', govorg_views.хадгалах),
+        path('<int:pk>/хадгалах/', govorg_views.хадгалах),
         path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
@@ -123,6 +123,12 @@ urlpatterns = [
         path('site/save/', config_views.site_configs_save),
         path('geoserver/', config_views.geoserver_configs),
         path('geoserver/save/', config_views.geoserver_configs_save),
+        path('system/', config_views.system_configs),
+        path('system/save/', config_views.system_configs_save),
+        path('email/', config_views.email_configs),
+        path('email/save/', config_views.email_configs_save),
+        path('qgis/', config_views.qgis_configs),
+        path('qgis/save/', config_views.qgis_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([

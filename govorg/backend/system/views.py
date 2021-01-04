@@ -1,16 +1,15 @@
-from django.shortcuts import render
-from backend.org.models import Org, OrgRole, Employee
-from geoportal_app.models import User
-from backend.bundle.models import Bundle
+from backend.org.models import Org
 from backend.wmslayer.models import WMSLayer
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from django.db import connections
 from django.contrib.postgres.search import SearchVector
 from backend.govorg.models import GovOrg
+from backend.wms.models import WMS
+from main import utils
+
 
 def _get_govorg_display(govorg):
 
@@ -20,6 +19,7 @@ def _get_govorg_display(govorg):
         'id': govorg.pk,
         'name': govorg.name,
         'token': govorg.token,
+        'website': govorg.website,
         'created_at': govorg.created_at.strftime('%Y-%m-%d'),
         'layers': layers,
     }
@@ -31,7 +31,7 @@ def systemList(request, payload):
     org = Org.objects.filter(employee__user=request.user).first()
     page = payload.get('page')
     per_page = payload.get('per_page')
-    query = payload.get('query')
+    query = payload.get('query') or ''
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'id'
@@ -50,6 +50,41 @@ def systemList(request, payload):
         'items': items,
         'page': page,
         'total_page': total_page,
+    }
+
+    return JsonResponse(rsp)
+
+
+def _get_system_detail_display(request, system):
+
+    wms_list = [
+        {
+            'id': wms.id,
+            'name': wms.name,
+            'is_active': wms.is_active,
+            'url': wms.url,
+            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+        }
+        for wms in WMS.objects.all()
+    ]
+
+    return {
+        **_get_govorg_display(system),
+        'wms_list': wms_list,
+    }
+
+
+@require_GET
+@ajax_required
+def detail(request, pk):
+
+    system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    system_local_base_url = utils.get_config('system_local_base_url')
+    rsp = {
+        'system': _get_system_detail_display(request, system),
+        'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[system.token])),
+        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[system.token]),
+        'success': True,
     }
 
     return JsonResponse(rsp)
