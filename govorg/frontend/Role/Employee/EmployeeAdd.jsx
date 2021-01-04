@@ -21,7 +21,7 @@ export class EmployeeAdd extends Component {
                 first_name: '',
                 position: '',
                 email: '',
-                gender: '',
+                gender: 'Эрэгтэй',
                 register: '',
                 is_admin: false,
                 choose_role: '',
@@ -111,7 +111,7 @@ export class EmployeeAdd extends Component {
                     setSubmitting(false)
                     this.setState({model_type_icon: 'danger'})
                 }
-                this.setState({ modal_alert_status: 'open', title: info})
+                this.setState({ modal_alert_status: 'open', title: "Алдаа гарлаа"})
                 this.modalCloseTime()
             })
     }
