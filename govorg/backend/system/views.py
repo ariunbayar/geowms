@@ -12,8 +12,7 @@ from backend.wms.models import WMS
 from main import utils
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
-from datetime import datetime
-
+from django.utils.timezone import localtime, now
 
 def _get_govorg_display(govorg):
 
@@ -89,7 +88,7 @@ def detail(request, pk):
     rsp = {
         'system': _get_system_detail_display(request, system),
         'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[system.token])),
-        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[system.token]),
+        'private_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[system.token]),
         'success': True,
     }
 
@@ -106,7 +105,7 @@ def file_download(request, pk, code, types, service_type):
     if not govorg.wms_layers.filter(code=code):
         raise Http404
 
-    if service_type == 'prvite':
+    if service_type == 'private':
         system_local_base_url = utils.get_config('system_local_base_url')
         proxy_url = system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
     elif service_type == 'public':
@@ -114,7 +113,7 @@ def file_download(request, pk, code, types, service_type):
     else:
         raise Http404
 
-    date_now = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    date_now = str(localtime(now()).strftime("%Y-%m-%d_%H-%M"))
     if types == 'json':
         req_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(url=proxy_url[0], code=code)
         filename = '{}.json'.format(date_now)
@@ -131,3 +130,4 @@ def file_download(request, pk, code, types, service_type):
     response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
 
     return response
+print(str(localtime(now()).strftime("%Y-%m-%d_%H-%M")))

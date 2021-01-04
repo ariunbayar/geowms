@@ -14,7 +14,7 @@ export class Дэлгэрэнгүй extends Component {
             govorg: {},
             govorg_wms_list: [],
             public_url: '',
-            prvite_url: '',
+            private_url: '',
             is_state: false,
             proxy: '/back/api/систем'
         }
@@ -35,7 +35,7 @@ export class Дэлгэрэнгүй extends Component {
     componentDidMount() {
         service
             .detail(this.props.match.params.system_id)
-            .then(({govorg, public_url, prvite_url}) => {
+            .then(({govorg, public_url, private_url}) => {
                 const govorg_wms_list =
                     govorg.wms_list
                         .map((wms) => {
@@ -47,7 +47,7 @@ export class Дэлгэрэнгүй extends Component {
                             }
                         })
                         .filter((wms) => wms.layer_list.length)
-                this.setState({govorg, govorg_wms_list, public_url, prvite_url})
+                this.setState({govorg, govorg_wms_list, public_url, private_url})
             })
     }
 
@@ -85,9 +85,9 @@ export class Дэлгэрэнгүй extends Component {
                         <a className={is_state ? "ml-2 btn btn-dark text-white btn-sm" : "ml-2 btn btn-primary text-white btn-sm"} onClick={() => this.setState({is_state:false})}>Интернэт сүлжээ</a>
                         {is_state ?
                         <div className="input-group mt-2">
-                            <input type="text" className="form-control col-6" disabled value={this.state.prvite_url}/>
+                            <input type="text" className="form-control col-6" disabled value={this.state.private_url}/>
                             <span className="input-group-btn">
-                            <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.prvite_url)}>
+                            <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.private_url)}>
                                 <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
                             </button>
                             </span>
@@ -110,8 +110,8 @@ export class Дэлгэрэнгүй extends Component {
                                     <li key={idx}>
                                         {layer.title} ({layer.code})
                                         <p className="row ml-1">
-                                            <a className="ml-2" href={`${proxy}/${id}/${layer.code}/json/${is_state ? 'privite' : 'public'}/file-download/`}>json</a>
-                                            <a className="ml-2" href={`${proxy}/${id}/${layer.code}/gml/${is_state ? 'privite' : 'public'}/file-download/`}>gml</a>
+                                            <a className="ml-2" href={`${proxy}/${id}/${layer.code}/json/${is_state ? 'private' : 'public'}/file-download/`}>json</a>
+                                            <a className="ml-2" href={`${proxy}/${id}/${layer.code}/gml/${is_state ? 'private' : 'public'}/file-download/`}>gml</a>
                                         </p>
                                     </li>
                                 )}

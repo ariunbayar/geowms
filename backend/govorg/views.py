@@ -90,7 +90,7 @@ def дэлгэрэнгүй(request, pk):
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
         'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
-        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
+        'private_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
         'success': True,
     }
 
@@ -185,7 +185,7 @@ def file_download(request, pk, code, types, service_type):
     if not govorg.wms_layers.filter(code=code):
         raise Http404
 
-    if service_type == 'prvite':
+    if service_type == 'private':
         system_local_base_url = utils.get_config('system_local_base_url')
         proxy_url = system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
     elif service_type == 'public':
@@ -193,7 +193,7 @@ def file_download(request, pk, code, types, service_type):
     else:
         raise Http404
 
-    date_now = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    date_now = str(localtime(now()).strftime("%Y-%m-%d_%H-%M"))
     if types == 'json':
         req_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(url=proxy_url[0], code=code)
         filename = '{}.json'.format(date_now)
