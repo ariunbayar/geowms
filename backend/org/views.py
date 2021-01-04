@@ -1396,8 +1396,7 @@ def form_options(request):
     code_list_id = get_object_or_404(LCodeLists, code_list_code='1stOrder\n').code_list_id
     feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-    firstOrder_geom = get_object_or_404(
-, property_id=property_id, code_list_id=code_list_id, feature_config_id__in=feature_config_ids).geo_id
+    firstOrder_geom = get_object_or_404(MDatasBoundary, property_id=property_id, code_list_id=code_list_id, feature_config_id__in=feature_config_ids).geo_id
     rsp = {
         'success': True,
         'secondOrders': admin_levels,
