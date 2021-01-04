@@ -387,11 +387,12 @@ def _get_type(value_type_id):
         value_type = 'option'
     return value_type
 
+
 def _get_property(ob, roles, lproperties):
 
     data = ''
     value_type = ''
-    data_list = []
+    data_list = ''
     property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
     value_type = _get_type(lproperties.value_type_id)
 

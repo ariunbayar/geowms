@@ -27,33 +27,32 @@ export default class Маягт extends Component {
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list } = this.props
-        if(!this.props.cancel_button_active) {
-            if(this.props.roles[6]) {
-                    if(null_form_isload) {
-                        service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
-                            if (success) {
-                                this.setState({is_loading: true})
-                                this.props.requestRefreshCount()
-                                this.addNotif('success', info, 'check')
-                            }
-                        })
-                    }
-                    else if (modifyend_selected_feature_check || update_geom_from_list) {
-                        this.props.SaveBtn(values)
-                    }
-                    else if (remove_button_active) {
-                        this.props.requestRemove(values)
-                    }
-                    else {
-                        service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info }) => {
-                            if (success) {
-                                this.setState({is_loading: true})
-                                this.props.requestRefreshCount()
-                                this.addNotif('success', info, 'check')
-                            }
-                        })
-                    }
+        const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list, cancel_button_active, roles } = this.props
+        if(!cancel_button_active) {
+            if(roles.PERM_APPROVE) {
+                if(null_form_isload) {
+                    service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.props.requestRefreshCount()
+                            this.addNotif('success', info, 'check')
+                        }
+                    })
+                }
+                else if (modifyend_selected_feature_check || update_geom_from_list) {
+                    this.props.SaveBtn(values)
+                }
+                else if (remove_button_active) {
+                    this.props.requestRemove(values)
+                }
+                else {
+                    service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.props.requestRefreshCount()
+                            this.addNotif('success', info, 'check')
+                        }
+                    })
                 }
             }
             else {
@@ -65,7 +64,7 @@ export default class Маягт extends Component {
                         }
                     })
                 }
-                else {
+                else if(!null_form_isload){
                     service.update(values, this.state.pid, this.state.fid).then(({ success }) => {
                         if (success) {
                             this.setState({is_loading: true})
@@ -74,7 +73,8 @@ export default class Маягт extends Component {
                     })
                 }
             }
-        if (this.props.cancel_button_active) {
+        }
+        else if (cancel_button_active) {
             this.props.requestCancel(values.order_at, values.order_no, values.form_values)
         }
     }

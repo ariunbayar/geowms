@@ -220,9 +220,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ is_loading:false, roles})
     }
 
-    loadData(){
+    loadData(rows){
 
-        const rows = this.state.rows
         const map = this.map
         const styles = {
           'MultiPolygon': new Style({
@@ -322,7 +321,7 @@ export default class BarilgaSuurinGazar extends Component{
           const { id, geom } = row
           if (geom){
             const feature = (new GeoJSON().readFeatures(geom, {
-                dataProjection: this.state.dataProjection,
+                dataProjection: this.state.featureProjection,
                 featureProjection: this.state.featureProjection,
             }))[0]
             feature.setProperties({ id })
@@ -461,8 +460,8 @@ export default class BarilgaSuurinGazar extends Component{
           if (!this.state.remove_button_active || !this.state.cancel_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
+          if (this.state.modify_button_active) this.DrawButton()
           const selectedFeature_ID = event.selected[0].getProperties()['id']
-          this.DrawButton()
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
@@ -605,8 +604,7 @@ export default class BarilgaSuurinGazar extends Component{
       service
           .rows(this.state.pid, this.state.fid)
           .then(({ rows }) => {
-              this.setState({ rows })
-              this.loadData()
+              this.loadData(rows)
           })
     }
 
@@ -664,6 +662,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     setInActiveButtonStyle(active_id) {
+      console.log(active_id);
       document.getElementById('⚙-toggle-' + active_id + '-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
       const { button_ids } = this.state
       button_ids.map((in_active, idx) => {
@@ -798,11 +797,16 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     CancelButton() {
+      this.setInActiveButtonStyle('cancel')
       this.hideMetaList()
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
+      if (this.state.cancel_button_active) {
+        this.setState({ cancel_button_active: false })
+      }
+      else {
       this.setState({ cancel_button_active: true, modify_button_active: false })
-      this.setInActiveButtonStyle('cancel')
+      }
     }
 
     cancelModal(){
@@ -940,6 +944,7 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({modify_button_active: false})
       }
       else {
+        this.DrawButton()
         this.setState({modify_button_active: true, remove_button_active: false, cancel_button_active: false})
       }
       this.drawE.setActive(false);
@@ -1149,7 +1154,6 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     DrawButton() {
-      this.setInActiveButtonStyle('shapeDraw')
       const dragBox = new DragBox({
         condition: platformModifierKeyOnly,
       });
