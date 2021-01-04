@@ -287,6 +287,7 @@ export class EmployeeAdd extends Component {
                                                         dontDid={true}
                                                         org_roles={org_roles}
                                                         role={roles}
+                                                        is_check_perm={this.perms}
                                                     />
                                                 : null
                                             }

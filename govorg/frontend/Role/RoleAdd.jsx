@@ -191,6 +191,7 @@ export class RoleAdd extends Component {
                                             sendAllValue={this.getAllValue}
                                             dontDid={true}
                                             org_roles={org_roles}
+                                            is_check_perm={this.perms}
                                         />
                                     </div>
                                     <br />

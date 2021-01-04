@@ -3,6 +3,7 @@ import {Switch, Route} from "react-router-dom"
 import {service} from "./service"
 import {PermAcc} from './PermAccordion'
 import "./ins.css"
+import { set } from "ol/transform"
 
 export default class InsPerms extends Component {
 
@@ -314,7 +315,7 @@ export default class InsPerms extends Component {
 
     render() {
         const {themes, package_features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name, is_role_border, is_emp_border } = this.state
-        const { action_type, is_employee } = this.props
+        const { action_type, is_employee, is_check_perm } = this.props
         return (
             <div className="row">
                 <div className="col-md-6 p-0">
@@ -445,6 +446,7 @@ export default class InsPerms extends Component {
                                                         is_role_emp_id={property.roles[perm.is_role_emp_id]}
                                                         is_emp_perm={property.roles[perm.is_employee_perm]}
                                                         is_employee={is_employee}
+                                                        is_check_perm={is_check_perm ? is_check_perm.filter((item) => item.gov_perm_inspire_id == property.roles[perm.insp_id]).length > 0 : null}
                                                     />
                                                 ))}
                                             </tr>
@@ -464,8 +466,8 @@ export class PermChecks extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            addable: false,
-            // editable: this.props.is_role_check,
+            addable: props.is_check_perm || false,
+            editable: props.is_check_perm || false,
         }
         this.handleOnChange = this.handleOnChange.bind(this)
     }
