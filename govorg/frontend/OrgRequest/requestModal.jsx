@@ -147,7 +147,6 @@ export default class RequestModal extends Component {
                                                     <input
                                                         className='form-control'
                                                         disabled={true}
-                                                        placeholder={prop.property_name}
                                                         value={prop.data}
                                                         type={prop.value_type}
                                                     />
@@ -195,7 +194,7 @@ export default class RequestModal extends Component {
                                             зөвшөөрөхдөө итгэлтэй байна уу ?`}
                                             title="Тохиргоог зөвшөөрөх"
                                             status={this.state.status}
-                                            model_type_icon = "success"
+                                            model_type_icon = "warning"
                                             actionNameDelete="зөвшөөрөх"
                                         />
                                     }
