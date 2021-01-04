@@ -22,7 +22,8 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import EmpPerm
+from backend.inspire.models import MDatasBoundary
+from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 
@@ -1390,10 +1391,18 @@ def form_options(request):
 
     admin_levels = utils.get_administrative_levels()
     roles = _get_roles_display()
+    feature_id = get_object_or_404(LFeatures, feature_code='au-au-au').feature_id
+    property_id = get_object_or_404(LProperties, property_code='NationalLevel').property_id
+    code_list_id = get_object_or_404(LCodeLists, code_list_code='1stOrder\n').code_list_id
+    feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+
+    firstOrder_geom = get_object_or_404(
+, property_id=property_id, code_list_id=code_list_id, feature_config_id__in=feature_config_ids).geo_id
     rsp = {
         'success': True,
         'secondOrders': admin_levels,
         'roles': roles,
+        'firstOrder_geom': firstOrder_geom,
     }
 
     return JsonResponse(rsp)
