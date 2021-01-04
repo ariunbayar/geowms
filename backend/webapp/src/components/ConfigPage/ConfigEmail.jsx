@@ -180,7 +180,7 @@ export default class ConfigEmail extends Component {
                                                 <Field
                                                     name="EMAIL_HOST_PASSWORD"
                                                     id="EMAIL_HOST_PASSWORD"
-                                                    type="text"
+                                                    type="password"
                                                     className="form-control"
                                                 />
                                             </div>

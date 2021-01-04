@@ -884,7 +884,7 @@ export default class BarilgaSuurinGazar extends Component{
                     "Тийм",
                     `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
                     null,
-                    null,
+                    "warning",
                     "Үгүй"
               )
               this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
@@ -894,7 +894,7 @@ export default class BarilgaSuurinGazar extends Component{
           }
       }
       else{
-        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, null, "Үгүй")
+        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, "warning", "Үгүй")
         else this.addNotif('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
       }
     }
