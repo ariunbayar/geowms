@@ -16,6 +16,7 @@ export class Дэлгэрэнгүй extends Component {
             public_url: '',
             prvite_url: '',
             is_state: false,
+            proxy: '/back/api/систем'
         }
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.addNotif = this.addNotif.bind(this)
@@ -62,9 +63,10 @@ export class Дэлгэрэнгүй extends Component {
 
     render() {
 
-        const {name, token, website} = this.state.govorg
+        const {id, name, token, website} = this.state.govorg
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
+        const {is_state, proxy} = this.state
         return (
             <div className="my-4">
                 <div className="row">
@@ -79,9 +81,9 @@ export class Дэлгэрэнгүй extends Component {
                         <h5>{name}</h5>
                         <p><strong>Token</strong>: {token} </p>
                         {website && <p><strong>Вебсайт</strong>: {website} </p>}
-                        <a className={this.state.is_state ? "btn btn-primary text-white btn-sm" : "btn btn-dark text-white btn-sm"} onClick={() => this.setState({is_state:true})}>Төрийн сүлжээ</a>
-                        <a className={this.state.is_state ? "ml-2 btn btn-dark text-white btn-sm" : "ml-2 btn btn-primary text-white btn-sm"} onClick={() => this.setState({is_state:false})}>Интернэт сүлжээ</a>
-                        {this.state.is_state ?
+                        <a className={is_state ? "btn btn-primary text-white btn-sm" : "btn btn-dark text-white btn-sm"} onClick={() => this.setState({is_state:true})}>Төрийн сүлжээ</a>
+                        <a className={is_state ? "ml-2 btn btn-dark text-white btn-sm" : "ml-2 btn btn-primary text-white btn-sm"} onClick={() => this.setState({is_state:false})}>Интернэт сүлжээ</a>
+                        {is_state ?
                         <div className="input-group mt-2">
                             <input type="text" className="form-control col-6" disabled value={this.state.prvite_url}/>
                             <span className="input-group-btn">
@@ -108,8 +110,8 @@ export class Дэлгэрэнгүй extends Component {
                                     <li key={idx}>
                                         {layer.title} ({layer.code})
                                         <p className="row ml-1">
-                                            <a className="ml-2" href={(this.state.is_state ? this.state.prvite_url : this.state.public_url) + layer.json}>json</a>
-                                            <a className="ml-2" href={(this.state.is_state ? this.state.prvite_url : this.state.public_url) + layer.gml}>gml</a>
+                                            <a className="ml-2" href={`${proxy}/${id}/${layer.code}/json/${is_state ? 'privite' : 'public'}/file-download/`}>json</a>
+                                            <a className="ml-2" href={`${proxy}/${id}/${layer.code}/gml/${is_state ? 'privite' : 'public'}/file-download/`}>gml</a>
                                         </p>
                                     </li>
                                 )}

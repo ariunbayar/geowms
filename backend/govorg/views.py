@@ -16,7 +16,9 @@ from main import utils
 
 from .models import GovOrg
 from .forms import SystemForm
-
+import requests
+from django.http import HttpResponse, Http404
+from datetime import datetime
 
 def _get_govorg_display(govorg):
 
@@ -171,3 +173,40 @@ def govorgList(request, payload):
         'total_page': total_page,
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@user_passes_test(lambda u: u.is_superuser)
+def file_download(request, pk, code, types, service_type):
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    if not govorg.wms_layers.filter(code=code):
+        raise Http404
+
+    if service_type == 'prvite':
+        system_local_base_url = utils.get_config('system_local_base_url')
+        proxy_url = system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
+    elif service_type == 'public':
+        proxy_url = request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
+    else:
+        raise Http404
+
+    date_now = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    if types == 'json':
+        req_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(url=proxy_url[0], code=code)
+        filename = '{}.json'.format(date_now)
+    elif types == 'gml':
+        req_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}'.format(url=proxy_url[0], code=code)
+        filename = '{}.xml'.format(date_now)
+    else:
+        raise Http404
+
+    response = requests.get(req_url, request.GET, headers={**BASE_HEADERS}, timeout=5)
+    content_type = response.headers.get('content-type')
+    content = response.content
+    response = HttpResponse(content, content_type=content_type)
+    response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+
+    return response

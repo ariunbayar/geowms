@@ -34,6 +34,8 @@ urlpatterns = [
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
+            path('<int:pk>/detail/', system_views.detail, name='detail'),
+            path('<int:pk>/<str:code>/<str:types>/<str:service_type>/file-download/', system_views.file_download, name='file-download'),
         ], 'system'))),
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),

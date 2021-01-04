@@ -113,6 +113,7 @@ urlpatterns = [
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
         path('govorgList/', govorg_views.govorgList, name='govorgList'),
+        path('<int:pk>/<str:code>/<str:types>/<str:service_type>/file-download/', govorg_views.file_download, name='file-download'),
     ], 'govorg'))),
 
     path('api/config/', include(([
