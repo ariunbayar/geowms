@@ -534,7 +534,6 @@ def _get_Feature_info_from_url(polygon, layer):
     full_url =  url + 'service=' + service + '&version=' + version + '&request=' +request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1)  + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
     with urllib.request.urlopen(full_url) as response:
         get_features = response.read().decode("utf-8")
-        print(get_features)
         for feature in json.loads(get_features)['features']:
             geo_id = feature['id']
             geo_id = geo_id.split('.')[len(geo_id.split('.')) - 1]
