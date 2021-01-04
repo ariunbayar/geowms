@@ -25,3 +25,9 @@ AS $$
         return rsp.content
 $$;
 ```
+
+
+SMTP сервер ажиллуулах:
+```sh
+python -m smtpd -c DebuggingServer -n localhost:1025
+```

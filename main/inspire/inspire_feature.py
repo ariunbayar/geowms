@@ -66,7 +66,7 @@ class InspireFeature():
         self.select_options = select_options
 
         for i_data_type, i_properties in select_options.items():
-            if i_data_type == 'geo_id':
+            if isinstance(i_data_type, str) and i_data_type == 'geo_id':
                 continue
             assert isinstance(i_data_type, InspireDataType)
             for i_property in i_properties:
@@ -78,7 +78,7 @@ class InspireFeature():
 
         for filter_key, filter_property_options in filter_options.items():
 
-            if filter_key == 'geo_id':
+            if isinstance(filter_key, str) and filter_key == 'geo_id':
                 continue
 
             assert isinstance(filter_key, InspireDataType)
@@ -167,7 +167,7 @@ class InspireFeature():
 
         for key, values in filter_options.items():
 
-            if key == 'geo_id':
+            if isinstance(key, str) and key == 'geo_id':
 
                 statement = self._build_filter_geo_id_statement(values)
                 statements.append(statement)
@@ -199,7 +199,7 @@ class InspireFeature():
 
         for i_data_type, i_properties in select_options.items():
 
-            if i_data_type == 'geo_id':
+            if isinstance(i_data_type, str) and i_data_type == 'geo_id':
                 continue
 
             feature_config_id = self._get_feature_config_id(i_data_type)
@@ -261,7 +261,7 @@ class InspireFeature():
 
             for i_data_type, i_properties in self.select_options.items():
 
-                if i_data_type == 'geo_id':
+                if isinstance(i_data_type, str) and i_data_type == 'geo_id':
                     row['geo_id'] = data_result['geo_id']
                     continue
 

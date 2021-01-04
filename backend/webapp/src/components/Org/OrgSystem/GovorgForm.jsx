@@ -61,7 +61,7 @@ export class GovorgForm extends Component {
         const data = {
             ...values,
             layers: this.state.layers,
-            'org_id': org_id
+            'org': org_id
         }
 
         setStatus('checking')

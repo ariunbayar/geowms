@@ -68,7 +68,10 @@ def _set_emp_role_inspire_data(emp_role, role, user):
     emp_role_inspire.created_by = user
     emp_role_inspire.emp_role = emp_role
     emp_role_inspire.feature_id = role.get('feature_id')
-    emp_role_inspire.property_id = role.get('property_id')
+    if role.get('property_id') == 'geom':
+        emp_role_inspire.geom = True
+    else:
+        emp_role_inspire.property_id = role.get('property_id')
     emp_role_inspire.perm_kind = get_convert_perm_kind(EmpRoleInspire, role.get('perm_kind'))
     emp_role_inspire.save()
 
@@ -84,13 +87,33 @@ def _delete_emp_role_inspire_data(emp_role, roles):
     return False
 
 
+def _role_name_validation(payload, role):
+    name = payload.get('role_name')
+    errors = {}
+    check_name = False
+    if not name:
+        errors['role_name'] = 'Хоосон байна утга оруулна уу.'
+
+    if role:
+        if role.name != name:
+            check_name = True
+
+    if check_name or not role:
+        role_by_name = EmpRole.objects.filter(name=name).first()
+        if role_by_name:
+            errors['role_name'] = 'Нэр давхцаж байна !.'
+    return errors
+
+
 @require_POST
 @ajax_required
 def create(request, payload):
-
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
+    errors = _role_name_validation(payload, None)
+    if errors:
+        return JsonResponse({'success': False, 'errors':errors})
 
     with transaction.atomic():
 
@@ -104,9 +127,9 @@ def create(request, payload):
             for role in roles:
                 _set_emp_role_inspire_data(emp_role, role, request.user)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'errors': errors})
 
-    return JsonResponse({'success': False})
+    return JsonResponse({'success': False, 'errors': errors})
 
 
 @require_POST
@@ -119,6 +142,12 @@ def update(request, payload, pk):
     add_roles = payload.get('add_roles')
 
     emp_role = get_object_or_404(EmpRole, pk=pk)
+
+    errors = _role_name_validation(payload, emp_role)
+
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
     emp_role.updated_by = request.user
     emp_role.save()
 
@@ -133,7 +162,7 @@ def update(request, payload, pk):
             for role in add_roles:
                 _set_emp_role_inspire_data(emp_role, role, request.user)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'errors': errors})
 
 
 def _get_emp_roles_data_display(emp_role):
@@ -147,10 +176,10 @@ def _get_emp_roles_data_display(emp_role):
 
     for feature_id in feature_ids:
         property_ids = EmpRoleInspire.objects.filter(emp_role=emp_role, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True)
-
         property_of_feature[feature_id] = property_ids
+        properties.append(get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True))
         for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire))
+            properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire, False))
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)

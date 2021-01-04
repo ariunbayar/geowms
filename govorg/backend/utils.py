@@ -5,12 +5,14 @@ from backend.inspire.models import (
     GovPermInspire,
     EmpRoleInspire,
     EmpPermInspire,
+    EmpPerm,
     LProperties,
     LFeatures,
     LFeatureConfigs,
     LDataTypeConfigs,
     LPackages,
     LThemes,
+    MGeoDatas,
 )
 
 def get_convert_perm_kind(model, kind):
@@ -81,32 +83,44 @@ def get_convert_display_name(perm_list):
             roles['PERM_REVOKE'] = True
             roles['revoke_id'] = perm.get('ins_id')
 
+
     return roles
 
 
-def get_property_data_display(property_id, feature_id, role_model, inspire_model):
-
+def get_property_data_display(property_id, feature_id, role_model, inspire_model, geom):
+    perm_list = []
     if role_model.__class__.__name__ == 'EmpRole':
-        perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-
+        if not geom:
+            perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        else:
+            perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
     if role_model.__class__.__name__ == 'GovPerm':
-        perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-
+        if not geom:
+            perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        else:
+            perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
     if role_model.__class__.__name__ == 'EmpPerm':
-        perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-
-    property = get_object_or_404(LProperties, property_id=property_id)
-
-
+        if not geom:
+            perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
+        else:
+            perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
     roles = get_convert_display_name(perm_list)
+    if not geom:
+        property = get_object_or_404(LProperties, property_id=property_id)
 
-    return {
-          'id': property.property_id,
-          'name': property.property_name,
-          'name': property.property_name,
-          'parent_id': feature_id,
-          'roles': roles
-        }
+        return {
+            'id': property.property_id,
+            'name': property.property_name,
+            'parent_id': feature_id,
+            'roles': roles
+            }
+    else:
+        return {
+            'id': 'geom',
+            'name': 'geom',
+            'parent_id': feature_id,
+            'roles': roles
+            }
 
 
 def get_all_child_feature(feature_id):
@@ -127,13 +141,14 @@ def get_feature_data_display(feature_id, property_of_feature):
 
     feature = get_object_or_404(LFeatures, feature_id=feature_id)
     all_child = get_all_child_feature(feature_id)
-
+    count = MGeoDatas.objects.filter(feature_id=feature_id).count()
     return {
         'id': feature.feature_id,
         'name': feature.feature_name,
         'parent_id': feature.package_id,
         'perm_child_ids': list(property_of_feature),
-        'all_child':all_child
+        'all_child':all_child,
+        'count': count
     }
 
 
