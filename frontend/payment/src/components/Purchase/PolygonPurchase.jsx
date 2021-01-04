@@ -31,9 +31,11 @@ export class PolygonPurchase extends Component {
     }
 
     downloadPurchase(id) {
-        service.downloadPurchase(id, this.props.match.params.type).then(rsp => {
-            console.log(rsp);
-        })
+        service
+            .downloadPurchase(id, this.props.match.params.type)
+            .then(rsp => {
+                console.log(rsp);
+            })
     }
 
     componentDidMount(){
@@ -43,9 +45,6 @@ export class PolygonPurchase extends Component {
               items.map(( items ) =>
                   this.setState({items})
               )
-              if(!items[0].export_file) {
-                this.downloadPurchase(id)
-              }
               this.setState({polygon, layers})
             }
             else {
@@ -69,6 +68,9 @@ export class PolygonPurchase extends Component {
 
     handleModalApproveClose(){
       const purchase_id = this.props.match.params.id
+      if(!this.state.items.export_file) {
+        this.downloadPurchase(purchase_id)
+      }
       this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 

@@ -319,6 +319,7 @@ def _create_folder_payment_id(type, payment_id):
     path = os.path.join(settings.FILES_ROOT, type, str(payment_id))
     if not os.path.isdir(path):
         os.mkdir(path)
+    return path
 
 
 def _create_shp_file(payment, layer, polygon):
@@ -329,7 +330,7 @@ def _create_shp_file(payment, layer, polygon):
 
     try:
         file_type = 'ESRI SHAPEFILE'
-        _create_folder_payment_id('shape', payment.id)
+        path = _create_folder_payment_id('shape', payment.id)
         file_ext = '.shp'
         filename = os.path.join(path, str(layer.code) + file_ext)
 
@@ -533,6 +534,7 @@ def _get_Feature_info_from_url(polygon, layer):
     full_url =  url + 'service=' + service + '&version=' + version + '&request=' +request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1)  + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
     with urllib.request.urlopen(full_url) as response:
         get_features = response.read().decode("utf-8")
+        print(get_features)
         for feature in json.loads(get_features)['features']:
             geo_id = feature['id']
             geo_id = geo_id.split('.')[len(geo_id.split('.')) - 1]
@@ -571,12 +573,14 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
                             value_type = 'number'
                         if value_type == 'single-select':
                             value_type = 'code_list_id'
+                        if value_type == 'link':
+                            value_type = 'text'
 
                     if 'code' in value_type:
                         filter_value = value_type
                     else:
                         filter_value = "value_" + value_type
-                    if getattr(mdata_value, filter_value):
+                    if hasattr(mdata_value, filter_value):
                         value = getattr(mdata_value, filter_value)
                     else:
                         value = None

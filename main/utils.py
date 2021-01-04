@@ -5,6 +5,7 @@ import base64
 import re
 import unicodedata
 
+from django.conf import settings
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
