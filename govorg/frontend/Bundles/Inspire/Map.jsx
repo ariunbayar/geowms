@@ -332,10 +332,12 @@ export default class BarilgaSuurinGazar extends Component{
           .then((text) => {
               const parser = new WMSGetFeatureInfo()
               const features = parser.readFeatures(text)
-              const source = new VectorSource({
-                  features: features
-              });
-              this.state.vector_layer.setSource(source)
+              if(features){
+                const source = new VectorSource({
+                    features: features
+                });
+                this.state.vector_layer.setSource(source)
+              }
               const feature_info = features.map((feature) => {
                   const geometry_name = feature.getGeometryName()
                   const values =
