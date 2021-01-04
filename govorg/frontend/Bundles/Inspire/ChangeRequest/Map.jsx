@@ -10,7 +10,9 @@ import "./styles.css"
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
 import {Vector as VectorSource} from 'ol/source';
 import {Vector as VectorLayer} from 'ol/layer';
-
+console.log("hohoh")
+console.log("hohoh")
+console.log("hohoh")
 export default class RequestMap extends Component {
     constructor(props) {
 
