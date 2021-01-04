@@ -67,7 +67,7 @@ export class App extends Component {
             tseg_burtgel,
         } = this.state
 
-        const { emp_role, org_role } = this.props.org
+        const { emp_role, org_role, org_geom} = this.props.org
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -177,7 +177,7 @@ export class App extends Component {
 
                             <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
                             <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props}  org_geom = {org_geom}  refreshCount={() => this.requestCount()}/>} />
 
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={OrgRequest} />

@@ -3,6 +3,8 @@ from backend.org.models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
 from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas
 from django.contrib.auth.decorators import login_required
+from main import utils
+from geojson import Feature
 
 from govorg.backend.utils import (
     get_package_features_data_display,
@@ -94,6 +96,9 @@ def _emp_role(org, user):
 def frontend(request):
     org = get_object_or_404(Org, employee__user=request.user)
     perms = []
+    geom = []
+    if org.geo_id:
+        geom = utils.get_geom(org.geo_id, 'MultiPolygon')
 
     for module in Bundle.MODULE_CHOICES:
         roles = OrgRole.objects.filter(org=org, bundle__module=module[0]).distinct('bundle')
@@ -116,6 +121,7 @@ def frontend(request):
             'perms':perms,
             'org_role':_org_role(org),
             'emp_role':_emp_role(org, request.user),
+            'org_geom': geom.json if geom else None,
         },
     }
     return render(request, 'org/index.html', context)
