@@ -381,7 +381,7 @@ export class EmployeeEdit extends Component {
                                                         org_roles={org_roles}
                                                         role={roles}
                                                         emp_perms={old_role_id == role_id ? perms : null}
-                                                        is_check_perm={this.perms}
+                                                        editable_is_check={this.perms}
                                                     />
                                                 : null
                                             }
