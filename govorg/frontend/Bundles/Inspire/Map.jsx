@@ -321,7 +321,7 @@ export default class BarilgaSuurinGazar extends Component{
           const { id, geom } = row
           if (geom){
             const feature = (new GeoJSON().readFeatures(geom, {
-                dataProjection: this.state.featureProjection,
+                dataProjection: this.state.dataProjection,
                 featureProjection: this.state.featureProjection,
             }))[0]
             feature.setProperties({ id })
