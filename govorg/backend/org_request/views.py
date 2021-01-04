@@ -411,6 +411,15 @@ def request_approve(request, payload, pk):
         new_geo_id = str(count)+'geo'
 
         if old_geo_id:
+            geo_data = MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id)
+            if not geo_data:
+                r_approve.state = ChangeRequest.STATE_REJECT
+                r_approve.save()
+                rsp = {
+                    'success': False,
+                }
+                return JsonResponse(rsp)
+
             if old_geo_json:
                 geom = []
                 geo_json = old_geo_json['geometry']
