@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
 from django.db import transaction
-from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import get_list_or_404
@@ -25,7 +25,6 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import MDatasBoundary
 from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
-
 from geoportal_app.models import User
 
 from main.decorators import ajax_required
@@ -414,7 +413,6 @@ def employee_add(request, payload, level, pk):
         user.is_superuser = is_super if org.level == 4 else False
         user.register = register.upper()
         user.save()
-
         user.roles.add(2)
         user.save()
 
@@ -423,7 +421,6 @@ def employee_add(request, payload, level, pk):
         employee.org = org
         employee.user_id = user.id
         employee.is_admin = is_admin
-
         employee.token = TokenGeneratorEmployee().get()
         employee.save()
 
@@ -473,6 +470,7 @@ def org_add(request, payload, level):
                         perm_kind=gov_role_inspire.perm_kind,
                         feature_id=gov_role_inspire.feature_id,
                         property_id=gov_role_inspire.property_id,
+                        data_type_id=gov_role_inspire.data_type_id,
                         geom=gov_role_inspire.geom,
                         created_by=gov_role_inspire.created_by,
                         updated_by=gov_role_inspire.updated_by,
@@ -559,11 +557,13 @@ def org_list(request, payload, level):
 
     if not sort_name:
         sort_name = 'id'
+
     qs = Org.objects.filter(level=level)
     qs = qs.annotate(num_employees=Count('employee'))
     qs = qs.annotate(num_systems=Count('govorg'))
-    qs = qs.annotate(search=SearchVector('name'))
-    qs = qs.filter(search__contains=query)
+    if query:
+        qs = qs.annotate(search=SearchVector('name'))
+        qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
     qs = qs.order_by(sort_name)
 
     total_items = Paginator(qs, per_page)
@@ -1108,21 +1108,21 @@ def get_gov_roles(request, level, pk):
                 'perm_approve': t_perm_approve,
                 'perm_revoke': t_perm_revoke,
             })
-        gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
-        if gov_perm_inspire_all:
-            for datas in gov_perm_inspire_all:
-                disable = False
-                if datas.gov_role_inspire:
-                    disable = True
-                roles.append({
-                        'perm_kind': datas.perm_kind,
-                        'feature_id': datas.feature_id,
-                        'data_type_id': datas.data_type_id,
-                        'property_id': datas.property_id,
-                        'geom': datas.geom,
-                        'disable': disable,
-                    })
 
+    gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
+    if gov_perm_inspire_all:
+        for datas in gov_perm_inspire_all:
+            disable = False
+            if datas.gov_role_inspire:
+                disable = True
+            roles.append({
+                    'perm_kind': datas.perm_kind,
+                    'feature_id': datas.feature_id,
+                    'data_type_id': datas.data_type_id,
+                    'property_id': datas.property_id,
+                    'geom': datas.geom,
+                    'disable': disable,
+                })
     return JsonResponse({
         'data': data,
         'roles': roles,
@@ -1396,7 +1396,8 @@ def form_options(request):
     code_list_id = get_object_or_404(LCodeLists, code_list_code='1stOrder\n').code_list_id
     feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-    firstOrder_geom = get_object_or_404(MDatasBoundary, property_id=property_id, code_list_id=code_list_id, feature_config_id__in=feature_config_ids).geo_id
+    firstOrder_geom = get_object_or_404(
+, property_id=property_id, code_list_id=code_list_id, feature_config_id__in=feature_config_ids).geo_id
     rsp = {
         'success': True,
         'secondOrders': admin_levels,
