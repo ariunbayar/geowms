@@ -18,7 +18,6 @@ from .models import GovOrg
 from .forms import SystemForm
 import requests
 from django.http import HttpResponse, Http404
-from datetime import datetime
 
 def _get_govorg_display(govorg):
 
