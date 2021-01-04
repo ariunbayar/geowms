@@ -33,7 +33,6 @@ export class UserFormTable extends Component {
                 <td>{idx}</td>
                 <td>{employee.last_name + ". " + employee.first_name}</td>
                 <td>{employee.email}</td>
-                <td>{employee.is_sso}</td>
                 <td>{employee.position}</td>
                 <td>
                     {

@@ -17,7 +17,7 @@ export class UserAdd extends Component {
                 last_name: '',
                 position: '',
                 email: '',
-                gender: '',
+                gender: 'Эрэгтэй',
                 register:'',
                 is_admin: false,
                 is_super: false,
