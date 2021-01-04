@@ -126,7 +126,7 @@ urlpatterns = [
         ], 'meta-data'))),
 
         path('revoke_request/', include(([
-            path('revoke-new/', revoke_request_views.revokeNew, name='revoke-new'),
+            path('revoke-new/', govorg_inspire_views.revokeNew, name='revoke-new'),
             path('revoke-change-state/', revoke_request_views.revokeState, name='revoke-state'),
             path('revoke-search/', revoke_request_views.revokePaginate, name='revoke-paginate'),
         ], 'revoke_request'))),

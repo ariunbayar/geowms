@@ -76,7 +76,7 @@ export default class RevokeRequestForm extends Component {
                                     type="text"
                                     className="form-control form-control-xs"
                                     id="search_query"
-                                    placeholder="Тушаалын дугаараар хайх"
+                                    placeholder="Хайх утгаа оруулна уу"
                                     onChange={(e) => this.handleSearch('search_query', e)}
                                     value={this.state.search_query}
                                 />
@@ -108,7 +108,7 @@ export default class RevokeRequestForm extends Component {
                                         <th scope="col">Байгууллага / мэргэжилтэн</th>
                                         <th scope="col">Тушаалын дугаар</th >
                                         <th scope="col">Тушаал гарсан огноо</th >
-                                        <th></th>
+                                        <th scope="col">Үүссэн огноо</th>
                                         <th scope="col">Төлөв</th>
                                         <th scope="col"></th>
                                     </tr>
@@ -134,6 +134,7 @@ export default class RevokeRequestForm extends Component {
                                                 idx={(current_page * revoke_per_page) - revoke_per_page + idx + 1}
                                                 values={req}
                                                 paginate={this.paginate}
+                                                setLoading={this.setLoading}
                                             />
                                         )
                                     }

@@ -7,6 +7,7 @@ import random
 from django.conf import settings
 from django.db.utils import InternalError
 from geojson import Feature, FeatureCollection
+from django.utils.timezone import make_aware
 
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
@@ -740,6 +741,54 @@ def create(request, payload):
         'info': "Хүсэлт амжилттай үүслээ",
     }
     return JsonResponse(rsp)
+
+
+def _date_to_timezone(input_date):
+    naive_time = datetime.datetime.strptime(input_date, '%Y-%m-%d')
+    settings.TIME_ZONE  # 'UTC'
+    output_date = make_aware(naive_time)
+    return output_date
+
+
+def _new_revoke_request(employee, payload):
+
+    theme_id = payload.get('tid')
+    package_id = payload.get('pid')
+    feature_id = payload.get('fid')
+    old_geo_id = payload.get('old_geo_id')
+    geo_json = payload.get('geo_json')
+    form_json = payload.get('form_json')
+    order_no = payload.get('order_no')
+    order_at = payload.get('order_at')
+    form_json = _check_form_json(feature_id, form_json, employee)
+
+    changeRequest = ChangeRequest()
+    changeRequest.old_geo_id = old_geo_id
+    changeRequest.new_geo_id = None
+    changeRequest.theme_id = theme_id
+    changeRequest.package_id = package_id
+    changeRequest.feature_id = feature_id
+    changeRequest.employee = employee
+    changeRequest.state = ChangeRequest.STATE_NEW
+    changeRequest.kind = ChangeRequest.KIND_REVOKE
+    changeRequest.form_json = form_json
+    changeRequest.geo_json = geo_json
+    changeRequest.order_at = _date_to_timezone(order_at)
+    changeRequest.order_no = order_no
+    changeRequest.save()
+
+
+@require_POST
+@ajax_required
+def revokeNew(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
+
+    success, info = _has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
+    if success:
+        _new_revoke_request(employee, payload)
+        info = "Цуцлах хүсэлт амжилттай үүслээ"
+
+    return JsonResponse({ 'success': success, 'info': info })
 
 
 @require_POST

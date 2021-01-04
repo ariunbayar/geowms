@@ -24,18 +24,22 @@ from backend.inspire.models import (
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Org, Employee
 
-from datetime import datetime
 from django.conf import settings
-from django.utils.timezone import make_aware
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 
 
 def _convert_text_json(data):
-    data = data.replace("\'", "\"")
+    data = data.replace("'", '"')
+    data = data.replace("True", "true")
+    data = data.replace("False", "false")
     data = json.loads(data)
 
     return data
+
+
+def _date_to_str(date):
+    return date.strftime('%Y-%m-%d')
 
 
 def _get_revoke_request_display(revoke_request):
@@ -43,13 +47,14 @@ def _get_revoke_request_display(revoke_request):
             'id': revoke_request.id,
             'old_geo_id': revoke_request.old_geo_id,
             'order_no': revoke_request.order_no,
-            'order_at': revoke_request.order_at.strftime('%Y-%m-%d') if revoke_request.order_at else '',
+            'order_at': _date_to_str(revoke_request.order_at) if revoke_request.order_at else '',
             'theme_name': LThemes.objects.filter(theme_id=revoke_request.theme_id).first().theme_name,
             'package_name': LPackages.objects.filter(package_id=revoke_request.package_id).first().package_name,
             'feature_name': LFeatures.objects.filter(feature_id=revoke_request.feature_id).first().feature_name,
             'last_name': revoke_request.employee.user.last_name,
             'first_name': revoke_request.employee.user.first_name,
             'org': revoke_request.employee.org.name,
+            'created_at': _date_to_str(revoke_request.created_at) if revoke_request.created_at else '',
             'form_json': _convert_text_json(revoke_request.form_json) if revoke_request.form_json else '',
             'geo_json': revoke_request.geo_json,
             'state': revoke_request.get_state_display(),
@@ -93,12 +98,8 @@ def revokePaginate(request, payload):
     page = payload.get('page')
     per_page = payload.get('per_page')
     query = payload.get('query') or ''
-    sort_name = payload.get('sort_name')
     order_at = payload.get('order_at')
     state = payload.get('state')
-
-    if not sort_name:
-        sort_name = 'id'
 
     revoke_requests = ChangeRequest.objects.annotate(
         search=SearchVector(
@@ -110,7 +111,7 @@ def revokePaginate(request, payload):
         search__icontains=query,
         kind=ChangeRequest.KIND_REVOKE,
         feature_id__in=emp_features,
-    ).order_by(sort_name)
+    ).order_by('-created_at')
 
     if state:
         revoke_requests = revoke_requests.filter(
@@ -134,40 +135,6 @@ def revokePaginate(request, payload):
     }
 
     return JsonResponse(rsp)
-
-
-def _date_to_timezone(input_date):
-    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
-    settings.TIME_ZONE  # 'UTC'
-    output_date = make_aware(naive_time)
-    return output_date
-
-
-def _new_revoke_request(employee, payload):
-
-    theme_id = payload.get('tid')
-    package_id = payload.get('pid')
-    feature_id = payload.get('fid')
-    old_geo_id = payload.get('old_geo_id')
-    geo_json = payload.get('geo_json')
-    form_json = payload.get('form_json')
-    order_no = payload.get('order_no')
-    order_at = payload.get('order_at')
-
-    changeRequest = ChangeRequest()
-    changeRequest.old_geo_id = old_geo_id
-    changeRequest.new_geo_id = None
-    changeRequest.theme_id = theme_id
-    changeRequest.package_id = package_id
-    changeRequest.feature_id = feature_id
-    changeRequest.employee = employee
-    changeRequest.state = ChangeRequest.STATE_NEW
-    changeRequest.kind = ChangeRequest.KIND_REVOKE
-    changeRequest.form_json = form_json
-    changeRequest.geo_json = geo_json
-    changeRequest.order_at = _date_to_timezone(order_at)
-    changeRequest.order_no = order_no
-    changeRequest.save()
 
 
 def _get_model_name(name):
@@ -196,16 +163,6 @@ def _delete_geom_data(change_request):
     theme_code=LThemes.objects.filter(theme_id=change_request.theme_id).first().theme_code
     _get_model_name(theme_code).objects.filter(geo_id=change_request.old_geo_id).delete()
     refreshMaterializedView(change_request.feature_id)
-
-
-@require_POST
-@ajax_required
-def revokeNew(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
-
-    _new_revoke_request(employee, payload)
-
-    return JsonResponse({ 'success':True })
 
 
 @require_POST
