@@ -252,6 +252,7 @@ export class RoleEdit extends Component {
                                             dontDid={true}
                                             org_roles={org_roles}
                                             role={roles}
+                                            addable_is_check={this.perms}
                                             />
                                         }
                                     </div>
