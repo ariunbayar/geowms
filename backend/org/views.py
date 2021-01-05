@@ -22,7 +22,7 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import MDatasBoundary
+# from backend.inspire.models import MDatasBoundary
 from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
