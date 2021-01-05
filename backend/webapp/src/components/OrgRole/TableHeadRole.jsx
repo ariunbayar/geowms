@@ -72,10 +72,10 @@ export class TableHeadRole extends Component {
                                             null)
                                         }
                                     >
-                                        <div className={perm_view >= perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        <div className={perm_view >= perm_all ? 'switch-all switch-one' : 'switch-all'}
                                         ></div>
                                         <div className={0 < perm_view && perm_view < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
-                                        <div className={perm_view <= 0 ? 'switch-all switch-tree' : 'switch-all'} 
+                                        <div className={perm_view <= 0 ? 'switch-all switch-tree' : 'switch-all'}
                                         ></div>
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_view}</small> */}
@@ -101,7 +101,7 @@ export class TableHeadRole extends Component {
                                         this.props.handleCheckedFeature(true, 2, root_1, root_1_index, root_2, root_2_index, root_3, root_3_index):
                                         null)
                                     }>
-                                        <div className={perm_create == perm_all ? 'switch-all switch-one' : 'switch-all'} 
+                                        <div className={perm_create == perm_all ? 'switch-all switch-one' : 'switch-all'}
                                         ></div>
                                         <div className={0 < perm_create && perm_create < perm_all ? 'switch-all switch-two' : 'switch-all'}></div>
                                         <div className={perm_create == 0 ? 'switch-all switch-tree' : 'switch-all'} ></div>
