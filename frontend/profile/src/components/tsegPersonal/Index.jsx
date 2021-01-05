@@ -34,8 +34,8 @@ export class Bar extends Component {
                 </div>
                 <div>
                 <Switch>
-                            <Route path="/profile/tseg-personal/tseg-info/tseg-ustsan/" component={DanForm}/> 
-                            <Route path="/profile/tseg-personal/tseg-info/tseg-personal/" component={Forms}/> 
+                            <Route path="/profile/tseg-personal/tseg-info/tseg-ustsan/" component={DanForm}/>
+                            <Route path="/profile/tseg-personal/tseg-info/tseg-personal/" component={Forms}/>
                             <Route exact path="/profile/tseg-personal/"/>
                  </Switch>
                 </div>

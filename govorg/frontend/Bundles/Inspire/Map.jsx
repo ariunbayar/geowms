@@ -51,7 +51,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.state = {
           format: new GeoJSON(),
           dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857', 
+          featureProjection: 'EPSG:3857',
           tid: props.match.params.tid,
           pid: props.match.params.pid,
           fid: props.match.params.fid,

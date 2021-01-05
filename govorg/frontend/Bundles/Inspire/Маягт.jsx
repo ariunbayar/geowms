@@ -151,7 +151,7 @@ export default class Маягт extends Component {
             <div className='overflow-auto card-body'>
                 {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
                 <hr></hr>
-                <Formik 
+                <Formik
                     enableReinitialize
                     initialValues={{
                         form_values: values,

@@ -159,7 +159,7 @@ export default class RequestModal extends Component {
                                         {
                                             <RequestMap geoJson ={geo_json}/>
                                         }
-                                        
+
                                     </div>
                                 </div>
                                 <div className="row my-2 mr-1 float-right">
