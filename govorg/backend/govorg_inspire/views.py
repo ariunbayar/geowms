@@ -17,6 +17,9 @@ from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
+    MDatasBoundary,
+    MDatasGeographical,
+    MDatasCadastral,
     LDataTypeConfigs,
     LFeatureConfigs,
     LDataTypes,
@@ -25,6 +28,8 @@ from backend.inspire.models import (
     LCodeListConfigs,
     LCodeLists,
     MGeoDatas,
+    MDatasBuilding,
+    MDatasHydrography,
     EmpPerm,
     EmpPermInspire
     )

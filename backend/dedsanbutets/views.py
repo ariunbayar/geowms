@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, Http404
 
 from .models import ViewNames, ViewProperties
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding
 
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
