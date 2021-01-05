@@ -16,13 +16,12 @@ class SidebarComponent extends Component {
     }
 
     render() {
+        const map_wms_list = this.props.map_wms_list
         return (
             <div>
-                <span>Давхаргууд</span>
+                <span>{map_wms_list.name}</span>
                 <hr></hr>
-                {this.props.map_wms_list.map((wms, idx) =>
-                    <WMSItem wms={wms} key={idx}/>
-                )}
+                <WMSItem wms={map_wms_list}/>
             </div>
         )
     }

@@ -9,6 +9,7 @@ from django.contrib.postgres.search import SearchVector
 from backend.govorg.models import GovOrg
 from backend.wms.models import WMS
 from main import utils
+from django.contrib.auth.decorators import login_required
 
 
 def _get_govorg_display(govorg):
@@ -27,6 +28,7 @@ def _get_govorg_display(govorg):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def systemList(request, payload):
     org = Org.objects.filter(employee__user=request.user).first()
     page = payload.get('page')
@@ -54,6 +56,20 @@ def systemList(request, payload):
 
     return JsonResponse(rsp)
 
+def _get_wmslayer(request, system, wms):
+    layer_list = []
+    system_local_base_url = utils.get_config('system_local_base_url')
+    for wmslayer in wms.wmslayer_set.all():
+        layer_list.append({
+            'id': wmslayer.id,
+            'code': wmslayer.code,
+            'name': wmslayer.name,
+            'title': wmslayer.title,
+            'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[system.token, wmslayer.code])),
+            'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[system.token, wmslayer.code]),
+        })
+    return layer_list
+
 
 def _get_system_detail_display(request, system):
 
@@ -63,7 +79,7 @@ def _get_system_detail_display(request, system):
             'name': wms.name,
             'is_active': wms.is_active,
             'url': wms.url,
-            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+            'layer_list': _get_wmslayer(request, system, wms),
         }
         for wms in WMS.objects.all()
     ]
@@ -76,6 +92,7 @@ def _get_system_detail_display(request, system):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
 
     system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
@@ -83,7 +100,7 @@ def detail(request, pk):
     rsp = {
         'system': _get_system_detail_display(request, system),
         'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[system.token])),
-        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[system.token]),
+        'private_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[system.token]),
         'success': True,
     }
 

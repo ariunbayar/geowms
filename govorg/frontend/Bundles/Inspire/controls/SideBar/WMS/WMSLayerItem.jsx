@@ -10,34 +10,15 @@ export default class WMSLayerItem extends Component {
             name: props.layer.name,
             code: props.layer.code,
             tile: props.layer.tile,
-            is_visible: props.is_visible,
+            is_visible: false,
             legend: props.layer.legend,
         }
 
         this.toggle = this.toggle.bind(this)
     }
 
-    componentDidMount(){
-        this.state.tile.setVisible(this.props.is_visible)
-    }
-
-    componentDidUpdate(pP){
-        if (pP.is_visible !== this.props.is_visible){
-            this.setState({ is_visible: this.props.is_visible })
-        }
-    }
-
     toggle(is_visible) {
-        if (this.props.is_visible && is_visible){
-            this.state.tile.setVisible(is_visible)
-        }
-        if (!this.props.is_visible && is_visible) {
-            this.state.tile.setVisible(is_visible)
-            this.props.toggle(is_visible)
-        }
-        if (!is_visible) {
-            this.state.tile.setVisible(is_visible)
-        }
+        this.state.tile.setVisible(is_visible)
         this.setState({is_visible})
     }
 
@@ -45,7 +26,7 @@ export default class WMSLayerItem extends Component {
 
         const { name, code, is_visible, legend } = this.state
         return (
-            <li>
+            <div className="col-12">
                 <label>
                     <div className="custom-control custom-switch">
                         <input
@@ -56,12 +37,10 @@ export default class WMSLayerItem extends Component {
                     <label className="custom-control-label" htmlFor={code}>{name}</label>
                     </div>
                 </label>
-                <ul>
-                    <li>
-                        <img className="img" src={legend}/>
-                    </li>
-                </ul>
-            </li>
+                <div className="ml-5">
+                    <img className="img" src={legend}/>
+                </div>
+            </div>
         )
     }
 }

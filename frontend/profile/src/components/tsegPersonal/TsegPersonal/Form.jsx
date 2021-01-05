@@ -526,7 +526,7 @@ export default class Forms extends Component {
                                                 id="tesgiin_ner"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
                                                 onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
                                                 value = {this.state.tesgiin_ner}
                                             />
@@ -543,7 +543,7 @@ export default class Forms extends Component {
                                                 id="toviin_dugaar"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')} 
+                                                className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
                                                 onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
                                                 value = {this.state.toviin_dugaar}
                                             />
@@ -878,7 +878,7 @@ export default class Forms extends Component {
                                     <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
                                          {this.state.barishil_tuhai.length < 50 ? <a className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </a> : ''}
                                         <input
-                                            className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')} 
+                                            className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')}
                                             name='barishil_tuhai'
                                             id="id_barishil_tuhai"
                                             type="textarea"
@@ -950,14 +950,14 @@ export default class Forms extends Component {
                                     <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
                                     <td colSpan="4" scope="rowgroup">
                                     {this.state.hors_error ? <a className="text-danger">Бүртгэлгүй хөрсний мэдээлэл байна</a> : ''}
-                                        <div className="input-group"> 
+                                        <div className="input-group">
                                             <input
                                                 name="hors_shinj_baidal"
                                                 type="text"
                                                 id="hors_shinj_baidal"
                                                 list="tsegList"
                                                 autoComplete="off"
-                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')} 
+                                                className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')}
                                                 onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                 value = {this.state.hors_shinj_baidal}
                                             />
@@ -1085,7 +1085,7 @@ export default class Forms extends Component {
                                     {!isSubmitting && 'Нэмэх' }
                                 </button>
                             </div>
-                            <datalist id="tsegList">                               
+                            <datalist id="tsegList">
                                 {this.datalist}
                             </datalist>
                         </div>

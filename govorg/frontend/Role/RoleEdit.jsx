@@ -1,9 +1,16 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
+import { Formik, Form, Field, ErrorMessage} from 'formik'
 import ModalAlert from "../components/helpers/ModalAlert";
 import { service } from "./Role/service";
 import InsPerms from './Role/GovPerms'
-import { array } from "yup";
+import * as Yup from 'yup'
+
+const validationSchema = Yup.object().shape({
+    role_name: Yup.string()
+        .required('Нэр оруулна уу !'),
+})
+
 
 export class RoleEdit extends Component {
 
@@ -13,8 +20,10 @@ export class RoleEdit extends Component {
         this.remove_perms=[]
         this.role=[]
         this.state = {
-            role_name: '',
-            role_description: '',
+            initial_values:{
+                role_name: '',
+                role_description: '',
+            },
             edit: false,
             handleSaveIsLoad: false,
             modal_alert_status: "closed",
@@ -30,16 +39,21 @@ export class RoleEdit extends Component {
         this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
     }
 
-    handleSave() {
-        const { role_name,role_description, gov_perm_id } = this.state
+    handleSave(values, { setStatus, setSubmitting, setErrors}) {
+        const {gov_perm_id } = this.state
         const id = this.props.match.params.id
         this.setState({ handleSaveIsLoad: true })
         service
-            .updateRole(id, gov_perm_id, role_name, role_description, this.remove_perms, this.perms)
-            .then(({success}) => {
+            .updateRole(id, gov_perm_id, values.role_name, values.role_description, this.remove_perms, this.perms)
+            .then(({success, errors}) => {
                 if (success) {
-                    this.setState({ modal_alert_status: 'open' })
+                    this.setState({modal_alert_status: "open"})
+                    setStatus('saved')
+                    setSubmitting(false)
                     this.modalCloseTime()
+                }else{
+                    setErrors(errors)
+                    setSubmitting(false)
                 }
             })
     }
@@ -158,90 +172,109 @@ export class RoleEdit extends Component {
             .detailRole(this.props.match.params.id)
             .then(({ success, role_id, role_name, role_description, roles }) => {
                 if (success) {
-                    this.setState({ role_id, role_name, role_description, roles, is_continue: true })
+                    this.setState({ role_id, roles, is_continue: true, initial_values:{
+                        role_name, role_description,
+                    }
+                    })
                 }
             })
     }
 
     render() {
-        const { role_name, is_continue, role_description, roles } = this.state
+        const { is_continue, initial_values, roles} = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="text-left">
-                            <NavLink to={`/gov/perm/role`}>
-                                <p className="btn gp-outline-primary">
-                                    <i className="fa fa-angle-double-left"></i> Буцах
-                                </p>
-                            </NavLink>
-                        </div>
-                    <div className="row">
+                        <NavLink to={`/gov/perm/role`}>
+                            <p className="btn gp-outline-primary">
+                                <i className="fa fa-angle-double-left"></i> Буцах
+                            </p>
+                        </NavLink>
+                    </div>
+                    <Formik
+                        initialValues={ initial_values }
+                        enableReinitialize
+                        validationSchema={ validationSchema }
+                        onSubmit={ this.handleSave}
+                    >
+                        {({
+                            errors,
+                            status,
+                            touched,
+                            isSubmitting,
+                            setFieldValue,
+                            setStatus,
+                            setValues,
+                            handleBlur,
+                            values,
+                            isValid,
+                            dirty,
+                        }) => {
+                            return (
+                                <Form>
+                                    <div className="row">
 
-                        <div className="form-group col-md-12">
-                            <div className="row">
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="role_id" >Role нэр:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="role_id"
-                                        onChange={(e) => this.setState({ role_name: e.target.value })}
-                                        value={role_name}
-                                    />
-                                </div>
-
-                                <div className="form-group col-md-6">
-                                    <label htmlFor="role_description" >Role тайлбар:</label>
-                                    <textarea
-                                        type="text"
-                                        className="form-control"
-                                        id="role_description"
-                                        onChange={(e) => this.setState({ role_description: e.target.value })}
-                                        value={role_description}
-                                    ></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <br />
-                    <div>
-                        {
-                            is_continue &&
-                            <InsPerms
-                                action_type="editable"
-                                getValue={this.getValue}
-                                sendAllValue={this.getAllValue}
-                                dontDid={true}
-                                org_roles={org_roles}
-                                role={roles}
-                            />
-                        }
-                    </div>
-                    <br />
-                    <div className="form-group">
-                        {this.state.handleSaveIsLoad ?
-                            <>
-                                <button className="btn btn-block gp-btn-primary">
-                                    <a className="spinner-border text-light" role="status">
-                                        <span className="sr-only">Loading...</span>
-                                    </a>
-                                    <span> Шалгаж байна. </span>
-                                </button>
-                                <ModalAlert
-                                    modalAction={() => this.modalClose()}
-                                    status={this.state.modal_alert_status}
-                                    title="Амжилттай хадгаллаа"
-                                    model_type_icon="success"
-                                />
-                            </>
-                            :
-                            <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
-                                Хадгалах
-                        </button>
-                        }
-                    </div>
+                                        <div className="form-group col-md-12">
+                                            <div className="row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="role_name" >Эрхийн нэр:</label>
+                                                        <Field
+                                                            name="role_name"
+                                                            id="id_role_name"
+                                                            type="text"
+                                                            className="form-control"
+                                                        />
+                                                        <ErrorMessage className="text-danger" name="role_name" component="span"/>
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="role_description" >Эрхийн тайлбар:</label>
+                                                    <Field
+                                                        name="role_description"
+                                                        id="id_role_description"
+                                                        type="text"
+                                                        className="form-control"
+                                                    />
+                                                    <ErrorMessage className="text-danger" name="role_description" component="span"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div>
+                                        {
+                                            is_continue &&
+                                            <InsPerms
+                                            action_type="editable"
+                                            getValue={this.getValue}
+                                            sendAllValue={this.getAllValue}
+                                            dontDid={true}
+                                            org_roles={org_roles}
+                                            role={roles}
+                                            addable_is_check={this.perms}
+                                            />
+                                        }
+                                    </div>
+                                    <br />
+                                    <div className="form-group">
+                                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || Object.keys(errors).length >0}>
+                                            {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                            {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                            {!isSubmitting && 'Хадгалах' }
+                                        </button>
+                                    </div>
+                                </Form>
+                            )
+                        }}
+                    </Formik>
                 </div>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon = "success"
+                />
             </div>
         )
     }
