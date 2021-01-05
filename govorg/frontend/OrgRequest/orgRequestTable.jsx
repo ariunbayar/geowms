@@ -30,13 +30,11 @@ export class OrgRequestTable extends Component {
     handleRequestApprove(id){
         const values = this.props.values
         service.requestApprove(id, values).then(({success})=>{
-            if(success){
                 this.setState({
-                    is_loading:false
+                    is_loading:false,
                 })
                 this.props.getAll()
                 this.handleRequestClose()
-            }
         })
     }
 

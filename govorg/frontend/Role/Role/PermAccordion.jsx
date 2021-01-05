@@ -74,8 +74,8 @@ export class PermAcc extends Component {
                 {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false},
                 {'name': 'нэмэх', 'eng_name': 'PERM_CREATE', 'value': false},
                 {'name': 'хасах', 'eng_name': 'PERM_REMOVE', 'value': false},
+                {'name': 'засах', 'eng_name': 'PERM_UPDATE', 'value': false},
                 {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE', 'value': false},
-                {'name': 'хянах', 'eng_name': 'PERM_UPDATE', 'value': false},
                 {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
             ],
             r_name: '',
@@ -86,7 +86,7 @@ export class PermAcc extends Component {
         const { perms, r_name } = this.state
         const { name, index, type, id, total_length, small, is_open, t_name, p_name, f_name, now_length } = this.props
         return (
-            <div className="card-header" id={`${index}-${type}`}>
+            <div className={type == "theme" ? "card-header bg-light " : type == "feature" ? " " : "card-header"} id={`${index}-${type}`}>
                 <div className="row">
                     <div className="col-3">
                         <h5 className="mb-0 mt-4">
@@ -100,7 +100,7 @@ export class PermAcc extends Component {
                             &nbsp;
                             <span
                                 role="button"
-                                className={`gp-text-primary ` + (small ? small : `text-uppercase`) + ` font-weight-bold text-break shadow-none`}
+                                className={`gp-text-primary ` + (small ? small : `text-uppercase`) + ` font-weight-bold text-break shadow-none collapsed`}
                                 data-toggle="collapse"
                                 data-target={`#acc-${index}-${type}`}
                                 aria-controls={`acc-${index}-${type}`}

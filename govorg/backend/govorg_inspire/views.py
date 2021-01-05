@@ -10,7 +10,7 @@ from geojson import Feature, FeatureCollection
 
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 
 from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import (
@@ -50,14 +50,14 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
+from backend.dedsanbutets.models import ViewNames
+from backend.wmslayer.models import WMSLayer
+from geoportal_app.models import User
 from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
 
 from main.utils import (
-    gis_delete,
-    gis_fetch_one,
     gis_fields_by_oid,
     gis_insert,
-    gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
     refreshMaterializedView,
@@ -132,6 +132,7 @@ def _get_package(theme_id):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def changeset_all(request):
 
     changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
@@ -145,6 +146,7 @@ def changeset_all(request):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def getRoles(request, fid):
 
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
@@ -176,7 +178,7 @@ def getRoles(request, fid):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
+@login_required(login_url='/gov/secure/login/')
 def bundleButetsAll(request):
     data = []
     for themes in LThemes.objects.all():
@@ -193,8 +195,10 @@ def bundleButetsAll(request):
     }
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def table_list(request):
 
     rows = []
@@ -226,6 +230,7 @@ def table_list(request):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def geom_type(request, pid, fid):
     data = MGeoDatas.objects.filter(feature_id=fid).first()
     if data:
@@ -243,32 +248,27 @@ def geom_type(request, pid, fid):
 
 @require_GET
 @ajax_required
-def rows(request, pid, fid):
-    cursor = connections['default'].cursor()
-    sql = """
-        SELECT
-            geo_id as id, ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
-        FROM
-            m_geo_datas
-        WHERE
-            feature_id = {fid}
-        order by created_on desc
-        limit {limit}
-    """.format(
-        fid=fid,
-        limit=4000
-    )
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
+@login_required(login_url='/gov/secure/login/')
+def get_wms_layer(request, tid, pid, fid):
+    view_name_ob = ViewNames.objects.filter(feature_id=fid).first()
+    employee = get_object_or_404(Employee, user=request.user)
     rsp = {
-        'rows': rows,
+        'success': False,
+        'url': '',
+        'code': '',
     }
+    if view_name_ob:
+        rsp = {
+            'success': True,
+            'url': request.build_absolute_uri(reverse('api:service:qgis-proxy', args=[employee.token])),
+            'code': 'gp_layer_' + view_name_ob.view_name,
+        }
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def add(request, payload, oid):
 
     get_object_or_404(request.bundle.bundlegis_set, oid=oid)
@@ -295,6 +295,7 @@ def add(request, payload, oid):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def save(request, payload, pid, fid):
 
     form_values = payload.get('form_values')
@@ -320,6 +321,7 @@ def save(request, payload, pid, fid):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def delete(request, payload, pid, fid):
     gid = payload.get('gid')
     get_object_or_404(MGeoDatas, geo_id=gid)
@@ -461,6 +463,7 @@ def _get_emp_property_roles(employee, fid):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def detail(request, gid, fid, tid):
     property_ids = []
     properties = []
@@ -483,6 +486,7 @@ def detail(request, gid, fid, tid):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def detailCreate(request, tid, pid, fid):
     property_ids = []
     property_roles = []
@@ -529,6 +533,7 @@ def findGeomField(fields):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def updateGeom(request, payload, fid):
     geojson = payload.get('geojson')
     geo_id = payload.get('id')
@@ -597,6 +602,7 @@ def _geoJsonConvertGeom(geojson):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
@@ -770,7 +776,7 @@ def remove(request, payload):
             feature_id = fid,
             employee = employee,
             state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_UPDATE,
+            kind = ChangeRequest.KIND_DELETE,
             form_json = None,
             geo_json = None,
             order_at=order_at,
@@ -812,7 +818,7 @@ def update(request, payload):
             feature_id = fid,
             employee = employee,
             state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_DELETE,
+            kind = ChangeRequest.KIND_UPDATE,
             form_json = form_json,
             geo_json = geo_json,
             order_at=order_at,
@@ -975,6 +981,7 @@ def _deleteDB(id_made, model_name):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def FileUploadSaveData(request, tid, fid):
     form = request.FILES.getlist('data')
     file_name = ''

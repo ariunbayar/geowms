@@ -117,19 +117,18 @@ def _get_org_request(ob, employee):
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
     if ob.old_geo_id:
         old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
+        
         if old_geo_data:
-            if ob.geo_json:
-                geo_json = _convert_text_json(ob.geo_json)
-                current_geo_json = _get_geoJson(geo_json)
-                old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
-                old_geo_data = _get_geoJson(old_geo_data)
-                geo_json = FeatureCollection([geo_json, old_geo_data])
+            old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+            old_geo_data = _get_geoJson(old_geo_data)
 
-            else:
-                if old_geo_data:
-                    old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
-                    geo_json = _get_geoJson(old_geo_data)
-                    geo_json = FeatureCollection([geo_json])
+        if ob.geo_json:
+            geo_json = _convert_text_json(ob.geo_json)
+            current_geo_json = _get_geoJson(geo_json)
+            geo_json = FeatureCollection([current_geo_json, old_geo_data])
+
+        else:
+            geo_json = FeatureCollection([old_geo_data])
 
     else:
         geo_json = _convert_text_json(ob.geo_json)
@@ -412,6 +411,15 @@ def request_approve(request, payload, pk):
         new_geo_id = str(count)+'geo'
 
         if old_geo_id:
+            geo_data = MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id)
+            if not geo_data:
+                r_approve.state = ChangeRequest.STATE_REJECT
+                r_approve.save()
+                rsp = {
+                    'success': False,
+                }
+                return JsonResponse(rsp)
+
             if old_geo_json:
                 geom = []
                 geo_json = old_geo_json['geometry']

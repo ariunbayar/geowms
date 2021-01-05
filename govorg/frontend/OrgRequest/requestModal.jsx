@@ -111,9 +111,7 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const form_json = this.props.form_json
-        const id = this.props.id
-        const kind = this.props.kind
+        const {form_json, id, kind, geo_json} = this.props
         const {is_modal_approve_open, is_modal_reject_open, is_loading} = this.state
         return (
             <Fragment>
@@ -147,7 +145,6 @@ export default class RequestModal extends Component {
                                                     <input
                                                         className='form-control'
                                                         disabled={true}
-                                                        placeholder={prop.property_name}
                                                         value={prop.data}
                                                         type={prop.value_type}
                                                     />
@@ -159,7 +156,10 @@ export default class RequestModal extends Component {
                                     </div>
                                     }
                                     <div className= {form_json ? "col-md-6" : "col-md-12"}>
-                                        <RequestMap geoJson ={this.props.geo_json}/>
+                                        {
+                                            <RequestMap geoJson ={geo_json}/>
+                                        }
+
                                     </div>
                                 </div>
                                 <div className="row my-2 mr-1 float-right">
@@ -195,7 +195,7 @@ export default class RequestModal extends Component {
                                             зөвшөөрөхдөө итгэлтэй байна уу ?`}
                                             title="Тохиргоог зөвшөөрөх"
                                             status={this.state.status}
-                                            model_type_icon = "success"
+                                            model_type_icon = "warning"
                                             actionNameDelete="зөвшөөрөх"
                                         />
                                     }
