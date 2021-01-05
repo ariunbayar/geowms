@@ -49,6 +49,15 @@ export default class Маягт extends Component {
             else if (cancel_button_active) {
                 this.props.requestCancel(values.order_at, values.order_no, values.form_values)
             }
+            else {
+                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info}) => {
+                    if (success) {
+                        this.setState({is_loading: true})
+                        this.props.requestRefreshCount()
+                        this.addNotif('success', info, 'check')
+                    }
+                })
+            }
     }
 
     handleUpdate(gid){

@@ -13,8 +13,8 @@ import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS, createStringXY} from 'ol/coordinate'
 import {platformModifierKeyOnly} from 'ol/events/condition';
 import * as geom_type from 'ol/geom'
-
-
+import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
+import Tile from 'ol/layer/Tile'
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
 import {LineBarButton} from './controls/Line/LineBarButton'
 import {PointBarButton} from './controls/Point/PointBarButton'
@@ -29,17 +29,14 @@ import {MetaList} from './controls/MetaData/MetaList'
 import {CancelBarButton} from './controls/Cancel/CancelBarButton'
 import {QgisButton} from './controls/QgisLink/QgisButton'
 import {QgisModal} from './controls/QgisLink/QgisPopUp'
-
 import {CoordList} from './controls/CoordinateList/CordList'
-
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
 import {Modal} from "../../../../src/components/MapModal/Modal"
-
-import "./styles.css"
 import { service } from './service'
 import Маягт from "./Маягт"
 import {Mongolia_boundary} from './MongoliaBorder'
+import "./styles.css"
 
 export default class BarilgaSuurinGazar extends Component{
 
@@ -59,14 +56,13 @@ export default class BarilgaSuurinGazar extends Component{
           tid: props.match.params.tid,
           pid: props.match.params.pid,
           fid: props.match.params.fid,
-          rows: [],
-          roles: [],
           button_ids: [
             'side', 'remove', 'qgis',
             'polygon', 'point', 'modify',
             'meta', 'form', 'upload',
             'shapeDraw', 'cancel', 'add'
           ],
+          roles:[],
           is_loading:true,
           featureID: null,
           featureID_list: [],
@@ -92,6 +88,12 @@ export default class BarilgaSuurinGazar extends Component{
           pointFeature: null,
           is_not_mongolia: false,
           update_geom_from_list: false,
+          map_wms: [],
+          vector_layer: null,
+          draw_is_active: false,
+          wms_layer: {},
+          layer_choices: [],
+          emp_perm_prefix: '',
           wms_url: '',
           wfs_url: ''
       }
@@ -154,7 +156,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.hideShowList = this.hideShowList.bind(this)
       this.setInActiveButtonStyle = this.setInActiveButtonStyle.bind(this)
       this.getTypeFunction = this.getTypeFunction.bind(this)
-
+      this.handleMapClick = this.handleMapClick.bind(this)
+      this.showFeaturesAt = this.showFeaturesAt.bind(this)
     }
 
     componentDidMount(){
@@ -163,9 +166,9 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({ wms_url, wfs_url })
       })
       service.geomType(pid, fid).then(({type}) => {
-          this.setState({ type })
+        this.setState({ type })
+        this.loadRows()
       })
-      this.loadRows()
       this.loadMap()
     }
 
@@ -187,9 +190,9 @@ export default class BarilgaSuurinGazar extends Component{
       map.addControl(new ScaleLine())
       map.addControl(this.controls.modal)
       if(roles.PERM_CREATE){
-        if(type.includes("Line")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
-        else if(type.includes("Point")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
-        else if(type.includes("Polygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
+        if(type.includes("Line") || type.includes("MultiLine")) map.addControl(new LineBarButton({LineButton: this.LineButton}))
+        else if(type.includes("Point") || type.includes("MultiPoint")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
+        else if(type.includes("Polygon") || type.includes("MultiPolygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
         else {
           this.addNotif('warning', type, 'times')
           map.addControl(new LineBarButton({LineButton: this.LineButton, 'null': true}))
@@ -220,152 +223,49 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ is_loading:false, roles})
     }
 
-    loadData(rows){
+    loadData(){
 
-        const map = this.map
-        const styles = {
-          'MultiPolygon': new Style({
-            stroke: new Stroke({
-              color: 'blue',
-              width: 3,
-            }),
-            fill: new Fill({
-              color: 'rgba(255, 255, 0, 0.1)',
-            }),
-            text: new Text({
-              font: '15px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-              textAlign: 'center'
-            }),
-          }),
-          'Polygon': new Style({
-            stroke: new Stroke({
-              color: 'orange',
-              width: 4,
-            }),
-            fill: new Fill({
-              color: 'rgba(255, 255, 0, 0.1)',
-            }),
-            text: new Text({
-              font: '15px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-              textAlign: 'center'
-            }),
-          }),
-          'Point': new Style({
-            image: new CircleStyle({
-              radius: 5,
-              fill: new Fill({
-                color: 'blue',
-              }),
-            }),
-            text: new Text({
-              font: '8px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-            }),
-          }),
-          'LineString': new Style({
-            stroke: new Stroke({
-              color: 'green',
-              width: 2,
-            }),
-            text: new Text({
-              font: '8px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-            }),
-          }),
-          'MultiLineString': new Style({
-            stroke: new Stroke({
-              color: 'green',
-              width: 2,
-            }),
-            text: new Text({
-              font: '8px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-            }),
-          }),
-          'MultiPoint': new Style({
-            image: new CircleStyle({
-              radius: 5,
-              fill: new Fill({
-                color: 'orange',
-              }),
-            }),
-            text: new Text({
-              font: '8px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-            }),
-          }),
-        };
-
-      const features = []
-      rows.map((row) => {
-          const { id, geom } = row
-          if (geom){
-            const feature = (new GeoJSON().readFeatures(geom, {
-                dataProjection: this.state.dataProjection,
-                featureProjection: this.state.featureProjection,
-            }))[0]
-            feature.setProperties({ id })
-            features.push(feature)
-          }
-      })
+      const wms_layer = this.state.wms_layer
+      this.setState({emp_perm_prefix: wms_layer.url})
+      const map_wms = {
+        tile: new Tile({
+        source: new TileWMS({
+            projection: this.state.projection,
+            url: wms_layer.url,
+            params: {
+                'LAYERS': wms_layer.code,
+                'FORMAT': 'image/png',
+            }
+        }),
+      })}
+      this.setState({map_wms})
+      this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
           dataProjection: this.state.dataProjection,
           featureProjection: this.state.featureProjection,
       }))[0]
+
       Mongolia_feaure.setProperties({ id: 'Mongolia' })
       this.setState({ Mongolia_feaure })
-
-      const vectorSource = new VectorSource({
-        features: features,
-      })
-      const vectorLayer = new VectorLayer({
-            name: 'vector_layer',
-            source: vectorSource,
-        })
-
-      vectorLayer.setStyle((feature, resolution) => {
-        let text = ''
-        const type = feature.getGeometry().getType()
-        if (type.includes('Point') || type.includes('Line')) {
-          text = resolution < 400 ? feature.get('id') : ''
-        } else {
-          text = feature.get('id')
-        }
-        const styleWithType = styles[type]
-        styleWithType.getText().setText(text)
-        return styleWithType
-      })
-
-      map.addLayer(vectorLayer)
-      this.snap(vectorLayer)
-      this.vectorLayer = vectorLayer
-      this.vectorSource = vectorSource
       this.getRole()
-  }
+    }
 
     loadMap(){
-
+      const vector_layer = new VectorLayer({
+        source: new VectorSource(),
+        style: new Style({
+            stroke: new Stroke({
+                color: 'rgba(100, 255, 0, 1)',
+                width: 2
+            }),
+            fill: new Fill({
+                color: 'rgba(100, 255, 0, 0.3)'
+            })
+        })
+      })
+      this.setState({vector_layer})
+      vector_layer.setZIndex(101)
       const raster = new TileLayer({
           source: new OSM(),
       })
@@ -389,18 +289,21 @@ export default class BarilgaSuurinGazar extends Component{
         }),
       })
 
-        this.container = document.getElementById('popup')
+      this.container = document.getElementById('popup')
 
-       const overlay = new Overlay({
-         element: this.container,
-         autoPan: true,
-         autoPanAnimation: {
-           duration: 250,
-         },
-       });
-
+      const overlay = new Overlay({
+        element: this.container,
+        autoPan: true,
+        autoPanAnimation: {
+          duration: 250,
+        },
+      });
       const map = new Map({
-        layers: [raster, vector],
+        layers: [
+          raster,
+          vector,
+          vector_layer
+        ],
         target: 'map',
         view: new View({
           center: this.state.Mongolia,
@@ -416,10 +319,64 @@ export default class BarilgaSuurinGazar extends Component{
       this.modifyE.funct()
     }
 
+    handleMapClick(event) {
+      const coordinate = event.coordinate
+      if(!this.state.draw_is_active) this.showFeaturesAt(coordinate)
+    }
+
+    showFeaturesAt(coordinate) {
+      const view = this.map.getView()
+      const projection = view.getProjection()
+      const resolution = view.getResolution()
+      this.setState({pay_modal_check: false})
+      const map_wms = this.state.map_wms
+      const wms_source = map_wms.tile.getSource()
+      const url = wms_source.getFeatureInfoUrl(
+          coordinate,
+          resolution,
+          projection,
+          {
+              'INFO_FORMAT': 'application/vnd.ogc.gml',
+          }
+      )
+      if (url) {
+        fetch(url)
+          .then((response) => response.text())
+          .then((text) => {
+              const parser = new WMSGetFeatureInfo()
+              const features = parser.readFeatures(text)
+              if(features){
+                const source = new VectorSource({
+                    features: features
+                });
+                this.state.vector_layer.setSource(source)
+              }
+              const feature_info = features.map((feature) => {
+                  const geometry_name = feature.getGeometryName()
+                  const values =
+                      feature.getKeys()
+                      .filter((key) => key != geometry_name)
+                      .map((key) => [key, feature.get(key)])
+                  return [feature.getId(), values]
+              })
+              if(feature_info.length > 0 ){
+                feature_info.map(([layer_name, values], idx) => {
+                  values.map(([field, value], val_idx) => {
+                    field == 'inspire_id' && this.setState({selectedFeature_ID: value})
+                  })
+                })
+              }
+          })
+      } else {
+          /* TODO */
+          console.log('no feature url', wms_source);
+      }
+    }
 
     Modify(){
       const init = () => {
         const select = new Select();
+        this.map.on('click', this.handleMapClick)
         this.map.addInteraction(select);
         select.on("select", event => this.featureSelected(event));
 
@@ -457,11 +414,11 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const { isMeta } = this.state
         if (!isMeta) {
-          if (!this.state.remove_button_active || !this.state.cancel_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
+          if (this.state.modify_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
           if (this.state.modify_button_active) this.DrawButton()
-          const selectedFeature_ID = event.selected[0].getProperties()['id']
+          const selectedFeature_ID = this.state.selectedFeature_ID
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
@@ -602,9 +559,10 @@ export default class BarilgaSuurinGazar extends Component{
 
     loadRows() {
       service
-          .rows(this.state.pid, this.state.fid)
-          .then(({ rows }) => {
-              this.loadData(rows)
+          .getWmsLayer(this.state.tid, this.state.pid, this.state.fid)
+          .then((wms_layer) => {
+              this.setState({ wms_layer })
+              this.loadData()
           })
     }
 
@@ -730,6 +688,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.hideMetaList()
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
+      this.setState({draw_is_active: false})
       if(this.state.remove_button_active)
       {
         this.setState({ remove_button_active: false })
@@ -802,11 +761,9 @@ export default class BarilgaSuurinGazar extends Component{
 
     remove(values){
       const vector = this.vector
-      const vectorLayer = this.vectorLayer
       const {tid, fid, pid, selectedFeature_ID} = this.state
 
       const features_new = vector.getSource().getFeatures();
-      const features = vectorLayer.getSource().getFeatures();
 
       if(selectedFeature_ID){
             this.setState({ togle_islaod: false })
@@ -952,6 +909,7 @@ export default class BarilgaSuurinGazar extends Component{
         this.DrawButton()
         this.setState({modify_button_active: true, remove_button_active: false, cancel_button_active: false})
       }
+      this.setState({draw_is_active: false})
       this.drawE.setActive(false);
       this.modifyE.setActive(true);
       this.hideMetaList()
@@ -998,7 +956,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       else {
         this.setInActiveButtonStyle('meta')
-        this.setState({ isMeta: true })
+        this.setState({ isMeta: true, draw_is_active: false })
       }
     }
 
@@ -1024,47 +982,41 @@ export default class BarilgaSuurinGazar extends Component{
 
     SideBarBtn(){
       this.setInActiveButtonStyle('side')
-      const bundle_id = 7
-      service.loadWMSLayers(bundle_id).then(({wms_list}) => {
-        this.WmsTile(wms_list)
+      service.getLayers(this.state.emp_perm_prefix).then((layer_choices) => {
+        this.setState({layer_choices})
+        this.WmsTile(layer_choices)
       })
     }
 
-    WmsTile(wms_list){
+    WmsTile(layer_choices){
       const map = this.map
-      const wms_map_list = wms_list.map(({layers, url, name}) => {
-        return {
-            name,
-            layers: layers.map((layer) => {
+      const wms_map_list = {
+            name: "Таны харах эрхтэй давхаргууд",
+            layers: layer_choices.slice(1, layer_choices.length).map((layer) => {
               return {
                 ...layer,
                 tile: new TileLayer({
                   source: new TileWMS({
-                    url: url,
+                    url: this.state.emp_perm_prefix,
                       params: {
                         'LAYERS': layer.code,
-                        //'FORMAT': 'image/svg+xml',
                         'FORMAT': 'image/png',
                     },
                     serverType: 'geoserver',
-                    // Countries have transparency, so do not fade tiles:
                     transition: 0,
                   }),
                 })
               }
           })
         }
-      })
+
       this.setState({wms_map_list})
-      wms_map_list.map((wms, idx) => {
-        wms_map_list[idx].layers.map((layer,idx) => {
-          map.addLayer(layer.tile)
-          layer.defaultCheck == 0 && layer.tile.setVisible(false)
-          layer['legend'] = layer.tile.getSource().getLegendUrl()
-        })
+      wms_map_list.layers.map((layer, idx) => {
+        map.addLayer(layer.tile)
+        layer.tile.setVisible(false)
+        layer['legend'] = layer.tile.getSource().getLegendUrl()
       })
-      const vectorLayer = this.vectorLayer
-      vectorLayer.setZIndex(100)
+
       this.setState(prevState => ({
         is_sidebar_open: !prevState.is_sidebar_open,
       }))
