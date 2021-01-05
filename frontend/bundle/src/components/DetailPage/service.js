@@ -111,8 +111,6 @@ function paymentCalcPrice(area, layer_list, feature_info_list, selected_type) {
 }
 
 function purchaseFromCart(datas) {
-    console.log(JSON.stringify({ datas }));
-    console.log(JSON.stringify(datas));
     const requestOptions = {
         ..._getPostOptions(),
         body: JSON.stringify({ datas })

@@ -78,12 +78,10 @@ export class Cart extends Component{
                     'geom_name': geom_name,
                     'pdf_id': pdf_id,
                 }
-                console.log(this.state.data.length);
                 if (this.state.data.length > 0) {
                     const found = this.state.data.filter(element => {
                         return element.geom_name == json.geom_name
                     }).length > 0
-                    console.log(found);
                     if(!found) {
                         const data = this.state.data
                         data.push(json)

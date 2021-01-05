@@ -85,11 +85,7 @@ export class Purchase extends Component {
     }
 
     madeLavlagaa(id) {
-        service
-            .downloadPurchase(id, 'point')
-            .then(rsp => {
-                console.log(rsp);
-            })
+        service.downloadPurchase(id, 'point')
     }
 
     handleModalApproveClose(){

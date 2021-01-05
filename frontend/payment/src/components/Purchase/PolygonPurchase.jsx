@@ -36,9 +36,6 @@ export class PolygonPurchase extends Component {
     downloadPurchase(id) {
         service
             .downloadPurchase(id, this.props.match.params.type)
-            .then(rsp => {
-                console.log(rsp);
-            })
     }
 
     componentDidMount(){
@@ -48,6 +45,7 @@ export class PolygonPurchase extends Component {
               items.map(( items ) =>
                   this.setState({items})
               )
+              this.downloadPurchase(id)
               this.setState({ polygon, layers })
             }
             else {
