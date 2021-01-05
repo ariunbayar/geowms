@@ -187,101 +187,17 @@ class LValueTypes(models.Model):
     modified_by = models.IntegerField()
 
 
-class MDatasBoundary(models.Model):
+class MDatas(models.Model):
     class Meta:
-        db_table = 'm_datas_boundary'
+        db_table = 'm_datas'
         managed = False
 
-    boundary_id = models.BigAutoField(primary_key=True)
+    transport_id = models.BigAutoField(primary_key=True)
     geo_id = models.CharField(max_length=100)
     feature_config_id = models.IntegerField()
     data_type_id = models.IntegerField()
-    property_id = models.IntegerField()
-    code_list_id = models.IntegerField()
-    value_text = models.CharField(max_length=4000)
-    value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=False)
-    value_connected_geo_id = models.CharField(max_length=100)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
-
-
-class MDatasBuilding(models.Model):
-    class Meta:
-        db_table = 'm_datas_building'
-        managed = False
-
-    building_id = models.BigAutoField(primary_key=True)
-    geo_id = models.CharField(max_length=100)
-    feature_config_id = models.IntegerField()
-    data_type_id = models.IntegerField()
-    property_id = models.IntegerField()
-    code_list_id = models.IntegerField()
-    value_text = models.CharField(max_length=4000)
-    value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=False)
-    value_connected_geo_id = models.CharField(max_length=100)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
-
-
-class MDatasCadastral(models.Model):
-    class Meta:
-        db_table = 'm_datas_cadastral'
-        managed = False
-
-    cadastral_id = models.BigAutoField(primary_key=True)
-    geo_id = models.CharField(max_length=100)
-    feature_config_id = models.IntegerField()
-    data_type_id = models.IntegerField()
-    property_id = models.IntegerField()
-    code_list_id = models.IntegerField()
-    value_text = models.CharField(max_length=4000)
-    value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=False)
-    value_connected_geo_id = models.CharField(max_length=100)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
-
-
-class MDatasGeographical(models.Model):
-    class Meta:
-        db_table = 'm_datas_geographical'
-        managed= False
-
-    geographical_id = models.BigAutoField(primary_key=True)
-    geo_id = models.CharField(max_length=100)
-    feature_config_id = models.IntegerField()
-    data_type_id = models.IntegerField()
-    property_id = models.IntegerField()
-    code_list_id = models.IntegerField()
-    value_text = models.CharField(max_length=4000)
-    value_number = models.FloatField()
-    value_date = models.DateTimeField(auto_now=False)
-    value_connected_geo_id = models.CharField(max_length=100)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
-    modified_on = models.DateTimeField(auto_now=True)
-    modified_by = models.IntegerField()
-
-
-class MDatasHydrography(models.Model):
-    class Meta:
-        db_table = 'm_datas_hydrography'
-        managed= False
-
-    hydrography_id = models.BigAutoField(primary_key=True)
-    geo_id = models.CharField(max_length=100)
-    feature_config_id = models.IntegerField()
-    data_type_id = models.IntegerField()
-    property_id = models.IntegerField()
-    code_list_id = models.IntegerField()
+    property_id = models.IntegerField() 
+    code_list_id = models.IntegerField() 
     value_text = models.CharField(max_length=4000)
     value_number = models.FloatField()
     value_date = models.DateTimeField(auto_now=False)
