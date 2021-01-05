@@ -292,6 +292,27 @@ class MDatasHydrography(models.Model):
     modified_by = models.IntegerField()
 
 
+class MDatas(models.Model):
+    class Meta:
+        db_table = 'm_datas'
+        managed = False
+
+    transport_id = models.BigAutoField(primary_key=True)
+    geo_id = models.CharField(max_length=100)
+    feature_config_id = models.IntegerField()
+    data_type_id = models.IntegerField()
+    property_id = models.IntegerField()
+    code_list_id = models.IntegerField()
+    value_text = models.CharField(max_length=4000)
+    value_number = models.FloatField()
+    value_date = models.DateTimeField(auto_now=False)
+    value_connected_geo_id = models.CharField(max_length=100)
+    created_on = models.DateTimeField(auto_now_add=True)
+    created_by = models.IntegerField()
+    modified_on = models.DateTimeField(auto_now=True)
+    modified_by = models.IntegerField()
+
+
 class MGeoDatas(models.Model):
     class Meta:
         db_table = 'm_geo_datas'
