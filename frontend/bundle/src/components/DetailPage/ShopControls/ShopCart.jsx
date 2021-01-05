@@ -115,7 +115,7 @@ export class Cart extends Component{
             })
         }
         if(data.length > 1){
-            const isBelowThreshold = (geom_nameFromArray) => geom_nameromArray = geom_name;
+            const isBelowThreshold = (geom_name_from_array) => geom_name_from_array = geom_name;
             if(data.every(isBelowThreshold)){
                 var array = data.filter((item) =>{
                     return item.geom_name !== geom_name
