@@ -110,10 +110,14 @@ export class Detail extends Component {
                                         {wms.layer_list.map((layer, idx) =>
                                             <li key={idx}>
                                                 {layer.title} ({layer.code})
-                                                <p className="row ml-1">
-                                                    <a className="ml-2" href={`${proxy}/${id}/${layer.code}/json/${is_state ? 'private' : 'public'}/file-download/`}>json</a>
-                                                    <a className="ml-2" href={`${proxy}/${id}/${layer.code}/gml/${is_state ? 'private' : 'public'}/file-download/`}>gml</a>
-                                                </p>
+                                                <div className="input-group mt-2">
+                                                    <input type="text" className="form-control col-4" disabled value={`json линк: ${is_state ? layer.json_private_url : layer.json_public_url}`}/>
+                                                    <span className="input-group-btn">
+                                                        <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(is_state ? layer.json_private_url : layer.json_public_url)}>
+                                                            <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                                        </button>
+                                                    </span>
+                                                </div>
                                             </li>
                                         )}
                                     </ul>
