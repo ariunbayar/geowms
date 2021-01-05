@@ -812,12 +812,11 @@ export default class BarilgaSuurinGazar extends Component{
       const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
       const geo_json = this.writeFeat(geom_for_revoke)
 
-      const parsed_geojson = JSON.parse(geo_json)
-      const geometry = JSON.stringify(parsed_geojson.geometry)
+      const parsed_geojson = JSON.parse(geo_json).geometry
       const form_values = new Object()
       form_values['form_values'] = form_json
 
-      service.cancel(pid, fid, tid, selectedFeature_ID, geometry, form_values, number, order_at).then(({ success, info }) => {
+      service.cancel(pid, fid, tid, selectedFeature_ID, parsed_geojson, form_values, number, order_at).then(({ success, info }) => {
         if (success) {
           this.addNotif('success', info, 'check')
           this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })

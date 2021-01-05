@@ -406,7 +406,7 @@ def _get_property(ob, roles, lproperties):
     elif value_type == 'number':
         data = ob.get('value_number') or ''
     else:
-        data = ob.get('value_date') or ''
+        data = _datetime_display(ob.get('value_date')) or ''
 
     for role in roles:
         if role.get('property_id') == lproperties.property_id:
@@ -738,7 +738,7 @@ def create(request, payload):
             kind = ChangeRequest.KIND_CREATE,
             form_json = form_json,
             geo_json = geo_json,
-            order_at=order_at,
+            order_at=_date_to_timezone(order_at) if order_at else "",
             order_no=order_no,
     )
 
