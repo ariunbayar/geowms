@@ -53,15 +53,11 @@ from django.contrib.gis.gdal.error import GDALException
 from backend.dedsanbutets.models import ViewNames
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import User
-from itertools import groupby
 from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
 
 from main.utils import (
-    gis_delete,
-    gis_fetch_one,
     gis_fields_by_oid,
     gis_insert,
-    gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
     refreshMaterializedView,
