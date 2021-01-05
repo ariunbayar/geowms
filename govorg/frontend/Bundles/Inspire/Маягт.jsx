@@ -46,6 +46,15 @@ export default class Маягт extends Component {
             else if (remove_button_active) {
                 this.props.requestRemove(values)
             }
+            else{
+                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info}) => {
+                    if (success) {
+                        this.setState({is_loading: true})
+                        this.props.requestRefreshCount()
+                        this.addNotif('success', info, 'check')
+                    }
+                })
+            }
     }
 
     handleUpdate(gid){
