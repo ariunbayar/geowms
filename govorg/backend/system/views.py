@@ -130,4 +130,3 @@ def file_download(request, pk, code, types, service_type):
     response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
 
     return response
-print(str(localtime(now()).strftime("%Y-%m-%d_%H-%M")))
