@@ -1,4 +1,3 @@
-import requests
 from backend.org.models import Org
 from backend.wmslayer.models import WMSLayer
 from django.shortcuts import get_object_or_404, reverse
@@ -11,8 +10,7 @@ from backend.govorg.models import GovOrg
 from backend.wms.models import WMS
 from main import utils
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, Http404
-from django.utils.timezone import localtime, now
+
 
 def _get_govorg_display(govorg):
 
@@ -58,6 +56,20 @@ def systemList(request, payload):
 
     return JsonResponse(rsp)
 
+def _get_wmslayer(request, system, wms):
+    layer_list = []
+    system_local_base_url = utils.get_config('system_local_base_url')
+    for wmslayer in wms.wmslayer_set.all():
+        layer_list.append({
+            'id': wmslayer.id,
+            'code': wmslayer.code,
+            'name': wmslayer.name,
+            'title': wmslayer.title,
+            'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[system.token, wmslayer.code])),
+            'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[system.token, wmslayer.code]),
+        })
+    return layer_list
+
 
 def _get_system_detail_display(request, system):
 
@@ -67,7 +79,7 @@ def _get_system_detail_display(request, system):
             'name': wms.name,
             'is_active': wms.is_active,
             'url': wms.url,
-            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+            'layer_list': _get_wmslayer(request, system, wms),
         }
         for wms in WMS.objects.all()
     ]
@@ -93,40 +105,3 @@ def detail(request, pk):
     }
 
     return JsonResponse(rsp)
-
-
-@require_GET
-@login_required(login_url='/gov/secure/login/')
-def file_download(request, pk, code, types, service_type):
-    BASE_HEADERS = {
-        'User-Agent': 'geo 1.0',
-    }
-    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-    if not govorg.wms_layers.filter(code=code):
-        raise Http404
-
-    if service_type == 'private':
-        system_local_base_url = utils.get_config('system_local_base_url')
-        proxy_url = system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
-    elif service_type == 'public':
-        proxy_url = request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
-    else:
-        raise Http404
-
-    date_now = str(localtime(now()).strftime("%Y-%m-%d_%H-%M"))
-    if types == 'json':
-        req_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(url=proxy_url[0], code=code)
-        filename = '{}.json'.format(date_now)
-    elif types == 'gml':
-        req_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}'.format(url=proxy_url[0], code=code)
-        filename = '{}.xml'.format(date_now)
-    else:
-        raise Http404
-
-    response = requests.get(req_url, request.GET, headers={**BASE_HEADERS}, timeout=5)
-    content_type = response.headers.get('content-type')
-    content = response.content
-    response = HttpResponse(content, content_type=content_type)
-    response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
-
-    return response
