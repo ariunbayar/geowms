@@ -6,7 +6,6 @@ def _geo_id_null_to_au_496(apps, schema_editor):
     orgs = Org.objects.filter(geo_id__isnull=True).update(geo_id='au_496')
 
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
