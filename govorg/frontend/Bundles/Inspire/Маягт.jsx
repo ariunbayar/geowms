@@ -179,7 +179,6 @@ export default class Маягт extends Component {
                         isValid,
                         dirty,
                     }) => {
-                        console.log(values);
                     return(
                         <Form>
                         <FieldArray
