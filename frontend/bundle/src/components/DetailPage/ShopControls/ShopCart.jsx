@@ -182,7 +182,7 @@ export class Cart extends Component{
     render(){
         const {coordinate, torf, data, is_button, alert_msg, success, max_size, first_number, undoItem } = this.state
         const {x, y} = this.props
-        console.log(data);
+
         if(data.length > 0){
             this.div = []
             data.slice(first_number, max_size).map((data, key) => {
