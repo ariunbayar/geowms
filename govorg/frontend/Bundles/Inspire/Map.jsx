@@ -343,33 +343,8 @@ export default class BarilgaSuurinGazar extends Component{
         styleWithType.getText().setText(text)
         return styleWithType
       })
-      
-
-      if(this.props.org_geom){
-          var features_perm = new GeoJSON().readFeatures(this.props.org_geom, {
-            dataProjection: this.state.dataProjection,
-            featureProjection: this.state.featureProjection,
-          }); 
-                  
-          const vectorSourceOld = new VectorSource({
-            features:features_perm
-          });
-
-          const vectorLayerOld = new VectorLayer({
-            source: vectorSourceOld,
-            style: function (feature) {
-              return styles[feature.getGeometry().getType()];
-            }
-          });
-          map.addLayer(vectorLayerOld)
-      }
 
       map.addLayer(vectorLayer)
-
-      map.getView().fit(
-        features_perm[0].getGeometry(),
-        { padding: [25, 25, 25, 25] }
-      )
       this.snap(vectorLayer)
       this.vectorLayer = vectorLayer
       this.vectorSource = vectorSource

@@ -51,7 +51,6 @@ export default class Bundles extends Component {
                     <Route path="/gov/org/map/:tid/:pid/:fid/map/" render={(routeProps) =>
                         <BarilgaSuurinGazar
                             { ...routeProps }
-                            org_geom = {this.props.org_geom}
                             addNotif={ this.addNotif }
                             refreshCount={this.props.refreshCount}
                         />
