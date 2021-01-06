@@ -220,13 +220,13 @@ class PopUpCmp extends Component {
                                 </table>
                             </div>
                     }
-                    {!is_user && !is_empty
+                    {!is_user && !is_empty && this.state.mode == 'mpoint_view'
                         ?
                         <div className="btn-group flex-wrap d-flex justify-content-center">
                             <button
-                                className="btn btn-xs btn-primary my-2 mx-3"
+                                className="btn btn-xs btn-primary mb-2 mx-3"
                             >
-                                <a style={{color: 'white'}} href="/login/">Нэвтрэх</a>
+                                <a className="text-decoration-none text-white" href="/login/">Нэвтрэх</a>
                             </button>
                         </div>
                         :
