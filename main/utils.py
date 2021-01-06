@@ -4,7 +4,6 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
-import json
 
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform

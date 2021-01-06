@@ -55,8 +55,8 @@ urlpatterns = [
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
             path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
-            path('control-to-approve/', govorg_inspire_views.control_to_approve, name="control-to-approve"),
-            path('control-to-remove/', govorg_inspire_views.control_to_remove, name="control-to-remove"),
+            path('control-to-approve/', govorg_inspire_views.control_to_approve),
+            path('control-to-remove/', govorg_inspire_views.control_to_remove),
         ], 'inspire'))),
 
         path('org-request/', include(([

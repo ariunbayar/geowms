@@ -18,6 +18,7 @@ from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 import main.geoserver as geoserver
 
+
 def _get_service_url(request, token):
     url = reverse('api:service:system_proxy', args=[token])
     absolute_url = request.build_absolute_uri(url)
@@ -121,8 +122,10 @@ def _geojson_convert_3d_geojson(geojson):
     with connections['default'].cursor() as cursor:
         sql = """ SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326),4326)) as geo_json """
         cursor.execute(sql, [str(geojson)])
-        geo_json = dict((cursor.description[i][0], value) \
-        for i, value in enumerate(cursor.fetchone()))
+        geo_json = {
+            cursor.description[i][0]: value
+            for i, value in enumerate(cursor.fetchone())
+        }
         return geo_json['geo_json']
 
 
