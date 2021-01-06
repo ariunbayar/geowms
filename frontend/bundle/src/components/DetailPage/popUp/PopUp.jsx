@@ -220,11 +220,11 @@ class PopUpCmp extends Component {
                                 </table>
                             </div>
                     }
-                    {!is_user
+                    {!is_user && !is_empty
                         ?
                         <div className="btn-group flex-wrap d-flex justify-content-center">
                             <button
-                                className="btn btn-xs btn-primary my-2 mx-1"
+                                className="btn btn-xs btn-primary my-2 mx-3"
                             >
                                 <a style={{color: 'white'}} href="/login/">Нэвтрэх</a>
                             </button>
@@ -235,7 +235,7 @@ class PopUpCmp extends Component {
                                 this.state.is_purchase
                                 ?
                                     <div className="btn-group flex-wrap d-flex justify-content-center">
-                                        <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
+                                        <button className="btn btn-xs btn-primary my-2 mx-3" disabled>
                                             <div className="spinner-border" role="status">
                                                 <span className="sr-only"></span>
                                             </div>
@@ -247,14 +247,14 @@ class PopUpCmp extends Component {
                                 ?
                                     <div className="btn-group flex-wrap d-flex justify-content-center">
                                         <button
-                                            className="btn btn-xs btn-primary my-2 mx-1"
+                                            className="btn btn-xs btn-primary mx-3"
                                             onClick={() => this.checkDataForPurchase()}
                                             disabled={is_enable ? "" : "disabled"}
                                         >
                                             Худалдаж авах
                                         </button>
                                         <button
-                                            className="btn btn-xs btn-primary my-2 mx-1"
+                                            className="btn btn-xs btn-primary my-2 mx-3"
                                             onClick={() => this.openCartSide()}
                                             disabled={is_enable ? "" : "disabled"}
                                         >
