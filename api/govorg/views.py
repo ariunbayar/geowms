@@ -1,6 +1,7 @@
 import requests
 import json
 
+from django.db import connections
 from django.http import HttpResponse, Http404
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
@@ -8,17 +9,14 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs
+from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
+from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
+from backend.org.models import Employee
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
-from backend.org.models import Employee
-from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
-from django.db import connections
+from main import utils
 import main.geoserver as geoserver
-from backend.dedsanbutets.models import ViewNames
-from main.utils import (
-    _has_employee_perm,
-)
 
 def _get_service_url(request, token):
     url = reverse('api:service:system_proxy', args=[token])
@@ -147,7 +145,7 @@ def qgis_submit(request, token):
         package = LFeatures.objects.filter(feature_id=feature_id).first()
         theme = LPackages.objects.filter(package_id=package.package_id).first()
         geo_json = _geojson_convert_3d_geojson(update_item['geom'])
-        success, info = _has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
+        success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
         if success:
             objs.append(ChangeRequest(
                 old_geo_id=geo_id,
@@ -174,7 +172,7 @@ def qgis_submit(request, token):
         package = LFeatures.objects.filter(feature_id=feature_id).first()
         theme = LPackages.objects.filter(package_id=package.package_id).first()
         geo_json = _geojson_convert_3d_geojson(delete_item['geom'])
-        success, info = _has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_REMOVE, geo_json)
+        success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_REMOVE, geo_json)
         if success:
             objs.append(ChangeRequest(
                 old_geo_id=geo_id,

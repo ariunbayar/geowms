@@ -555,7 +555,7 @@ def _is_geom_included(geo_json, org_geo_id):
     return is_included
 
 
-def _has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
+def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
     success = True
     info = ''
     EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')

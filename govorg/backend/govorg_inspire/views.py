@@ -62,7 +62,7 @@ from main.utils import (
     dict_fetchall,
     refreshMaterializedView,
     get_config,
-    _has_employee_perm
+    has_employee_perm
 )
 
 
@@ -676,7 +676,7 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
-    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
+    success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
@@ -719,7 +719,7 @@ def remove(request, payload):
     geo_data = _get_geom(old_geo_id, fid)
     geo_data = _convert_text_json(geo_data[0]["geom"])
     geo_json = _get_geoJson(geo_data)
-    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
+    success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -761,7 +761,7 @@ def update(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
-    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
+    success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
@@ -800,7 +800,7 @@ def control_to_approve(request, payload):
     employee = get_object_or_404(Employee, user__username=request.user)
     change_request = get_object_or_404(ChangeRequest, id=change_request_id)
 
-    success, info = _has_employee_perm(employee, change_request.feature_id, True, EmpPermInspire.PERM_UPDATE)
+    success, info = has_employee_perm(employee, change_request.feature_id, True, EmpPermInspire.PERM_UPDATE)
     if not success:
         return JsonResponse({'success': success, 'info': info})
     form_json = _check_form_json(change_request.feature_id, form_json, employee)
