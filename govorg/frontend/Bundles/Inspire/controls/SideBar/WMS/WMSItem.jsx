@@ -12,18 +12,7 @@ export default class WMSItem extends Component {
             name: props.wms.name,
             tiles: props.wms.tiles,
             layers: props.wms.layers,
-            is_visible: false,
         }
-
-        this.toggle = this.toggle.bind(this)
-
-    }
-
-    toggle(is_visible) {
-        this.setState({is_visible})
-        this.state.layers.map((layer) =>
-            layer.tile.setVisible(is_visible)
-        )
     }
 
     render() {
@@ -31,21 +20,9 @@ export default class WMSItem extends Component {
         const {tiles, name, layers, is_visible} = this.state
         return (
             <Fragment>
-                <div className="my-1">
-                    <div className="custom-control custom-switch font-weight-bold">
-                        <input
-                            type="checkbox" className="custom-control-input" id={name}
-                            onChange={(e) => this.toggle(e.target.checked)}
-                            checked={is_visible}
-                        />
-                        <label className="custom-control-label" htmlFor={name}>{name}</label>
-                    </div>
-                </div>
                 <WMSLayerItems
                     layers={layers}
                     tileWMS={tiles}
-                    is_visible={is_visible}
-                    toggle={this.toggle}
                 />
             </Fragment>
         )

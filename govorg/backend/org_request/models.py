@@ -18,14 +18,14 @@ class ChangeRequest(models.Model):
     )
 
     KIND_CREATE = 1
-    KIND_DELETE = 2
-    KIND_UPDATE = 3
+    KIND_UPDATE = 2
+    KIND_DELETE = 3
     KIND_DIRECT = 4
 
     KIND_CHOICES = (
         (KIND_CREATE, 'ҮҮССЭН'),
-        (KIND_DELETE, 'ЗАССАН'),
-        (KIND_UPDATE, 'УСТГАСАН'),
+        (KIND_DELETE, 'УСТГАСАН'),
+        (KIND_UPDATE, 'ЗАССАН'),
         (KIND_DIRECT, 'ШУУД'),
     )
 
