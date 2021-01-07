@@ -61,7 +61,8 @@ from main.utils import (
     gis_tables_by_oids,
     dict_fetchall,
     refreshMaterializedView,
-    get_config
+    get_config,
+    has_employee_perm
 )
 
 
@@ -637,28 +638,6 @@ def geomAdd(request, payload, fid):
     return JsonResponse(rsp)
 
 
-def _is_geom_included(geojson, org_geo_id):
-
-    geojson = json.dumps(geojson)
-
-    cursor = connections['default'].cursor()
-    sql = """
-        select ST_Contains(
-            ((
-                SELECT (ST_Transform(geo_data,4326))
-                FROM m_geo_datas
-                WHERE geo_id = %s
-            )),
-            ((
-                select ST_GeomFromGeoJSON(%s)
-            ))
-        )
-    """
-    cursor.execute(sql, [org_geo_id, geojson])
-    is_included = cursor.fetchone()[0]
-    return is_included
-
-
 def _check_form_json(fid, form_json, employee):
 
     request_json = []
@@ -683,29 +662,6 @@ def _check_form_json(fid, form_json, employee):
     return request_json if request_json else ''
 
 
-def _has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
-    success = True
-    info = ''
-
-    qs = EmpPermInspire.objects
-    qs = qs.filter(emp_perm__employee=employee)
-    qs = qs.filter(feature_id=fid)
-    qs = qs.filter(geom=geom)
-    qs = qs.filter(perm_kind=perm_kind)
-
-    if not qs:
-        success = False
-        info = "Албан хаагчийн эрх олгогдоогүй байна."
-
-    if geo_json:
-        is_included = _is_geom_included(geo_json, employee.org.geo_id)
-        if not is_included:
-            success = False
-            info = "Байгууллагын эрх олгогдоогүй байна."
-
-    return success, info
-
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -720,7 +676,7 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
-    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
+    success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
@@ -763,7 +719,7 @@ def remove(request, payload):
     geo_data = _get_geom(old_geo_id, fid)
     geo_data = _convert_text_json(geo_data[0]["geom"])
     geo_json = _get_geoJson(geo_data)
-    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
+    success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -805,7 +761,7 @@ def update(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
-    success, info = _has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
+    success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
@@ -828,6 +784,48 @@ def update(request, payload):
     rsp = {
         'success': True,
         'info': "Хүсэлт амжилттай үүслээ",
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def control_to_approve(request, payload):
+    form_json = payload.get("values")
+    change_request_id = payload.get("change_request_id")
+    order_no = form_json['order_no']
+    order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
+
+    employee = get_object_or_404(Employee, user__username=request.user)
+    change_request = get_object_or_404(ChangeRequest, id=change_request_id)
+
+    success, info = has_employee_perm(employee, change_request.feature_id, True, EmpPermInspire.PERM_UPDATE)
+    if not success:
+        return JsonResponse({'success': success, 'info': info})
+    form_json = _check_form_json(change_request.feature_id, form_json, employee)
+
+    change_request.order_no = order_no
+    change_request.order_at = order_at
+    change_request.form_json = form_json
+    change_request.state = ChangeRequest.STATE_NEW
+    change_request.save()
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа'
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def control_to_remove(request, payload):
+    change_request_id = payload.get("change_request_id")
+    get_object_or_404(ChangeRequest, id=change_request_id)
+    ChangeRequest.objects.filter(id=change_request_id).delete()
+    rsp = {
+        'success': True,
     }
     return JsonResponse(rsp)
 

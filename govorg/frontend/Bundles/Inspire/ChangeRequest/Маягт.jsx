@@ -28,10 +28,18 @@ export default class Маягт extends Component {
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        const {change_request_id} = this.state
-        service.controlToApprove(values, change_request_id).then(({success}) => {
-            if(success) this.props.handleClose()
-        })
+
+        const { change_request_id } = this.state
+
+        this.props.handleIsload(true)
+
+        service
+            .controlToApprove(values, change_request_id)
+            .then(({success, info}) => {
+                this.props.handleIsload(false)
+                this.props.handleClose()
+            })
+
     }
 
     handleRemove(){

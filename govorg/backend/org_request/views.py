@@ -544,36 +544,3 @@ def search(request, payload):
             'info': str(e)
         }
     return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def control_to_approve(request, payload):
-    form_json = payload.get("values")
-    change_request_id = payload.get("change_request_id")
-    order_no = form_json['order_no']
-    order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
-    change_request = get_object_or_404(ChangeRequest, id=change_request_id)
-    change_request.order_no = order_no
-    change_request.order_at = order_at
-    change_request.form_json = form_json
-    change_request.state = ChangeRequest.STATE_NEW
-    change_request.save()
-    rsp = {
-        'success': True,
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def control_to_remove(request, payload):
-    change_request_id = payload.get("change_request_id")
-    get_object_or_404(ChangeRequest, id=change_request_id)
-    ChangeRequest.objects.filter(id=change_request_id).delete()
-    rsp = {
-        'success': True,
-    }
-    return JsonResponse(rsp)
