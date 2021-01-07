@@ -570,7 +570,7 @@ def _geo_json_convert_geom(geojson):
 def geomAdd(request, payload, fid):
 
     geojson = payload.get('geojson')
-    geom = _geoJsonConvertGeom(geojson)
+    geom = _geo_json_convert_geom(geojson)
     if not geom:
         rsp = {
             'success': False,
