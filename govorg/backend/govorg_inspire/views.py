@@ -17,9 +17,6 @@ from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
-    MDatasBoundary,
-    MDatasGeographical,
-    MDatasCadastral,
     LDataTypeConfigs,
     LFeatureConfigs,
     LDataTypes,
@@ -28,8 +25,7 @@ from backend.inspire.models import (
     LCodeListConfigs,
     LCodeLists,
     MGeoDatas,
-    MDatasBuilding,
-    MDatasHydrography,
+    MDatas,
     EmpPerm,
     EmpPermInspire
     )
@@ -117,18 +113,6 @@ def _get_feature_coll(ob, changeset_list):
         return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
-def _get_package(theme_id):
-    package_data = []
-    for package in LPackages.objects.filter(theme_id=theme_id):
-        package_data.append({
-                'id': package.package_id,
-                'code': package.package_code,
-                'name': package.package_name,
-                'features': list(LFeatures.objects.filter(package_id=package.package_id).extra(select={'id': 'feature_id', 'code': 'feature_code', 'name': 'feature_name'}).values('id', 'code', 'name'))
-            })
-    return package_data
-
-
 
 @require_GET
 @ajax_required
@@ -175,25 +159,6 @@ def getRoles(request, fid):
 
     return JsonResponse(rsp)
 
-
-@require_GET
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def bundleButetsAll(request):
-    data = []
-    for themes in LThemes.objects.all():
-        if themes.theme_name =='Барилга, суурин газар':
-            data.append({
-                    'id': themes.theme_id,
-                    'code': themes.theme_code,
-                    'name': themes.theme_name,
-                    'packages': _get_package(themes.theme_id),
-                })
-    rsp = {
-        'success': True,
-        'data': data,
-    }
-    return JsonResponse(rsp)
 
 
 @require_GET
@@ -302,16 +267,16 @@ def save(request, payload, pid, fid):
     for data in form_values:
         if data['value_type'] == 'number':
             if data['data']:
-                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_number=data['data'])
+                MDatas.objects.filter(id=data['pk'], geo_id=data['geo_id']).update(value_number=data['data'])
         elif data['value_type'] == 'option':
             if data['data']:
-                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(code_list_id=data['data'])
+                MDatas.objects.filter(id=data['pk'], geo_id=data['geo_id']).update(code_list_id=data['data'])
         elif data['value_type'] == 'text':
             if data['data']:
-                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_text=data['data'])
+                MDatas.objects.filter(id=data['pk'], geo_id=data['geo_id']).update(value_text=data['data'])
         elif data['value_type'] == 'date':
             if data['data']:
-                MDatasBuilding.objects.filter(building_id=data['building_id'], geo_id=data['geo_id']).update(value_date=data['data'])
+                MDatas.objects.filter(id=data['pk'], geo_id=data['geo_id']).update(value_date=data['data'])
     rsp = {
         'success': True,
         'info': "Амжилттай",
@@ -326,7 +291,7 @@ def delete(request, payload, pid, fid):
     gid = payload.get('gid')
     get_object_or_404(MGeoDatas, geo_id=gid)
 
-    geom = MDatasBuilding.objects.filter(geo_id=gid)
+    geom = MDatas.objects.filter(geo_id=gid)
     datas = MGeoDatas.objects.filter(geo_id=gid)
     if geom and datas:
         geom.delete()
@@ -469,10 +434,8 @@ def detail(request, gid, fid, tid):
     properties = []
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_details = _get_emp_property_roles(employee, fid)
-    theme_code = LThemes.objects.filter(theme_id=tid).first().theme_code
-    model = get_theme_name(theme_code)
     if property_ids:
-        mdatas = model.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'pk')
+        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id')
         for prop in mdatas:
             lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
             properties.append(_get_property(prop, property_details, lproperty))
@@ -620,7 +583,7 @@ def geomAdd(request, payload, fid):
     MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
     fields = get_rows(fid)
     for field in fields:
-        MDatasBuilding.objects.create(
+        MDatas.objects.create(
             geo_id = geo_id,
             feature_config_id = field['feature_config_id'],
             data_type_id = field['data_type_id'],
@@ -846,7 +809,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     keys = ''
     feature_config_id = None
     savename = model_name
-    model_name = get_theme_name(model_name)
+    model_name = MDatas
     code_value = None
     try:
         if not isinstance(model_name, str):
@@ -932,20 +895,6 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
     return rsp
 
 
-def get_theme_name(model_name):
-    if model_name == 'au':
-        model_name = MDatasBoundary
-    if model_name == 'bu':
-        model_name = MDatasBuilding
-    if model_name == 'cp':
-        model_name = MDatasCadastral
-    if model_name == 'gn':
-        model_name = MDatasGeographical
-    if model_name == 'hg':
-        model_name = MDatasHydrography
-    return model_name
-
-
 def _deleteFile(file_name, for_delete_name, type_name):
     fileList = glob.glob(os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', type_name, file_name+'.*'))
     text = ''
@@ -957,14 +906,14 @@ def _deleteFile(file_name, for_delete_name, type_name):
     return text
 
 
-def _deleteDB(id_made, model_name):
+def _deleteDB(id_made):
     try:
         if id_made != '':
             delete_geos = MGeoDatas.objects.filter(geo_id=id_made)
             if delete_geos:
                 for geo in delete_geos:
                     geo.delete()
-            delete_main_datas = model_name.objects.filter(geo_id=id_made)
+            delete_main_datas = MDatas.objects.filter(geo_id=id_made)
             if delete_main_datas:
                 for data in delete_main_datas:
                     data.delete()
@@ -1087,7 +1036,7 @@ def FileUploadSaveData(request, tid, fid):
                                     return JsonResponse(rsp)
                         else:
                             deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
-                            delete_db = _deleteDB(id_made, model_name)
+                            delete_db = _deleteDB(id_made)
                             rsp = {
                                 "success": False,
                                 'info': 'geom байхгүй дата' + deleted,
@@ -1102,7 +1051,7 @@ def FileUploadSaveData(request, tid, fid):
                     })
             except InternalError as e:
                 deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
-                delete_db = _deleteDB(id_made, model_name)
+                delete_db = _deleteDB(id_made)
                 rsp = {
                     'success': False,
                     'info': return_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй ' + deleted
@@ -1110,7 +1059,7 @@ def FileUploadSaveData(request, tid, fid):
                 return JsonResponse(rsp)
             except GEOSException as e:
                 deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
-                delete_db = _deleteDB(id_made, model_name)
+                delete_db = _deleteDB(id_made)
                 rsp = {
                     'success': False,
                     'info': return_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
@@ -1119,7 +1068,7 @@ def FileUploadSaveData(request, tid, fid):
             saved = _saveToMainData(values, model_name, geo_id, feature_id)
             if not saved['success']:
                 deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
-                delete_db = _deleteDB(id_made, model_name)
+                delete_db = _deleteDB(id_made)
                 rsp = saved
                 return JsonResponse(rsp)
             else:
