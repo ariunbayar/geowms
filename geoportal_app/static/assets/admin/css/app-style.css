@@ -3718,14 +3718,14 @@ table.grid td {
 }
 
 .nav-tabs-dark-gray.nav-tabs{
-	border-bottom: 1px solid #95a7b5;
+	border-bottom: 1px solid #75808a;
 }
 
 .nav-tabs-dark-gray .nav-link.active, .nav-tabs-dark-gray .nav-item.show>.nav-link {
     color: #034ea2;
     background-color: #fff;
-    border-color: #95a7b5 #95a7b5 #fff;
-    border-top: 1px solid #95a7b5;
+    border-color: #75808a #75808a #fff;
+    border-top: 1px solid #75808a;
 }
 
 .nav-tabs-secondary.nav-tabs{
