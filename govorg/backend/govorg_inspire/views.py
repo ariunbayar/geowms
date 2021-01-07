@@ -292,8 +292,8 @@ def delete(request, payload, pid, fid):
     gid = payload.get('gid')
     get_object_or_404(MGeoDatas, geo_id=gid)
 
-    geom = MDatas.objects.filter(geo_id=gid)
-    datas = MGeoDatas.objects.filter(geo_id=gid)
+    datas = MDatas.objects.filter(geo_id=gid)
+    geom = MGeoDatas.objects.filter(geo_id=gid)
     if geom and datas:
         geom.delete()
         datas.delete()
@@ -378,7 +378,7 @@ def _get_property(ob, roles, lproperties):
 
 
     return {
-        'pk':ob.get('pk'),
+        'pk':ob.get('id'),
         'property_name': lproperties.property_name,
         'property_id': lproperties.property_id,
         'property_code': lproperties.property_code,
@@ -803,14 +803,12 @@ def geoJsonConvertGeom(geojson):
     return None
 
 
-def _saveToMainData(values, model_name, geo_id, feature_id):
+def _saveToMainData(values, theme_code, geo_id, feature_id):
     keys = ''
     feature_config_id = None
-    savename = model_name
-    model_name = MDatas
     code_value = None
     try:
-        if not isinstance(model_name, str):
+        if not isinstance(MDatas, str):
             if values:
                 feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
                 if feature_config:
@@ -835,7 +833,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
                                                 if code_list_value.code_list_code.lower() == value.lower():
                                                     code_value = code_list_value.code_list_id
                                         if val_type != 'boolean':
-                                            for i in model_name._meta.get_fields():
+                                            for i in MDatas._meta.get_fields():
                                                 if 'value' in i.name:
                                                     out = i.name.split('_')
                                                     if out[1] == 'date' and val_type == 'date':
@@ -867,7 +865,7 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
                                                 'info': "Алдаа гарсан байна: " + val_type + ' буруу байна'
                                             }
                                             return rsp
-                                    sain = model_name.objects.create(**datas)
+                                    sain = MDatas.objects.create(**datas)
                         else:
                             keys += key + ' ,'
                 rsp = {
@@ -878,12 +876,12 @@ def _saveToMainData(values, model_name, geo_id, feature_id):
             else:
                 rsp = {
                     'success': False,
-                    'info': 'Хоосон ирж байна. ' + savename,
+                    'info': 'Хоосон ирж байна. ' + theme_code,
                 }
         else:
             rsp = {
                 'success': False,
-                'info': 'Алдаа гарсан байна.' + savename,
+                'info': 'Алдаа гарсан байна.' + theme_code,
             }
     except Exception as e:
         rsp = {
@@ -984,7 +982,7 @@ def FileUploadSaveData(request, tid, fid):
             values = []
             try:
                 code = LThemes.objects.filter(theme_id=tid).first()
-                model_name = code.theme_code
+                theme_code = code.theme_code
                 need_id = MGeoDatas.objects.count()
                 for name in range(0, len(layer.fields)):
                     field_name = val[name].name # field name
@@ -1063,7 +1061,7 @@ def FileUploadSaveData(request, tid, fid):
                     'info': return_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
                 }
                 return JsonResponse(rsp)
-            saved = _saveToMainData(values, model_name, geo_id, feature_id)
+            saved = _saveToMainData(values, theme_code, geo_id, feature_id)
             if not saved['success']:
                 deleted = _deleteFile(uniq_name, for_delete_name, file_type_name)
                 delete_db = _deleteDB(id_made)

@@ -438,7 +438,7 @@ def request_approve(request, payload, pk):
                     )
             approve_type = 'create'
             _create_mdatas_object(form_json, feature_id, new_geo_id, approve_type)
-        
+
         refreshMaterializedView(feature_id)
         r_approve.state = ChangeRequest.STATE_APPROVE
         r_approve.save()
