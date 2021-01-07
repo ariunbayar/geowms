@@ -4,10 +4,9 @@ import datetime
 import uuid
 import glob
 import random
-from django.conf import settings
+
 from django.db.utils import InternalError
 from geojson import Feature, FeatureCollection
-from django.utils.timezone import make_aware
 
 from django.db import connections
 from django.http import JsonResponse, Http404, HttpResponseBadRequest
@@ -129,7 +128,6 @@ def _get_package(theme_id):
                 'features': list(LFeatures.objects.filter(package_id=package.package_id).extra(select={'id': 'feature_id', 'code': 'feature_code', 'name': 'feature_name'}).values('id', 'code', 'name'))
             })
     return package_data
-
 
 
 @require_GET
@@ -396,7 +394,7 @@ def _get_property(ob, roles, lproperties):
 
     data = ''
     value_type = ''
-    data_list = ''
+    data_list = []
     property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
     value_type = _get_type(lproperties.value_type_id)
 
@@ -407,7 +405,7 @@ def _get_property(ob, roles, lproperties):
     elif value_type == 'number':
         data = ob.get('value_number') or ''
     else:
-        data = _datetime_display(ob.get('value_date')) or ''
+        data = _datetime_display(ob.get('value_date') or '')
 
     for role in roles:
         if role.get('property_id') == lproperties.property_id:
@@ -694,7 +692,7 @@ def create(request, payload):
             kind = ChangeRequest.KIND_CREATE,
             form_json = form_json,
             geo_json = geo_json,
-            order_at=_date_to_timezone(order_at) if order_at else "",
+            order_at=order_at,
             order_no=order_no,
     )
 
@@ -705,14 +703,7 @@ def create(request, payload):
     return JsonResponse(rsp)
 
 
-def _date_to_timezone(input_date):
-    naive_time = datetime.datetime.strptime(input_date, '%Y-%m-%d')
-    settings.TIME_ZONE  # 'UTC'
-    output_date = make_aware(naive_time)
-    return output_date
-
-
-def _new_revoke_request(employee, payload):
+def _create_revoke_request(employee, payload):
 
     theme_id = payload.get('tid')
     package_id = payload.get('pid')
@@ -722,32 +713,35 @@ def _new_revoke_request(employee, payload):
     form_json = payload.get('form_json')
     order_no = payload.get('order_no')
     order_at = payload.get('order_at')
+
     form_json = _check_form_json(feature_id, form_json, employee)
 
-    changeRequest = ChangeRequest()
-    changeRequest.old_geo_id = old_geo_id
-    changeRequest.new_geo_id = None
-    changeRequest.theme_id = theme_id
-    changeRequest.package_id = package_id
-    changeRequest.feature_id = feature_id
-    changeRequest.employee = employee
-    changeRequest.state = ChangeRequest.STATE_NEW
-    changeRequest.kind = ChangeRequest.KIND_REVOKE
-    changeRequest.form_json = form_json
-    changeRequest.geo_json = geo_json
-    changeRequest.order_at = _date_to_timezone(order_at)
-    changeRequest.order_no = order_no
-    changeRequest.save()
+    change_request = ChangeRequest()
+    change_request.old_geo_id = old_geo_id
+    change_request.new_geo_id = None
+    change_request.theme_id = theme_id
+    change_request.package_id = package_id
+    change_request.feature_id = feature_id
+    change_request.employee = employee
+    change_request.state = ChangeRequest.STATE_NEW
+    change_request.kind = ChangeRequest.KIND_REVOKE
+    change_request.form_json = form_json
+    change_request.geo_json = geo_json
+    change_request.order_at = order_at
+    change_request.order_no = order_no
+    change_request.save()
+
+    return change_request
 
 
 @require_POST
 @ajax_required
-def revokeNew(request, payload):
+def revoke_new(request, payload):
     employee = get_object_or_404(Employee, user=request.user)
 
-    success, info = _has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
+    success, info = has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
     if success:
-        _new_revoke_request(employee, payload)
+        _create_revoke_request(employee, payload)
         info = "Цуцлах хүсэлт амжилттай үүслээ"
 
     return JsonResponse({ 'success': success, 'info': info })
