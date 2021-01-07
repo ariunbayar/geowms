@@ -6,14 +6,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_POST, require_GET
-
 from backend.token.utils import TokenGeneratorSystem
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
-
 from main.decorators import ajax_required
 from main import utils
-
 from .models import GovOrg
 from .forms import SystemForm
 
@@ -60,6 +57,21 @@ def хадгалах(request, payload, pk=None):
         return JsonResponse({'success': False, 'errors': form.errors})
 
 
+def _get_wmslayer(request, govorg, wms):
+    layer_list = []
+    system_local_base_url = utils.get_config('system_local_base_url')
+    for wmslayer in wms.wmslayer_set.all():
+        layer_list.append({
+            'id': wmslayer.id,
+            'code': wmslayer.code,
+            'name': wmslayer.name,
+            'title': wmslayer.title,
+            'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wmslayer.code])),
+            'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wmslayer.code]),
+        })
+    return layer_list
+
+
 def _get_govorg_detail_display(request, govorg):
     wms_list = [
         {
@@ -67,7 +79,7 @@ def _get_govorg_detail_display(request, govorg):
             'name': wms.name,
             'is_active': wms.is_active,
             'url': wms.url,
-            'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+            'layer_list': _get_wmslayer(request, govorg, wms),
         }
         for wms in WMS.objects.all()
     ]
@@ -88,7 +100,7 @@ def дэлгэрэнгүй(request, pk):
     rsp = {
         'govorg': _get_govorg_detail_display(request, govorg),
         'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
-        'prvite_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
+        'private_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
         'success': True,
     }
 

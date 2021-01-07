@@ -14,7 +14,7 @@ function getGovRoles(level, org_id){
         ...getGetOptions(),
     }
     return fetch(`${prefix}/level-${level}/${org_id}/gov-perm/`, requestOptions).then(handleResponse)
-}       
+}
 
 function saveGovRoles(level, org_id, values){
     const requestOptions = {

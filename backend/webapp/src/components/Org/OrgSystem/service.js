@@ -7,7 +7,7 @@ export const service = {
     detail,
     getWMSList,
     govorgList,
-}   
+}
 
 
 const prefix = '/back/api/систем'

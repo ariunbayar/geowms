@@ -147,16 +147,18 @@ export default class RequestMap extends Component {
         };
 
         const geojsonObject =  GeoJson
+        var check_update = 0
         if(geojsonObject['features'])
-        { 
+        {
           if(geojsonObject['features'][0]){
             if(Object.keys(geojsonObject['features'][0]).length>0)
-            {            
+            {
+              var features_new =  new GeoJSON().readFeatures(geojsonObject['features'][0], {
+                dataProjection: this.state.dataProjection,
+                featureProjection: this.state.featureProjection,
+              });
               const vectorSourceNew = new VectorSource({
-                features: new GeoJSON().readFeatures(geojsonObject['features'][0], {
-                  dataProjection: this.state.dataProjection,
-                  featureProjection: this.state.featureProjection,
-                }),
+                features: features_new
               });
 
               const vectorLayerNew = new VectorLayer({
@@ -171,12 +173,14 @@ export default class RequestMap extends Component {
 
           if(geojsonObject['features'][1]){
             if(Object.keys(geojsonObject['features'][1]).length>0)
-                {           
+                {
+                  var features_old = new GeoJSON().readFeatures(geojsonObject['features'][1], {
+                    dataProjection: this.state.dataProjection,
+                    featureProjection: this.state.featureProjection,
+                  });
+
                   const vectorSourceOld = new VectorSource({
-                    features: new GeoJSON().readFeatures(geojsonObject['features'][1], {
-                      dataProjection: this.state.dataProjection,
-                      featureProjection: this.state.featureProjection,
-                    }),
+                    features:features_old
                   });
 
                   const vectorLayerOld = new VectorLayer({
@@ -185,10 +189,14 @@ export default class RequestMap extends Component {
                       return styles_old[feature.getGeometry().getType()];
                     }
                   });
+                  check_update = 1
 
                   this.map.addLayer(vectorLayerOld)
                 }
           }
+          if (check_update !=0) this.map.getView().fit(features_old[0].getGeometry(),{ padding: [300, 300, 300, 300] })
+          else  this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
+
         }
     }
 
