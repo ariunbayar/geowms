@@ -533,3 +533,44 @@ def get_configs(config_names):
     }
 
     return rsp
+
+
+def _is_geom_included(geo_json, org_geo_id):
+    cursor = connections['default'].cursor()
+    sql = """
+        select ST_Contains(
+            ((
+                SELECT (ST_Transform(geo_data,4326))
+                FROM m_geo_datas
+                WHERE geo_id = %s
+            )),
+            ((
+                select ST_GeomFromGeoJSON(%s)
+            ))
+        )
+    """
+    cursor.execute(sql, [org_geo_id, str(geo_json)])
+    is_included = cursor.fetchone()[0]
+    return is_included
+
+
+def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
+    success = True
+    info = ''
+    EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm__employee=employee)
+    qs = qs.filter(feature_id=fid)
+    qs = qs.filter(geom=geom)
+    qs = qs.filter(perm_kind=perm_kind)
+
+    if not qs:
+        success = False
+        info = "Албан хаагчийн эрх олгогдоогүй байна."
+    if geo_json:
+        is_included = _is_geom_included(geo_json, employee.org.geo_id)
+        if not is_included:
+            success = False
+            info = "Байгууллагын эрх олгогдоогүй байна."
+
+    return success, info
