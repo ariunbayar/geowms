@@ -163,7 +163,6 @@ class LThemes(models.Model):
     theme_code = models.CharField(max_length=255, null=True)
     theme_name = models.CharField(max_length=255, null=True)
     theme_name_eng = models.CharField(max_length=255, null=True)
-    top_theme_id = models.IntegerField(null=True)
     order_no = models.IntegerField(null=True)
     is_active = models.BooleanField(default=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True, null=True)
