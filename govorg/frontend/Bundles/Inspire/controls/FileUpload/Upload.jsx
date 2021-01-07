@@ -287,7 +287,7 @@ export class Upload extends Component {
                             className="btn gp-btn-primary"
                             onClick={this.handleSubmit}
                             disabled={this.list.length == 0 ? 'disabled' : ''}
-                        >Файлийг илгээх</button>
+                        >Файлыг илгээх</button>
                         }
                         <button
                             className="btn btn-secondary float-right"

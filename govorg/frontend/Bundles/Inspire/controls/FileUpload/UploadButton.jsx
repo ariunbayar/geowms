@@ -18,7 +18,7 @@ export class UploadButton extends Control {
         const elementa = document.createElement('a')
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
-        elementa.setAttribute('title', 'Талбай зурах')
+        elementa.setAttribute('title', 'Файл оруулах')
         elementa.setAttribute('href', '#')
 
         const elementi = document.createElement('i')
