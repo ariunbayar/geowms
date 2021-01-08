@@ -9,8 +9,8 @@ def remove_top_theme_id(apps, schema_editor):
     cursor = connections['default'].cursor()
     sql = """
         ALTER TABLE
-            l_themes 
-        DROP COLUMN 
+            l_themes
+        DROP COLUMN
             top_theme_id;
     """
     cursor.execute(sql)
