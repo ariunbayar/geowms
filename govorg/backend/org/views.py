@@ -17,8 +17,27 @@ from backend.inspire.models import (
     EmpPermInspire,
 )
 
-def _org_role(org):
 
+def _get_properties_by_feature(initial_qs, feature_ids):
+
+    qs = initial_qs
+    qs = qs.filter(feature_id__in=feature_ids)
+    qs = qs.filter(property_id__isnull=False)
+    qs = qs.distinct('property_id')
+
+    item_pairs = qs.values_list('feature_id', 'property_id')
+
+    feature_property_ids = {
+        feature_id: []
+        for feature_id in feature_ids
+    }
+
+    for feature_id, property_id in item_pairs:
+        feature_property_ids[feature_id].append(property_id)
+
+    return feature_property_ids
+
+def _org_role(org):
 
     properties = []
     property_of_feature = {}
@@ -31,9 +50,10 @@ def _org_role(org):
         package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
         theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
 
-        for feature_id in feature_ids:
-            property_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
-            property_of_feature[feature_id] = property_ids
+        qs = GovPermInspire.objects.filter(gov_perm=gov_perm)
+        property_of_feature = _get_properties_by_feature(qs, feature_ids)
+
+        for feature_id, property_ids in property_of_feature.items():
             properties.append(get_property_data_display(None, feature_id, gov_perm, GovPermInspire, True))
             for property_id in property_ids:
                 properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire, False))
@@ -81,9 +101,11 @@ def _emp_role(org, user):
         if feature_ids:
             package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
             theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
-            for feature_id in feature_ids:
-                property_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True))
-                property_of_feature[feature_id] = property_ids
+
+            qs = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id)
+            property_of_feature = _get_properties_by_feature(qs, feature_ids)
+
+            for feature_id, property_ids in property_of_feature.items():
                 for property_id in property_ids:
                     properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire, False))
 
