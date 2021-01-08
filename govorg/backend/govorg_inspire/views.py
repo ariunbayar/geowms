@@ -855,7 +855,12 @@ def _save_to_m_data(values, geo_id, feature_id):
                         return success, info
 
                     datas = _make_value_json(val_type, property, value, geo_id, feature_config_id)
-                dt = MDatas.objects.create(**datas)
+                qs_obj = MDatas.objects
+                qs = qs_obj.filter(geo_id=geo_id)
+                if qs:
+                    qs = qs.update(**datas)
+                else:
+                    dt = qs_obj.create(**datas)
 
         success = True
         info = 'Амжилттай хадгалалаа'
@@ -967,8 +972,8 @@ def _geom_to_multi(geom, geom_type, SRID):
 def file_upload_save_data(request, tid, fid):
     form = request.FILES.getlist('data')
     feature_id = fid
-    id_made = ''
     geo_id = ''
+    has_before = False
     try:
         unique_filename = str(uuid.uuid4())
         for fo in form:
@@ -1001,16 +1006,20 @@ def file_upload_save_data(request, tid, fid):
         for val in layer:
             values = []
             try:
-                need_id = MGeoDatas.objects.count()
+                value = val.get(name) # value ni
+                if value == 'geo_id':
+                    geo_id = value
+                    has_before = True
+                else:
+                    g_id = val.get(name)
+                    need_id = MGeoDatas.objects.count()
+                    geo_id = str(need_id) + str(g_id)
                 for name in range(0, len(layer.fields)):
                     field_name = val[name].name # field name
                     if name == 0:
                         geom = ''
                         geom_type = ''
                         SRID = 4326
-                        DIMENSION_3 = 3
-                        DIMENSION_2 = 3
-                        g_id = val.get(name)
                         dim = val.geom.coord_dim # dimension
                         geom = val.geom.json # goemetry json
                         geom_srid = GEOSGeometry(geom).srid # geomiin srid
@@ -1026,36 +1035,47 @@ def file_upload_save_data(request, tid, fid):
                             if dim == 2:
                                 geom = _geo_json_convert_geom(geom)
                             if geom:
-                                id_made = str(need_id) + str(g_id)
-                                geo = MGeoDatas.objects.create(
-                                    geo_id=id_made,
-                                    geo_data=geom,
-                                    feature_id=feature_id,
-                                    created_by=1,
-                                    modified_by=1,
-                                )
+                                if has_before:
+                                    geo = MGeoDatas.objects.filter(geo_id=geo_id)
+                                    if geo:
+                                        geo = geo.update(geo_data=geom)
+                                    else:
+                                        geo = MGeoDatas.objects.create(
+                                            geo_id=geo_id,
+                                            geo_data=geom,
+                                            feature_id=feature_id,
+                                            created_by=1,
+                                            modified_by=1,
+                                        )
+                                elif not has_before:
+                                    geo = MGeoDatas.objects.create(
+                                        geo_id=geo_id,
+                                        geo_data=geom,
+                                        feature_id=feature_id,
+                                        created_by=1,
+                                        modified_by=1,
+                                    )
                         else:
                             info = 'geom байхгүй дата'
-                            rsp = _remove_uploaded_file(id_made, for_delete_items, info, False)
+                            rsp = _remove_uploaded_file(geo_id, for_delete_items, info, False)
                             return JsonResponse(rsp)
 
                     type_name = val[name].type_name.decode('utf-8')
                     type_code = val[name].type # type code
-                    value = val.get(name) # value ni
                     values.append({
                         field_name: value,
                     })
 
             except InternalError as e:
                 return_info = return_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй'
-                rsp = _remove_uploaded_file(id_made, for_delete_items, return_info, False)
+                rsp = _remove_uploaded_file(geo_id, for_delete_items, return_info, False)
             except GEOSException as e:
                 return_info = return_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
-                rsp = _remove_uploaded_file(id_made, for_delete_items, return_info, False)
+                rsp = _remove_uploaded_file(geo_id, for_delete_items, return_info, False)
 
-            success, info = _save_to_m_data(values, id_made, feature_id)
+            success, info = _save_to_m_data(values, geo_id, feature_id)
             if not success:
-                rsp = _remove_uploaded_file(id_made, for_delete_items, info, success)
+                rsp = _remove_uploaded_file(geo_id, for_delete_items, info, success)
             else:
                 refreshMaterializedView(feature_id)
                 rsp = {
