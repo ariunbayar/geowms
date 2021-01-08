@@ -26,14 +26,6 @@ class InspireFeature():
 
     """ Table == LFeatures """
 
-    THEME_CODE_TO_DATA_MODEL = {
-        'au': 'MDatasBoundary',
-        'bu': 'MDatasBuilding',
-        'cp': 'MDatasCadastral',
-        'gn': 'MDatasGeographical',
-        'hg': 'MDatasHydrography',
-    }
-
     def __init__(self, feature_code):
 
         self.manager = InspireManager.get_instance()
@@ -45,8 +37,7 @@ class InspireFeature():
 
         self.feature_id = self._get_feature_id(feature_code)
 
-        model_name = self._get_data_model_name(feature_code)
-        self.model = self.manager.get_model(model_name)
+        self.model = self.manager.get_model('MDatas')
 
     def _get_feature_id(self, feature_code):
         qs = self.manager.get_model('LFeatures').objects
@@ -55,11 +46,6 @@ class InspireFeature():
         feature_ids = list(qs)
         assert len(feature_ids) == 1, 'Expected 1 LFeatures.feature_id by "feature_code={}"'.format(feature_code)
         return feature_ids[0]
-
-    def _get_data_model_name(self, feature_code):
-        theme_code = re.split(r'[^a-zA-Z]+', feature_code, 1)[0]
-        assert theme_code in self.THEME_CODE_TO_DATA_MODEL, 'Data model for "{}" is undefined'.format(theme_code)
-        return self.THEME_CODE_TO_DATA_MODEL[theme_code]
 
     def select(self, select_options):
 
