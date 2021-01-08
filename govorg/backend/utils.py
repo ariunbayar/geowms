@@ -137,7 +137,7 @@ def get_all_child_feature(feature_id):
     return len(properties)
 
 
-def get_feature_data_display(feature_id, property_of_feature):
+def _get_feature_data_display(feature_id, property_of_feature):
 
     feature = get_object_or_404(LFeatures, feature_id=feature_id)
     all_child = get_all_child_feature(feature_id)
@@ -158,7 +158,7 @@ def get_package_features_data_display(package_id, feature_ids, property_of_featu
     all_child = LFeatures.objects.filter(package_id=package_id).count()
 
     features = [
-        get_feature_data_display(feature_id, property_of_feature[feature_id])
+        _get_feature_data_display(feature_id, property_of_feature[feature_id])
         for feature_id in feature_ids
     ]
 

@@ -41,7 +41,6 @@ urlpatterns = [
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
-            path('table_list/', govorg_inspire_views.bundleButetsAll),
             path('<int:tid>/<int:pid>/<int:fid>/get-wms-layer/', govorg_inspire_views.get_wms_layer),
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
             path('<int:pid>/<int:fid>/add/', govorg_inspire_views.add),
@@ -128,9 +127,9 @@ urlpatterns = [
         ], 'meta-data'))),
 
         path('revoke_request/', include(([
-            path('revoke-new/', govorg_inspire_views.revokeNew, name='revoke-new'),
-            path('revoke-change-state/', revoke_request_views.revoke_state, name='revoke-state'),
-            path('revoke-search/', revoke_request_views.revoke_paginate, name='revoke-paginate'),
+            path('revoke-new/', revoke_request_views.revoke_new),
+            path('revoke-change-state/', revoke_request_views.revoke_state),
+            path('revoke-search/', revoke_request_views.revoke_paginate),
         ], 'revoke_request'))),
 
     ], 'back_org'))),

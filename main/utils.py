@@ -574,3 +574,27 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
             info = "Байгууллагын эрх олгогдоогүй байна."
 
     return success, info
+
+
+def check_form_json(fid, form_json, employee):
+
+    request_json = []
+    property_ids, roles = _get_emp_property_roles(employee, fid)
+    if form_json and roles:
+        for role in roles:
+            for propert in form_json['form_values']:
+                if role.get('property_id') == propert.get('property_id'):
+                    request_json.append({
+                        'pk':propert.get('pk') or '',
+                        'property_name': propert.get('property_name') or '',
+                        'property_id': propert.get('property_id'),
+                        'property_code': propert.get('property_code') or '',
+                        'property_definition': propert.get('property_definition') or '',
+                        'value_type_id': propert.get('value_type_id') or '',
+                        'value_type': propert.get('value_type') or '',
+                        'data': propert.get('data') or '',
+                        'data_list': propert.get('data_list') or '',
+                        'roles': propert.get('roles') or ''
+                    })
+
+    return request_json if request_json else ''
