@@ -10,11 +10,7 @@ from main.utils import refreshMaterializedView
 
 from backend.inspire.models import (
     MGeoDatas,
-    MDatasBoundary,
-    MDatasBuilding,
-    MDatasCadastral,
-    MDatasGeographical,
-    MDatasHydrography,
+    MDatas,
     LThemes,
     LPackages,
     LFeatures,
@@ -91,7 +87,7 @@ def _get_emp_features(employees, request):
 
 @require_POST
 @ajax_required
-def revokePaginate(request, payload):
+def revoke_paginate(request, payload):
     employees = _get_employees(request)
     emp_features = _get_emp_features(employees, request)
 
@@ -137,20 +133,6 @@ def revokePaginate(request, payload):
     return JsonResponse(rsp)
 
 
-def _get_model_name(name):
-
-    if name == 'hg':
-        return MDatasHydrography
-    elif name == 'au':
-        return MDatasBoundary
-    elif name =='bu':
-        return MDatasBuilding
-    elif name=='gn':
-        return MDatasGeographical
-    elif name=='cp':
-        return MDatasCadastral
-
-
 def _change_revoke_request(id, state):
     change_request = get_object_or_404(ChangeRequest, id=id)
     change_request.state = state
@@ -160,14 +142,13 @@ def _change_revoke_request(id, state):
 
 def _delete_geom_data(change_request):
     MGeoDatas.objects.filter(geo_id=change_request.old_geo_id, feature_id=change_request.feature_id).delete()
-    theme_code=LThemes.objects.filter(theme_id=change_request.theme_id).first().theme_code
-    _get_model_name(theme_code).objects.filter(geo_id=change_request.old_geo_id).delete()
+    MDatas.objects.filter(geo_id=change_request.old_geo_id).delete()
     refreshMaterializedView(change_request.feature_id)
 
 
 @require_POST
 @ajax_required
-def revokeState(request, payload):
+def revoke_state(request, payload):
     state = payload.get('state')
     pk = payload.get('id')
 
