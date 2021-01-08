@@ -158,7 +158,7 @@ def qgis_submit(request, token):
                 feature_id=feature_id,
                 employee=employee,
                 state=ChangeRequest.STATE_CONTROL,
-                kind=ChangeRequest.KIND_DELETE,
+                kind=ChangeRequest.KIND_UPDATE,
                 form_json=None,
                 geo_json=geo_json,
             ))
@@ -185,7 +185,7 @@ def qgis_submit(request, token):
                 feature_id=feature_id,
                 employee=employee,
                 state=ChangeRequest.STATE_CONTROL,
-                kind=ChangeRequest.KIND_UPDATE,
+                kind=ChangeRequest.KIND_DELETE,
                 form_json=None,
                 geo_json=geo_json,
             ))

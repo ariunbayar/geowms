@@ -318,7 +318,7 @@ class MGeoDatas(models.Model):
         managed= False
 
     geo_id = models.CharField(primary_key=True, max_length=100)
-    geo_data = models.GeometryCollectionField(srid=32648) #geometry(GeometryZ,32648),
+    geo_data = models.GeometryCollectionField(srid=4326) #geometry(GeometryZ,32648),
     feature_id = models.IntegerField()
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
