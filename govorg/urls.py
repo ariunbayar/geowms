@@ -129,8 +129,8 @@ urlpatterns = [
 
         path('revoke_request/', include(([
             path('revoke-new/', govorg_inspire_views.revokeNew, name='revoke-new'),
-            path('revoke-change-state/', revoke_request_views.revokeState, name='revoke-state'),
-            path('revoke-search/', revoke_request_views.revokePaginate, name='revoke-paginate'),
+            path('revoke-change-state/', revoke_request_views.revoke_state, name='revoke-state'),
+            path('revoke-search/', revoke_request_views.revoke_paginate, name='revoke-paginate'),
         ], 'revoke_request'))),
 
     ], 'back_org'))),
