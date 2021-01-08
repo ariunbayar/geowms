@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, Http404
 
 from .models import ViewNames, ViewProperties
-from backend.inspire.models import LThemes, LPackages, LFeatures, MDatasBoundary, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatasBuilding
+from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas
 
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
@@ -374,20 +374,6 @@ def propertyFields(request, fid):
     return JsonResponse(rsp)
 
 
-def _get_model_name(name):
-
-    if name == 'hg':
-        return 'm_datas_hydrography'
-    elif name == 'au':
-        return 'm_datas_boundary'
-    elif name =='bu':
-        return 'm_datas_building'
-    elif name=='gn':
-        return 'm_datas_geographical'
-    elif name=='cp':
-        return 'm_datas_cadastral'
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -420,7 +406,6 @@ def propertyFieldsSave(request, payload):
         return JsonResponse(rsp)
 
     check_name = ViewNames.objects.filter(feature_id=fid).first()
-    model_name = _get_model_name(theme.theme_code)
     if not theme:
         rsp = {
             'success': False,
@@ -439,9 +424,9 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
-    check = createView(id_list, table_name, model_name, data_type_ids, feature_config_id)
+    check = _create_view(id_list, table_name, data_type_ids, feature_config_id)
     if check:
-        rsp = _create_geoserver_detail(table_name, model_name, theme, user.id, feature)
+        rsp = _create_geoserver_detail(table_name, theme, user.id, feature)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -713,7 +698,7 @@ def get_colName_type(view_name, data):
     return geom_att, some_attributes
 
 
-def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
+def _create_geoserver_detail(table_name, theme, user_id, feature):
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
     layer_name = 'gp_layer_' + table_name
@@ -925,7 +910,8 @@ def _create_geoserver_detail(table_name, model_name, theme, user_id, feature):
 
     return {'success': True, 'info': 'Амжилттай үүсгэлээ'}
 
-def createView(ids, table_name, model_name, data_type_ids, feature_config_id):
+
+def _create_view(ids, table_name, data_type_ids, feature_config_id):
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
@@ -934,12 +920,11 @@ def createView(ids, table_name, model_name, data_type_ids, feature_config_id):
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, b.value_text from {model_name} b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, b.value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
                 table_name = table_name,
-                model_name = model_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
