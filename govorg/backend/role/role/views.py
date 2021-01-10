@@ -12,6 +12,7 @@ from backend.inspire.models import (
     EmpRoleInspire,
     LFeatures,
     LPackages,
+    LProperties,
 )
 
 from govorg.backend.utils import (
@@ -179,7 +180,8 @@ def _get_emp_roles_data_display(emp_role):
         property_of_feature[feature_id] = property_ids
         properties.append(get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True))
         for property_id in property_ids:
-            properties.append(get_property_data_display(property_id, feature_id, emp_role, EmpRoleInspire, False))
+            prop = LProperties.objects.get(property_id=property_id)
+            properties.append(get_property_data_display(prop, feature_id, emp_role, EmpRoleInspire, False))
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
