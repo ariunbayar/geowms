@@ -839,8 +839,7 @@ def _save_to_m_data(values, geo_id, feature_id):
     try:
         feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id)
         if feature_config:
-            # feature_config_id = feature_config.first().feature_config_id
-            feature_config_id = None
+            feature_config_id = feature_config.first().feature_config_id
         for j in values:
             for key, value in j.items():
                 properties = LProperties.objects.filter(property_code__icontains=key)
@@ -853,14 +852,16 @@ def _save_to_m_data(values, geo_id, feature_id):
                         success = False
                         info = "Алдаа гарсан байна: " + val_type + ' буруу байна'
                         return success, info
-
+                    print("geo _id", geo_id)
                     datas = _make_value_json(val_type, property, value, geo_id, feature_config_id)
+                    print(datas)
                 qs_obj = MDatas.objects
                 qs = qs_obj.filter(geo_id=geo_id)
                 if qs:
                     qs = qs.update(**datas)
                 else:
-                    dt = qs_obj.create(**datas)
+                    qs = qs_obj.create(**datas)
+                print(qs)
 
         success = True
         info = 'Амжилттай хадгалалаа'
@@ -970,10 +971,11 @@ def _geom_to_multi(geom, geom_type, SRID):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def file_upload_save_data(request, tid, fid):
+    employee = get_object_or_404(Employee, user=request.user)
     form = request.FILES.getlist('data')
     feature_id = fid
     geo_id = ''
-    has_before = False
+
     try:
         unique_filename = str(uuid.uuid4())
         for fo in form:
@@ -1006,17 +1008,17 @@ def file_upload_save_data(request, tid, fid):
         for val in layer:
             values = []
             try:
-                value = val.get(name) # value ni
-                if value == 'geo_id':
-                    geo_id = value
-                    has_before = True
-                else:
-                    g_id = val.get(name)
-                    need_id = MGeoDatas.objects.count()
-                    geo_id = str(need_id) + str(g_id)
                 for name in range(0, len(layer.fields)):
                     field_name = val[name].name # field name
+
+                    value = val.get(name) # value ni
                     if name == 0:
+                        if field_name == 'geo_id':
+                            geo_id = value
+                        else:
+                            g_id = val.get(name)
+                            need_id = MGeoDatas.objects.count()
+                            geo_id = str(need_id) + str(g_id)
                         geom = ''
                         geom_type = ''
                         SRID = 4326
@@ -1035,19 +1037,20 @@ def file_upload_save_data(request, tid, fid):
                             if dim == 2:
                                 geom = _geo_json_convert_geom(geom)
                             if geom:
-                                if has_before:
-                                    geo = MGeoDatas.objects.filter(geo_id=geo_id)
-                                    if geo:
-                                        geo = geo.update(geo_data=geom)
-                                    else:
-                                        geo = MGeoDatas.objects.create(
-                                            geo_id=geo_id,
-                                            geo_data=geom,
-                                            feature_id=feature_id,
-                                            created_by=1,
-                                            modified_by=1,
-                                        )
-                                elif not has_before:
+                                geo = MGeoDatas.objects.filter(geo_id=geo_id)
+                                if geo:
+
+                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geom)
+                                    if not success:
+                                        return JsonResponse({'success': success, 'info': info})
+
+                                    geo = geo.update(geo_data=geom)
+                                else:
+
+                                    # success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_CREATE, geom)
+                                    # if not success:
+                                        # return JsonResponse({'success': success, 'info': info})
+
                                     geo = MGeoDatas.objects.create(
                                         geo_id=geo_id,
                                         geo_data=geom,
@@ -1076,6 +1079,7 @@ def file_upload_save_data(request, tid, fid):
             success, info = _save_to_m_data(values, geo_id, feature_id)
             if not success:
                 rsp = _remove_uploaded_file(geo_id, for_delete_items, info, success)
+                return JsonResponse(rsp)
             else:
                 refreshMaterializedView(feature_id)
                 rsp = {
