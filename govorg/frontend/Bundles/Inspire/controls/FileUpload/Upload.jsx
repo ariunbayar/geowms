@@ -112,17 +112,11 @@ export class Upload extends Component {
         service
             .sendFile(formData, fid, tid)
             .then(({success, info, key}) => {
-            if (success){
+            if (success) {
                 alert(info)
-                if (key){
-                    alert(key)
-                }
-                else{
-                    alert(key)
-                }
                 this.props.rows()
             }
-            else{
+            else {
                 alert(info)
             }
             this.cancel()

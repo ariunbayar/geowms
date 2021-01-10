@@ -793,10 +793,9 @@ def control_to_remove(request, payload):
     return JsonResponse(rsp)
 
 
-def _make_value_json(val_type, property, value, geo_id, feature_config_id):
+def _make_value_json(val_type, property, value, geo_id, feature_config_id, data_type_id):
     datas = {}
     code_value = None
-    data_type_id = None
     if val_type == 'single-select':
         code_list_values = LCodeLists.objects.filter(property_id=property.property_id, code_list_code=value)
         for code_list_value in code_list_values:
@@ -836,32 +835,33 @@ def _save_to_m_data(values, geo_id, feature_id):
     feature_config_id = None
     success = False
     info = ''
+    data_type_id = None
     try:
-        feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id)
+
+        feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
         if feature_config:
-            feature_config_id = feature_config.first().feature_config_id
+            feature_config_id = feature_config.feature_config_id
+            data_type_id = feature_config.data_type_id
+
         for j in values:
             for key, value in j.items():
-                properties = LProperties.objects.filter(property_code__icontains=key)
-            for property in properties:
-                value_types = LValueTypes.objects.filter(value_type_id=property.value_type_id)
-                for value_type in value_types:
-                    val_type = value_type.value_type_id
+                prop = LProperties.objects.filter(property_code__icontains=key).first()
+                if prop:
+                    value_types = LValueTypes.objects.filter(value_type_id=prop.value_type_id)
+                    for value_type in value_types:
+                        val_type = value_type.value_type_id
 
-                    if val_type == 'boolean':
-                        success = False
-                        info = "Алдаа гарсан байна: " + val_type + ' буруу байна'
-                        return success, info
-                    print("geo _id", geo_id)
-                    datas = _make_value_json(val_type, property, value, geo_id, feature_config_id)
-                    print(datas)
-                qs_obj = MDatas.objects
-                qs = qs_obj.filter(geo_id=geo_id)
-                if qs:
-                    qs = qs.update(**datas)
-                else:
-                    qs = qs_obj.create(**datas)
-                print(qs)
+                        if val_type == 'boolean':
+                            success = False
+                            info = "Алдаа гарсан байна: " + val_type + ' буруу байна'
+                            return success, info
+                        datas = _make_value_json(val_type, prop, value, geo_id, feature_config_id, data_type_id)
+
+                        qs = MDatas.objects.filter(geo_id=geo_id, property_id=prop.property_id, feature_config_id=feature_config_id)
+                        if qs:
+                            qs = qs.update(**datas)
+                        else:
+                            qs = MDatas.objects.create(**datas)
 
         success = True
         info = 'Амжилттай хадгалалаа'
@@ -902,7 +902,7 @@ def _delete_db(geo_id):
                     data.delete()
             success = True
     except Exception as e:
-        deleted_db_info = "Устгах явцад алдаа гарсан" + str(e)
+        deleted_db_info = "Устгах явцад алдаа гарсан " + str(e)
     return success, deleted_db_info
 
 
@@ -1023,33 +1023,35 @@ def file_upload_save_data(request, tid, fid):
                         geom_type = ''
                         SRID = 4326
                         dim = val.geom.coord_dim # dimension
-                        geom = val.geom.json # goemetry json
-                        geom_srid = GEOSGeometry(geom).srid # geomiin srid
-                        if geom:
+                        geo_json = val.geom.json # goemetry json
+                        if geo_json:
+                            geom_srid = GEOSGeometry(geo_json).srid # geomiin srid
                             if geom_srid != SRID:
-                                geom = GEOSGeometry(geom, srid=SRID)
+                                geom = GEOSGeometry(geo_json, srid=SRID)
                             if dim == 3:
-                                geom_type = GEOSGeometry(geom).geom_type #geom iin type
-                                geom = GEOSGeometry(geom).hex
-                                geom = geom.decode("utf-8") #binary hurwuuleh
+                                geom_type = GEOSGeometry(geo_json).geom_type #geom iin type
+                                geom = GEOSGeometry(geo_json).hex
+                                geom = geo_json.decode("utf-8") #binary hurwuuleh
                                 geom = GEOSGeometry(geom)
                                 geom = _geom_to_multi(geom, geom_type, SRID)
                             if dim == 2:
-                                geom = _geo_json_convert_geom(geom)
+                                geom = _geo_json_convert_geom(geo_json)
                             if geom:
                                 geo = MGeoDatas.objects.filter(geo_id=geo_id)
                                 if geo:
-
-                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geom)
+                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
                                     if not success:
+                                        _delete_file(for_delete_items)
                                         return JsonResponse({'success': success, 'info': info})
 
                                     geo = geo.update(geo_data=geom)
+
                                 else:
 
-                                    # success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_CREATE, geom)
-                                    # if not success:
-                                        # return JsonResponse({'success': success, 'info': info})
+                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_CREATE, geo_json)
+                                    if not success:
+                                        _delete_file(for_delete_items)
+                                        return JsonResponse({'success': success, 'info': info})
 
                                     geo = MGeoDatas.objects.create(
                                         geo_id=geo_id,
@@ -1086,6 +1088,7 @@ def file_upload_save_data(request, tid, fid):
                     'success': success,
                     'info': info,
                 }
+
     except GDALException as e:
         _delete_file(for_delete_items)
         rsp = {
