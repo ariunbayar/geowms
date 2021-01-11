@@ -112,17 +112,11 @@ export class Upload extends Component {
         service
             .sendFile(formData, fid, tid)
             .then(({success, info, key}) => {
-            if (success){
+            if (success) {
                 alert(info)
-                if (key){
-                    alert(key)
-                }
-                else{
-                    alert(key)
-                }
                 this.props.rows()
             }
-            else{
+            else {
                 alert(info)
             }
             this.cancel()
@@ -287,7 +281,7 @@ export class Upload extends Component {
                             className="btn gp-btn-primary"
                             onClick={this.handleSubmit}
                             disabled={this.list.length == 0 ? 'disabled' : ''}
-                        >Файлийг илгээх</button>
+                        >Файлыг илгээх</button>
                         }
                         <button
                             className="btn btn-secondary float-right"

@@ -1,20 +1,21 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import F
+from django.contrib.auth.decorators import login_required
+
 from backend.org.models import Org, OrgRole, Employee, InspirePerm
 from backend.bundle.models import Bundle
 from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas
-from django.contrib.auth.decorators import login_required
-
-from govorg.backend.utils import (
-    get_package_features_data_display,
-    get_theme_data_display,
-    get_property_data_display
-)
-
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
     EmpPerm,
     EmpPermInspire,
+    LProperties,
+)
+from govorg.backend.utils import (
+    get_package_features_data_display,
+    get_theme_data_display,
+    get_property_data_display2,
 )
 
 
@@ -23,7 +24,12 @@ def _get_properties_by_feature(initial_qs, feature_ids):
     qs = initial_qs
     qs = qs.filter(feature_id__in=feature_ids)
     qs = qs.filter(property_id__isnull=False)
-    qs = qs.distinct('property_id')
+
+    qs_for_props = qs.values_list('property_id', flat=True)
+    properties = {
+        prop.property_id: prop
+        for prop in LProperties.objects.filter(property_id__in=qs_for_props)
+    }
 
     item_pairs = qs.values_list('feature_id', 'property_id')
 
@@ -33,7 +39,9 @@ def _get_properties_by_feature(initial_qs, feature_ids):
     }
 
     for feature_id, property_id in item_pairs:
-        feature_property_ids[feature_id].append(property_id)
+        feature_property_ids[feature_id].append(
+            properties[property_id]
+        )
 
     return feature_property_ids
 
@@ -53,10 +61,47 @@ def _org_role(org):
         qs = GovPermInspire.objects.filter(gov_perm=gov_perm)
         property_of_feature = _get_properties_by_feature(qs, feature_ids)
 
-        for feature_id, property_ids in property_of_feature.items():
-            properties.append(get_property_data_display(None, feature_id, gov_perm, GovPermInspire, True))
-            for property_id in property_ids:
-                properties.append(get_property_data_display(property_id, feature_id, gov_perm, GovPermInspire, False))
+        property_ids_of_feature = {}
+        for feature_id, props in property_of_feature.items():
+            property_ids_of_feature[feature_id] = [prop.property_id for prop in props]
+
+        qs = GovPermInspire.objects.filter(feature_id__in=feature_ids, gov_perm=gov_perm)
+        perm_list_all = list(qs.values('geom', 'property_id', 'feature_id', ins_id=F('id'), kind=F('perm_kind')))
+
+        def _get_perm_list(feature_id, property_id, geom):
+            perm_list_filtered = []
+
+            for item in perm_list_all:
+                if item['feature_id'] == feature_id:
+                    if geom == True:
+                        if item['geom'] == True:
+                            perm_list_filtered.append({
+                                'ins_id': item['ins_id'],
+                                'kind': item['kind'],
+                            })
+                    else:
+                        if item['property_id'] == property_id:
+                            perm_list_filtered.append({
+                                'ins_id': item['ins_id'],
+                                'kind': item['kind'],
+                            })
+
+            return perm_list_filtered
+
+        for feature_id, props in property_of_feature.items():
+
+            # geom
+            perm_list = _get_perm_list(feature_id, None, True)
+            properties.append(
+                get_property_data_display2(perm_list, None, feature_id, True)
+            )
+
+            # properties
+            for prop in props:
+                perm_list = _get_perm_list(feature_id, prop.property_id, False)
+                properties.append(
+                    get_property_data_display2(perm_list, prop, feature_id, False)
+                )
 
         def _get_package_features_data_display(package_id, feature_ids):
 
@@ -67,7 +112,7 @@ def _org_role(org):
 
             package_feature_ids = list(qs)
 
-            return get_package_features_data_display(package_id, package_feature_ids, property_of_feature)
+            return get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature)
 
         package_features = [
             _get_package_features_data_display(package_id, feature_ids)
@@ -88,7 +133,6 @@ def _org_role(org):
 
 
 def _emp_role(org, user):
-    properties = []
     property_of_feature = {}
     feature_ids = []
     package_features = []
@@ -105,12 +149,19 @@ def _emp_role(org, user):
             qs = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id)
             property_of_feature = _get_properties_by_feature(qs, feature_ids)
 
-            for feature_id, property_ids in property_of_feature.items():
-                for property_id in property_ids:
-                    properties.append(get_property_data_display(property_id, feature_id, emp_perm, EmpPermInspire, False))
+            property_ids_of_feature = {}
+            for feature_id, props in property_of_feature.items():
+                property_ids_of_feature[feature_id] = [prop.property_id for prop in props]
+
 
             package_features = [
-                get_package_features_data_display(package_id, list(LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)), property_of_feature)
+                get_package_features_data_display(
+                    package_id,
+                    list(
+                        LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)
+                    ),
+                    property_ids_of_feature
+                )
                 for package_id in package_ids
             ]
 
