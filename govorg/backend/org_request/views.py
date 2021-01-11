@@ -18,11 +18,7 @@ from backend.inspire.models import (
     LPackages,
     LFeatures,
     MGeoDatas,
-    MDatasBoundary,
-    MDatasBuilding,
-    MDatasCadastral,
-    MDatasGeographical,
-    MDatasHydrography,
+    MDatas,
     EmpPermInspire,
     EmpPerm,
     GovPerm,
@@ -318,20 +314,6 @@ def geoJsonConvertGeom(geojson):
         return geom
 
 
-def _get_model_name(name):
-
-    if name == 'hg':
-        return MDatasHydrography
-    elif name == 'au':
-        return MDatasBoundary
-    elif name =='bu':
-        return MDatasBuilding
-    elif name=='gn':
-        return MDatasGeographical
-    elif name=='cp':
-        return MDatasCadastral
-
-
 def _get_ids(fid, pid):
     cursor = connections['default'].cursor()
     sql = """
@@ -355,7 +337,7 @@ def _get_ids(fid, pid):
 
 
 
-def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve_type):
+def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     value_number = None
     value_text = ''
     for i in form_json:
@@ -371,7 +353,7 @@ def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve
         else:
             value_text = i.get('data') or ''
         if approve_type == 'create':
-            geo_data_model.objects.create(
+            MDatas.objects.create(
                 geo_id = geo_id,
                 feature_config_id=fid,
                 data_type_id = did,
@@ -381,7 +363,7 @@ def _create_mdatas_object(form_json, geo_data_model, feature_id, geo_id, approve
                 value_date = value_date
             )
         else:
-            geo_data_model.objects.filter(pk=i['pk']).update(
+            MDatas.objects.filter(pk=i['pk']).update(
                 value_text = value_text,
                 value_number = value_number,
                 value_date = value_date
@@ -399,7 +381,6 @@ def request_approve(request, payload, pk):
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
     form_json = values['form_json']
-    geo_data_model = _get_model_name(theme_code)
 
     perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
 
@@ -427,7 +408,7 @@ def request_approve(request, payload, pk):
                 geom = GEOSGeometry(geo_json)
                 approve_type = 'update'
                 MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id).update(geo_data=geom)
-                _create_mdatas_object(form_json, geo_data_model, feature_id, old_geo_id, approve_type)
+                _create_mdatas_object(form_json, feature_id, old_geo_id, approve_type)
 
             else:
                 data = MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id)
@@ -456,8 +437,8 @@ def request_approve(request, payload, pk):
                     geo_data=geom
                     )
             approve_type = 'create'
-            _create_mdatas_object(form_json, geo_data_model, feature_id, new_geo_id, approve_type)
-        
+            _create_mdatas_object(form_json, feature_id, new_geo_id, approve_type)
+
         refreshMaterializedView(feature_id)
         r_approve.state = ChangeRequest.STATE_APPROVE
         r_approve.save()
@@ -543,37 +524,4 @@ def search(request, payload):
             'success': False,
             'info': str(e)
         }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def control_to_approve(request, payload):
-    form_json = payload.get("values")
-    change_request_id = payload.get("change_request_id")
-    order_no = form_json['order_no']
-    order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
-    change_request = get_object_or_404(ChangeRequest, id=change_request_id)
-    change_request.order_no = order_no
-    change_request.order_at = order_at
-    change_request.form_json = form_json
-    change_request.state = ChangeRequest.STATE_NEW
-    change_request.save()
-    rsp = {
-        'success': True,
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def control_to_remove(request, payload):
-    change_request_id = payload.get("change_request_id")
-    get_object_or_404(ChangeRequest, id=change_request_id)
-    ChangeRequest.objects.filter(id=change_request_id).delete()
-    rsp = {
-        'success': True,
-    }
     return JsonResponse(rsp)

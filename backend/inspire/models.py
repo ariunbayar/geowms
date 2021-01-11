@@ -163,7 +163,6 @@ class LThemes(models.Model):
     theme_code = models.CharField(max_length=255, null=True)
     theme_name = models.CharField(max_length=255, null=True)
     theme_name_eng = models.CharField(max_length=255, null=True)
-    top_theme_id = models.IntegerField(null=True)
     order_no = models.IntegerField(null=True)
     is_active = models.BooleanField(default=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True, null=True)
@@ -297,7 +296,7 @@ class MDatas(models.Model):
         db_table = 'm_datas'
         managed = False
 
-    transport_id = models.BigAutoField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     geo_id = models.CharField(max_length=100, null=True)
     feature_config_id = models.IntegerField(null=True)
     data_type_id = models.IntegerField(null=True)
@@ -319,7 +318,7 @@ class MGeoDatas(models.Model):
         managed= False
 
     geo_id = models.CharField(primary_key=True, max_length=100)
-    geo_data = models.GeometryCollectionField(srid=32648) #geometry(GeometryZ,32648),
+    geo_data = models.GeometryCollectionField(srid=4326) #geometry(GeometryZ,32648),
     feature_id = models.IntegerField()
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()

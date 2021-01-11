@@ -36,10 +36,10 @@ urlpatterns = [
             path('<int:pk>/detail/', system_views.detail, name='detail'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
         ], 'system'))),
+
         path('inspire/', include(([
             path('', govorg_inspire_views.changeset_all),
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
-            path('table_list/', govorg_inspire_views.bundleButetsAll),
             path('<int:tid>/<int:pid>/<int:fid>/get-wms-layer/', govorg_inspire_views.get_wms_layer),
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
             path('<int:pid>/<int:fid>/add/', govorg_inspire_views.add),
@@ -52,15 +52,15 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
-            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
+            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.file_upload_save_data),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
+            path('control-to-approve/', govorg_inspire_views.control_to_approve),
+            path('control-to-remove/', govorg_inspire_views.control_to_remove),
         ], 'inspire'))),
 
         path('org-request/', include(([
             path('', org_request_views.getAll, name="all"),
             path('change-request/', org_request_views.get_change_all, name="change-request"),
-            path('control-to-approve/', org_request_views.control_to_approve, name="control-to-approve"),
-            path('control-to-remove/', org_request_views.control_to_remove, name="control-to-remove"),
             path('<int:pk>/delete/', org_request_views.request_delete, name="delete"),
             path('<int:pk>/approve/', org_request_views.request_approve, name="approve"),
             path('getCount/', org_request_views.get_count, name='getCount'),

@@ -17,7 +17,6 @@ export class Detail extends Component {
             copy_url_is: false,
             private_url: '',
             is_state: false,
-            proxy: '/gov/api/system'
         }
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.addNotif = this.addNotif.bind(this)
@@ -66,7 +65,7 @@ export class Detail extends Component {
     render() {
 
         const {id, name, token, website} = this.state.system
-        const {is_state, proxy} = this.state
+        const {is_state} = this.state
 
         return (
             <div className="card">
@@ -79,39 +78,51 @@ export class Detail extends Component {
                         </div>
                     </div>
                     <div className="row">
-                        <div className="col-md-12 mb-4">
+                        <div className="col-md-12">
                             <h5>{name}</h5>
                             <p><strong>Token</strong>: {token} </p>
                             {website && <p><strong>Вебсайт</strong>: {website} </p>}
-                            <a className={is_state ? "btn btn-primary text-white btn-sm" : "btn btn-dark text-white btn-sm"} onClick={() => this.setState({is_state:true})}>Төрийн сүлжээ</a>
-                            <a className={is_state ? "ml-2 btn btn-dark text-white btn-sm" : "ml-2 btn btn-primary text-white btn-sm"} onClick={() => this.setState({is_state:false})}>Интернэт сүлжээ</a>
-                            {is_state ?
-                            <div className="input-group mt-2">
-                                <input type="text" className="form-control col-6" disabled value={this.state.private_url}/>
-                                <span className="input-group-btn">
-                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.private_url)}>
-                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
-                                </button>
-                                </span>
-                            </div>:
-                            <div className="input-group mt-2">
-                                <input type="text" className="form-control col-6" disabled value={this.state.public_url}/>
-                                <span className="input-group-btn">
-                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
-                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
-                                </button>
-                                </span>
+                        </div>
+                        <div className="col-md-9 pr-0 pl-0">
+                            <ul className="nav nav-tabs nav-tabs-dark-gray col-12">
+                                <li className="nav-item gp-text-primary">
+                                    <a onClick={() => this.setState({is_state:false})} className="nav-link active" data-toggle="tab" href="#tabe-4"><i className="icon-home"></i> <span className="hidden-xs">Интернэт сүлжээ</span></a>
+                                </li>
+                                <li className="nav-item gp-text-primary">
+                                    <a onClick={() => this.setState({is_state:true})} className="nav-link" data-toggle="tab" href="#tabe-4"><i className="icon-home"></i> <span className="hidden-xs">Төрийн сүлжээ</span></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="col-md-9 border-top-0 border border-secondary">
+                            <div className="col-md-12 mt-3 mb-3">
+                                {is_state ?
+                                <div className="input-group mt-2">
+                                    <input type="text" className="form-control col-9" disabled value={this.state.private_url}/>
+                                    <span className="input-group-btn">
+                                    <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.private_url)}>
+                                        <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                    </button>
+                                    </span>
+                                </div>:
+                                <div className="input-group mt-2">
+                                    <input type="text" className="form-control col-9" disabled value={this.state.public_url}/>
+                                    <span className="input-group-btn">
+                                    <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
+                                        <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                    </button>
+                                    </span>
+                                </div>
+                                }
                             </div>
-                            }
                             {this.state.system_wms_list.map((wms) =>
-                                <div className="col-md-12 mb-2 ml-3" key={wms.id}>
+                                <div className="col-md-12 mt-3 mb-3 ml-3" key={wms.id}>
                                     <h5> {wms.name} </h5>
                                     <ul>
                                         {wms.layer_list.map((layer, idx) =>
                                             <li key={idx}>
-                                                {layer.title} ({layer.code})
+                                                GeoJSON: {layer.title} ({layer.code})
                                                 <div className="input-group mt-2">
-                                                    <input type="text" className="form-control col-4" disabled value={`json линк: ${is_state ? layer.json_private_url : layer.json_public_url}`}/>
+                                                    <input type="text" className="form-control col-7" disabled value={`${is_state ? layer.json_private_url : layer.json_public_url}`}/>
                                                     <span className="input-group-btn">
                                                         <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(is_state ? layer.json_private_url : layer.json_public_url)}>
                                                             <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
