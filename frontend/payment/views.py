@@ -215,13 +215,6 @@ def _value_types(value_type_id, property_id):
     return value_type_names
 
 
-def _get_theme_code(feature_id):
-    package_id = get_object_or_404(LFeatures, feature_id=feature_id).package_id
-    theme_id = get_object_or_404(LPackages, package_id=package_id).theme_id
-    theme_code = get_object_or_404(LThemes, theme_id=theme_id).theme_code
-    return theme_code
-
-
 def _get_code_list_name(code_list_id):
     code_list_name = None
     code_list = LCodeLists.objects.filter(code_list_id=code_list_id)
@@ -231,12 +224,11 @@ def _get_code_list_name(code_list_id):
 
 
 def _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name):
-    theme_code = _get_theme_code(feature_id)
     att_type = ''
     for info in feature_infos:
         for property in info['data_types']:
             property_code = property['property_code']
-            mdata_value = m_datas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
+            mdata_value = MDatas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
             if mdata_value:
                 mdata_value = mdata_value.first()
             for value_type in property['value_types']:
@@ -540,12 +532,11 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
         for_pdf_info = []
         if feature_id != prev_feature_id:
             lfeatures = _lfeatureconfig(feature_id, None, None, None)
-            theme_code = _get_theme_code(feature_id)
         for info in lfeatures:
             for property in info['data_types']:
                 property_code = property['property_code']
                 property_name = property['property_name']
-                mdata_value = m_datas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
+                mdata_value = MDatas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
                 if mdata_value:
                     mdata_value = mdata_value.first()
                     for value_type in property['value_types']:
