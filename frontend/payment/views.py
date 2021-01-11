@@ -28,6 +28,7 @@ from backend.inspire.models import (
     LDataTypeConfigs, LProperties,
     LValueTypes, LCodeListConfigs,
     LCodeLists, LFeatures, LPackages,
+    MDatas,
 )
 from geoportal_app.models import User
 from backend.wmslayer.models import WMSLayer
