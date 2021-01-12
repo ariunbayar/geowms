@@ -6,15 +6,10 @@ import json
 import pytz
 
 from main.decorators import ajax_required
-from main.utils import refreshMaterializedView
 
 from backend.inspire.models import (
     MGeoDatas,
-    MDatasBoundary,
-    MDatasBuilding,
-    MDatasCadastral,
-    MDatasGeographical,
-    MDatasHydrography,
+    MDatas,
     LThemes,
     LPackages,
     LFeatures,
@@ -28,6 +23,11 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 
+from main.utils import (
+    refreshMaterializedView,
+    has_employee_perm,
+    check_form_json,
+)
 
 def _convert_text_json(data):
     data = data.replace("'", '"')
@@ -91,7 +91,7 @@ def _get_emp_features(employees, request):
 
 @require_POST
 @ajax_required
-def revokePaginate(request, payload):
+def revoke_paginate(request, payload):
     employees = _get_employees(request)
     emp_features = _get_emp_features(employees, request)
 
@@ -137,20 +137,6 @@ def revokePaginate(request, payload):
     return JsonResponse(rsp)
 
 
-def _get_model_name(name):
-
-    if name == 'hg':
-        return MDatasHydrography
-    elif name == 'au':
-        return MDatasBoundary
-    elif name =='bu':
-        return MDatasBuilding
-    elif name=='gn':
-        return MDatasGeographical
-    elif name=='cp':
-        return MDatasCadastral
-
-
 def _change_revoke_request(id, state):
     change_request = get_object_or_404(ChangeRequest, id=id)
     change_request.state = state
@@ -160,14 +146,13 @@ def _change_revoke_request(id, state):
 
 def _delete_geom_data(change_request):
     MGeoDatas.objects.filter(geo_id=change_request.old_geo_id, feature_id=change_request.feature_id).delete()
-    theme_code=LThemes.objects.filter(theme_id=change_request.theme_id).first().theme_code
-    _get_model_name(theme_code).objects.filter(geo_id=change_request.old_geo_id).delete()
+    MDatas.objects.filter(geo_id=change_request.old_geo_id).delete()
     refreshMaterializedView(change_request.feature_id)
 
 
 @require_POST
 @ajax_required
-def revokeState(request, payload):
+def revoke_state(request, payload):
     state = payload.get('state')
     pk = payload.get('id')
 
@@ -179,3 +164,44 @@ def revokeState(request, payload):
         _delete_geom_data(change_request)
 
     return JsonResponse({ 'success': True })
+
+
+def _new_revoke_request(employee, payload):
+
+    theme_id = payload.get('tid')
+    package_id = payload.get('pid')
+    feature_id = payload.get('fid')
+    old_geo_id = payload.get('old_geo_id')
+    geo_json = payload.get('geo_json')
+    form_json = payload.get('form_json')
+    order_no = payload.get('order_no')
+    order_at = payload.get('order_at')
+    form_json = check_form_json(feature_id, form_json, employee)
+
+    change_request = ChangeRequest()
+    change_request.old_geo_id = old_geo_id
+    change_request.new_geo_id = None
+    change_request.theme_id = theme_id
+    change_request.package_id = package_id
+    change_request.feature_id = feature_id
+    change_request.employee = employee
+    change_request.state = ChangeRequest.STATE_NEW
+    change_request.kind = ChangeRequest.KIND_REVOKE
+    change_request.form_json = form_json
+    change_request.geo_json = geo_json
+    change_request.order_at = _date_to_timezone(order_at)
+    change_request.order_no = order_no
+    change_request.save()
+
+
+@require_POST
+@ajax_required
+def revoke_new(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
+
+    success, info = has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
+    if success:
+        _new_revoke_request(employee, payload)
+        info = "Цуцлах хүсэлт амжилттай үүслээ"
+
+    return JsonResponse({ 'success': success, 'info': info })
