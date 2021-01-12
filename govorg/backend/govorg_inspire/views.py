@@ -937,53 +937,84 @@ def _save_file_to_storage(file_type_name, file_name, fo):
     return path
 
 
-def _check_file_for_geom(form_file_name, unique_filename):
+def _check_file_for_geom(form_file_name, unique_filename, ext):
     return_name = ''
     file_type_name = ''
     file_name = ''
-    if '.shx' in form_file_name or '.shp' in form_file_name or '.prj' in form_file_name or '.dbf' in form_file_name or '.cpg' in form_file_name:
-        file_name = unique_filename + form_file_name
-        file_type_name = 'shp'
-        return_name += form_file_name + ','
-    elif '.gml' in form_file_name or '.gfs' in form_file_name:
-        file_type_name = 'gml'
-        file_name = unique_filename + form_file_name
-        return_name += form_file_name + ','
-    elif '.geojson' in form_file_name or '.gfs' in form_file_name:
-        file_type_name = 'geojson'
-        file_name = unique_filename + form_file_name
-        return_name += form_file_name + ','
+
+    if ext == 'shp':
+        exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
+    elif ext == 'gml':
+        exts = ['.gml', '.gfs']
+    elif ext == 'geojson':
+        exts = ['.geojson', '.gfs']
+
+    for extension in exts:
+        if extension in form_file_name:
+            file_name = unique_filename + "_" + form_file_name
+            file_type_name = ext
+            return_name += form_file_name + ','
+
     return file_name, file_type_name, return_name
 
 
 def _geom_to_multi(geom, geom_type, SRID):
-    geom = None
+    GEO = None
+
     if geom_type == 'Point':
-        geom = MultiPoint(geom, srid=SRID) # Pointiig MultiPoint bolgoj bna
+        GEO = MultiPoint
     if geom_type == 'LineString':
-        geom = MultiLineString(geom, srid=SRID) # LineString MultiLineString bolgoj bna
+        GEO = MultiLineString
     if geom_type == 'Polygon':
-        geom = MultiPolygon(geom, srid=SRID) # Polygon MultiPolygon bolgoj bna
+        GEO = MultiPolygon
+
+    geom = GEO(geom, srid=SRID)
+
     return geom
+
+
+def _make_geo_id(feature_id, field_name, value):
+    geo_id = ''
+    if field_name == 'inspire_id' or field_name == 'geo_id':
+        geo_id = value
+    else:
+        f_code = get_object_or_404(LFeatures, feature_id=feature_id).feature_code
+        splited_f_code = f_code.split('-')
+        feature_code = splited_f_code[len(splited_f_code)-1]
+        len_geo_datas = MGeoDatas.objects.count()
+        geo_id = str(feature_code) + "_" + str(len_geo_datas)
+
+    return geo_id
+
+
+def _check_perm(geo_id, employee, feature_id, geo_json):
+    perm_kind = ''
+
+    geo = MGeoDatas.objects.filter(geo_id=geo_id)
+    if geo:
+        perm_kind = EmpPermInspire.PERM_UPDATE
+    else:
+        perm_kind = EmpPermInspire.PERM_CREATE
+
+    success, info = has_employee_perm(employee, feature_id, True, perm_kind, geo_json)
+
+    return success, info
 
 
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def file_upload_save_data(request, tid, fid):
+def file_upload_save_data(request, tid, pid, fid, ext):
     employee = get_object_or_404(Employee, user=request.user)
     form = request.FILES.getlist('data')
     feature_id = fid
-    geo_id = ''
 
     try:
+
         unique_filename = str(uuid.uuid4())
         for fo in form:
-            file_name, file_type_name, return_name = _check_file_for_geom(fo.name, unique_filename)
-            if not file_name:
-                file_name = fo.name
-            if file_type_name:
-                path = _save_file_to_storage(file_type_name, file_name, fo)
+            file_name, file_type_name, return_name = _check_file_for_geom(fo.name, unique_filename, ext)
+            path = _save_file_to_storage(file_type_name, file_name, fo)
 
         file_name, uniq_name = _make_file_name(file_name, file_type_name)
 
@@ -1010,63 +1041,28 @@ def file_upload_save_data(request, tid, fid):
             try:
                 for name in range(0, len(layer.fields)):
                     field_name = val[name].name # field name
-
                     value = val.get(name) # value ni
+
                     if name == 0:
-                        if field_name == 'geo_id':
-                            geo_id = value
-                        else:
-                            g_id = val.get(name)
-                            need_id = MGeoDatas.objects.count()
-                            geo_id = str(need_id) + str(g_id)
                         geom = ''
                         geom_type = ''
-                        SRID = 4326
-                        dim = val.geom.coord_dim # dimension
+
+                        geo_id = _make_geo_id(feature_id, field_name, value)
                         geo_json = val.geom.json # goemetry json
+
                         if geo_json:
-                            geom_srid = GEOSGeometry(geo_json).srid # geomiin srid
-                            if geom_srid != SRID:
-                                geom = GEOSGeometry(geo_json, srid=SRID)
-                            if dim == 3:
-                                geom_type = GEOSGeometry(geo_json).geom_type #geom iin type
-                                geom = GEOSGeometry(geo_json).hex
-                                geom = geo_json.decode("utf-8") #binary hurwuuleh
-                                geom = GEOSGeometry(geom)
-                                geom = _geom_to_multi(geom, geom_type, SRID)
-                            if dim == 2:
-                                geom = _geo_json_convert_geom(geo_json)
-                            if geom:
-                                geo = MGeoDatas.objects.filter(geo_id=geo_id)
-                                if geo:
-                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
-                                    if not success:
-                                        _delete_file(for_delete_items)
-                                        return JsonResponse({'success': success, 'info': info})
+                            success, info = _check_perm(geo_id, employee, feature_id, geo_json)
 
-                                    geo = geo.update(geo_data=geom)
+                            if not success:
+                                _delete_file(for_delete_items)
+                                return JsonResponse({'success': success, 'info': info})
 
-                                else:
-
-                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_CREATE, geo_json)
-                                    if not success:
-                                        _delete_file(for_delete_items)
-                                        return JsonResponse({'success': success, 'info': info})
-
-                                    geo = MGeoDatas.objects.create(
-                                        geo_id=geo_id,
-                                        geo_data=geom,
-                                        feature_id=feature_id,
-                                        created_by=1,
-                                        modified_by=1,
-                                    )
                         else:
-                            info = 'geom байхгүй дата'
+                            info = 'ямар нэгэн зурагдсан дата байхгүй байна'
                             rsp = _remove_uploaded_file(geo_id, for_delete_items, info, False)
                             return JsonResponse(rsp)
 
-                    type_name = val[name].type_name.decode('utf-8')
-                    type_code = val[name].type # type code
+                    # type_name = val[name].type_name.decode('utf-8')
                     values.append({
                         field_name: value,
                     })

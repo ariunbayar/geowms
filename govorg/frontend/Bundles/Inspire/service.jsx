@@ -154,12 +154,12 @@ function createDel(tid, pid, fid, old_geo_id, form_json) {
     return fetch(`${prefix}/createDel/`, opts).then(handleResponse)
 }
 
-function sendFile(formData, fid, tid){
+function sendFile(formData, fid, tid, name, pid){
     const opts = {
         ...getPostOptions(),
         body: formData,
     }
-    return fetch(`${prefix}/send-data/${tid}/${fid}/`, opts).then(handleResponse)
+    return fetch(`${prefix}/send-data/${tid}/${pid}/${fid}/${name}/`, opts).then(handleResponse)
 }
 
 function loadWMSLayers(id) {

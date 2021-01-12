@@ -29,6 +29,7 @@ class UploadCmp extends Component {
                         <div className="modal-body">
                             <Upload
                                 fid={this.props.fid}
+                                pid={this.props.pid}
                                 tid={this.props.tid}
                                 func={this.props.func}
                                 rows={this.props.rows}
@@ -90,9 +91,9 @@ export class UploadBtn extends Control {
         ReactDOM.hydrate(<UploadCmp {...props}/>, this.element)
     }
 
-    showUpload(islaod, fid, func, rows, notif, tid) {
+    showUpload(islaod, fid, func, rows, notif, tid, pid) {
         this.toggleControl(islaod)
-        this.renderComponent({fid, func, rows, notif, tid})
+        this.renderComponent({fid, func, rows, notif, tid, pid})
     }
 
 }

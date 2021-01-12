@@ -102,15 +102,15 @@ export class Upload extends Component {
     }
 
     handleSubmit(){
-        const { files } = this.state
-        const { fid, tid } = this.props
+        const { files, name } = this.state
+        const { fid, tid, pid } = this.props
         const formData = new FormData();
         this.setState({ btn_upload_is_laod: true, not_cancel: true })
         for(var i = 0; i < files.length; i ++) {
             formData.append("data", files[i], files[i].name);
         }
         service
-            .sendFile(formData, fid, tid)
+            .sendFile(formData, fid, tid, name, pid)
             .then(({success, info, key}) => {
             if (success) {
                 alert(info)

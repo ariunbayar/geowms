@@ -851,7 +851,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     showUploadBtn(){
-      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid)
+      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid, this.props.match.params.pid)
       this.setState({ showUpload: true })
     }
 
