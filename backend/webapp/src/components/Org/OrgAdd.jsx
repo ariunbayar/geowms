@@ -105,7 +105,7 @@ export class OrgAdd extends Component {
     }
 
     handle2ndOrderChange(value) {
-        const { secondOrders } = this.state
+        const { firstOrder_geom, secondOrders } = this.state
         if (value !== '-1') {
             secondOrders.map((province) => {
                 if (province['geo_id'] === value){
