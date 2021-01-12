@@ -1,9 +1,7 @@
-from django.shortcuts import render, get_object_or_404
-from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST
 import json
-import pytz
 
 from main.decorators import ajax_required
 
@@ -17,9 +15,8 @@ from backend.inspire.models import (
     EmpPerm,
 )
 from govorg.backend.org_request.models import ChangeRequest
-from backend.org.models import Org, Employee
+from backend.org.models import Employee
 
-from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 
@@ -28,6 +25,7 @@ from main.utils import (
     has_employee_perm,
     check_form_json,
 )
+
 
 def _convert_text_json(data):
     data = data.replace("'", '"')
@@ -98,7 +96,6 @@ def revoke_paginate(request, payload):
     page = payload.get('page')
     per_page = payload.get('per_page')
     query = payload.get('query') or ''
-    order_at = payload.get('order_at')
     state = payload.get('state')
 
     revoke_requests = ChangeRequest.objects.annotate(
@@ -122,7 +119,7 @@ def revoke_paginate(request, payload):
     items_page = total_items.page(page)
     items = [
         _get_revoke_request_display(revoke_request)
-        for revoke_request  in items_page.object_list
+        for revoke_request in items_page.object_list
     ]
     total_page = total_items.num_pages
 
@@ -163,7 +160,7 @@ def revoke_state(request, payload):
         change_request = _change_revoke_request(pk, ChangeRequest.STATE_APPROVE)
         _delete_geom_data(change_request)
 
-    return JsonResponse({ 'success': True })
+    return JsonResponse({'success': True})
 
 
 def _new_revoke_request(employee, payload):
@@ -189,7 +186,6 @@ def _new_revoke_request(employee, payload):
     change_request.kind = ChangeRequest.KIND_REVOKE
     change_request.form_json = form_json
     change_request.geo_json = geo_json
-    change_request.order_at = _date_to_timezone(order_at)
     change_request.order_no = order_no
     change_request.save()
 
@@ -204,4 +200,4 @@ def revoke_new(request, payload):
         _new_revoke_request(employee, payload)
         info = "Цуцлах хүсэлт амжилттай үүслээ"
 
-    return JsonResponse({ 'success': success, 'info': info })
+    return JsonResponse({'success': success, 'info': info})
