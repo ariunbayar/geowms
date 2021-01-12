@@ -50,11 +50,18 @@ def хадгалах(request, payload, pk=None):
             layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
             system.wms_layers.set(layers)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгаллаа.'
+        })
 
     else:
-
-        return JsonResponse({'success': False, 'errors': form.errors})
+        errors = {}
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+        return JsonResponse({
+            'success': False,
+            'errors': errors,
+        })
 
 
 def _get_wmslayer(request, govorg, wms):
