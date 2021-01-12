@@ -1,5 +1,4 @@
 import re
-import json
 from xml.etree import ElementTree
 
 
@@ -23,7 +22,7 @@ def filter_layers(content, allowed_layers):
                 return items[0]
 
     matches = re_layer.findall(content)
-    
+
     for content_start, content_mid, content_end in matches:
 
         content_mid_clean = re.sub('<Layer[^>]*>.*?</Layer>', '', content_mid.strip(), flags=re.S)
@@ -66,24 +65,6 @@ def filter_layers_wfs(content, allowed_layers):
                 content_end.strip(),
             )
 
-    return content.encode()
-
-
-def filter_layers_json(content, allowed_layers):
-    if isinstance(content, bytes):
-        content = content.decode()
-    features = []
-    content = json.loads(content)
-    features = []
-    for i in content['features']:
-        check = False
-        for j in allowed_layers:
-            if j in i['id']:
-                check = True
-        if check:
-            features.append(i)
-    content['features'] = features
-    content = str(content)
     return content.encode()
 
 

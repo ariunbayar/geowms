@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from api.utils import filter_layers, replace_src_url, filter_layers_wfs, filter_layers_json
+from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
@@ -54,7 +54,7 @@ def proxy(request, token, pk=None):
             raise Exception()
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url)
-        
+
     qs_request = queryargs.get('REQUEST', 'no request')
 
     WMSLog.objects.create(
@@ -84,7 +84,6 @@ def json_proxy(request, token, code):
     conf_geoserver = geoserver.get_connection_conf()
     system = get_object_or_404(System, token=token, deleted_by__isnull=True)
 
-    allowed_layers = [layer.code for layer in system.wms_layers.all() if layer.wms.is_active]
     if not system.wms_layers.filter(code=code):
         raise Http404
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
@@ -99,28 +98,23 @@ def json_proxy(request, token, code):
     )
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
-    content_type = rsp.headers.get('content-type')
-    if request.GET.get('REQUEST') == 'GetCapabilities':
+    if request.GET.get('REQUEST') == 'GetCapabilities': 
+        allowed_layers = [code]
         if request.GET.get('SERVICE') == 'WFS':
-            base_url = 'http://{host}:{port}/geoserver'.format(
+            base_url = 'http://{host}:{port}/geoserver/ows'.format(
                 host=conf_geoserver['geoserver_host'],
                 port=conf_geoserver['geoserver_port'],
             )
             rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
             content = rsp.content
             content = filter_layers_wfs(content, allowed_layers)
-            rsp = HttpResponse(content, content_type=content_type)
-
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
-            rsp = HttpResponse(content, content_type=content_type)
-
         else:
             raise Exception()
-
-    elif content:
-        content = filter_layers_json(content, allowed_layers)
-        rsp = HttpResponse(content, content_type=content_type)
+    
+    content_type = rsp.headers.get('content-type')
+    rsp = HttpResponse(content, content_type=content_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
     WMSLog.objects.create(
