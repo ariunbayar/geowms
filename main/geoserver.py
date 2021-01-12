@@ -250,10 +250,10 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
             <title>{layer_title}</title>
             <srs>EPSG:{srs}</srs>
             <nativeBoundingBox>
-                <minx>-775021.5</minx>
-                <maxx>1652101.875</maxx>
-                <miny>4597390.5</miny>
-                <maxy>5800999.5</maxy>
+                <minx>87.5879287719727</minx>
+                <maxx>119.325157165527</maxx>
+                <miny>42.4366416931152</miny>
+                <maxy>51.6822853088379</maxy>
                 <crs>EPSG:{srs}</crs>
             </nativeBoundingBox>
             <latLonBoundingBox>
