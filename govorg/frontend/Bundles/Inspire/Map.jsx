@@ -345,26 +345,31 @@ export default class BarilgaSuurinGazar extends Component{
           .then((text) => {
               const parser = new WMSGetFeatureInfo()
               const features = parser.readFeatures(text)
-              if(features){
+              if(features.length > 0){
                 const source = new VectorSource({
                     features: features
                 });
-                this.state.vector_layer.setSource(source)
-              }
-              const feature_info = features.map((feature) => {
-                  const geometry_name = feature.getGeometryName()
-                  const values =
-                      feature.getKeys()
-                      .filter((key) => key != geometry_name)
-                      .map((key) => [key, feature.get(key)])
-                  return [feature.getId(), values]
-              })
-              if(feature_info.length > 0 ){
-                feature_info.map(([layer_name, values], idx) => {
-                  values.map(([field, value], val_idx) => {
-                    field == 'inspire_id' && this.setState({selectedFeature_ID: value})
-                  })
+                const feature_info = features.map((feature) => {
+                    const geometry_name = feature.getGeometryName()
+                    const values =
+                        feature.getKeys()
+                        .filter((key) => key != geometry_name)
+                        .map((key) => [key, feature.get(key)])
+                    return [feature.getId(), values]
                 })
+                if(feature_info.length > 0 ){
+                  feature_info.map(([layer_name, values], idx) => {
+                    values.map(([field, value], val_idx) => {
+                      if(field == 'inspire_id'){
+                        if(this.state.selectedFeature_ID != value)
+                        {
+                          this.state.vector_layer.setSource(source)
+                        }
+                        this.setState({selectedFeature_ID: value})
+                      }
+                    })
+                  })
+                }
               }
           })
       } else {

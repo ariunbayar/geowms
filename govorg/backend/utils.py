@@ -6,7 +6,6 @@ from backend.inspire.models import (
     EmpRoleInspire,
     EmpPermInspire,
     EmpPerm,
-    LProperties,
     LFeatures,
     LFeatureConfigs,
     LDataTypeConfigs,
@@ -87,40 +86,48 @@ def get_convert_display_name(perm_list):
     return roles
 
 
-def get_property_data_display(property_id, feature_id, role_model, inspire_model, geom):
-    perm_list = []
-    if role_model.__class__.__name__ == 'EmpRole':
-        if not geom:
-            perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-        else:
-            perm_list = list(inspire_model.objects.filter(emp_role=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
-    if role_model.__class__.__name__ == 'GovPerm':
-        if not geom:
-            perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-        else:
-            perm_list = list(inspire_model.objects.filter(gov_perm=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
-    if role_model.__class__.__name__ == 'EmpPerm':
-        if not geom:
-            perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, property_id=property_id).values(ins_id=F('id'), kind=F('perm_kind')))
-        else:
-            perm_list = list(inspire_model.objects.filter(emp_perm=role_model, feature_id=feature_id, geom=geom).values(ins_id=F('id'), kind=F('perm_kind')))
-    roles = get_convert_display_name(perm_list)
-    if not geom:
-        property = get_object_or_404(LProperties, property_id=property_id)
+def get_property_data_display(prop, feature_id, role_model, inspire_model, geom):
 
-        return {
-            'id': property.property_id,
-            'name': property.property_name,
-            'parent_id': feature_id,
-            'roles': roles
-            }
+    perm_list = []
+
+    qs = inspire_model.objects.filter(feature_id=feature_id)
+
+    if role_model.__class__.__name__ == 'EmpRole':
+        qs = qs.filter(emp_role=role_model)
+    if role_model.__class__.__name__ == 'GovPerm':
+        qs = qs.filter(gov_perm=role_model)
+    if role_model.__class__.__name__ == 'EmpPerm':
+        qs = qs.filter(emp_perm=role_model)
+
+    if geom:
+        qs = qs.filter(geom=geom)
     else:
+        qs = qs.filter(property_id=prop.property_id)
+
+    perm_list = list(qs.values(ins_id=F('id'), kind=F('perm_kind')))
+
+    return get_property_data_display2(perm_list, prop, feature_id, geom)
+
+
+def get_property_data_display2(perm_list, prop, feature_id, geom):
+
+    roles = get_convert_display_name(perm_list)
+
+    if geom:
         return {
             'id': 'geom',
             'name': 'geom',
             'parent_id': feature_id,
             'roles': roles
             }
+    else:
+        return {
+            'id': prop.property_id,
+            'name': prop.property_name,
+            'parent_id': feature_id,
+            'roles': roles
+            }
+
 
 
 def get_all_child_feature(feature_id):

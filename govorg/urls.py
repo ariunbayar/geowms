@@ -53,7 +53,7 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
-            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.FileUploadSaveData),
+            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.file_upload_save_data),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
