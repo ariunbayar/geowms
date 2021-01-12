@@ -245,7 +245,7 @@ class Command(BaseCommand):
                     pg_tables
                 WHERE
                     schemaname = 'public'
-                    AND tablename NOT SIMILAR TO '(l_|m_|spatial_ref_sys)%';
+                    AND tablename NOT SIMILAR TO '(l\_|m\_|spatial_ref_sys)%';
             """
             cursor.execute(sql)
             tables = cursor.fetchall()
