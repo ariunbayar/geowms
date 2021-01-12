@@ -4,63 +4,49 @@ import datetime
 import uuid
 import glob
 import random
-
-from django.db.utils import InternalError
 from geojson import Feature, FeatureCollection
 
-from django.db import connections
-from django.http import JsonResponse, Http404, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, reverse
-
-from django.views.decorators.http import require_GET, require_POST
-from backend.inspire.models import (
-    LThemes,
-    LPackages,
-    LFeatures,
-    LDataTypeConfigs,
-    LFeatureConfigs,
-    LDataTypes,
-    LProperties,
-    LValueTypes,
-    LCodeListConfigs,
-    LCodeLists,
-    MGeoDatas,
-    MDatas,
-    EmpPerm,
-    EmpPermInspire
-    )
-from govorg.backend.org_request.models import ChangeRequest
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
-
-from django.core.files.uploadedfile import UploadedFile
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal.error import GDALException
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import MultiPoint
+from django.contrib.gis.geos import MultiLineString
+from django.contrib.gis.geos import MultiPolygon
+from django.contrib.gis.geos.error import GEOSException
 from django.core.files.storage import FileSystemStorage
+from django.db import connections
+from django.db.utils import InternalError
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, reverse
+from django.views.decorators.http import require_GET, require_POST
 
 from backend.changeset.models import ChangeSet
-from backend.bundle.models import Bundle
-from main.decorators import ajax_required, gov_bundle_required
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, WKBWriter, WKBReader, fromstr
-from backend.org.models import Org, Employee, InspirePerm
-
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal import OGRGeometry
-from django.contrib.gis.geos.error import GEOSException
-from django.contrib.gis.gdal.error import GDALException
 from backend.dedsanbutets.models import ViewNames
-from backend.wmslayer.models import WMSLayer
-from geoportal_app.models import User
-from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
-
-from main.utils import (
-    gis_fields_by_oid,
-    gis_insert,
-    gis_tables_by_oids,
-    dict_fetchall,
-    refreshMaterializedView,
-    get_config,
-    has_employee_perm,
-    check_form_json,
-)
+from backend.inspire.models import EmpPerm
+from backend.inspire.models import EmpPermInspire
+from backend.inspire.models import LCodeListConfigs
+from backend.inspire.models import LCodeLists
+from backend.inspire.models import LFeatureConfigs
+from backend.inspire.models import LProperties
+from backend.inspire.models import LValueTypes
+from backend.inspire.models import MDatas
+from backend.inspire.models import MGeoDatas
+from backend.org.models import Employee
+from govorg.backend.org_request.models import ChangeRequest
+from govorg.backend.org_request.views import _get_geom
+from govorg.backend.org_request.views import _get_geoJson
+from govorg.backend.org_request.views import _convert_text_json
+from main.decorators import ajax_required
+from main.utils import check_form_json
+from main.utils import dict_fetchall
+from main.utils import get_config
+from main.utils import gis_fields_by_oid
+from main.utils import gis_insert
+from main.utils import gis_tables_by_oids
+from main.utils import has_employee_perm
+from main.utils import refreshMaterializedView
 
 
 def _get_changeset_display(ob):
@@ -297,15 +283,15 @@ def delete(request, payload, pid, fid):
     if geom and datas:
         geom.delete()
         datas.delete()
-        view_check = refreshMaterializedView(fid)
+        refreshMaterializedView(fid)
         rsp = {
-        'success': True,
-        'info': "Амжилттай",
+            'success': True,
+            'info': "Амжилттай",
         }
     else:
         rsp = {
-        'success': False,
-        'info': "Амжилтгүй",
+            'success': False,
+            'info': "Амжилтгүй",
         }
     return JsonResponse(rsp)
 
@@ -476,26 +462,6 @@ def detailCreate(request, tid, pid, fid):
     return JsonResponse(rsp)
 
 
-def tableLastfindID(table_name):
-    try:
-        with connections['postgis_db'].cursor() as cursor:
-            sql = """ select id from {table_name} order by id desc limit 1; """.format(table_name=table_name)
-            cursor.execute(sql)
-            row_id = cursor.fetchone()
-        return row_id
-    except Exception:
-        return None
-
-
-def findGeomField(fields):
-    geom_field = None
-    for field in fields:
-        if field.atttypid == 'geometry':
-            geom_field = field.attname
-    return geom_field
-
-
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -512,7 +478,7 @@ def updateGeom(request, payload, fid):
         }
         return JsonResponse(rsp)
     MGeoDatas.objects.filter(geo_id=geo_id).update(geo_data=geom)
-    view_check = refreshMaterializedView(fid)
+    refreshMaterializedView(fid)
     rsp = {
         'success': True,
         'info': "Амжилттай",
@@ -579,7 +545,6 @@ def geomAdd(request, payload, fid):
             'id': None
         }
         return JsonResponse(rsp)
-    check = True
     count = random.randint(1062, 9969)
     geo_id = str(fid) + str(count) + 'geo'
     MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
@@ -593,7 +558,7 @@ def geomAdd(request, payload, fid):
             created_by = 1,
             modified_by = 1
         )
-    view_check = refreshMaterializedView(fid)
+    refreshMaterializedView(fid)
     rsp = {
         'success': True,
         'info': "Ажилттай ",
@@ -654,7 +619,7 @@ def _create_revoke_request(employee, payload):
     order_no = payload.get('order_no')
     order_at = payload.get('order_at')
 
-    form_json = _check_form_json(feature_id, form_json, employee)
+    form_json = check_form_json(feature_id, form_json, employee)
 
     change_request = ChangeRequest()
     change_request.old_geo_id = old_geo_id
@@ -852,7 +817,6 @@ def _make_value_json(val_type, property, value, geo_id, feature_config_id, data_
 
 
 def _save_to_m_data(values, geo_id, feature_id):
-    keys = ''
     feature_config_id = None
     success = False
     info = ''
@@ -954,7 +918,7 @@ def _save_file_to_storage(file_type_name, file_name, fo):
         location=path
     )
     file = fs.save(file_name, fo)
-    fileurl = fs.url(file)
+    fs.url(file)
     return path
 
 
@@ -1050,9 +1014,9 @@ def file_upload_save_data(request, tid, fid):
                             if geom_srid != SRID:
                                 geom = GEOSGeometry(geo_json, srid=SRID)
                             if dim == 3:
-                                geom_type = GEOSGeometry(geo_json).geom_type #geom iin type
+                                geom_type = GEOSGeometry(geo_json).geom_type # geom iin type
                                 geom = GEOSGeometry(geo_json).hex
-                                geom = geo_json.decode("utf-8") #binary hurwuuleh
+                                geom = geo_json.decode("utf-8") # binary hurwuuleh
                                 geom = GEOSGeometry(geom)
                                 geom = _geom_to_multi(geom, geom_type, SRID)
                             if dim == 2:
@@ -1086,8 +1050,6 @@ def file_upload_save_data(request, tid, fid):
                             rsp = _remove_uploaded_file(geo_id, for_delete_items, info, False)
                             return JsonResponse(rsp)
 
-                    type_name = val[name].type_name.decode('utf-8')
-                    type_code = val[name].type # type code
                     values.append({
                         field_name: value,
                     })
