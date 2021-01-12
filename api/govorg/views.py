@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from api.utils import filter_layers, replace_src_url, filter_layers_wfs
+from api.utils import filter_layers, replace_src_url, filter_layers_wfs, filter_layers_json
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
@@ -32,7 +32,7 @@ def proxy(request, token, pk=None):
     }
     system = get_object_or_404(System, token=token, deleted_by__isnull=True)
     conf_geoserver = geoserver.get_connection_conf()
-
+ 
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
 
@@ -54,7 +54,7 @@ def proxy(request, token, pk=None):
             raise Exception()
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url)
-
+        
     qs_request = queryargs.get('REQUEST', 'no request')
 
     WMSLog.objects.create(
@@ -83,11 +83,13 @@ def json_proxy(request, token, code):
     }
     conf_geoserver = geoserver.get_connection_conf()
     system = get_object_or_404(System, token=token, deleted_by__isnull=True)
+
+    allowed_layers = [layer.code for layer in system.wms_layers.all() if layer.wms.is_active]
     if not system.wms_layers.filter(code=code):
         raise Http404
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
-
+    
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     base_url = 'http://{host}:{port}/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(
@@ -97,6 +99,28 @@ def json_proxy(request, token, code):
     )
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
+    content_type = rsp.headers.get('content-type')
+    if request.GET.get('REQUEST') == 'GetCapabilities':
+        if request.GET.get('SERVICE') == 'WFS':
+            base_url = 'http://{host}:{port}/geoserver'.format(
+                host=conf_geoserver['geoserver_host'],
+                port=conf_geoserver['geoserver_port'],
+            )
+            rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+            content = rsp.content
+            content = filter_layers_wfs(content, allowed_layers)
+            rsp = HttpResponse(content, content_type=content_type)
+
+        elif request.GET.get('SERVICE') == 'WMS':
+            content = filter_layers(content, allowed_layers)
+            rsp = HttpResponse(content, content_type=content_type)
+
+        else:
+            raise Exception()
+
+    elif content:
+        content = filter_layers_json(content, allowed_layers)
+        rsp = HttpResponse(content, content_type=content_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
     WMSLog.objects.create(
@@ -106,15 +130,11 @@ def json_proxy(request, token, code):
         rsp_size=len(rsp.content),
         system_id=system.id,
     )
-    content_type = rsp.headers.get('content-type')
-
-    rsp = HttpResponse(content, content_type=content_type)
 
     if system.website:
         rsp['Access-Control-Allow-Origin'] = system.website
     else:
         rsp['Access-Control-Allow-Origin'] = '*'
-
     return rsp
 
 
@@ -210,13 +230,14 @@ def qgis_proxy(request, token):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
+
     employee = get_object_or_404(Employee, token=token)
     allowed_layers = _get_layer_name(employee)
     conf_geoserver = geoserver.get_connection_conf()
     base_url = 'http://{host}:{port}/geoserver/ows'.format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
-    )
+    )   
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
