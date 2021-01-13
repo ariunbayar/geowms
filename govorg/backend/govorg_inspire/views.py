@@ -978,15 +978,14 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             ext
         )
         path = _save_file_to_storage(file_type_name, uniq_file_name, fo)
-    print(uniq_file_name, file_type_name, return_name)
-    file_name, uniq_name = _make_file_name(uniq_file_name, file_type_name)
 
+    file_name, uniq_name = _make_file_name(uniq_file_name, file_type_name)
     for_delete_items = {
         "uniq_name": uniq_name,
         "file_name": file_name,
         "file_type_name": file_type_name
     }
-    print(path, file_name)
+
     ds_path = os.path.join(path, file_name)
     ds = DataSource(ds_path)
 
@@ -1008,9 +1007,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             if name == 0:
 
                 geo_id = _make_geo_id(feature_id, field_name, value)
-                print(geo_id)
                 geo_json = val.geom.json  # goemetry json
-                print(geo_json)
 
                 if geo_json:
                     success, info, request_kind = _check_perm(
