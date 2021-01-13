@@ -25,8 +25,7 @@ def _update_layer(layer_name, url):
         '''.format(
                 layer_name=layer_name,
             )
-    rsp = requests.put(BASE_URL+url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
-    print(rsp.text)
+    requests.put(BASE_URL+url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
 
 
 def _get_detail_geoserver(url):
