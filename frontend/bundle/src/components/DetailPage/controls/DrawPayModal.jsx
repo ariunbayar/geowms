@@ -55,7 +55,6 @@ class ModalComponent extends Component{
 
         const values = {
             price: total_price,
-            // total_price: NULL,
             description,
             coodrinatLeftTop,
             coodrinatRightBottom,
