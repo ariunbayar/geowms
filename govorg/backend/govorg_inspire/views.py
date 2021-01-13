@@ -49,7 +49,7 @@ from django.contrib.gis.gdal.error import GDALException
 from backend.dedsanbutets.models import ViewNames
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import User
-from govorg.backend.org_request.views import _get_geom, _get_geoJson, _convert_text_json
+from govorg.backend.org_request.views import _get_geom, _get_geoJson
 
 from main.utils import (
     gis_fields_by_oid,
@@ -609,20 +609,9 @@ def _check_form_json(fid, form_json, employee):
         for role in roles:
             for propert in form_json['form_values']:
                 if role.get('property_id') == propert.get('property_id'):
-                    request_json.append({
-                        'pk':propert.get('pk') or '',
-                        'property_name': propert.get('property_name') or '',
-                        'property_id': propert.get('property_id'),
-                        'property_code': propert.get('property_code') or '',
-                        'property_definition': propert.get('property_definition') or '',
-                        'value_type_id': propert.get('value_type_id') or '',
-                        'value_type': propert.get('value_type') or '',
-                        'data': propert.get('data') or '',
-                        'data_list': propert.get('data_list') or '',
-                        'roles': propert.get('roles') or ''
-                    })
+                    request_json.append(propert)
 
-    return request_json if request_json else ''
+    return json.dumps(request_json, ensure_ascii=False) if request_json else ''
 
 
 @require_POST
@@ -644,6 +633,7 @@ def create(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     form_json = _check_form_json(fid, form_json, employee)
+    geo_json = json.dumps(geo_json, ensure_ascii=False)
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -680,7 +670,14 @@ def remove(request, payload):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     geo_data = _get_geom(old_geo_id, fid)
-    geo_data = _convert_text_json(geo_data[0]["geom"])
+    if not geo_data:
+        rsp = {
+        'success': False,
+        'info': "Аль хэдийн устсан геом байна.",
+        }
+        return JsonResponse(rsp)
+
+    geo_data = geo_data[0]["geom"]
     geo_json = _get_geoJson(geo_data)
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
@@ -729,6 +726,7 @@ def update(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     form_json = _check_form_json(fid, form_json, employee)
+    geo_json = json.dumps(geo_json, ensure_ascii=False)
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
             new_geo_id = None,
