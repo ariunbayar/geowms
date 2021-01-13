@@ -788,13 +788,15 @@ def control_to_remove(request, payload):
 
 
 def _check_and_make_form_json(feature_id, values):
-    form_json = dict()
+    form_json_list = list()
+    code_list_values = ""
     with transaction.atomic():
         view = get_object_or_404(ViewNames, feature_id=feature_id)
         view_props = ViewProperties.objects.filter(view=view)
 
         for view_prop in view_props:
             for p_code, value in values.items():
+                form_json = dict()
 
                 prop = LProperties.objects.filter(
                     property_id=view_prop.property_id,
@@ -802,10 +804,21 @@ def _check_and_make_form_json(feature_id, values):
                 ).first()
 
                 if prop:
-                    form_json[prop.property_code] = value
+                    form_json['property_name'] = prop.property_name
+                    form_json['property_id'] = prop.property_id
+                    form_json['property_code'] = prop.property_code
+                    form_json['property_definition'] = prop.property_definition
+                    if prop.value_type_id == 'single-select':
+                        code_list_values = _code_list_display(prop.property_id)
+                    form_json['value_type_id'] = prop.value_type_id
+                    form_json['value_type'] = prop.value_type_id
+                    form_json['data'] = value
+                    form_json['data_list'] = code_list_values
 
-    form_json = json.dumps(form_json)
-    return form_json
+                    form_json_list.append(form_json)
+
+    form_json_list = json.dumps(form_json_list)
+    return form_json_list
 
 
 def _create_request(request_datas):
@@ -830,7 +843,7 @@ def _create_request(request_datas):
 
 def _make_request(values, request_values):
     try:
-        form_json = _check_and_make_form_json(
+        form_json_list = _check_and_make_form_json(
             request_values['feature_id'],
             values
         )
@@ -843,7 +856,7 @@ def _make_request(values, request_values):
             'employee': request_values['employee'],
             'state': ChangeRequest.STATE_NEW,
             'kind': request_values['kind'],
-            'form_json': form_json,
+            'form_json': form_json_list,
             'geo_json': request_values['geo_json'],
         }
         with transaction.atomic():
@@ -929,11 +942,11 @@ def _make_geo_id(feature_id, field_name, value):
             LFeatures,
             feature_id=feature_id
         ).feature_code
-
         splited_f_code = f_code.split('-')
         feature_code = splited_f_code[len(splited_f_code)-1]
-        len_geo_datas = MGeoDatas.objects.count()
-        geo_id = str(feature_code) + "_" + str(len_geo_datas)
+
+        count = ChangeRequest.objects.count()
+        geo_id = str(feature_code) + "_" + str(count)
 
     return geo_id
 

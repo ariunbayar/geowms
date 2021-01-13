@@ -182,7 +182,19 @@ export class Upload extends Component {
         if (files.length > 0){
             for(var i=0; i < files.length; i++){
                 const size = filesize(files[i].size)
-                this.list.push(<li key={i}>{files[i].name} - {size} <i role="button" className="float-right fa fa-times text-danger mt-1" aria-hidden='true' onClick={(e) => this.removeFromList(e.target.parentElement.innerHTML.split(' ')[0])}></i></li>)
+                this.list.push(
+                    <li key={i}>
+                        {files[i].name} - {size}
+                        <i role="button"
+                            className="float-right fa fa-times text-danger mt-1"
+                            aria-hidden='true'
+                            onClick={
+                                (e) => this.removeFromList(e.target.parentElement.innerHTML.split(' ')[0])
+                            }
+                        >
+                        </i>
+                    </li>
+                )
             }
         }
         return (
@@ -200,7 +212,11 @@ export class Upload extends Component {
                                 />
                             <label className="custom-control-label" htmlFor="gml">GML</label>
                             &nbsp;
-                            <i role="button" className="fa fa-info-circle" onMouseOver={() => this.setInfo('gml')} onMouseOut={() => this.setState({ text: '' })}>
+                            <i role="button"
+                                className="fa fa-info-circle"
+                                onMouseOver={() => this.setInfo('gml')}
+                                onMouseOut={() => this.setState({ text: '' })}
+                            >
                                     {
                                         type == 'gml' && text !== ''
                                         ? <b className="position-absolute card card-body" style={{zIndex: '1050'}}>{text}</b>
@@ -221,7 +237,11 @@ export class Upload extends Component {
                             />
                             <label className="custom-control-label" htmlFor="SHP">SHP</label>
                             &nbsp;
-                            <i role="button" className="fa fa-info-circle" onMouseOver={() => this.setInfo('shp')} onMouseOut={() => this.setState({ text: '' })}>
+                            <i role="button"
+                                className="fa fa-info-circle"
+                                onMouseOver={() => this.setInfo('shp')}
+                                onMouseOut={() => this.setState({ text: '' })}
+                            >
                                     {
                                         type == 'shp' && text !== ''
                                         ? <b className="position-absolute card card-body" style={{zIndex: '1050'}}>{text}</b>
