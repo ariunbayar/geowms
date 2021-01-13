@@ -32,7 +32,7 @@ def proxy(request, token, pk=None):
     }
     system = get_object_or_404(System, token=token, deleted_by__isnull=True)
     conf_geoserver = geoserver.get_connection_conf()
- 
+
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
 
@@ -88,31 +88,38 @@ def json_proxy(request, token, code):
         raise Http404
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
-    
-    queryargs = request.GET
+
     headers = {**BASE_HEADERS}
-    base_url = 'http://{host}:{port}/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
-        code=code
+    base_url = 'http://{host}:{port}/geoserver/ows'.format(
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port'],
     )
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
-    content = rsp.content
-    if request.GET.get('REQUEST') == 'GetCapabilities': 
+
+    if request.GET.get('REQUEST') == 'GetCapabilities':
         allowed_layers = [code]
         if request.GET.get('SERVICE') == 'WFS':
-            base_url = 'http://{host}:{port}/geoserver/ows'.format(
-                host=conf_geoserver['geoserver_host'],
-                port=conf_geoserver['geoserver_port'],
-            )
+            queryargs = {
+                **request.GET
+            }
             rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
             content = rsp.content
             content = filter_layers_wfs(content, allowed_layers)
-        elif request.GET.get('SERVICE') == 'WMS':
-            content = filter_layers(content, allowed_layers)
         else:
-            raise Exception()
-    
+            raise Http404
+
+
+    else:
+        queryargs = {
+            'service': 'WFS',
+            'version': '1.3.0',
+            'request': 'GetFeature',
+            'typeName': code,
+            'outputFormat': 'application/json',
+        }
+
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+        content = rsp.content
+
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
 
@@ -231,7 +238,7 @@ def qgis_proxy(request, token):
     base_url = 'http://{host}:{port}/geoserver/ows'.format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
-    )   
+    )
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
