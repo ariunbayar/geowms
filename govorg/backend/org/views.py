@@ -58,7 +58,7 @@ def _org_role(org):
         package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
         theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
 
-        qs = GovPermInspire.objects.filter(gov_perm=gov_perm, perm_kind=GovPermInspire.PERM_VIEW)
+        qs = GovPermInspire.objects.filter(gov_perm=gov_perm)
         property_of_feature = _get_properties_by_feature(qs, feature_ids)
 
         property_ids_of_feature = {}
