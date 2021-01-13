@@ -83,20 +83,45 @@ def json_proxy(request, token, code):
     }
     conf_geoserver = geoserver.get_connection_conf()
     system = get_object_or_404(System, token=token, deleted_by__isnull=True)
+
     if not system.wms_layers.filter(code=code):
         raise Http404
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
 
-    queryargs = request.GET
     headers = {**BASE_HEADERS}
-    base_url = 'http://{host}:{port}/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName={code}&outputFormat=application%2Fjson'.format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
-        code=code
+    base_url = 'http://{host}:{port}/geoserver/ows'.format(
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port'],
     )
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
-    content = rsp.content
+
+    if request.GET.get('REQUEST') == 'GetCapabilities':
+        allowed_layers = [code]
+        if request.GET.get('SERVICE') == 'WFS':
+            queryargs = {
+                **request.GET
+            }
+            rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+            content = rsp.content
+            content = filter_layers_wfs(content, allowed_layers)
+        else:
+            raise Http404
+
+
+    else:
+        queryargs = {
+            'service': 'WFS',
+            'version': '1.3.0',
+            'request': 'GetFeature',
+            'typeName': code,
+            'outputFormat': 'application/json',
+        }
+
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+        content = rsp.content
+
+    content_type = rsp.headers.get('content-type')
+    rsp = HttpResponse(content, content_type=content_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
     WMSLog.objects.create(
@@ -106,15 +131,11 @@ def json_proxy(request, token, code):
         rsp_size=len(rsp.content),
         system_id=system.id,
     )
-    content_type = rsp.headers.get('content-type')
-
-    rsp = HttpResponse(content, content_type=content_type)
 
     if system.website:
         rsp['Access-Control-Allow-Origin'] = system.website
     else:
         rsp['Access-Control-Allow-Origin'] = '*'
-
     return rsp
 
 
@@ -210,6 +231,7 @@ def qgis_proxy(request, token):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
+
     employee = get_object_or_404(Employee, token=token)
     allowed_layers = _get_layer_name(employee)
     conf_geoserver = geoserver.get_connection_conf()
