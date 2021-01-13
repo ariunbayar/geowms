@@ -47,6 +47,7 @@ from main.utils import gis_insert
 from main.utils import gis_tables_by_oids
 from main.utils import has_employee_perm
 from main.utils import refreshMaterializedView
+from main.utils import get_emp_property_roles
 
 
 def _get_changeset_display(ob):
@@ -377,43 +378,6 @@ def _get_property(ob, roles, lproperties):
         'roles': property_roles
     }
 
-def _get_emp_property_roles(employee, fid):
-
-    property_ids = []
-    property_details = []
-    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-
-    property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
-    if property_perms:
-        for prop in property_perms:
-            if prop.get('property_id') not in property_ids:
-                property_ids.append(prop.get('property_id'))
-        for property_id in property_ids:
-            for prop in property_perms:
-                if property_id == prop['property_id']:
-                    if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
-                        property_roles['PERM_VIEW'] = True
-                    if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
-                        property_roles['PERM_CREATE'] = True
-                    if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
-                        property_roles['PERM_REMOVE'] = True
-                    if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
-                        property_roles['PERM_UPDATE'] = True
-                    if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
-                        property_roles['PERM_APPROVE'] = True
-                    else:
-                        property_roles['PERM_REVOKE'] = True
-
-            property_details.append({
-                'property_id': property_id,
-                'roles':property_roles
-            })
-
-    return property_ids, property_details
-
-
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -421,7 +385,7 @@ def detail(request, gid, fid, tid):
     property_ids = []
     properties = []
     employee = get_object_or_404(Employee, user__username=request.user)
-    property_ids, property_details = _get_emp_property_roles(employee, fid)
+    property_ids, property_details = get_emp_property_roles(employee, fid)
     if property_ids:
         mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id')
         for prop in mdatas:
@@ -449,7 +413,7 @@ def detailCreate(request, tid, pid, fid):
         'value_number':''
         }
     employee = get_object_or_404(Employee, user__username=request.user)
-    property_ids, property_roles = _get_emp_property_roles(employee, fid)
+    property_ids, property_roles = get_emp_property_roles(employee, fid)
 
     if property_ids:
         for prop in property_ids:

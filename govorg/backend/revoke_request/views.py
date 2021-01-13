@@ -1,9 +1,10 @@
+import json
+
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-import json
-
-from main.decorators import ajax_required
+from django.core.paginator import Paginator
+from django.contrib.postgres.search import SearchVector
 
 from backend.inspire.models import (
     MGeoDatas,
@@ -17,14 +18,10 @@ from backend.inspire.models import (
 from govorg.backend.org_request.models import ChangeRequest
 from backend.org.models import Employee
 
-from django.core.paginator import Paginator
-from django.contrib.postgres.search import SearchVector
-
-from main.utils import (
-    refreshMaterializedView,
-    has_employee_perm,
-    check_form_json,
-)
+from main.decorators import ajax_required
+from main.utils import refreshMaterializedView
+from main.utils import has_employee_perm
+from main.utils import check_form_json
 
 
 def _convert_text_json(data):
