@@ -114,7 +114,7 @@ export class Upload extends Component {
             .then(({success, info, key}) => {
             if (success) {
                 alert(info)
-                this.props.rows()
+                this.props.refreshRequestCount()
             }
             else {
                 alert(info)

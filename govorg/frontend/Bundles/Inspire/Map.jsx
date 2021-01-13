@@ -195,12 +195,12 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.qgis)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
+        map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
+        map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
 
-      map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
-      map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
 
       if(roles.PERM_UPDATE){
         map.addControl(this.controls.coordList)
@@ -851,7 +851,12 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     showUploadBtn(){
-      this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid, this.props.match.params.pid)
+      this.controls.upload.showUpload(
+        true, this.state.fid,
+        this.closeUploadBtn, this.props.refreshCount,
+        this.addNotif, this.props.match.params.tid,
+        this.props.match.params.pid
+      )
       this.setState({ showUpload: true })
     }
 
