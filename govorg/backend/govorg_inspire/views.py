@@ -608,50 +608,6 @@ def create(request, payload):
     return JsonResponse(rsp)
 
 
-def _create_revoke_request(employee, payload):
-
-    theme_id = payload.get('tid')
-    package_id = payload.get('pid')
-    feature_id = payload.get('fid')
-    old_geo_id = payload.get('old_geo_id')
-    geo_json = payload.get('geo_json')
-    form_json = payload.get('form_json')
-    order_no = payload.get('order_no')
-    order_at = payload.get('order_at')
-
-    form_json = check_form_json(feature_id, form_json, employee)
-
-    change_request = ChangeRequest()
-    change_request.old_geo_id = old_geo_id
-    change_request.new_geo_id = None
-    change_request.theme_id = theme_id
-    change_request.package_id = package_id
-    change_request.feature_id = feature_id
-    change_request.employee = employee
-    change_request.state = ChangeRequest.STATE_NEW
-    change_request.kind = ChangeRequest.KIND_REVOKE
-    change_request.form_json = form_json
-    change_request.geo_json = geo_json
-    change_request.order_at = order_at
-    change_request.order_no = order_no
-    change_request.save()
-
-    return change_request
-
-
-@require_POST
-@ajax_required
-def revoke_new(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
-
-    success, info = has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
-    if success:
-        _create_revoke_request(employee, payload)
-        info = "Цуцлах хүсэлт амжилттай үүслээ"
-
-    return JsonResponse({ 'success': success, 'info': info })
-
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
