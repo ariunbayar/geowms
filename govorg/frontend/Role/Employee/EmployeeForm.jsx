@@ -19,6 +19,7 @@ export class EmployeeForm extends Component {
         this.getList = this.getList.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.addNotif = this.addNotif.bind(this)
+        this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
     }
 
     getList() {
@@ -42,6 +43,20 @@ export class EmployeeForm extends Component {
                 if(success) {
                     this.addNotif('success', 'Амжилттай устгалаа', 'check')
                     this.getList()
+                }
+            })
+    }
+
+    handleTokenRefresh(id) {
+        service
+            .empTokenRefresh(id)
+            .then(({ success, info }) => {
+                if(success) {
+                    this.addNotif('success', info, 'check')
+                    this.getList()
+                }
+                else {
+                    this.addNotif('danger', info, 'times')
                 }
             })
     }
@@ -77,6 +92,7 @@ export class EmployeeForm extends Component {
                                             <th scope="col">Имэйл</th >
                                             <th scope="col">Албан тушаал</th >
                                             <th className="text-center" scope="col">Админ эсэх</th >
+                                            <th className="text-center" scope="col">Токен шинэчлэх</th>
                                             <th className="text-center" scope="col">Засах</th>
                                             <th className="text-center" scope="col">Устгах</th>
                                         </tr>
@@ -88,6 +104,7 @@ export class EmployeeForm extends Component {
                                                 values={item}
                                                 prefix={prefix}
                                                 handleRemove={() => this.handleRemove(item.id)}
+                                                handleTokenRefresh={() => this.handleTokenRefresh(item.id)}
                                             />
                                         )}
                                     </tbody>

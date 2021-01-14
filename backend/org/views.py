@@ -278,6 +278,21 @@ def employee_detail(request, pk):
     return JsonResponse({'success': True, 'employee': employees_display})
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_token_refresh(request, pk):
+    employee = get_object_or_404(Employee, user_id=pk)
+    employee.token = TokenGeneratorEmployee().get()
+    employee.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
 def _employee_validation(payload, user):
     username = payload.get('username')
     position = payload.get('position')

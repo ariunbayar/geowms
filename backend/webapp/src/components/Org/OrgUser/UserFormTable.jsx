@@ -7,27 +7,41 @@ export class UserFormTable extends Component {
 
     constructor(props) {
         super(props)
+
         this.state={
-            is_modal_delete_open: false,
+            modal_status: "closed",
+            action_type: '',
+            text: '',
+            title: '',
+            action_name: ''
         }
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-    }
-    componentDidMount(){
-    }
-    handleModalDeleteOpen() {
-        this.setState({is_modal_delete_open: true})
+
+        this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
+        this.handleModalActionClose = this.handleModalActionClose.bind(this)
+        this.modalAction = this.modalAction.bind(this)
     }
 
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
+    handleModalActionOpen(action_type, text, title, action_name){
+        this.setState({modal_status: 'open', action_type, text, title, action_name})
     }
+
+    handleModalActionClose() {
+        this.setState({modal_status: 'closed'})
+    }
+
+    modalAction(){
+        if(this.state.action_type == 'refresh_token') this.props.handleTokenRefresh()
+        else if (this.state.action_type == 'remove') this.props.handleGovorgDelete()
+        this.handleModalActionClose()
+    }
+
+
     render() {
         const org_id = this.props.org_id
         const idx = this.props.idx
         const org_level = this.props.org_level
         const employee = this.props.values
-        const is_modal_delete_open=this.state.is_modal_delete_open
+        const {text, title, action_name, modal_status} = this.state
         return (
             <tr>
                 <td>{idx}</td>
@@ -47,23 +61,44 @@ export class UserFormTable extends Component {
                 <td>{employee.created_at}</td>
                 <td>{employee.updated_at}</td>
                 <td>
+                    <a role="button"
+                        onClick={() =>
+                            this.handleModalActionOpen(
+                                'refresh_token',
+                                `Та "${employee.first_name}" нэртэй хэрэглэгчийн токенийг шинэчлэхдээ итгэлтэй байна уу?`,
+                                "Тохиргоог шинэчлэх",
+                                "ШИНЭЧЛЭХ"
+                            )
+                        }
+                    >
+                        <i className="fa fa-refresh text-primary" aria-hidden="true"></i>
+                    </a>
+                </td>
+                <td>
                     <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${employee.id}/засах/`}>
                         <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </NavLink>
                 </td>
                 <td>
-                    <a href="#" onClick={this.handleModalDeleteOpen}>
+                    <a role="button" onClick={() =>
+                        this.handleModalActionOpen(
+                            'remove',
+                            `Та "${employee.first_name}" нэртэй хэрэглэгчийг устгахдаа итгэлтэй байна уу?`,
+                            "Хэрэглэгч устгах"
+                            )
+                        }
+                    >
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleGovorgDelete}
-                            text={`Та "${employee.first_name}" нэртэй хэрэглэгчийг устгахдаа итгэлтэй байна уу?`}
-                            title="Хэрэглэгч устгах"
-                            model_type_icon = "success"
-                        />
-                    }
+                    <Modal
+                        modalClose={this.handleModalActionClose}
+                        modalAction={this.modalAction}
+                        status={modal_status}
+                        text={text}
+                        title={title}
+                        model_type_icon = "success"
+                        actionName={action_name}
+                    />
                 </td>
             </tr>
         )

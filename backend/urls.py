@@ -75,6 +75,7 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/roles-add/', org_views.roles_add),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('employee-remove-<int:pk>/', org_views.employee_remove, name='employee-remove'),
+        path('employee-token-refresh-<int:pk>/', org_views.employee_token_refresh, name='employee-token-refresh'),
         path('employee-detail-<int:pk>/', org_views.employee_detail, name='employee-detail'),
         path('level-<int:level>/employee-update-<int:pk>/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),

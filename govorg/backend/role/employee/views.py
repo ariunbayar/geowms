@@ -348,3 +348,28 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': True})
+
+
+@require_GET
+@ajax_required
+def refresh_token(request, pk):
+
+    employee = get_object_or_404(Employee, pk=pk)
+    req_employee = get_object_or_404(Employee, user=request.user)
+    if req_employee.is_admin:
+
+        employee.token = TokenGeneratorEmployee().get()
+        employee.save()
+
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай шинэчиллээ'
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Та байгуулгын админ биш байна.'
+        }
+
+    return JsonResponse(rsp)

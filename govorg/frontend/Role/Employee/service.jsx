@@ -8,6 +8,7 @@ export const service = {
     getDetailEmployee,
     deleteEmployee,
     updateEmployee,
+    empTokenRefresh
 }
 
 const prefix = "/gov/api/role/employee"
@@ -69,4 +70,11 @@ function updateEmployee(username, first_name, last_name, position, email, gender
     }
 
     return fetch(`${prefix}/${id}/update/`, requestOptions).then(handleResponse)
+}
+
+function empTokenRefresh(id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/refresh-token/`, requestOptions).then(handleResponse)
 }

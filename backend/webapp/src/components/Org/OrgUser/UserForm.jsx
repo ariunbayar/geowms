@@ -30,6 +30,7 @@ export class UserForm extends Component {
         this.handleSearch=this.handleSearch.bind(this)
         this.modalCloseTime=this.modalCloseTime.bind(this)
         this.modalClose=this.modalClose.bind(this)
+        this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
     }
 
     paginate (page, query) {
@@ -61,6 +62,20 @@ export class UserForm extends Component {
     handleGovorgDelete(id) {
         const { load, searchQuery } = this.state
         service.employeeRemove(id).then(({ success }) => {
+            if (success) {
+                var a = load
+                a ++
+                this.setState({ load: a })
+                this.paginate(1, searchQuery)
+                this.setState({modal_alert_status: "open"})
+            }
+        })
+        this.modalCloseTime()
+    }
+
+    handleTokenRefresh(id) {
+        const { load, searchQuery } = this.state
+        service.empTokenRefresh(id).then(({ success }) => {
             if (success) {
                 var a = load
                 a ++
@@ -126,8 +141,9 @@ export class UserForm extends Component {
                                         <th scope="col"> Админ </th>
                                         <th scope="col"> Үүссэн </th>
                                         <th scope="col"> Зассан </th>
-                                        <th scope="col"> </th>
-                                        <th scope="col"> </th>
+                                        <th scope="col"> Токен шинэчлэх</th>
+                                        <th scope="col"> Засах</th>
+                                        <th scope="col"> Устгах</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -141,6 +157,7 @@ export class UserForm extends Component {
                                             idx = {(currentPage*employeesPerPage)-employeesPerPage+idx+1}
                                             values={employe}
                                             handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
+                                            handleTokenRefresh={() => this.handleTokenRefresh(employe.id)}
                                         >
                                         </UserFormTable>
                                     )}
