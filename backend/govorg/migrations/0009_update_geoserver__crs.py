@@ -8,7 +8,7 @@ def _update_layer(layer_name, url):
     BASE_URL, AUTH = getHeader()
     payload = '''
             <featureType>
-            <name>{layer_name}</name>
+            <projectionPolicy>NONE</projectionPolicy>
             <nativeBoundingBox>
                <minx>87.5879287719727</minx>
                 <maxx>119.325157165527</maxx>
