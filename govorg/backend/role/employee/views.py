@@ -9,6 +9,7 @@ from main.decorators import ajax_required
 from main.utils import send_approve_email, is_email
 from backend.token.utils import TokenGeneratorEmployee
 from main import utils
+from django.contrib.auth.decorators import login_required
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
@@ -48,6 +49,7 @@ def _get_employee_display(employee):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -163,6 +165,7 @@ def _employee_validation(user, user_detail):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def create(request, payload):
 
     user_detail = payload.get('user_detail')
@@ -221,6 +224,7 @@ def _delete_remove_perm(remove_perms):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
 
     role_id = payload.get('role_id') or None
@@ -306,6 +310,7 @@ def _get_emp_perm_display(emp_perm):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
@@ -336,6 +341,7 @@ def detail(request, pk):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def delete(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
@@ -352,6 +358,7 @@ def delete(request, pk):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def refresh_token(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
