@@ -616,7 +616,11 @@ def _check_form_json(fid, form_json, employee):
                         'roles': propert.get('roles') or ''
                     })
 
-    return request_json if request_json else ''
+    if request_json:
+        request_json = json.dumps(request_json)
+    else:
+        request_json = ''
+    return request_json
 
 
 @require_POST
