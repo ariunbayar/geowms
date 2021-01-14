@@ -29,8 +29,6 @@ from govorg.backend.utils import (
 )
 
 
-
-
 def _get_employee_display(employee):
 
     user = employee.user
@@ -51,8 +49,7 @@ def _get_employee_display(employee):
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
-        'role_name': role,
-        
+        'role_name': role,        
     }
 
 
@@ -62,7 +59,6 @@ def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
     employees = Employee.objects.filter(org=org)
-
 
     employee_list = [
         _get_employee_display(employee)
