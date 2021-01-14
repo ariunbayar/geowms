@@ -29,27 +29,12 @@ export class OrgRequestTable extends Component {
 
     handleRequestApprove(id){
         const values = this.props.values
-        service.requestApprove(id, values).then(({ success, info })=>{
-            if(success)
-            {
-                this.setState({ is_loading:false })
+        service.requestApprove(id, values).then(({success})=>{
+                this.setState({
+                    is_loading:false,
+                })
                 this.props.getAll()
                 this.handleRequestClose()
-                this.props.modalAlertOpen(info, "success")
-            }
-            else
-            {
-                this.setState({ is_loading:false })
-                this.handleRequestClose()
-                this.props.modalAlertOpen(info, "warning")
-            }
-        }).catch((error) => {
-            if(error == 'Bad Request')
-            {
-                this.setState({ is_loading:false })
-                this.handleRequestClose()
-                this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
-            }
         })
     }
 
@@ -111,7 +96,6 @@ export class OrgRequestTable extends Component {
                         <RequestModal
                             modalClose={this.handleRequestClose}
                             modalAction={() =>this.handleRequestApprove(id)}
-                            modalAlertOpen={this.props.modalAlertOpen}
                             form_json = {form_json}
                             geo_json = {geo_json}
                             title="Шийдвэрлэх"

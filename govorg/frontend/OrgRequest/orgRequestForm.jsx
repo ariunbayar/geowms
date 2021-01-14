@@ -2,7 +2,6 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {OrgRequestTable} from './orgRequestTable'
-import ModalAlert from '../components/helpers/ModalAlert'
 
 
 export default class OrgRequestForm extends Component {
@@ -18,32 +17,9 @@ export default class OrgRequestForm extends Component {
             search_package: '',
             search_feature: '',
             is_loading: false,
-            modal_alert_status: "closed",
-            title: '',
-            model_type_icon: '',
         }
-
         this.getAll = this.getAll.bind(this)
         this.onChangeTheme = this.onChangeTheme.bind(this)
-        this.modalAlertOpen = this.modalAlertOpen.bind(this)
-        this.modalAlertClose = this.modalAlertClose.bind(this)
-        this.modalAlertCloseTime = this.modalAlertCloseTime.bind(this)
-
-    }
-
-    modalAlertOpen(title, model_type_icon){
-        this.setState({modal_alert_status: 'open', title, model_type_icon})
-    }
-
-    modalAlertClose(){
-        this.setState({modal_alert_status: "closed"})
-        clearTimeout(this.state.timer)
-    }
-
-    modalAlertCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
     }
 
     componentDidMount(){
@@ -52,8 +28,10 @@ export default class OrgRequestForm extends Component {
 
     getAll(){
         this.setState({ is_loading: true })
-        service.getAll().then(({ success ,org_request, choices, modules }) => {
-            if(success){
+        service
+        .getAll()
+        .then(({ success ,org_request, choices, modules }) => {
+           if(success){
                 this.themes = []
                 this.packages = []
                 this.features = []
@@ -66,11 +44,9 @@ export default class OrgRequestForm extends Component {
                         })
                     })
                 })
-            this.setState({org_request, is_loading: false, choices, modules, themes: this.themes, packages: this.packages, features: this.features})
+               this.setState({org_request, is_loading: false, choices, modules, themes: this.themes, packages: this.packages, features: this.features})
             }
             else this.setState({is_loading:false})
-        }).catch((error) => {
-            this.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
         })
     }
 
@@ -83,10 +59,8 @@ export default class OrgRequestForm extends Component {
                 if(success){
                     this.setState({ org_request, is_loading: false })
                 } else {
-                    this.modalAlertOpen(info, 'warning')
+                    console.log(info);
                 }
-            }).catch((error) => {
-                this.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
             })
     }
 
@@ -137,7 +111,7 @@ export default class OrgRequestForm extends Component {
 
     render() {
         const org_request = this.state.org_request
-        const {is_loading, choices, packages, features, themes, title, model_type_icon, modal_alert_status} = this.state
+        const {is_loading, choices, packages, features, themes} = this.state
         return (
             <div className="row">
                 <div className="col-md-12 row">
@@ -261,9 +235,8 @@ export default class OrgRequestForm extends Component {
                                             <OrgRequestTable
                                                 key={idx}
                                                 idx={idx}
-                                                values={req}
-                                                getAll={this.getAll}
-                                                modalAlertOpen={this.modalAlertOpen}
+                                                values = {req}
+                                                getAll = {this.getAll}
                                             />
                                         )
                                         :<tr>
@@ -275,12 +248,6 @@ export default class OrgRequestForm extends Component {
                         </div>
                 }
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalAlertClose()}
-                    status={modal_alert_status}
-                    title={title}
-                    model_type_icon={model_type_icon}
-                />
             </div>
         )
     }

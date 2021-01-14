@@ -283,24 +283,20 @@ def request_delete(request, pk):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    change_req_obj = get_object_or_404(ChangeRequest, pk=pk)
+    r_reject = get_object_or_404(ChangeRequest, pk=pk)
 
-    qs = EmpPermInspire.objects
-    qs = qs.filter(emp_perm=emp_perm)
-    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
-    perm_reject = qs.filter(feature_id=change_req_obj.feature_id)
+    perm_reject = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_REVOKE, feature_id=r_reject.feature_id)
 
     if perm_reject:
-        change_req_obj.state = ChangeRequest.STATE_REJECT
-        change_req_obj.save()
+        r_reject.state = ChangeRequest.STATE_REJECT
+        r_reject.save()
         rsp = {
             'success': True,
-            'info': 'Амжилттай цуцаллаа'
         }
     else:
         rsp = {
             'success': False,
-            'info': 'Цуцлах эрхгүй байна'
+            'info': 'Батлах эрхгүй байна'
         }
 
     return JsonResponse(rsp)
@@ -402,7 +398,6 @@ def request_approve(request, payload, pk):
                 r_approve.save()
                 rsp = {
                     'success': False,
-                    'info': 'Устсан мэдээлэл байна. Цуцлагдлаа.'
                 }
                 return JsonResponse(rsp)
 
@@ -448,14 +443,12 @@ def request_approve(request, payload, pk):
         r_approve.state = ChangeRequest.STATE_APPROVE
         r_approve.save()
         rsp = {
-            'success': True,
-            'info': 'Амжилттай баталгаажууллаа.'
+            'success': True
         }
 
     else:
         rsp = {
-            'success': False,
-            'info': 'Таньд цуцлах эрх алга байна.'
+            'success': False
         }
 
     return JsonResponse(rsp)
