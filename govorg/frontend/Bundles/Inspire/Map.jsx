@@ -306,12 +306,13 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     handleMapClick(event) {
+      console.log('click map');
       const coordinate = event.coordinate
+      var start_drawing = false;
       if(!this.state.draw_is_active) this.showFeaturesAt(coordinate)
     }
 
     showFeaturesAt(coordinate) {
-      this.sendFeatureInfo = []
       const view = this.map.getView()
       const projection = view.getProjection()
       const resolution = view.getResolution()
@@ -363,7 +364,6 @@ export default class BarilgaSuurinGazar extends Component{
           /* TODO */
           console.log('no feature url', wms_source);
       }
-      this.sendFeatureInfo = []
     }
 
     Modify(){
@@ -942,15 +942,20 @@ export default class BarilgaSuurinGazar extends Component{
 
     addMarker(coord) {
       const point_geom = coord.coordinate
+      console.log(point_geom);
       const point_turning = coord.turning.toString()
+      console.log(point_turning);
       const coordinate = [point_geom[0], point_geom[1]]
+      console.log(coordinate);
       const source = this.vectorSource
 
       const point = new geom_type.Point(coordinate)
+      console.log(point);
       const feature = new Feature({
         geometry: point,
         id: "TurningPoint"
       });
+      console.log(feature);
 
       const style = new Style({
         image: new CircleStyle({
@@ -1035,80 +1040,76 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     BoxStart() {
+      console.log('draw start')
       this.removeTurning()
       const selectedFeatures = this.select.getFeatures();
       selectedFeatures.clear();
     }
 
     BoxEnd(dragBox) {
-      const source = this.vectorSource
-      const selectedFeatures = this.select.getFeatures();
       const {selected_feature} = this.state
+      const selectedFeatures = this.select.getFeatures();
       const extent = dragBox.getGeometry().getExtent();
       this.sendCoordinateList = []
       this.turningPoint = []
-      source.forEachFeatureIntersectingExtent(extent, (feature) => {
-        var feats = []
-        const feat_type = feature.getGeometry().getType()
-        this.feat_type = feat_type
-        if (feat_type.includes('MultiPolygon')) {
-          const feat_multi = this.getTypeFunction(feature.getGeometry())
-          feat_multi.map((feature_multi, idx) => {
-            feats.push(feature_multi)
-          })
-        } else {
-          feats.push(feature)
-        }
-        feats.map((feat_mutli, idx) => {
-          var checkBounds = null
-          if (feat_type.includes('MultiPolygon')) {
-            checkBounds = feat_mutli.getCoordinates()
-          }
-          else if (feat_type.includes('MultiPoint')){
-            checkBounds = [feat_mutli.getGeometry().getCoordinates()]
-          }
-          else if (feat_type == 'Point'){
-            checkBounds = [[feat_mutli.getGeometry().getCoordinates()]]
-          }
-          else {
-            checkBounds = feat_mutli.getGeometry().getCoordinates()
-          }
-          checkBounds.map((checkBound, idx) => {
-            const lastElement = checkBound.length
-            this.lastElement = lastElement
-            for (let i = 0; i < checkBound.length; i ++){
-              const check = selected_feature.getGeometry().containsXY(checkBound[i][0], checkBound[i][1])
-              if (check) {
-                const coordinates = this.getTurningPoints(dragBox, checkBound)
-                this.dupl = true
-                if (coordinates.length > 0) {
-                  if (this.turningPoint.length > 0) {
-                    const duplicate = this.turningPoint.every((item) => {
-                      const item_check = coordinates.map((coord, idx) => {
-                        return coord.turning
-                      })
-                      if (item == item_check[0]) {
-                        this.dupl = false
-                      }
-                    })
-                  }
-                  if (this.dupl) {
-                    selectedFeatures.push(feature);
-                    this.setState({ build_name: feature.get('id') })
-                    coordinates.map((coordinate, i) => {
-                      this.sendCoordinateList.push(coordinate.coordinate)
-                      this.turningPoint.push(coordinate.turning)
-                      if (!feat_type.includes("Point") && lastElement !== coordinate.turning) {
-                        this.addMarker(coordinate)
-                      }
-                    })
-                  }
-                }
-              }
-            }
-          })
+      const feat_type = selected_feature.getGeometry().getType()
+      this.feat_type = feat_type
+      var feature = []
+      if (feat_type.includes('MultiPolygon')) {
+        const feat_multi = this.getTypeFunction(selected_feature.getGeometry())
+        feat_multi.map((feature_multi, idx) => {
+          feature = feature_multi
         })
-      });
+      } else {
+        feature = selected_feature
+      }
+      var checkBounds = null
+      if (feat_type.includes('MultiPolygon')) {
+        checkBounds = feature.getCoordinates()
+      }
+      else if (feat_type.includes('MultiPoint')){
+        checkBounds = [feature.getGeometry().getCoordinates()]
+      }
+      else if (feat_type == 'Point'){
+        checkBounds = [[feature.getGeometry().getCoordinates()]]
+      }
+      else {
+        checkBounds = feature.getGeometry().getCoordinates()
+      }
+      console.log(checkBounds);
+      checkBounds.map((checkBound, idx) => {
+        const lastElement = checkBound.length
+        this.lastElement = lastElement
+        for (let i = 0; i < checkBound.length; i ++){
+          const coordinates = this.getTurningPoints(dragBox, checkBound)
+          this.dupl = true
+          if (coordinates.length > 0) {
+            if (this.turningPoint.length > 0) {
+              const duplicate = this.turningPoint.every((item) => {
+                const item_check = coordinates.map((coord, idx) => {
+                  return coord.turning
+                })
+                if (item == item_check[0]) {
+                  this.dupl = false
+                }
+              })
+            }
+            if (this.dupl) {
+              selectedFeatures.push(selected_feature);
+              this.setState({ build_name: selected_feature.get('inspire_id') })
+              console.log(coordinates);
+              coordinates.map((coordinate, i) => {
+                this.sendCoordinateList.push(coordinate.coordinate)
+                this.turningPoint.push(coordinate.turning)
+                if (!feat_type.includes("Point") && lastElement !== coordinate.turning) {
+                  this.addMarker(coordinate)
+                }
+              })
+            }
+          }
+        }
+      })
+      // });
       const data = {
         'geom': this.sendCoordinateList,
         'turning': this.turningPoint,
