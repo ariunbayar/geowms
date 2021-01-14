@@ -209,10 +209,12 @@ export default class BarilgaSuurinGazar extends Component{
       }
       this.setState({ is_loading:false, roles})
     }
+
     loadData(){
 
       const wms_layer = this.state.wms_layer
       this.setState({emp_perm_prefix: wms_layer.url})
+
       const map_wms = {
         tile: new Tile({
         source: new TileWMS({
@@ -222,8 +224,9 @@ export default class BarilgaSuurinGazar extends Component{
                 'LAYERS': wms_layer.code,
                 'FORMAT': 'image/png',
             }
-        }),
+      })
       })}
+
       this.setState({map_wms})
       this.map.addLayer(map_wms.tile);
 
@@ -300,15 +303,14 @@ export default class BarilgaSuurinGazar extends Component{
       this.map = map
       this.overlay = overlay
       this.vector = vector
+      this.vector_layer = vector_layer
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
     }
 
     handleMapClick(event) {
-      console.log('click map');
       const coordinate = event.coordinate
-      var start_drawing = false;
       if(!this.state.draw_is_active) this.showFeaturesAt(coordinate)
     }
 
@@ -942,20 +944,15 @@ export default class BarilgaSuurinGazar extends Component{
 
     addMarker(coord) {
       const point_geom = coord.coordinate
-      console.log(point_geom);
       const point_turning = coord.turning.toString()
-      console.log(point_turning);
       const coordinate = [point_geom[0], point_geom[1]]
-      console.log(coordinate);
-      const source = this.vectorSource
+      const source = this.vector_layer.getSource()
 
       const point = new geom_type.Point(coordinate)
-      console.log(point);
       const feature = new Feature({
         geometry: point,
         id: "TurningPoint"
       });
-      console.log(feature);
 
       const style = new Style({
         image: new CircleStyle({
@@ -976,8 +973,9 @@ export default class BarilgaSuurinGazar extends Component{
       });
 
       feature.setStyle(style)
-      this.setState({ pointFeature: feature })
       source.addFeature(feature)
+
+      this.setState({ pointFeature: feature })
     }
 
     sendToShowList(data) {
@@ -1027,7 +1025,7 @@ export default class BarilgaSuurinGazar extends Component{
     removeTurning() {
       const { pointFeature } = this.state
       if ( pointFeature !== null ) {
-        const source = this.vectorSource
+        const source = this.vector_layer.getSource()
         const features = source.getFeatures()
         if (features != null && features.length > 0) {
           features.map((x) => {
@@ -1040,7 +1038,6 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     BoxStart() {
-      console.log('draw start')
       this.removeTurning()
       const selectedFeatures = this.select.getFeatures();
       selectedFeatures.clear();
@@ -1076,38 +1073,19 @@ export default class BarilgaSuurinGazar extends Component{
       else {
         checkBounds = feature.getGeometry().getCoordinates()
       }
-      console.log(checkBounds);
       checkBounds.map((checkBound, idx) => {
         const lastElement = checkBound.length
         this.lastElement = lastElement
-        for (let i = 0; i < checkBound.length; i ++){
-          const coordinates = this.getTurningPoints(dragBox, checkBound)
-          this.dupl = true
-          if (coordinates.length > 0) {
-            if (this.turningPoint.length > 0) {
-              const duplicate = this.turningPoint.every((item) => {
-                const item_check = coordinates.map((coord, idx) => {
-                  return coord.turning
-                })
-                if (item == item_check[0]) {
-                  this.dupl = false
-                }
-              })
-            }
-            if (this.dupl) {
-              selectedFeatures.push(selected_feature);
-              this.setState({ build_name: selected_feature.get('inspire_id') })
-              console.log(coordinates);
-              coordinates.map((coordinate, i) => {
-                this.sendCoordinateList.push(coordinate.coordinate)
-                this.turningPoint.push(coordinate.turning)
-                if (!feat_type.includes("Point") && lastElement !== coordinate.turning) {
-                  this.addMarker(coordinate)
-                }
-              })
-            }
+        const coordinates = this.getTurningPoints(dragBox, checkBound)
+        selectedFeatures.push(selected_feature);
+        this.setState({ build_name: selected_feature.get('inspire_id') })
+        coordinates.map((coordinate, i) => {
+          this.sendCoordinateList.push(coordinate.coordinate)
+          this.turningPoint.push(coordinate.turning)
+          if (!feat_type.includes("Point")) {
+            this.addMarker(coordinate)
           }
-        }
+        })
       })
       // });
       const data = {
@@ -1161,7 +1139,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     updateFromList(coord_list) {
-      const source = this.vectorSource
+      const source = this.vector_layer.getSource()
       const id = coord_list.id
       const coords = coord_list.data.map(({geom, turning}) => {
         const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
