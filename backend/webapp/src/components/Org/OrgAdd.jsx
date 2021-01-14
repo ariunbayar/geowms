@@ -4,6 +4,7 @@ import {service} from "./service"
 import ModalAlert from "../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
+import { disable } from "ol/rotationconstraint"
 
 
 export class OrgAdd extends Component {
@@ -234,14 +235,18 @@ export class OrgAdd extends Component {
                                 <div className="form-group col-md-4">
                                     <div className="position-relative has-icon-right">
                                         <label htmlFor="org_name">Байгууллагын нэр</label>
-                                        <Field
-                                            className={'form-control ' + (errors.org_name ? 'is-invalid' : '')}
-                                            name='org_name'
-                                            id="id_org_name"
-                                            type="text"
-                                            placeholder="Байгууллагын нэр"
-                                        />
-                                        <ErrorMessage name="org_name" component="div" className="text-danger"/>
+                                        <div className='row'>
+                                            <div class="col-md-11">
+                                                <Field
+                                                    className={'form-control ' + (errors.org_name ? 'is-invalid' : '')}
+                                                    name='org_name'
+                                                    id="id_org_name"
+                                                    type="text"
+                                                    placeholder="Байгууллагын нэр"
+                                                />
+                                                <ErrorMessage name="org_name" component="div" className="text-danger"/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -249,68 +254,118 @@ export class OrgAdd extends Component {
                                 <div className="form-row">
                                     <div className="form-group col-md-4">
                                         <label htmlFor="org_level">Түвшин</label>
-                                        <Fragment>
-                                            <Field name="org_level" as="select" className="form-control"
-                                            className={'form-control ' + (errors.org_level ? 'is-invalid' : '')} disabled={disabled}>
-                                                <option>1</option>
-                                                <option>2</option>
-                                                <option>3</option>
-                                                <option>4</option>
-                                            </Field>
-                                            <ErrorMessage name="org_level" component="div" className="text-dange"/>
-                                        </Fragment>
+                                        <div className='row'>
+                                            <div class="col-md-11">
+                                                <Fragment>
+                                                    <Field name="org_level" as="select" className="form-control"
+                                                    className={'form-control ' + (errors.org_level ? 'is-invalid' : '')} disabled={disabled}>
+                                                        <option>1</option>
+                                                        <option>2</option>
+                                                        <option>3</option>
+                                                        <option>4</option>
+                                                    </Field>
+                                                    <ErrorMessage name="org_level" component="div" className="text-dange"/>
+                                                </Fragment>
+                                            </div>
+                                            {disabled &&
+                                                <div class="col p-0 pt-1">
+                                                    <div class="spinner-border" role="status"></div>
+                                                </div>
+
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             }
                             <div className="form-row">
                                 <div className="form-group col-md-4">
                                     <label htmlFor="org_role">Байгууллагын эрх</label>
-                                    <Fragment>
-                                        <Field name="org_role" as="select" className="form-control"
-                                        className={'form-control ' + (errors.org_role ? 'is-invalid' : '' )} disabled={disabled}>
-                                            <option value="-1">....</option>
-                                            {roles.map((role, idx) =>
-                                                <option key={idx} value={role.id}>{role.name}</option>
-                                            )}
-                                        </Field>
-                                        <ErrorMessage name="org_role" component="div" className="text-dange"/>
-                                    </Fragment>
+                                    <div className='row'>
+                                        <div class="col-md-11">
+                                            <Fragment>
+                                                <Field name="org_role" as="select" className="form-control"
+                                                className={'form-control ' + (errors.org_role ? 'is-invalid' : '' )} disabled={disabled}>
+                                                    <option value="-1">....</option>
+                                                    {roles.map((role, idx) =>
+                                                        <option key={idx} value={role.id}>{role.name}</option>
+                                                    )}
+                                                </Field>
+                                                <ErrorMessage name="org_role" component="div" className="text-dange"/>
+                                            </Fragment>
+                                        </div>
+                                        {disabled &&
+                                            <div class="col p-0 pt-1">
+                                                <div class="spinner-border" role="status"></div>
+                                            </div>
+
+                                        }
+                                    </div>
                                 </div>
                             </div>
                             <h5 className="mb-3">Байгууллагын хамрах хүрээ</h5>
                             <table className="table col-md-4">
                                 <tbody>
                                     <tr>
-                                        <th>Аймаг/ Хот</th>
+                                        <th className='pt-3'>Аймаг/ Хот</th>
                                         <td>
-                                            <select className='form-control' value={this.state.secondOrder_value} disabled={disabled} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
-                                                <option value='-1'>--- Улсын хэмжээнд ---</option>
-                                                {this.state.secondOrders.map((data, idx) =>
-                                                    <option key={idx} value={data['geo_id']} >{data['name']}</option>
-                                                )}
-                                            </select>
+                                            <div className='row'>
+                                                <div class="col-md-11">
+                                                    <select className='form-control' value={this.state.secondOrder_value} disabled={disabled} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
+                                                        <option value='-1'>--- Улсын хэмжээнд ---</option>
+                                                        {this.state.secondOrders.map((data, idx) =>
+                                                            <option key={idx} value={data['geo_id']} >{data['name']}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                                {disabled &&
+                                                    <div class="col p-0 pt-1">
+                                                        <div class="spinner-border" role="status"></div>
+                                                    </div>
+
+                                                }
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Сум/ Дүүрэг</th>
+                                        <th className='pt-3'>Сум/ Дүүрэг</th>
                                         <td>
-                                            <select className='form-control' value={this.state.thirthOrder_value} disabled={disabled} onChange={(e) => this.handle3rdOrderChange(e.target.value)}>
-                                                <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
-                                                {this.state.thirthOrders.map((data, idx) =>
-                                                    <option key={idx} value={data['geo_id']}>{data['name']}</option>
-                                                )}
-                                            </select>
+                                            <div className='row'>
+                                                <div class="col-md-11">
+                                                    <select className='form-control' value={this.state.thirthOrder_value} disabled={disabled} onChange={(e) => this.handle3rdOrderChange(e.target.value)}>
+                                                        <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
+                                                        {this.state.thirthOrders.map((data, idx) =>
+                                                            <option key={idx} value={data['geo_id']}>{data['name']}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                                {disabled &&
+                                                    <div class="col p-0 pt-1">
+                                                        <div class="spinner-border" role="status"></div>
+                                                    </div>
+
+                                                }
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Баг/ Хороо</th>
+                                        <th className='pt-3'>Баг/ Хороо</th>
                                         <td>
-                                            <select className='form-control' value={this.state.fourthOrder_value} disabled={disabled} onChange={(e) => this.handle4thOrderChange(e.target.value)}>
-                                                <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
-                                                {this.state.fourthOrders.map((data, idx) =>
-                                                    <option key={idx} value={data['geo_id']}>{data['name']}</option>
-                                                )}
-                                            </select>
+                                            <div className='row'>
+                                                <div class="col-md-11">
+                                                    <select className='form-control' value={this.state.fourthOrder_value} disabled={disabled} onChange={(e) => this.handle4thOrderChange(e.target.value)}>
+                                                        <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
+                                                        {this.state.fourthOrders.map((data, idx) =>
+                                                            <option key={idx} value={data['geo_id']}>{data['name']}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                                {disabled &&
+                                                    <div class="col p-0 pt-1">
+                                                        <div class="spinner-border" role="status"></div>
+                                                    </div>
+
+                                                }
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
