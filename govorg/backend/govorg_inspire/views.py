@@ -1036,6 +1036,11 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
                         if not success:
                             _delete_file(for_delete_items)
+                            rsp = {
+                                'success': success,
+                                'info': info,
+                            }
+                            return JsonResponse(rsp)
 
                     else:
                         _delete_file(for_delete_items)
