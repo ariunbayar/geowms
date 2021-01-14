@@ -73,8 +73,7 @@ def all(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def userCount(request):
 
-    
-    employee_ids = Employee.objects.all().values_list('user_id', flat=True) 
+    employee_ids = Employee.objects.all().values_list('user_id', flat=True)
     user_count = User.objects.exclude(pk__in=employee_ids).count()
     rsp = {
         'user_count': user_count,
@@ -149,7 +148,7 @@ def paginatedList(request, payload):
     if not sort_name:
         sort_name = 'id'
 
-    employee_ids = Employee.objects.all().values_list('user_id', flat=True) 
+    employee_ids = Employee.objects.all().values_list('user_id', flat=True)
 
     qs = User.objects
     qs = qs.exclude(pk__in=employee_ids)

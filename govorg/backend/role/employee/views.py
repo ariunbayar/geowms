@@ -29,9 +29,25 @@ from govorg.backend.utils import (
 )
 
 
+def _get_employee_display_with_role(employee):
+
+    emp_role = employee.emp_role
+
+    return {
+        'emp_role_name':emp_role.name,
+        'emp_data': _get_employee_display(employee.employee)
+    }
+
+
 def _get_employee_display(employee):
 
     user = employee.user
+    role = EmpPerm.objects.filter(employee=employee).first()
+
+    if role:
+        role = role.emp_role.name
+    else:
+        role = None
 
     return {
         'username': user.username,
@@ -43,6 +59,8 @@ def _get_employee_display(employee):
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+        'role_name': role,
+        
     }
 
 
@@ -52,6 +70,12 @@ def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
     employees = Employee.objects.filter(org=org)
+    employees_with_role = EmpPerm.objects.filter(employee__in=employees)
+
+    employees_with_list = [
+            _get_employee_display_with_role(employee)
+            for employee in employees_with_role
+    ]
 
     employee_list = [
         _get_employee_display(employee)
@@ -61,8 +85,9 @@ def list(request):
     rsp = {
         'success': True,
         'employees': employee_list,
+        'employee_with_role':employees_with_list
     }
-
+    
     return JsonResponse(rsp)
 
 

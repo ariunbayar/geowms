@@ -24,9 +24,10 @@ export class EmployeeForm extends Component {
     getList() {
         service
             .getListEmployee()
-            .then(({ success, employees }) => {
+            .then(({ success, employees , employee_with_role}) => {
                 if (success) {
-                    this.setState({ employees })
+			this.setState({ employees },()=>
+				console.log('eey',employees))
                 }
             })
     }
