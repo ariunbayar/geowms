@@ -49,7 +49,7 @@ def _get_employee_display(employee):
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
-        'role_name': role,        
+        'role_name': role,
     }
 
 
@@ -69,7 +69,7 @@ def list(request):
         'success': True,
         'employees': employee_list,
     }
-    
+
     return JsonResponse(rsp)
 
 
