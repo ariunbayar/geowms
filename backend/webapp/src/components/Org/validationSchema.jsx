@@ -10,5 +10,4 @@ export const validationSchema = object().shape({
         .required('Хоосон байна утга оруулна уу.'),
     org_role: string()
         .max(100, '100-с илүүгүй урттай утга оруулна уу!')
-        .required('Хоосон байна утга оруулна уу.'),
 })
