@@ -66,7 +66,7 @@ export default class Govorg extends Component {
                 </td>
                 <td>
                     <a role="button" onClick={() => this.handleModalActionOpen('refresh_token', `Та "${name}" нэртэй тохиргооны токен шинэчлэхдээ итгэлтэй байна уу?`, "Тохиргоог шинэчлэх", "ШИНЭЧЛЭХ")}>
-                        <i class="fa fa-refresh text-primary" aria-hidden="true"></i>
+                        <i className="fa fa-refresh text-primary" aria-hidden="true"></i>
                     </a>
                 </td>
                 <td>
