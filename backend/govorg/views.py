@@ -110,7 +110,7 @@ def дэлгэрэнгүй(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def шинэ_токен(request, pk):
+def refresh_token(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
     govorg.token = TokenGeneratorSystem().get()

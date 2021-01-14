@@ -109,7 +109,7 @@ urlpatterns = [
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('үүсгэх/', govorg_views.хадгалах),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах),
-        path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
+        path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
         path('govorgList/', govorg_views.govorgList, name='govorgList'),

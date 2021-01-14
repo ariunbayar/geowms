@@ -8,20 +8,24 @@ export default class Govorg extends Component {
         super(props)
 
         this.state = {
-            modal_status: "closed"
+            modal_status: "closed",
+            action_type: '',
+            text: '',
+            title: '',
+            action_name: ''
         }
 
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
+        this.handleModalActionClose = this.handleModalActionClose.bind(this)
 
         this.handleRemove = this.handleRemove.bind(this);
     }
 
-    handleModalDeleteOpen(){
-        this.setState({modal_status: 'open'})
+    handleModalActionOpen(action_type, text, title, action_name){
+        this.setState({modal_status: 'open', action_type, text, title, action_name})
     }
 
-    handleModalDeleteClose(){
+    handleModalActionClose(){
         this.setState({modal_status: 'closed'})
     }
 
@@ -33,7 +37,8 @@ export default class Govorg extends Component {
     }
 
     modalClose(){
-        this.props.handleRemove()
+        if(this.state.action_type == 'refresh_token') this.props.handleTokenRefresh()
+        else if (this.state.action_type == 'remove') this.props.handleRemove()
         this.setState({modal_status: 'closed'})
     }
 
@@ -42,6 +47,7 @@ export default class Govorg extends Component {
         const org_level = this.props.org_level
         const org_id = this.props.org_id
         const idx=this.props.idx
+        const {text, title, action_name} = this.state
         return (
             <tr>
 
@@ -59,6 +65,11 @@ export default class Govorg extends Component {
                     {token}
                 </td>
                 <td>
+                    <a role="button" onClick={() => this.handleModalActionOpen('refresh_token', `Та "${name}" нэртэй тохиргооны токен шинэчлэхдээ итгэлтэй байна уу?`, "Тохиргоог шинэчлэх", "ШИНЭЧЛЭХ")}>
+                        <i class="fa fa-refresh text-primary" aria-hidden="true"></i>
+                    </a>
+                </td>
+                <td>
                     {created_at}
                 </td>
                 <td>
@@ -68,16 +79,17 @@ export default class Govorg extends Component {
                 </td>
 
                 <td>
-                    <a href="#" onClick={this.handleModalDeleteOpen}>
+                    <a href="#" onClick={() => this.handleModalActionOpen('remove', `Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`, "Тохиргоог устгах")}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     <Modal
-                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                        title="Тохиргоог устгах"
+                        text={text}
+                        title={title}
                         model_type_icon = "success"
                         status={this.state.modal_status}
-                        modalClose={this.handleModalDeleteClose}
+                        modalClose={this.handleModalActionClose}
                         modalAction={() => this.modalClose()}
+                        actionName={action_name}
                     />
                 </td>
             </tr>

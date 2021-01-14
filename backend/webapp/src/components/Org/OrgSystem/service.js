@@ -7,6 +7,7 @@ export const service = {
     detail,
     getWMSList,
     govorgList,
+    tokenRefresh
 }
 
 
@@ -43,6 +44,12 @@ function remove(id) {
     return fetch(`${prefix}/${id}/устгах/`, opts).then(handleResponse)
 }
 
+function tokenRefresh(id) {
+    const opts = {
+        ...getPostOptions(),
+    }
+    return fetch(`${prefix}/${id}/refresh-token/`, opts).then(handleResponse)
+}
 
 function detail(id) {
     const opts = {
