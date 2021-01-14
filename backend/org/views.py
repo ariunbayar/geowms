@@ -439,21 +439,48 @@ def employee_remove(request, pk):
     return JsonResponse({'success': True})
 
 
+def _org_validation(org_name, org_id):
+    org = Org.objects.filter(pk=org_id).first()
+    errors = {}
+
+    if not org_name:
+        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
+    elif org_name.isspace():
+        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(org_name) > 150:
+        errors['org_name'] = '150-с илүүгүй урттай утга оруулна уу!'
+
+    if org:
+        if org.name != org_name:
+            if Org.objects.filter(name=org_name).first():
+                errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
+    else:
+        if Org.objects.filter(name=org_name).first():
+            errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
+
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def org_add(request, payload, level):
     org_name = payload.get('org_name')
-    upadte_level = payload.get('upadte_level')
+    org_level = payload.get('org_level')
     role_id = payload.get('role_id')
     org_role_filter = GovRole.objects.filter(pk=role_id).first()
     org_id = payload.get('id')
     geo_id = payload.get('geo_id')
     objs = []
+
+    errors = _org_validation(org_name, org_id)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
     if org_id:
         org = get_object_or_404(Org, pk=org_id)
         org.name = org_name
-        org.level = upadte_level
+        org.level = org_level
         org.geo_id = geo_id
         org.save()
         if int(role_id) > -1:
