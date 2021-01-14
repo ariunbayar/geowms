@@ -4,7 +4,6 @@ import {service} from "./service"
 import ModalAlert from "../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
-import { disable } from "ol/rotationconstraint"
 
 
 export class OrgAdd extends Component {
@@ -236,7 +235,7 @@ export class OrgAdd extends Component {
                                     <div className="position-relative has-icon-right">
                                         <label htmlFor="org_name">Байгууллагын нэр</label>
                                         <div className='row'>
-                                            <div class="col-md-11">
+                                            <div className="col-md-11">
                                                 <Field
                                                     className={'form-control ' + (errors.org_name ? 'is-invalid' : '')}
                                                     name='org_name'
@@ -255,7 +254,7 @@ export class OrgAdd extends Component {
                                     <div className="form-group col-md-4">
                                         <label htmlFor="org_level">Түвшин</label>
                                         <div className='row'>
-                                            <div class="col-md-11">
+                                            <div className="col-md-11">
                                                 <Fragment>
                                                     <Field name="org_level" as="select" className="form-control"
                                                     className={'form-control ' + (errors.org_level ? 'is-invalid' : '')} disabled={disabled}>
@@ -268,8 +267,8 @@ export class OrgAdd extends Component {
                                                 </Fragment>
                                             </div>
                                             {disabled &&
-                                                <div class="col p-0 pt-1">
-                                                    <div class="spinner-border" role="status"></div>
+                                                <div className="col p-0 pt-1">
+                                                    <div className="spinner-border" role="status"></div>
                                                 </div>
 
                                             }
@@ -281,7 +280,7 @@ export class OrgAdd extends Component {
                                 <div className="form-group col-md-4">
                                     <label htmlFor="org_role">Байгууллагын эрх</label>
                                     <div className='row'>
-                                        <div class="col-md-11">
+                                        <div className="col-md-11">
                                             <Fragment>
                                                 <Field name="org_role" as="select" className="form-control"
                                                 className={'form-control ' + (errors.org_role ? 'is-invalid' : '' )} disabled={disabled}>
@@ -294,8 +293,8 @@ export class OrgAdd extends Component {
                                             </Fragment>
                                         </div>
                                         {disabled &&
-                                            <div class="col p-0 pt-1">
-                                                <div class="spinner-border" role="status"></div>
+                                            <div className="col p-0 pt-1">
+                                                <div className="spinner-border" role="status"></div>
                                             </div>
 
                                         }
@@ -309,7 +308,7 @@ export class OrgAdd extends Component {
                                         <th className='pt-3'>Аймаг/ Хот</th>
                                         <td>
                                             <div className='row'>
-                                                <div class="col-md-11">
+                                                <div className="col-md-11">
                                                     <select className='form-control' value={this.state.secondOrder_value} disabled={disabled} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
                                                         <option value='-1'>--- Улсын хэмжээнд ---</option>
                                                         {this.state.secondOrders.map((data, idx) =>
@@ -318,8 +317,8 @@ export class OrgAdd extends Component {
                                                     </select>
                                                 </div>
                                                 {disabled &&
-                                                    <div class="col p-0 pt-1">
-                                                        <div class="spinner-border" role="status"></div>
+                                                    <div className="col p-0 pt-1">
+                                                        <div className="spinner-border" role="status"></div>
                                                     </div>
 
                                                 }
@@ -330,7 +329,7 @@ export class OrgAdd extends Component {
                                         <th className='pt-3'>Сум/ Дүүрэг</th>
                                         <td>
                                             <div className='row'>
-                                                <div class="col-md-11">
+                                                <div className="col-md-11">
                                                     <select className='form-control' value={this.state.thirthOrder_value} disabled={disabled} onChange={(e) => this.handle3rdOrderChange(e.target.value)}>
                                                         <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
                                                         {this.state.thirthOrders.map((data, idx) =>
@@ -339,8 +338,8 @@ export class OrgAdd extends Component {
                                                     </select>
                                                 </div>
                                                 {disabled &&
-                                                    <div class="col p-0 pt-1">
-                                                        <div class="spinner-border" role="status"></div>
+                                                    <div className="col p-0 pt-1">
+                                                        <div className="spinner-border" role="status"></div>
                                                     </div>
 
                                                 }
@@ -351,7 +350,7 @@ export class OrgAdd extends Component {
                                         <th className='pt-3'>Баг/ Хороо</th>
                                         <td>
                                             <div className='row'>
-                                                <div class="col-md-11">
+                                                <div className="col-md-11">
                                                     <select className='form-control' value={this.state.fourthOrder_value} disabled={disabled} onChange={(e) => this.handle4thOrderChange(e.target.value)}>
                                                         <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
                                                         {this.state.fourthOrders.map((data, idx) =>
@@ -360,8 +359,8 @@ export class OrgAdd extends Component {
                                                     </select>
                                                 </div>
                                                 {disabled &&
-                                                    <div class="col p-0 pt-1">
-                                                        <div class="spinner-border" role="status"></div>
+                                                    <div className="col p-0 pt-1">
+                                                        <div className="spinner-border" role="status"></div>
                                                     </div>
 
                                                 }
