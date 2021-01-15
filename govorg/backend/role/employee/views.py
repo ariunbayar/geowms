@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 from django.db import transaction
@@ -7,11 +7,9 @@ from django.contrib.auth.decorators import login_required
 from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
-from main.utils import send_approve_email, is_email
 from backend.token.utils import TokenGeneratorEmployee
 from main import utils
 from backend.inspire.models import (
-    GovPerm,
     GovPermInspire,
     EmpRole,
     EmpPerm,
@@ -84,6 +82,7 @@ def _set_user(user, user_detail):
     user.gender = user_detail['gender']
     user.register = user_detail['register']
     user.save()
+
 
 def _set_employee(employee, user_detail):
 
