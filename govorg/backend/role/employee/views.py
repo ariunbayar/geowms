@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
 
 from geoportal_app.models import User
 from backend.org.models import Org, Employee
@@ -55,6 +56,7 @@ def _get_employee_display(employee):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -168,8 +170,10 @@ def _employee_validation(user, user_detail):
         errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     return errors
 
+
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def create(request, payload):
 
     user_detail = payload.get('user_detail')
@@ -228,6 +232,7 @@ def _delete_remove_perm(remove_perms):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
 
     role_id = payload.get('role_id') or None
@@ -313,6 +318,7 @@ def _get_emp_perm_display(emp_perm):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
@@ -343,6 +349,7 @@ def detail(request, pk):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def delete(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
