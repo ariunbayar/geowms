@@ -383,8 +383,7 @@ def _get_emp_features(employee):
 @login_required(login_url='/gov/secure/login/')
 def request_approve(request, payload, pk):
 
-    employees = _get_employees(request)
-    employee = employees.filter(user=request.user).first()
+    employee = get_object_or_404(Employee, user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
     r_approve = get_object_or_404(ChangeRequest, pk=pk)
     values = payload.get("values")
@@ -474,34 +473,29 @@ def _get_employees(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_count(request):
-    try:
-        employees = _get_employees(request)
-        employee = employees.filter(user=request.user).first()
-        emp_features = _get_emp_features(employee)
-        request_count = 0
+
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_features = _get_emp_features(employee)
+
+    if emp_features:
+
+        qs = ChangeRequest.objects.all()
+        qs = qs.filter(state=ChangeRequest.STATE_NEW)
+        qs = qs.filter(feature_id__in=emp_features)
+
+        revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
+        request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
+
+    else:
         revoke_count = 0
+        request_count = 0
 
-        for employee in employees: # цуцлах хүсэлт тоолж байгаа нь
-            revoke_count += ChangeRequest.objects.filter(
-                kind=ChangeRequest.KIND_REVOKE,
-                employee=employee,
-                feature_id__in=emp_features,
-            ).count()
+    rsp = {
+        'success': True,
+        'count': request_count,
+        'revoke_count': revoke_count,
+    }
 
-        if emp_features:
-            request_count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW, feature_id__in=emp_features).count()
-
-        rsp = {
-            'success': True,
-            'count': request_count,
-            'revoke_count': revoke_count,
-        }
-
-    except Exception as e:
-        rsp = {
-            'success': False,
-            'info': str(e)
-        }
     return JsonResponse(rsp)
 
 
@@ -528,8 +522,7 @@ def search(request, payload):
     if feature:
         search['feature_id'] = feature
     try:
-        employees = _get_employees(request)
-        employee = employees.filter(user=request.user).first()
+        employee = get_object_or_404(Employee, user=request.user)
         emp_features = _get_emp_features(employee)
         if emp_features:
             datas = ChangeRequest.objects.filter(**search, feature_id__in=emp_features)
