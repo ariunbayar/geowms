@@ -159,6 +159,7 @@ def _get_org_request(ob, employee):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
     org_request = []
     employee = get_object_or_404(Employee, user=request.user)
@@ -239,6 +240,7 @@ def _getChoices(user):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def getAll(request):
     org_request = []
     employees = _get_employees(request)
@@ -273,6 +275,7 @@ def getAll(request):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def request_delete(request, pk):
 
     employee = get_object_or_404(Employee, user__username=request.user)
@@ -377,6 +380,7 @@ def _get_emp_features(employee):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def request_approve(request, payload, pk):
 
     employees = _get_employees(request)
@@ -468,6 +472,7 @@ def _get_employees(request):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_count(request):
     try:
         employees = _get_employees(request)
@@ -502,6 +507,7 @@ def get_count(request):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def search(request, payload):
     data_list = []
     search = {}

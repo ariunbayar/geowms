@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector
 
 from backend.inspire.models import (
@@ -86,6 +87,7 @@ def _get_emp_features(employees, request):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def revoke_paginate(request, payload):
     employees = _get_employees(request)
     emp_features = _get_emp_features(employees, request)
@@ -146,6 +148,7 @@ def _delete_geom_data(change_request):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def revoke_state(request, payload):
     state = payload.get('state')
     pk = payload.get('id')
@@ -188,6 +191,7 @@ def _new_revoke_request(employee, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def revoke_new(request, payload):
     employee = get_object_or_404(Employee, user=request.user)
 
