@@ -1,15 +1,16 @@
 import json
+from functools import wraps
 
+from django.apps import apps
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 
-from django.apps import apps
-
 
 def ajax_required(f):
 
-    def wrap(request, *args, **kwargs):
+    @wraps(f)
+    def inner(request, *args, **kwargs):
 
         if request.is_ajax():
 
@@ -37,10 +38,7 @@ def ajax_required(f):
         else:
             raise Http404
 
-    wrap.__doc__ = f.__doc__
-    wrap.__name__ = f.__name__
-
-    return wrap
+    return inner
 
 
 def gov_required(f):
