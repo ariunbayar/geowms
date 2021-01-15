@@ -430,12 +430,12 @@ export default class BarilgaSuurinGazar extends Component{
 
     collectFeatures(feature) {
       const collection = this.select.getFeatures()
-      this.featureNames.push(feature.get('id'))
+      this.featureNames.push(feature.get('inspire_id'))
       this.featuresForCollection.push(feature)
       this.featuresForCollection.map((feat, idx) => {
         collection.push(feat)
       })
-      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta,  this.addNotif)
+      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta, this.addNotif)
     }
 
     getTypeFunction(feature) {
@@ -1082,12 +1082,16 @@ export default class BarilgaSuurinGazar extends Component{
         coordinates.map((coordinate, i) => {
           this.sendCoordinateList.push(coordinate.coordinate)
           this.turningPoint.push(coordinate.turning)
-          if (!feat_type.includes("Point")) {
+          if (feat_type.includes("Line") ||
+              (
+                !feat_type.includes("Point") &&
+                  (feat_type.includes("Polygon") &&
+                  lastElement !== coordinate.turning)
+              )) {
             this.addMarker(coordinate)
           }
         })
       })
-      // });
       const data = {
         'geom': this.sendCoordinateList,
         'turning': this.turningPoint,
@@ -1140,9 +1144,6 @@ export default class BarilgaSuurinGazar extends Component{
 
     updateFromList(coord_list) {
 
-      var geom_coordinate = ''
-
-      const source = this.vector_layer.getSource()
       const id = coord_list.id
       const coords = coord_list.data.map(({geom, turning}) => {
         const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
@@ -1152,7 +1153,17 @@ export default class BarilgaSuurinGazar extends Component{
       const feature_id = selected_feature.get('inspire_id')
       if (feature_id == id) {
         const getType = selected_feature.getGeometry().getType()
-        if (getType == 'Point') {
+        const geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        if (getType.includes('MultiPolygon')) {
+          geom_coordinate.map((geo, idx) => {
+            geo.map((g, ix) => {
+              coords.map(({conv_geom, turning}) => {
+                geom_coordinate[idx][ix][turning - 1] = conv_geom
+              })
+            })
+          })
+        }
+        else if (getType == 'Point') {
           coords.map(({conv_geom}) => {
             geom_coordinate = conv_geom
           })
@@ -1162,8 +1173,10 @@ export default class BarilgaSuurinGazar extends Component{
           })
         }
         else {
-          coords.map(({conv_geom, turning}) => {
-            geom_coordinate[idx][turning - 1] = conv_geom
+          geom_coordinate.map((geo, idx) => {
+            coords.map(({conv_geom, turning}) => {
+              geom_coordinate[idx][turning - 1] = conv_geom
+            })
           })
         }
         const geom = new geom_type[getType](geom_coordinate)
