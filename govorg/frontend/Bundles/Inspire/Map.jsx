@@ -224,7 +224,7 @@ export default class BarilgaSuurinGazar extends Component{
                 'LAYERS': wms_layer.code,
                 'FORMAT': 'image/png',
             }
-      })
+        }),
       })}
 
       this.setState({map_wms})
