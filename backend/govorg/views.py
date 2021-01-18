@@ -33,6 +33,7 @@ def _get_govorg_display(govorg):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk=None):
+    errors = {}
 
     if pk:
         system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
@@ -41,6 +42,16 @@ def хадгалах(request, payload, pk=None):
         form = SystemForm(payload)
 
     if form.is_valid():
+
+        domain = payload['website']
+        is_domain = utils._is_domain(domain)
+
+        if is_domain is not True:
+            errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
+            return JsonResponse({
+                'success': False,
+                'errors': errors,
+            })
 
         with transaction.atomic():
 
@@ -56,7 +67,6 @@ def хадгалах(request, payload, pk=None):
         })
 
     else:
-        errors = {}
         errors['name'] = 'Хоосон байна утга оруулна уу.'
         return JsonResponse({
             'success': False,

@@ -514,6 +514,13 @@ def is_email(email):
     return re.search(re_email, email) is not None
 
 
+def _is_domain(domain):
+    pattern = re.compile(
+        r'^((ftp|http|https):\/\/)?([a-zA-Z0-9]+\.)?([a-zA-Z0-9][a-zA-Z0-9-]*)?((\:[a-zA-Z0-9]{2,6})|(\.[a-zA-Z0-9]{2,6}))$'
+    )
+    return re.search(pattern, domain) is not None
+
+
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
 def get_config(config_name):
