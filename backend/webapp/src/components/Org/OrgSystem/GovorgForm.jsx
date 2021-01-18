@@ -179,19 +179,11 @@ export class GovorgForm extends Component {
                                                 type="text"
                                             />
                                             <ErrorMessage name="website" component="div" className="text-danger"/>
-                                            <small className="text-muted">жишээ нь: https://domain.mn</small>
+                                            <small className="text-muted">Жишээ нь: https://domain.mn</small>
                                         </div>
 
                                         <div></div>
                                         <div className="span3">
-                                            {has_error
-                                                ?
-                                                    <p> </p>
-                                                : status == 'saved' && !dirty &&
-                                                    <p>
-                                                        Амжилттай нэмэгдлээ
-                                                    </p>
-                                            }
                                             <div>
                                                 <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}

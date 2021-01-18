@@ -29,33 +29,40 @@ def _get_govorg_display(govorg):
     }
 
 
+def _system_validation(payload, system):
+    system_name = payload['name']
+    domain = payload['website']
+    errors = {}
+
+    if not system_name:
+        errors['username'] = 'Хоосон байна утга оруулна уу.'
+    if domain:
+        is_domain = utils._is_domain(domain)
+        if is_domain is not True:
+            errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
+    if system:
+        if system.name != system_name:
+            if GovOrg.objects.filter(name=system_name).first():
+                errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk=None):
-    errors = {}
+    system = GovOrg.objects.filter(pk=pk, deleted_by__isnull=True).first()
+    errors = _system_validation(payload, system)
 
     if pk:
-        system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
         form = SystemForm(payload, instance=system)
     else:
         form = SystemForm(payload)
 
     if form.is_valid():
-
-        domain = payload['website']
-        is_domain = utils._is_domain(domain)
-
-        if is_domain is not True:
-            errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
-            return JsonResponse({
-                'success': False,
-                'errors': errors,
-            })
-
         with transaction.atomic():
-
             form.instance.token = TokenGeneratorSystem().get()
+            system.website = payload['website']
             system = form.save()
 
             layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
@@ -64,13 +71,6 @@ def хадгалах(request, payload, pk=None):
         return JsonResponse({
             'success': True,
             'info': 'Амжилттай хадгаллаа.'
-        })
-
-    else:
-        errors['name'] = 'Хоосон байна утга оруулна уу.'
-        return JsonResponse({
-            'success': False,
-            'errors': errors,
         })
 
 
