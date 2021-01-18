@@ -19,6 +19,7 @@ export class SaveBtn extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Хадгалах')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-add-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
@@ -27,7 +28,7 @@ export class SaveBtn extends Control {
 
         element.addEventListener('click', (event) => {
             event.preventDefault()
-            options.SaveBtn()
+            options.SaveBtn('add')
         })
         element.appendChild(elementa)
 

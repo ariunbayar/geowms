@@ -150,6 +150,7 @@ def _get_org_request(ob, employee):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
     org_request = []
     employee = get_object_or_404(Employee, user=request.user)
@@ -230,19 +231,14 @@ def _getChoices(user):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def getAll(request):
     org_request = []
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    emp_features = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
-    emp_feature = []
+    employees = _get_employees(request)
+    employee = employees.filter(user=request.user).first()
+    emp_features = _get_emp_features(employee)
     if emp_features:
-        for feature in emp_features:
-            if feature not in emp_feature:
-                emp_feature.append(feature)
-
-        org_request_list = ChangeRequest.objects.filter(feature_id__in=emp_feature).order_by('-created_at')
+        org_request_list = ChangeRequest.objects.filter(feature_id__in=emp_features).order_by('-created_at')
         if org_request_list:
             org_request = [_get_org_request(ob, employee) for ob in org_request_list]
             choices = _getChoices(request.user)
@@ -270,24 +266,29 @@ def getAll(request):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def request_delete(request, pk):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    r_reject = get_object_or_404(ChangeRequest, pk=pk)
+    change_req_obj = get_object_or_404(ChangeRequest, pk=pk)
 
-    perm_reject = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_REVOKE, feature_id=r_reject.feature_id)
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm=emp_perm)
+    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
+    perm_reject = qs.filter(feature_id=change_req_obj.feature_id)
 
     if perm_reject:
-        r_reject.state = ChangeRequest.STATE_REJECT
-        r_reject.save()
+        change_req_obj.state = ChangeRequest.STATE_REJECT
+        change_req_obj.save()
         rsp = {
             'success': True,
+            'info': 'Амжилттай цуцаллаа'
         }
     else:
         rsp = {
             'success': False,
-            'info': 'Батлах эрхгүй байна'
+            'info': 'Цуцлах эрхгүй байна'
         }
 
     return JsonResponse(rsp)
@@ -360,20 +361,32 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                 value_date = value_date
             )
 
+
+def _get_emp_features(employee):
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
+    emp_feature = []
+    if emp_features:
+        for feature in emp_features:
+            if feature not in emp_feature:
+                emp_feature.append(feature)
+    return emp_feature
+
+
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def request_approve(request, payload, pk):
 
-    org = get_object_or_404(Org, employee__user=request.user)
-    employee = get_object_or_404(Employee, org_id=org.id, user__username=request.user)
-    emp_perm = get_object_or_404(EmpPerm, employee_id=employee.id)
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_perm = get_object_or_404(EmpPerm, employee=employee)
     r_approve = get_object_or_404(ChangeRequest, pk=pk)
     values = payload.get("values")
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
     form_json = values['form_json']
 
-    perm_approve = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
+    perm_approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
 
     if perm_approve:
         old_geo_id = values['old_geo_id']
@@ -389,6 +402,7 @@ def request_approve(request, payload, pk):
                 r_approve.save()
                 rsp = {
                     'success': False,
+                    'info': 'Устсан мэдээлэл байна. Цуцлагдлаа.'
                 }
                 return JsonResponse(rsp)
 
@@ -434,47 +448,58 @@ def request_approve(request, payload, pk):
         r_approve.state = ChangeRequest.STATE_APPROVE
         r_approve.save()
         rsp = {
-            'success': True
+            'success': True,
+            'info': 'Амжилттай баталгаажууллаа.'
         }
 
     else:
         rsp = {
-            'success': False
+            'success': False,
+            'info': 'Таньд цуцлах эрх алга байна.'
         }
 
     return JsonResponse(rsp)
 
 
+def _get_employees(request):
+    org = get_object_or_404(Employee, user=request.user).org
+    employees = Employee.objects.filter(org=org)
+    return employees
+
+
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_count(request):
-    try:
-        count = None
-        org = get_object_or_404(Org, employee__user=request.user)
-        employee = Employee.objects.filter(org_id=org.id, user__username=request.user).first()
-        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-        emp_features = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
-        emp_feature = []
-        if emp_features:
-            for feature in emp_features:
-                if feature not in emp_feature:
-                    emp_feature.append(feature)
 
-            count = ChangeRequest.objects.filter(state=ChangeRequest.STATE_NEW).filter(feature_id__in=emp_feature).count()
-        rsp = {
-            'success': True,
-            'count': count
-        }
-    except Exception as e:
-        rsp = {
-            'success': False,
-            'info': str(e)
-        }
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_features = _get_emp_features(employee)
+
+    if emp_features:
+
+        qs = ChangeRequest.objects.all()
+        qs = qs.filter(state=ChangeRequest.STATE_NEW)
+        qs = qs.filter(feature_id__in=emp_features)
+
+        revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
+        request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
+
+    else:
+        revoke_count = 0
+        request_count = 0
+
+    rsp = {
+        'success': True,
+        'count': request_count,
+        'revoke_count': revoke_count,
+    }
+
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def search(request, payload):
     data_list = []
     search = {}
@@ -484,8 +509,6 @@ def search(request, payload):
     package = payload.get('packag')
     feature = payload.get('feature')
 
-    employee = get_object_or_404(Employee, user__username=request.user)
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     if state:
         search['state'] = state
     if kind:
@@ -497,14 +520,10 @@ def search(request, payload):
     if feature:
         search['feature_id'] = feature
     try:
-        emp_features = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
-        emp_feature = []
+        employee = get_object_or_404(Employee, user=request.user)
+        emp_features = _get_emp_features(employee)
         if emp_features:
-            for feature in emp_features:
-                if feature not in emp_feature:
-                    emp_feature.append(feature)
-
-            datas = ChangeRequest.objects.filter(**search).filter(feature_id__in=emp_feature)
+            datas = ChangeRequest.objects.filter(**search, feature_id__in=emp_features)
             data_list = [_get_org_request(data, employee) for data in datas]
         rsp = {
             'success': True,
