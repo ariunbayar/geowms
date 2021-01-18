@@ -285,7 +285,7 @@ export class UserAdd extends Component {
                 <ModalAlert
                     modalAction={() => this.modalClose()}
                     status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа та мэйл хаяг аа шалгана уу."
+                    title="Амжилттай хадгаллаа."
                     model_type_icon = "success"
                 />
             </div>
