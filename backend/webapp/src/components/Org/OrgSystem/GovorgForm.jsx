@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {TextField} from '../../../helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
@@ -14,10 +13,6 @@ export class GovorgForm extends Component {
         this.state = {
             govorg: {},
             wms_list: [],
-            values: {
-                id: '',
-                name: '',
-            },
             layers: [],
             modal_alert_status: "closed",
             title: '',
@@ -33,12 +28,13 @@ export class GovorgForm extends Component {
     componentDidMount() {
 
         const system_id = this.props.match.params.system_id
-        if (system_id){
-            Promise.all([
-                service.getWMSList(),
-                service.detail(system_id),
-            ]).then(([{wms_list}, {govorg}]) => {
-                this.setState({govorg, layers: govorg.layers, wms_list})
+        service.getWMSList().then(({wms_list}) => {
+            this.setState({wms_list})
+        })
+
+        if (system_id) {
+            service.detail(system_id).then(({govorg}) => {
+                this.setState(({govorg, layers: govorg.layers,}))
             })
         }
 
@@ -120,7 +116,6 @@ export class GovorgForm extends Component {
     }
 
     render() {
-        const {name, token, website} = this.state.govorg
         return (
 
             <div className="my-4">
