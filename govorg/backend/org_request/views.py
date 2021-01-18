@@ -289,6 +289,7 @@ def request_delete(request, pk):
         r_reject.save()
         rsp = {
             'success': True,
+            'info': 'Батлах эрхгүй байна'
         }
     else:
         rsp = {
@@ -392,7 +393,7 @@ def request_approve(request, payload, pk):
     form_json = values['form_json']
 
     perm_approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
-
+    print("wewqrwerwer")
     if perm_approve:
         old_geo_id = values['old_geo_id']
         old_geo_json = values["old_geo_json"]
@@ -407,6 +408,7 @@ def request_approve(request, payload, pk):
                 r_approve.save()
                 rsp = {
                     'success': False,
+                    'info': 'Устсан мэдээлэл байна. Цуцлагдлаа.'
                 }
                 return JsonResponse(rsp)
 
@@ -452,12 +454,14 @@ def request_approve(request, payload, pk):
         r_approve.state = ChangeRequest.STATE_APPROVE
         r_approve.save()
         rsp = {
-            'success': True
+            'success': True,
+            'info': 'Амжилттай баталгаажууллаа.'
         }
 
     else:
         rsp = {
-            'success': False
+            'success': False,
+            'info': 'Таньд цуцлах эрх алга байна.'
         }
 
     return JsonResponse(rsp)
