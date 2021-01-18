@@ -26,7 +26,7 @@ export class EmployeeForm extends Component {
             .getListEmployee()
             .then(({ success, employees }) => {
                 if (success) {
-                    this.setState({ employees })
+			this.setState({ employees })
                 }
             })
     }
@@ -76,6 +76,7 @@ export class EmployeeForm extends Component {
                                             <th scope="col">Овог нэр</th>
                                             <th scope="col">Имэйл</th >
                                             <th scope="col">Албан тушаал</th >
+					    <th scope="col">Role</th>
                                             <th className="text-center" scope="col">Админ эсэх</th >
                                             <th className="text-center" scope="col">Засах</th>
                                             <th className="text-center" scope="col">Устгах</th>
