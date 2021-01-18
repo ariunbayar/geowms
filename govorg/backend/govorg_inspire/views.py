@@ -531,7 +531,6 @@ def geomAdd(request, payload, fid):
     return JsonResponse(rsp)
 
 
-<<<<<<< HEAD
 def _check_form_json(fid, form_json, employee):
 
     request_json = []
@@ -545,8 +544,6 @@ def _check_form_json(fid, form_json, employee):
     return json.dumps(request_json, ensure_ascii=False) if request_json else ''
 
 
-=======
->>>>>>> 168501f05dd1de424a306841255de1910ca0fdd5
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -565,12 +562,9 @@ def create(request, payload):
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
-<<<<<<< HEAD
     form_json = _check_form_json(fid, form_json, employee)
     geo_json = json.dumps(geo_json, ensure_ascii=False)
-=======
-    form_json = check_form_json(fid, form_json, employee)
->>>>>>> 168501f05dd1de424a306841255de1910ca0fdd5
+
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -662,12 +656,9 @@ def update(request, payload):
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
-<<<<<<< HEAD
     form_json = _check_form_json(fid, form_json, employee)
     geo_json = json.dumps(geo_json, ensure_ascii=False)
-=======
-    form_json = check_form_json(fid, form_json, employee)
->>>>>>> 168501f05dd1de424a306841255de1910ca0fdd5
+
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
             new_geo_id = None,
