@@ -22,8 +22,6 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
-from backend.wmslayer.models import WMSLayer
-from geoportal_app.models import User
 from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
@@ -37,7 +35,6 @@ from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 from govorg.backend.org_request.views import _get_geoJson
-from govorg.backend.org_request.views import _convert_text_json
 from main.decorators import ajax_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
