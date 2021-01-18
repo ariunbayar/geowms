@@ -55,10 +55,10 @@
                             <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
                         </a>
                         {% if user.is_authenticated %}
-                            <ul class="dropdown-menu dropdown-menu-right">
-                                <li class="dropdown-item user-details">
-                                    <a href="javaScript:void();">
-                                        <div class="media">
+                            <div class="dropdown show">
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                                  <a class="dropdown-item user-details" href="javaScript:void();">
+                                    <div class="media">
                                             <div class="avatar"><img class="align-self-start mr-3" src="{% static "assets/image/user.png" %}" alt="user avatar"></img></div>
                                             <div class="media-body">
                                                 {% if user.is_superuser %}
@@ -70,14 +70,11 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    </a>
-                                </li>
-
-                                <li class="dropdown-divider"></li>
-                                <li class="dropdown-item"><a href="/gov/profile/" class="text-dark"><i class="icon-wallet mr-2"></i>ПРОФАЙЛ</a></li>
-                                <li class="dropdown-divider"></li>
-                                <li class="dropdown-item"><a href="{% url "gov_secure:logout" %}" class="text-dark"><i class="icon-power mr-2"></i> ГАРАХ</a></li>
-                            </ul>
+                                  </a>
+                                  <div class="dropdown-divider"></div>
+                                  <a class="dropdown-item text-dark" href="{% url "gov_secure:logout" %}"><i class="icon-power mr-2"></i>ГАРАХ</a>
+                                </div>
+                              </div>
                         {% else %}
                             <li class="dropdown-item"><a href="{% url "secure:login" %}"><i class="icon-power mr-2"></i>УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a></li>
                         {% endif %}

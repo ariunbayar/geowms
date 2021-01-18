@@ -10,48 +10,90 @@ export default class RequestModal extends Component {
         super(props)
         this.state = {
             status: this.props.status || "initial",
-            is_modal_approve_open:false,
-            is_modal_reject_open:false,
-            is_loading:this.props.is_loading
+            is_modal_approve_open: false,
+            is_modal_reject_open: false,
+            is_loading: this.props.is_loading,
+
+            modal_status: "closed",
+            action_type: '',
+            text: '',
+            title: '',
+            model_type_icon: '',
+            action_name: '',
         }
+
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
-        this.handleProceed = this.handleProceed.bind(this)
-        this.handleModalRejectClose=this.handleModalRejectClose.bind(this)
-        this.handleModalRejectOpen=this.handleModalRejectOpen.bind(this)
-        this.handleModalApproveOpen=this.handleModalApproveOpen.bind(this)
-        this.handleModalApproveClose=this.handleModalApproveClose.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalAction = this.handleModalAction.bind(this)
     }
-    handleModalRejectClose(){
+
+    handleModalClose(){
+        this.setState({ modal_status: "closed" })
+    }
+
+    handleModalOpen(action_type, text, title, model_type_icon, action_name){
+
         this.setState({
-            is_modal_reject_open:false
+            modal_status: "open",
+            action_type,
+            text,
+            title,
+            model_type_icon,
+            action_name
         })
     }
 
-    handleModalRejectOpen(){
-        this.setState({
-            is_modal_reject_open:true
-        })
-    }
+    handleModalAction(){
+        const { id } = this.props
+        if(this.state.action_type == 'approve' && id)
+        {
+            service.requestDelete(id).then(({ success, info }) =>{
+                if(success)
+                {
+                    this.setState({status: "closing"})
+                    setTimeout(() => {
+                        this.setState({status: "closed"})
+                        this.props.modalClose()
+                        this.props.modalAlertOpen(info, "success")
+                        this.props.getAll()
+                    }, 150)
+                }
+                else
+                {
+                    this.setState({status: "closing"})
+                    setTimeout(() => {
+                        this.setState({status: "closed"})
+                        this.props.modalClose()
+                        this.props.modalAlertOpen(info, "warning")
+                    }, 150)
+                }
 
-    handleModalApproveOpen(){
-        this.setState({
-            is_modal_approve_open:true,
-        })
-    }
-
-    handleModalApproveClose(){
-        this.setState({
-            is_modal_approve_open:false
-        })
+            }).catch((error) => {
+                if(error == 'Bad Request')
+                {
+                    this.setState({status: "closing"})
+                    setTimeout(() => {
+                        this.setState({status: "closed"})
+                        this.props.modalClose()
+                        this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
+                    }, 150)
+                }
+            })
+        }
+        if(this.state.action_type == 'reject')
+        {
+            this.setState({
+                is_loading: true
+            })
+            this.props.modalAction()
+        }
     }
 
     componentDidMount() {
-        if (this.state.status == "initial") {
-            this.handleOpen()
-        }
+        if (this.state.status == "initial") this.handleOpen()
     }
-
 
     componentDidUpdate(prevProps) {
         if (this.props.status != prevProps.status) {
@@ -71,31 +113,12 @@ export default class RequestModal extends Component {
         }, 0)
     }
 
-    handleClose(id,callback) {
-        if(id){
-            service.requestDelete(id).then(({success}) =>{
-                this.setState({status: "closing"})
-                setTimeout(() => {
-                    this.setState({status: "closed"})
-                    this.props.modalClose()
-                    this.props.getAll()
-                }, 150)
-            })
-        }
-        else{
-            this.setState({status: "closing"})
-            setTimeout(() => {
-                this.setState({status: "closed"})
-                this.props.modalClose()
-            }, 150)
-        }
-    }
-
-    handleProceed() {
-        this.setState({
-            is_loading:true
-        })
-        this.props.modalAction()
+    handleClose() {
+        this.setState({status: "closing"})
+        setTimeout(() => {
+            this.setState({status: "closed"})
+            this.props.modalClose()
+        }, 150)
     }
 
     render () {
@@ -111,8 +134,8 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const {form_json, id, kind, geo_json} = this.props
-        const {is_modal_approve_open, is_modal_reject_open, is_loading} = this.state
+        const { form_json, id, kind, geo_json } = this.props
+        const { is_loading,  modal_status, text, title, model_type_icon, action_name } = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
@@ -163,47 +186,53 @@ export default class RequestModal extends Component {
                                     </div>
                                 </div>
                                 <div className="row my-2 mr-1 float-right">
-                                    <button type="button mr-2 ml-2" onClick={() => this.handleModalRejectOpen()} className="btn gp-btn-primary waves-effect waves-light">
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.handleModalOpen(
+                                            'approve',
+                                            `Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
+                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
+                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
+                                            татгалзахдаа итгэлтэй байна уу ?`,
+                                            "Тохиргоог татгалзах",
+                                            "success",
+                                            " татгалзах"
+
+                                        )}
+                                        className="btn gp-btn-primary waves-effect waves-light"
+                                    >
                                         <i className="fa fa-check-square-o">Татгалзах</i>
                                     </button>
-                                    {
-                                     is_modal_reject_open &&
-                                        <Modal
-                                            modalAction={() => this.handleClose(id)}
-                                            modalClose = {() => this.handleModalRejectClose()}
-                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.handleModalOpen(
+                                            'reject',
+                                            `Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
                                             : kind == 2 ? 'засагдсан геометр өгөгдлийг':
                                             kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
-                                            татгалзахдаа итгэлтэй байна уу ?`}
-                                            title="Тохиргоог татгалзах"
-                                            status={this.state.status}
-                                            model_type_icon = "success"
-                                            actionNameDelete="татгалзах"
-                                        />
-                                    }
-                                    <button type="button mr-2 ml-2" onClick={() => this.handleModalApproveOpen()} className="btn gp-btn-outline-primary waves-effect waves-light ml-2">
+                                            зөвшөөрөхдөө итгэлтэй байна уу ?`,
+                                            "Тохиргоог зөвшөөрөх",
+                                            "warning",
+                                            " зөвшөөрөх"
+                                        )}
+                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                                    >
                                         <i className="fa fa-check">Зөвшөөрөх</i>
                                     </button>
-                                    {
-                                     is_modal_approve_open &&
-                                        <Modal
-                                            modalAction={() => this.handleProceed()}
-                                            modalClose = {() => this.handleModalApproveClose()}
-                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
-                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
-                                            зөвшөөрөхдөө итгэлтэй байна уу ?`}
-                                            title="Тохиргоог зөвшөөрөх"
-                                            status={this.state.status}
-                                            model_type_icon = "warning"
-                                            actionNameDelete="зөвшөөрөх"
-                                        />
-                                    }
                                 </div>
                              {is_loading && <span className="text-center modal fade show d-block text-sp" style={{position:"fixed", top:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Хүсэлтийг шалгаж байна түр хүлээнэ үү... </span>}
                             </div>
                         </div>
                     </div>
+                    <Modal
+                        modalAction = {() => this.handleModalAction()}
+                        modalClose = {() => this.handleModalClose()}
+                        text = {text}
+                        title = {title}
+                        status = {modal_status}
+                        model_type_icon = {model_type_icon}
+                        actionNameDelete = {action_name}
+                    />
                 </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>
