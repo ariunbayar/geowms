@@ -92,6 +92,7 @@ def _role_name_validation(payload, role):
     name = payload.get('role_name')
     errors = {}
     check_name = False
+    gov_perm = payload.get('gov_perm_id')
     if not name:
         errors['role_name'] = 'Хоосон байна утга оруулна уу.'
 
@@ -100,7 +101,7 @@ def _role_name_validation(payload, role):
             check_name = True
 
     if check_name or not role:
-        role_by_name = EmpRole.objects.filter(name=name).first()
+        role_by_name = EmpRole.objects.filter(name=name,gov_perm=gov_perm).first()
         if role_by_name:
             errors['role_name'] = 'Нэр давхцаж байна !.'
     return errors
