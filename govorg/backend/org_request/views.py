@@ -280,21 +280,24 @@ def request_delete(request, pk):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    r_reject = get_object_or_404(ChangeRequest, pk=pk)
+    change_req_obj = get_object_or_404(ChangeRequest, pk=pk)
 
-    perm_reject = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, perm_kind=EmpPermInspire.PERM_REVOKE, feature_id=r_reject.feature_id)
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm=emp_perm)
+    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
+    perm_reject = qs.filter(feature_id=change_req_obj.feature_id)
 
     if perm_reject:
-        r_reject.state = ChangeRequest.STATE_REJECT
-        r_reject.save()
+        change_req_obj.state = ChangeRequest.STATE_REJECT
+        change_req_obj.save()
         rsp = {
             'success': True,
-            'info': 'Батлах эрхгүй байна'
+            'info': 'Амжилттай цуцаллаа'
         }
     else:
         rsp = {
             'success': False,
-            'info': 'Батлах эрхгүй байна'
+            'info': 'Цуцлах эрхгүй байна'
         }
 
     return JsonResponse(rsp)
