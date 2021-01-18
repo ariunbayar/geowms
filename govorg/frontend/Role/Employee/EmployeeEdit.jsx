@@ -150,13 +150,17 @@ export class EmployeeEdit extends Component {
     }
 
     removeItemFromArray (array, feature_id, property_id, perm_kind, perm_inspire_id, is_emp_perm) {
+        if(is_emp_perm){
+            this.remove_perms.push(perm_inspire_id)
+            return
+        }
+
         array.map((perm, idx) => {
             if(perm.feature_id == feature_id &&
                 perm.property_id == property_id &&
                 perm.perm_kind == perm_kind)
             {
-                if(is_emp_perm) this.remove_perms.push(perm_inspire_id)
-                else array.splice(idx, 1)
+                array.splice(idx, 1)
             }
         })
     }
