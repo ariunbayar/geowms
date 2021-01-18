@@ -577,3 +577,66 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
             info = "Байгууллагын эрх олгогдоогүй байна."
 
     return success, info
+
+
+def get_emp_property_roles(employee, fid):
+
+    property_ids = []
+    property_details = []
+    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+
+    EmpPerm = apps.get_model('backend_inspire', 'EmpPerm')
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
+    property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+    if property_perms:
+        for prop in property_perms:
+            if prop.get('property_id') not in property_ids:
+                property_ids.append(prop.get('property_id'))
+        for property_id in property_ids:
+            for prop in property_perms:
+                if property_id == prop['property_id']:
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
+                        property_roles['PERM_VIEW'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
+                        property_roles['PERM_CREATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
+                        property_roles['PERM_REMOVE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
+                        property_roles['PERM_UPDATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
+                        property_roles['PERM_APPROVE'] = True
+                    else:
+                        property_roles['PERM_REVOKE'] = True
+
+            property_details.append({
+                'property_id': property_id,
+                'roles':property_roles
+            })
+
+    return property_ids, property_details
+
+
+def check_form_json(fid, form_json, employee):
+
+    request_json = []
+    property_ids, roles = get_emp_property_roles(employee, fid)
+    if form_json and roles:
+        for role in roles:
+            for propert in form_json['form_values']:
+                if role.get('property_id') == propert.get('property_id'):
+                    request_json.append({
+                        'pk':propert.get('pk') or '',
+                        'property_name': propert.get('property_name') or '',
+                        'property_id': propert.get('property_id'),
+                        'property_code': propert.get('property_code') or '',
+                        'property_definition': propert.get('property_definition') or '',
+                        'value_type_id': propert.get('value_type_id') or '',
+                        'value_type': propert.get('value_type') or '',
+                        'data': propert.get('data') or '',
+                        'data_list': propert.get('data_list') or '',
+                        'roles': propert.get('roles') or ''
+                    })
+
+    return request_json if request_json else ''
