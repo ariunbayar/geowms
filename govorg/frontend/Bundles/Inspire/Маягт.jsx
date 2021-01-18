@@ -27,7 +27,7 @@ export default class Маягт extends Component {
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
-        const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list } = this.props
+        const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list, cancel_button_active } = this.props
             if(null_form_isload){
                 service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
                     if (success) {
@@ -35,7 +35,7 @@ export default class Маягт extends Component {
                         this.props.requestRefreshCount()
                         this.addNotif('success', info, 'check')
                     }
-                    else{
+                    else {
                         this.addNotif('danger', info, 'warning')
                     }
                 })
@@ -46,7 +46,10 @@ export default class Маягт extends Component {
             else if (remove_button_active) {
                 this.props.requestRemove(values)
             }
-            else{
+            else if (cancel_button_active) {
+                this.props.requestCancel(values.order_at, values.order_no, values.form_values)
+            }
+            else {
                 service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info}) => {
                     if (success) {
                         this.setState({is_loading: true})
@@ -142,6 +145,8 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
+        const { modifyend_selected_feature_check, update_geom_from_list, cancel_button_active } = this.props
+
         if (this.state.is_loading) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
@@ -189,7 +194,7 @@ export default class Маягт extends Component {
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={friend.roles.PERM_UPDATE ? false : true}>
+                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={modifyend_selected_feature_check || update_geom_from_list ? false : true}>
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
@@ -206,7 +211,7 @@ export default class Маягт extends Component {
                                                 name={`form_values.${index}.data`|| ""}
                                                 as="select"
                                                 className='form-control'
-                                                disabled={friend.roles.PERM_UPDATE ? false : true}
+                                                disabled={modifyend_selected_feature_check || update_geom_from_list ? false : true}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -215,7 +220,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
-                                                    disabled={friend.roles.PERM_UPDATE ? false : true}
+                                                    disabled={modifyend_selected_feature_check || update_geom_from_list ? false : true}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                     />

@@ -26,6 +26,7 @@ import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
 import {MetaBarButton} from './controls/MetaData/MetaBarButton'
 import {MetaList} from './controls/MetaData/MetaList'
+import {CancelBarButton} from './controls/Cancel/CancelBarButton'
 import {QgisButton} from './controls/QgisLink/QgisButton'
 import {QgisModal} from './controls/QgisLink/QgisPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
@@ -55,11 +56,18 @@ export default class BarilgaSuurinGazar extends Component{
           tid: props.match.params.tid,
           pid: props.match.params.pid,
           fid: props.match.params.fid,
+          button_ids: [
+            'side', 'remove', 'qgis',
+            'polygon', 'point', 'modify',
+            'meta', 'form', 'upload',
+            'shapeDraw', 'cancel', 'add'
+          ],
           roles:[],
           is_loading:true,
           featureID: null,
           featureID_list: [],
           remove_button_active: false,
+          cancel_button_active: false,
           modify_button_active: false,
           selectedFeature_ID: null,
           modifyend_selected_feature_ID: null,
@@ -115,10 +123,13 @@ export default class BarilgaSuurinGazar extends Component{
       this.PolygonButton = this.PolygonButton.bind(this)
       this.SaveBtn = this.SaveBtn.bind(this)
       this.RemoveButton = this.RemoveButton.bind(this)
+      this.CancelButton = this.CancelButton.bind(this)
       this.FormButton = this.FormButton.bind(this)
       this.remove = this.remove.bind(this)
       this.requestRemove = this.requestRemove.bind(this)
+      this.requestCancel = this.requestCancel.bind(this)
       this.removeModal = this.removeModal.bind(this)
+      this.cancelModal = this.cancelModal.bind(this)
       this.modifiedFeature = this.modifiedFeature.bind(this)
       this.featureSelected = this.featureSelected.bind(this)
       this.drawed = this.drawed.bind(this)
@@ -143,6 +154,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.callModalWithMeta = this.callModalWithMeta.bind(this)
       this.hideMetaList = this.hideMetaList.bind(this)
       this.hideShowList = this.hideShowList.bind(this)
+      this.setInActiveButtonStyle = this.setInActiveButtonStyle.bind(this)
       this.getTypeFunction = this.getTypeFunction.bind(this)
       this.handleMapClick = this.handleMapClick.bind(this)
       this.showFeaturesAt = this.showFeaturesAt.bind(this)
@@ -197,6 +209,7 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.sidebar)
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
+      if(roles.PERM_REVOKE) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
 
       map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
       map.addControl(new SideBarBtn({SideBarBtn: this.SideBarBtn}))
@@ -409,14 +422,19 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const { isMeta } = this.state
         if (!isMeta) {
-          this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
+          if (this.state.modify_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
+          if (this.state.modify_button_active) this.DrawButton()
           const selectedFeature_ID = this.state.selectedFeature_ID
-          this.DrawButton()
           this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
+          if(this.state.cancel_button_active){
+            const geom_for_revoke = event.selected[0]
+            this.setState({ geom_for_revoke })
+            this.cancelModal()
+          }
         } else {
           const feature = event.selected[0]
           this.collectFeatures(feature)
@@ -609,6 +627,29 @@ export default class BarilgaSuurinGazar extends Component{
         }
     }
 
+    setInActiveButtonStyle(active_id, second_active_id) {
+      const { button_ids } = this.state
+      if (active_id) {
+        document.getElementById('⚙-toggle-' + active_id + '-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
+        button_ids.map((in_active, idx) => {
+          if (in_active != active_id && in_active != second_active_id) {
+            const element = document.getElementById('⚙-toggle-' + in_active + '-id')
+            if (element) {
+              element.style.backgroundColor = 'rgba(0,60,136,0.5)'
+            }
+          }
+        })
+      }
+      else {
+        button_ids.map((in_active, idx) => {
+          const element = document.getElementById('⚙-toggle-' + in_active + '-id')
+          if (element) {
+            element.style.backgroundColor = 'rgba(0,60,136,0.5)'
+          }
+        })
+      }
+    }
+
     snap(vector){
       const snap = new Snap({
         source: vector.getSource(),
@@ -658,18 +699,41 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({draw_is_active: false})
       if(this.state.remove_button_active)
       {
-        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({ remove_button_active: false })
+        this.setInActiveButtonStyle()
       }
       else
       {
-        document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        if(this.state.selectedFeature_ID) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({ remove_button_active: true, modify_button_active: false })
+        this.setInActiveButtonStyle('remove')
+        this.setState({ remove_button_active: true, modify_button_active: false, cancel_button_active: false })
       }
     }
 
-    FormButton(){
+    FormButton(add){
+      const { remove_button_active, togle_islaod, modify_button_active } = this.state
+      if(add) {
+        this.setInActiveButtonStyle(add)
+      }
+      else {
+        if (remove_button_active) {
+          this.setInActiveButtonStyle('form', 'remove')
+        }
+        if (modify_button_active) {
+          this.setInActiveButtonStyle('form', 'modify')
+        }
+        if (!remove_button_active && !modify_button_active) {
+          this.setInActiveButtonStyle('form')
+        }
+      }
+      if (!togle_islaod && remove_button_active) {
+        this.setInActiveButtonStyle('remove')
+      }
+      else if (!togle_islaod && modify_button_active) {
+        this.setInActiveButtonStyle('modify')
+      }
+      else if (!togle_islaod && !remove_button_active && !modify_button_active) {
+        this.setInActiveButtonStyle()
+      }
       this.setState(prevState => ({togle_islaod: !prevState.togle_islaod}))
     }
 
@@ -723,6 +787,53 @@ export default class BarilgaSuurinGazar extends Component{
           this.setState({featureID_list: [], drawed: null})
         }
       }
+    }
+
+    CancelButton() {
+      this.hideMetaList()
+      this.drawE.setActive(false);
+      this.modifyE.setActive(true);
+      if (this.state.cancel_button_active) {
+        this.setState({ cancel_button_active: false })
+        this.setInActiveButtonStyle()
+        this.modifyE.setActive(false);
+      }
+      else {
+        this.setInActiveButtonStyle('cancel')
+        this.setState({ cancel_button_active: true, modify_button_active: false })
+      }
+    }
+
+    cancelModal(){
+
+      if(this.state.selectedFeature_ID){
+          this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `${this.state.selectedFeature_ID} дугаартай мэдээллийг цуцлах уу`, null, 'danger', "Үгүй")
+      }
+      else
+      {
+        if(this.state.drawed) this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `Шинээр үүссэн цэгийг цуцлах уу`, null, 'danger', "Үгүй")
+        else this.addNotif('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
+      }
+    }
+
+    requestCancel(order_at, number, form_json) {
+      const {tid, fid, pid, selectedFeature_ID, geom_for_revoke} = this.state
+      const geo_json = this.writeFeat(geom_for_revoke)
+
+      const parsed_geojson = JSON.parse(geo_json).geometry
+      const form_values = new Object()
+      form_values['form_values'] = form_json
+
+      service.cancel(pid, fid, tid, selectedFeature_ID, parsed_geojson, form_values, number, order_at).then(({ success, info }) => {
+        if (success) {
+          this.addNotif('success', info, 'check')
+          this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
+          this.props.refreshCount()
+        }
+        else {
+          this.addNotif('danger', info, 'times')
+        }
+      })
     }
 
     SaveBtn(form_values) {
@@ -796,15 +907,14 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     ModifyButton(){
-      const roles = this.state.roles
       if(this.state.modify_button_active){
-        if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
         this.setState({modify_button_active: false})
+        this.setInActiveButtonStyle()
       }
-      else{
-        if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,9.5)'
-        if(roles.PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-        this.setState({modify_button_active: true,  remove_button_active: false})
+      else {
+        this.setInActiveButtonStyle('modify')
+        this.DrawButton()
+        this.setState({modify_button_active: true, remove_button_active: false, cancel_button_active: false})
       }
       this.setState({draw_is_active: false})
       this.drawE.setActive(false);
@@ -813,10 +923,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     LineButton(){
-      const roles = this.state.roles
-      if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false, draw_is_active: true})
+      this.setInActiveButtonStyle('line')
+      this.setState({modify_button_active: false, remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -825,10 +933,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PointButton(){
-      const roles = this.state.roles
-      if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(roles.PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false, draw_is_active: true})
+      this.setInActiveButtonStyle('point')
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'Point' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -837,10 +943,8 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     PolygonButton(){
-      const roles = this.state.roles
-      if(roles.PERM_UPDATE) document.getElementById('⚙-toggle-modify-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      if(roles.PERM_REMOVE) document.getElementById('⚙-toggle-remove-id').style.backgroundColor = 'rgba(0,60,136,0.5)'
-      this.setState({modify_button_active: false,  remove_button_active: false, draw_is_active: true})
+      this.setInActiveButtonStyle('polygon')
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -852,18 +956,25 @@ export default class BarilgaSuurinGazar extends Component{
       this.drawE.getActive()
       this.drawE.setActive(false);
       this.modifyE.setActive(false);
-      const map = this.map
       this.select.setActive(true)
-      this.setState({ isMeta: true, draw_is_active: false })
+      if (this.state.isMeta) {
+        this.hideMetaList()
+        this.setInActiveButtonStyle()
+      }
+      else {
+        this.setInActiveButtonStyle('meta')
+        this.setState({ isMeta: true, draw_is_active: false })
+      }
     }
 
     showUploadBtn(){
+      this.setInActiveButtonStyle('upload')
       this.controls.upload.showUpload(true, this.state.fid, this.closeUploadBtn, this.loadRows, this.addNotif, this.props.match.params.tid)
       this.setState({ showUpload: true })
     }
 
     showQgisBtn(){
-
+      this.setInActiveButtonStyle('qgis')
       this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
     }
 
@@ -877,6 +988,7 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     SideBarBtn(){
+      this.setInActiveButtonStyle('side')
       service.getLayers(this.state.emp_perm_prefix).then((layer_choices) => {
         this.setState({layer_choices})
         this.WmsTile(layer_choices)
@@ -1227,19 +1339,21 @@ export default class BarilgaSuurinGazar extends Component{
                   <div id="sidebar-wrapper-map" className="overflow-auto">
                     <div className="card-body">
                         <Маягт
-                          tid = {this.props.match.params.tid}
-                          pid = {this.props.match.params.pid}
-                          fid = {this.props.match.params.fid}
-                          geojson = {this.state.geojson}
-                          gid = {this.state.selectedFeature_ID}
-                          togle_islaod = {this.state.togle_islaod}
-                          null_form_isload = {this.state.null_form_isload}
-                          addNotif = {this.addNotif}
+                          tid={this.props.match.params.tid}
+                          pid={this.props.match.params.pid}
+                          fid={this.props.match.params.fid}
+                          geojson={this.state.geojson}
+                          gid={this.state.selectedFeature_ID}
+                          togle_islaod={this.state.togle_islaod}
+                          null_form_isload={this.state.null_form_isload}
+                          addNotif={this.addNotif}
                           SaveBtn={this.SaveBtn}
                           requestRefreshCount={this.props.refreshCount}
                           modifyend_selected_feature_check={this.state.modifyend_selected_feature_check}
                           requestRemove={this.requestRemove}
+                          requestCancel={this.requestCancel}
                           remove_button_active={this.state.remove_button_active}
+                          cancel_button_active={this.state.cancel_button_active}
                           update_geom_from_list={this.state.update_geom_from_list}
                         >
                         </Маягт>
