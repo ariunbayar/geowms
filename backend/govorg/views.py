@@ -44,12 +44,14 @@ def _system_validation(payload, system):
         if is_domain is not True:
             errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
 
-    if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True).first():
-        if system:
-            if system.name != system_name:
-                errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
-        else:
+    domain_check = False
+    if system:
+        if system.name != system_name:
+            domain_check = True
+    if domain_check or not system:
+        if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True).first():
             errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
+
     return errors
 
 
