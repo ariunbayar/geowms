@@ -173,6 +173,7 @@ def _new_revoke_request(employee, payload):
     form_json = payload.get('form_json')
     order_no = payload.get('order_no')
     form_json = check_form_json(feature_id, form_json, employee)
+    geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     change_request = ChangeRequest()
     change_request.old_geo_id = old_geo_id
