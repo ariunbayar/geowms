@@ -35,7 +35,10 @@ def _system_validation(payload, system):
     errors = {}
 
     if not system_name:
-        errors['username'] = 'Хоосон байна утга оруулна уу.'
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+    elif system_name.isspace():
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+
     if domain:
         is_domain = utils._is_domain(domain)
         if is_domain is not True:
@@ -53,6 +56,12 @@ def _system_validation(payload, system):
 def хадгалах(request, payload, pk=None):
     system = GovOrg.objects.filter(pk=pk, deleted_by__isnull=True).first()
     errors = _system_validation(payload, system)
+
+    if errors:
+        return JsonResponse({
+            'success': False,
+            'errors': errors,
+        })
 
     if pk:
         form = SystemForm(payload, instance=system)

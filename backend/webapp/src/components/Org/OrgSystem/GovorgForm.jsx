@@ -185,7 +185,7 @@ export class GovorgForm extends Component {
                                         <div></div>
                                         <div className="span3">
                                             <div>
-                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
+                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                     {isSubmitting && ' Шалгаж байна.'}
                                                     {!isSubmitting && 'Хадгалах' }
