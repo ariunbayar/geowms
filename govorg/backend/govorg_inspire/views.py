@@ -7,6 +7,7 @@ import random
 from django.conf import settings
 from geojson import Feature, FeatureCollection
 
+from django.contrib.auth.decorators import login_required
 from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
@@ -18,9 +19,7 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
-from backend.inspire.models import LFeatureConfigs
 from backend.inspire.models import LProperties
-from backend.inspire.models import LValueTypes
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
 from backend.org.models import Employee
@@ -689,49 +688,12 @@ def control_to_remove(request, payload):
     return JsonResponse(rsp)
 
 
-def _make_value_json(val_type, property, value, geo_id, feature_config_id, data_type_id):
-    datas = {}
-    code_value = None
-    if val_type == 'single-select':
-        code_list_values = LCodeLists.objects.filter(property_id=property.property_id, code_list_code=value)
-        for code_list_value in code_list_values:
-            if code_list_value.code_list_code.lower() == value.lower():
-                code_value = code_list_value.code_list_id
-    for i in MDatas._meta.get_fields():
-        if 'value' in i.name:
-            datas[i.name] = None
-            out = i.name.split('_')
-            type_name = 1
-            if out[type_name] == 'date' and val_type == 'date':
-                if '/' in value:
-                    dt = value.split('/')
-                    value = dt[0] + "-" + dt[1] + '-' + dt[2]
-            if out[type_name] == val_type:
-                datas[i.name] = value
-        else:
-            if i.name == 'geo_id':
-                datas[i.name] = geo_id
-            if i.name == 'data_type_id':
-                datas[i.name] = data_type_id
-            if i.name == 'property_id':
-                datas[i.name] = property.property_id
-            if i.name == 'feature_config_id':
-                datas[i.name] = feature_config_id
-            if i.name == 'code_list_id':
-                datas[i.name] = code_value
-            if i.name == 'created_by':
-                datas[i.name] = 1
-            if i.name == 'modified_by':
-                datas[i.name] = 1
-    return datas
-
-
-def _save_to_m_data(values, geo_id, feature_id):
-    feature_config_id = None
-    success = False
-    info = ''
-    data_type_id = None
-    try:
+def _check_and_make_form_json(feature_id, values):
+    form_json_list = list()
+    code_list_values = ""
+    with transaction.atomic():
+        view = get_object_or_404(ViewNames, feature_id=feature_id)
+        view_props = ViewProperties.objects.filter(view=view)
 
         for view_prop in view_props:
             for p_code, value in values.items():
@@ -846,7 +808,7 @@ def _save_file_to_storage(file_type_name, uniq_file_name, fo):
     fs = FileSystemStorage(
         location=path
     )
-    file = fs.save(file_name, fo)
+    file = fs.save(uniq_file_name, fo)
     fs.url(file)
     return path
 
