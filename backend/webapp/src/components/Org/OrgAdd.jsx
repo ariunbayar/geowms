@@ -1,7 +1,8 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
-import ModalAlert from "../ModalAlert";
+import ModalAlert from "../ModalAlert"
+import Loader from "../Loader"
 
 
 export class OrgAdd extends Component {

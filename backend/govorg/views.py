@@ -43,10 +43,13 @@ def _system_validation(payload, system):
         is_domain = utils._is_domain(domain)
         if is_domain is not True:
             errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
-    if system:
-        if system.name != system_name:
-            if GovOrg.objects.filter(name=system_name).first():
+
+    if GovOrg.objects.filter(name=system_name).first():
+        if system:
+            if system.name != system_name:
                 errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
+        else:
+            errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
     return errors
 
 
