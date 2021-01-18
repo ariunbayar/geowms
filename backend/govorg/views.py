@@ -56,13 +56,13 @@ def хадгалах(request, payload, pk=None):
 
     if pk:
         form = SystemForm(payload, instance=system)
+        system.website = payload['website']
     else:
         form = SystemForm(payload)
 
     if form.is_valid():
         with transaction.atomic():
             form.instance.token = TokenGeneratorSystem().get()
-            system.website = payload['website']
             system = form.save()
 
             layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
