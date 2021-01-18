@@ -111,7 +111,7 @@ def revoke_paginate(request, payload):
         _get_revoke_request_display(revoke_request)
         for revoke_request in items_page.object_list
     ]
-    print(items)
+
     total_page = total_items.num_pages
 
     rsp = {
