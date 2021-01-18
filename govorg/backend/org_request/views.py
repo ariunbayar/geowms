@@ -396,7 +396,7 @@ def request_approve(request, payload, pk):
     form_json = values['form_json']
 
     perm_approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
-    print("wewqrwerwer")
+
     if perm_approve:
         old_geo_id = values['old_geo_id']
         old_geo_json = values["old_geo_json"]
