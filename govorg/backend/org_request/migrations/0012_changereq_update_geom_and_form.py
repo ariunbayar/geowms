@@ -27,7 +27,7 @@ def update_change_req_forms_and_geom_json_dumps(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('org_request', '0011_auto_20210105_0111'),
+        ('org_request', '0012_auto_20201128_0917'),
     ]
 
     operations = [
