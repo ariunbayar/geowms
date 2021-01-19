@@ -22,8 +22,6 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
-from backend.wmslayer.models import WMSLayer
-from geoportal_app.models import User
 from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
@@ -37,7 +35,6 @@ from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 from govorg.backend.org_request.views import _get_geoJson
-from govorg.backend.org_request.views import _convert_text_json
 from main.decorators import ajax_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
@@ -531,19 +528,6 @@ def geomAdd(request, payload, fid):
     return JsonResponse(rsp)
 
 
-def _check_form_json(fid, form_json, employee):
-
-    request_json = []
-    property_ids, roles = _get_emp_property_roles(employee, fid)
-    if form_json and roles:
-        for role in roles:
-            for propert in form_json['form_values']:
-                if role.get('property_id') == propert.get('property_id'):
-                    request_json.append(propert)
-
-    return json.dumps(request_json, ensure_ascii=False) if request_json else ''
-
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -562,7 +546,7 @@ def create(request, payload):
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
-    form_json = _check_form_json(fid, form_json, employee)
+    form_json = check_form_json(fid, form_json, employee)
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
@@ -641,7 +625,6 @@ def remove(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload):
-
     tid = payload.get('tid')
     pid = payload.get('pid')
     fid = payload.get('fid')
@@ -656,7 +639,7 @@ def update(request, payload):
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
-    form_json = _check_form_json(fid, form_json, employee)
+    form_json = check_form_json(fid, form_json, employee)
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
