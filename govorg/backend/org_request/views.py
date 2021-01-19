@@ -484,18 +484,12 @@ def get_count(request):
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
 
-    if emp_features:
+    qs = ChangeRequest.objects
+    qs = qs.filter(state=ChangeRequest.STATE_NEW)
+    qs = qs.filter(feature_id__in=emp_features)
 
-        qs = ChangeRequest.objects.all()
-        qs = qs.filter(state=ChangeRequest.STATE_NEW)
-        qs = qs.filter(feature_id__in=emp_features)
-
-        revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
-        request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
-
-    else:
-        revoke_count = 0
-        request_count = 0
+    revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
+    request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
     rsp = {
         'success': True,
