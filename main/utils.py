@@ -345,7 +345,7 @@ def get_administrative_levels():
         table_au_au_ab.filter({'geo_id': national_codes})
         table_au_au_ab.select({
             'geo_id': True,
-            i_data_type_administrative_boundary: {i_property_name},
+            i_data_type_administrative_boundary: [i_property_name],
         })
 
         for item in table_au_au_ab.fetch():
