@@ -160,7 +160,7 @@ export class GovorgForm extends Component {
                                             </label>
 
                                             <Field
-                                                className={'form-control mb-2' + (errors.name ? 'is-invalid' : '')}
+                                                className={'form-control mb-2' + (errors.name ? ' is-invalid' : '')}
                                                 placeholder="Системүүдийн нэр"
                                                 name='name'
                                                 id="id_name"
@@ -172,7 +172,7 @@ export class GovorgForm extends Component {
                                                 Домэйнээр хязгаарлах:
                                             </label>
                                             <Field
-                                                className={'form-control my-1' + (errors.website ? 'is-invalid' : '')}
+                                                className={'form-control my-1' + (errors.website ? ' is-invalid' : '')}
                                                 placeholder="Байршуулах вэбсайт"
                                                 name='website'
                                                 id="id_website"
