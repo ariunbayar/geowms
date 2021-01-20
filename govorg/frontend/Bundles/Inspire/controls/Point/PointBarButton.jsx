@@ -20,6 +20,7 @@ export class PointBarButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Цэг зурах')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-point-id')
         if (options.null) {
             element.style.right = '60px'
         }

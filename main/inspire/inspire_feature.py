@@ -1,6 +1,5 @@
 import functools
 import operator
-import re
 
 from django.db.models import Q
 
@@ -9,7 +8,6 @@ from .inspire_data_type import InspireDataType
 from .inspire_manager import InspireManager
 from .inspire_property import InspireProperty
 from .inspire_value import InspireValue
-
 
 
 class StatementSingleSelect():
@@ -140,7 +138,6 @@ class InspireFeature():
 
         return Q(**options)
 
-
     def _build_filter_geo_id_statement(self, values):
         if isinstance(values, list):
             return Q(geo_id__in=values)
@@ -188,12 +185,14 @@ class InspireFeature():
             if isinstance(i_data_type, str) and i_data_type == 'geo_id':
                 continue
 
-            feature_config_id = self._get_feature_config_id(i_data_type)
+            # XXX Datatype-аар шүүж байгаа учраас feature_config_id-аар шүүх шаардлагагүй
+            # feature_config_id = self._get_feature_config_id(i_data_type)
 
             for i_property in i_properties:
 
                 statement = Q(
-                    feature_config_id=feature_config_id,
+                    # XXX Datatype-аар шүүж байгаа учраас feature_config_id-аар шүүх шаардлагагүй
+                    # feature_config_id=feature_config_id,
                     data_type_id=i_data_type.data_type_id,
                     property_id=i_property.property_id,
                 )
@@ -229,13 +228,30 @@ class InspireFeature():
 
         yield row
 
+    def _is_only_geo_id_filter(self, filter_options):
+
+        keys = list(filter_options.keys())
+
+        if len(keys) == 1:
+            if isinstance(keys[0], str):
+                if keys[0] == 'geo_id':
+                    return True
+
+        return False
+
     def fetch(self):
 
-        # TODO optimize when it filters only by geo_id
-        qs_geo_ids = self._apply_filter(self.model.objects, self.filter_options)
-        qs_geo_ids = qs_geo_ids.values_list('geo_id', flat=True)
+        qs = self.model.objects
 
-        qs = self.model.objects.filter(geo_id__in=qs_geo_ids)
+        if self._is_only_geo_id_filter(self.filter_options):
+            values = self.filter_options['geo_id']
+            geo_id_filter = self._build_filter_geo_id_statement(values)
+            qs = qs.filter(geo_id_filter)
+        else:
+            qs_geo_ids = self._apply_filter(self.model.objects, self.filter_options)
+            qs_geo_ids = qs_geo_ids.values_list('geo_id', flat=True)
+            qs = qs.filter(geo_id__in=qs_geo_ids)
+
         qs = self._apply_select(qs, self.select_options)
         qs = qs.order_by('geo_id')
 

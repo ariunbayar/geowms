@@ -586,8 +586,9 @@ def org_list(request, payload, level):
         sort_name = 'id'
 
     qs = Org.objects.filter(level=level)
-    qs = qs.annotate(num_employees=Count('employee'))
-    qs = qs.annotate(num_systems=Count('govorg'))
+    qs = qs.annotate(num_employees=Count('employee', distinct=True))
+    qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+
     if query:
         qs = qs.annotate(search=SearchVector('name'))
         qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
