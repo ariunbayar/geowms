@@ -9,6 +9,7 @@ from govorg.backend.govorg_inspire import views as govorg_inspire_views
 from govorg.backend.zipcode import views as zipcode_views
 from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
+from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
 
 urlpatterns = [
@@ -124,6 +125,12 @@ urlpatterns = [
             path('create/', meta_data_views.create),
             path('get-fields/', meta_data_views.get_fields),
         ], 'meta-data'))),
+
+        path('revoke_request/', include(([
+            path('revoke-new/', revoke_request_views.revoke_new),
+            path('revoke-change-state/', revoke_request_views.revoke_state),
+            path('revoke-search/', revoke_request_views.revoke_paginate),
+        ], 'revoke_request'))),
 
     ], 'back_org'))),
 
