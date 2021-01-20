@@ -288,31 +288,31 @@ def _employee_validation(payload, user):
     register = payload.get('register')
     errors = {}
     if not username:
-        errors['username'] = 'Хоосон байна утга оруулна уу.'
+        errors['username'] = 'Хоосон байна утга оруулна уу!'
     elif len(username) > 150:
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
-        errors['position'] = 'Хоосон байна утга оруулна уу.'
+        errors['position'] = 'Хоосон байна утга оруулна уу!'
     elif len(position) > 250:
         errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
-        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
+        errors['first_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(first_name) > 30:
         errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
     if not last_name:
-        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
+        errors['last_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(last_name) > 150:
         errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not email:
-        errors['email'] = 'Хоосон байна утга оруулна уу.'
+        errors['email'] = 'Хоосон байна утга оруулна уу!'
     elif len(email) > 254:
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
     if not gender:
-        errors['gender'] = 'Хоосон байна утга оруулна уу.'
+        errors['gender'] = 'Хоосон байна утга оруулна уу!'
     elif len(gender) > 100:
         errors['gender'] = '100-с илүүгүй урттай утга оруулна уу!'
     if not register:
-        errors['register'] = 'Хоосон байна утга оруулна уу.'
+        errors['register'] = 'Хоосон байна утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():
@@ -810,9 +810,18 @@ def perm_get_list(request, payload):
 def create_perm(request, payload):
     values = payload.get('values')
     name_check = GovRole.objects.filter(name=values['name'])
+    errors = {}
     if name_check:
+        errors['name'] = 'Нэр давхцаж байна'
         rsp = {
             'success': False,
+            'errors': errors,
+        }
+    elif values['name'].isspace():
+        errors['name'] = 'Хоосон байна утга оруулна уу!'
+        rsp = {
+            'success': False,
+            'errors': errors,
         }
     else:
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
