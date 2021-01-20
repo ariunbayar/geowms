@@ -1,10 +1,9 @@
 import React, { Component } from "react"
 
 import {service} from './service'
-import GovorgForm from './GovorgForm'
 import Govorg from './Govorg'
 import {NavLink} from "react-router-dom"
-import { Pagination } from '../../../../../../src/components/Pagination/index'
+import { Pagination } from '@utils/Pagination'
 import ModalAlert from "../../ModalAlert";
 
 export class Жагсаалт extends Component {

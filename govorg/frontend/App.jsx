@@ -17,7 +17,7 @@ import ChangeRequest from './Bundles/Inspire/ChangeRequest'
 
 import { Help } from './Help'
 import { service } from "./service"
-import MenuItem from "../../src/components/MenuItem"
+import MenuItem from "@utils/MenuItem"
 import { Role } from './Role';
 
 export class App extends Component {
