@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
-import ModalAlert from "../ModalAlert";
-
+import ModalAlert from "../ModalAlert"
+import Loader from "@utils/Loader"
 
 export class OrgAdd extends Component {
 
@@ -25,6 +25,7 @@ export class OrgAdd extends Component {
             fourthOrder_value: -1,
             geo_id: null,
             firstOrder_geom: '',
+            is_loading: true,
         }
 
         this.handleUserSearch = this.handleUserSearch.bind(this)
@@ -69,7 +70,7 @@ export class OrgAdd extends Component {
     formOptions() {
         service.formOptions().then(({success, secondOrders, roles, firstOrder_geom}) => {
             if (success) {
-                this.setState({secondOrders, roles, firstOrder_geom})
+                this.setState({secondOrders, roles, firstOrder_geom, is_loading: false})
                 const geo_id = this.state.geo_id
                 if (geo_id) {
                     var find_text = ''
@@ -215,6 +216,9 @@ export class OrgAdd extends Component {
                     </div>
                     <div className="row">
                         <div className="col-md-4 card-body">
+                            <Loader
+                                is_loading = {this.state.is_loading}
+                            />
                             <div className="form-group">
                                 <h5 className="mb-3">Байгууллагын нэр</h5>
                                 <input
@@ -285,10 +289,6 @@ export class OrgAdd extends Component {
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-2 ml-3">
                             <div className="form-group">
                                 {this.state.handleSaveIsLoad ?
                                     <>
