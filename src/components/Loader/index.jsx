@@ -1,20 +1,23 @@
 import React, { Component } from 'react'
 import './style.css'
 
+
 export default class Loader extends Component {
 
     render() {
-        const is_loading = this.props.is_loading
-        return (
-            <>
-                {is_loading ?
-                    <span className="text-center loader">
+
+        if (this.props.is_loading) {
+            return (
+                <div className="loader text-center">
+                    <div>
                         <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-                        <br/>Түр хүлээнэ үү...
-                    </span>
-                    :null
-                }
-            </>
-        )
+                        <br/>
+                        Түр хүлээнэ үү...
+                    </div>
+                </div>
+            )
+        }
+
+        return null
     }
 }
