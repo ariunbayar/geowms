@@ -11,12 +11,12 @@ export default class OrgRequestForm extends Component {
         super(props)
         this.state={
             org_request:[],
-            search_state: '',
-            search_kind: '',
-            search_geom: '',
-            search_theme: '',
-            search_package: '',
-            search_feature: '',
+            search_state: null,
+            search_kind: null,
+            search_geom: null,
+            search_theme: null,
+            search_package: null,
+            search_feature: null,
             is_loading: false,
             modal_alert_status: "closed",
             title: '',

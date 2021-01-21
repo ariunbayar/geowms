@@ -23,6 +23,7 @@ from main.decorators import ajax_required
 from main.utils import refreshMaterializedView
 from main.utils import has_employee_perm
 from main.utils import check_form_json
+from main.utils import ModelFilter
 
 
 def _convert_text_json(data):
