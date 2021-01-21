@@ -193,6 +193,7 @@ export class EmployeeEdit extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                     this.setState({model_type_icon: 'success'})
+                    this.props.getEmpRoles()
                 } else {
                     if (errors) {
                         setErrors(errors)
@@ -391,7 +392,7 @@ export class EmployeeEdit extends Component {
                                             }
                                         </div>
                                         <div className="form-group">
-                                            <button type="submit" className="btn btn-primary btn-block waves-effect waves-light m-1" disabled={isSubmitting}>
+                                            <button type="submit" className="btn btn-primary waves-effect waves-light m-1" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                 {!isSubmitting && 'Хадгалах' }
