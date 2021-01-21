@@ -26,10 +26,10 @@ function requestApprove(id, values) {
     return fetch(`${prefix}/${id}/approve/`, requestOptions).then(handleResponse)
 }
 
-function requestSearch(state, kind, theme, packag, feature) {
+function requestSearch(state, kind, theme_id, package_id, feature_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({state, kind, theme, packag, feature}),
+        body: JSON.stringify({state, kind, theme_id, package_id, feature_id}),
     }
     return fetch(`${prefix}/search/`, requestOptions).then(handleResponse)
 }

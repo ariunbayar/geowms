@@ -640,3 +640,21 @@ def check_form_json(fid, form_json, employee):
                     })
 
     return request_json if request_json else ''
+
+
+class ModelFilter():
+    def __init__(self, initial_qs, payload):
+        self.qs = initial_qs
+        self.payload = payload
+
+    def filter(self):
+        payload = self.payload
+        qs = self.qs
+
+        for key, value in payload.items():
+            values = dict()
+            if value:
+                values[key] = payload.get(key)
+                qs = qs.filter(**values)
+
+        return qs

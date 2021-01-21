@@ -34,7 +34,8 @@ from main.utils import (
     gis_table_by_oid,
     gis_tables_by_oids,
     dict_fetchall,
-    refreshMaterializedView
+    refreshMaterializedView,
+    ModelFilter,
 )
 
 
@@ -577,37 +578,15 @@ def get_count(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def search(request, payload):
-    data_list = []
-    search = {}
-    state = payload.get('state')
-    kind = payload.get('kind')
-    theme = payload.get('theme')
-    package = payload.get('packag')
-    feature = payload.get('feature')
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_features = _get_emp_features(employee)
 
-    if state:
-        search['state'] = state
-    if kind:
-        search['kind'] = kind
-    if theme:
-        search['theme_id'] = theme
-    if package:
-        search['package_id'] = package
-    if feature:
-        search['feature_id'] = feature
-    try:
-        employee = get_object_or_404(Employee, user=request.user)
-        emp_features = _get_emp_features(employee)
-        if emp_features:
-            datas = ChangeRequest.objects.filter(**search, feature_id__in=emp_features)
-            data_list = [_get_org_request(data, employee) for data in datas]
-        rsp = {
-            'success': True,
-            'org_request': data_list
-        }
-    except Exception as e:
-        rsp = {
-            'success': False,
-            'info': str(e)
-        }
+    initial_qs = ChangeRequest.objects.filter(feature_id__in=emp_features)
+    datas = ModelFilter(initial_qs, payload).filter()
+    data_list = [_get_org_request(data, employee) for data in datas]
+
+    rsp = {
+        'success': True,
+        'org_request': data_list
+    }
     return JsonResponse(rsp)
