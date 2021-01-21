@@ -642,14 +642,28 @@ def check_form_json(fid, form_json, employee):
     return request_json if request_json else ''
 
 
+def has_attr_in_model(Model, payload):
+    values = dict()
+    for f in Model._meta.get_fields():
+        for key, value in payload.items():
+            if key == f.name:
+                values[key] = value
+
+    return values
+
+
 class ModelFilter():
-    def __init__(self, initial_qs, payload):
+    def __init__(self, initial_qs, payload, Model):
         self.qs = initial_qs
         self.payload = payload
+        self.Model = Model
 
     def filter(self):
         payload = self.payload
         qs = self.qs
+        Model = self.Model
+
+        payload = has_attr_in_model(Model, payload)
 
         for key, value in payload.items():
             values = dict()

@@ -582,7 +582,7 @@ def search(request, payload):
     emp_features = _get_emp_features(employee)
 
     initial_qs = ChangeRequest.objects.filter(feature_id__in=emp_features)
-    datas = ModelFilter(initial_qs, payload).filter()
+    datas = ModelFilter(initial_qs, payload, ChangeRequest).filter()
     data_list = [_get_org_request(data, employee) for data in datas]
 
     rsp = {
