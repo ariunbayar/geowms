@@ -62,6 +62,7 @@ def _get_geom(geo_id, fid):
 
 
 def _get_geoJson(data):
+    data = json.loads(data)
     geom_type = data['type']
     coordinates = data['coordinates']
     if geom_type == 'Point':
@@ -95,15 +96,6 @@ def _get_geoJson(data):
         return Feature(geometry=point)
 
 
-def _convert_text_json(data):
-    data = data.replace("\'", "\"")
-    data = data.replace("True", "true")
-    data = data.replace("False", "false")
-    data = json.loads(data)
-
-    return data
-
-
 def _get_org_request(ob, employee):
 
     geo_json = []
@@ -114,13 +106,12 @@ def _get_org_request(ob, employee):
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
     if ob.old_geo_id:
         old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
-
         if old_geo_data:
-            old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
+            old_geo_data = old_geo_data[0]['geom']
             old_geo_data = _get_geoJson(old_geo_data)
 
         if ob.geo_json:
-            geo_json = _convert_text_json(ob.geo_json)
+            geo_json = ob.geo_json
             current_geo_json = _get_geoJson(geo_json)
             geo_json = FeatureCollection([current_geo_json, old_geo_data])
 
@@ -128,7 +119,7 @@ def _get_org_request(ob, employee):
             geo_json = FeatureCollection([old_geo_data])
 
     elif geo_json and ob.old_geo_id:
-        geo_json = _convert_text_json(ob.geo_json)
+        geo_json = ob.geo_json
         geo_json = _get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
@@ -148,7 +139,7 @@ def _get_org_request(ob, employee):
         'state': ob.get_state_display(),
         'kind': ob.get_kind_display(),
         'group_id': ob.group_id,
-        'form_json': _convert_text_json(ob.form_json) if ob.form_json else '',
+        'form_json': json.loads(ob.form_json) if ob.form_json else '',
         'geo_json': geo_json,
         'created_at': ob.created_at.strftime('%Y-%m-%d'),
         'employee': employee.user.first_name,
@@ -552,18 +543,12 @@ def get_count(request):
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
 
-    if emp_features:
+    qs = ChangeRequest.objects
+    qs = qs.filter(state=ChangeRequest.STATE_NEW)
+    qs = qs.filter(feature_id__in=emp_features)
 
-        qs = ChangeRequest.objects.all()
-        qs = qs.filter(state=ChangeRequest.STATE_NEW)
-        qs = qs.filter(feature_id__in=emp_features)
-
-        revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
-        request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
-
-    else:
-        revoke_count = 0
-        request_count = 0
+    revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
+    request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
     rsp = {
         'success': True,

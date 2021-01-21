@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
 
-import Modal from "../../../src/components/Modal/DeleteModal"
+import Modal from "@utils/Modal/DeleteModal"
 import { service } from "./service"
 
 

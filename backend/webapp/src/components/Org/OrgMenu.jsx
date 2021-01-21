@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch , Route, Link, NavLink} from "react-router-dom"
 
 import {service} from './service'
-import {OrgDetail} from './OrgDetail/index'
+import {OrgDetail} from './OrgDetail'
 import {OrgRoleOld} from './OrgRoleOld'
 import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
