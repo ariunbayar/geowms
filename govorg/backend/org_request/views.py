@@ -149,7 +149,6 @@ def _get_org_request(ob, employee):
     }
 
 
-
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
