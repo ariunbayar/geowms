@@ -8,6 +8,7 @@ export default class RequestModal extends Component {
 
     constructor(props) {
         super(props)
+
         this.state = {
             status: this.props.status || "initial",
             is_modal_approve_open: false,

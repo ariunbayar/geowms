@@ -3,7 +3,7 @@ import React, { Component } from "react"
 import {EmployeeTable} from './EmployeeTable'
 import { service } from "./service"
 import { NavLink } from "react-router-dom"
-import { Notif } from "../../../../src/components/Notification/index"
+import { Notif } from "@utils/Notification"
 
 
 export class EmployeeForm extends Component {

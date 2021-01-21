@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {service} from "../service"
-import { Pagination } from "../../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 import {Charts} from './Chart'
 import { WMSLogTable } from './WMSLogTable'
 

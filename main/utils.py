@@ -254,7 +254,7 @@ def send_approve_email(user, subject=None, text=None):
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
     if host_name == 'localhost:8000':
-        msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     else:
         msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     from_email = get_config('EMAIL_HOST_USER')
@@ -345,7 +345,7 @@ def get_administrative_levels():
         table_au_au_ab.filter({'geo_id': national_codes})
         table_au_au_ab.select({
             'geo_id': True,
-            i_data_type_administrative_boundary: {i_property_name},
+            i_data_type_administrative_boundary: [i_property_name],
         })
 
         for item in table_au_au_ab.fetch():
@@ -512,6 +512,13 @@ def is_register(register):
 def is_email(email):
     re_email = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
     return re.search(re_email, email) is not None
+
+
+def _is_domain(domain):
+    pattern = re.compile(
+        r'^((http|https):\/\/)?([a-zA-Z0-9]+\.)?([a-zA-Z0-9][a-zA-Z0-9-]*)?((\:[a-zA-Z0-9]{2,6})|(\.[a-zA-Z0-9]{2,6}))$'
+    )
+    return re.search(pattern, domain) is not None
 
 
 # Зөвхөн нэг config мэдээллийг буцаана

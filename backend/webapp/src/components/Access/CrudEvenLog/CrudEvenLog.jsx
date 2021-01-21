@@ -3,7 +3,7 @@ import {Charts} from './Chart'
 import {RadarChart} from './Radar'
 import {service} from "../service"
 import {CrudEvenLogTable} from './CrudEvenLogTable'
-import { Pagination } from "../../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 
 
 export class CrudEvenLog extends Component {

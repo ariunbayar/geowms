@@ -8,5 +8,4 @@ export const validationSchema = object().shape({
         .required('Хоосон байна хоосон байж болохгүй!'),
     description: string()
         .max(250, '1000-с илүүгүй урттай оруулна уу!')
-        .required('Хоосон байна хоосон байж болохгүй!'),
 })
