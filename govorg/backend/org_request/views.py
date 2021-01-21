@@ -239,13 +239,22 @@ def _getChoices(user):
     return {'choices': choices, 'modules': modules}
 
 
+def _make_group_request(org_request_list, org_request, ob, employee):
+    group_request = []
+    group = org_request_list.filter(group_id=ob.id)
+    for ob in group:
+        group_request.append(_get_org_request(ob, employee))
+    if group_request:
+        org_request['group'] = group_request
+
+    return org_request
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def getAll(request):
     org_requests = []
-    group_request = []
-    dont_append = []
 
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
@@ -257,22 +266,17 @@ def getAll(request):
         org_request_list = qs.order_by('-created_at')
 
         if org_request_list:
-
-            for ob in org_request_list:
-                if dont_append and ob.id not in dont_append:
-                    org_requests.append(_get_org_request(ob, employee))
+            for_list_request = org_request_list.filter(group_id__isnull=True)
+            for ob in for_list_request:
+                org_request = _get_org_request(ob, employee)
 
                 if not ob.form_json and not ob.geo_json:
-                    org_request = _get_org_request(ob, employee)
-                    group = org_request_list.filter(group_id=ob.id)
-                    for ob in group:
-                        dont_append.append(ob.id)
-                        group_request.append(_get_org_request(ob, employee))
+                    org_request = _make_group_request(
+                        org_request_list, org_request,
+                        ob, employee,
+                    )
 
-                    if group_request:
-                        org_request['group'] = group_request
-                        org_requests.append(org_request)
-                        group_request = []
+                org_requests.append(org_request)
 
             choices = _getChoices(request.user)
             rsp = {
