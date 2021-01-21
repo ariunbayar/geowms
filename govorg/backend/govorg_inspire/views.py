@@ -12,14 +12,19 @@ from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
+from django.contrib.gis.geos import GEOSGeometry
+from django.core.files.storage import FileSystemStorage
+from django.contrib.gis.gdal import DataSource
 
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
 from backend.inspire.models import LProperties
+from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
 from backend.org.models import Employee
@@ -725,21 +730,22 @@ def _check_and_make_form_json(feature_id, values):
 def _create_request(request_datas):
     change_request = ChangeRequest()
 
-    change_request.old_geo_id = request_datas['geo_id']
+    change_request.old_geo_id = request_datas['geo_id'] if 'geo_id' in request_datas else None
     change_request.new_geo_id = None
     change_request.theme_id = request_datas['theme_id']
     change_request.package_id = request_datas['package_id']
     change_request.feature_id = request_datas['feature_id']
     change_request.employee = request_datas['employee']
     change_request.state = request_datas['state']
-    change_request.kind = request_datas['kind']
-    change_request.form_json = request_datas['form_json']
-    change_request.geo_json = request_datas['geo_json']
+    change_request.kind = request_datas['kind'] if 'kind' in request_datas else None
+    change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
+    change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
+    change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
     change_request.order_at = None
     change_request.order_no = None
 
     change_request.save()
-    return True
+    return change_request.id
 
 
 def _make_request(values, request_values):
@@ -759,9 +765,11 @@ def _make_request(values, request_values):
             'kind': request_values['kind'],
             'form_json': form_json_list,
             'geo_json': request_values['geo_json'],
+            'group_id': request_values['group_id'],
         }
         with transaction.atomic():
-            success = _create_request(request_datas)
+            _create_request(request_datas)
+            success = True
             info = 'Амжилттай хадгалалаа'
 
     except Exception:
@@ -911,6 +919,15 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             }
             return JsonResponse(rsp)
 
+        request_datas = {
+            'theme_id': tid,
+            'package_id': pid,
+            'feature_id': feature_id,
+            'state': ChangeRequest.STATE_NEW,
+            'employee': employee,
+        }
+        main_request_id = _create_request(request_datas)
+
         layer = ds[0]
         for val in layer:
             values = dict()
@@ -957,6 +974,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                 'employee': employee,
                 'geo_json': geo_json,
                 'kind': request_kind,
+                'group_id': main_request_id,
             }
             success, info = _make_request(values, request_values)
 
