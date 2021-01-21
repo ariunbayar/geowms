@@ -72,7 +72,7 @@ export default class Modal extends Component {
             <Fragment>
                 <div className={className}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content animated jackInTheBox" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
+                        <div className="modal-content" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
                             <div className="col-md-12 offset-md-12 float-right my-1">
                                 <button type="button" className="close mt-2 mr-2" aria-label="Close">
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
