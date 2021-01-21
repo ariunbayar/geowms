@@ -26,11 +26,14 @@ export class Дэлгэрэнгүй extends Component {
             private_url: '',
             is_state: false,
             is_loading: true,
+            modal_status: 'closed',
         }
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.addNotif = this.addNotif.bind(this)
         this.loadDetail = this.loadDetail.bind(this)
         this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
+        this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
+        this.handleModalActionClose = this.handleModalActionClose.bind(this)
     }
 
     addNotif(style, msg, icon){
@@ -98,6 +101,14 @@ export class Дэлгэрэнгүй extends Component {
         this.addNotif('success', 'Амжилттай хууллаа', 'times')
     }
 
+    handleModalActionOpen(){
+        this.setState({modal_status: 'open'})
+    }
+
+    handleModalActionClose(){
+        this.setState({modal_status: 'closed'})
+    }
+
     render() {
 
         const {id, name, token, website} = this.state.govorg
@@ -126,7 +137,7 @@ export class Дэлгэрэнгүй extends Component {
                                 </div>
                                 <input type="text" className="form-control" disabled value={token}/>
                                 <div className="input-group-append">
-                                    <button className="btn btn-outline-primary" type="button" onClick={this.handleTokenRefresh}>
+                                    <button className="btn btn-outline-primary" type="button" onClick={this.handleModalActionOpen}>
                                         <i className="fa fa-refresh" aria-hidden="true"></i>
                                         {} Шинэчлэх
                                     </button>
@@ -189,6 +200,15 @@ export class Дэлгэрэнгүй extends Component {
                         )}
                     </div>
                 </div>
+                <Modal
+                    text="Токенийг шинэчилсэнээр уг URL-ээр одоо ашиглаж байгаа газрууд ажиллахгүй болохыг анхаарна уу!"
+                    title="Токен шинэчлэх"
+                    model_type_icon = "success"
+                    status={this.state.modal_status}
+                    modalClose={this.handleModalActionClose}
+                    modalAction={() => this.handleTokenRefresh()}
+                    actionName='Шинэчлэх'
+                />
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
             </div>
         )
