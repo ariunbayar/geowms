@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import { Pagination } from "../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 import {service} from "./service"
 import {ListTable} from "./ListTable"
 

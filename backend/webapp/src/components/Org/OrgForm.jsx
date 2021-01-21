@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {OrgFormTable} from './OrgFormTable'
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
-import { Pagination } from "../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 import ModalAlert from "../ModalAlert"
 
 export class OrgForm extends Component {

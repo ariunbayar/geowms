@@ -3,7 +3,7 @@ import React, { Component } from "react"
 import {EmployeeTable} from './EmployeeTable'
 import { service } from "./service"
 import { NavLink } from "react-router-dom"
-import { Notif } from "../../../../src/components/Notification/index"
+import { Notif } from "@utils/Notification"
 
 
 export class EmployeeForm extends Component {
@@ -27,7 +27,7 @@ export class EmployeeForm extends Component {
             .getListEmployee()
             .then(({ success, employees }) => {
                 if (success) {
-                    this.setState({ employees })
+			this.setState({ employees })
                 }
             })
     }
@@ -91,6 +91,7 @@ export class EmployeeForm extends Component {
                                             <th scope="col">Овог нэр</th>
                                             <th scope="col">Имэйл</th >
                                             <th scope="col">Албан тушаал</th >
+					    <th scope="col">Role</th>
                                             <th className="text-center" scope="col">Админ эсэх</th >
                                             <th className="text-center" scope="col">Токен шинэчлэх</th>
                                             <th className="text-center" scope="col">Засах</th>

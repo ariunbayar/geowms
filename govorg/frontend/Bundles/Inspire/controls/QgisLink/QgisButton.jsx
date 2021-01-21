@@ -20,6 +20,7 @@ export class QgisButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'WMS/WFS линк.')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-qgis-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')

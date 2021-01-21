@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Propties from './propertyList'
-import {Notif} from '../../../../../src/components/Notification'
+import {Notif} from '@utils/Notification'
 
 export default class SideBar extends Component {
 

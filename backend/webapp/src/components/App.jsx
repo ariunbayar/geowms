@@ -13,7 +13,7 @@ import {Log} from "./Log"
 import {Gis} from "./Gis"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
-import MenuItem from "../../../../src/components/MenuItem"
+import MenuItem from "@utils/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
 import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'

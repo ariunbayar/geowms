@@ -1,17 +1,16 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
 
 from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
-from main.utils import send_approve_email, is_email
 from backend.token.utils import TokenGeneratorEmployee
 from main import utils
 from django.contrib.auth.decorators import login_required
 from backend.inspire.models import (
-    GovPerm,
     GovPermInspire,
     EmpRole,
     EmpPerm,
@@ -33,6 +32,12 @@ from govorg.backend.utils import (
 def _get_employee_display(employee):
 
     user = employee.user
+    role = EmpPerm.objects.filter(employee=employee).first()
+
+    if role:
+        role = role.emp_role.name
+    else:
+        role = None
 
     return {
         'username': user.username,
@@ -44,6 +49,7 @@ def _get_employee_display(employee):
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+        'role_name': role,
     }
 
 
@@ -77,6 +83,7 @@ def _set_user(user, user_detail):
     user.gender = user_detail['gender']
     user.register = user_detail['register']
     user.save()
+
 
 def _set_employee(employee, user_detail):
 
@@ -162,6 +169,7 @@ def _employee_validation(user, user_detail):
     else:
         errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     return errors
+
 
 @require_POST
 @ajax_required
