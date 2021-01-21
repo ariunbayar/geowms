@@ -247,7 +247,7 @@ export class OrgAdd extends Component {
                                                     type="text"
                                                     placeholder="Байгууллагын нэр"
                                                 />
-                                                <ErrorMessage name="org_name" component="div" className="text-danger"/>
+                                                <ErrorMessage name="org_name" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                     </div>
@@ -265,7 +265,7 @@ export class OrgAdd extends Component {
                                                         <option>3</option>
                                                         <option>4</option>
                                                     </Field>
-                                                    <ErrorMessage name="org_level" component="div" className="text-dange"/>
+                                                    <ErrorMessage name="org_level" component="div" className="invalid-feedback"/>
                                                 </Fragment>
                                             </div>
                                         </div>
@@ -283,7 +283,7 @@ export class OrgAdd extends Component {
                                                         <option key={idx} value={role.id}>{role.name}</option>
                                                     )}
                                                 </Field>
-                                                <ErrorMessage name="org_role" component="div" className="text-dange"/>
+                                                <ErrorMessage name="org_role" component="div" className="invalid-feedback"/>
                                             </Fragment>
                                         </div>
                                     </div>
