@@ -1,7 +1,11 @@
 import React, { Component } from 'react'
 import {NavLink} from 'react-router-dom'
-import {service} from './service'
+
 import {Notif} from '@utils/Notification'
+import Loader from "@utils/Loader"
+
+import {service} from './service'
+import Modal from "../../Modal"
 
 
 export class Дэлгэрэнгүй extends Component {
@@ -11,14 +15,22 @@ export class Дэлгэрэнгүй extends Component {
         this.too = 0;
 
         this.state = {
-            govorg: {},
+            govorg: {
+                id: '',
+                name: '',
+                token: '',
+                website: '',
+            },
             govorg_wms_list: [],
             public_url: '',
             private_url: '',
             is_state: false,
+            is_loading: true,
         }
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.addNotif = this.addNotif.bind(this)
+        this.loadDetail = this.loadDetail.bind(this)
+        this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
     }
 
     addNotif(style, msg, icon){
@@ -32,6 +44,11 @@ export class Дэлгэрэнгүй extends Component {
     }
 
     componentDidMount() {
+        this.loadDetail()
+    }
+
+    loadDetail(cbSuccess) {
+        this.setState({is_loading: true })
         service
             .detail(this.props.match.params.system_id)
             .then(({govorg, public_url, private_url}) => {
@@ -46,8 +63,29 @@ export class Дэлгэрэнгүй extends Component {
                             }
                         })
                         .filter((wms) => wms.layer_list.length)
-                this.setState({govorg, govorg_wms_list, public_url, private_url})
+                this.setState({
+                    govorg,
+                    govorg_wms_list,
+                    public_url,
+                    private_url,
+                    is_loading: false,
+                })
+                if (cbSuccess) cbSuccess()
             })
+    }
+
+    handleTokenRefresh() {
+        const { system_id } = this.props.match.params
+
+        service.tokenRefresh(system_id).then(({ success }) => {
+            if (success) {
+                this.loadDetail(() => {
+                    this.addNotif('success', 'Токенийг амжилттай шинэчиллээ', 'check')
+                })
+            } else {
+                this.addNotif('danger', 'Алдаа гарлаа!', 'times')
+            }
+        })
     }
 
     copyToClipboard(url){
@@ -57,7 +95,7 @@ export class Дэлгэрэнгүй extends Component {
         textField.select()
         document.execCommand('copy')
         textField.remove()
-        this.addNotif('success', 'Амжилттай хуулаа', 'times')
+        this.addNotif('success', 'Амжилттай хууллаа', 'times')
     }
 
     render() {
@@ -66,6 +104,7 @@ export class Дэлгэрэнгүй extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {is_state} = this.state
+
         return (
             <div className="my-4">
                 <div className="row">
@@ -76,9 +115,25 @@ export class Дэлгэрэнгүй extends Component {
                     </div>
                 </div>
                 <div className="row">
+                    <Loader is_loading={this.state.is_loading}/>
                     <div className="col-md-12">
                         <h5>{name}</h5>
-                        <p><strong>Token</strong>: {token} </p>
+
+                        <form className="form-inline">
+                            <div className="input-group mb-3">
+                                <div className="input-group-prepend">
+                                    <span className="input-group-text">Токен</span>
+                                </div>
+                                <input type="text" className="form-control" disabled value={token}/>
+                                <div className="input-group-append">
+                                    <button className="btn btn-outline-primary" type="button" onClick={this.handleTokenRefresh}>
+                                        <i className="fa fa-refresh" aria-hidden="true"></i>
+                                        {} Шинэчлэх
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
                         {website && <p><strong>Вебсайт</strong>: {website} </p>}
                     </div>
                     <div className="col-md-9 pr-0 pl-0">
