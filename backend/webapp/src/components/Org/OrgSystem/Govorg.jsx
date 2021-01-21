@@ -37,6 +37,7 @@ export default class Govorg extends Component {
     }
 
     modalClose(){
+        this.props.handleRemove()
         if(this.state.action_type == 'refresh_token') this.props.handleTokenRefresh()
         else if (this.state.action_type == 'remove') this.props.handleRemove()
         this.setState({modal_status: 'closed'})
@@ -63,11 +64,6 @@ export default class Govorg extends Component {
 
                 <td>
                     {token}
-                </td>
-                <td>
-                    <a role="button" onClick={() => this.handleModalActionOpen('refresh_token', `Та "${name}" нэртэй тохиргооны токен шинэчлэхдээ итгэлтэй байна уу?`, "Тохиргоог шинэчлэх", "ШИНЭЧЛЭХ")}>
-                        <i className="fa fa-refresh text-primary" aria-hidden="true"></i>
-                    </a>
                 </td>
                 <td>
                     {created_at}

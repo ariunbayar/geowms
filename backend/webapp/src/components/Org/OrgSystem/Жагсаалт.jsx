@@ -31,7 +31,6 @@ export class Жагсаалт extends Component {
         this.handleSearch = this.handleSearch.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
-        this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
     }
 
     paginate (page, query) {
@@ -62,20 +61,6 @@ export class Жагсаалт extends Component {
     handleRemove(id) {
         const { load, searchQuery }=this.state
         service.remove(id).then(({success}) => {
-            if (success) {
-                var a = load
-                a ++
-                this.setState({ load: a })
-                this.paginate(1, searchQuery)
-                this.setState({modal_alert_status: 'open'})
-            }
-        })
-        this.modalCloseTime()
-    }
-
-    handleTokenRefresh(id) {
-        const { load, searchQuery }=this.state
-        service.tokenRefresh(id).then(({success}) => {
             if (success) {
                 var a = load
                 a ++
@@ -139,7 +124,6 @@ export class Жагсаалт extends Component {
                                                 <th scope="col"> # </th>
                                                 <th scope="col"> Системүүдийн нэр</th>
                                                 <th scope="col"> Токен </th>
-                                                <th scope="col"> Токен шинэчлэх</th>
                                                 <th scope="col"> Үүсгэсэн огноо </th>
                                                 <th scope="col"> </th>
                                                 <th scope="col"> </th>
@@ -156,7 +140,6 @@ export class Жагсаалт extends Component {
                                                         idx={(currentPage*govorgPerPage)-govorgPerPage+index+1}
                                                         values={values}
                                                         handleRemove={() => this.handleRemove(values.id)}
-                                                        handleTokenRefresh={() => this.handleTokenRefresh(values.id)}
                                                         handleEdit={() => this.handleEdit(values)}
                                                     />
                                             )}
