@@ -1,16 +1,15 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
 
 from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
-from main.utils import send_approve_email, is_email
 from backend.token.utils import TokenGeneratorEmployee
 from main import utils
 from backend.inspire.models import (
-    GovPerm,
     GovPermInspire,
     EmpRole,
     EmpPerm,
@@ -32,6 +31,12 @@ from govorg.backend.utils import (
 def _get_employee_display(employee):
 
     user = employee.user
+    role = EmpPerm.objects.filter(employee=employee).first()
+
+    if role:
+        role = role.emp_role.name
+    else:
+        role = None
 
     return {
         'username': user.username,
@@ -43,11 +48,13 @@ def _get_employee_display(employee):
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+        'role_name': role,
     }
 
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -75,6 +82,7 @@ def _set_user(user, user_detail):
     user.gender = user_detail['gender']
     user.register = user_detail['register']
     user.save()
+
 
 def _set_employee(employee, user_detail):
 
@@ -161,8 +169,10 @@ def _employee_validation(user, user_detail):
         errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     return errors
 
+
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def create(request, payload):
 
     user_detail = payload.get('user_detail')
@@ -221,6 +231,7 @@ def _delete_remove_perm(remove_perms):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
 
     role_id = payload.get('role_id') or None
@@ -306,6 +317,7 @@ def _get_emp_perm_display(emp_perm):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
@@ -336,6 +348,7 @@ def detail(request, pk):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def delete(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)

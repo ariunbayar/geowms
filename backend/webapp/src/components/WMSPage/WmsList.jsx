@@ -3,9 +3,8 @@ import React, { Component } from "react"
 import {service} from './service'
 import WMSForm from './WMSForm'
 import WMS from './WMS'
-import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
-import { Pagination } from "../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 import ModalAlert from "../ModalAlert"
 
 export class WmsList extends Component {

@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import "./styles.css";
 import {service} from './service'
-import {Notif} from '../../../../../src/components/Notification/index'
+import {Notif} from '@utils/Notification'
 
 export default class BundleFormTable extends Component {
 

@@ -18,6 +18,7 @@ export class SideBarBtn extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Сонголт')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-side-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
