@@ -4,7 +4,7 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
-
+import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
@@ -254,7 +254,7 @@ def send_approve_email(user, subject=None, text=None):
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
     if host_name == 'localhost:8000':
-        msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     else:
         msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     from_email = get_config('EMAIL_HOST_USER')
@@ -345,7 +345,7 @@ def get_administrative_levels():
         table_au_au_ab.filter({'geo_id': national_codes})
         table_au_au_ab.select({
             'geo_id': True,
-            i_data_type_administrative_boundary: {i_property_name},
+            i_data_type_administrative_boundary: [i_property_name],
         })
 
         for item in table_au_au_ab.fetch():
@@ -514,6 +514,13 @@ def is_email(email):
     return re.search(re_email, email) is not None
 
 
+def _is_domain(domain):
+    pattern = re.compile(
+        r'^((http|https):\/\/)?([a-zA-Z0-9]+\.)?([a-zA-Z0-9][a-zA-Z0-9-]*)?((\:[a-zA-Z0-9]{2,6})|(\.[a-zA-Z0-9]{2,6}))$'
+    )
+    return re.search(pattern, domain) is not None
+
+
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
 def get_config(config_name):
@@ -626,17 +633,6 @@ def check_form_json(fid, form_json, employee):
         for role in roles:
             for propert in form_json['form_values']:
                 if role.get('property_id') == propert.get('property_id'):
-                    request_json.append({
-                        'pk':propert.get('pk') or '',
-                        'property_name': propert.get('property_name') or '',
-                        'property_id': propert.get('property_id'),
-                        'property_code': propert.get('property_code') or '',
-                        'property_definition': propert.get('property_definition') or '',
-                        'value_type_id': propert.get('value_type_id') or '',
-                        'value_type': propert.get('value_type') or '',
-                        'data': propert.get('data') or '',
-                        'data_list': propert.get('data_list') or '',
-                        'roles': propert.get('roles') or ''
-                    })
+                    request_json.append(propert)
 
-    return request_json if request_json else ''
+    return json.dumps(request_json, ensure_ascii=False) if request_json else ''

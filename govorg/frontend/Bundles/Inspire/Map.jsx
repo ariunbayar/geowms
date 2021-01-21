@@ -32,7 +32,7 @@ import {QgisModal} from './controls/QgisLink/QgisPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
-import {Modal} from "../../../../src/components/MapModal/Modal"
+import {Modal} from "@utils/MapModal/Modal"
 import { service } from './service'
 import Маягт from "./Маягт"
 import {Mongolia_boundary} from './MongoliaBorder'

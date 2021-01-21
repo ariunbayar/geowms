@@ -13,13 +13,6 @@ main/settings/prod.py
 main/settings/test.py
 
 
-backend/webapp/static/
-frontend/bundle/static/
-frontend/mobile/static/
-frontend/payment/static/
-frontend/profile/static/
-
-
 geoportal_app/static/dist_dev
 
 geoportal_app/datas/geojson/*

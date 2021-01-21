@@ -3,7 +3,7 @@ import {PageLogTable} from './PageLogTable'
 import {Charts} from './Chart'
 import {PieChart} from './PieChart'
 import {service} from "../service"
-import { Pagination } from "../../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 
 export class PageLog extends Component {
 
