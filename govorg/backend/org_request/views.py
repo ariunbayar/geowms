@@ -101,9 +101,9 @@ def _get_org_request(ob, employee):
     geo_json = []
     old_geo_data = []
     current_geo_json = []
-    feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
-    package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
-    theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
+    feature_name = LFeatures.objects.filter(feature_id=ob.feature_id).first().feature_name
+    package_name = LPackages.objects.filter(package_id=ob.package_id).first().package_name
+    theme_name = LThemes.objects.filter(theme_id=ob.theme_id).values('theme_name', 'theme_code').first()
     if ob.old_geo_id:
         old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
         if old_geo_data:
