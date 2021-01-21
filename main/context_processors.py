@@ -7,7 +7,7 @@ def context_processor(request):
 
     context = {
             'DEBUG': settings.DEBUG,
-            'STATIC_VERSION': '20201027',
+            'STATIC_VERSION': '20210121',
         }
 
     return context
