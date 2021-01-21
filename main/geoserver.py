@@ -249,6 +249,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
             <nativeName>{view_name}</nativeName>
             <title>{layer_title}</title>
             <srs>EPSG:{srs}</srs>
+            <projectionPolicy>NONE</projectionPolicy>
             <nativeBoundingBox>
                 <minx>87.5879287719727</minx>
                 <maxx>119.325157165527</maxx>
