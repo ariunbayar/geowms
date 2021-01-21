@@ -71,6 +71,7 @@ export class OrgRequestTable extends Component {
             order_at,
             order_no
           } = this.props.values
+
         return (
             <tr>
                 <td>
@@ -91,20 +92,23 @@ export class OrgRequestTable extends Component {
                 <td>
                     {created_at}
                 </td>
-                {state==1 ? <td className="text-priamry">ШИНЭ</td>:
-                state==2 ? <td className="text-danger">ТАТГАЛЗСАН</td>:
-                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
-                state==4 ? <td className="text-success">ХЯНАХ</td>: null
+                {
+                    state == "ШИНЭ" ? <td className="text-primary">{state}</td>:
+                    state == 'ТАТГАЛЗСАН' ? <td className="text-danger">{state}</td>:
+                    state == 'ЗӨВШӨӨРСӨН' ? <td className="text-success">{state}</td>:
+                    state == 'ХЯНАХ' ? <td className="text-success">{state}</td>: null
                 }
 
-                {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
-                kind==3 ? <td className="text-primary">ЗАССАН</td>:
-                kind==5 ? <td className="text-danger">ЦУЦЛАСАН</td>:
-                kind==2 ? <td className="text-danger">УСТГАСАН</td>:
-                kind==4 ? <td className="text-danger">ШУУД ШИЙДВЭРЛЭСЭН</td>: null
-                }
                 {
-                state ==1 ?
+                    kind == 'ҮҮССЭН' ? <td className="text-success">{kind}</td>:
+                    kind == 'ЗАССАН' ? <td className="text-primary">{kind}</td>:
+                    kind == 'ЦУЦЛАСАН' ? <td className="text-danger">{kind}</td>:
+                    kind == 'УСТГАСАН' ? <td className="text-danger">{kind}</td>:
+                    kind == 'ШУУД' ? <td className="text-danger">{kind}</td>: null
+                }
+
+                {
+                state == "ШИНЭ" ?
                     <td>
                     <button className="btn btn-primary" onClick={this.handleRequestOpen}>
                         ШИЙДВЭРЛЭХ
