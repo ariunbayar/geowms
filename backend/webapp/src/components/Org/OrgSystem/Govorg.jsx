@@ -15,17 +15,17 @@ export default class Govorg extends Component {
             action_name: ''
         }
 
-        this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
-        this.handleModalActionClose = this.handleModalActionClose.bind(this)
+        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
+        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
 
         this.handleRemove = this.handleRemove.bind(this);
     }
 
-    handleModalActionOpen(action_type, text, title, action_name){
-        this.setState({modal_status: 'open', action_type, text, title, action_name})
+    handleModalDeleteOpen(){
+        this.setState({modal_status: 'open'})
     }
 
-    handleModalActionClose(){
+    handleModalDeleteClose(){
         this.setState({modal_status: 'closed'})
     }
 
@@ -79,15 +79,15 @@ export default class Govorg extends Component {
                 </td>
 
                 <td>
-                    <a href="#" onClick={() => this.handleModalActionOpen('remove', `Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`, "Тохиргоог устгах")}>
+                    <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
                     <Modal
-                        text={text}
-                        title={title}
+                        text={`Та "${name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                        title="Тохиргоог устгах"
                         model_type_icon = "success"
                         status={this.state.modal_status}
-                        modalClose={this.handleModalActionClose}
+                        modalClose={this.handleModalDeleteClose}
                         modalAction={() => this.modalClose()}
                         actionName={action_name}
                     />
