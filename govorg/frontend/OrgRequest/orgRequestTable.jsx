@@ -98,9 +98,9 @@ export class OrgRequestTable extends Component {
                 }
 
                 {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
-                kind==3 ? <td className="text-primary">ЗАССАН</td>:
+                kind==2 ? <td className="text-primary">ЗАССАН</td>:
                 kind==5 ? <td className="text-danger">ЦУЦЛАСАН</td>:
-                kind==2 ? <td className="text-danger">УСТГАСАН</td>:
+                kind==3 ? <td className="text-danger">УСТГАСАН</td>:
                 kind==4 ? <td className="text-danger">ШУУД ШИЙДВЭРЛЭСЭН</td>: null
                 }
                 {

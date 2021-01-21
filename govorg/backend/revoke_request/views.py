@@ -25,15 +25,6 @@ from main.utils import has_employee_perm
 from main.utils import check_form_json
 
 
-def _convert_text_json(data):
-    data = data.replace("'", '"')
-    data = data.replace("True", "true")
-    data = data.replace("False", "false")
-    data = json.loads(data)
-
-    return data
-
-
 def _date_to_str(date):
     return date.strftime('%Y-%m-%d')
 
@@ -51,7 +42,7 @@ def _get_revoke_request_display(revoke_request):
             'first_name': revoke_request.employee.user.first_name,
             'org': revoke_request.employee.org.name,
             'created_at': _date_to_str(revoke_request.created_at) if revoke_request.created_at else '',
-            'form_json': _convert_text_json(revoke_request.form_json) if revoke_request.form_json else '',
+            'form_json': _json.loads(revoke_request.form_json) if revoke_request.form_json else '',
             'geo_json': revoke_request.geo_json,
             'state': revoke_request.get_state_display(),
             'kind': revoke_request.get_kind_display(),
@@ -120,6 +111,7 @@ def revoke_paginate(request, payload):
         _get_revoke_request_display(revoke_request)
         for revoke_request in items_page.object_list
     ]
+
     total_page = total_items.num_pages
 
     rsp = {

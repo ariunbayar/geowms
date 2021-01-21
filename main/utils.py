@@ -4,7 +4,7 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
-
+import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
@@ -633,17 +633,6 @@ def check_form_json(fid, form_json, employee):
         for role in roles:
             for propert in form_json['form_values']:
                 if role.get('property_id') == propert.get('property_id'):
-                    request_json.append({
-                        'pk':propert.get('pk') or '',
-                        'property_name': propert.get('property_name') or '',
-                        'property_id': propert.get('property_id'),
-                        'property_code': propert.get('property_code') or '',
-                        'property_definition': propert.get('property_definition') or '',
-                        'value_type_id': propert.get('value_type_id') or '',
-                        'value_type': propert.get('value_type') or '',
-                        'data': propert.get('data') or '',
-                        'data_list': propert.get('data_list') or '',
-                        'roles': propert.get('roles') or ''
-                    })
+                    request_json.append(propert)
 
-    return request_json if request_json else ''
+    return json.dumps(request_json, ensure_ascii=False) if request_json else ''
