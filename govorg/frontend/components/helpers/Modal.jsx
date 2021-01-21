@@ -72,9 +72,9 @@ export default class Modal extends Component {
             <Fragment>
                 <div className={className}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content animated jackInTheBox" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
+                        <div className="modal-content" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
                             <div className="col-md-12 offset-md-12 float-right my-1">
-                                <button type="button" className="close mt-2 mr-2" data-dismiss="modal" aria-label="Close">
+                                <button type="button" className="close mt-2 mr-2" aria-label="Close">
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
                                 </button>
                             </div>
@@ -91,7 +91,7 @@ export default class Modal extends Component {
                             <div className="d-flex justify-content-center">
                                 <h5 >{this.props.title}</h5>
                                 </div>
-                            <div className="modal-body text-wrap ml-2 mr-2 text-justify">
+                            <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify">
                                 {this.props.text}
                             </div>
                             <div className="modal-footer" style={{border: 'none'}}>

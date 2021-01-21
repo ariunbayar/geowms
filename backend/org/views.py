@@ -288,31 +288,31 @@ def _employee_validation(payload, user):
     register = payload.get('register')
     errors = {}
     if not username:
-        errors['username'] = 'Хоосон байна утга оруулна уу.'
+        errors['username'] = 'Хоосон байна утга оруулна уу!'
     elif len(username) > 150:
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
-        errors['position'] = 'Хоосон байна утга оруулна уу.'
+        errors['position'] = 'Хоосон байна утга оруулна уу!'
     elif len(position) > 250:
         errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
-        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
+        errors['first_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(first_name) > 30:
         errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
     if not last_name:
-        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
+        errors['last_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(last_name) > 150:
         errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not email:
-        errors['email'] = 'Хоосон байна утга оруулна уу.'
+        errors['email'] = 'Хоосон байна утга оруулна уу!'
     elif len(email) > 254:
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
     if not gender:
-        errors['gender'] = 'Хоосон байна утга оруулна уу.'
+        errors['gender'] = 'Хоосон байна утга оруулна уу!'
     elif len(gender) > 100:
         errors['gender'] = '100-с илүүгүй урттай утга оруулна уу!'
     if not register:
-        errors['register'] = 'Хоосон байна утга оруулна уу.'
+        errors['register'] = 'Хоосон байна утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():
@@ -439,21 +439,48 @@ def employee_remove(request, pk):
     return JsonResponse({'success': True})
 
 
+def _org_validation(org_name, org_id):
+    org = Org.objects.filter(pk=org_id).first()
+    errors = {}
+
+    if not org_name:
+        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
+    elif org_name.isspace():
+        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(org_name) > 150:
+        errors['org_name'] = '150-с илүүгүй урттай утга оруулна уу!'
+
+    if org:
+        if org.name != org_name:
+            if Org.objects.filter(name=org_name).first():
+                errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
+    else:
+        if Org.objects.filter(name=org_name).first():
+            errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
+
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def org_add(request, payload, level):
     org_name = payload.get('org_name')
-    upadte_level = payload.get('upadte_level')
+    org_level = payload.get('org_level')
     role_id = payload.get('role_id')
     org_role_filter = GovRole.objects.filter(pk=role_id).first()
     org_id = payload.get('id')
     geo_id = payload.get('geo_id')
     objs = []
+
+    errors = _org_validation(org_name, org_id)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
     if org_id:
         org = get_object_or_404(Org, pk=org_id)
         org.name = org_name
-        org.level = upadte_level
+        org.level = org_level
         org.geo_id = geo_id
         org.save()
         if int(role_id) > -1:
@@ -559,8 +586,9 @@ def org_list(request, payload, level):
         sort_name = 'id'
 
     qs = Org.objects.filter(level=level)
-    qs = qs.annotate(num_employees=Count('employee'))
-    qs = qs.annotate(num_systems=Count('govorg'))
+    qs = qs.annotate(num_employees=Count('employee', distinct=True))
+    qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+
     if query:
         qs = qs.annotate(search=SearchVector('name'))
         qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
@@ -782,9 +810,18 @@ def perm_get_list(request, payload):
 def create_perm(request, payload):
     values = payload.get('values')
     name_check = GovRole.objects.filter(name=values['name'])
+    errors = {}
     if name_check:
+        errors['name'] = 'Нэр давхцаж байна'
         rsp = {
             'success': False,
+            'errors': errors,
+        }
+    elif values['name'].isspace():
+        errors['name'] = 'Хоосон байна утга оруулна уу!'
+        rsp = {
+            'success': False,
+            'errors': errors,
         }
     else:
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
