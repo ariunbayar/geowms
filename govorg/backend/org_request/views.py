@@ -102,7 +102,7 @@ def _convert_text_json(data):
 
     return data
 
- 
+
 def _get_org_request(ob, employee):
 
     geo_json = []
@@ -113,7 +113,7 @@ def _get_org_request(ob, employee):
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
     if ob.old_geo_id:
         old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
-        
+
         if old_geo_data:
             old_geo_data = _convert_text_json(old_geo_data[0]['geom'])
             old_geo_data = _get_geoJson(old_geo_data)
@@ -126,31 +126,32 @@ def _get_org_request(ob, employee):
         else:
             geo_json = FeatureCollection([old_geo_data])
 
-    else:
+    elif geo_json and ob.old_geo_id:
         geo_json = _convert_text_json(ob.geo_json)
         geo_json = _get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
     return {
-        'change_request_id':ob.id,
-        'old_geo_id':ob.old_geo_id,
-        'new_geo_id':ob.new_geo_id,
-        'id':ob.id,
-        'feature_id':ob.feature_id,
-        'package_id':ob.package_id,
-        'theme_id':ob.theme_id,
-        'theme_code':theme_name['theme_code'],
-        'theme_name':theme_name['theme_name'],
-        'package_name':package_name,
-        'feature_name':feature_name,
-        'old_geo_json':current_geo_json,
-        'state':ob.state,
-        'kind':ob.kind,
-        'form_json':_convert_text_json(ob.form_json) if ob.form_json else '',
-        'geo_json':geo_json,
-        'created_at':ob.created_at.strftime('%Y-%m-%d'),
-        'employee':employee.user.first_name,
-        'org':employee.org.name,
+        'change_request_id': ob.id,
+        'old_geo_id': ob.old_geo_id,
+        'new_geo_id': ob.new_geo_id,
+        'id': ob.id,
+        'feature_id': ob.feature_id,
+        'package_id': ob.package_id,
+        'theme_id': ob.theme_id,
+        'theme_code': theme_name['theme_code'],
+        'theme_name': theme_name['theme_name'],
+        'package_name': package_name,
+        'feature_name': feature_name,
+        'old_geo_json': current_geo_json,
+        'state': ob.state,
+        'kind': ob.kind,
+        'group_id': ob.group_id,
+        'form_json': _convert_text_json(ob.form_json) if ob.form_json else '',
+        'geo_json': geo_json,
+        'created_at': ob.created_at.strftime('%Y-%m-%d'),
+        'employee': employee.user.first_name,
+        'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
     }
@@ -238,39 +239,64 @@ def _getChoices(user):
     return {'choices': choices, 'modules': modules}
 
 
+def _make_group_request(org_request_list, org_request, ob, employee):
+    group_request = []
+    group = org_request_list.filter(group_id=ob.id)
+    for ob in group:
+        group_request.append(_get_org_request(ob, employee))
+    if group_request:
+        org_request['group'] = group_request
+
+    return org_request
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def getAll(request):
-    org_request = []
-    employees = _get_employees(request)
-    employee = employees.filter(user=request.user).first()
+    org_requests = []
+
+    employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
-        org_request_list = ChangeRequest.objects.filter(feature_id__in=emp_features).order_by('-created_at')
+
+        qs = ChangeRequest.objects
+        qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.filter(state=ChangeRequest.STATE_NEW)
+        org_request_list = qs.order_by('-created_at')
+
         if org_request_list:
-            org_request = [_get_org_request(ob, employee) for ob in org_request_list]
+            for_list_request = org_request_list.filter(group_id__isnull=True)
+            for ob in for_list_request:
+                org_request = _get_org_request(ob, employee)
+
+                if not ob.form_json and not ob.geo_json:
+                    org_request = _make_group_request(
+                        org_request_list, org_request,
+                        ob, employee,
+                    )
+
+                org_requests.append(org_request)
+
             choices = _getChoices(request.user)
             rsp = {
-                'success':True,
-                'org_request': org_request,
+                'success': True,
+                'org_request': org_requests,
                 'choices': choices['choices'],
                 'modules': choices['modules'],
             }
 
-            return JsonResponse(rsp)
         else:
             rsp = {
-                'success':False,
+                'success': False,
             }
 
-            return JsonResponse(rsp)
     else:
         rsp = {
-                'success':False,
+                'success': False,
             }
 
-        return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -515,12 +541,6 @@ def request_approve(request, payload, pk):
         }
 
     return JsonResponse(rsp)
-
-
-def _get_employees(request):
-    org = get_object_or_404(Employee, user=request.user).org
-    employees = Employee.objects.filter(org=org)
-    return employees
 
 
 @require_GET
