@@ -4,7 +4,7 @@ from main import utils
 def _multilinestring_to_multipolygon(apps, schema_editor):
     Org = apps.get_model('backend_org', 'Org')
     MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
-    firstOrder_geom = utils.get_1stOrder_geo_id()
+    firstOrder_geo_id = utils.get_1stOrder_geo_id()
 
     org_geo_ids = Org.objects.all().values_list('geo_id', flat=True)
     geo_datas = MGeoDatas.objects.filter(geo_id__in=org_geo_ids)
@@ -15,7 +15,7 @@ def _multilinestring_to_multipolygon(apps, schema_editor):
         if geom_type not in ['MultiPolygon', 'Polygon']:
             geo_ids.append(geo_data.geo_id)
 
-    Org.objects.filter(geo_id__in=geo_ids).update(geo_id=firstOrder_geom)
+    Org.objects.filter(geo_id__in=geo_ids).update(geo_id=firstOrder_geo_id)
 
 
 class Migration(migrations.Migration):
