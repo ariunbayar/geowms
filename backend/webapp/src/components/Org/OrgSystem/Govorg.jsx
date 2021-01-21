@@ -8,11 +8,7 @@ export default class Govorg extends Component {
         super(props)
 
         this.state = {
-            modal_status: "closed",
-            action_type: '',
-            text: '',
-            title: '',
-            action_name: ''
+            modal_status: "closed"
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -38,8 +34,6 @@ export default class Govorg extends Component {
 
     modalClose(){
         this.props.handleRemove()
-        if(this.state.action_type == 'refresh_token') this.props.handleTokenRefresh()
-        else if (this.state.action_type == 'remove') this.props.handleRemove()
         this.setState({modal_status: 'closed'})
     }
 
@@ -48,7 +42,6 @@ export default class Govorg extends Component {
         const org_level = this.props.org_level
         const org_id = this.props.org_id
         const idx=this.props.idx
-        const {text, title, action_name} = this.state
         return (
             <tr>
 
@@ -85,7 +78,6 @@ export default class Govorg extends Component {
                         status={this.state.modal_status}
                         modalClose={this.handleModalDeleteClose}
                         modalAction={() => this.modalClose()}
-                        actionName={action_name}
                     />
                 </td>
             </tr>
