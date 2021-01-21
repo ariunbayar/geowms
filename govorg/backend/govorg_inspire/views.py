@@ -5,7 +5,6 @@ import uuid
 import glob
 import random
 from geojson import Feature, FeatureCollection
-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.gdal import DataSource
@@ -21,7 +20,6 @@ from django.db.utils import InternalError
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
-
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
 from backend.inspire.models import EmpPerm
@@ -37,7 +35,6 @@ from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 from govorg.backend.org_request.views import _get_geoJson
-from govorg.backend.org_request.views import _convert_text_json
 from main.decorators import ajax_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
@@ -550,6 +547,8 @@ def create(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     form_json = check_form_json(fid, form_json, employee)
+    geo_json = json.dumps(geo_json, ensure_ascii=False)
+
     ChangeRequest.objects.create(
             old_geo_id = None,
             new_geo_id = None,
@@ -586,7 +585,14 @@ def remove(request, payload):
 
     employee = get_object_or_404(Employee, user__username=request.user)
     geo_data = _get_geom(old_geo_id, fid)
-    geo_data = _convert_text_json(geo_data[0]["geom"])
+    if not geo_data:
+        rsp = {
+        'success': False,
+        'info': "Аль хэдийн устсан геом байна.",
+        }
+        return JsonResponse(rsp)
+
+    geo_data = geo_data[0]["geom"]
     geo_json = _get_geoJson(geo_data)
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
@@ -619,7 +625,6 @@ def remove(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload):
-
     tid = payload.get('tid')
     pid = payload.get('pid')
     fid = payload.get('fid')
@@ -635,6 +640,8 @@ def update(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     form_json = check_form_json(fid, form_json, employee)
+    geo_json = json.dumps(geo_json, ensure_ascii=False)
+
     ChangeRequest.objects.create(
             old_geo_id = old_geo_id,
             new_geo_id = None,

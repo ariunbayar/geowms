@@ -5,7 +5,7 @@ import { CompilationStatus } from 'webpack-build-notifier/dist/types'
 import SideBar from './sideTable'
 import Forms from './Form'
 import './style.css'
-import Modal from '../../../../../src/components/Modal/DeleteModal'
+import Modal from '@utils/Modal/DeleteModal'
 
 export class List extends Component {
 

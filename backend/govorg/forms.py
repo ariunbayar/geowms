@@ -12,5 +12,4 @@ class SystemForm(forms.ModelForm):
         fields = [
             'name',
             'org',
-            'website',
         ]

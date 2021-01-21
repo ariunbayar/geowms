@@ -2,8 +2,7 @@ import React, { Component } from "react"
 import "./style.css"
 import {service} from './service'
 import User from './User'
-import { toSize } from "ol/size"
-import { Pagination } from "../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 
 export class Жагсаалт extends Component {
 

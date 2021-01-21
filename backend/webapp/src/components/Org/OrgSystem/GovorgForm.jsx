@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {TextField} from '../../../helpers/forms'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
@@ -14,12 +13,11 @@ export class GovorgForm extends Component {
         this.state = {
             govorg: {},
             wms_list: [],
-            values: {
-                id: '',
-                name: '',
-            },
             layers: [],
             modal_alert_status: "closed",
+            title: '',
+            model_type_icon: '',
+            timer: null,
         }
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
@@ -29,16 +27,16 @@ export class GovorgForm extends Component {
 
     componentDidMount() {
 
-        Promise.all([
-            service.getWMSList(),
-            service.detail(this.props.match.params.system_id),
-        ]).then(([{wms_list}, {govorg}]) => {
-            this.setState({govorg, layers: govorg.layers, wms_list})
+        const system_id = this.props.match.params.system_id
+        service.getWMSList().then(({wms_list}) => {
+            this.setState({wms_list})
         })
 
-    }
-
-    componentDidUpdate(prevProps) {
+        if (system_id) {
+            service.detail(system_id).then(({govorg}) => {
+                this.setState(({govorg, layers: govorg.layers,}))
+            })
+        }
 
     }
 
@@ -55,8 +53,7 @@ export class GovorgForm extends Component {
         this.setState({layers})
     }
 
-    handleSubmit(values, {setStatus, setSubmitting}) {
-        const org_level = this.props.match.params.level
+    handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
         const org_id = this.props.match.params.id
         const data = {
             ...values,
@@ -69,26 +66,38 @@ export class GovorgForm extends Component {
 
         if(this.state.govorg.id){
             data.id = this.state.govorg.id
-            service.update(data).then(({success}) => {
-                setTimeout(() => {
+            service.update(data).then(({success, info, errors}) => {
+                if (success){
                     setStatus('saved')
                     setSubmitting(false)
-                    this.setState({modal_alert_status: "open"})
-                }, 800)
+                    this.setState({
+                        modal_alert_status: "open",
+                        title: info,
+                        model_type_icon: 'success',
+                    })
+                    this.modalCloseTime()
+                } else {
+                    setErrors(errors)
+                    setSubmitting(false)
+                }
             })
-        }
-        else{
-        const org_id = this.props.match.params.id
-
-            service.create(data).then(({success}) => {
-                setTimeout(() => {
+        } else{
+            service.create(data).then(({success, info, errors}) => {
+                if (success){
                     setStatus('saved')
                     setSubmitting(false)
-                    this.setState({modal_alert_status: "open"})
-                }, 800)
+                    this.setState({
+                        modal_alert_status: "open",
+                        title: info,
+                        model_type_icon: 'success',
+                    })
+                    this.modalCloseTime()
+                } else {
+                    setErrors(errors)
+                    setSubmitting(false)
+                }
             })
         }
-        this.modalCloseTime()
 
     }
 
@@ -104,12 +113,9 @@ export class GovorgForm extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
-        this.setState({modal_alert_status: "closed"})
-        clearTimeout(this.state.timer)
     }
 
     render() {
-        const {name, token, website} = this.state.govorg
         return (
 
             <div className="my-4">
@@ -154,7 +160,7 @@ export class GovorgForm extends Component {
                                             </label>
 
                                             <Field
-                                                className={'form-control mb-2' + (errors.name ? 'is-invalid' : '')}
+                                                className={'form-control mb-2' + (errors.name ? ' is-invalid' : '')}
                                                 placeholder="Системүүдийн нэр"
                                                 name='name'
                                                 id="id_name"
@@ -166,28 +172,20 @@ export class GovorgForm extends Component {
                                                 Домэйнээр хязгаарлах:
                                             </label>
                                             <Field
-                                                className={'form-control my-1' + (errors.website ? 'is-invalid' : '')}
+                                                className={'form-control my-1' + (errors.website ? ' is-invalid' : '')}
                                                 placeholder="Байршуулах вэбсайт"
                                                 name='website'
                                                 id="id_website"
                                                 type="text"
                                             />
                                             <ErrorMessage name="website" component="div" className="invalid-feedback"/>
-                                            <small className="text-muted">жишээ нь: https://domain.mn</small>
+                                            <small className="text-muted">Жишээ нь: https://domain.mn</small>
                                         </div>
 
                                         <div></div>
                                         <div className="span3">
-                                            {has_error
-                                                ?
-                                                    <p> </p>
-                                                : status == 'saved' && !dirty &&
-                                                    <p>
-                                                        Амжилттай нэмэгдлээ
-                                                    </p>
-                                            }
                                             <div>
-                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
+                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                     {isSubmitting && ' Шалгаж байна.'}
                                                     {!isSubmitting && 'Хадгалах' }
@@ -237,8 +235,8 @@ export class GovorgForm extends Component {
                 <ModalAlert
                     modalAction={() => this.modalClose()}
                     status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа"
-                    model_type_icon = "success"
+                    title={this.state.title}
+                    model_type_icon = {this.state.model_type_icon}
                 />
             </div>
 

@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom"
 import { service } from "./service"
 import WMSCheckFormSort from './WMSCheckFormSort'
 import ModalAlert from '../ModalAlert'
-import {Notif} from '../../../../../src/components/Notification/index'
+import {Notif} from '@utils/Notification'
 import './styles.css'
 
 export class WMSForm extends Component {
