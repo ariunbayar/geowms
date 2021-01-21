@@ -246,25 +246,34 @@ def getAll(request):
     org_requests = []
     group_request = []
     dont_append = []
-    employees = _get_employees(request)
-    employee = employees.filter(user=request.user).first()
+
+    employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
-        org_request_list = ChangeRequest.objects.filter(feature_id__in=emp_features).order_by('-created_at')
+
+        qs = ChangeRequest.objects
+        qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.filter(state=ChangeRequest.STATE_NEW)
+        org_request_list = qs.order_by('-created_at')
+
         if org_request_list:
+
             for ob in org_request_list:
                 if dont_append and ob.id not in dont_append:
                     org_requests.append(_get_org_request(ob, employee))
+
                 if not ob.form_json and not ob.geo_json:
                     org_request = _get_org_request(ob, employee)
                     group = org_request_list.filter(group_id=ob.id)
                     for ob in group:
                         dont_append.append(ob.id)
                         group_request.append(_get_org_request(ob, employee))
+
                     if group_request:
                         org_request['group'] = group_request
                         org_requests.append(org_request)
                         group_request = []
+
             choices = _getChoices(request.user)
             rsp = {
                 'success': True,
@@ -528,12 +537,6 @@ def request_approve(request, payload, pk):
         }
 
     return JsonResponse(rsp)
-
-
-def _get_employees(request):
-    org = get_object_or_404(Employee, user=request.user).org
-    employees = Employee.objects.filter(org=org)
-    return employees
 
 
 @require_GET

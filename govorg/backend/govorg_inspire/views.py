@@ -737,7 +737,7 @@ def _create_request(request_datas):
     change_request.feature_id = request_datas['feature_id']
     change_request.employee = request_datas['employee']
     change_request.state = request_datas['state']
-    change_request.kind = request_datas['kind'] if 'kind' in request_datas else None
+    change_request.kind = request_datas['kind']
     change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
     change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
     change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
@@ -924,6 +924,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             'package_id': pid,
             'feature_id': feature_id,
             'state': ChangeRequest.STATE_NEW,
+            'kind': ChangeRequest.KIND_CREATE,
             'employee': employee,
         }
         main_request_id = _create_request(request_datas)
