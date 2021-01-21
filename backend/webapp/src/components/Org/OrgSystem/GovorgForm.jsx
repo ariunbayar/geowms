@@ -166,7 +166,7 @@ export class GovorgForm extends Component {
                                                 id="id_name"
                                                 type="text"
                                             />
-                                            <ErrorMessage name="name" component="div" className="text-danger"/>
+                                            <ErrorMessage name="name" component="div" className="invalid-feedback"/>
 
                                             <label htmlFor="id_website">
                                                 Домэйнээр хязгаарлах:
@@ -178,7 +178,7 @@ export class GovorgForm extends Component {
                                                 id="id_website"
                                                 type="text"
                                             />
-                                            <ErrorMessage name="website" component="div" className="text-danger"/>
+                                            <ErrorMessage name="website" component="div" className="invalid-feedback"/>
                                             <small className="text-muted">Жишээ нь: https://domain.mn</small>
                                         </div>
 

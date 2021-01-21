@@ -17,38 +17,46 @@ export class Forms extends Component {
             },
             modal_alert_status: "closed",
             title: '',
-            icon: ''
+            icon: '',
+            timer: null,
 
         }
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
 
     }
-    handleSubmit(values, {setStatus, setSubmitting}) {
+    handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
         setStatus('checking')
         setSubmitting(true)
-        service.createPerm(values).then(({success}) => {
+        service.createPerm(values).then(({success, errors}) => {
             if(success){
-                setTimeout(() => {
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({modal_alert_status: "open", title: 'Амжилттай хадгаллаа', icon: 'success'})
-                    this.modalClose()
-                }, 800)
-            }else{
-                setTimeout(() => {
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({modal_alert_status: "open", title: 'Нэр давхцаж байна', icon: 'danger'})
-                }, 800)
+                setStatus('saved')
+                setSubmitting(false)
+                this.setState({
+                    modal_alert_status: "open",
+                    title: 'Амжилттай хадгаллаа',
+                    icon: 'success'
+                })
+                this.modalCloseTime()
+            } else {
+                setSubmitting(false)
+                setErrors(errors)
             }
         })
 
     }
 
+    modalCloseTime(){
+        this.state.timer = setTimeout(() => {
+            this.props.history.push(`/back/org-role/`)
+        }, 2000)
+    }
+
     modalClose(){
-        this.props.history.push(`/back/org-role/`)
-        this.setState({modal_alert_status: "closed"})
         clearTimeout(this.state.timer)
+        this.props.history.push(`/back/org-role/`)
     }
 
     render() {
@@ -56,7 +64,7 @@ export class Forms extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="row">
+                    <div className="text-left">
                         <NavLink to={`/back/org-role/`}>
                             <p className="btn gp-outline-primary">
                                 <i className="fa fa-angle-double-left"> Буцах</i>
@@ -116,14 +124,6 @@ export class Forms extends Component {
                                             </div>
                                             <div></div>
                                             <div className="span3">
-                                                {has_error
-                                                    ?
-                                                        <p> </p>
-                                                    : status == 'saved' && !dirty &&
-                                                        <p>
-                                                            Амжилттай нэмэгдлээ
-                                                        </p>
-                                                }
                                                 <div>
                                                     <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
                                                         {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}

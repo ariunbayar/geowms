@@ -514,7 +514,6 @@ def save(request, payload):
                 theme_code = datas['theme_code']
                 theme_name = datas['theme_name']
                 theme_name_eng = datas['theme_name_eng']
-                top_theme_id = datas['top_theme_id']
                 order_no = datas['order_no']
                 is_active = datas['is_active']
                 modified_by = datas['modified_by']
@@ -528,7 +527,6 @@ def save(request, payload):
                                     theme_code=theme_code,
                                     theme_name=theme_name,
                                     theme_name_eng=theme_name_eng,
-                                    top_theme_id=top_theme_id,
                                     order_no=order_no,
                                     is_active=is_active,
                                     created_by=created_by,

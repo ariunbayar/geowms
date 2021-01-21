@@ -33,7 +33,7 @@ export class EmployeeTable extends Component {
 
     render() {
         const { idx, prefix } = this.props
-        const { id, last_name, first_name, email, position, is_admin } = this.props.values
+        const { id, last_name, first_name, email, position, is_admin, role_name } = this.props.values
 
         const last_name_conv = last_name.charAt(0).toUpperCase()
         const firt_name_conv = first_name.charAt(0).toUpperCase() + first_name.slice(1)
@@ -55,6 +55,7 @@ export class EmployeeTable extends Component {
                 <td>
                     {position}
                 </td>
+		<td>{role_name}</td>
                 <td className="text-center">
                     <i className={`fa ` +
                         (is_admin

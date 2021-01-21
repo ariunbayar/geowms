@@ -21,6 +21,7 @@ export const service = {
     geom,
     getWmsLayer,
     remove,
+    cancel,
     save,
     detail,
     sendFeature,
@@ -73,6 +74,14 @@ function remove(pid, fid, gid) {
         body: JSON.stringify({gid}),
     }
     return fetch(`${prefix}/${pid}/${fid}/remove/`, opts).then(handleResponse)
+}
+
+function cancel(pid, fid, tid, old_geo_id, geo_json, form_json, order_no, order_at) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({pid, fid, tid, old_geo_id, geo_json, form_json, order_no, order_at}),
+    }
+    return fetch(`/gov/api/revoke_request/revoke-new/`, opts).then(handleResponse)
 }
 
 function save(oid, values) {

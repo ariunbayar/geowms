@@ -1,9 +1,10 @@
-import React, { Component } from "react"
+import React, { Component, Fragment } from "react"
 import {NavLink} from "react-router-dom"
 import {service} from "./service"
 import ModalAlert from "../ModalAlert"
-import Loader from "../Loader"
-
+import {Formik, Field, Form, ErrorMessage} from 'formik'
+import {validationSchema} from './validationSchema'
+import Loader from "@utils/Loader"
 
 export class OrgAdd extends Component {
 
@@ -11,10 +12,6 @@ export class OrgAdd extends Component {
         super(props)
 
         this.state = {
-            org_name: '',
-            upadte_level: 1,
-            org_role: -1,
-            handleSaveIsLoad: false,
             modal_alert_status: "closed",
             timer: null,
             roles: [],
@@ -26,10 +23,17 @@ export class OrgAdd extends Component {
             fourthOrder_value: -1,
             geo_id: null,
             firstOrder_geom: '',
+            disabled: true,
+            is_loading: true,
+
+            form_values: {
+                org_level: 1,
+                org_name: '',
+                org_role: '-1',
+            }
         }
 
-        this.handleUserSearch = this.handleUserSearch.bind(this)
-        this.handleSave = this.handleSave.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.formOptions = this.formOptions.bind(this)
@@ -41,7 +45,6 @@ export class OrgAdd extends Component {
     componentDidMount() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        this.setState({upadte_level: org_level})
         this.handleGetAll(org_level, org_id)
     }
 
@@ -50,9 +53,12 @@ export class OrgAdd extends Component {
             service.orgAll(org_level, org_id).then(({ orgs }) => {
                 if (orgs) {
                     orgs.map(org => this.setState({
-                        org_name: org.name,
-                        org_role: org.org_role,
-                        geo_id: org.geo_id
+                        form_values: {
+                            org_level: org_level,
+                            org_name: org.name,
+                            org_role: org.org_role,
+                        },
+                        geo_id: org.geo_id,
                     }))
                     this.formOptions()
                 }
@@ -63,14 +69,10 @@ export class OrgAdd extends Component {
         }
     }
 
-    handleUserSearch(org_name, e){
-        this.setState({[org_name]: e.target.value})
-    }
-
     formOptions() {
         service.formOptions().then(({success, secondOrders, roles, firstOrder_geom}) => {
             if (success) {
-                this.setState({secondOrders, roles, firstOrder_geom})
+                this.setState({secondOrders, roles, firstOrder_geom, is_loading: false})
                 const geo_id = this.state.geo_id
                 if (geo_id) {
                     var find_text = ''
@@ -101,6 +103,7 @@ export class OrgAdd extends Component {
                 } else {
                     this.setState({geo_id: firstOrder_geom})
                 }
+                this.setState({disabled: false})
             }
         })
     }
@@ -162,159 +165,190 @@ export class OrgAdd extends Component {
         this.setState({fourthOrder_value: value})
     }
 
-    handleSave(){
-        this.setState({handleSaveIsLoad:true})
+    handleSubmit(values, { setStatus, setSubmitting, setErrors }){
+
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        const {org_name, upadte_level, geo_id, org_role} = this.state
-        const values = {
-            org_name: org_name,
+        const {geo_id} = this.state
+        const datas = {
+            org_name: values.org_name,
             id: org_id,
-            upadte_level: upadte_level,
-            role_id: org_role,
+            org_level: values.org_level,
+            role_id: values.org_role,
             geo_id: geo_id,
         }
-        service.org_add(org_level, values).then(({ success }) => {
-            success && this.setState({modal_alert_status: "open"})
-            this.modalCloseTime()
+        service.org_add(org_level, datas).then(({success, errors}) => {
+            if (success) {
+                this.setState({modal_alert_status: "open"})
+                setStatus('saved')
+                setSubmitting(false)
+                this.modalCloseTime()
+            } else {
+                setErrors(errors)
+                setSubmitting(false)
+            }
         })
     }
 
     modalClose(){
         const org_level = this.props.match.params.level
-        this.setState({handleSaveIsLoad:false})
-        this.setState({modal_alert_status: "closed"})
         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-        clearTimeout(this.state.timer)
     }
 
     modalCloseTime(){
         const org_level = this.props.match.params.level
         this.state.timer = setTimeout(() => {
-            this.setState({handleSaveIsLoad:false})
-            this.setState({modal_alert_status: "closed"})
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
         }, 2000)
     }
 
     render() {
 
-        const {org_name, upadte_level, roles} = this.state
+        const {form_values, roles, disabled} = this.state
 
         const org_id = this.props.match.params.id
         const org_level = this.props.match.params.level
 
         return (
-            <div className="main-content">
-                <div className="page-container my-4">
-                    <div className="text-left">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </p>
-                        </NavLink>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-4 card-body">
-                            <div className="form-group">
-                                <h5 className="mb-3">Байгууллагын нэр</h5>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="org_name"
-                                    onChange={(e) => this.handleUserSearch('org_name', e)}
-                                    value={org_name}
+            <div>
+                <Formik
+                    enableReinitialize
+                    initialValues={form_values}
+                    validationSchema={validationSchema}
+                    onSubmit={this.handleSubmit}
+                >
+                {({
+                    errors,
+                    isSubmitting,
+                }) => {
+                    const has_error = Object.keys(errors).length > 0
+                    return (
+                        <div>
+                            <div className="text-left">
+                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
+                                    <p className="btn gp-outline-primary">
+                                        <i className="fa fa-angle-double-left"></i> Буцах
+                                    </p>
+                                </NavLink>
+                            </div>
+                            <Form className="col-4">
+                                <Loader
+                                    is_loading = {this.state.is_loading}
                                 />
-                            </div>
-                            {org_id &&
-                            <div className="form-group">
-                                    <h5 className="mb-3">Түвшин</h5>
-                                    <select className="form-control" id="upadte_level" value={this.state.upadte_level} onChange={(e) => this.handleUserSearch('upadte_level', e)}>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                    </select>
+                                <div className="form-row">
+                                    <div className="form-group col">
+                                        <div className="position-relative has-icon-right">
+                                            <label htmlFor="org_name">Байгууллагын нэр</label>
+                                            <div className='row'>
+                                                <Field
+                                                    className={'form-control ' + (errors.org_name ? 'is-invalid' : '')}
+                                                    name='org_name'
+                                                    id="id_org_name"
+                                                    type="text"
+                                                    placeholder="Байгууллагын нэр"
+                                                />
+                                                <ErrorMessage name="org_name" component="div" className="invalid-feedback"/>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                            <div className="form-group">
-                                <h5 className="mb-3">Байгууллагын эрх</h5>
-                                <select className="form-control" id="org_role" value={this.state.org_role} onChange={(e) => this.setState({org_role: e.target.value})}>
-                                    <option value={-1}>....</option>
-                                    {roles.map((role, idx) =>
-                                        <option key={idx} value={role.id}>{role.name}</option>
-                                    )}
-                                </select>
-                            </div>
-
-                            <h5 className="mb-3">Байгууллагын хамрах хүрээ</h5>
-
-                            <table className="table">
-                                <tbody>
-                                    <tr>
-                                        <th style={{width:"38%"}}>Аймаг/ Хот</th>
-                                        <td style={{width:"60%"}}>
-                                            <select className='form-control' value={this.state.secondOrder_value} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
-                                                <option value='-1'>--- Улсын хэмжээнд ---</option>
-                                                {this.state.secondOrders.map((data, idx) =>
-                                                    <option key={idx} value={data['geo_id']} >{data['name']}</option>
-                                                )}
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Сум/ Дүүрэг</th>
-                                        <td>
-                                            <select className='form-control' value={this.state.thirthOrder_value} onChange={(e) => this.handle3rdOrderChange(e.target.value)}>
-                                                <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
-                                                {this.state.thirthOrders.map((data, idx) =>
-                                                    <option key={idx} value={data['geo_id']}>{data['name']}</option>
-                                                )}
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Баг/ Хороо</th>
-                                        <td>
-                                            <select className='form-control' value={this.state.fourthOrder_value} onChange={(e) => this.handle4thOrderChange(e.target.value)}>
-                                                <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
-                                                {this.state.fourthOrders.map((data, idx) =>
-                                                    <option key={idx} value={data['geo_id']}>{data['name']}</option>
-                                                )}
-                                            </select>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-2 ml-3">
-                            <div className="form-group">
-                                {this.state.handleSaveIsLoad ?
-                                    <>
-                                        <button className="btn btn-block gp-btn-primary">
-                                            <a className="spinner-border text-light" role="status">
-                                                <span className="sr-only">Loading...</span>
-                                            </a>
-                                            <span> Шалгаж байна. </span>
-                                        </button>
-                                        <ModalAlert
-                                            modalAction={() => this.modalClose()}
-                                            status={this.state.modal_alert_status}
-                                            title="Амжилттай хадгаллаа"
-                                            model_type_icon = "success"
-                                        />
-                                    </>
-                                :
-                                <button className="btn btn-block gp-btn-primary" onClick={this.handleSave} >
-                                    Хадгалах
-                                </button>
+                                {org_id &&
+                                    <div className="form-row">
+                                        <div className="form-group col">
+                                            <label htmlFor="org_level">Түвшин</label>
+                                            <div className='row'>
+                                                <Fragment>
+                                                    <Field name="org_level" as="select" className="form-control"
+                                                    className={'form-control ' + (errors.org_level ? 'is-invalid' : '')}>
+                                                        <option>1</option>
+                                                        <option>2</option>
+                                                        <option>3</option>
+                                                        <option>4</option>
+                                                    </Field>
+                                                    <ErrorMessage name="org_level" component="div" className="invalid-feedback"/>
+                                                </Fragment>
+                                            </div>
+                                        </div>
+                                    </div>
                                 }
-                            </div>
+                                <div className="form-row">
+                                    <div className="form-group col">
+                                        <label htmlFor="org_role">Байгууллагын эрх</label>
+                                        <div className='row'>
+                                            <Fragment>
+                                                <Field name="org_role" as="select" className="form-control"
+                                                className={'form-control ' + (errors.org_role ? 'is-invalid' : '' )}>
+                                                    <option value="-1">....</option>
+                                                    {roles.map((role, idx) =>
+                                                        <option key={idx} value={role.id}>{role.name}</option>
+                                                    )}
+                                                </Field>
+                                                <ErrorMessage name="org_role" component="div" className="invalid-feedback"/>
+                                            </Fragment>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h5 className="mb-3">Байгууллагын хамрах хүрээ</h5>
+                                <table className="table col">
+                                    <tbody>
+                                        <tr>
+                                            <th className='pt-3'>Аймаг/ Хот</th>
+                                            <td>
+                                                <div className='row'>
+                                                    <select className='form-control' value={this.state.secondOrder_value} onChange={(e) => this.handle2ndOrderChange(e.target.value)}>
+                                                        <option value='-1'>--- Улсын хэмжээнд ---</option>
+                                                        {this.state.secondOrders.map((data, idx) =>
+                                                            <option key={idx} value={data['geo_id']} >{data['name']}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th className='pt-3'>Сум/ Дүүрэг</th>
+                                            <td>
+                                                <div className='row'>
+                                                    <select className='form-control' value={this.state.thirthOrder_value} onChange={(e) => this.handle3rdOrderChange(e.target.value)}>
+                                                        <option value="-1">--- Сум/Дүүрэг сонгоно уу ---</option>
+                                                        {this.state.thirthOrders.map((data, idx) =>
+                                                            <option key={idx} value={data['geo_id']}>{data['name']}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th className='pt-3'>Баг/ Хороо</th>
+                                            <td>
+                                                <div className='row'>
+                                                    <select className='form-control' value={this.state.fourthOrder_value} onChange={(e) => this.handle4thOrderChange(e.target.value)}>
+                                                        <option value="-1">--- Баг/Хороо сонгоно уу ---</option>
+                                                        {this.state.fourthOrders.map((data, idx) =>
+                                                            <option key={idx} value={data['geo_id']}>{data['name']}</option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div className="form-group">
+                                    <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
+                                        {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                        {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                        {!isSubmitting && 'Хадгалах' }
+                                    </button>
+                                </div>
+                            </Form>
                         </div>
-                    </div>
-                </div>
+                    )}}
+                </Formik>
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={this.state.modal_alert_status}
+                    title="Амжилттай хадгаллаа"
+                    model_type_icon = "success"
+                />
             </div>
         )
     }

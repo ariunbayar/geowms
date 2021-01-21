@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {UserFormTable} from './UserFormTable'
 import {service} from '../service'
 import {NavLink} from "react-router-dom"
-import { Pagination } from "../../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 import ModalAlert from "../../ModalAlert"
 
 export class UserForm extends Component {

@@ -60,20 +60,15 @@ def _system_validation(payload, system):
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk=None):
     system = GovOrg.objects.filter(pk=pk, deleted_by__isnull=True).first()
-    errors = _system_validation(payload, system)
-
-    if errors:
-        return JsonResponse({
-            'success': False,
-            'errors': errors,
-        })
 
     if pk:
         form = SystemForm(payload, instance=system)
+        errors = _system_validation(payload, system)
     else:
         form = SystemForm(payload)
+        errors = _system_validation(payload, system=None)
 
-    if form.is_valid():
+    if form.is_valid() and not errors:
         with transaction.atomic():
             form.instance.token = TokenGeneratorSystem().get()
             form.instance.website = payload['website']
@@ -85,6 +80,11 @@ def хадгалах(request, payload, pk=None):
         return JsonResponse({
             'success': True,
             'info': 'Амжилттай хадгаллаа.'
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': errors,
         })
 
 

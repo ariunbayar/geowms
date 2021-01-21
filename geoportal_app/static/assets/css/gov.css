@@ -83,6 +83,10 @@ body {
   font-size: 14px;
   font-weight: 400;
   color: #484848;
+  min-height: 1000px;
+  background-image: url("../image/login-back.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 a {
@@ -171,16 +175,6 @@ a {
 .logo-bottom {
   width: 137px;
 }
-
-/*login*/
-
-.login-container {
-  min-height: 1000px;
-  background-image: url("../image/login-back.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 
 /* help table */
 .serviceDiv tbody {

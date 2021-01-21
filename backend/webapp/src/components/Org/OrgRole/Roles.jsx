@@ -503,7 +503,7 @@ export class Roles extends Component {
                     }
                 </div>
                 </div>
-            <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}><i className="fa fa-chevron-left" aria-hidden="true"></i></a>
+            <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}><i aria-hidden="true"></i></a>
             <ModalAlert
                 modalAction={() => this.modalClose()}
                 status={this.state.modal_alert_status}
