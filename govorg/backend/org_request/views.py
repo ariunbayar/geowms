@@ -102,7 +102,7 @@ def _convert_text_json(data):
 
     return data
 
-
+ 
 def _get_org_request(ob, employee):
 
     geo_json = []
