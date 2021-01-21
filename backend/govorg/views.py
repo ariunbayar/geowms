@@ -29,7 +29,7 @@ def _get_govorg_display(govorg):
     }
 
 
-def _system_validation(payload, system):
+def _system_validation(payload, system=None):
     system_name = payload['name']
     domain = payload['website']
     errors = {}
@@ -44,11 +44,11 @@ def _system_validation(payload, system):
         if is_domain is not True:
             errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
 
-    domain_check = False
+    is_name_changed = False
     if system:
         if system.name != system_name:
-            domain_check = True
-    if domain_check or not system:
+            is_name_changed = True
+    if is_name_changed or not system:
         if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True).first():
             errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
 
@@ -59,14 +59,13 @@ def _system_validation(payload, system):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk=None):
-    system = GovOrg.objects.filter(pk=pk, deleted_by__isnull=True).first()
-
     if pk:
+        system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
         form = SystemForm(payload, instance=system)
         errors = _system_validation(payload, system)
     else:
         form = SystemForm(payload)
-        errors = _system_validation(payload, system=None)
+        errors = _system_validation(payload)
 
     if form.is_valid() and not errors:
         with transaction.atomic():
@@ -84,7 +83,7 @@ def хадгалах(request, payload, pk=None):
     else:
         return JsonResponse({
             'success': False,
-            'errors': errors,
+            'errors': {**form.errors, **errors},
         })
 
 
