@@ -105,9 +105,9 @@ export class EmployeeDetail extends Component {
                         </div>
                         <div className="form-group col-md-6">
                             <div className="table-responsive text-right">
-                                <a href="#" className="btn btn-outline-success waves-effect waves-light m-1"> <i className="fa fa-pencil-square-o text-success"></i>Засах</a>
-                                <a href="#" className="btn btn-outline-danger waves-effect waves-light m-1"> <i className="fa fa fa-trash-o"></i>Устгах</a>
-                                <a href="#" className="btn btn-outline-primary waves-effect waves-light m-1"> <i className="fa fa-refresh text-primary"></i>Токен шинэчлэх</a>
+                                <a href="#" className="btn btn-outline-success waves-effect waves-light m-1"> <i className="fa fa-pencil-square-o text-success mr-1"></i>Засах</a>
+                                <a href="#" className="btn btn-outline-danger waves-effect waves-light m-1"> <i className="fa fa fa-trash-o mr-1"></i>Устгах</a>
+                                <a href="#" className="btn btn-outline-primary waves-effect waves-light m-1"> <i className="fa fa-refresh text-primary mr-1"></i>Токен шинэчлэх</a>
                             </div>
                         </div>
                     </div>
@@ -196,6 +196,16 @@ export class EmployeeDetail extends Component {
                                             id="register"
                                             disabled
                                             value={register || ''}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="role">Role:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="role"
+                                            disabled
+                                            value={role_name || ''}
                                         />
                                     </div>
                                     <div className="form-group">
