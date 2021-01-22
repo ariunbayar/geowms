@@ -13,6 +13,7 @@ import random
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
 from geoportal_app.models import User
+from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
     LThemes,
     LPackages,
@@ -529,3 +530,4 @@ def search(request, payload):
             'info': str(e)
         }
     return JsonResponse(rsp)
+

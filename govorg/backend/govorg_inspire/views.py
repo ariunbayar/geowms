@@ -45,6 +45,7 @@ from main.utils import gis_tables_by_oids
 from main.utils import has_employee_perm
 from main.utils import refreshMaterializedView
 from main.utils import get_emp_property_roles
+from main.inspire import GEoIdGenerator
 
 
 def _get_changeset_display(ob):
