@@ -100,8 +100,8 @@ def _get_org_request(ob, employee):
     geo_json = []
     old_geo_data = []
     current_geo_json = []
-    feature_name = LFeatures.objects.filter(feature_id= ob.feature_id).first().feature_name
-    package_name = LPackages.objects.filter(package_id= ob.package_id).first().package_name
+    feature_name = LFeatures.objects.filter(feature_id=ob.feature_id).first().feature_name
+    package_name = LPackages.objects.filter(package_id=ob.package_id).first().package_name
     theme_name = LThemes.objects.filter(theme_id= ob.theme_id).values('theme_name', 'theme_code').first()
     if ob.old_geo_id:
         old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
@@ -238,7 +238,11 @@ def getAll(request):
     employee = employees.filter(user=request.user).first()
     emp_features = _get_emp_features(employee)
     if emp_features:
-        org_request_list = ChangeRequest.objects.filter(feature_id__in=emp_features).order_by('-created_at')
+        qs = ChangeRequest.objects
+        qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
+        qs = qs.order_by('-created_at')
+        org_request_list = qs
         if org_request_list:
             org_request = [_get_org_request(ob, employee) for ob in org_request_list]
             choices = _getChoices(request.user)
