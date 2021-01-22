@@ -232,9 +232,7 @@ export class OrgAdd extends Component {
                                 </NavLink>
                             </div>
                             <Form className="col-4">
-                                <Loader
-                                    is_loading = {this.state.is_loading}
-                                />
+                                <Loader is_loading={this.state.is_loading}/>
                                 <div className="form-row">
                                     <div className="form-group col">
                                         <div className="position-relative has-icon-right">
