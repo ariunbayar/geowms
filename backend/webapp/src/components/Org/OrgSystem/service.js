@@ -7,10 +7,8 @@ export const service = {
     detail,
     getWMSList,
     govorgList,
+    tokenRefresh
 }
-
-
-const prefix = '/back/api/систем'
 
 
 function create(values) {
@@ -20,7 +18,7 @@ function create(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/үүсгэх/`, opts).then(handleResponse)
+    return fetch(`/back/api/систем/үүсгэх/`, opts).then(handleResponse)
 }
 
 
@@ -31,7 +29,7 @@ function update(values) {
         body: JSON.stringify(values),
     }
 
-    return fetch(`${prefix}/${values.id}/хадгалах/`, opts).then(handleResponse)
+    return fetch(`/back/api/систем/${values.id}/хадгалах/`, opts).then(handleResponse)
 }
 
 
@@ -40,7 +38,15 @@ function remove(id) {
         ...getPostOptions(),
     }
 
-    return fetch(`${prefix}/${id}/устгах/`, opts).then(handleResponse)
+    return fetch(`/back/api/систем/${id}/устгах/`, opts).then(handleResponse)
+}
+
+
+function tokenRefresh(id) {
+    const opts = {
+        ...getPostOptions(),
+    }
+    return fetch(`/back/api/систем/${id}/refresh-token/`, opts).then(handleResponse)
 }
 
 
@@ -49,7 +55,7 @@ function detail(id) {
         ...getGetOptions(),
     }
 
-    return fetch(`${prefix}/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
+    return fetch(`/back/api/систем/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
 }
 
 
@@ -61,10 +67,11 @@ function getWMSList() {
     return fetch(`/back/wms/all/`, opts).then(handleResponse)
 }
 
+
 function govorgList(page, perpage, query, org_id) {
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({page, perpage, query, org_id}),
     }
-    return fetch(`${prefix}/govorgList/`, requestOptions).then(handleResponse)
+    return fetch(`/back/api/систем/govorgList/`, requestOptions).then(handleResponse)
 }

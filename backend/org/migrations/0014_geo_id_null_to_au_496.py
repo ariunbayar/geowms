@@ -1,9 +1,11 @@
-from django.db import migrations, models
+from django.db import migrations
+from main import utils
 
 
 def _geo_id_null_to_au_496(apps, schema_editor):
     Org = apps.get_model('backend_org', 'Org')
-    orgs = Org.objects.filter(geo_id__isnull=True).update(geo_id='au_496')
+    firstOrder_geo_id = utils.get_1stOrder_geo_id()
+    Org.objects.filter(geo_id__isnull=True).update(geo_id=firstOrder_geo_id)
 
 
 class Migration(migrations.Migration):
