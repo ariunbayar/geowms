@@ -9,7 +9,6 @@ from backend.org.models import Org, Employee
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from main import utils
-from django.contrib.auth.decorators import login_required
 from backend.inspire.models import (
     GovPermInspire,
     EmpRole,
@@ -384,7 +383,7 @@ def refresh_token(request, pk):
     else:
         rsp = {
             'success': False,
-            'info': 'Та байгуулгын админ биш байна.'
+            'info': 'Та байгууллагын админ биш байна.'
         }
 
     return JsonResponse(rsp)
