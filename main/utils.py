@@ -676,7 +676,7 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
             for хувьсах_талбар in хувьсах_талбарууд:
                 if хувьсах_талбар['field'] == field:
                     action = хувьсах_талбар['action']
-                    obj[хувьсах_талбар['new_field']] = action(item[field])
+                    obj[хувьсах_талбар['new_field']] = action(item[field], item)
 
         display.append(obj)
 

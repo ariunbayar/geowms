@@ -31,7 +31,7 @@ urlpatterns = [
         path('move/', wms_views.move, name='move'),
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
-        path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
+        path('paginatedList/', wms_views.paginated_list, name='paginatedList'),
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
     ], 'wms'))),

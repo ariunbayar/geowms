@@ -19,7 +19,6 @@ class Datatable():
         self.items_page = None
         self.total_page = None
 
-
     def get_fields(self):
         fields = []
         for field in self.Model._meta.get_fields():
@@ -36,15 +35,15 @@ class Datatable():
 
     @хасах_талбарууд.setter
     def хасах_талбарууд(self, values):
-        fields = self.get_fields()
-        for value in values:
-            if value in fields:
-                fields.remove(value)
+        if values:
+            fields = self.get_fields()
+            for value in values:
+                if value in fields:
+                    fields.remove(value)
 
-        self.оруулах_талбарууд = fields
+            self.оруулах_талбарууд = fields
 
     def search(self):
-
         qs = self.Model.objects.annotate(search=SearchVector(*self.оруулах_талбарууд))
         qs = qs.filter(search__icontains=self.query)
         qs = qs.order_by(self.sort_name)
@@ -62,4 +61,3 @@ class Datatable():
         items = get_display_items(self.items_page, self.оруулах_талбарууд, self.хувьсах_талбарууд)
 
         return items, self.total_page
-

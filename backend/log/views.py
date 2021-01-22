@@ -18,9 +18,16 @@ def login_list(request, payload):
 
     LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
 
+    def _get_login_type_name(login_type, item):
+        return "Нэвтэрсэн" if login_type == 1 else "Системээс гарсан"
+
+    оруулах_талбарууд = ['id', 'login_type', 'username', 'datetime', 'user_id', 'remote_ip']
+    хувьсах_талбарууд = [{"field": "login_type", "action": _get_login_type_name, "new_field": "login_type"}]
     datatable = Datatable(
         model=LoginEvent,
         payload=payload,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        оруулах_талбарууд=оруулах_талбарууд
     )
     items, total_page = datatable.get()
 
@@ -113,7 +120,7 @@ def page_user_count(request):
     return JsonResponse(rsp)
 
 
-def _get_user_name(user_id):
+def _get_user_name(user_id, item):
 
     if user_id:
         return User.objects.filter(id=user_id).values('username').first()['username']

@@ -15,6 +15,7 @@ from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from backend.payment.models import PaymentLayer
 from main.decorators import ajax_required
+from main.components import Datatable
 
 from .models import WMS
 from .forms import WMSForm
@@ -255,28 +256,21 @@ def delete(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def paginatedList(request, payload):
+def paginated_list(request, payload):
 
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('per_page')
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    wms_list = WMS.objects.all().annotate(search=SearchVector('name')).filter(search__contains=query).order_by(sort_name)
+    оруулах_талбарууд = ['id', 'name', 'url', 'created_at', 'is_active']
 
-    total_items = Paginator(wms_list, per_page)
-    items_page = total_items.page(page)
-    items = [
-        _get_wms_display(request, wms)
-        for wms in items_page.object_list
-    ]
-    total_page = total_items.num_pages
+    datatable = Datatable(
+        model=WMS,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
 
+    items, total_page = datatable.get()
     rsp = {
         'items': items,
-        'page': page,
-        'total_page': total_page,
+        'page': payload.get("page"),
+        'total_page': total_page
     }
 
     return JsonResponse(rsp)
