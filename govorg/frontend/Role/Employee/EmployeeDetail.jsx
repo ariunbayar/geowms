@@ -1,9 +1,10 @@
-import React, { Component, Fragment } from "react"
-import {NavLink} from "react-router-dom"
+import React, { Component } from "react"
+import { NavLink } from "react-router-dom"
 
 import { service } from "./service"
 import Modal from "../../components/helpers/Modal"
 import { Notif } from "@utils/Notification"
+import InsPerms from '../Role/GovPerms'
 
 
 export class EmployeeDetail extends Component {
@@ -35,6 +36,11 @@ export class EmployeeDetail extends Component {
             action_name: "",
 
             prefix: '/gov/perm/employee/',
+
+            emp_role_id: null,
+            perms: {},
+            role_name: '',
+            is_inspire_role: false,
         }
         this.getDetail = this.getDetail.bind(this)
         this.getRole = this.getRole.bind(this)
@@ -132,8 +138,8 @@ export class EmployeeDetail extends Component {
 
     render() {
 
-        const { level, id } = this.props.match.params
-        const prefix = '/gov/perm/employee/'
+        const { id } = this.props.match.params
+        const { prefix, roles, is_inspire_role, perms, role_name} = this.state
         const {
             username,
             last_name,
@@ -240,6 +246,11 @@ export class EmployeeDetail extends Component {
                                     <dd className="col-md-9">
                                         { register }
                                     </dd>
+
+                                    <dt className="col-md-3">Эрх:</dt>
+                                    <dd className="col-md-9">
+                                        { role_name }
+                                    </dd>
                                 </dl>
                                 { is_admin &&
                                     <p>
@@ -257,7 +268,20 @@ export class EmployeeDetail extends Component {
                             </div>
 
                         </div>
-
+                        <div>
+                            {
+                                roles !== {} && is_inspire_role
+                                ?
+                                    <InsPerms
+                                        action_type="viewable"
+                                        is_employee={true}
+                                        dontDid={true}
+                                        org_roles={roles}
+                                        emp_perms={perms}
+                                    />
+                                : null
+                            }
+                        </div>
                     </div>
 
                 <Modal
@@ -270,7 +294,7 @@ export class EmployeeDetail extends Component {
                     actionNameDelete={this.state.action_name}
                 />
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
-                </div>
+            </div>
         )
     }
 
