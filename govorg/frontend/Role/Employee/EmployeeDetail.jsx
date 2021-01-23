@@ -1,10 +1,10 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../../components/helpers/ModalAlert';
-import { service } from './service'
+
+import { service } from "./service"
+import Modal from "../../components/helpers/Modal"
+import { Notif } from "@utils/Notification"
 import InsPerms from '../Role/GovPerms'
-import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
 
 
 export class EmployeeDetail extends Component {
@@ -12,51 +12,45 @@ export class EmployeeDetail extends Component {
     constructor(props) {
         super(props)
 
-        this.perms=[]
-        this.role=[]
-        this.remove_perms=[]
-        this.emp_perms=[]
+        this.too = 0;
         this.state = {
-            form_values: {
+            employee: {
+                id: '',
                 username: '',
-                last_name: '',
                 first_name: '',
-                position: '',
+                last_name: '',
                 email: '',
                 gender: '',
                 register: '',
+                position: '',
                 is_admin: false,
+                is_super: false,
             },
 
-            roles: {},
-            perms: {},
             role_id: this.props.match.params.id,
-            old_role_id: null,
-            is_inspire_role: false,
+
+            modal_status: 'closed',
+            action_type: '',
+            text: '',
+            title: "",
+            action_name: "",
+
             prefix: '/gov/perm/employee/',
-            id: this.props.match.params.id,
-            role_list: [],
-            modal_alert_status: "closed",
-            timer: null,
-            model_type_icon: '',
-            title: '',
-            disabled: true,
+
+            emp_role_id: null,
+            perms: {},
             role_name: '',
+            is_inspire_role: false,
         }
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getDetail = this.getDetail.bind(this)
         this.getRole = this.getRole.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
-
-        this.getRolesForOption = this.getRolesForOption.bind(this)
-        this.getValue = this.getValue.bind(this)
-        this.removeItemFromArray = this.removeItemFromArray.bind(this)
-        this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
-        this.checkRoleAndPerm = this.checkRoleAndPerm.bind(this)
+        this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
+        this.handleModalActionClose = this.handleModalActionClose.bind(this)
+        this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
+        this.modalAction = this.modalAction.bind(this)
     }
 
-    componentDidMount() {
+    componentDidMount(){
         this.getDetail()
     }
 
@@ -67,23 +61,11 @@ export class EmployeeDetail extends Component {
             .then(({employee_detail, perms, role_name, role_id, success}) => {
                 if(success) {
                     this.setState({
+                        employee: employee_detail,
                         perms,
-                        role_id,
-                        old_role_id: role_id,
                         role_name,
-                        form_values:{
-                            username: employee_detail.username,
-                            last_name: employee_detail.last_name,
-                            first_name: employee_detail.first_name,
-                            position: employee_detail.position,
-                            email: employee_detail.email,
-                            gender: employee_detail.gender,
-                            register: employee_detail.register,
-                            is_admin: employee_detail.is_admin,
-                        }
                     })
                 }
-                this.getRolesForOption()
                 this.getRole(role_id)
             })
     }
@@ -100,342 +82,220 @@ export class EmployeeDetail extends Component {
         }
     }
 
-    getRolesForOption() {
-        console.log('yeah');
-        // service
-        //     .getRoleList()
-        //     .then(({ success, roles }) => {
-        //         if (success) {
-        //             console.log(roles);
-        //             this.setState({ role_list: roles })
-        //             this.getRole(this.state.role_id)
-        //         }
-        //     })
+    handleModalActionOpen(action_type, text, title, action_name){
+        this.setState({modal_status: 'open', action_type, text, title, action_name})
+
     }
 
-    getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm) {
-        if(!checked && this.role.length > 0 && type == null) {
-            this.removeItemFromArray(
-                this.role,
-                feature_id,
-                property_id,
-                perm_kind,
-                is_role_emp_id,
-                is_emp_perm
-            )
-        }
-        if(!checked && this.perms.length > 0) {
-            this.removeItemFromArray(
-                this.perms,
-                feature_id,
-                property_id,
-                perm_kind,
-            )
-        }
-        if((checked && !type && !is_emp_perm) ||
-            (checked && (type == 'role' || type == "perms"))
-        ) {
-            const add_role = {
-                'feature_id': feature_id,
-                'property_id': property_id,
-                'perm_kind': perm_kind,
-                'gov_perm_ins_id': perm_inspire_id,
-                'emp_role_ins_id': is_role_emp_id ? is_role_emp_id : null,
-            }
-            if (type == 'role') this.role.push(add_role)
-            if (type == 'perms') this.emp_perms.push(add_role)
-            else this.perms.push(add_role)
-        }
-        if (is_emp_perm && checked && type == null && this.remove_perms.length > 0) {
-            this.removeItemFromRemoveRoles(is_role_emp_id)
-        }
+    handleModalActionClose() {
+        this.setState({modal_status: 'closed'})
     }
 
-    removeItemFromArray (array, feature_id, property_id, perm_kind, perm_inspire_id, is_emp_perm) {
-        array.map((perm, idx) => {
-            if(perm.feature_id == feature_id &&
-                perm.property_id == property_id &&
-                perm.perm_kind == perm_kind)
-            {
-                if(is_emp_perm) this.remove_perms.push(perm_inspire_id)
-                else array.splice(idx, 1)
-            }
-        })
+    modalAction(){
+        if(this.state.action_type == 'refresh_token') this.handleTokenRefresh()
+        else if (this.state.action_type == 'remove') this.handleRemove()
+        this.handleModalActionClose()
     }
 
-    removeItemFromRemoveRoles(is_role_emp_id) {
-        this.remove_perms.map((id, idx) => {
-            if (id == is_role_emp_id) {
-                this.remove_perms.splice(idx, 1)
-            }
-        })
-    }
-
-    checkRoleAndPerm() {
-        this.role.map((role, idx) => {
-            this.emp_perms.map((perm, p_idx) => {
-                if(role.property_id == perm.property_id && role.feature_id == perm.feature_id && role.perm_kind == perm.perm_kind) {
-                    const found = this.remove_perms.find(element => element == perm.gov_perm_ins_id);
-                    if(!found) {
-                        this.remove_perms.push(perm.gov_perm_ins_id)
-                    }
-                }
-            })
-        })
-    }
-
-    handleSubmit(form_values, {setStatus, setSubmitting, setErrors}) {
-        const username = form_values.username
-        const first_name = form_values.first_name
-        const last_name = form_values.last_name
-        const position = form_values.position
-        const email = form_values.email
-        const gender = form_values.gender
-        const register = form_values.register
-        const is_admin = form_values.is_admin
-        const {id, role_id} = this.state
-
-        this.checkRoleAndPerm()
+    handleTokenRefresh() {
         service
-            .updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, this.perms, this.remove_perms)
+            .empTokenRefresh(this.state.employee.id)
             .then(({ success, info }) => {
                 if(success) {
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'success'})
-                } else {
-                    if (errors) {
-                        setErrors(errors)
-                    }
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'danger'})
+                    this.addNotif('success', info, 'check')
+                    this.getDetail()
                 }
-                this.setState({ modal_alert_status: 'open', title: info})
-                this.modalCloseTime()
+                else {
+                    this.addNotif('danger', info, 'times')
+                }
+                this.setState({modal_status: 'closed'})
             })
     }
 
-    modalCloseTime() {
-        setTimeout(() => {
-            this.setState({ handleSaveIsLoad: false })
-            this.props.history.push(this.state.prefix)
-            this.setState({ modal_alert_status: "closed" })
-        }, 2000)
+    handleRemove() {
+        const id = this.state.employee.id
+        service
+            .deleteEmployee(id)
+            .then(({ success }) => {
+                if(success) {
+                    this.addNotif('success', 'Амжилттай устгалаа', 'check')
+                    setTimeout(() => {
+                        this.props.history.push(this.state.prefix)
+                    }, 2000);
+                }
+            })
     }
 
-    modalClose() {
-        this.setState({ handleSaveIsLoad: false })
-        this.props.history.push(this.state.prefix)
-        this.setState({ modal_alert_status: "closed" })
-        clearTimeout(this.state.timer)
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style, msg, icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
     }
 
     render() {
-        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id, role_name } = this.state
-        const { org_roles } = this.props
+
+        const { id } = this.props.match.params
+        const { prefix, roles, is_inspire_role, perms, role_name} = this.state
+        const {
+            username,
+            last_name,
+            first_name,
+            position,
+            email,
+            gender,
+            register,
+            is_admin,
+            is_active,
+            token,
+            created_at,
+            updated_at,
+        } = this.state.employee
 
         return (
             <div className="card">
                 <div className="card-body"></div>
-                    <div className="col-12">
-                        <div className="col-4">
-                            <div className="row justify-content-between">
-                                <div className="col-6 pl-0">
-                                    <NavLink to={`${prefix}`}>
-                                        <p className="btn gp-outline-primary">
-                                            <i className="fa fa-angle-double-left"></i> Буцах
-                                        </p>
-                                    </NavLink>
-                                </div>
-                                <div className="col-6 text-right">
-                                    <div className="dropdown">
-                                        <button className="btn dropdown-toggle gp-outline-primary" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Dropdown button
-                                        </button>
-                                        <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                            <div className="dropdown-divider"></div>
-                                            <a className="dropdown-item" href="#" ><i className="fa fa-pencil-square-o text-primary mr-2"></i>Засах</a>
-                                            <div className="dropdown-divider"></div>
-                                            <a className="dropdown-item" href="#"><i className="fa fa-pencil-square-o text-primary mr-2"></i>Role</a>
-                                            <div className="dropdown-divider"></div>
-                                            <a className="dropdown-item" href="#"><i className="fa fa-trash-o text-danger    mr-2"></i>Устгах</a>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="container-fluid">
+                        <div className="row">
+                            <div className="col-md-6 pl-1">
+                                <NavLink
+                                    to={prefix}
+                                    className="btn gp-outline-primary m-1"
+                                >
+                                    <i className="fa fa-angle-double-left"></i>
+                                    Буцах
+                                </NavLink>
+                            </div>
+
+                            <div className="col-md-6 p-0 text-right pr-2">
+                                <a href="#" className="btn btn-primary waves-effect waves-light m-1"
+                                    onClick={() => this.handleModalActionOpen(
+                                        'refresh_token',
+                                        `Та "${first_name}" нэртэй хэрэглэгчийн токенийг шинэчлэхдээ итгэлтэй байна уу?`,
+                                        "Тохиргоог шинэчлэх",
+                                        "ШИНЭЧЛЭХ"
+                                    )}>
+                                    <i className="fa fa-refresh mr-1"></i>Токен шинэчлэх
+                                </a>
+                                <a href={`${prefix}${id}/edit/`} className="btn btn-primary waves-effect waves-light m-1">
+                                    <i className="fa fa-pencil-square-o mr-1"></i>Засах
+                                </a>
+                                <a href="#" className="btn btn-danger waves-effect waves-light m-1"
+                                    onClick={() => this.handleModalActionOpen(
+                                        'remove',
+                                        `Та "${first_name}" нэртэй хэрэглэгчийг устгахдаа итгэлтэй байна уу?`,
+                                        "Хэрэглэгч устгах"
+                                        )}>
+                                    <i className="fa fa fa-trash-o mr-1"></i>Устгах
+                                </a>
                             </div>
                         </div>
-                        <Formik
-                            enableReinitialize
-                            initialValues={form_values}
-                            validationSchema={validationSchema}
-                            onSubmit={this.handleSubmit}
-                        >
-                        {({
-                            errors,
-                            isSubmitting,
-                        }) => {
-                            const has_error = Object.keys(errors).length > 0
-                            return (
-                                <Form>
-                                    <div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-4">
-                                                <div className="position-relative has-icon-right">
-                                                    <label htmlFor="id_name" >Нэвтрэх нэр:</label>
-                                                    <Field
-                                                        className={'form-control ' + (errors.username ? 'is-invalid' : '')}
-                                                        name='username'
-                                                        id="id_username"
-                                                        type="text"
-                                                        placeholder="Нэвтрэх нэр"
-                                                        disabled={this.state.disabled}
-                                                    />
-                                                    <ErrorMessage name="username" component="div" className="text-danger"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-2">
-                                                <label htmlFor="first_name">Овог:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
-                                                    name='last_name'
-                                                    id="id_last_name"
-                                                    type="text"
-                                                    placeholder="Овог"
-                                                    disabled={this.state.disabled}
-                                                />
-                                                <ErrorMessage name="last_name" component="div" className="text-danger"/>
-                                            </div>
-                                            <div className="form-group col-md-2">
-                                                <label htmlFor="first_name">Нэр:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
-                                                    name='first_name'
-                                                    id="id_first_name"
-                                                    type="text"
-                                                    placeholder="Нэр"
-                                                    disabled={this.state.disabled}
-                                                />
-                                                <ErrorMessage name="first_name" component="div" className="text-danger"/>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="position">Албан тушаал:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.position ? 'is-invalid' : '')}
-                                                    name='position'
-                                                    id="id_position"
-                                                    type="text"
-                                                    placeholder="Албан тушаал"
-                                                    disabled={this.state.disabled}
-                                                />
-                                                <ErrorMessage name="position" component="div" className="text-danger"/>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="email">Цахим хаяг:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.email ? 'is-invalid' : '')}
-                                                    name='email'
-                                                    id="id_email"
-                                                    type="text"
-                                                    placeholder="Цахим хаяг"
-                                                    disabled={this.state.disabled}
-                                                />
-                                                <ErrorMessage name="email" component="div" className="text-danger"/>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="gender">Хүйс:</label>
-                                                <Fragment>
-                                                    <Field name="gender" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.gender ? 'is-invalid' : '')} disabled={this.state.disabled}>
-                                                        <option>Эрэгтэй</option>
-                                                        <option>Эмэгтэй</option>
-                                                    </Field>
-                                                    <ErrorMessage name="gender" component="div" className="text-dange"/>
-                                                </Fragment>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="register">Регистер:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.register ? 'is-invalid' : '')}
-                                                    name='register'
-                                                    id="id_register"
-                                                    type="text"
-                                                    placeholder="Регистер"
-                                                    disabled={this.state.disabled}
-                                                />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
-                                            </div>
-                                        </div>
-                                        <div className="form-group col-md-4 pl-0">
-                                            <label htmlFor="role">Role:</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="role"
-                                                disabled
-                                                value={role_name || ''}
-                                            />
-                                        </div>
-                                        <div className="form-group col-md-6 pl-0">
-                                            <label>Админ эсэх:</label>
-                                            &nbsp;
-                                            &nbsp;
-                                            &nbsp;
-                                            <i className={`fa ` +
-                                                (form_values.is_admin
-                                                    ? `fa-check-circle-o text-success`
-                                                    : `fa-times-circle-o text-danger`
-                                                ) +
-                                                    ` fa-lg`
-                                                }
-                                                aria-hidden="true"
-                                            ></i>
-                                        </div>
-                                        <div>
-                                            {
-                                                roles !== {} && is_inspire_role
-                                                ?
-                                                    <InsPerms
-                                                        action_type="viewable"
-                                                        is_employee={true}
-                                                        dontDid={true}
-                                                        org_roles={roles}
-                                                        emp_perms={perms}
-                                                    />
-                                                : null
-                                            }
-                                        </div>
-                                        {this.state.disabled === false &&
-                                            <div className="form-group">
-                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
-                                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                                    {!isSubmitting && 'Хадгалах' }
-                                                </button>
-                                            </div>
-                                        }
-                                    </div>
-                                </Form>
-                            )}}
-                        </Formik>
+
+                        <div className="row mt-4">
+                            <div className="col-md-6">
+                                <dl className="row">
+                                    <dt className="col-md-3">Нэвтрэх нэр:</dt>
+                                    <dd className="col-md-9">{ username }</dd>
+
+                                    <dt className="col-md-3">Овог, нэр:</dt>
+                                    <dd className="col-md-9">
+                                        { last_name }, { first_name }
+                                    </dd>
+
+                                    <dt className="col-md-3">Албан тушаал:</dt>
+                                    <dd className="col-md-9">
+                                        { position }
+                                    </dd>
+
+                                    <dt className="col-md-3">Токен:</dt>
+                                    <dd className="col-md-9">
+                                        { token }
+                                    </dd>
+
+                                </dl>
+                                <dl className="row">
+                                    <dt className="col-md-3">Бүртгэсэн:</dt>
+                                    <dd className="col-md-9">
+                                        { created_at }
+                                    </dd>
+
+                                    <dt className="col-md-3">Зассан:</dt>
+                                    <dd className="col-md-9">
+                                        { updated_at }
+                                    </dd>
+
+                                </dl>
+                            </div>
+
+                            <div className="col-md-6">
+                                <dl className="row">
+                                    <dt className="col-md-3">Мэйл хаяг:</dt>
+                                    <dd className="col-md-9">
+                                        { email }
+                                    </dd>
+
+                                    <dt className="col-md-3">Хүйс:</dt>
+                                    <dd className="col-md-9">
+                                        { gender }
+                                    </dd>
+
+                                    <dt className="col-md-3">Регистр:</dt>
+                                    <dd className="col-md-9">
+                                        { register }
+                                    </dd>
+
+                                    <dt className="col-md-3">Эрх:</dt>
+                                    <dd className="col-md-9">
+                                        { role_name }
+                                    </dd>
+                                </dl>
+                                { is_admin &&
+                                    <p>
+                                        <i className="fa fa-check-circle-o fa-lg" aria-hidden="true"></i>
+                                        {} Байгууллагын админ
+                                    </p>
+                                }
+
+                                { !is_active &&
+                                    <p>
+                                        <i className="fa fa-times-circle text-danger fa-lg" aria-hidden="true"></i>
+                                        {} Нэвтрэх эрхгүй
+                                    </p>
+                                }
+                            </div>
+
+                        </div>
+                        <div>
+                            {
+                                roles !== {} && is_inspire_role
+                                ?
+                                    <InsPerms
+                                        action_type="viewable"
+                                        is_employee={true}
+                                        dontDid={true}
+                                        org_roles={roles}
+                                        emp_perms={perms}
+                                    />
+                                : null
+                            }
+                        </div>
                     </div>
 
-                    <ModalAlert
-                        modalAction={() => this.modalClose()}
-                        status = {this.state.modal_alert_status}
-                        title = {this.state.title}
-                        model_type_icon = {this.state.model_type_icon}
-                    />
-                </div>
-            )
+                <Modal
+                    modalClose={this.handleModalActionClose}
+                    modalAction={this.modalAction}
+                    status={this.state.modal_status}
+                    text={this.state.text}
+                    title={this.state.title}
+                    model_type_icon = "success"
+                    actionNameDelete={this.state.action_name}
+                />
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
+            </div>
+        )
     }
+
 }

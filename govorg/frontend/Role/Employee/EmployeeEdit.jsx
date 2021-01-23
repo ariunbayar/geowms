@@ -230,13 +230,13 @@ export class EmployeeEdit extends Component {
     }
 
     render() {
-        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id } = this.state
+        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id, id } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="text-left">
-                        <NavLink to={`${prefix}`}>
+                        <NavLink to={`${prefix}${id}/detail/#`}>
                             <p className="btn gp-outline-primary">
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </p>

@@ -9,7 +9,6 @@ from backend.org.models import Org, Employee
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from main import utils
-from django.contrib.auth.decorators import login_required
 from backend.inspire.models import (
     GovPermInspire,
     EmpRole,
@@ -44,11 +43,17 @@ def _get_employee_display(employee):
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
+
+        'token': employee.token,
+        'created_at': employee.created_at,
+        'updated_at': employee.updated_at,
+
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+
         'role_name': role,
     }
 
@@ -384,7 +389,7 @@ def refresh_token(request, pk):
     else:
         rsp = {
             'success': False,
-            'info': 'Та байгуулгын админ биш байна.'
+            'info': 'Та байгууллагын админ биш байна.'
         }
 
     return JsonResponse(rsp)
