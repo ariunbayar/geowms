@@ -259,6 +259,7 @@ def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
+
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -267,6 +268,7 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
+        'token': employee.token,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
         'position': employee.position,
@@ -275,6 +277,7 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
+
     return JsonResponse({'success': True, 'employee': employees_display})
 
 
