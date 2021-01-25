@@ -10,14 +10,12 @@ export class Upload extends Component {
         this.send = null
 
         this.state = {
-            button_ids: ['form'],
             btn_upload_is_laod: false,
             file_path_shp: null,
             files: [],
             name: '',
             type: '',
             errors: {},
-            showForm: false,
             not_cancel: false,
             is_upload_button: true,
             initial_values: {
