@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Charts} from './Chart'
 import {service} from "../service"
 import {LoginLogTable} from './LoginLogTable'
-import { Pagination } from "../../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination"
 
 
 export class LoginLog extends Component {

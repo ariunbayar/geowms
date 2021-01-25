@@ -4,7 +4,7 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
-
+import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
@@ -254,7 +254,7 @@ def send_approve_email(user, subject=None, text=None):
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
     if host_name == 'localhost:8000':
-        msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     else:
         msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     from_email = get_config('EMAIL_HOST_USER')
@@ -345,7 +345,7 @@ def get_administrative_levels():
         table_au_au_ab.filter({'geo_id': national_codes})
         table_au_au_ab.select({
             'geo_id': True,
-            i_data_type_administrative_boundary: {i_property_name},
+            i_data_type_administrative_boundary: [i_property_name],
         })
 
         for item in table_au_au_ab.fetch():
@@ -514,6 +514,13 @@ def is_email(email):
     return re.search(re_email, email) is not None
 
 
+def _is_domain(domain):
+    pattern = re.compile(
+        r'^((http|https):\/\/)?([a-zA-Z0-9]+\.)?([a-zA-Z0-9][a-zA-Z0-9-]*)?((\:[a-zA-Z0-9]{2,6})|(\.[a-zA-Z0-9]{2,6}))$'
+    )
+    return re.search(pattern, domain) is not None
+
+
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
 def get_config(config_name):
@@ -577,3 +584,77 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
             info = "Байгууллагын эрх олгогдоогүй байна."
 
     return success, info
+
+
+def get_emp_property_roles(employee, fid):
+
+    property_ids = []
+    property_details = []
+    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+
+    EmpPerm = apps.get_model('backend_inspire', 'EmpPerm')
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
+    property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+    if property_perms:
+        for prop in property_perms:
+            if prop.get('property_id') not in property_ids:
+                property_ids.append(prop.get('property_id'))
+        for property_id in property_ids:
+            for prop in property_perms:
+                if property_id == prop['property_id']:
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
+                        property_roles['PERM_VIEW'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
+                        property_roles['PERM_CREATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
+                        property_roles['PERM_REMOVE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
+                        property_roles['PERM_UPDATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
+                        property_roles['PERM_APPROVE'] = True
+                    else:
+                        property_roles['PERM_REVOKE'] = True
+
+            property_details.append({
+                'property_id': property_id,
+                'roles':property_roles
+            })
+
+    return property_ids, property_details
+
+
+def check_form_json(fid, form_json, employee):
+
+    request_json = []
+    property_ids, roles = get_emp_property_roles(employee, fid)
+    if form_json and roles:
+        for role in roles:
+            for propert in form_json['form_values']:
+                if role.get('property_id') == propert.get('property_id'):
+                    request_json.append(propert)
+
+    return json.dumps(request_json, ensure_ascii=False) if request_json else ''
+
+
+def get_1stOrder_geo_id():
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+
+    try:
+        feature_id = LFeatures.objects.filter(feature_code='au-au-au').first().feature_id
+        property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
+        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder\n').first().code_list_id
+        feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+
+        qs = MDatas.objects.filter(property_id=property_id)
+        qs = qs.filter(code_list_id=code_list_id)
+
+        return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
+
+    except:
+        return None

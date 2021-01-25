@@ -29,32 +29,62 @@ def _get_govorg_display(govorg):
     }
 
 
+def _system_validation(payload, system=None):
+    system_name = payload['name']
+    domain = payload['website']
+    errors = {}
+
+    if not system_name:
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+    elif system_name.isspace():
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+
+    if domain:
+        is_domain = utils._is_domain(domain)
+        if is_domain is not True:
+            errors['website'] = 'Домайн нэрээ зөв оруулна уу.'
+
+    is_name_changed = False
+    if system:
+        if system.name != system_name:
+            is_name_changed = True
+    if is_name_changed or not system:
+        if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True).first():
+            errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
+
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk=None):
-
     if pk:
         system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
         form = SystemForm(payload, instance=system)
+        errors = _system_validation(payload, system)
     else:
         form = SystemForm(payload)
+        errors = _system_validation(payload)
 
-    if form.is_valid():
-
+    if form.is_valid() and not errors:
         with transaction.atomic():
-
             form.instance.token = TokenGeneratorSystem().get()
+            form.instance.website = payload['website']
             system = form.save()
 
             layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
             system.wms_layers.set(layers)
 
-        return JsonResponse({'success': True})
-
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгаллаа.'
+        })
     else:
-
-        return JsonResponse({'success': False, 'errors': form.errors})
+        return JsonResponse({
+            'success': False,
+            'errors': {**form.errors, **errors},
+        })
 
 
 def _get_wmslayer(request, govorg, wms):
@@ -110,7 +140,7 @@ def дэлгэрэнгүй(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def шинэ_токен(request, pk):
+def refresh_token(request, pk):
 
     govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
     govorg.token = TokenGeneratorSystem().get()

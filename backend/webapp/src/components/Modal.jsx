@@ -94,7 +94,7 @@ export default class Modal extends Component {
                             <div className="modal-footer" style={{border: 'none'}}>
                                 <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
                                     <i className="fa fa-times"></i>
-                                    {this.props.actionName ? this.props.actionName : "  БУЦАХ"}
+                                    {this.props.actionNameBack ? this.props.actionName : "  БУЦАХ"}
                                 </button>
                                 <button
                                     type="button"

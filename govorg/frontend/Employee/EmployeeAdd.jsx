@@ -1,6 +1,5 @@
 import React, { Component } from "react"
-// import ModalAlert from '../../../backend/webapp/src/components/ModalAlert'
-// import { service } from "../service"
+
 
 export class EmployeeAdd extends Component {
 

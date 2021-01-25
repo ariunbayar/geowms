@@ -20,6 +20,7 @@ export class PolygonBarButton extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'Талбай зурах')
         elementa.setAttribute('href', '#')
+        element.setAttribute('id', '⚙-toggle-polygon-id')
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')
