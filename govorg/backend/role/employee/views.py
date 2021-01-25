@@ -33,7 +33,7 @@ def _get_employee_display(employee):
     user = employee.user
     role = EmpPerm.objects.filter(employee=employee).first()
 
-    if role:
+    if role and role.emp_role:
         role = role.emp_role.name
     else:
         role = None
