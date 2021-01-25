@@ -42,7 +42,7 @@ def _get_revoke_request_display(revoke_request):
             'first_name': revoke_request.employee.user.first_name,
             'org': revoke_request.employee.org.name,
             'created_at': _date_to_str(revoke_request.created_at) if revoke_request.created_at else '',
-            'form_json': _json.loads(revoke_request.form_json) if revoke_request.form_json else '',
+            'form_json': json.loads(revoke_request.form_json) if revoke_request.form_json else '',
             'geo_json': revoke_request.geo_json,
             'state': revoke_request.get_state_display(),
             'kind': revoke_request.get_kind_display(),

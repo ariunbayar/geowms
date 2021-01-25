@@ -142,6 +142,7 @@ urlpatterns = [
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),
+        path('emp-role/', org_views.emp_role, name='emp-role'),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

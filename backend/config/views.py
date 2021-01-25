@@ -6,15 +6,13 @@ from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 from django.db import connections
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
-from django.utils.timezone import localtime, now
+from django.utils.timezone import localtime
 
 from .models import Config
 
 from backend.config.models import Error500
-from backend.payment.models import Payment
 from main.decorators import ajax_required
 from main import geoserver
 

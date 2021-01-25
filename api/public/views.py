@@ -7,8 +7,6 @@ from django.views.decorators.http import require_GET
 from api.utils import filter_layers, replace_src_url
 from backend.bundle.models import Bundle
 from backend.wms.models import WMS
-from backend.wmslayer.models import WMSLayer
-from geoportal_app.models import Role
 
 
 def _get_user_roles(user):
