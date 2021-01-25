@@ -1,38 +1,16 @@
-import os
-import datetime
-import uuid
-import glob
-import requests
 from django.db import connections
-from django.db.utils import InternalError
 from django.forms.models import model_to_dict
-from django.conf import settings
-from django.shortcuts import render
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 
 from .models import ViewNames, ViewProperties
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
 
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 
-from django.core.management import call_command
-from django.core.files.uploadedfile import UploadedFile
-from django.core.files.storage import FileSystemStorage
-
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
-from django.contrib.gis.geos import WKBWriter, WKBReader
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos import fromstr
-from django.contrib.gis.gdal import OGRGeometry
-from django.contrib.gis.geos.error import GEOSException
-from django.contrib.gis.gdal.error import GDALException
-from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.auth.decorators import user_passes_test
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
-from backend.config.models import Config
 
 from backend.bundle.models import BundleLayer, Bundle
 from backend.wmslayer.models import WMSLayer

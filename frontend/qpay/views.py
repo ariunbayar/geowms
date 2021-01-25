@@ -1,11 +1,6 @@
-import requests
-
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from geoportal_app.models import User
 from .qpay import Qpay
 from backend.payment.models import Payment
 from datetime import datetime

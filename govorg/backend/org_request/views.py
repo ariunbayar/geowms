@@ -2,17 +2,15 @@ import json
 from geojson import Feature, FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
-from django.http import JsonResponse, Http404, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
-import datetime
 import random
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
-from geoportal_app.models import User
 from backend.inspire.models import (
     LThemes,
     LPackages,
@@ -20,19 +18,10 @@ from backend.inspire.models import (
     MGeoDatas,
     MDatas,
     EmpPermInspire,
-    EmpPerm,
-    GovPerm,
-    GovPermInspire
+    EmpPerm
 )
 from django.contrib.auth.decorators import login_required
-import datetime
 from main.utils import (
-    gis_delete,
-    gis_fetch_one,
-    gis_fields_by_oid,
-    gis_insert,
-    gis_table_by_oid,
-    gis_tables_by_oids,
     dict_fetchall,
     refreshMaterializedView
 )
