@@ -1,7 +1,9 @@
 import React, { Component } from "react"
+
 import {service} from '../service'
 import AyulFormTable from "./AyulFormTable"
-import ModalAlert from '../../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class AyulForm extends Component {
 

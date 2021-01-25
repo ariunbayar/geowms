@@ -1,10 +1,12 @@
 import React, { Component, Fragment } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../../components/helpers/ModalAlert';
-import { service } from './service'
-import InsPerms from '../Role/GovPerms'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+
+import { service } from './service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
+
 
 export class EmployeeAdd extends Component {
 

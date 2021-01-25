@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react"
 
-import Modal from "../../../components/helpers/Modal"
-import ModalAlert from "../../../components/helpers/ModalAlert"
+import Modal from "@utils/Modal/Modal"
+import ModalAlert from "@utils/Modal/ModalAlert"
 
 
 export class ButtonTokenRefresh extends Component {
