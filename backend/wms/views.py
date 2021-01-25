@@ -1,13 +1,11 @@
 import requests
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
-from django.core.files import File
-from django.core.files.temp import NamedTemporaryFile
 from django.contrib.postgres.search import SearchVector
 
 from api.utils import replace_src_url

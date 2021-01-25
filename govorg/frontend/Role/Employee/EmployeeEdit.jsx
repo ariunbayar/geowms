@@ -152,13 +152,17 @@ export class EmployeeEdit extends Component {
     }
 
     removeItemFromArray (array, feature_id, property_id, perm_kind, perm_inspire_id, is_emp_perm) {
+        if(is_emp_perm){
+            this.remove_perms.push(perm_inspire_id)
+            return
+        }
+
         array.map((perm, idx) => {
             if(perm.feature_id == feature_id &&
                 perm.property_id == property_id &&
                 perm.perm_kind == perm_kind)
             {
-                if(is_emp_perm) this.remove_perms.push(perm_inspire_id)
-                else array.splice(idx, 1)
+                array.splice(idx, 1)
             }
         })
     }
@@ -191,6 +195,7 @@ export class EmployeeEdit extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                     this.setState({model_type_icon: 'success'})
+                    this.props.getEmpRoles()
                 } else {
                     if (errors) {
                         setErrors(errors)
@@ -389,7 +394,7 @@ export class EmployeeEdit extends Component {
                                             }
                                         </div>
                                         <div className="form-group">
-                                            <button type="submit" className="btn btn-primary btn-block waves-effect waves-light m-1" disabled={isSubmitting}>
+                                            <button type="submit" className="btn btn-primary waves-effect waves-light m-1" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                 {!isSubmitting && 'Хадгалах' }

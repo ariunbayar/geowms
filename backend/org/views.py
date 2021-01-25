@@ -5,7 +5,6 @@ from django.db.models import Count, Q
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import get_list_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 
@@ -22,8 +21,6 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import MDatas
-from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 
