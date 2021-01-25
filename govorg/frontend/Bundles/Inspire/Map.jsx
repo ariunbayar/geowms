@@ -24,6 +24,7 @@ import {FormBarButton} from './controls/Forms/FormBarButton'
 import {SaveBtn} from "./controls/Add/AddButton"
 import {UploadButton} from './controls/FileUpload/UploadButton'
 import {UploadBtn} from './controls/FileUpload/UploadPopUp'
+// import {FormBtn} from './controls/FileUpload/FormPopUp'
 import {MetaBarButton} from './controls/MetaData/MetaBarButton'
 import {MetaList} from './controls/MetaData/MetaList'
 import {CancelBarButton} from './controls/Cancel/CancelBarButton'
@@ -975,8 +976,9 @@ export default class BarilgaSuurinGazar extends Component{
         this.addNotif, this.props.match.params.tid,
         this.props.match.params.pid
       )
-      this.setState({ showUpload: true })
+      // this.setState({ showUpload: true })
     }
+
 
     showQgisBtn(){
       this.setInActiveButtonStyle('qgis')
@@ -989,7 +991,9 @@ export default class BarilgaSuurinGazar extends Component{
 
     closeUploadBtn(){
       this.controls.upload.showUpload(false)
+      // this.controls.form.showForm(false)
       this.setState({ showUpload: false })
+      // this.setState({ showForm: false })
     }
 
     SideBarBtn(){
@@ -1347,6 +1351,8 @@ export default class BarilgaSuurinGazar extends Component{
                           tid={this.props.match.params.tid}
                           pid={this.props.match.params.pid}
                           fid={this.props.match.params.fid}
+                          // order_at={this.props.match.params.order_at}
+                          // order_no={this.props.match.params.order_no}
                           geojson={this.state.geojson}
                           gid={this.state.selectedFeature_ID}
                           togle_islaod={this.state.togle_islaod}
