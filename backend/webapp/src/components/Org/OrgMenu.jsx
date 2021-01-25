@@ -3,7 +3,6 @@ import {Switch , Route, Link, NavLink} from "react-router-dom"
 
 import {service} from './service'
 import {OrgDetail} from './OrgDetail'
-import {OrgRoleOld} from './OrgRoleOld'
 import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
@@ -70,13 +69,6 @@ export class OrgMenu extends Component {
                             <i className="fa fa-th-large"></i> <span className="hidden-xs"></span>
                         </NavLink>
                     </li>
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} className="nav-link"
-                            activeClassName="active"  data-toggle="tab">
-                            <i className="fa fa-lock"></i> <span className="hidden-xs">Эрх</span>
-                        </NavLink>
-                    </li>
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/org-role/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
@@ -110,7 +102,6 @@ export class OrgMenu extends Component {
                         <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
                             <OrgDetail { ...routeProps } allowed_geom={ allowed_geom }/>
                         }/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRoleOld}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/org-role/" component={OrgRole}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/inspire/" component={OrgInspireRole}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>

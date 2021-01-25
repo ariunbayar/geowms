@@ -12,13 +12,9 @@ export default class BundleForm extends Component {
         this.state = {
             id: props.values.id,
             name: props.values.name,
-            price: props.values.price,
             layers: props.values.layers,
             icon: props.values.icon,
             icon_url: props.values.icon_url,
-            self_module:'',
-            module:props.values.self_module,
-            check_module:false,
             icon_url_err: ''
         }
 
@@ -26,7 +22,6 @@ export default class BundleForm extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.onDrop = this.onDrop.bind(this)
-        this.handleSelectChange = this.handleSelectChange.bind(this)
 
     }
 
@@ -35,8 +30,8 @@ export default class BundleForm extends Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.values.id !== prevProps.values.id) {
-            const {id, name, price, layers, icon_url, self_module} = this.props.values
-            this.setState({id, name, price, layers, icon_url, self_module, module:self_module})
+            const {id, name, layers, icon_url} = this.props.values
+            this.setState({id, name, layers, icon_url})
         }
 
 
@@ -47,9 +42,9 @@ export default class BundleForm extends Component {
     }
 
     handleSave() {
-        const {id, name, layers,icon, icon_url, module}=this.state
+        const {id, name, layers,icon, icon_url}=this.state
         if(id){
-            const values ={'id':id, 'name':name, "layers":layers, 'icon':icon, 'icon_url':icon_url, 'module':module}
+            const values ={'id':id, 'name':name, "layers":layers, 'icon':icon, 'icon_url':icon_url}
             this.props.handleSave(values)
         }else{
             if(icon){
@@ -72,32 +67,6 @@ export default class BundleForm extends Component {
             layers = layers.filter((id) => id != value)
         }
         this.setState({layers})
-    }
-
-
-    handleSelectChange(event){
-        const value = {'module':event.target.value, 'id':this.state.id}
-        const module = event.target.value
-        service.ModuleCheck(value).then(({success}) => {
-            if (success){
-                this.setState({
-                    module:'',
-                    check_module:true,
-                })
-                setTimeout(() => {
-                    this.setState({
-                        check_module:false
-                    })
-                }, 1000);
-            }
-            else{
-                this.setState({
-                    module:module,
-                    self_module:module,
-                })
-            }
-        })
-
     }
 
     onDrop([icon]) {
@@ -127,28 +96,6 @@ export default class BundleForm extends Component {
                         style={{marginBottom: "8px"}}
                     />
                 </div>
-                {this.props.values.id &&
-                <div className="form-group" style={{marginBottom: "10px"}}>
-                    <label htmlFor="id_price"> Модулын нэр: {this.state.check_module ? <a className="text-danger">Давхцаж байна</a>: ''} </label>
-
-                    {this.state.price ?
-                        <select className='form-control ' name="module" onChange={e =>this.handleSelectChange(e)}
-                        value={this.state.self_module ? `${this.state.self_module}` : ''}
-                        >
-                            <option value=''></option>
-                            {this.state.price.map(a=>
-                                <option key={a.id}
-                                value={a.id}
-                                >
-                                {a.name}
-                                </option>)}
-                    </select>:
-                        <select className='form-control ' name="module">
-                        <option value=''></option>
-                    </select>
-                    }
-                </div>}
-
                 <div className ="bundle-table-scroll border border-light rounded">
                     {this.props.formOptions.map(({name, layers,is_active}, idx) =>
                         <div className="form-group" style={{marginTop: '10px'}} key={idx}>

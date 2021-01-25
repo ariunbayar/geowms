@@ -12,12 +12,11 @@ export class TsegUstsan extends Component {
     }
 
     render() {
-        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         return (
             <Switch>
-                    {perm_view ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/"} component={()=><List perms={this.props.perms}/>}/> : null}
-                    {perm_create ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"} component={(data)=><FormTseg data={data} perms={this.props.perms}/>}/> : null}
-                    {perm_view && perm_remove && perm_create ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/:id/засах"} component={(data)=><FormTseg data={data} perms={this.props.perms}/>}/> : null}
+                    <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/"} component={List}/>
+                    <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"} component={(data)=><FormTseg data={data}/>}/>
+                    <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/:id/засах"} component={(data)=><FormTseg data={data}/>}/>
             </Switch>
         )
 

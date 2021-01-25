@@ -15,8 +15,6 @@ export default class AyulFormTable extends Component {
             disable: false,
             save_is_load: false,
             save_is_error: false,
-            perms: this.props.perms,
-            is_editable: this.props.is_editable,
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -92,7 +90,6 @@ export default class AyulFormTable extends Component {
 
     render() {
         const idx = this.props.idx
-        const { perms, is_editable } = this.state
         return (
             <tr key={idx}>
                 <th scope="row">{idx+1}</th>
@@ -116,33 +113,25 @@ export default class AyulFormTable extends Component {
                         value={this.state.y}
                     />
                 </td>
-                {
-                    is_editable
-                    ?
-                    <td>
-                    {this.state.disable ?
-                        (this.state.save_is_load ?
-                            <a className="spinner-border text-primary" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </a>:
-                            <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Хадгалах">
-                                <i className="fa fa-floppy-o" aria-hidden="true"></i>
-                            </a>
-                        ):
-                        <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Засах">
-                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                <td>
+                {this.state.disable ?
+                    (this.state.save_is_load ?
+                        <a className="spinner-border text-primary" role="status">
+                            <span className="sr-only">Loading...</span>
+                        </a>:
+                        <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Хадгалах">
+                            <i className="fa fa-floppy-o" aria-hidden="true"></i>
                         </a>
+                    ):
+                    <a onClick={this.handleSubmit} data-toggle="tooltip" data-placement="top" title="Засах">
+                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                    </a>
 
-                        }
-                        <br></br>
-                        {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
-                    </td>
-                    :
-                    null
-                }
+                    }
+                    <br></br>
+                    {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+                </td>
                 {
-                    perms.perm_remove
-                    ?
                     <td>
                         <a onClick={this.handleModalDeleteOpen}>
                             <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
@@ -157,8 +146,6 @@ export default class AyulFormTable extends Component {
                             />
                         }
                     </td>
-                    :
-                    perms.perm_remove && perms.perm_create ? null: <td rowSpan="1"></td>
                 }
             </tr>
         )

@@ -5,11 +5,9 @@ from django.db.models import Count, Q
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import get_list_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 
-from backend.bundle.models import Bundle
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
 from backend.inspire.models import LDataTypes
@@ -22,15 +20,13 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import MDatas
-from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 
 from main.decorators import ajax_required
 from main import utils
 
-from .models import Org, OrgRole, Employee, InspirePerm
+from .models import Org, Employee, InspirePerm
 
 
 def _get_property(org_id, feature_id):
@@ -40,9 +36,9 @@ def _get_property(org_id, feature_id):
     properties = LProperties.objects.filter(property_id__in=property_ids).values('property_id', "property_code", "property_name")
     for prop in properties:
         properties_list.append({
-            'id':prop['property_id'],
-            'code':prop['property_code'],
-            'name':prop['property_name'],
+            'id': prop['property_id'],
+            'code': prop['property_code'],
+            'name': prop['property_name'],
             'roles': _get_roles(org_id, prop['property_id'], 4, feature_id)
         })
 
@@ -51,13 +47,13 @@ def _get_property(org_id, feature_id):
 
 def _get_features(org_id, package_id,):
     feat_values = []
-    features = LFeatures.objects.filter(package_id=package_id   )
+    features = LFeatures.objects.filter(package_id=package_id)
 
     for feat in features:
         feat_values.append({
-            'id':feat.feature_id,
-            'code':feat.feature_code,
-            'name':feat.feature_name,
+            'id': feat.feature_id,
+            'code': feat.feature_code,
+            'name': feat.feature_name,
             'roles': _get_roles(org_id, feat.feature_id, 3, package_id),
             'properties': _get_property(org_id, feat.feature_id)
         })
@@ -75,7 +71,7 @@ def _get_package(org_id, theme_id):
                 'id': package.package_id,
                 'code': package.package_code,
                 'name': package.package_name,
-                'roles':roles,
+                'roles': roles,
                 'features': _get_features(org_id, package.package_id)
             })
 
@@ -86,9 +82,9 @@ def _get_roles(org_id, module_id, module, module_root_id):
     roles = []
     module = InspirePerm.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
     if module:
-        roles = [module.perm_view,module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
+        roles = [module.perm_view, module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
     else:
-        roles = [False,False,False,False,False,False,False]
+        roles = [False, False, False, False, False, False, False]
     return roles
 
 
@@ -113,6 +109,7 @@ def inspire_roles(request, level, pk):
         'success': True
     })
 
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -131,125 +128,6 @@ def all(request, payload, level):
         'orgs': orgs_display,
         'len': Org.objects.filter(level=level).count()
     })
-
-
-def _get_org_role_display(org_role):
-
-    bundle = org_role.bundle
-    return {
-        'org_id': org_role.org_id,
-        'bundle': {
-            'id': bundle.id,
-            'name': bundle.ltheme.theme_name if bundle.ltheme else '',
-            'icon_url': bundle.icon.url if bundle.icon else '',
-        },
-        'perm_view': org_role.perm_view,
-        'perm_create': org_role.perm_create,
-        'perm_remove': org_role.perm_remove,
-        'perm_revoke': org_role.perm_revoke,
-        'perm_review': org_role.perm_review,
-        'perm_approve': org_role.perm_approve,
-        'created_at': org_role.created_at.strftime('%Y-%m-%d'),
-        'updated_at': org_role.updated_at.strftime('%Y-%m-%d'),
-    }
-
-
-def _get_default_org_role(org, bundle):
-    org_role = OrgRole()
-    org_role.org = org
-    org_role.bundle = bundle
-    org_role.perm_view = False
-    org_role.perm_create = False
-    org_role.perm_remove = False
-    org_role.perm_revoke = False
-    org_role.perm_review = False
-    org_role.perm_approve = False
-    org_role.created_at = localtime(now())
-    org_role.updated_at = localtime(now())
-    return org_role
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def roles(request, level, pk):
-
-    org = get_object_or_404(Org, pk=pk)
-
-    bundles = Bundle.objects.all()
-    mapped_org_roles = dict([
-        (org_role.bundle_id, org_role)
-        for org_role in org.orgrole_set.all()
-    ])
-
-    org_roles_display = []
-    for bundle in bundles:
-        if bundle.id not in mapped_org_roles:
-            org_role = _get_default_org_role(org, bundle)
-        else:
-            org_role = mapped_org_roles[bundle.id]
-        org_roles_display.append(
-            _get_org_role_display(org_role)
-        )
-
-    return JsonResponse({'org_roles': org_roles_display})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def roles_save(request, payload, level, pk):
-
-    org = get_object_or_404(Org, pk=pk)
-
-    org_roles_new = []
-    org_roles_existing = org.orgrole_set.all()
-    mapped_org_roles_existing = dict([
-        (org_role.bundle_id, org_role)
-        for org_role in org_roles_existing
-    ])
-
-    bundle_ids = [
-        org_role['bundle']['id']
-        for org_role in payload
-    ]
-    bundles_mapped = dict([
-        (bundle.id, bundle)
-        for bundle in Bundle.objects.filter(pk__in=bundle_ids)
-    ])
-
-    def _set_org_role_perms(org_role, bundle_permission):
-        org_role.perm_view = bundle_permission.get('perm_view') is True
-        org_role.perm_create = bundle_permission.get('perm_create') is True
-        org_role.perm_remove = bundle_permission.get('perm_remove') is True
-        org_role.perm_revoke = bundle_permission.get('perm_revoke') is True
-        org_role.perm_review = bundle_permission.get('perm_review') is True
-        org_role.perm_approve = bundle_permission.get('perm_approve') is True
-
-    for bundle_permission in payload:
-
-        bundle_id = bundle_permission.get('bundle', {}).get('id')
-
-        if bundle_id not in bundles_mapped:
-            continue
-
-        if bundle_id in mapped_org_roles_existing:
-            org_role = mapped_org_roles_existing[bundle_id]
-            org_role.updated_at = localtime(now())
-        else:
-            org_role = OrgRole(org=org, bundle=bundles_mapped[bundle_id])
-            org_roles_new.append(org_role)
-
-        _set_org_role_perms(org_role, bundle_permission)
-
-    OrgRole.objects.bulk_create(org_roles_new)
-
-    OrgRole.objects.bulk_update(
-        org_roles_existing,
-        ['perm_view', 'perm_create', 'perm_remove', 'perm_revoke', 'perm_review', 'perm_approve', 'updated_at']
-    )
-
-    return JsonResponse({'success': True})
 
 
 @require_GET
@@ -698,12 +576,14 @@ def employee_list(request,payload, level, pk):
 
     return JsonResponse(rsp)
 
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def roles_add(request, payload, level, pk):
     form_datas = payload.get("form_values")
     org = get_object_or_404(Org, pk=pk, level=level)
+
     def role_update(roles, table_name, root_id, id):
         if root_id:
             org_check = InspirePerm.objects.filter(module_root_id=root_id , module_id=id, module=table_name, org=org)
@@ -736,7 +616,6 @@ def roles_add(request, payload, level, pk):
                 orgRole.module_root_id = root_id
                 orgRole.save()
 
-
     for themes in form_datas:
         role_update(themes['roles'], 1, None, themes['id'])
         for packages in themes['packages']:
@@ -754,7 +633,7 @@ def roles_add(request, payload, level, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def count_org(request):
     rsp = {
-        'gov_count':{
+        'gov_count': {
             'level1': Org.objects.filter(level=1).count(),
             'level2': Org.objects.filter(level=2).count(),
             'level3': Org.objects.filter(level=3).count(),

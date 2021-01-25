@@ -4,8 +4,6 @@ export const service = {
     getAll,
     org_add,
     org_remove,
-    roles,
-    rolesSave,
     employeeAdd,
     employeeRemove,
     employeeDetail,
@@ -57,20 +55,6 @@ function org_remove(level, org_id) {
 function inspireRoles(level, org_id) {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/level-${level}/${org_id}/Inspireroles/`, requestOptions).then(handleResponse)
-}
-
-
-function roles(level, org_id) {
-    const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/level-${level}/${org_id}/roles/`, requestOptions).then(handleResponse)
-}
-
-function rolesSave(level, org_id, org_roles) {
-    const opts = {
-        ...getPostOptions(),
-           body: JSON.stringify(org_roles),
-    }
-    return fetch(`${prefix}/level-${level}/${org_id}/roles-save/`, opts).then(handleResponse)
 }
 
 function employeeDetail(pk) {
