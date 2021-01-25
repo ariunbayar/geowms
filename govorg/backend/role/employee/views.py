@@ -383,7 +383,7 @@ def refresh_token(request, pk):
 
         rsp = {
             'success': True,
-            'info': 'Амжилттай шинэчиллээ'
+            'info': 'Токенийг амжилттай шинэчиллээ!'
         }
 
     else:

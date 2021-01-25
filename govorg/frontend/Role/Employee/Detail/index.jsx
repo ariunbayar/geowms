@@ -80,13 +80,16 @@ export class Detail extends Component {
     }
 
     handleTokenRefresh() {
+        this.setState({ status_token_refresh: 'loading' })
         service
             .empTokenRefresh(this.state.employee.id)
             .then(({ success, info }) => {
-                if(success) {
+                if(success)
                     this.getDetail()
-                }
-                this.setState({ status_token_refresh: success ? 'success' : 'fail' })
+                this.setState({
+                    status_token_refresh: success ? 'success' : 'fail',
+                    info_token_refresh: info
+                })
             })
     }
 
@@ -126,6 +129,7 @@ export class Detail extends Component {
         const {
             status_token_refresh,
             status_delete,
+            info_token_refresh,
         } = this.state
 
         return (
@@ -140,7 +144,11 @@ export class Detail extends Component {
 
                             <div className="col-md-6 p-0 text-right">
 
-                                <ButtonTokenRefresh onClick={ this.handleTokenRefresh } status={ status_token_refresh }/>
+                                <ButtonTokenRefresh
+                                    onClick={ this.handleTokenRefresh }
+                                    status={ status_token_refresh }
+                                    status_info={ info_token_refresh }
+                                />
                                 <ButtonEdit to={`${prefix}${id}/edit/`}/>
                                 <ButtonDelete
                                     status={ status_delete }

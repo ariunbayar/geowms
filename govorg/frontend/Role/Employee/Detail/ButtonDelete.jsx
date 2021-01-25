@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react"
 
-import Modal from "../../../../../backend/webapp/src/components/Modal"
+import Modal from "@utils/Modal/Modal"
 import ModalAlert from "../../../../../backend/webapp/src/components/ModalAlert"
 
 
@@ -12,12 +12,17 @@ export class ButtonDelete extends Component {
             modal_status_confirm: 'closed',
         }
         this.handleButtonClick = this.handleButtonClick.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     handleButtonClick() {
         this.setState({ modal_status_confirm: 'open' }, () => {
             this.setState({ modal_status_confirm: 'initial' })
         })
+    }
+
+    modalClose() {
+        this.setState({ modal_status_confirm: 'closed' })
     }
 
     render() {
@@ -34,10 +39,11 @@ export class ButtonDelete extends Component {
                 <Modal
                     text={`Та "${this.props.employee_name}" нэртэй албан хаагчийг устгахдаа итгэлтэй байна уу?`}
                     title="Албан хаагчийг устгах"
-                    model_type_icon="remove"
+                    model_type_icon="warning"
                     actionName="Устгах"
                     status={ this.state.modal_status_confirm }
                     modalAction={ this.props.onClick }
+                    modalClose={ this.modalClose }
                 />
 
                 <ModalAlert

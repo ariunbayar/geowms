@@ -12,12 +12,17 @@ export class ButtonTokenRefresh extends Component {
             modal_status_confirm: 'closed',
         }
         this.handleButtonClick = this.handleButtonClick.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     handleButtonClick() {
         this.setState({ modal_status_confirm: 'open' }, () => {
             this.setState({ modal_status_confirm: 'initial' })
         })
+    }
+
+    modalClose() {
+        this.setState({ modal_status_confirm: 'closed' })
     }
 
     render() {
@@ -38,17 +43,18 @@ export class ButtonTokenRefresh extends Component {
                     actionNameDelete="Шинэчлэх"
                     status={ this.state.modal_status_confirm }
                     modalAction={ this.props.onClick }
+                    modalClose={ this.modalClose }
                 />
 
                 <ModalAlert
                     status={ this.props.status == 'success' ? 'open' : 'closed' }
-                    title="Токенийг амжилттай шинэчиллээ!"
+                    title={ this.props.status_info }
                     model_type_icon="success"
                 />
 
                 <ModalAlert
                     status={ this.props.status == 'fail' ? 'open' : 'closed' }
-                    title="Токен шинэчлэхэд алдаа гарлаа!"
+                    title={ this.props.status_info }
                     model_type_icon="danger"
                 />
 
