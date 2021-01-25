@@ -1,14 +1,12 @@
-import uuid
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_GET
 from geoportal_app.models import User, UserValidationEmail
 from backend.org.models import Employee
 
-from .form import RegisterForm, LoginForm, ApproveForm
+from .form import LoginForm, ApproveForm
 
 
 def login(request):
