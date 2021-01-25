@@ -429,7 +429,7 @@ export class Roles extends Component {
                 </div>
             <div className="col-md-6">
                 <div className="">
-                    <div className="fixed-height-body">
+                    <div>
                         <div className="fixed-height bc-white">
                             {properties.length > 0 &&
                             <div className="table-responsive table_wrapper-100">

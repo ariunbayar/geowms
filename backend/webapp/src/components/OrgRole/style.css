@@ -1,6 +1,6 @@
 .fixed-height{
     overflow-y: scroll;
-    height: calc(97vh - 88px);
+    height: calc(97vh - 60px);
     padding-right: 5px;
 }
 
