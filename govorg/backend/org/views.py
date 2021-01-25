@@ -1,21 +1,27 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
+from backend.org.models import Org, Employee
+from main.decorators import ajax_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from backend.inspire.models import GovPerm
+from backend.inspire.models import GovPermInspire
+from backend.inspire.models import EmpPerm
+from backend.inspire.models import EmpPermInspire
+from backend.inspire.models import LProperties
+from backend.inspire.models import LThemes
+from backend.inspire.models import LPackages
+from backend.inspire.models import LFeatures
+from backend.inspire.models import MGeoDatas
 
-from backend.org.models import Org, OrgRole, Employee, InspirePerm
-from backend.bundle.models import Bundle
-from backend.inspire.models import LThemes, LPackages, LFeatures, MGeoDatas
-from backend.inspire.models import (
-    GovPerm,
-    GovPermInspire,
-    EmpPerm,
-    EmpPermInspire,
-    LProperties,
-)
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
     get_property_data_display2,
+    count_property_of_feature,
+    get_perm_kind_name,
+    get_perm_list
 )
 
 
@@ -31,19 +37,20 @@ def _get_properties_by_feature(initial_qs, feature_ids):
         for prop in LProperties.objects.filter(property_id__in=qs_for_props)
     }
 
-    item_pairs = qs.values_list('feature_id', 'property_id')
+    item_pairs = qs.values_list('feature_id', 'property_id', 'perm_kind')
 
     feature_property_ids = {
         feature_id: []
         for feature_id in feature_ids
     }
 
-    for feature_id, property_id in item_pairs:
-        feature_property_ids[feature_id].append(
-            properties[property_id]
-        )
+    for feature_id, property_id, perm_kind in item_pairs:
+        feature_property_ids[feature_id].append({
+            "perm_kind":perm_kind, "prop_obj": properties[property_id]
+        })
 
     return feature_property_ids
+
 
 def _org_role(org):
 
@@ -52,6 +59,8 @@ def _org_role(org):
     themes = []
     package_features = []
     gov_perm = GovPerm.objects.filter(org=org).first()
+    property_ids_of_feature = {}
+
     if gov_perm:
         feature_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm.id).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
 
@@ -61,47 +70,33 @@ def _org_role(org):
         qs = GovPermInspire.objects.filter(gov_perm=gov_perm)
         property_of_feature = _get_properties_by_feature(qs, feature_ids)
 
-        property_ids_of_feature = {}
-        for feature_id, props in property_of_feature.items():
-            property_ids_of_feature[feature_id] = [prop.property_id for prop in props]
-
         qs = GovPermInspire.objects.filter(feature_id__in=feature_ids, gov_perm=gov_perm)
         perm_list_all = list(qs.values('geom', 'property_id', 'feature_id', ins_id=F('id'), kind=F('perm_kind')))
 
-        def _get_perm_list(feature_id, property_id, geom):
-            perm_list_filtered = []
-
-            for item in perm_list_all:
-                if item['feature_id'] == feature_id:
-                    if geom == True:
-                        if item['geom'] == True:
-                            perm_list_filtered.append({
-                                'ins_id': item['ins_id'],
-                                'kind': item['kind'],
-                            })
-                    else:
-                        if item['property_id'] == property_id:
-                            perm_list_filtered.append({
-                                'ins_id': item['ins_id'],
-                                'kind': item['kind'],
-                            })
-
-            return perm_list_filtered
-
         for feature_id, props in property_of_feature.items():
-
             # geom
-            perm_list = _get_perm_list(feature_id, None, True)
+            perm_list = get_perm_list(feature_id, None, True, perm_list_all)
             properties.append(
                 get_property_data_display2(perm_list, None, feature_id, True)
             )
+            property_perm_count = count_property_of_feature(props)
 
+            for perm in perm_list:
+                kind_name = get_perm_kind_name(perm['kind'])
+                property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+
+            property_ids_of_feature[feature_id] = property_perm_count
+            # property давхардал арилгах
+            check_list = []
             # properties
             for prop in props:
-                perm_list = _get_perm_list(feature_id, prop.property_id, False)
-                properties.append(
-                    get_property_data_display2(perm_list, prop, feature_id, False)
-                )
+                if not prop['prop_obj'] in check_list:
+                    perm_list = get_perm_list(feature_id, prop['prop_obj'].property_id, False, perm_list_all)
+                    properties.append(
+                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, False)
+                    )
+                    check_list.append(prop['prop_obj'])
+
 
         def _get_package_features_data_display(package_id, feature_ids):
 
@@ -111,16 +106,16 @@ def _org_role(org):
             qs = qs.values_list('feature_id', flat=True)
 
             package_feature_ids = list(qs)
+            return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature)
 
-            return get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature)
 
-        package_features = [
-            _get_package_features_data_display(package_id, feature_ids)
-            for package_id in package_ids
-        ]
+        package_features = []
+        for package_id in package_ids:
+            package_obj = _get_package_features_data_display(package_id, feature_ids)
+            package_features.append(package_obj)
 
         themes = [
-            get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
+            get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)), package_features)
             for theme_id in theme_ids
         ]
 
@@ -133,11 +128,10 @@ def _org_role(org):
 
 
 def _emp_role(org, user):
-    property_of_feature = {}
+
     feature_ids = []
     package_features = []
     themes = []
-
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     if emp_perm:
@@ -146,29 +140,32 @@ def _emp_role(org, user):
             package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
             theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
 
-            qs = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id)
-            property_of_feature = _get_properties_by_feature(qs, feature_ids)
+            for package_id in package_ids:
+                package = LPackages.objects.filter(package_id=package_id).first()
+                feature_objs = LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids)
+                features = []
+                for feature_obj in feature_objs:
+                    count = MGeoDatas.objects.filter(feature_id=feature_obj.feature_id).count()
+                    features.append({
+                            'id': feature_obj.feature_id,
+                            'name': feature_obj.feature_name,
+                            'parent_id': feature_obj.package_id,
+                            'count': count,
+                        })
 
-            property_ids_of_feature = {}
-            for feature_id, props in property_of_feature.items():
-                property_ids_of_feature[feature_id] = [prop.property_id for prop in props]
+                package_features.append({
+                    'id': package.package_id,
+                    'name': package.package_name,
+                    'parent_id': package.theme_id,
+                    'features': features,
+                })
 
-
-            package_features = [
-                get_package_features_data_display(
-                    package_id,
-                    list(
-                        LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True)
-                    ),
-                    property_ids_of_feature
-                )
-                for package_id in package_ids
-            ]
-
-            themes = [
-                get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)))
-                for theme_id in theme_ids
-            ]
+            for theme_id in theme_ids:
+                theme = LThemes.objects.filter(theme_id=theme_id).first()
+                themes.append({
+                    'id': theme.theme_id,
+                    'name': theme.theme_name,
+                })
     return {
         'themes': themes,
         'package_features': package_features,
@@ -251,7 +248,6 @@ def frontend(request):
             "org_name": org.name.upper(),
             "org_level": org.level,
             'org_role': _org_role(org),
-            'emp_role': _emp_role(org, request.user),
         },
     }
 
@@ -259,3 +255,17 @@ def frontend(request):
     context['org']['perms'] = _get_bundle_permissions()
 
     return render(request, 'org/index.html', context)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def emp_role(request):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    rsp = {
+        'success': True,
+        'emp_role': _emp_role(org, request.user)
+    }
+
+    return JsonResponse(rsp)

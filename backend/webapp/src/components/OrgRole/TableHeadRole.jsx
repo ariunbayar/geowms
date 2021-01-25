@@ -21,7 +21,7 @@ export class TableHeadRole extends Component {
                 root_1_index, root_2_index, root_3_index
         } = this.props
         return (
-            <div className={(inspire == "theme" ? "role-card" : "role-table-card") + (mtop ? ' mt-3' : '')}>
+            <div className={(inspire == "theme" ? "role-card" : "role-table-card") + (mtop ? ' mb-0 mt-3' : '')}>
                 <div className={inspire == "theme" ? "role-card-body" : "role-table-card-body"}>
                     <div className="row">
                         <div className="col-4 arrow-tree collapsed" style={{width:'100px', paddingLeft:tree}}>
