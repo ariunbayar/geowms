@@ -498,6 +498,7 @@ def _geo_json_convert_geom(geojson):
 @login_required(login_url='/gov/secure/login/')
 def geomAdd(request, payload, fid):
 
+    feature_obj = get_object_or_404(LFeatures, feature_id=fid)
     geojson = payload.get('geojson')
     geom = _geo_json_convert_geom(geojson)
     if not geom:
@@ -507,8 +508,11 @@ def geomAdd(request, payload, fid):
             'id': None
         }
         return JsonResponse(rsp)
-    count = random.randint(1062, 9969)
-    geo_id = str(fid) + str(count) + 'geo'
+    geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
+    print("govins", geo_id)
+    print("govins", geo_id)
+    print("govins", geo_id)
+    print("govins", geo_id)
     MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
     fields = get_rows(fid)
     for field in fields:

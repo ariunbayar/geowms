@@ -386,16 +386,14 @@ def request_approve(request, payload, pk):
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
     form_json = values['form_json']
-
+    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
     perm_approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
 
     if perm_approve:
         old_geo_id = values['old_geo_id']
         old_geo_json = values["old_geo_json"]
         geo_json = values['geo_json']
-        count = random.randint(106942, 996942)
-        new_geo_id = str(count)+'geo'
-
+        new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
         if old_geo_id:
             geo_data = MGeoDatas.objects.filter(geo_id=old_geo_id, feature_id=feature_id)
             if not geo_data:

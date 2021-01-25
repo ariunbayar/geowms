@@ -23,30 +23,31 @@ class GEoIdGenerator():
         feature_code = self.feature_code
         feature_code = feature_code.replace('-', '_')
         feature_code = feature_code.upper()
+        feature_code = feature_code + '__'
         self.feature_code = feature_code
 
-    def geo_id_check(self, geo_id):
-        qs = self.qs
-        qs = qs.filter(geo_id=geo_id)
-        qs = qs.first()
-        return True if qs else False
-
-    def count_feature(self):
+    def get_last_geo_id_of_feature(self):
         qs = self.qs
         qs = qs.filter(feature_id=self.feature_id)
-        qs = qs.count()
+        qs = qs.filter(geo_id__contains=self.feature_code)
+        qs = qs.order_by('-geo_id')
+        qs = qs.first()
         return qs
 
-    def create_geo_id(self, plus=0):
-        feature_count = self.count_feature()
-        feature_count = feature_count + plus
-        geo_id = self.feature_code + '_' + str(feature_count)
-        check = self.geo_id_check(geo_id)
-        if check:
-            self.create_geo_id(plus+1)
-        return geo_id
+    def str_to_int(self, geo_id):
+        return int(geo_id[-9:])
+
+    def int_to_str(self, number):
+        return str(number).zfill(9)
 
     def get(self):
         self.code_generator()
-        geo_id = self.create_geo_id()
+        last_geo_id = self.get_last_geo_id_of_feature()
+        if last_geo_id:
+            last_geo_id = self.str_to_int(last_geo_id.geo_id)
+            last_geo_id = last_geo_id + 1
+            geo_id = self.feature_code + self.int_to_str(last_geo_id)
+        else:
+            geo_id = self.feature_code + self.int_to_str(1)
+
         return geo_id
