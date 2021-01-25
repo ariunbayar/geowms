@@ -489,13 +489,14 @@ def request_approve(request, payload, pk):
         r_approve.state = ChangeRequest.STATE_APPROVE
         r_approve.save()
         rsp = {
-            'success': success
+            'success': success,
+            'info': 'Амжилттай баталгаажсан',
         }
 
     else:
         rsp = {
             'success': False,
-            'info': 'Таньд цуцлах эрх алга байна.'
+            'info': 'Таньд баталгаажуулах эрх алга байна.'
         }
 
     return JsonResponse(rsp)
