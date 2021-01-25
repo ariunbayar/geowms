@@ -1,18 +1,18 @@
 import React, { Component } from "react"
-import { NavLink } from "react-router-dom"
 
-import { service } from "./service"
-import Modal from "../../components/helpers/Modal"
-import { Notif } from "@utils/Notification"
-import InsPerms from '../Role/GovPerms'
+import { service } from "../service"
+import InsPerms from '../../Role/GovPerms'
+import { ButtonBack } from "./ButtonBack"
+import { ButtonTokenRefresh } from "./ButtonTokenRefresh"
+import { ButtonEdit } from "./ButtonEdit"
+import { ButtonDelete } from "./ButtonDelete"
 
 
-export class EmployeeDetail extends Component {
+export class Detail extends Component {
 
     constructor(props) {
         super(props)
 
-        this.too = 0;
         this.state = {
             employee: {
                 id: '',
@@ -27,27 +27,23 @@ export class EmployeeDetail extends Component {
                 is_super: false,
             },
 
-            role_id: this.props.match.params.id,
-
-            modal_status: 'closed',
-            action_type: '',
-            text: '',
-            title: "",
-            action_name: "",
-
             prefix: '/gov/perm/employee/',
 
-            emp_role_id: null,
+            role_id: this.props.match.params.id,
             perms: {},
             role_name: '',
+            roles: {},
             is_inspire_role: false,
+
+            status_token_refresh: 'initial',
+            status_delete: 'initial',
         }
+
         this.getDetail = this.getDetail.bind(this)
         this.getRole = this.getRole.bind(this)
-        this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
-        this.handleModalActionClose = this.handleModalActionClose.bind(this)
         this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
-        this.modalAction = this.modalAction.bind(this)
+        this.handleDelete = this.handleDelete.bind(this)
+        this.handleDeleteSuccess = this.handleDeleteSuccess.bind(this)
     }
 
     componentDidMount(){
@@ -55,6 +51,7 @@ export class EmployeeDetail extends Component {
     }
 
     getDetail() {
+
         const { role_id } = this.state
         service
             .getDetailEmployee(role_id)
@@ -82,58 +79,29 @@ export class EmployeeDetail extends Component {
         }
     }
 
-    handleModalActionOpen(action_type, text, title, action_name){
-        this.setState({modal_status: 'open', action_type, text, title, action_name})
-
-    }
-
-    handleModalActionClose() {
-        this.setState({modal_status: 'closed'})
-    }
-
-    modalAction(){
-        if(this.state.action_type == 'refresh_token') this.handleTokenRefresh()
-        else if (this.state.action_type == 'remove') this.handleRemove()
-        this.handleModalActionClose()
-    }
-
     handleTokenRefresh() {
         service
             .empTokenRefresh(this.state.employee.id)
             .then(({ success, info }) => {
                 if(success) {
-                    this.addNotif('success', info, 'check')
                     this.getDetail()
                 }
-                else {
-                    this.addNotif('danger', info, 'times')
-                }
-                this.setState({modal_status: 'closed'})
+                this.setState({ status_token_refresh: success ? 'success' : 'fail' })
             })
     }
 
-    handleRemove() {
+    handleDelete() {
+        this.setState({ status_delete: 'loading' })
         const id = this.state.employee.id
         service
             .deleteEmployee(id)
             .then(({ success }) => {
-                if(success) {
-                    this.addNotif('success', 'Амжилттай устгалаа', 'check')
-                    setTimeout(() => {
-                        this.props.history.push(this.state.prefix)
-                    }, 2000);
-                }
+                this.setState({ status_delete: success ? 'success' : 'fail' })
             })
     }
 
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style, msg, icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
+    handleDeleteSuccess() {
+        this.props.history.push(`${this.state.prefix}`)
     }
 
     render() {
@@ -155,42 +123,31 @@ export class EmployeeDetail extends Component {
             updated_at,
         } = this.state.employee
 
+        const {
+            status_token_refresh,
+            status_delete,
+        } = this.state
+
         return (
             <div className="card">
-                <div className="card-body"></div>
+                <div className="card-body">
                     <div className="container-fluid">
+
                         <div className="row">
-                            <div className="col-md-6 pl-1">
-                                <NavLink
-                                    to={prefix}
-                                    className="btn gp-outline-primary m-1"
-                                >
-                                    <i className="fa fa-angle-double-left"></i>
-                                    Буцах
-                                </NavLink>
+                            <div className="col-md-6 p-0">
+                                <ButtonBack to={prefix}/>
                             </div>
 
-                            <div className="col-md-6 p-0 text-right pr-2">
-                                <a href="#" className="btn btn-primary waves-effect waves-light m-1"
-                                    onClick={() => this.handleModalActionOpen(
-                                        'refresh_token',
-                                        `Та "${first_name}" нэртэй хэрэглэгчийн токенийг шинэчлэхдээ итгэлтэй байна уу?`,
-                                        "Тохиргоог шинэчлэх",
-                                        "ШИНЭЧЛЭХ"
-                                    )}>
-                                    <i className="fa fa-refresh mr-1"></i>Токен шинэчлэх
-                                </a>
-                                <a href={`${prefix}${id}/edit/`} className="btn btn-primary waves-effect waves-light m-1">
-                                    <i className="fa fa-pencil-square-o mr-1"></i>Засах
-                                </a>
-                                <a href="#" className="btn btn-danger waves-effect waves-light m-1"
-                                    onClick={() => this.handleModalActionOpen(
-                                        'remove',
-                                        `Та "${first_name}" нэртэй хэрэглэгчийг устгахдаа итгэлтэй байна уу?`,
-                                        "Хэрэглэгч устгах"
-                                        )}>
-                                    <i className="fa fa fa-trash-o mr-1"></i>Устгах
-                                </a>
+                            <div className="col-md-6 p-0 text-right">
+
+                                <ButtonTokenRefresh onClick={ this.handleTokenRefresh } status={ status_token_refresh }/>
+                                <ButtonEdit to={`${prefix}${id}/edit/`}/>
+                                <ButtonDelete
+                                    status={ status_delete }
+                                    onClick={ this.handleDelete }
+                                    employee_name={ first_name }
+                                    onSuccess={ this.handleDeleteSuccess }
+                                />
                             </div>
                         </div>
 
@@ -268,32 +225,22 @@ export class EmployeeDetail extends Component {
                             </div>
 
                         </div>
-                        <div>
-                            {
-                                roles !== {} && is_inspire_role
-                                ?
-                                    <InsPerms
-                                        action_type="viewable"
-                                        is_employee={true}
-                                        dontDid={true}
-                                        org_roles={roles}
-                                        emp_perms={perms}
-                                    />
-                                : null
-                            }
-                        </div>
                     </div>
-
-                <Modal
-                    modalClose={this.handleModalActionClose}
-                    modalAction={this.modalAction}
-                    status={this.state.modal_status}
-                    text={this.state.text}
-                    title={this.state.title}
-                    model_type_icon = "success"
-                    actionNameDelete={this.state.action_name}
-                />
-                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
+                    <div>
+                        {
+                            roles !== {} && is_inspire_role
+                            ?
+                                <InsPerms
+                                    action_type="viewable"
+                                    is_employee={true}
+                                    dontDid={true}
+                                    org_roles={roles}
+                                    emp_perms={perms}
+                                />
+                            : null
+                        }
+                    </div>
+                </div>
             </div>
         )
     }
