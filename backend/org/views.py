@@ -444,7 +444,15 @@ def employee_add(request, payload, level, pk):
 
         utils.send_approve_email(user)
 
-    return JsonResponse({'success': True, 'errors': errors})
+    rsp = {
+        'success': True,
+        'employee': {
+            'id': employee.id,
+            'user_id': employee.user_id,
+        }
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_GET
