@@ -20,12 +20,13 @@ export default class Modal extends Component {
     }
 
     componentDidUpdate(prevProps) {
+
         if (this.props.status != prevProps.status) {
             if (['initial', 'open'].includes(this.props.status)) {
                 this.handleOpen()
             }
             if (['closing', 'closed'].includes(this.props.status)) {
-                this.handleClose()
+                this.handleClose(null, 0)
             }
         }
     }
@@ -37,16 +38,18 @@ export default class Modal extends Component {
         }, 0)
     }
 
-    handleClose(callback) {
+    handleClose(callback, timeout) {
+        timeout = (timeout === undefined ? 150 : timeout)
         this.setState({status: 'closing'})
         setTimeout(() => {
             this.setState({status: 'closed'})
             if (callback) {
                 callback()
-            } else {
+            }
+            if (this.props.modalClose) {
                 this.props.modalClose()
             }
-        }, 150)
+        }, timeout)
     }
 
     handleProceed() {
@@ -72,7 +75,7 @@ export default class Modal extends Component {
             <Fragment>
                 <div className={className}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content animated jackInTheBox" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
+                        <div className="modal-content animated" style={{border: 'none', borderRadius: "7px", background: "#ebebeb"}}>
                             <div className="col-md-12 offset-md-12 float-right my-1">
                                 <button type="button" className="close mt-2 mr-2" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
@@ -80,9 +83,9 @@ export default class Modal extends Component {
                             </div>
                             <div className="d-flex justify-content-center">
                             { this.props.model_type_icon == "success" ?
-                                <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
-                                :
                                 <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-success" aria-hidden="true"></i>
+                                :
+                                <i className="fa fa-times-circle fa-3x my-3 animated bounceIn text-danger" aria-hidden="true"></i>
                             }
                             </div>
                             <div className="d-flex justify-content-center">

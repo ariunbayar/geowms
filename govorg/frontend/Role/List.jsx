@@ -1,8 +1,10 @@
 import React, { Component } from "react"
-import ModalAlert from '../components/helpers/ModalAlert'
 import { NavLink } from "react-router-dom"
-import Rows from './Rows'
+
 import {service} from './Role/service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import Rows from './Rows'
+
 
 export class List extends Component {
     constructor(props) {

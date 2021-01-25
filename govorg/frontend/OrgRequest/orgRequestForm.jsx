@@ -1,8 +1,9 @@
 
 import React, { Component } from "react"
+
 import {service} from './service'
 import {OrgRequestTable} from './orgRequestTable'
-import ModalAlert from '../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
 
 
 export default class OrgRequestForm extends Component {

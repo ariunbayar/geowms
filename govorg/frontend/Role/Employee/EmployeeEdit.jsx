@@ -1,10 +1,12 @@
 import React, { Component, Fragment } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../../components/helpers/ModalAlert';
-import { service } from './service'
-import InsPerms from '../Role/GovPerms'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+
+import { service } from './service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
+
 
 export class EmployeeEdit extends Component {
 
@@ -235,13 +237,13 @@ export class EmployeeEdit extends Component {
     }
 
     render() {
-        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id } = this.state
+        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id, id } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="text-left">
-                        <NavLink to={`${prefix}`}>
+                        <NavLink to={`${prefix}${id}/detail/#`}>
                             <p className="btn gp-outline-primary">
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </p>
