@@ -45,8 +45,8 @@ def _get_employee_display(employee):
         'is_admin': employee.is_admin,
 
         'token': employee.token,
-        'created_at': employee.created_at,
-        'updated_at': employee.updated_at,
+        'created_at': employee.created_at.strftime('%Y-%m-%d'),
+        'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
 
         'last_name': user.last_name,
         'first_name': user.first_name,
