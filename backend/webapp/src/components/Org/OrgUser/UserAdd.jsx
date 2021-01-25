@@ -88,12 +88,12 @@ export class UserAdd extends Component {
 
         }
         else{
-            service.employeeAdd(org_level, org_id, values).then(({ success, errors }) => {
+            service.employeeAdd(org_level, org_id, values).then(({ success, errors, employee }) => {
                 if (success) {
                     this.setState({modal_alert_status: "open"})
                     setStatus('saved')
                     setSubmitting(false)
-                    this.modalCloseTime()
+                    this.modalCloseTime(employee.user_id)
                 }
                 else{
                     setErrors(errors)
@@ -103,13 +103,15 @@ export class UserAdd extends Component {
         }
     }
 
-    modalCloseTime(){
-        setTimeout(this.modalClose, 2000)
+    modalCloseTime(user_id) {
+        setTimeout(() => this.modalClose(user_id), 2000)
     }
 
-    modalClose(){
+    modalClose(user_id) {
         const { level, id, emp } = this.props.match.params
-        this.props.history.push(`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/${emp}/дэлгэрэнгүй/`)
+        this.props.history.push(
+            `/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/${emp || user_id}/дэлгэрэнгүй/`
+        )
     }
 
     render() {
