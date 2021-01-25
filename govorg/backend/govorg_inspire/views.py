@@ -509,10 +509,6 @@ def geomAdd(request, payload, fid):
         }
         return JsonResponse(rsp)
     geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
-    print("govins", geo_id)
-    print("govins", geo_id)
-    print("govins", geo_id)
-    print("govins", geo_id)
     MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
     fields = get_rows(fid)
     for field in fields:
