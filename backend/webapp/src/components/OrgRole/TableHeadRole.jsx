@@ -50,7 +50,7 @@ export class TableHeadRole extends Component {
                         </div>
                         <div className="col-8">
                             <div className="row">
-                                <div className="col-2">
+                                <div className="col-2 pl-0 pr-0">
                                     <small className="smaller text-center ml-2">харах</small>
                                     <div className="switch-tree-state col-lg-12"
                                         onClick={(e) =>
@@ -80,7 +80,7 @@ export class TableHeadRole extends Component {
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_view}</small> */}
                                 </div>
-                                <div className="col-2">
+                                <div className="col-2 pl-0 pr-0">
                                     <small className="smaller text-center ml-2">нэмэх</small>
                                     <div className="switch-tree-state col-lg-12"
                                     onClick={(e) =>
@@ -108,7 +108,7 @@ export class TableHeadRole extends Component {
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_create}</small> */}
                                 </div>
-                                <div className="col-2"
+                                <div className="col-2 pl-0 pr-0"
                                 onClick={(e) =>
                                     perm_remove >= perm_all ?
                                     (inspire == 'theme' ?
@@ -135,7 +135,7 @@ export class TableHeadRole extends Component {
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_remove}</small> */}
                                 </div>
-                                <div className="col-2"
+                                <div className="col-2 pl-0 pr-0"
                                 onClick={(e) =>
                                     perm_update >= perm_all ?
                                     (inspire == 'theme' ?
@@ -162,7 +162,7 @@ export class TableHeadRole extends Component {
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_update}</small> */}
                                 </div>
-                                <div className="col-2"
+                                <div className="col-2 pl-0 pr-0"
                                 onClick={(e) =>
                                     perm_revoke >= perm_all ?
                                     (inspire == 'theme' ?
@@ -189,7 +189,7 @@ export class TableHeadRole extends Component {
                                     </div>
                                     {/* <small className="smaller text-center">{perm_all}-{perm_revoke}</small> */}
                                 </div>
-                                <div className="col-2"
+                                <div className="col-2 pl-0 pr-0"
                                 onClick={(e) =>
                                     perm_approve >= perm_all ?
                                     (inspire == 'theme' ?

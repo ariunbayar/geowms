@@ -1,6 +1,6 @@
 .fixed-height-b{
     overflow-y: scroll;
-    height: calc(87vh - 88px);
+    height: calc(87vh - 60px);
     padding-right: 5px;
 }
 
