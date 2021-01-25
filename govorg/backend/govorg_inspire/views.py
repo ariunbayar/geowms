@@ -7,19 +7,24 @@ import random
 from geojson import Feature, FeatureCollection
 
 from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.gdal import DataSource
 from django.contrib.auth.decorators import login_required
 from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
+from django.core.files.storage import FileSystemStorage
 
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
 from backend.inspire.models import LProperties
+from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
 from backend.org.models import Employee
@@ -746,38 +751,35 @@ def _create_request(request_datas):
     change_request.kind = request_datas['kind']
     change_request.form_json = request_datas['form_json']
     change_request.geo_json = request_datas['geo_json']
-    change_request.order_at = None
-    change_request.order_no = None
+    change_request.order_at = request_datas['order_at']
+    change_request.order_no = request_datas['order_no']
 
     change_request.save()
     return True
 
 
 def _make_request(values, request_values):
-    try:
-        form_json_list = _check_and_make_form_json(
-            request_values['feature_id'],
-            values
-        )
+    form_json_list = _check_and_make_form_json(
+        request_values['feature_id'],
+        values
+    )
 
-        request_datas = {
-            'geo_id': request_values['geo_id'],
-            'theme_id': request_values['theme_id'],
-            'package_id': request_values['package_id'],
-            'feature_id': request_values['feature_id'],
-            'employee': request_values['employee'],
-            'state': ChangeRequest.STATE_NEW,
-            'kind': request_values['kind'],
-            'form_json': form_json_list,
-            'geo_json': request_values['geo_json'],
-        }
-        with transaction.atomic():
-            success = _create_request(request_datas)
-            info = 'Амжилттай хадгалалаа'
-
-    except Exception:
-        success = False
-        info = 'Хадгалах явцад алдаа гарсан'
+    request_datas = {
+        'geo_id': request_values['geo_id'],
+        'theme_id': request_values['theme_id'],
+        'package_id': request_values['package_id'],
+        'feature_id': request_values['feature_id'],
+        'employee': request_values['employee'],
+        'state': ChangeRequest.STATE_NEW,
+        'kind': request_values['kind'],
+        'form_json': form_json_list,
+        'geo_json': request_values['geo_json'],
+        'order_at': request_values['order_at'],
+        'order_no': request_values['order_no'],
+    }
+    with transaction.atomic():
+        success = _create_request(request_datas)
+        info = 'Амжилттай хадгалалаа'
 
     return success, info
 
@@ -891,95 +893,91 @@ def _check_perm(geo_id, employee, feature_id, geo_json):
 def file_upload_save_data(request, tid, pid, fid, ext):
     employee = get_object_or_404(Employee, user=request.user)
     form = request.FILES.getlist('data')
+    order_at = request.POST.get('order_at')
+    order_no = request.POST.get('order_no')
     feature_id = fid
 
-    try:
+    uniq_name = str(uuid.uuid4())
+    for fo in form:
+        uniq_file_name, file_type_name, return_name = _check_file_for_geom(
+            fo.name,
+            uniq_name,
+            ext
+        )
+        path = _save_file_to_storage(file_type_name, uniq_file_name, fo)
 
-        uniq_name = str(uuid.uuid4())
-        for fo in form:
-            uniq_file_name, file_type_name, return_name = _check_file_for_geom(
-                fo.name,
-                uniq_name,
-                ext
-            )
-            path = _save_file_to_storage(file_type_name, uniq_file_name, fo)
+    file_name, uniq_name = _make_file_name(uniq_file_name, file_type_name)
+    for_delete_items = {
+        "uniq_name": uniq_name,
+        "file_name": file_name,
+        "file_type_name": file_type_name
+    }
 
-        file_name, uniq_name = _make_file_name(uniq_file_name, file_type_name)
-        for_delete_items = {
-            "uniq_name": uniq_name,
-            "file_name": file_name,
-            "file_type_name": file_type_name
+    ds_path = os.path.join(path, file_name)
+    ds = DataSource(ds_path)
+
+    if len(ds) <= 0:
+        _delete_file(for_delete_items)
+        rsp = {
+            'success': False,
+            'info': 'Source олдсонгүй'
         }
+        return JsonResponse(rsp)
 
-        ds_path = os.path.join(path, file_name)
-        ds = DataSource(ds_path)
+    layer = ds[0]
+    for val in layer:
+        values = dict()
+        for name in range(0, len(layer.fields)):
+            field_name = val[name].name  # field name
+            value = val.get(name)  # value ni
 
-        if len(ds) <= 0:
-            _delete_file(for_delete_items)
-            rsp = {
-                'success': False,
-                'info': 'Source олдсонгүй'
-            }
-            return JsonResponse(rsp)
+            if name == 0:
 
-        layer = ds[0]
-        for val in layer:
-            values = dict()
-            for name in range(0, len(layer.fields)):
-                field_name = val[name].name  # field name
-                value = val.get(name)  # value ni
+                geo_id = _make_geo_id(feature_id, field_name, value)
+                geo_json = val.geom.json  # goemetry json
 
-                if name == 0:
+                if geo_json:
+                    success, info, request_kind = _check_perm(
+                        geo_id,
+                        employee,
+                        feature_id,
+                        geo_json
+                    )
 
-                    geo_id = _make_geo_id(feature_id, field_name, value)
-                    geo_json = val.geom.json  # goemetry json
-
-                    if geo_json:
-                        success, info, request_kind = _check_perm(
-                            geo_id,
-                            employee,
-                            feature_id,
-                            geo_json
-                        )
-
-                        if not success:
-                            _delete_file(for_delete_items)
-                            rsp = {
-                                'success': success,
-                                'info': info,
-                            }
-                            return JsonResponse(rsp)
-
-                    else:
+                    if not success:
                         _delete_file(for_delete_items)
                         rsp = {
-                            'success': False,
-                            'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
+                            'success': success,
+                            'info': info,
                         }
                         return JsonResponse(rsp)
 
-                values[field_name] = value
+                else:
+                    _delete_file(for_delete_items)
+                    rsp = {
+                        'success': False,
+                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
+                    }
+                    return JsonResponse(rsp)
 
-            request_values = {
-                'geo_id': geo_id,
-                'theme_id': tid,
-                'package_id': pid,
-                'feature_id': fid,
-                'employee': employee,
-                'geo_json': geo_json,
-                'kind': request_kind,
-            }
-            success, info = _make_request(values, request_values)
+            values[field_name] = value
 
-            if not success:
-                _delete_file(for_delete_items)
-                break
+        request_values = {
+            'geo_id': geo_id,
+            'theme_id': tid,
+            'package_id': pid,
+            'feature_id': fid,
+            'employee': employee,
+            'geo_json': geo_json,
+            'kind': request_kind,
+            'order_at': order_at,
+            'order_no': order_no,
+        }
+        success, info = _make_request(values, request_values)
 
-    except Exception:
-        _delete_file(for_delete_items)
-        success = False
-        main_msg = ' энэ файлд алдаа гарсан тул файлаа шалгана уу'
-        info = return_name + main_msg
+        if not success:
+            _delete_file(for_delete_items)
+            break
 
     rsp = {
         'success': success,
