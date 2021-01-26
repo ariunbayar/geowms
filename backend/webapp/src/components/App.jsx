@@ -28,7 +28,7 @@ export default class App extends Component {
 
     this.state = {
       user_count: 0,
-      gov_count: []
+      gov_count: [],
     };
     this.handleBoxOver = this.handleBoxOver.bind(this)
   }
