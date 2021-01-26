@@ -398,7 +398,6 @@ def request_approve(request, payload, pk):
     values = payload.get("values")
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
-    form_json = values['form_json']
     success = False
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
 
