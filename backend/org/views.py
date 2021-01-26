@@ -26,89 +26,6 @@ from geoportal_app.models import User
 from main.decorators import ajax_required
 from main import utils
 
-from .models import Org, Employee, InspirePerm
-
-
-def _get_property(org_id, feature_id):
-    properties_list = []
-    data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
-    property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values_list('property_id', flat=True)
-    properties = LProperties.objects.filter(property_id__in=property_ids).values('property_id', "property_code", "property_name")
-    for prop in properties:
-        properties_list.append({
-            'id': prop['property_id'],
-            'code': prop['property_code'],
-            'name': prop['property_name'],
-            'roles': _get_roles(org_id, prop['property_id'], 4, feature_id)
-        })
-
-    return properties_list
-
-
-def _get_features(org_id, package_id,):
-    feat_values = []
-    features = LFeatures.objects.filter(package_id=package_id)
-
-    for feat in features:
-        feat_values.append({
-            'id': feat.feature_id,
-            'code': feat.feature_code,
-            'name': feat.feature_name,
-            'roles': _get_roles(org_id, feat.feature_id, 3, package_id),
-            'properties': _get_property(org_id, feat.feature_id)
-        })
-
-    return feat_values
-
-
-def _get_package(org_id, theme_id):
-
-    package_data = []
-    roles = []
-    for package in LPackages.objects.filter(theme_id=theme_id):
-        roles = _get_roles(org_id, package.package_id, 2, theme_id)
-        package_data.append({
-                'id': package.package_id,
-                'code': package.package_code,
-                'name': package.package_name,
-                'roles': roles,
-                'features': _get_features(org_id, package.package_id)
-            })
-
-    return package_data
-
-
-def _get_roles(org_id, module_id, module, module_root_id):
-    roles = []
-    module = InspirePerm.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
-    if module:
-        roles = [module.perm_view, module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
-    else:
-        roles = [False, False, False, False, False, False, False]
-    return roles
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def inspire_roles(request, level, pk):
-
-    data = []
-    org = get_object_or_404(Org, pk=pk, level=level)
-    for themes in LThemes.objects.all():
-        data.append({
-                'id': themes.theme_id,
-                'code': themes.theme_code,
-                'name': themes.theme_name,
-                'packages': _get_package(org.id, themes.theme_id),
-                'roles': _get_roles(org.id, themes.theme_id, 1, None)
-            })
-
-    return JsonResponse({
-        'data': data,
-        'success': True
-    })
-
 
 @require_POST
 @ajax_required
@@ -429,7 +346,6 @@ def org_remove(request, payload, level):
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
     org_users = Employee.objects.filter(org=org_id)
-    inspire_perm = InspirePerm.objects.filter(org=org)
     for org_user in org_users:
         user = User.objects.filter(pk=org_user.user_id)
         org_user.delete()
@@ -440,7 +356,6 @@ def org_remove(request, payload, level):
         org_govorg.deleted_by = request.user
         org_govorg.deleted_at = localtime(now())
         org_govorg.save()
-    inspire_perm.delete()
     org.orgrole_set.all().delete()
     gov_perm = GovPerm.objects.filter(org=org)
     gov_perm.delete()
@@ -575,57 +490,6 @@ def employee_list(request,payload, level, pk):
     }
 
     return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def roles_add(request, payload, level, pk):
-    form_datas = payload.get("form_values")
-    org = get_object_or_404(Org, pk=pk, level=level)
-
-    def role_update(roles, table_name, root_id, id):
-        if root_id:
-            org_check = InspirePerm.objects.filter(module_root_id=root_id , module_id=id, module=table_name, org=org)
-        else:
-            org_check = InspirePerm.objects.filter(module_id=id, module=table_name, org=org)
-        if org_check:
-            org_check.update(
-                perm_view=roles[0],
-                perm_create=roles[1],
-                perm_remove=roles[2],
-                perm_update=roles[3],
-                perm_revoke=roles[4],
-                perm_review=roles[5],
-                perm_approve=roles[6]
-            )
-        else:
-            orgRole = InspirePerm.objects.create(
-                org=org,
-                module_id=id,
-                module=table_name,
-                perm_view=roles[0],
-                perm_create=roles[1],
-                perm_remove=roles[2],
-                perm_update=roles[3],
-                perm_revoke=roles[4],
-                perm_review=roles[5],
-                perm_approve=roles[6]
-            )
-            if orgRole and root_id:
-                orgRole.module_root_id = root_id
-                orgRole.save()
-
-    for themes in form_datas:
-        role_update(themes['roles'], 1, None, themes['id'])
-        for packages in themes['packages']:
-            role_update(packages['roles'], 2, themes['id'], packages['id'])
-            for features in packages['features']:
-                role_update(features['roles'], 3, packages['id'], features['id'])
-                for properties in features['properties']:
-                    role_update(properties['roles'], 4, features['id'], properties['id'])
-
-    return JsonResponse({'success': True})
 
 
 @require_GET
