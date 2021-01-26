@@ -75,7 +75,6 @@ export class QPay extends Component {
                 if(success) //Amjilttai boloh uyd
                 {
                     this.close(this.props.handleClose)
-                    this.props.history(`/payment/history/api/details/${purchase_id}/`)
                 }
                 else{
 

@@ -637,6 +637,7 @@ export default class BundleMap extends Component {
     };
 
     calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, feature_info_list) {
+        alert("hahaha")
         const area = this.formatArea(feature_geometry)
         var layer_list = []
         layer_info.wms_list.map((w, idx) => {
