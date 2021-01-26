@@ -1,11 +1,14 @@
 import React, { Component } from "react"
-import {UserFormTable} from './UserFormTable'
-import {service} from '../service'
-import {NavLink} from "react-router-dom"
-import { Pagination } from "../../../../../../src/components/Pagination/index"
-import ModalAlert from "../../ModalAlert"
+import { NavLink } from "react-router-dom"
 
-export class UserForm extends Component {
+import { Pagination } from "@utils/Pagination"
+
+import ModalAlert from "../../ModalAlert"
+import { UserTableItem } from './UserTableItem'
+import { service } from '../service'
+
+
+export class UserTable extends Component {
 
 
     constructor(props) {
@@ -22,14 +25,10 @@ export class UserForm extends Component {
             query_min: false,
             search_load: false,
             load: 0,
-            modal_alert_status: "closed",
             timer: null,
         }
         this.paginate = this.paginate.bind(this)
-        this.handleGovorgDelete = this.handleGovorgDelete.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
-        this.modalCloseTime=this.modalCloseTime.bind(this)
-        this.modalClose=this.modalClose.bind(this)
     }
 
     paginate (page, query) {
@@ -56,31 +55,6 @@ export class UserForm extends Component {
             this.setState({ [field]: e.target.value })
             this.paginate(1, e.target.value)
         }
-    }
-
-    handleGovorgDelete(id) {
-        const { load, searchQuery } = this.state
-        service.employeeRemove(id).then(({ success }) => {
-            if (success) {
-                var a = load
-                a ++
-                this.setState({ load: a })
-                this.paginate(1, searchQuery)
-                this.setState({modal_alert_status: "open"})
-            }
-        })
-        this.modalCloseTime()
-    }
-
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000);
-    }
-
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -126,23 +100,20 @@ export class UserForm extends Component {
                                         <th scope="col"> Админ </th>
                                         <th scope="col"> Үүссэн </th>
                                         <th scope="col"> Зассан </th>
-                                        <th scope="col"> </th>
-                                        <th scope="col"> </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     { employees_length === 0 ?
                                     <tr><td>Ажилтан бүртгэлгүй байна</td></tr>:
                                     employees.map((employe, idx) =>
-                                        <UserFormTable
+                                        <UserTableItem
                                             org_level={org_level}
                                             org_id={org_id}
                                             key = {idx}
                                             idx = {(currentPage*employeesPerPage)-employeesPerPage+idx+1}
                                             values={employe}
-                                            handleGovorgDelete={() => this.handleGovorgDelete(employe.id)}
                                         >
-                                        </UserFormTable>
+                                        </UserTableItem>
                                     )}
                                 </tbody>
                             </table>
@@ -153,12 +124,6 @@ export class UserForm extends Component {
                     paginate = { this.paginate }
                     searchQuery = { this.state.searchQuery }
                     load = { this.state.load }
-                />
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай устгалаа"
-                    model_type_icon = "success"
                 />
             </div>
         )

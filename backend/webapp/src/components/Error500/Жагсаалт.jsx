@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Pagination } from "../../../../../src/components/Pagination/index"
+import { Pagination } from "@utils/Pagination/index"
 import {service} from './service'
 
 export class Жагсаалт extends Component {

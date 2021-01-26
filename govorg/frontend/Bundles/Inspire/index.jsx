@@ -1,8 +1,7 @@
 import React, { Component } from "react"
 import {Switch, Route, Link, NavLink} from "react-router-dom"
 
-import Modal from "../../../../src/components/Modal/DeleteModal"
-import {Notif} from '../../../../src/components/Notification/index'
+import {Notif} from '@utils/Notification'
 import BarilgaSuurinGazar from "./Map"
 import {service} from './service'
 

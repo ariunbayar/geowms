@@ -75,6 +75,7 @@ export class ChangeRequestTable extends Component {
 
                 {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
                 kind==2 ? <td className="text-primary">ЗАССАН</td>:
+                kind==5 ? <td className="text-danger">ЦУЦЛАСАН</td>:
                 kind==3 ? <td className="text-danger">УСТГАСАН</td>: null
                 }
                 {

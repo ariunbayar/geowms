@@ -8,14 +8,12 @@ import json
 import subprocess
 from fpdf import FPDF
 from datetime import date
-import urllib.request
 
 from django.conf import settings
 from django.db import transaction
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse, Http404
-from django.shortcuts import get_object_or_404, get_list_or_404, reverse
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 from .MBUtil import MBUtil
@@ -24,10 +22,11 @@ from .PaymentMethodMB import PaymentMethodMB
 from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
 from backend.inspire.models import (
-    LThemes, LFeatureConfigs,
-    LDataTypeConfigs, LProperties,
-    LValueTypes, LCodeListConfigs,
-    LCodeLists, LFeatures, LPackages,
+    LFeatureConfigs,
+    LDataTypeConfigs,
+    LProperties,
+    LValueTypes,
+    LCodeLists,
     MDatas,
 )
 from geoportal_app.models import User
@@ -320,7 +319,7 @@ def _create_shp_file(payment, layer, polygon):
         # source_srs = 'EPSG:32648'
         trans_srs = 'EPSG:4326'
         meta = 'ENCODING=UTF-8'
-        command = subprocess.run([
+        subprocess.run([
             'ogr2ogr',
             '-f', file_type,
             filename,
@@ -353,8 +352,6 @@ def get_all_file_paths(directory):
 
 def get_all_file_remove(directory):
 
-    file_paths = []
-
     for root, directories, files in os.walk(directory):
         for filename in files:
             if filename != 'export.zip':
@@ -367,10 +364,10 @@ def _file_to_zip(payment_id, folder_name):
         path = os.path.join(settings.FILES_ROOT, folder_name, payment_id)
         file_paths = get_all_file_paths(path)
         zip_path = os.path.join(path, 'export.zip')
-        with ZipFile(zip_path,'w') as zip:
+        with ZipFile(zip_path, 'w') as zip:
             for file in file_paths:
                 if folder_name == 'pdf':
-                    if not '.jpeg' in str(file):
+                    if '.jpeg' not in str(file):
                         zip.write(file, os.path.basename(file))
                 else:
                     zip.write(file, os.path.basename(file))

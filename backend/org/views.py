@@ -5,7 +5,6 @@ from django.db.models import Count, Q
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import get_list_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 
@@ -22,8 +21,6 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import MDatas
-from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 
@@ -259,6 +256,7 @@ def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
+
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -267,6 +265,7 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
+        'token': employee.token,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
         'position': employee.position,
@@ -275,7 +274,23 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
+
     return JsonResponse({'success': True, 'employee': employees_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_token_refresh(request, pk):
+    employee = get_object_or_404(Employee, user_id=pk)
+    employee.token = TokenGeneratorEmployee().get()
+    employee.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
 
 
 def _employee_validation(payload, user):
@@ -288,31 +303,31 @@ def _employee_validation(payload, user):
     register = payload.get('register')
     errors = {}
     if not username:
-        errors['username'] = 'Хоосон байна утга оруулна уу.'
+        errors['username'] = 'Хоосон байна утга оруулна уу!'
     elif len(username) > 150:
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
-        errors['position'] = 'Хоосон байна утга оруулна уу.'
+        errors['position'] = 'Хоосон байна утга оруулна уу!'
     elif len(position) > 250:
         errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
-        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
+        errors['first_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(first_name) > 30:
         errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
     if not last_name:
-        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
+        errors['last_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(last_name) > 150:
         errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not email:
-        errors['email'] = 'Хоосон байна утга оруулна уу.'
+        errors['email'] = 'Хоосон байна утга оруулна уу!'
     elif len(email) > 254:
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
     if not gender:
-        errors['gender'] = 'Хоосон байна утга оруулна уу.'
+        errors['gender'] = 'Хоосон байна утга оруулна уу!'
     elif len(gender) > 100:
         errors['gender'] = '100-с илүүгүй урттай утга оруулна уу!'
     if not register:
-        errors['register'] = 'Хоосон байна утга оруулна уу.'
+        errors['register'] = 'Хоосон байна утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():
@@ -426,7 +441,15 @@ def employee_add(request, payload, level, pk):
 
         utils.send_approve_email(user)
 
-    return JsonResponse({'success': True, 'errors': errors})
+    rsp = {
+        'success': True,
+        'employee': {
+            'id': employee.id,
+            'user_id': employee.user_id,
+        }
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -439,21 +462,48 @@ def employee_remove(request, pk):
     return JsonResponse({'success': True})
 
 
+def _org_validation(org_name, org_id):
+    org = Org.objects.filter(pk=org_id).first()
+    errors = {}
+
+    if not org_name:
+        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
+    elif org_name.isspace():
+        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
+    elif len(org_name) > 150:
+        errors['org_name'] = '150-с илүүгүй урттай утга оруулна уу!'
+
+    if org:
+        if org.name != org_name:
+            if Org.objects.filter(name=org_name).first():
+                errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
+    else:
+        if Org.objects.filter(name=org_name).first():
+            errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
+
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def org_add(request, payload, level):
     org_name = payload.get('org_name')
-    upadte_level = payload.get('upadte_level')
+    org_level = payload.get('org_level')
     role_id = payload.get('role_id')
     org_role_filter = GovRole.objects.filter(pk=role_id).first()
     org_id = payload.get('id')
     geo_id = payload.get('geo_id')
     objs = []
+
+    errors = _org_validation(org_name, org_id)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
     if org_id:
         org = get_object_or_404(Org, pk=org_id)
         org.name = org_name
-        org.level = upadte_level
+        org.level = org_level
         org.geo_id = geo_id
         org.save()
         if int(role_id) > -1:
@@ -559,8 +609,9 @@ def org_list(request, payload, level):
         sort_name = 'id'
 
     qs = Org.objects.filter(level=level)
-    qs = qs.annotate(num_employees=Count('employee'))
-    qs = qs.annotate(num_systems=Count('govorg'))
+    qs = qs.annotate(num_employees=Count('employee', distinct=True))
+    qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+
     if query:
         qs = qs.annotate(search=SearchVector('name'))
         qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
@@ -782,9 +833,18 @@ def perm_get_list(request, payload):
 def create_perm(request, payload):
     values = payload.get('values')
     name_check = GovRole.objects.filter(name=values['name'])
+    errors = {}
     if name_check:
+        errors['name'] = 'Нэр давхцаж байна'
         rsp = {
             'success': False,
+            'errors': errors,
+        }
+    elif values['name'].isspace():
+        errors['name'] = 'Хоосон байна утга оруулна уу!'
+        rsp = {
+            'success': False,
+            'errors': errors,
         }
     else:
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
@@ -1391,17 +1451,12 @@ def form_options(request):
 
     admin_levels = utils.get_administrative_levels()
     roles = _get_roles_display()
-    feature_id = get_object_or_404(LFeatures, feature_code='au-au-au').feature_id
-    property_id = get_object_or_404(LProperties, property_code='NationalLevel').property_id
-    code_list_id = get_object_or_404(LCodeLists, code_list_code='1stOrder\n').code_list_id
-    feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-    firstOrder_geom = get_object_or_404(MDatas, property_id=property_id, code_list_id=code_list_id, feature_config_id__in=feature_config_ids).geo_id
     rsp = {
         'success': True,
         'secondOrders': admin_levels,
         'roles': roles,
-        'firstOrder_geom': firstOrder_geom,
+        'firstOrder_geom': utils.get_1stOrder_geo_id(),
     }
 
     return JsonResponse(rsp)

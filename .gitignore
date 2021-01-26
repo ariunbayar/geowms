@@ -13,14 +13,11 @@ main/settings/prod.py
 main/settings/test.py
 
 
-backend/webapp/static/
-frontend/bundle/static/
-frontend/mobile/static/
-frontend/payment/static/
-frontend/profile/static/
-
-
 geoportal_app/static/dist_dev
+
+geoportal_app/datas/geojson/*
+geoportal_app/datas/gml/*
+geoportal_app/datas/shp/*
 
 geoportal_app/media/DejaVuSansCondensed.cw127.pkl
 geoportal_app/media/DejaVuSansCondensed.pkl

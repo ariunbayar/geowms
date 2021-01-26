@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from backend.config.models import Config
 from main.decorators import ajax_required
 from main import geoserver
 
