@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react"
 import { Formik, Form, Field} from 'formik'
+import StyleMap from './Map'
 import * as Yup from 'yup'
 
 import {service} from './service'
@@ -15,21 +16,20 @@ export class ViewStyle extends Component {
 
         super(props)
         this.state = {
-            is_editing: false,
+            style_state: 'create_style',
             initial_values: {
-                style_kind: 'none'
+                style_name: '',
+                style_title: '',
+                style_color: '#ffffff',
+                style_size: '',
+                style_kind: ''
             },
-            values: {},
         }
-        this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     componentDidMount() {
 
-    }
-    handleChange(e){
-        console.log(e.target.name)
     }
 
     handleSubmit(values, { setStatus, setValues }) {
@@ -38,7 +38,7 @@ export class ViewStyle extends Component {
 
     render() {
         const {fname, view_name} = this.props
-        const initial_values  = this.state.initial_values
+        const { initial_values, style_state } = this.state
         return (
             <div className="card">
 
@@ -50,7 +50,6 @@ export class ViewStyle extends Component {
                 <div className="card-body">
                     <Formik
                         initialValues={ initial_values }
-                        initialStatus={ 'initial' }
                         enableReinitialize
                         validationSchema={ validationSchema }
                         onSubmit={ this.handleSubmit }
@@ -70,31 +69,88 @@ export class ViewStyle extends Component {
                         }) => {
                             return (
                                 <Form>
-                                    <div className="col-md-12">
-                                        <div className="row">
-                                            <div className="col-md-12 mb-4">
-                                                <a href="#" onClick={event => this.handleChange(event, id, 'up')}>
-                                                    <i className="fa fa-chevron-up gp-text-primary" aria-hidden="true"></i>
-                                                </a>
+                                    <fieldset>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="">Төлөв</label>
+		                                        <select className="form-control form-control-sm"
+		                                            onChange={(e) => this.setState({ style_state: e.target.value })}>
+		                                            <option value="create_style">Style үүсгэх</option>
+		                                            <option value="update_style">Үүссэн style-с сонгох</option>
+		                                        </select>
                                             </div>
                                         </div>
-                                        <div className="row">
-                                            <div className="col-md-12 mb-4">
-                                                <button type="button" className="btn gp-outline-primary" name="update" onClick={(e) =>this.handleChange}>
-                                                    Үүссэн style-аас сонгох
-                                                </button>
+                                        <div className="form-row">
+                                            {style_state == 'create_style' ?
+                                                <Fragment>
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="style_name">Style-ийн нэр</label>
+                                                        <Field
+                                                            name="style_name"
+                                                            id="id_geoserver_host"
+                                                            type="text"
+                                                            className="form-control"
+                                                        />
+                                                    </div>
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="style_title">Style-ийн гарчиг</label>
+                                                        <Field
+                                                            name="style_title"
+                                                            type="text"
+                                                            className="form-control"
+                                                            id="style_title"
+                                                        />
+                                                    </div>
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="style_color">Style-ийн өнгө</label>
+                                                        <Field
+                                                            name="style_size" as="select"
+                                                            className="form-control" className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option value="stroke">stroke</option>
+                                                            <option value="fill">fill</option>
+                                                            <option value="fill_opacity">fill-opacity</option>
+                                                        </Field>
+                                                    </div>
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="id_geoserver_user">Style-ийн хэмжээ</label>
+                                                        <Field
+                                                            name="style_size"
+                                                            type="text"
+                                                            className="form-control"
+                                                            id="style_size"
+                                                        />
+                                                    </div>
+                                                    {/* <div className="form-group col-md-6">
+                                                        <label htmlFor="id_geoserver_user">Style-ийн өнгө</label>
+                                                        <Field
+                                                            name="style_size" as="select"
+                                                            className="form-control" className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                            <option value="stroke">stroke</option>
+                                                            <option value="fill">fill</option>
+                                                            <option value="fill_opacity">fill-opacity</option>
+                                                        </Field>
+                                                        <ErrorMessage name="style_size" component="div" className="text-dange"/>
+                                                    </div> */}
+                                             </Fragment>
+                                            : null
+                                            }
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="">Өнгө</label>
+                                                <input
+                                                    type="color"
+                                                    value= {initial_values.style_color}
+                                                    onChange={(e) => this.setState({ initial_values: {style_color: e.target.value} })}
+                                                />
                                             </div>
                                         </div>
-                                    </div>
-                                    {
-                                        <div className="col-md-12">
-                                            <a className="col-md-6">Шинээр style үүсгэх</a>
-                                            <a className="col-md-6">Үүссэн style-аас сонгох</a>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <StyleMap/>
+                                            </div>
                                         </div>
-                                    }
-                                    <div className="col-md-12 ml-3">
-                                        <a>Map</a>
-                                    </div>
+                                    </fieldset>
                                 </Form>
                             )
                         }}
