@@ -19,7 +19,6 @@ export class PolygonPurchase extends Component {
             price: 3000,
             purchase_all: [],
             qpay_modal_is: false,
-            is_modal_open: false,
             is_modal_info_open: false,
             alert_toggle: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
@@ -58,14 +57,6 @@ export class PolygonPurchase extends Component {
 
     }
 
-    handleModalOpen(){
-        this.setState({ is_modal_open: true })
-    }
-
-    handleModalClose(){
-        this.setState({ is_modal_open: false })
-    }
-
     handleModalApproveClose(){
         const purchase_id = this.props.match.params.id
         if (!this.state.purchase_all.export_files) {
@@ -76,7 +67,6 @@ export class PolygonPurchase extends Component {
 
     handleQpay(){
         this.setState(prevState => ({
-            is_modal_open: false,
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
