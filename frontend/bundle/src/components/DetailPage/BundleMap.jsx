@@ -33,7 +33,7 @@ import {DrawButton} from './controls/Draw'
 import {PopUp} from './popUp/PopUp'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
-import LoginModal from '../../../../../src/components/Modal/InfoModal'
+import ModalAlert from "@utils/Modal/ModalAlert"
 export default class BundleMap extends Component {
 
     constructor(props) {
@@ -707,8 +707,8 @@ export default class BundleMap extends Component {
                             <div id="map"></div>
                             {
                              is_modal_info_open &&
-                                <LoginModal
-                                    modalClose = {() => this.handleModalApproveClose()}
+                                <ModalAlert
+                                    modalAction = {() => this.handleModalApproveClose()}
                                     text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
                                     title="Худалдан авалтын мэдээлэл"
                                     status={this.state.status}
