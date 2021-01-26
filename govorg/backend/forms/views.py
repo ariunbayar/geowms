@@ -5,29 +5,20 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from .models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view, Mpoint1, Mpoint2, Mpoint3, Mpoint4, Mpoint5, Mpoint6, Mpoint7, Mpoint8, Mpoint9,Mpoint10, TuuhSoyolHureePol, TuuhSoyolAyuulHureePol, TsegUstsanLog
+from .models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view, Mpoint2, Mpoint3, Mpoint4, Mpoint5, Mpoint6, Mpoint7, Mpoint8, Mpoint9,Mpoint10, TuuhSoyolHureePol, TuuhSoyolAyuulHureePol, TsegUstsanLog
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 from geoportal_app.models import User
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-import math
 from pyproj import Transformer
 import pyproj
 import uuid
 from django.db.models import Q
-import re
 from django.conf import settings
 from fpdf import FPDF
-from django.contrib.gis.geos import GEOSGeometry, Point, Polygon, LinearRing
+from django.contrib.gis.geos import GEOSGeometry, Point, Polygon
 from main.utils import (
-    gis_delete,
-    gis_fetch_one,
-    gis_fields_by_oid,
-    gis_insert,
-    gis_table_by_oid,
-    gis_tables_by_oids,
     dict_fetchall
 )
 # Create your models here.

@@ -25,6 +25,8 @@ from govorg.backend.utils import (
     get_theme_data_display,
     get_property_data_display,
     get_convert_perm_kind,
+    count_property_of_feature,
+    get_perm_kind_name
 )
 
 
@@ -33,7 +35,7 @@ def _get_employee_display(employee):
     user = employee.user
     role = EmpPerm.objects.filter(employee=employee).first()
 
-    if role:
+    if role and role.emp_role:
         role = role.emp_role.name
     else:
         role = None
@@ -43,11 +45,17 @@ def _get_employee_display(employee):
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
+
+        'token': employee.token,
+        'created_at': employee.created_at.strftime('%Y-%m-%d'),
+        'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+
         'role_name': role,
     }
 
@@ -162,7 +170,7 @@ def _employee_validation(user, user_detail):
             errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
     if not utils.is_email(email):
         errors['email'] = 'Email хаяг алдаатай байна.'
-    if len(register) ==  10:
+    if len(register) == 10:
         if not utils.is_register(register):
             errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     else:
@@ -260,6 +268,7 @@ def update(request, payload, pk):
 
         if remove_perms:
             _delete_remove_perm(remove_perms)
+
         if add_perms:
             for perm in add_perms:
                 _set_emp_perm_ins(emp_perm, perm, request.user)
@@ -290,13 +299,19 @@ def _get_emp_perm_display(emp_perm):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        property_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True)
+        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+        property_data, perm_list = get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True)
+        properties.append(property_data)
+        property_perm_count = count_property_of_feature(emp_perm_properties)
+        for perm in perm_list:
+            kind_name = get_perm_kind_name(perm['kind'])
+            property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+        property_of_feature[feature_id] = property_perm_count
 
-        property_of_feature[feature_id] = property_ids
-        properties.append(get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True))
-        for property_id in property_ids:
-            prop = LProperties.objects.get(property_id=property_id)
-            properties.append(get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False))
+        for property_id in emp_perm_properties:
+            prop = LProperties.objects.get(property_id=property_id['property_id'])
+            property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
+            properties.append(property_data)
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
@@ -304,7 +319,7 @@ def _get_emp_perm_display(emp_perm):
     ]
 
     themes = [
-        get_theme_data_display(theme_id, LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True))
+        get_theme_data_display(theme_id, LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True), package_features)
         for theme_id in theme_ids
     ]
 
@@ -361,3 +376,29 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': True})
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def refresh_token(request, pk):
+
+    employee = get_object_or_404(Employee, pk=pk)
+    req_employee = get_object_or_404(Employee, user=request.user)
+    if req_employee.is_admin:
+
+        employee.token = TokenGeneratorEmployee().get()
+        employee.save()
+
+        rsp = {
+            'success': True,
+            'info': 'Токенийг амжилттай шинэчиллээ!'
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Та байгууллагын админ биш байна.'
+        }
+
+    return JsonResponse(rsp)

@@ -10,7 +10,9 @@ import "./styles.css"
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
 import {Vector as VectorSource} from 'ol/source';
 import {Vector as VectorLayer} from 'ol/layer';
-import Modal from '../components/helpers/Modal'
+
+import Modal from "@utils/Modal/Modal"
+
 
 export class RequestMap extends Component {
     constructor(props) {

@@ -1,8 +1,11 @@
 import React, { Component, Fragment } from "react"
+import { NavLink } from "react-router-dom"
+
 import { service } from "../service"
 import ModalAlert from "../../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
+
 
 export class UserAdd extends Component {
 
@@ -24,12 +27,12 @@ export class UserAdd extends Component {
                 re_password_mail: false
             },
             modal_alert_status: "closed",
-            timer: null,
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     componentDidMount() {
@@ -85,12 +88,12 @@ export class UserAdd extends Component {
 
         }
         else{
-            service.employeeAdd(org_level, org_id, values).then(({ success, errors }) => {
+            service.employeeAdd(org_level, org_id, values).then(({ success, errors, employee }) => {
                 if (success) {
                     this.setState({modal_alert_status: "open"})
                     setStatus('saved')
                     setSubmitting(false)
-                    this.modalCloseTime()
+                    this.modalCloseTime(employee.user_id)
                 }
                 else{
                     setErrors(errors)
@@ -100,29 +103,40 @@ export class UserAdd extends Component {
         }
     }
 
-    modalCloseTime(){
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        this.state.timer = setTimeout(() => {
-            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
-        }, 2000)
+    modalCloseTime(user_id) {
+        setTimeout(() => this.modalClose(user_id), 2000)
     }
 
-    modalClose(){
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`)
+    modalClose(user_id) {
+        const { level, id, emp } = this.props.match.params
+        this.props.history.push(
+            `/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/${emp || user_id}/дэлгэрэнгүй/`
+        )
     }
 
     render() {
         const {form_values} = this.state
         const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
+
+        const url_list = `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`
+        const url_detail = `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${org_emp}/дэлгэрэнгүй/`
+
         return (
-            <div className="col-6 my-4">
+            <div className="col-6">
                 <div className="row">
                     <div className="col-md-12">
-                        <div className="row">
+                        <NavLink
+                            to={ org_emp ? url_detail : url_list }
+                            className="btn gp-outline-primary m-1"
+                        >
+                            <i className="fa fa-angle-double-left"></i>
+                            {} Буцах
+                        </NavLink>
+                    </div>
+
+                    <div className="col-md-12">
                         <Formik
                             enableReinitialize
                             initialValues={form_values}
@@ -272,14 +286,13 @@ export class UserAdd extends Component {
                                             <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                                {!isSubmitting && 'Нэмэх' }
+                                                {!isSubmitting && 'Хадгалах' }
                                             </button>
                                         </div>
                                     </div>
                                 </Form>
                                 )}}
-                            </Formik>
-                        </div>
+                        </Formik>
                     </div>
                 </div>
                 <ModalAlert

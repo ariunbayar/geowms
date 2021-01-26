@@ -22,6 +22,7 @@ urlpatterns = [
                 path('<int:pk>/update/', role_employee_views.update),
                 path('<int:pk>/detail/', role_employee_views.detail),
                 path('<int:pk>/delete/', role_employee_views.delete),
+                path('<int:pk>/refresh-token/', role_employee_views.refresh_token),
             ], 'employee'))),
             path('', include(([
                 path('', role_views.list),
@@ -53,7 +54,7 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
-            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.file_upload_save_data),
+            path('send-data/<int:tid>/<int:pid>/<int:fid>/<str:ext>/', govorg_inspire_views.file_upload_save_data),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
@@ -142,6 +143,7 @@ urlpatterns = [
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),
+        path('emp-role/', org_views.emp_role, name='emp-role'),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

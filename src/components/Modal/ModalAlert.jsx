@@ -25,7 +25,7 @@ export default class ModalAlert extends Component {
                 this.handleOpen()
             }
             if (['closing', 'closed'].includes(this.props.status)) {
-                this.handleClose()
+                this.handleClose(null, 0)
             }
         }
     }
@@ -37,14 +37,15 @@ export default class ModalAlert extends Component {
         }, 0)
     }
 
-    handleClose(callback) {
+    handleClose(callback, timeout) {
+        timeout = (timeout === undefined ? 150 : timeout)
         this.setState({status: 'closing'})
         setTimeout(() => {
             this.setState({status: 'closed'})
             if (callback) {
                 callback()
             }
-        }, 150)
+        }, timeout)
     }
 
     handleProceed() {
