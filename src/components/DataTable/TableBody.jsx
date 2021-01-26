@@ -21,10 +21,20 @@ export class TableBody extends Component {
                         &&
                         <td key={idx}>
                             {
+                                хувьс.component
+                                ?
+                                <хувьс.component values={values}/>
+                                :
                                 хувьс.action_type
                                 ?
                                 <span className={хувьс.action(values[item.field])}>
-                                    {values[item.field]}
+                                    {
+                                    хувьс.text
+                                    ?
+                                    хувьс.text
+                                    :
+                                    values[item.field]
+                                    }
                                 </span>
                                 :
                                 <a role="button" className="text-primary" onClick={() => хувьс.action(values)}>
@@ -38,14 +48,20 @@ export class TableBody extends Component {
                 )}
                 {нэмэлт_талбарууд.map((item, idx) =>
                     <td key={idx}>
+                        {item.component
+                        ?
+                        <item.component values={values}/>
+                        :
                         <a role="button" onClick={() => item.action(values)}>
-                            {item.text
+                            {
+                            item.text
                             ?
                             item.text
                             :
                             <i className={item.icon}></i>
                             }
                         </a>
+                        }
                     </td>
                 )}
             </tr>

@@ -83,6 +83,7 @@
 .table_wrapper .table_wrapper_table thead th{
     background:  #223035;
     color: #fff;
+    top: -1px;
 }
 
 .table_wrapper::-webkit-scrollbar {

@@ -4,7 +4,6 @@ import {TableBody} from './TableBody'
 import { Pagination } from "./Pagination"
 import {NavLink} from "react-router-dom"
 
-
 export class PortalDataTable extends Component {
 
     constructor(props) {
@@ -24,7 +23,8 @@ export class PortalDataTable extends Component {
             нэмэлт_талбарууд: props.нэмэлт_талбарууд || [],
             нэмэх_товч: props.нэмэх_товч || '',
             хайлт: props.хайлт || "open",
-            sort_name: ''
+            sort_name: '',
+            color: props.color || "dark"
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
@@ -66,17 +66,28 @@ export class PortalDataTable extends Component {
         }
     }
 
-    componentDidUpdate(pp){
+    componentDidUpdate(pp, ps){
+        const {current_page, query, sort_name} = this.state
         if(pp.refresh !== this.props.refresh){
-            this.paginate(this.state.current_page, this.state.query, this.state.sort_name)
+            this.paginate(current_page, query, sort_name)
         }
+        if(ps.per_page !== this.state.per_page){
+            this.paginate(current_page, query, sort_name)
+        }
+    }
+
+    pageInput(per_page){
+        const {current_page, query, sort_name} = this.state
+        this.setState({per_page})
+        this.paginate(current_page, query, sort_name)
+
     }
 
     render() {
         const { items,current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
-            хайлт
+            хайлт, color
         } = this.state
         return (
            <div>
@@ -85,7 +96,7 @@ export class PortalDataTable extends Component {
                null
                :
                 <div className="row">
-                    <div className="col-md-6">
+                    <div className="col-3">
                         {хайлт == "open" &&
                         <div className="float-sm-left search-bar">
                             <input
@@ -100,8 +111,21 @@ export class PortalDataTable extends Component {
                         </div>
                         }
                     </div>
+                    <div className="col">
+                        <div className="float-sm-right input-group">
+                            <strong className={`mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
+                            <select className="form-control form-control-sm col-2" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
                     {нэмэх_товч &&
-                    <div className="col-md-6">
+                    <div className="col">
                         <div className="float-sm-right">
                             <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2" to={нэмэх_товч}>
                                 Нэмэх
@@ -116,11 +140,11 @@ export class PortalDataTable extends Component {
                     <div className="col-lg-12">
                         <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
-                                <thead>
+                                <thead className="bg-primary">
                                     <tr>
-                                        <th scope="col">№</th>
+                                        <th scope="col" className={`bg-${color}`}>№</th>
                                         {талбарууд.map((item, index) =>
-                                            <th key={index}>
+                                            <th key={index} className={`bg-${color}`}>
                                                 {item.title}&nbsp;
                                                 <a onClick={() => this.handleSort(item.field, this.state[item.field])}><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
                                             </th>
@@ -153,9 +177,10 @@ export class PortalDataTable extends Component {
                             </table>
                         </div>
                         <Pagination
-                            paginate = {this.paginate}
-                            query = {this.state.query}
-                            sort_name = {this.state.sort_name}
+                            paginate={this.paginate}
+                            query={this.state.query}
+                            sort_name={this.state.sort_name}
+                            color={color}
                         />
                     </div>
                 </div>

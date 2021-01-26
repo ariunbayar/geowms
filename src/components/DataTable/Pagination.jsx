@@ -1,3 +1,4 @@
+import { set } from "ol/transform"
 import React, { Component } from "react"
 
 
@@ -100,6 +101,7 @@ export class Pagination extends Component {
     render() {
         const {page, total_page} = this.state
         const pages = []
+        const { color } = this.props
         for (let i = page; i <= total_page; i++) {
             pages.push(<li className="page-item" key={i}><a className="page-link">{i}</a></li>)
 
@@ -109,13 +111,13 @@ export class Pagination extends Component {
                 <div className="col-md-12">
                     <div className="col-md-12">
                         <div className="float-left">
-                            <strong className="gp-text-primary">Хуудас {page}-{total_page}</strong>
+                            <h5 className={`text-${color}`}>Хуудас&nbsp;{page}-{total_page}</h5>
                         </div>
                         <div className="float-right btn-group group-round">
                             <button
                                 type=" button"
                                 value="1"
-                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
                                 onClick={(e) => this.addPage(e)}
                             >
                                 &lt;&lt;
@@ -123,7 +125,7 @@ export class Pagination extends Component {
                             { page > 1 &&
                                 <button
                                     type=" button"
-                                    className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                    className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
                                     onClick={this.prevPage}
                                 >
                                     &lt;
@@ -132,13 +134,13 @@ export class Pagination extends Component {
                             <button
                                 type=" button"
                                 value={page}
-                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
                             >{page}
                             </button> {}
                             { page < total_page &&
                                 <button
                                     type="button"
-                                    className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                    className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
                                     onClick={this.nextPage}
                                 >
                                     &gt;
@@ -147,7 +149,7 @@ export class Pagination extends Component {
                             <button
                                 type=" button"
                                 value={total_page}
-                                className={"btn gp-btn-primary waves-effect waves-light btn-sm" + (this.state.is_loading ? " disabled" : "")}
+                                className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
                                 onClick={(e) => this.addPage(e)}
                             >
                                 &gt;&gt;

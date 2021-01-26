@@ -16,11 +16,26 @@ export class WmsList extends Component {
                 {'field': 'is_active', "title": 'ИДЭВХТЭЙ ЭСЭХ', 'has_action': true}
             ],
             хувьсах_талбарууд: [
-                {"field": "is_active", "action": this.set_active_color, "action_type": true},
+                {
+                    "field": "is_active",
+                    "text": "",
+                    "action": this.set_active_color,
+                    "action_type": true,
+                },
             ],
             нэмэлт_талбарууд: [
-                {"title": 'Засах', "text": '', "icon": 'fa fa-pencil-square-o text-success', "action": (values) => this.go_link(values)},
-                {"title": 'Устгах', "text": '', "icon": 'fa fa-trash-o text-danger', "action": (values) => this.handleRemove(values)}
+                {
+                    "title": 'Засах',
+                    "text": '', "icon":
+                    'fa fa-pencil-square-o text-success',
+                    "action": (values) => this.go_link(values),
+                },
+                {
+                    "title": 'Устгах',
+                    "text": '',
+                    "icon": 'fa fa-trash-o text-danger',
+                    "action": (values) => this.handleRemove(values),
+                }
             ],
             refresh: true
         }
@@ -58,7 +73,6 @@ export class WmsList extends Component {
                             <PortalDataTable
                                 талбарууд={талбарууд}
                                 жагсаалтын_холбоос={жагсаалтын_холбоос}
-                                per_page={100}
                                 уншиж_байх_үед_зурвас={"Уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
