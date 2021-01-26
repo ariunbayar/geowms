@@ -11,6 +11,7 @@ from django.db import connections
 import random
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
+from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
     LThemes,
     LPackages,
@@ -375,18 +376,6 @@ def _has_data_in_geo_datas(old_geo_id, feature_id):
     return m_geo_datas
 
 
-def _make_geo_id(theme_code, feature_id):
-    count = random.randint(106942, 996942)
-    feature_code = LFeatures.objects.get(feature_id=feature_id).feature_code
-    new_geo_id = feature_code + "_" + str(count) + "_" + 'geo'
-    m_geo_datas = _has_data_in_geo_datas(new_geo_id, feature_id)
-    if m_geo_datas:
-        new_geo_id = _make_geo_id(theme_code)
-
-    return new_geo_id
-
-
-
 def _get_emp_features(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
@@ -410,6 +399,7 @@ def request_approve(request, payload, pk):
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
     success = False
+    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
 
     perm_approve = EmpPermInspire.objects.filter(
         emp_perm_id=emp_perm.id,
@@ -459,7 +449,7 @@ def request_approve(request, payload, pk):
                     old_geo_id,
                 )
             else:
-                new_geo_id = _make_geo_id(theme_code, feature_id)
+                new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
                 approve_type = 'create'
                 success = _request_to_m(
                     new_geo_json, theme_code,
@@ -570,3 +560,4 @@ def search(request, payload):
             'info': str(e)
         }
     return JsonResponse(rsp)
+
