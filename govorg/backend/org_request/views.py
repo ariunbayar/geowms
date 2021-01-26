@@ -11,10 +11,7 @@ from django.db import connections
 import random
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
-<<<<<<< HEAD
 from main.inspire import GEoIdGenerator
-=======
->>>>>>> 04c80c8db86fcbd032b86f0d92e95c11cdbecbd7
 from backend.inspire.models import (
     LThemes,
     LPackages,
