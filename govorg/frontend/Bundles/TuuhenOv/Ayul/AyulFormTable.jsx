@@ -1,6 +1,8 @@
 import React, { Component } from "react"
-import Modal from "../../../components/helpers/Modal"
+
 import {service} from '../service'
+import Modal from "@utils/Modal/Modal"
+
 
 export default class AyulFormTable extends Component {
 

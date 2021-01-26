@@ -35,7 +35,7 @@ def _get_employee_display(employee):
     user = employee.user
     role = EmpPerm.objects.filter(employee=employee).first()
 
-    if role:
+    if role and role.emp_role:
         role = role.emp_role.name
     else:
         role = None
@@ -45,11 +45,17 @@ def _get_employee_display(employee):
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
+
+        'token': employee.token,
+        'created_at': employee.created_at.strftime('%Y-%m-%d'),
+        'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+
         'role_name': role,
     }
 
@@ -370,3 +376,29 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': True})
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def refresh_token(request, pk):
+
+    employee = get_object_or_404(Employee, pk=pk)
+    req_employee = get_object_or_404(Employee, user=request.user)
+    if req_employee.is_admin:
+
+        employee.token = TokenGeneratorEmployee().get()
+        employee.save()
+
+        rsp = {
+            'success': True,
+            'info': 'Токенийг амжилттай шинэчиллээ!'
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Та байгууллагын админ биш байна.'
+        }
+
+    return JsonResponse(rsp)

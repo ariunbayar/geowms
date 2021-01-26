@@ -1,11 +1,13 @@
 import React, { Component, Fragment } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from '../../service'
 import {NavLink} from "react-router-dom"
-import {validationSchema} from './validationSchema'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+
+import {service} from '../../service'
+import {validationSchema} from './validationSchema'
 import Maps from '../../../../components/map/Map'
-import ModalAlert from '../../../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export  class Forms extends Component {
 

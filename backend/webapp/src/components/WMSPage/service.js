@@ -15,7 +15,6 @@ export const service = {
     detail,
     wmsIsActiveUpdate,
     pagination,
-    paginatedList,
     getData,
     saveData,
 }
@@ -81,13 +80,7 @@ function pagination(last,first) {
     return fetch(`${prefix}/wms/pagination/`, requestOptions).then(handleResponse)
 }
 
-function paginatedList (page, per_page, query, sort_name) {
-    const requestOptions = {
-        ..._getPostOptions(),
-        body: JSON.stringify({ page, per_page, query, sort_name }),
-    }
-    return fetch(`${prefix}/wms/paginatedList/`, requestOptions).then(handleResponse)
-}
+
 
 function getAll() {
     const requestOptions = {

@@ -1,9 +1,11 @@
 import React, { Component } from "react"
-import FormTable from './FormTable'
 import {NavLink} from "react-router-dom"
+
+import FormTable from './FormTable'
 import {service} from './service'
 import {Pagination} from '../../components/pagination/pagination'
-import ModalAlert from '../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class FormList extends Component {
 

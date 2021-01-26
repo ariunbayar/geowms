@@ -10,7 +10,7 @@ from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 
@@ -658,3 +658,26 @@ def get_1stOrder_geo_id():
 
     except:
         return None
+
+
+def datetime_to_string(date):
+    return date.strftime('%Y-%m-%d') if date else ''
+
+
+def get_display_items(items, fields, хувьсах_талбарууд=[]):
+    display = list()
+    for item in items.values():
+        obj = dict()
+        for field in fields:
+            if isinstance(item[field], datetime):
+                obj[field] = datetime_to_string(item[field])
+            else:
+                obj[field] = item[field]
+            for хувьсах_талбар in хувьсах_талбарууд:
+                if хувьсах_талбар['field'] == field:
+                    action = хувьсах_талбар['action']
+                    obj[хувьсах_талбар['new_field']] = action(item[field], item)
+
+        display.append(obj)
+
+    return display

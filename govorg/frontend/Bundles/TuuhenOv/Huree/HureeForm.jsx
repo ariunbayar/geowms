@@ -1,7 +1,9 @@
 import React, { Component } from "react"
+
 import {service} from '../service'
 import HureeFormTable from "./HureeFormTable"
-import ModalAlert from '../../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class HureeForm extends Component {
 

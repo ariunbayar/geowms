@@ -54,6 +54,7 @@ def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
+
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -62,6 +63,7 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
+        'token': employee.token,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
         'position': employee.position,
@@ -70,7 +72,23 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
+
     return JsonResponse({'success': True, 'employee': employees_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_token_refresh(request, pk):
+    employee = get_object_or_404(Employee, user_id=pk)
+    employee.token = TokenGeneratorEmployee().get()
+    employee.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
 
 
 def _employee_validation(payload, user):
@@ -221,7 +239,15 @@ def employee_add(request, payload, level, pk):
 
         utils.send_approve_email(user)
 
-    return JsonResponse({'success': True, 'errors': errors})
+    rsp = {
+        'success': True,
+        'employee': {
+            'id': employee.id,
+            'user_id': employee.user_id,
+        }
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_GET

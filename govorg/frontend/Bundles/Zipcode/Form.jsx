@@ -1,8 +1,10 @@
 import React, { Component } from "react"
+
 import Maps from './map/Map'
 import {service} from './service'
 import FormTable from './FormTable'
-import ModalAlert from '../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class Forms extends Component {
 

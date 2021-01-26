@@ -15,6 +15,10 @@ main/settings/test.py
 
 geoportal_app/static/dist_dev
 
+geoportal_app/datas/geojson/*
+geoportal_app/datas/gml/*
+geoportal_app/datas/shp/*
+
 geoportal_app/media/DejaVuSansCondensed.cw127.pkl
 geoportal_app/media/DejaVuSansCondensed.pkl
 
