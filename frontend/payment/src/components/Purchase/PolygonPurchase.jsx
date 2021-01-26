@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
-import Modal from '../../../../../src/components/Modal/InfoModal'
+import ModalAlert from '@utils/Modal/ModalAlert'
 
 export class PolygonPurchase extends Component {
 
@@ -161,12 +161,12 @@ export class PolygonPurchase extends Component {
 
             {
              is_modal_info_open &&
-                <Modal
-                    modalClose = {() => this.handleModalApproveClose()}
+                <ModalAlert
+                    model_type_icon='success'
                     text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
                     title="Худалдан авалтын мэдээлэл"
                     status={this.state.status}
-                    actionNameDelete="зөвшөөрөх"
+                    modalAction={() => this.handleModalApproveClose()}
                 />
             }
         </div>

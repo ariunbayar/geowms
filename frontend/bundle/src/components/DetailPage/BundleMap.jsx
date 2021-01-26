@@ -33,7 +33,7 @@ import {DrawButton} from './controls/Draw'
 import {PopUp} from './popUp/PopUp'
 import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
-import LoginModal from '../../../../../src/components/Modal/InfoModal'
+import ModalAlert from "@utils/Modal/ModalAlert"
 export default class BundleMap extends Component {
 
     constructor(props) {
@@ -474,7 +474,6 @@ export default class BundleMap extends Component {
                         })
                 } else {
                     /* TODO */
-                    console.log('no feature url', wms_source);
                 }
             })
         })
@@ -637,7 +636,6 @@ export default class BundleMap extends Component {
     };
 
     calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, feature_info_list) {
-        alert("hahaha")
         const area = this.formatArea(feature_geometry)
         var layer_list = []
         layer_info.wms_list.map((w, idx) => {
@@ -708,8 +706,8 @@ export default class BundleMap extends Component {
                             <div id="map"></div>
                             {
                              is_modal_info_open &&
-                                <LoginModal
-                                    modalClose = {() => this.handleModalApproveClose()}
+                                <ModalAlert
+                                    modalAction = {() => this.handleModalApproveClose()}
                                     text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
                                     title="Худалдан авалтын мэдээлэл"
                                     status={this.state.status}
