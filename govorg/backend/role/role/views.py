@@ -66,10 +66,10 @@ def _set_emp_role_data(emp_role, name, description):
 
 def _set_emp_role_inspire_data(emp_role, role, user):
 
-    gov_perm_inspire =  get_object_or_404(GovPermInspire, pk=role.get('gov_perm_inspire_id'))
+    gov_perm_inspire =  role.get('gov_perm_inspire_id')
 
     emp_role_inspire = EmpRoleInspire()
-    emp_role_inspire.gov_perm_inspire = gov_perm_inspire
+    emp_role_inspire.gov_perm_inspire_id = gov_perm_inspire
     emp_role_inspire.created_by = user
     emp_role_inspire.emp_role = emp_role
     emp_role_inspire.feature_id = role.get('feature_id')
@@ -78,7 +78,6 @@ def _set_emp_role_inspire_data(emp_role, role, user):
     else:
         emp_role_inspire.property_id = role.get('property_id')
     emp_role_inspire.perm_kind = get_convert_perm_kind(EmpRoleInspire, role.get('perm_kind'))
-    emp_role_inspire.save()
 
     return emp_role_inspire, gov_perm_inspire
 
@@ -90,7 +89,7 @@ def _set_emp_perm_ins(emp_perm, perm, user, emp_role_inspire, gov_perm_inspire):
 
     emp_perm_inspire = EmpPermInspire(
         emp_role_inspire=emp_role_inspire,
-        gov_perm_inspire=gov_perm_inspire,
+        gov_perm_inspire_id=gov_perm_inspire,
         emp_perm=emp_perm,
         feature_id=feature_id,
         created_by=user,
@@ -139,24 +138,23 @@ def create(request, payload):
     description = payload.get('role_description')
     roles = payload.get('roles')
     errors = _role_name_validation(payload, None)
+    user = request.user
     if errors:
         return JsonResponse({'success': False, 'errors':errors})
 
-    with transaction.atomic():
+    gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
+    emp_role = EmpRole()
+    emp_role.gov_perm = gov_perm
+    emp_role.created_by = request.user
+    emp_role.save()
+    if _set_emp_role_data(emp_role, name, description):
+        obj = []
+        for role in roles:
+            emp_role_inspire, gov_perm_inspire = _set_emp_role_inspire_data(emp_role, role, user)
+            obj.append(emp_role_inspire)
+        EmpRoleInspire.objects.bulk_create(obj)
 
-        gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
-        emp_role = EmpRole()
-        emp_role.gov_perm = gov_perm
-        emp_role.created_by = request.user
-        emp_role.save()
-
-        if _set_emp_role_data(emp_role, name, description):
-            for role in roles:
-                _set_emp_role_inspire_data(emp_role, role, request.user)
-
-        return JsonResponse({'success': True, 'errors': errors})
-
-    return JsonResponse({'success': False, 'errors': errors})
+    return JsonResponse({'success': True, 'errors': errors})
 
 
 @require_POST
@@ -188,14 +186,17 @@ def update(request, payload, pk):
 
         if add_roles:
             objs = []
+            objstest = []
             for role in add_roles:
                 emp_role_inspire, gov_perm_inspire = _set_emp_role_inspire_data(emp_role, role, request.user)
+                objstest.append(emp_role_inspire)
                 # Role дээр нэмэлд засвар хийхэд тухайн role той хэрэглэгчидэд бас check нэмж өгж байана.
                 for emp_perm in emp_perms:
                     emp_perm_inspire_obj = _set_emp_perm_ins(emp_perm, role, request.user, emp_role_inspire, gov_perm_inspire)
                     objs.append(emp_perm_inspire_obj)
 
             EmpPermInspire.objects.bulk_create(objs)
+            EmpRoleInspire.objects.bulk_create(objstest)
 
         return JsonResponse({'success': True, 'errors': errors})
 
