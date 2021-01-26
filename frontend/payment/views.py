@@ -1,12 +1,10 @@
 from zipfile import ZipFile
 import os
 import uuid
-import re
 from urllib.parse import urlencode
 
 from django.conf import settings
 from django.db import transaction
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -145,9 +143,8 @@ def _create_shp_file(payment, layer, polygon):
 
     import sys
     sys.path.append('/usr/lib/python3/dist-packages/')
-    from qgis.utils import iface
     from qgis.core import \
-        QgsVectorLayer, QgsDataSourceUri, QgsVectorFileWriter, QgsFeature, QgsApplication, QgsProject, QgsWkbTypes,  QgsFields, QgsCoordinateReferenceSystem
+        QgsVectorLayer, QgsVectorFileWriter, QgsApplication, QgsCoordinateReferenceSystem
 
     x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
 

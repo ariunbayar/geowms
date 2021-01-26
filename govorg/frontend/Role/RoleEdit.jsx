@@ -1,10 +1,11 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
 import { Formik, Form, Field, ErrorMessage} from 'formik'
-import ModalAlert from "../components/helpers/ModalAlert";
-import { service } from "./Role/service";
-import InsPerms from './Role/GovPerms'
 import * as Yup from 'yup'
+
+import { service } from "./Role/service";
+import ModalAlert from "@utils/Modal/ModalAlert"
+import InsPerms from './Role/GovPerms'
 
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()

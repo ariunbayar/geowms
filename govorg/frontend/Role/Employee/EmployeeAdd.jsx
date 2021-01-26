@@ -1,10 +1,12 @@
 import React, { Component, Fragment } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../../components/helpers/ModalAlert';
-import { service } from './service'
-import InsPerms from '../Role/GovPerms'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+
+import { service } from './service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
+
 
 export class EmployeeAdd extends Component {
 
@@ -30,7 +32,6 @@ export class EmployeeAdd extends Component {
             emp_role_id: null,
             roles: {},
             modal_alert_status: "closed",
-            timer: null,
             model_type_icon: '',
             title: '',
             prefix: '/gov/perm/employee/',
@@ -38,7 +39,6 @@ export class EmployeeAdd extends Component {
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getRolesForOption = this.getRolesForOption.bind(this)
         this.getRole = this.getRole.bind(this)
         this.getValue = this.getValue.bind(this)
@@ -102,38 +102,22 @@ export class EmployeeAdd extends Component {
             .then(({ success, errors, info }) => {
                 if(success) {
                     setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'success'})
-                    this.props.getEmpRoles()
+                    this.setState({
+                        model_type_icon: 'success',
+                        modal_alert_status: 'open',
+                        title: info
+                    })
                 } else {
                     if (errors) {
                         setErrors(errors)
                     }
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'danger'})
                 }
-                this.setState({ modal_alert_status: 'open', title: "Алдаа гарлаа"})
-                this.modalCloseTime()
+                setSubmitting(false)
             })
     }
 
     modalClose() {
-        if (this.state.model_type_icon === 'success') {
-            this.props.history.push(this.state.prefix)
-        } else {
-            this.setState({ modal_alert_status: "closed" })
-            clearTimeout(this.state.timer)
-        }
-    }
-
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            if (this.state.model_type_icon === 'success') {
-                this.props.history.push(this.state.prefix)
-            } else {
-                this.setState({ modal_alert_status: "closed" })
-            }
-        }, 2000)
+        this.props.history.push(this.state.prefix)
     }
 
     render() {

@@ -5,7 +5,6 @@ from django.db.models import Count, Q
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import get_list_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 
@@ -22,8 +21,6 @@ from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import MDatas
-from backend.inspire.models import LCodeLists
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 
@@ -259,6 +256,7 @@ def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
+
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -267,6 +265,7 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
+        'token': employee.token,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
         'position': employee.position,
@@ -275,7 +274,23 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
+
     return JsonResponse({'success': True, 'employee': employees_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_token_refresh(request, pk):
+    employee = get_object_or_404(Employee, user_id=pk)
+    employee.token = TokenGeneratorEmployee().get()
+    employee.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
 
 
 def _employee_validation(payload, user):
@@ -426,7 +441,15 @@ def employee_add(request, payload, level, pk):
 
         utils.send_approve_email(user)
 
-    return JsonResponse({'success': True, 'errors': errors})
+    rsp = {
+        'success': True,
+        'employee': {
+            'id': employee.id,
+            'user_id': employee.user_id,
+        }
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_GET

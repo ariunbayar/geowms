@@ -1,14 +1,8 @@
-from itertools import groupby
-
 from django.http import JsonResponse
-from django.shortcuts import render, reverse, get_object_or_404
-from django.views.decorators.http import require_GET, require_POST
-
-from main.decorators import ajax_required
+from django.shortcuts import render, get_object_or_404
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
-from django.db import connections
 from backend.inspire.models import LThemes
 
 

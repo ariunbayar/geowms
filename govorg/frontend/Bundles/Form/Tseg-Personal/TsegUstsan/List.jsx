@@ -1,9 +1,11 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
+
 import ListTable from "./ListTable"
 import {service} from './service'
 import {Pagination} from '../../../../components/pagination/pagination'
-import ModalAlert from '../../../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class List extends Component {
 

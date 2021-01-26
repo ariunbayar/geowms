@@ -10,6 +10,7 @@ export const service = {
     employeeRemove,
     employeeDetail,
     employeeUpdate,
+    empTokenRefresh,
     sistemCount,
     employee_list,
     orgList,
@@ -101,6 +102,13 @@ function employeeUpdate(pk, level, paylaod) {
     }
 
     return fetch(`${prefix}/level-${level}/employee-update-${pk}/`, opts).then(handleResponse)
+}
+
+function empTokenRefresh(pk) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/employee-token-refresh-${pk}/`, opts).then(handleResponse)
 }
 
 function orgList(page, perpage, query, org_level, sort_name) {
