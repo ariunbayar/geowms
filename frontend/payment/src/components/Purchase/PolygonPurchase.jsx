@@ -27,15 +27,6 @@ export class PolygonPurchase extends Component {
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
-        this.downloadPurchase = this.downloadPurchase.bind(this)
-    }
-
-    downloadPurchase(id) {
-        service
-            .downloadPurchase(id, this.props.match.params.type)
-            .then(rsp => {
-                console.log(rsp);
-            })
     }
 
     componentDidMount(){
@@ -45,7 +36,7 @@ export class PolygonPurchase extends Component {
               items.map(( items ) =>
                   this.setState({items})
               )
-              this.setState({polygon, layers})
+              this.setState({ polygon, layers })
             }
             else {
                 this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
@@ -67,11 +58,11 @@ export class PolygonPurchase extends Component {
     }
 
     handleModalApproveClose(){
-      const purchase_id = this.props.match.params.id
-      if(!this.state.items.export_file) {
-        this.downloadPurchase(purchase_id)
-      }
-      this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+        const purchase_id = this.props.match.params.id
+        if (!this.state.purchase_all.export_files) {
+            service.downloadPurchase(purchase_id, this.props.match.params.type)
+        }
+        this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 
     handleQpay(){
@@ -81,7 +72,7 @@ export class PolygonPurchase extends Component {
     }
 
     qPayClose(){
-        this.setState({qpay_modal_is: false})
+        this.setState({ qpay_modal_is: false, is_modal_info_open: true })
     }
 
     alertOver(){
