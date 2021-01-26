@@ -10,13 +10,13 @@ export class LoginLog extends Component {
         this.state = {
             талбарууд: [
                 {'field': 'username', "title": 'Хэрэглэгчийн нэр'},
-                {'field': 'login_type', "title": 'Хэрэглэгчийн үйлдэл'},
+                {'field': 'login_type', "title": 'Хэрэглэгчийн үйлдэл', 'has_action': true},
                 {'field': 'user_id', "title": 'Хэрэглэгчийн дугаар'},
                 {'field': 'remote_ip', "title": 'IP Хаяг'},
                 {'field': 'datetime', "title": 'Нэвтэрсэн огноо'},
             ],
             жагсаалтын_холбоос: '/back/api/log/login-list/',
-            хувьсах_талбарууд: [{"field": "login_type", "action": this.get_login_type}]
+            хувьсах_талбарууд: [{"field": "login_type", "action": this.get_login_type, "action_type": true,}]
         }
     }
 

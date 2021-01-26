@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {service} from './service'
 import { PortalDataTable } from "@utils/DataTable"
+import Modal from "../Modal"
 
 export class WmsList extends Component {
 
@@ -34,14 +35,19 @@ export class WmsList extends Component {
                     "title": 'Устгах',
                     "text": '',
                     "icon": 'fa fa-trash-o text-danger',
-                    "action": (values) => this.handleRemove(values),
+                    "action": (values) => this.handleRemoveAction(values),
                 }
             ],
-            refresh: true
+            refresh: true,
+            modal_status: "closed",
+            values: {}
         }
 
         this.handleRemove = this.handleRemove.bind(this)
         this.go_link = this.go_link.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
 
     }
 
@@ -55,16 +61,31 @@ export class WmsList extends Component {
         this.props.history.push(`/back/wms/${values.id}/засах/`)
     }
 
-    handleRemove(values) {
+    handleRemove() {
+        const {values} = this.state
         service.remove(values.id).then(({success}) => {
             if (success) {
                 this.setState({refresh: !this.state.refresh})
+                this.handleModalClose()
             }
         })
     }
 
+    handleModalOpen(){
+        this.setState({modal_status: 'open'})
+    }
+
+    handleModalClose(){
+        this.setState({modal_status: 'closed'})
+    }
+
+    handleRemoveAction(values){
+        this.setState({values})
+        this.handleModalOpen()
+    }
+
     render() {
-        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status } = this.state
         return (
             <div className="row">
                 <div className="col-lg-12">
@@ -82,6 +103,14 @@ export class WmsList extends Component {
                         </div>
                     </div>
                 </div>
+                <Modal
+                    text={`Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                    title={'Тохиргоог устгах'}
+                    model_type_icon={'success'}
+                    status={modal_status}
+                    modalClose={this.handleModalClose}
+                    modalAction={this.handleRemove}
+                />
             </div>
         )
     }
