@@ -11,7 +11,7 @@ export default class RequestModal extends Component {
         super(props)
 
         this.state = {
-            status: this.props.status || "initial",
+            status: "initial",
             is_modal_approve_open: false,
             is_modal_reject_open: false,
             is_loading: this.props.is_loading,
@@ -48,7 +48,7 @@ export default class RequestModal extends Component {
     }
 
     handleModalAction(){
-        const { id } = this.props
+        const { id } = this.props.values
         if(this.state.action_type == 'approve' && id)
         {
             service.requestDelete(id).then(({ success, info }) =>{
@@ -124,7 +124,7 @@ export default class RequestModal extends Component {
     }
 
     render () {
-        const {status} = this.state
+        const { status } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -136,14 +136,13 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const { form_json, id, kind, geo_json } = this.props
+        const { form_json, id, kind, geo_json } = this.props.values
         const { is_loading,  modal_status, text, title, model_type_icon, action_name } = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
-
                             <div className="col-md-12">
                                 <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
                                     <div className="col-md-11">
@@ -199,7 +198,6 @@ export default class RequestModal extends Component {
                                             "Тохиргоог татгалзах",
                                             "success",
                                             " татгалзах"
-
                                         )}
                                         className="btn gp-btn-primary waves-effect waves-light"
                                     >
@@ -215,7 +213,7 @@ export default class RequestModal extends Component {
                                             зөвшөөрөхдөө итгэлтэй байна уу ?`,
                                             "Тохиргоог зөвшөөрөх",
                                             "warning",
-                                            " зөвшөөрөх"
+                                            "зөвшөөрөх"
                                         )}
                                         className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
                                     >
@@ -227,18 +225,17 @@ export default class RequestModal extends Component {
                         </div>
                     </div>
                     <Modal
-                        modalAction = {() => this.handleModalAction()}
-                        modalClose = {() => this.handleModalClose()}
-                        text = {text}
-                        title = {title}
-                        status = {modal_status}
-                        model_type_icon = {model_type_icon}
-                        actionNameDelete = {action_name}
+                        modalAction={() => this.handleModalAction()}
+                        modalClose={() => this.handleModalClose()}
+                        text={text}
+                        title={title}
+                        status={modal_status}
+                        model_type_icon={model_type_icon}
+                        actionNameDelete={action_name}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>
         )
     }
-
 }

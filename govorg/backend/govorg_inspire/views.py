@@ -755,8 +755,8 @@ def _create_request(request_datas):
     change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
     change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
     change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
-    change_request.order_at = request_datas['order_at']
-    change_request.order_no = request_datas['order_no']
+    change_request.order_at = request_datas['order_at'] if 'order_at' in request_datas else None
+    change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
 
     change_request.save()
     return change_request.id
@@ -929,6 +929,18 @@ def file_upload_save_data(request, tid, pid, fid, ext):
         }
         return JsonResponse(rsp)
 
+    request_datas = {
+        'theme_id': tid,
+        'package_id': pid,
+        'feature_id': feature_id,
+        'state': ChangeRequest.STATE_NEW,
+        'kind': ChangeRequest.KIND_CREATE,
+        'employee': employee,
+        'order_at': order_at,
+        'order_no': order_no,
+    }
+    main_request_id = _create_request(request_datas)
+
     layer = ds[0]
     for val in layer:
         values = dict()
@@ -936,53 +948,20 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             field_name = val[name].name  # field name
             value = val.get(name)  # value ni
 
-        if len(ds) <= 0:
-            _delete_file(for_delete_items)
-            rsp = {
-                'success': False,
-                'info': 'Source олдсонгүй'
-            }
-            return JsonResponse(rsp)
+            if name == 0:
 
-        request_datas = {
-            'theme_id': tid,
-            'package_id': pid,
-            'feature_id': feature_id,
-            'state': ChangeRequest.STATE_NEW,
-            'kind': ChangeRequest.KIND_CREATE,
-            'employee': employee,
-        }
-        main_request_id = _create_request(request_datas)
+                geo_id = _make_geo_id(feature_id, field_name, value)
+                geo_json = val.geom.json  # goemetry json
 
-        layer = ds[0]
-        for val in layer:
-            values = dict()
-            for name in range(0, len(layer.fields)):
-                field_name = val[name].name  # field name
-                value = val.get(name)  # value ni
+                if geo_json:
+                    success, info, request_kind = _check_perm(
+                        geo_id,
+                        employee,
+                        feature_id,
+                        geo_json
+                    )
 
-                if name == 0:
-
-                    geo_id = _make_geo_id(feature_id, field_name, value)
-                    geo_json = val.geom.json  # goemetry json
-
-                    if geo_json:
-                        success, info, request_kind = _check_perm(
-                            geo_id,
-                            employee,
-                            feature_id,
-                            geo_json
-                        )
-
-                        if not success:
-                            _delete_file(for_delete_items)
-                            rsp = {
-                                'success': success,
-                                'info': info,
-                            }
-                            return JsonResponse(rsp)
-
-                    else:
+                    if not success:
                         _delete_file(for_delete_items)
                         rsp = {
                             'success': success,

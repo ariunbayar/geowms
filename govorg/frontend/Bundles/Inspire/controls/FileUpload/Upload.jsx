@@ -127,20 +127,24 @@ export class Upload extends Component {
             service
                 .sendFile(formData, fid, tid, name, pid)
                 .then(({success, info, errors}) => {
-                if (success) {
-                    alert(info)
-                    this.props.refreshRequestCount()
-                }
-                else {
-                    alert(info)
-                    if(errors) {
-                        this.setState({ is_upload_button: false, errors })
+                    if (success) {
+                        alert(info)
+                        this.props.refreshRequestCount()
                     }
-                }
-                this.cancel()
-                this.setState({ btn_is_laod: false, files: [], not_cancel: false })
-                this.props.func()
-            })
+                    else {
+                        alert(info)
+                        if(errors) {
+                            this.setState({ is_upload_button: false, errors })
+                        }
+                    }
+                    this.cancel()
+                    this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
+                    this.props.func()
+                })
+                .catch((error) => {
+                    alert("Алдаа гарсан байна")
+                    this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
+                })
         }
     }
 
