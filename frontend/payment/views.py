@@ -865,19 +865,12 @@ def calcPrice(request, payload):
     area_type = area['type']
     area = area['output']
 
-    is_user = request.user
-    if str(is_user) != 'AnonymousUser':
-        is_user = True
-    else:
-        is_user = False
-
     all_len_property = _get_all_property_count(layer_list, feature_info_list)
     total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
 
     rsp = {
         'success': True,
         'total_price': total_price,
-        'is_user': is_user,
     }
 
     return JsonResponse(rsp)
