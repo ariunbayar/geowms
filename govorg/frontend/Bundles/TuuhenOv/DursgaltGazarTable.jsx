@@ -11,8 +11,6 @@ export default class DursgaltGazarTable extends Component {
 
         this.state = {
             is_modal_delete_open: false,
-            perms: this.props.perms,
-            is_editable: this.props.is_editable,
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
@@ -34,7 +32,6 @@ export default class DursgaltGazarTable extends Component {
 
     render() {
         const dursgalt_id = this.props.dursgalt_id
-        const { perms, is_editable } = this.state
         const { id, dursgal, tuuh_soyl_id, x,y, stone, protection, created_at, point_check} = this.props.values
         const idx = this.props.idx
         return (
@@ -51,37 +48,25 @@ export default class DursgaltGazarTable extends Component {
                     }
                 </th>
                 <th>{created_at}</th>
-                {
-                    is_editable
-                    ?
-                    <th>
-                        <NavLink to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/update/${id}/`}>
-                                <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                        </NavLink>
-                    </th>
-                    :
-                    null
-                }
-                {
-                    perms.perm_remove
-                    ?
-                    <th>
-                        <a href="#" onClick={this.handleModalDeleteOpen}>
-                            <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                        </a>
-                        {this.state.is_modal_delete_open &&
-                            <Modal
-                                modalClose={this.handleModalDeleteClose}
-                                modalAction={this.props.handleRemove}
-                                text={`Та "${dursgal}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                                title="Тохиргоог устгах"
-                                model_type_icon="success"
-                            />
-                        }
-                    </th>
-                    :
-                    null
-                }
+                <th>
+                    <NavLink to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/update/${id}/`}>
+                            <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                    </NavLink>
+                </th>
+                <th>
+                    <a href="#" onClick={this.handleModalDeleteOpen}>
+                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                    </a>
+                    {this.state.is_modal_delete_open &&
+                        <Modal
+                            modalClose={this.handleModalDeleteClose}
+                            modalAction={this.props.handleRemove}
+                            text={`Та "${dursgal}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                            title="Тохиргоог устгах"
+                            model_type_icon="success"
+                        />
+                    }
+                </th>
             </tr>
         )
     }

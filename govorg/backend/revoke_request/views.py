@@ -165,6 +165,7 @@ def _new_revoke_request(employee, payload):
     geo_json = payload.get('geo_json')
     form_json = payload.get('form_json')
     order_no = payload.get('order_no')
+    order_at = payload.get('order_at')
     form_json = check_form_json(feature_id, form_json, employee)
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
@@ -180,6 +181,7 @@ def _new_revoke_request(employee, payload):
     change_request.form_json = form_json
     change_request.geo_json = geo_json
     change_request.order_no = order_no
+    change_request.order_at = order_at
     change_request.save()
 
 

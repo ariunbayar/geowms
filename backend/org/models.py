@@ -38,31 +38,3 @@ class OrgRole(models.Model):
     perm_approve = models.BooleanField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-class InspirePerm(models.Model):
-    THEME = 1
-    PACKEGE = 2
-    FEATURE = 3
-    PROPERTY = 4
-
-    MODULE_CHOICES = (
-        (THEME, 'Дэд сан'),
-        (PACKEGE, 'Багц'),
-        (FEATURE, 'Давхрага'),
-        (PROPERTY, 'Талбар'),
-    )
-
-    org = models.ForeignKey(Org, on_delete=models.PROTECT)
-    module_root_id = models.BigIntegerField(null=True)
-    module_id = models.BigIntegerField()
-    module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
-    perm_view = models.BooleanField(db_index=True)
-    perm_create = models.BooleanField(db_index=True)
-    perm_remove = models.BooleanField(db_index=True)
-    perm_update = models.BooleanField(db_index=True)
-    perm_revoke = models.BooleanField(db_index=True)
-    perm_review = models.BooleanField(db_index=True)
-    perm_approve = models.BooleanField(db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)

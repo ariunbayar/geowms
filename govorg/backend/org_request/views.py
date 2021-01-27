@@ -9,7 +9,7 @@ from main.decorators import ajax_required
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
 
-from backend.org.models import Org, Employee, InspirePerm
+from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
@@ -166,34 +166,28 @@ def get_change_all(request):
     return JsonResponse(rsp)
 
 
-def _get_features(org, package_id):
+def _get_features(package_id, feature_ids):
     features = []
     inspire_features = LFeatures.objects.filter(package_id=package_id).values('feature_id', 'feature_name')
-    if inspire_features:
-        for org_feature in inspire_features:
-            org_features = InspirePerm.objects.filter(org=org, perm_view=True, module_root_id = package_id, module_id=org_feature['feature_id'])
-            if org_features:
-                for feature in org_features:
-                    features.append({
-                        'id': org_feature['feature_id'],
-                        'name': org_feature['feature_name'],
-                    })
+    for org_feature in inspire_features:
+        if org_feature['feature_id'] in feature_ids:
+            features.append({
+                'id': org_feature['feature_id'],
+                'name': org_feature['feature_name'],
+            })
     return features
 
 
-def _get_packages(org, theme_id):
+def _get_packages(theme_id, package_ids, feature_ids):
     packages = []
-    org_packages = InspirePerm.objects.filter(org=org, perm_view=True, module_root_id = theme_id)
-    if org_packages:
-        for org_package in org_packages:
-            inspire_packages = LPackages.objects.filter(package_id=org_package.module_id).values('package_id', 'package_name')
-            if inspire_packages:
-                for package in inspire_packages:
-                    packages.append({
-                        'id':package['package_id'],
-                        'name':package['package_name'],
-                        'features':_get_features(org, package['package_id'])
-                    })
+    inspire_packages = LPackages.objects.filter(theme_id=theme_id).values('package_id', 'package_name')
+    for package in inspire_packages:
+        if package['package_id'] in package_ids:
+            packages.append({
+                'id': package['package_id'],
+                'name': package['package_name'],
+                'features': _get_features(package['package_id'], feature_ids)
+            })
     return packages
 
 
@@ -206,16 +200,15 @@ def _getChoices(user):
                 choices.append(f.choices)
             if f.name == 'kind':
                 choices.append(f.choices)
-    org = get_object_or_404(Org, employee__user=user)
-    roles_inspire = InspirePerm.objects.filter(org=org, perm_view=True, module=1)
-    for role in roles_inspire:
-        themes = LThemes.objects.filter(theme_id=role.module_id)
-        for theme in themes:
-            modules.append({
-                'id': theme.theme_id,
-                'name': theme.theme_name,
-                'packages': _get_packages(org, theme.theme_id)
-            })
+
+    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(user)
+    themes = LThemes.objects.filter(theme_id__in=theme_ids)
+    for theme in themes:
+        modules.append({
+            'id': theme.theme_id,
+            'name': theme.theme_name,
+            'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
+        })
 
     return {'choices': choices, 'modules': modules}
 
@@ -229,6 +222,15 @@ def _make_group_request(org_request_list, org_request, ob, employee):
         org_request['group'] = group_request
 
     return org_request
+
+
+def _get_emp_inspire_roles(user):
+    employee = Employee.objects.filter(user=user).first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm).distinct('feature_id').values_list('feature_id', flat=True)
+    package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
+    theme_ids = LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True)
+    return feature_ids, package_ids, theme_ids
 
 
 @require_POST

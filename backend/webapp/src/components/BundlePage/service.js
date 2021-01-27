@@ -6,7 +6,6 @@ export const service = {
     roleRemove,
     defaultCheckUpdate,
     detail,
-    ModuleCheck,
     getLayer
 }
 
@@ -128,13 +127,4 @@ function defaultCheckUpdate(values) {
     }
 
     return fetch(`${prefix}/bundle/default-check-update/`, opts).then(handleResponse)
-}
-
-function ModuleCheck(values){
-    const opts = {
-        ..._getPostOptions(),
-        body: JSON.stringify(values),
-    }
-
-    return fetch(`${prefix}/bundle/module-check/`, opts).then(handleResponse)
 }

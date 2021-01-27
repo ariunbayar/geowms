@@ -38,7 +38,6 @@ urlpatterns = [
 
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
-        path('module-check/', bundle_views.moduleCheck, name='module-check'),
         path('update/', bundle_views.update, name='update'),
         path('move/', bundle_views.move, name='move'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
@@ -69,10 +68,6 @@ urlpatterns = [
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
         path('level-<int:level>/<int:pk>/', org_views.detail),
-        path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
-        path('level-<int:level>/<int:pk>/Inspireroles/', org_views.inspire_roles),
-        path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
-        path('level-<int:level>/<int:pk>/roles-add/', org_views.roles_add),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('employee-remove-<int:pk>/', org_views.employee_remove, name='employee-remove'),
         path('employee-token-refresh-<int:pk>/', org_views.employee_token_refresh, name='employee-token-refresh'),
