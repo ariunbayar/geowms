@@ -120,8 +120,11 @@ export default class InsPerms extends Component {
                             perm.eng_name,
                             property.id,
                             property.parent_id,
-                            property.roles[perm.insp_id],
+                            property.roles[perm.is_role_emp_id],
                             type_name,
+                            property.roles[perm.is_role_check],
+                            property.roles[perm.insp_id],
+                            property.roles[perm.is_employee_perm]
                         )
                     }
                 }

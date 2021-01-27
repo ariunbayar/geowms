@@ -107,23 +107,28 @@ def _set_emp_perm_ins(emp_perm, perm, user):
 
     emp_perm_inspire = EmpPermInspire()
 
+    gov_perm_ins_id = perm.get("gov_perm_ins_id")
+    if gov_perm_ins_id:
+        emp_perm_inspire.emp_role_inspire = None
+        emp_perm_inspire.gov_perm_inspire_id = gov_perm_ins_id
+    else:
+        emp_role_ins_id = perm.get("emp_role_ins_id")
+        emp_role_inspire = EmpRoleInspire.objects.filter(pk=emp_role_ins_id).first()
+        gov_perm_inspire = emp_role_inspire.gov_perm_inspire
+        emp_perm_inspire.emp_role_inspire = emp_role_inspire
+        emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
+
     if property_id == 'geom':
-        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
-        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
         emp_perm_inspire.geom = True
     else:
-        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
-        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
         emp_perm_inspire.property_id = property_id
 
-    emp_perm_inspire.emp_role_inspire = emp_role_inspire
-    emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
     emp_perm_inspire.emp_perm = emp_perm
     emp_perm_inspire.feature_id = feature_id
     emp_perm_inspire.created_by = user
     emp_perm_inspire.updated_by = user
     emp_perm_inspire.perm_kind = perm_kind
-    emp_perm_inspire.save()
+    return emp_perm_inspire
 
 
 def _employee_validation(user, user_detail):
@@ -214,9 +219,12 @@ def create(request, payload):
             emp_perm.employee_id = employee.id
             emp_perm.updated_by = user
             emp_perm.save()
-
+            obj_array = []
             for role in roles:
-                _set_emp_perm_ins(emp_perm, role, request.user)
+                emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
+                obj_array.append(emp_perm_inspire)
+            EmpPermInspire.objects.bulk_create(obj_array)
+
         utils.send_approve_email(user)
 
         return JsonResponse({
@@ -270,8 +278,11 @@ def update(request, payload, pk):
             _delete_remove_perm(remove_perms)
 
         if add_perms:
+            obj_array = []
             for perm in add_perms:
-                _set_emp_perm_ins(emp_perm, perm, request.user)
+                emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
+                obj_array.append(emp_perm_inspire)
+            EmpPermInspire.objects.bulk_create(obj_array)
 
         user = employee.user
         _set_user(user, payload)
