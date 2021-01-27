@@ -1,0 +1,23 @@
+.reaquest #map{
+    width: auto;
+    height: calc( 90vh - 85px - 15px);
+}
+
+
+.⚙-toggle-swipe-button {
+    padding: 1px 5px;
+    font-size: 15px;
+    top: 56px;
+    right: 7px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+}
+.⚙-toggle-swipe-button:active{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-swipe-button:hover{
+    background-color: rgba(0,60,136,0.7);
+}

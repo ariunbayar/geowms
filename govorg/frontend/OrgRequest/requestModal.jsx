@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from "react"
-import RequestMap from './Map'
+import RequestMap from './Map/Map'
 
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"

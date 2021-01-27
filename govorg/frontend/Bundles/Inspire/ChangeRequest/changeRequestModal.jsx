@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from "react"
-import RequestMap from './Map'
+import RequestMap from '../../../OrgRequest/Map/Map'
 
 import Маягт from "./Маягт"
 
