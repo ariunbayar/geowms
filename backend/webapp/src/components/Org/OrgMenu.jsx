@@ -69,7 +69,7 @@ export class OrgMenu extends Component {
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/org-role/`} className="nav-link"
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
                             <i className="fa fa-lock"></i> <span className="hidden-xs">Эрх</span>
                         </NavLink>
@@ -95,7 +95,7 @@ export class OrgMenu extends Component {
                         <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
                             <OrgDetail { ...routeProps } allowed_geom={ allowed_geom }/>
                         }/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/org-role/" component={OrgRole}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
                     </Switch>

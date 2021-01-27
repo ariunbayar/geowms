@@ -13,7 +13,7 @@ export class OrgRole extends Component {
 
         return (
             <Switch>
-                <Route exact path={"/back/байгууллага/түвшин/:level/:id/org-role/"} component={Roles}/>
+                <Route exact path={"/back/байгууллага/түвшин/:level/:id/эрх/"} component={Roles}/>
             </Switch>
         )
 
