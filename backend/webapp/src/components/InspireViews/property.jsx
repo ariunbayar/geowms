@@ -24,7 +24,6 @@ export class Property extends Component {
         }
         this.setState({id_list})
     }
-
     render() {
         const {fields, fname, view_name} = this.props
         const id_list = this.state.id_list

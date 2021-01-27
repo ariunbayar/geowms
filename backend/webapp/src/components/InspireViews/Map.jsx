@@ -21,6 +21,9 @@ export default class StyleMap extends Component {
                 GeoJson: [],
                 dataProjection: 'EPSG:4326',
                 featureProjection: 'EPSG:3857',
+                style_color: props.style_color,
+                style_size: props.style_size,
+                fill_color: props.fill_color
             }
             this.loadMapData = this.loadMapData.bind(this)
         }
@@ -28,9 +31,21 @@ export default class StyleMap extends Component {
     componentDidMount() {
         this.loadMapData()
     }
+    componentDidUpdate(pP, pS){
+        if(pP.style_color != this.props.style_color){
+            this.setState({style_color:this.props.style_color})
+        }
+
+        if(pP.style_size != this.props.style_size){
+            this.setState({style_size:this.props.style_size})
+        }
+
+        if(pP.fill_color != this.props.fill_color){
+            this.setState({fill_color:this.props.fill_color})
+        }
+    }
 
     loadMapData(){
-
         var geojsonObject = {
             'type': 'FeatureCollection',
             'crs': {
@@ -80,11 +95,11 @@ export default class StyleMap extends Component {
               source: vectorSource,
               style: new Style({
                 stroke: new Stroke({
-                    color: 'red',
-                    width: 3
+                    color: this.state.style_color,
+                    width: this.state.style_size
                 }),
                 fill: new Fill({
-                    color: 'rgba(0, 108, 182, 0.2)'
+                    color: this.state.fill_color
                 })
             })
             });

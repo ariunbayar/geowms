@@ -16,11 +16,22 @@ export default class SideBar extends Component {
             modal_alert_check: 'closed',
             title: '',
             model_type_icon: 'success',
-            view_name: ''
+            view_name: '',
+            style_item: {
+                style_name: '',
+                style_title: '',
+                style_color: '#ffffff',
+                style_size: 1,
+                style_kind: '',
+            }
 
         }
         this.handleSave = this.handleSave.bind(this)
+        this.handleStyleSave = this.handleSave.bind(this)
 
+    }
+
+    handleStyleSave(values){
     }
 
 
@@ -84,12 +95,12 @@ export default class SideBar extends Component {
                             <div>
                                 <ul className="nav nav-tabs nav-tabs-dark-gray nav-justified">
                                     <li className="nav-item">
-                                        <NavLink to={"/back/inspire-views/property/"} activeClassName="active" className="nav-link"  data-toggle="tab">
+                                        <NavLink exact to={"/back/inspire-views/property/"}   activeClassName="active" className="nav-link"  data-toggle="tab">
                                         <span className="hidden-xs">Property</span>
                                         </NavLink>
                                     </li>
                                     <li className="nav-item gp-text-primary">
-                                        <NavLink to={"/back/inspire-views/styles/"} activeClassName="active" className="nav-link" exact data-toggle="tab">
+                                        <NavLink to={"/back/inspire-views/styles/"} activeClassName="active"  className="nav-link"  data-toggle="tab">
                                             <span className="hidden-xs">Style</span>
                                         </NavLink>
                                     </li>
@@ -97,7 +108,7 @@ export default class SideBar extends Component {
 
                                 <div className="tab-content">
                                     <Switch>
-                                        <Route path="/back/inspire-views/property/" component={() => <Property
+                                        <Route path={"/back/inspire-views/property/"} component={() => <Property
                                             fields={fields}
                                             fname={fname}
                                             id_list={id_list}
@@ -105,16 +116,17 @@ export default class SideBar extends Component {
                                             />
                                         }
                                         />
-                                        <Route path={"/back/inspire-views/styles/"} component={() => <ViewStyle
+                                        <Route path={"/back/inspire-views/styles/"}  component={() => <ViewStyle
                                             fname={fname}
                                             view_name={view_name}
+                                            handleStyleSave={() => this.handleStyleSave}
                                         />} />
                                     </Switch>
                                 </div>
                             </div>
                             {save_is_load ?
-                                <a className="btn btn-block gp-btn-primary text-white">Уншиж байна</a>:
-                                <a onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</a>
+                                <button type="submit"  className="btn btn-block gp-btn-primary text-white">Уншиж байна</button>:
+                                <button type="submit" onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</button>
                             }
                         </div>
                         :
