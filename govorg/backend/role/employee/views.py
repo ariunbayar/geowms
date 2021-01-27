@@ -66,7 +66,7 @@ def _get_employee_display(employee):
 def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
-    employees = Employee.objects.filter(org=org, id=60)
+    employees = Employee.objects.filter(org=org)
 
     employee_list = [
         _get_employee_display(employee)
