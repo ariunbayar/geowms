@@ -19,7 +19,7 @@ class ModalComponent extends Component{
             handlePaymentIsLoad: false,
             types: ['shp', 'jpeg', 'png', 'tiff', 'pdf'],
             selected_type: '',
-            is_user: true,
+            is_authenticated: true,
         }
 
         this.handlePayment = this.handlePayment.bind(this)
@@ -33,12 +33,15 @@ class ModalComponent extends Component{
         const selected_type = e.target.value
         this.setState({ selected_type })
         service
-        .paymentCalcPrice(area, layer_list, feature_info_list, selected_type)
-        .then(({ success, total_price, is_user }) => {
-            if (success) {
-                this.setState({total_price, is_user})
-            }
-        })
+            .paymentCalcPrice(area, layer_list, feature_info_list, selected_type)
+            .then(({ success, total_price }) => {
+                if (success) {
+                    this.setState({ total_price })
+                }
+            })
+        service.getUser().then(({ is_authenticated }) => {
+                this.setState({ is_authenticated })
+            })
     }
 
     closeModal(){
@@ -80,7 +83,7 @@ class ModalComponent extends Component{
     }
 
     render() {
-        const {user_name, user_email, user_number, types, total_price, is_user} = this.state
+        const {user_name, user_email, user_number, types, total_price, is_authenticated} = this.state
         const { layer_info, is_loading, area } = this.props
         return (
             <div>
@@ -123,7 +126,7 @@ class ModalComponent extends Component{
                                                     <span className="form-control" id="price">{total_price}₮</span>
                                                 </div>
                                                 {
-                                                    !is_user &&
+                                                    !is_authenticated &&
                                                     <div>
                                                         <div className="form-group">
                                                             <label htmlFor="user_name" className="col-form-label">Хэрэглэгчийн нэр:</label>
