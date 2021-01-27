@@ -25,6 +25,8 @@ from govorg.backend.utils import (
     get_theme_data_display,
     get_property_data_display,
     get_convert_perm_kind,
+    count_property_of_feature,
+    get_perm_kind_name
 )
 
 
@@ -33,7 +35,7 @@ def _get_employee_display(employee):
     user = employee.user
     role = EmpPerm.objects.filter(employee=employee).first()
 
-    if role:
+    if role and role.emp_role:
         role = role.emp_role.name
     else:
         role = None
@@ -43,11 +45,17 @@ def _get_employee_display(employee):
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
+
+        'token': employee.token,
+        'created_at': employee.created_at.strftime('%Y-%m-%d'),
+        'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+
         'role_name': role,
     }
 
@@ -99,23 +107,28 @@ def _set_emp_perm_ins(emp_perm, perm, user):
 
     emp_perm_inspire = EmpPermInspire()
 
+    gov_perm_ins_id = perm.get("gov_perm_ins_id")
+    if gov_perm_ins_id:
+        emp_perm_inspire.emp_role_inspire = None
+        emp_perm_inspire.gov_perm_inspire_id = gov_perm_ins_id
+    else:
+        emp_role_ins_id = perm.get("emp_role_ins_id")
+        emp_role_inspire = EmpRoleInspire.objects.filter(pk=emp_role_ins_id).first()
+        gov_perm_inspire = emp_role_inspire.gov_perm_inspire
+        emp_perm_inspire.emp_role_inspire = emp_role_inspire
+        emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
+
     if property_id == 'geom':
-        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
-        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, geom=True).first()
         emp_perm_inspire.geom = True
     else:
-        gov_perm_inspire = GovPermInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
-        emp_role_inspire = EmpRoleInspire.objects.filter(feature_id=feature_id, perm_kind=perm_kind, property_id=property_id).first()
         emp_perm_inspire.property_id = property_id
 
-    emp_perm_inspire.emp_role_inspire = emp_role_inspire
-    emp_perm_inspire.gov_perm_inspire = gov_perm_inspire
     emp_perm_inspire.emp_perm = emp_perm
     emp_perm_inspire.feature_id = feature_id
     emp_perm_inspire.created_by = user
     emp_perm_inspire.updated_by = user
     emp_perm_inspire.perm_kind = perm_kind
-    emp_perm_inspire.save()
+    return emp_perm_inspire
 
 
 def _employee_validation(user, user_detail):
@@ -162,7 +175,7 @@ def _employee_validation(user, user_detail):
             errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
     if not utils.is_email(email):
         errors['email'] = 'Email хаяг алдаатай байна.'
-    if len(register) ==  10:
+    if len(register) == 10:
         if not utils.is_register(register):
             errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
     else:
@@ -206,9 +219,12 @@ def create(request, payload):
             emp_perm.employee_id = employee.id
             emp_perm.updated_by = user
             emp_perm.save()
-
+            obj_array = []
             for role in roles:
-                _set_emp_perm_ins(emp_perm, role, request.user)
+                emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
+                obj_array.append(emp_perm_inspire)
+            EmpPermInspire.objects.bulk_create(obj_array)
+
         utils.send_approve_email(user)
 
         return JsonResponse({
@@ -260,9 +276,13 @@ def update(request, payload, pk):
 
         if remove_perms:
             _delete_remove_perm(remove_perms)
+
         if add_perms:
+            obj_array = []
             for perm in add_perms:
-                _set_emp_perm_ins(emp_perm, perm, request.user)
+                emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
+                obj_array.append(emp_perm_inspire)
+            EmpPermInspire.objects.bulk_create(obj_array)
 
         user = employee.user
         _set_user(user, payload)
@@ -290,13 +310,19 @@ def _get_emp_perm_display(emp_perm):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        property_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True)
+        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+        property_data, perm_list = get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True)
+        properties.append(property_data)
+        property_perm_count = count_property_of_feature(emp_perm_properties)
+        for perm in perm_list:
+            kind_name = get_perm_kind_name(perm['kind'])
+            property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+        property_of_feature[feature_id] = property_perm_count
 
-        property_of_feature[feature_id] = property_ids
-        properties.append(get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True))
-        for property_id in property_ids:
-            prop = LProperties.objects.get(property_id=property_id)
-            properties.append(get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False))
+        for property_id in emp_perm_properties:
+            prop = LProperties.objects.get(property_id=property_id['property_id'])
+            property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
+            properties.append(property_data)
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
@@ -304,7 +330,7 @@ def _get_emp_perm_display(emp_perm):
     ]
 
     themes = [
-        get_theme_data_display(theme_id, LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True))
+        get_theme_data_display(theme_id, LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True), package_features)
         for theme_id in theme_ids
     ]
 
@@ -361,3 +387,29 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': True})
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def refresh_token(request, pk):
+
+    employee = get_object_or_404(Employee, pk=pk)
+    req_employee = get_object_or_404(Employee, user=request.user)
+    if req_employee.is_admin:
+
+        employee.token = TokenGeneratorEmployee().get()
+        employee.save()
+
+        rsp = {
+            'success': True,
+            'info': 'Токенийг амжилттай шинэчиллээ!'
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Та байгууллагын админ биш байна.'
+        }
+
+    return JsonResponse(rsp)

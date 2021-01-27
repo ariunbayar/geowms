@@ -10,7 +10,7 @@ from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 
@@ -680,3 +680,48 @@ class ModelFilter():
                 qs = qs.filter(**values)
 
         return qs
+
+
+def get_1stOrder_geo_id():
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+
+    try:
+        feature_id = LFeatures.objects.filter(feature_code='au-au-au').first().feature_id
+        property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
+        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder\n').first().code_list_id
+        feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+
+        qs = MDatas.objects.filter(property_id=property_id)
+        qs = qs.filter(code_list_id=code_list_id)
+
+        return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
+
+    except:
+        return None
+
+
+def datetime_to_string(date):
+    return date.strftime('%Y-%m-%d') if date else ''
+
+
+def get_display_items(items, fields, хувьсах_талбарууд=[]):
+    display = list()
+    for item in items.values():
+        obj = dict()
+        for field in fields:
+            if isinstance(item[field], datetime):
+                obj[field] = datetime_to_string(item[field])
+            else:
+                obj[field] = item[field]
+            for хувьсах_талбар in хувьсах_талбарууд:
+                if хувьсах_талбар['field'] == field:
+                    action = хувьсах_талбар['action']
+                    obj[хувьсах_талбар['new_field']] = action(item[field], item)
+
+        display.append(obj)
+
+    return display

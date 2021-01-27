@@ -8,32 +8,7 @@ from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from geoportal_app.models import User
 from backend.wms.models import WMSLog
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def login_all(request, payload):
-
-    LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
-
-    last = payload.get('last')
-    first = payload.get('first')
-    login_log_all_display = []
-
-    for login_log_all in LoginEvent.objects.all()[first:last]:
-        login_log_all_display.append({
-            'id': login_log_all.id,
-            'login_type': login_log_all.login_type,
-            'username': login_log_all.username,
-            'datetime': login_log_all.datetime.strftime('%Y-%m-%d'),
-            'user_id': login_log_all.user_id,
-            'remote_ip': login_log_all.remote_ip,
-        })
-    return JsonResponse({
-        'login_log_all': login_log_all_display,
-        'len': LoginEvent.objects.all().count()
-    })
+from main.components import Datatable
 
 
 @require_POST
@@ -43,40 +18,23 @@ def login_list(request, payload):
 
     LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
 
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    login_log_all_display = []
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    logins = LoginEvent.objects.annotate(search=SearchVector(
-        'login_type',
-        'user_id',
-        'remote_ip',
-        'datetime'
-    ) + SearchVector('username'),).filter(search__icontains=query).order_by(sort_name)
+    def _get_login_type_name(login_type, item):
+        return "Нэвтэрсэн" if login_type == 1 else "Системээс гарсан"
 
-    total_items = Paginator(logins, per_page)
-    items_page = total_items.page(page)
-
-    for login_log_all in items_page.object_list:
-        login_log_all_display.append({
-            'id': login_log_all.id,
-            'username': login_log_all.username,
-            'login_type': login_log_all.login_type,
-            'user_id': login_log_all.user_id,
-            'remote_ip': login_log_all.remote_ip,
-            'datetime': login_log_all.datetime.strftime('%Y-%m-%d'),
-        })
-
-    total_page = total_items.num_pages
+    хувьсах_талбарууд = [{"field": "login_type", "action": _get_login_type_name, "new_field": "login_type"}]
+    datatable = Datatable(
+        model=LoginEvent,
+        payload=payload,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+    )
+    items, total_page = datatable.get()
 
     rsp = {
-        'items': login_log_all_display,
-        'page': page,
-        'total_page': total_page,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page
     }
+
     return JsonResponse(rsp)
 
 
@@ -107,40 +65,17 @@ def login_date_count(request):
 def page_list(request, payload):
 
     RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
+    оруулах_талбарууд = ['id', 'url', 'method', 'query_string', 'remote_ip', 'user_id', 'datetime']
+    datatable = Datatable(
+        model=RequestEvent,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
+    items, total_page = datatable.get()
 
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    log_display = []
-
-    pages = RequestEvent.objects.annotate(search=SearchVector(
-        'url',
-        'id',
-        'method',
-        'remote_ip',
-        'user_id',
-        'url',)
-    ).filter(search__contains=query).order_by(sort_name)
-
-    total_items = Paginator(pages, per_page)
-    items_page = total_items.page(page)
-    for log in items_page.object_list:
-        log_display.append({
-            'id': log.id,
-            'url': log.url,
-            'method': log.method,
-            'query_string': log.query_string,
-            'remote_ip': log.remote_ip,
-            'user_id': log.user_id,
-            'datetime': log.datetime.strftime('%Y-%m-%d'),
-        })
-    total_page = total_items.num_pages
     rsp = {
-        'items': log_display,
-        'page': page,
+        'items': items,
+        'page': payload.get('page'),
         'total_page': total_page,
     }
 
@@ -183,7 +118,7 @@ def page_user_count(request):
     return JsonResponse(rsp)
 
 
-def _get_user_name(user_id):
+def _get_user_name(user_id, item):
 
     if user_id:
         return User.objects.filter(id=user_id).values('username').first()['username']
@@ -197,41 +132,18 @@ def _get_user_name(user_id):
 def crudList(request, payload):
 
     CRUDEvent = apps.get_model('easyaudit', 'CRUDEvent')
-
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    crud_event_display = []
-    cruds = CRUDEvent.objects.annotate(search=SearchVector(
-        'event_type',
-        'object_id',
-        'content_type_id',
-        'user_id',
-        'changed_fields'
-    ) + SearchVector('object_repr')).filter(search__icontains=query).order_by(sort_name)
-    total_items = Paginator(cruds, per_page)
-    items_page = total_items.page(page)
-
-    for crud_event in items_page.object_list:
-        crud_event_display.append({
-            'id': crud_event.id,
-            'event_type': crud_event.event_type,
-            'object_id': crud_event.object_id,
-            'object_repr': crud_event.object_repr,
-            'datetime': crud_event.datetime.strftime('%Y-%m-%d'),
-            'content_type_id': crud_event.content_type_id,
-            'username': _get_user_name(crud_event.user_id),
-            'user_id': crud_event.user_id,
-            'user_pk_as_string': crud_event.user_pk_as_string,
-            'changed_fields': crud_event.changed_fields,
-        })
-    total_page = total_items.num_pages
+    оруулах_талбарууд = ['id', 'event_type', 'object_id', 'object_repr', 'datetime', 'content_type_id', 'user_id', 'user_pk_as_string', 'changed_fields']
+    хувьсах_талбарууд = [{"field": "user_id", "action": _get_user_name, "new_field": "username"}]
+    datatable = Datatable(
+        model=CRUDEvent,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд
+    )
+    items, total_page = datatable.get()
     rsp = {
-        'items': crud_event_display,
-        'page': page,
+        'items': items,
+        'page': payload.get('page'),
         'total_page': total_page,
     }
     return JsonResponse(rsp)

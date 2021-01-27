@@ -1,8 +1,8 @@
 import React, {Component, Fragment} from "react"
 import RequestMap from './Map'
-import {service} from './service'
-import Modal from '../../../components/helpers/Modal'
+
 import Маягт from "./Маягт"
+
 
 export default class ChangeRequestModal extends Component {
 

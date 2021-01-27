@@ -975,8 +975,8 @@ export default class BarilgaSuurinGazar extends Component{
         this.addNotif, this.props.match.params.tid,
         this.props.match.params.pid
       )
-      this.setState({ showUpload: true })
     }
+
 
     showQgisBtn(){
       this.setInActiveButtonStyle('qgis')

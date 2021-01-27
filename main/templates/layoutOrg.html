@@ -8,7 +8,7 @@
     <link rel="icon" href="{% static "assets/favicon.ico" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/bootstrap.min.css" %}"
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static "assets/css/style.css" %}">
+    <link rel="stylesheet" href="{% static "assets/css/style.css" %}?v={{ STATIC_VERSION }}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.carousel.min.css" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.theme.default.min.css" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/animate.min.css" %}">
@@ -72,6 +72,8 @@
                                         </div>
                                   </a>
                                   <div class="dropdown-divider"></div>
+                                  <a class="dropdown-item text-dark" href="/gov/profile/"><i class="icon-wallet mr-2"></i>ПРОФАЙЛ</a>
+                                  <div class="dropdown-divider"></div>
                                   <a class="dropdown-item text-dark" href="{% url "gov_secure:logout" %}"><i class="icon-power mr-2"></i>ГАРАХ</a>
                                 </div>
                               </div>
@@ -101,7 +103,7 @@
     <script src="{% static "assets/admin/js/app-script.js" %}"></script>
     <script src="{% static "assets/admin/plugins/vectormap/jquery-jvectormap-2.0.2.min.js" %}"></script>
     <script src="{% static "assets/admin/plugins/vectormap/jquery-jvectormap-world-mill-en.js" %}"></script>
-    <script src="{% static "assets/admin/js/index.js" %}?v=20210108"></script>
+    <script src="{% static "assets/admin/js/index.js" %}?v={{ STATIC_VERSION }}"></script>
 </body>
 
 </html>

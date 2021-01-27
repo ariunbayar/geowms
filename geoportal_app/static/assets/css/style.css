@@ -70,8 +70,9 @@
   border-radius: 0.18rem;
 }
 
-.form-control {
-  font-size: 0.8rem;
+.form-control,
+.input-group-text {
+    font-size: 0.8rem;
 }
 
 body {

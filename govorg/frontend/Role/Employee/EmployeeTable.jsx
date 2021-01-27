@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
-import Modal from "../../components/helpers/Modal"
+
 
 export class EmployeeTable extends Component {
 
@@ -8,28 +8,14 @@ export class EmployeeTable extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
+            modal_status: "closed",
+            action_type: '',
+            text: '',
+            title: '',
+            action_name: ''
         }
-
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
 
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({ is_modal_delete_open: true })
-    }
-
-    handleModalDeleteClose() {
-        this.setState({ is_modal_delete_open: false })
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps.values !== this.props.values) {
-            this.setState({ is_modal_delete_open: false })
-        }
-
-    }
 
     render() {
         const { idx, prefix } = this.props
@@ -55,7 +41,9 @@ export class EmployeeTable extends Component {
                 <td>
                     {position}
                 </td>
-		<td>{role_name}</td>
+		        <td>
+                    {role_name}
+                </td>
                 <td className="text-center">
                     <i className={`fa ` +
                         (is_admin
@@ -66,25 +54,6 @@ export class EmployeeTable extends Component {
                         }
                         aria-hidden="true"
                     ></i>
-                </td>
-                <td className="text-center">
-                    <NavLink to={`${prefix}/${id}/edit/`}>
-                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                    </NavLink>
-                </td>
-                <td className="text-center">
-                    <a href="delete" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                    </a>
-                    {this.state.is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                            model_type_icon="success"
-                        />
-                    }
                 </td>
             </tr>
         )

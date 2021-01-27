@@ -10,10 +10,9 @@ from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
-from django.db import connections
 
 from .forms import BundleForm
-from .models import Bundle, BundleLayer, BundleGIS
+from .models import Bundle, BundleLayer
 from backend.inspire.models import LThemes
 
 def _layer_visible(layers):

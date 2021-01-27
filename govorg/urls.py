@@ -22,6 +22,7 @@ urlpatterns = [
                 path('<int:pk>/update/', role_employee_views.update),
                 path('<int:pk>/detail/', role_employee_views.detail),
                 path('<int:pk>/delete/', role_employee_views.delete),
+                path('<int:pk>/refresh-token/', role_employee_views.refresh_token),
             ], 'employee'))),
             path('', include(([
                 path('', role_views.list),
@@ -142,6 +143,7 @@ urlpatterns = [
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),
+        path('emp-role/', org_views.emp_role, name='emp-role'),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

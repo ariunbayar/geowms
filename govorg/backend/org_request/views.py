@@ -2,17 +2,16 @@ import json
 from geojson import Feature, FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
-from django.http import JsonResponse, Http404, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
-import datetime
 import random
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
-from geoportal_app.models import User
+from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
     LThemes,
     LPackages,
@@ -20,19 +19,10 @@ from backend.inspire.models import (
     MGeoDatas,
     MDatas,
     EmpPermInspire,
-    EmpPerm,
-    GovPerm,
-    GovPermInspire
+    EmpPerm
 )
 from django.contrib.auth.decorators import login_required
-import datetime
 from main.utils import (
-    gis_delete,
-    gis_fetch_one,
-    gis_fields_by_oid,
-    gis_insert,
-    gis_table_by_oid,
-    gis_tables_by_oids,
     dict_fetchall,
     refreshMaterializedView,
     ModelFilter,
@@ -250,11 +240,11 @@ def getAll(request):
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
-
         qs = ChangeRequest.objects
         qs = qs.filter(feature_id__in=emp_features)
-        qs = qs.filter(state=ChangeRequest.STATE_NEW)
-        org_request_list = qs.order_by('-created_at')
+        qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
+        qs = qs.order_by('-created_at')
+        org_request_list = qs
 
         if org_request_list:
             for_list_request = org_request_list.filter(group_id__isnull=True)
@@ -408,18 +398,6 @@ def _has_data_in_geo_datas(old_geo_id, feature_id):
     return m_geo_datas
 
 
-def _make_geo_id(theme_code, feature_id):
-    count = random.randint(106942, 996942)
-    feature_code = LFeatures.objects.get(feature_id=feature_id).feature_code
-    new_geo_id = feature_code + "_" + str(count) + "_" + 'geo'
-    m_geo_datas = _has_data_in_geo_datas(new_geo_id, feature_id)
-    if m_geo_datas:
-        new_geo_id = _make_geo_id(theme_code)
-
-    return new_geo_id
-
-
-
 def _get_emp_features(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
@@ -443,6 +421,7 @@ def request_approve(request, payload, pk):
     feature_id = values['feature_id']
     theme_code = values["theme_code"]
     success = False
+    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
 
     perm_approve = EmpPermInspire.objects.filter(
         emp_perm_id=emp_perm.id,
@@ -492,7 +471,7 @@ def request_approve(request, payload, pk):
                     old_geo_id,
                 )
             else:
-                new_geo_id = _make_geo_id(theme_code, feature_id)
+                new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
                 approve_type = 'create'
                 success = _request_to_m(
                     new_geo_json, theme_code,
@@ -575,3 +554,4 @@ def search(request, payload):
         'org_request': data_list
     }
     return JsonResponse(rsp)
+
