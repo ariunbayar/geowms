@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { service } from "./service"
+import { service } from "../service"
 import { NavLink } from "react-router-dom"
 import { Notif } from '../../../../../src/components/Notification/index'
 
