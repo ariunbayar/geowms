@@ -93,7 +93,6 @@ def _calc_layer_amount(area, area_type, len_object_in_layer):
 @login_required
 def purchaseDraw(request, payload):
 
-    price = payload.get('price')
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
@@ -101,10 +100,18 @@ def purchaseDraw(request, payload):
     bundle_id = payload.get('bundle_id')
     area = payload.get('area')
     area_type = payload.get('area_type')
+    layer_list = payload.get('layer_list')
     feature_info_list = payload.get('feature_info_list')
+    selected_type = payload.get('selected_type')
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
+
+    layer_prices = {}
+    for layer in layers:
+        all_len_property = _get_all_property_count(layer_list, feature_info_list)
+        layer_prices[layer.id] = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
+
     with transaction.atomic():
 
         payment = Payment()
@@ -114,7 +121,7 @@ def purchaseDraw(request, payload):
         payment.user = request.user
         payment.bundle = bundle
         payment.kind = Payment.KIND_QPAY
-        payment.total_amount = price
+        payment.total_amount = sum(layer_prices.values())
         payment.export_kind = Payment.EXPORT_KIND_POLYGON
         payment.is_success = False
         payment.message = 'Хэсэгчлэн худалдаж авах хүсэлт'
@@ -135,13 +142,12 @@ def purchaseDraw(request, payload):
             payment_layer = PaymentLayer()
             payment_layer.payment = payment
             payment_layer.wms_layer = layer
-            payment_layer.amount = _calc_layer_amount(area, area_type, len(feature_info_list))
+            payment_layer.amount = layer_prices[layer.id]
             payment_layer.save()
 
     return JsonResponse({
         'success': True,
         'payment_id': payment.id,
-        'msg': 'Амжилттай боллоо',
     })
 
 

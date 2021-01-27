@@ -524,7 +524,7 @@ export default class BundleMap extends Component {
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
         const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
-        const { bundle, map_wms_list } = this.state //http://127.0.0.1:8080/geoserver/gp_bu/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=gp_bu:gp_layer_building_view&bbox=100.4464067,46.2854066,100.4489819,46.2870236,EPSG:4326
+        const { bundle, map_wms_list } = this.state
         const layer_info = {
             bundle: { id: bundle.id },
             wms_list: map_wms_list.reduce((acc, { name, layers }) => {
