@@ -18,6 +18,7 @@ urlpatterns = [
         path('role/', include(([
             path('employee/', include(([
                 path('', role_employee_views.list),
+                path('send-mail/', role_employee_views.send_mail),
                 path('create/', role_employee_views.create),
                 path('<int:pk>/update/', role_employee_views.update),
                 path('<int:pk>/detail/', role_employee_views.detail),
