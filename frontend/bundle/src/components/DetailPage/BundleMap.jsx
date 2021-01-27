@@ -1,39 +1,40 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
 import 'ol/ol.css'
-import {Map, View, Feature, Overlay, Observable } from 'ol'
-import {unByKey} from 'ol/Observable'
-import {transform as transformCoordinate} from 'ol/proj'
+import { Map, View, Feature, Overlay } from 'ol'
+import { transform as transformCoordinate } from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
-import {getArea, getLength} from 'ol/sphere';
-import {toLonLat} from 'ol/proj';
+import { getArea } from 'ol/sphere';
+import { toLonLat } from 'ol/proj';
 import Tile from 'ol/layer/Tile'
-import {Vector as VectorLayer} from 'ol/layer'
-import {Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
-import {Point} from 'ol/geom'
+import { Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorSource } from 'ol/source'
+import { Icon, Style, Stroke, Fill } from 'ol/style'
+import { Point } from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
-import {format as coordinateFormat} from 'ol/coordinate';
-import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
+import { format as coordinateFormat } from 'ol/coordinate';
+import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 
-import {СуурьДавхарга} from './controls/СуурьДавхарга'
-import {CoordinateCopy} from './controls/CoordinateCopy'
-import {Modal} from './controls/Modal'
-import {ShopModal} from './ShopControls/Modal'
-import {ShopCart} from './ShopControls/ShopCart'
-import {DrawPayModal} from './controls/DrawPayModal'
+import { СуурьДавхарга } from './controls/СуурьДавхарга'
+import { CoordinateCopy } from './controls/CoordinateCopy'
+import { Modal } from './controls/Modal'
+import { ShopModal } from './ShopControls/Modal'
+import { ShopCart } from './ShopControls/ShopCart'
+import { DrawPayModal } from './controls/DrawPayModal'
 import "./styles.css"
-import {service} from './service'
-import {SidebarButton} from './SidebarButton'
-import {Sidebar} from './Sidebar'
-import {SearchBar} from './searchControl/SearchBar'
-import {SearchBarButton} from './searchControl/SearchBarButton'
-import {DrawButton} from './controls/Draw'
-import {PopUp} from './popUp/PopUp'
-import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
+import { service } from './service'
+import { SidebarButton } from './SidebarButton'
+import { Sidebar } from './Sidebar'
+import { SearchBar } from './searchControl/SearchBar'
+import { SearchBarButton } from './searchControl/SearchBarButton'
+import { DrawButton } from './controls/Draw'
+import { PopUp } from './popUp/PopUp'
+import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
+
+
 export default class BundleMap extends Component {
 
     constructor(props) {
@@ -41,7 +42,7 @@ export default class BundleMap extends Component {
         this.sendFeatureInfo = []
         this.state = {
             projection: 'EPSG:3857',
-            is_user: false,
+            is_authenticated: false,
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
@@ -67,7 +68,7 @@ export default class BundleMap extends Component {
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
             searchbar: new SearchBar(),
-            alertBox: new AlertRoot(),
+            alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
 
@@ -125,12 +126,10 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
-      service.isUser().then(({success}) =>
-      {
-        if (success) {
-            this.setState({is_user: true})
-        }
-      })
+      service.getUser().then(({is_authenticated}) =>
+        {
+            this.setState({is_authenticated})
+        })
         this.loadMapData(this.state.bundle.id)
     }
 
@@ -454,22 +453,6 @@ export default class BundleMap extends Component {
                                 else {
                                     this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
                                 }
-                                // if(geodb_table == 'mpoint_view'){
-                                //     if(feature_info.length > 0){
-                                //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
-                                //         this.setState({pay_modal_check: true})
-                                //         this.state.vector_layer.setSource(null)
-                                //     }
-                                //     // else{
-                                //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
-                                //     // }
-                                // }
-                                // else{
-                                //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                //         this.state.vector_layer.setSource(source)
-                                //         // this.controls.modal.showModal(feature_info, true)
-                                //     }
-                                // }
                             }
                         })
                 } else {
@@ -658,9 +641,9 @@ export default class BundleMap extends Component {
 
     toggleDraw() {
 
-        const {is_user} = this.state
+        const {is_authenticated} = this.state
 
-        if (is_user){
+        if (is_authenticated){
 
           this.setState(prevState => ({
               is_draw_open: !prevState.is_draw_open,
