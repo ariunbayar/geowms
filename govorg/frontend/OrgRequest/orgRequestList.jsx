@@ -29,13 +29,19 @@ class OpenMapModal extends Component {
     render() {
         const { is_modal_request_open, title } = this.state
         const { values, button_name } = this.props
+        const { state, geo_json } = values
+        if (!button_name) {
+            this.values = [values]
+        } else {
+            this.values = values
+        }
         return (
             <div>
                 {
-                    values.state == "ШИНЭ" && values.geo_json || button_name
+                    state == "ШИНЭ" && geo_json || button_name
                     ?
                         <a
-                            className="btn btn-primary"
+                            className="btn btn-primary btn-sm"
                             onClick={this.openModalMapMap}
                         >
                             {title}
@@ -49,7 +55,7 @@ class OpenMapModal extends Component {
                         modalAction={() => this.handleRequestApprove(id)}
                         title={title}
                         button_name={button_name}
-                        values={values}
+                        values={this.values}
                     />
                 }
             </div>
@@ -99,13 +105,12 @@ class MakeOronZai extends Component {
     render() {
         const { show_group, fields, values, collection_of_value } = this.state
         const { group, theme_name, package_name, feature_name } = values
-        console.log(collection_of_value);
         return (
             <div>
                 <span className={group ? "btn " : ''} onClick={this.showGroup}>
                     {theme_name} / {package_name} / {feature_name}
                 </span>
-                {show_group && <hr />}
+                {show_group && <br />}
                 {
                     show_group
                     ?
