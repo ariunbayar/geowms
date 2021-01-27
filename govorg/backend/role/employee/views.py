@@ -413,3 +413,14 @@ def refresh_token(request, pk):
         }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def send_mail(request):
+    subject = 'Геопортал нууц үг солих'
+    text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+    utils.send_approve_email(request.user, subject, text)
+
+    return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})
