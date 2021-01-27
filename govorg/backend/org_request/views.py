@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
-import random
+
 from backend.org.models import Org, Employee, InspirePerm
 from govorg.backend.org_request.models import ChangeRequest
 from main.inspire import GEoIdGenerator
@@ -130,7 +130,7 @@ def _get_org_request(ob, employee):
         'kind': ob.get_kind_display(),
         'group_id': ob.group_id,
         'form_json': json.loads(ob.form_json) if ob.form_json else '',
-        'geo_json': geo_json,
+        'geo_json': geo_json if geo_json else '',
         'created_at': ob.created_at.strftime('%Y-%m-%d'),
         'employee': employee.user.first_name,
         'org': employee.org.name,
@@ -231,10 +231,10 @@ def _make_group_request(org_request_list, org_request, ob, employee):
     return org_request
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def getAll(request):
+def getAll(request, payload):
     org_requests = []
 
     employee = get_object_or_404(Employee, user=request.user)
@@ -262,7 +262,7 @@ def getAll(request):
             choices = _getChoices(request.user)
             rsp = {
                 'success': True,
-                'org_request': org_requests,
+                'items': org_requests,
                 'choices': choices['choices'],
                 'modules': choices['modules'],
             }
@@ -276,7 +276,6 @@ def getAll(request):
         rsp = {
                 'success': False,
             }
-
     return JsonResponse(rsp)
 
 
