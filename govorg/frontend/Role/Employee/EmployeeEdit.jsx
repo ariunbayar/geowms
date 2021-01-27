@@ -415,9 +415,11 @@ export class EmployeeEdit extends Component {
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
-                                            <button type="button" className="btn btn-primary" aria-hidden="true" onClick={this.handleModalOpen}>
-                                                {} Нууц үг солих имэйл илгээх
-                                            </button>
+                                            <div className="col-md-6">
+                                                <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                    {} Нууц үг солих имэйл илгээх
+                                                </button>
+                                            </div>
                                         </div>
                                         <br/>
                                         <div>
