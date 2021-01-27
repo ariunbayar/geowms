@@ -8,6 +8,8 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { Vector as VectorSource, OSM } from 'ol/source';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import { Select } from 'ol/interaction';
+import Маягт from './Маягт'
+import { cmpPos } from "codemirror";
 
 export default class RequestMap extends Component {
     constructor(props) {
@@ -17,9 +19,13 @@ export default class RequestMap extends Component {
         this.state = {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
+            form_json: [],
+            show_form: false,
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
+        this.selectedFeature = this.selectedFeature.bind(this)
+        this.toggleForm = this.toggleForm.bind(this)
     }
 
     componentDidMount() {
@@ -41,11 +47,28 @@ export default class RequestMap extends Component {
         }),
       });
       this.map = map
-      const selectSingleClick = new Select();
-      map.addInteraction(selectSingleClick);
-      selectSingleClick.on('select', function (e) {
-        console.log("selected");
+      const selectSingleClick = new Select({
+        hitTolerance: 20
       });
+      map.addInteraction(selectSingleClick);
+      selectSingleClick.on('select', this.selectedFeature)
+
+      if (this.props.values.length == 1) {
+        map.removeInteraction(selectSingleClick)
+      }
+    }
+
+    selectedFeature(e) {
+      const feature = e.selected[0]
+      if (feature) {
+        const { values } = this.props
+        const id = feature.getProperties()['id']
+        values.map((value, idx) => {
+          if (value.id == id) {
+            this.setState({ show_form: true, form_json: value.form_json })
+          }
+        })
+      }
     }
 
     loadMapData(){
@@ -150,7 +173,7 @@ export default class RequestMap extends Component {
 
         const { values } = this.props
         var check_update = 0
-        values.map(({geo_json}, idx) => {
+        values.map(({id, geo_json}, idx) => {
           if(geo_json['features'])
           {
             if(geo_json['features'][0]){
@@ -160,6 +183,7 @@ export default class RequestMap extends Component {
                   dataProjection: this.state.dataProjection,
                   featureProjection: this.state.featureProjection,
                 });
+                features_new[0].setProperties({ id })
                 const vectorSourceNew = new VectorSource({
                   features: features_new
                 });
@@ -198,15 +222,29 @@ export default class RequestMap extends Component {
         })
     }
 
+    toggleForm() {
+      this.setState({ show_form: false })
+    }
+
     render() {
-        return (
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-md-12 px-0 reaquest">
-                        <div id="map"></div>
-                    </div>
-                </div>
+      const { form_json, show_form } = this.state
+      return (
+          <div className="row">
+            {
+              show_form
+              ?
+                <Маягт
+                  show_form={show_form}
+                  form_json={form_json}
+                  toggleForm={this.toggleForm}
+                />
+              :
+                null
+            }
+            <div className={show_form ? 'col-md-8' : 'col-md-12'}>
+              <div id="map"></div>
             </div>
-        )
+          </div>
+      )
     }
 }

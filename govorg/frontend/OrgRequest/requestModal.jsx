@@ -6,17 +6,16 @@ import Modal from "@utils/Modal/Modal"
 
 export const FormJson = ({form_json}) => {
     return (
-        <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
+        <div className="col-md-4 overflow-auto text-justify">
             {
                 form_json
                 ?
                     form_json.map((prop, idx) =>
                         <div key={idx} className="row my-3">
-                            <div className="col-md-3">
+                            <div className="col-md-5">
                                 <label className="col-form-label">{prop.property_code}</label>
                             </div>
-                            <div className="col-md-2"></div>
-                            <div  className="col-md-6 mr-1">
+                            <div className="col-md-7">
                                 <input
                                     className='form-control'
                                     disabled={true}
@@ -185,32 +184,31 @@ export default class RequestModal extends Component {
                                         </button>
                                     </div>
                                 </div>
-
-                                    {
-                                        values.length > 0
-                                        ?
-                                            values.map((value, idx) => {
-                                                const { form_json } = value
-                                                if (idx == values.length - 1) {
-                                                    return (
-                                                        <div key={idx} className="row">
-                                                            {
-                                                                values.length == 1
-                                                                ?
-                                                                    form_json && <FormJson form_json={form_json} />
-                                                                :
-                                                                    null
-                                                            }
-                                                            <div className= {values.length == 1 && form_json ? "col-md-6" : "col-md-12"}>
-                                                                <RequestMap values={values}/>
-                                                            </div>
+                                {
+                                    values.length > 0
+                                    ?
+                                        values.map((value, idx) => {
+                                            const { form_json } = value
+                                            if (idx == values.length - 1) {
+                                                return (
+                                                    <div key={idx} className="row">
+                                                        {
+                                                            values.length == 1
+                                                            ?
+                                                                form_json && <FormJson form_json={form_json} />
+                                                            :
+                                                                null
+                                                        }
+                                                        <div className= {values.length == 1 && form_json ? "col-md-8" : "col-md-12"}>
+                                                            <RequestMap values={values}/>
                                                         </div>
-                                                    )
-                                                }
-                                            })
-                                        :
-                                            null
-                                    }
+                                                    </div>
+                                                )
+                                            }
+                                        })
+                                    :
+                                        null
+                                }
                                 <div className="row my-2 mr-1 float-right">
                                     <button
                                         type="button mr-2 ml-2"
