@@ -22,6 +22,7 @@ from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
+from .models import Org, Employee
 
 from main.decorators import ajax_required
 from main import utils
