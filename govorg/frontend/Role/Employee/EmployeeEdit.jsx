@@ -4,7 +4,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 
 import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
-import Modal from "../../../../backend/webapp/src/components/Modal"
+import Modal from "@utils/Modal/Modal"
 import {Notif} from '@utils/Notification'
 import Loader from "@utils/Loader"
 import InsPerms from '../Role/GovPerms'
@@ -452,11 +452,11 @@ export class EmployeeEdit extends Component {
                 </div>
                 <Modal
                     title="Та нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?"
-                    model_type_icon = "success"
+                    model_type_icon = "warning"
                     status={this.state.modal_status}
                     modalClose={this.handleModalClose}
                     modalAction={() => this.handleSendMail()}
-                    actionName='Илгээх'
+                    actionNameDelete='Илгээх'
                 />
                 <ModalAlert
                     modalAction={() => this.modalClose()}
