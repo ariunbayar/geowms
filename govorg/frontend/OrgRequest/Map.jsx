@@ -1,15 +1,13 @@
 import React, { Component } from "react"
 
 import 'ol/ol.css';
-import Map from 'ol/Map';
-import OSM from 'ol/source/OSM';
-import TileLayer from 'ol/layer/Tile';
-import View from 'ol/View';
+import {Map, View} from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
 import "./styles.css"
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
-import {Vector as VectorSource} from 'ol/source';
-import {Vector as VectorLayer} from 'ol/layer';
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
+import { Vector as VectorSource, OSM } from 'ol/source';
+import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
+import { Select } from 'ol/interaction';
 
 export default class RequestMap extends Component {
     constructor(props) {
@@ -25,9 +23,8 @@ export default class RequestMap extends Component {
     }
 
     componentDidMount() {
-        const geoJson = this.props.geoJson
         this.loadMap()
-        this.loadMapData(geoJson)
+        this.loadMapData()
     }
 
     loadMap(){
@@ -44,9 +41,14 @@ export default class RequestMap extends Component {
         }),
       });
       this.map = map
+      const selectSingleClick = new Select();
+      map.addInteraction(selectSingleClick);
+      selectSingleClick.on('select', function (e) {
+        console.log("selected");
+      });
     }
 
-    loadMapData(GeoJson){
+    loadMapData(){
 
         const styles_new = {
           'MultiPolygon': new Style({
@@ -146,62 +148,57 @@ export default class RequestMap extends Component {
           }),
         };
 
-        const geojsonObject =  GeoJson
+        const { values } = this.props
         var check_update = 0
-        if(geojsonObject['features'])
-        {
-          if(geojsonObject['features'][0]){
-            if(Object.keys(geojsonObject['features'][0]).length>0)
-            {
-              var features_new =  new GeoJSON().readFeatures(geojsonObject['features'][0], {
-                dataProjection: this.state.dataProjection,
-                featureProjection: this.state.featureProjection,
-              });
-              const vectorSourceNew = new VectorSource({
-                features: features_new
-              });
-
-              const vectorLayerNew = new VectorLayer({
-                source: vectorSourceNew,
-                style: function (feature) {
-                  return styles_new[feature.getGeometry().getType()];
-                }
-              });
-              this.map.addLayer(vectorLayerNew)
+        values.map(({geo_json}, idx) => {
+          if(geo_json['features'])
+          {
+            if(geo_json['features'][0]){
+              if(Object.keys(geo_json['features'][0]).length>0)
+              {
+                var features_new =  new GeoJSON().readFeatures(geo_json['features'][0], {
+                  dataProjection: this.state.dataProjection,
+                  featureProjection: this.state.featureProjection,
+                });
+                const vectorSourceNew = new VectorSource({
+                  features: features_new
+                });
+                const vectorLayerNew = new VectorLayer({
+                  source: vectorSourceNew,
+                  style: function (feature) {
+                    return styles_new[feature.getGeometry().getType()];
+                  }
+                });
+                this.map.addLayer(vectorLayerNew)
+              }
             }
+            if(geo_json['features'][1]){
+              if(Object.keys(geo_json['features'][1]).length > 0)
+                  {
+                    var features_old = new GeoJSON().readFeatures(geo_json['features'][1], {
+                      dataProjection: this.state.dataProjection,
+                      featureProjection: this.state.featureProjection,
+                    });
+                    const vectorSourceOld = new VectorSource({
+                      features:features_old
+                    });
+                    const vectorLayerOld = new VectorLayer({
+                      source: vectorSourceOld,
+                      style: function (feature) {
+                        return styles_old[feature.getGeometry().getType()];
+                      }
+                    });
+                    check_update = 1
+                    this.map.addLayer(vectorLayerOld)
+                  }
+              }
+            if (check_update !=0) this.map.getView().fit(features_old[0].getGeometry(),{ padding: [300, 300, 300, 300] })
+            else  this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
           }
-
-          if(geojsonObject['features'][1]){
-            if(Object.keys(geojsonObject['features'][1]).length>0)
-                {
-                  var features_old = new GeoJSON().readFeatures(geojsonObject['features'][1], {
-                    dataProjection: this.state.dataProjection,
-                    featureProjection: this.state.featureProjection,
-                  });
-
-                  const vectorSourceOld = new VectorSource({
-                    features:features_old
-                  });
-
-                  const vectorLayerOld = new VectorLayer({
-                    source: vectorSourceOld,
-                    style: function (feature) {
-                      return styles_old[feature.getGeometry().getType()];
-                    }
-                  });
-                  check_update = 1
-
-                  this.map.addLayer(vectorLayerOld)
-                }
-          }
-          if (check_update !=0) this.map.getView().fit(features_old[0].getGeometry(),{ padding: [300, 300, 300, 300] })
-          else  this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
-
-        }
+        })
     }
 
     render() {
-      const geoJson = this.props.geoJson
         return (
             <div className="container-fluid">
                 <div className="row">
