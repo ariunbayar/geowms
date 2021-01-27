@@ -82,7 +82,6 @@ class ModalComponent extends Component{
     render() {
         const {user_name, user_email, user_number, types, total_price, is_user} = this.state
         const { layer_info, is_loading, area } = this.props
-        console.log(is_loading);
         return (
             <div>
                 <div className="show d-block modal bd-example-modal-lg" tabIndex="-1" role="dialog" aria-hidden="true">

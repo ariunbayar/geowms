@@ -293,7 +293,7 @@ def _update_and_add_column_with_value(path, file_name):
 def _create_folder_payment_id(type, payment_id):
     path = os.path.join(settings.FILES_ROOT, type, str(payment_id))
     if not os.path.isdir(path):
-        os.makedirs(path)
+        os.mkdir(path)
     return path
 
 
