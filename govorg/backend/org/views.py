@@ -172,72 +172,6 @@ def _emp_role(org, user):
     }
 
 
-# TODO remove during issue#1087
-def _get_bundle_permissions():
-    return [
-        {
-            "module_id": 1,
-            "module_name": "Түүх, соёлын өв",
-            "perm_view": True,
-            "perm_create": True,
-            "perm_remove": True,
-            "perm_revoke": True,
-            "perm_review": True,
-            "perm_approve": True
-        },
-        {
-            "module_id": 2,
-            "module_name": "Геодезийн тулгуур сүлжээ",
-            "perm_view": True,
-            "perm_create": True,
-            "perm_remove": True,
-            "perm_revoke": True,
-            "perm_review": True,
-            "perm_approve": True
-        },
-        {
-            "module_id": 3,
-            "module_name": "Тээврийн сүлжээ",
-            "perm_view": True,
-            "perm_create": True,
-            "perm_remove": True,
-            "perm_revoke": True,
-            "perm_review": True,
-            "perm_approve": True
-        },
-        {
-            "module_id": 4,
-            "module_name": "Дэд бүтэц",
-            "perm_view": True,
-            "perm_create": True,
-            "perm_remove": True,
-            "perm_revoke": True,
-            "perm_review": True,
-            "perm_approve": True
-        },
-        {
-            "module_id": 5,
-            "module_name": "Байр зүйн зураг",
-            "perm_view": True,
-            "perm_create": True,
-            "perm_remove": True,
-            "perm_revoke": True,
-            "perm_review": True,
-            "perm_approve": True
-        },
-        {
-                "module_id": 6,
-                "module_name": "Барилга, суурин газар",
-                "perm_view": True,
-                "perm_create": True,
-                "perm_remove": True,
-                "perm_revoke": True,
-                "perm_review": True,
-                "perm_approve": True
-        }
-    ]
-
-
 @login_required(login_url='/gov/secure/login/')
 def frontend(request):
 
@@ -250,9 +184,6 @@ def frontend(request):
             'org_role': _org_role(org),
         },
     }
-
-    # TODO remove during issue#1087
-    context['org']['perms'] = _get_bundle_permissions()
 
     return render(request, 'org/index.html', context)
 

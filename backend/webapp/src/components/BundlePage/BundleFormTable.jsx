@@ -91,7 +91,7 @@ export default class BundleFormTable extends Component {
     }
 
     render() {
-        const {id, name, price} = this.props.values
+        const {id, name} = this.props.values
         return (
             <tr>
                 <td >

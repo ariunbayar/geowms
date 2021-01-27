@@ -27,8 +27,6 @@ export class App extends Component {
         this.state = {
             org_level: props.org.org_level,
             name: props.org.name,
-            tuuhen_ov: {},
-            tseg_burtgel: {},
             map_list: [],
             emp_role: {}
         }
@@ -37,17 +35,6 @@ export class App extends Component {
     }
 
     componentDidMount() {
-
-        const { perms } = this.props.org
-        perms.map((perm) => {
-            if (perm.module_id == 1) {
-                this.setState({ tuuhen_ov: perm })
-            }
-            else if (perm.module_id == 2) {
-                this.setState({ tseg_burtgel: perm })
-            }
-        })
-
         this.requestCount()
         this.getEmpRoles()
     }
@@ -73,11 +60,6 @@ export class App extends Component {
     }
 
     render() {
-        const {
-            tuuhen_ov,
-            tseg_burtgel,
-        } = this.state
-
         const { org_role } = this.props.org
         const { emp_role } = this.state
         return (
@@ -114,21 +96,17 @@ export class App extends Component {
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
-                                {tuuhen_ov.perm_view &&
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
-                                }
-                                {tseg_burtgel.perm_view &&
-                                    <MenuItem
-                                        icon="gp-text-primary fa fa-circle-o"
-                                        url="/gov/froms/tseg-info/tsegpersonal/"
-                                        text="Цэгийн мэдээлэл"
-                                    >
-                                        <ul className="sidebar-submenu">
-                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
-                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
-                                        </ul>
-                                    </MenuItem>
-                                }
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
+                                <MenuItem
+                                    icon="gp-text-primary fa fa-circle-o"
+                                    url="/gov/froms/tseg-info/tsegpersonal/"
+                                    text="Цэгийн мэдээлэл"
+                                >
+                                    <ul className="sidebar-submenu">
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                    </ul>
+                                </MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
@@ -183,12 +161,8 @@ export class App extends Component {
                 <div className="clearfix">
                     <div className="content-wrapper">
                         <Switch>
-                            {tseg_burtgel.perm_view ?
-                                <Route path={"/gov/froms/"} component={() => <Forms perms={this.state.tseg_burtgel} />} /> : null
-                            }
-                            {tuuhen_ov.perm_view ?
-                                <Route path="/gov/tuuhen-ov/" component={() => <TuuhenOv perms={this.state.tuuhen_ov} />} /> : null
-                            }
+                            <Route path={"/gov/froms/"} component={Forms} />
+                            <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
                             <Route path="/gov/system/" component={System} />
                             <Route path="/gov/revoke-request/" component={RevokeRequest} />
                             <Route path="/gov/meta/" component={Meta} />
