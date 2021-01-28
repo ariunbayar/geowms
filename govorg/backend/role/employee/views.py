@@ -190,7 +190,7 @@ def create(request, payload):
 
     user_detail = payload.get('user_detail')
     roles = payload.get('roles')
-    emp_role_id = payload.get('emp_role_id')
+    emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
     user = get_object_or_404(User, employee__user=request.user)
 
@@ -212,20 +212,19 @@ def create(request, payload):
         employee.token = TokenGeneratorEmployee().get()
         _set_employee(employee, user_detail)
 
-        if emp_role_id:
-            emp_perm = EmpPerm()
-            emp_perm.created_by = user
-            emp_perm.emp_role_id = emp_role_id
-            emp_perm.employee_id = employee.id
-            emp_perm.updated_by = user
-            emp_perm.save()
-            obj_array = []
-            for role in roles:
-                emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
-                obj_array.append(emp_perm_inspire)
-            EmpPermInspire.objects.bulk_create(obj_array)
+        emp_perm = EmpPerm()
+        emp_perm.created_by = user
+        emp_perm.emp_role_id = emp_role_id
+        emp_perm.employee_id = employee.id
+        emp_perm.updated_by = user
+        emp_perm.save()
+        obj_array = []
+        for role in roles:
+            emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
+            obj_array.append(emp_perm_inspire)
+        EmpPermInspire.objects.bulk_create(obj_array)
 
-        utils.send_approve_email(user)
+        # utils.send_approve_email(user)
 
         return JsonResponse({
             'success': True,
@@ -358,7 +357,7 @@ def detail(request, pk):
             emp_role = emp_perm.emp_role
             role_id = emp_role.id
             role_name = emp_role.name
-            perms = _get_emp_perm_display(emp_perm)
+        perms = _get_emp_perm_display(emp_perm)
 
     rsp = {
         'success': True,
