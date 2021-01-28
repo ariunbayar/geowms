@@ -4,6 +4,8 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
+
+from django.conf import settings
 import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
@@ -259,6 +261,7 @@ def send_approve_email(user, subject=None, text=None):
         msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
+
     connection = get_connection(
         username=from_email,
         password=get_config('EMAIL_HOST_PASSWORD'),
@@ -271,6 +274,12 @@ def send_approve_email(user, subject=None, text=None):
     send_mail(subject, msg, from_email, to_email, connection=connection)
 
     return True
+
+
+def send_email(subject, msg, to_email):
+
+    from_email = settings.EMAIL_HOST_USER
+    send_mail(subject, msg, from_email, to_email, fail_silently=False)
 
 
 def get_administrative_levels():
