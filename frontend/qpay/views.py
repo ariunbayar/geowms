@@ -1,6 +1,7 @@
 import os
 import time
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_POST
@@ -13,6 +14,7 @@ from .qpay import Qpay
 
 @require_POST
 @ajax_required
+@login_required
 def create(request, payload):
 
     price = payload.get('price')
@@ -39,6 +41,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@login_required
 def check(request, payload):
 
     purchase_id = payload.get('purchase_id')
