@@ -8,6 +8,8 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { Vector as VectorSource, OSM } from 'ol/source';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import { Select } from 'ol/interaction';
+import {getRenderPixel} from 'ol/render';
+import {SwipeButton} from './Swipe'
 
 export default class RequestMap extends Component {
     constructor(props) {
@@ -17,10 +19,14 @@ export default class RequestMap extends Component {
         this.state = {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
+            is_layer_swipe: false,
+            last_layer: null
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
-    }
+        this.swipeButton = this.swipeButton.bind(this)
+        this.layerSwipe = this.layerSwipe.bind(this)
+      }
 
     componentDidMount() {
         this.loadMap()
@@ -32,7 +38,7 @@ export default class RequestMap extends Component {
         layers: [
             new TileLayer({
               source: new OSM(),
-            }),
+            })
         ],
         target: 'map',
         view: new View({
@@ -40,6 +46,7 @@ export default class RequestMap extends Component {
             zoom: 5.041301562246971,
         }),
       });
+      map.addControl(new SwipeButton(({swipeButton: this.swipeButton})))
       this.map = map
       const selectSingleClick = new Select();
       map.addInteraction(selectSingleClick);
@@ -198,15 +205,69 @@ export default class RequestMap extends Component {
         })
     }
 
+    layerSwipe(is_active){
+      if(is_active){
+        const {last_layer} = this.state
+        var swipe = document.getElementById('swipe');
+        swipe.value = 50
+        if(last_layer){
+          last_layer.on('prerender', (event) => {
+            var ctx = event.context;
+            var mapSize = this.map.getSize();
+            var width = mapSize[0] * (swipe.value / 100);
+            var tl = getRenderPixel(event, [width, 0]);
+            var tr = getRenderPixel(event, [mapSize[0], 0]);
+            var bl = getRenderPixel(event, [width, mapSize[1]]);
+            var br = getRenderPixel(event, mapSize);
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(tl[0], tl[1]);
+            ctx.lineTo(bl[0], bl[1]);
+            ctx.lineTo(br[0], br[1]);
+            ctx.lineTo(tr[0], tr[1]);
+            ctx.closePath();
+            ctx.clip();
+          });
+          last_layer.on('postrender', (event) => {
+            var ctx = event.context;
+            ctx.restore();
+          });
+          swipe.addEventListener(
+            'input',
+            () => {
+              this.map.render();
+            },
+            false
+          );
+        }
+      }else{
+        var swipe = document.getElementById('swipe');
+        swipe.value = 0
+      }
+    }
+
+    swipeButton(){
+      const {is_layer_swipe} = this.state
+      if(is_layer_swipe){
+        this.setState({is_layer_swipe: false})
+        this.layerSwipe(false)
+      }else{
+        this.setState({is_layer_swipe: true})
+        this.layerSwipe(true)
+      }
+    }
+
     render() {
+        const {is_layer_swipe} = this.state
         return (
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-md-12 px-0 reaquest">
-                        <div id="map"></div>
-                    </div>
-                </div>
-            </div>
+          <div className="container-fluid">
+              <div className="row">
+                  <div className="col-md-12 px-0 reaquest">
+                      <div id="map"></div>
+                      <input className={!is_layer_swipe ? "invisible" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
+                  </div>
+              </div>
+          </div>
         )
     }
 }

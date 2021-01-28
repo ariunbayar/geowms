@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react"
 
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
-import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
+import Loader from '@utils/Loader'
 import {Upload} from './Upload'
 
 class UploadCmp extends Component {
@@ -12,22 +12,38 @@ class UploadCmp extends Component {
         super(props)
 
         this.state = {
+            is_closed: false,
+            is_loading: false,
         }
+        this.closeModal = this.closeModal.bind(this)
+        this.setLoading = this.setLoading.bind(this)
+    }
+
+    setLoading(is_true) {
+        this.setState({ is_loading: is_true })
+    }
+
+    closeModal() {
+        this.setState({ is_closed: !this.state.is_closed })
     }
 
     render() {
+        const { is_closed, is_loading } = this.state
         return (
             <div className="modal-dialog modal-dialog-centered">
                 <div role="document" style={{zIndex: 1050}}>
                     <div className="modal-content animated slideInLeft">
                         <div className="modal-header">
                             <h5 className="modal-title" id="exampleModalLongTitle">Файлаа оруулна уу.</h5>
-                            <button type="button" className="animated close" data-dismiss="modal" aria-label="Close" onClick={()=> this.props.func()}>
+                            <button type="button" className="animated close" data-dismiss="modal" aria-label="Close" onClick={this.closeModal}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
+                            <Loader is_loading={is_loading} />
                             <Upload
+                                setLoading={this.setLoading}
+                                is_closed={is_closed}
                                 fid={this.props.fid}
                                 pid={this.props.pid}
                                 tid={this.props.tid}
