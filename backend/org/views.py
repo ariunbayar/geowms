@@ -298,7 +298,7 @@ def org_add(request, payload, level):
     errors = _org_validation(org_name, org_id)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-
+    # Байгууллага засах хэсэг
     if org_id:
         org = get_object_or_404(Org, pk=org_id)
         org.name = org_name
@@ -332,22 +332,20 @@ def org_add(request, payload, level):
                 GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
                 GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
             return JsonResponse({'success': True})
+    # Байгууллага шинээр үүсгэх
     else:
         gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
+
+        gov_perm = GovPerm.objects.create(
+                org=org,
+                created_by=request.user,
+                updated_by=request.user
+            )
         if org_role_filter:
-            gov_perm = GovPerm.objects.create(
-                org=org,
-                gov_role=org_role_filter,
-                created_by=request.user,
-                updated_by=request.user
-            )
-        else:
-            gov_perm = GovPerm.objects.create(
-                org=org,
-                created_by=request.user,
-                updated_by=request.user
-            )
+            gov_perm.gov_role = org_role_filter
+            gov_perm.save()
+
         if gov_role_inspire_all:
             for gov_role_inspire in gov_role_inspire_all:
                 objs.append(GovPermInspire(
