@@ -12,8 +12,10 @@ export class FormDetail extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    handleSubmit(values, {setErrors}) {
-        this.props.sendSubmit(values, setErrors)
+    handleSubmit(values, {setErrors, setSubmitting}) {
+        setSubmitting(true)
+        this.props.setLoading(true)
+        this.props.sendSubmit(values, setErrors, setSubmitting)
     }
 
     render() {
@@ -27,6 +29,8 @@ export class FormDetail extends Component {
                 {({
                     errors,
                     setErrors,
+                    setSubmitting,
+                    isSubmitting,
                     values,
                 }) => {
                     return(
@@ -53,12 +57,13 @@ export class FormDetail extends Component {
                                 />
                                 <ErrorMessage name="order_at" component="div" className="invalid-feedback"/>
                             </div>
-                            <button
-                                className="btn gp-btn-primary"
-                                type="submit"
-                            >
-                                Файл илгээх
-                            </button>
+                                <button
+                                    className="btn gp-btn-primary"
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                >
+                                    Файл илгээх
+                                </button>
                         </Form>
                     )
                 }}

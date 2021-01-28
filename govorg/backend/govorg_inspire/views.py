@@ -897,6 +897,8 @@ def file_upload_save_data(request, tid, pid, fid, ext):
     order_at = request.POST.get('order_at')
     order_no = request.POST.get('order_no')
     feature_id = fid
+    success = False
+    info = ''
 
     form = OrderForm(request.POST)
     if form.is_valid():
@@ -928,63 +930,71 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             return JsonResponse(rsp)
 
         layer = ds[0]
-        for val in layer:
-            values = dict()
-            for name in range(0, len(layer.fields)):
-                field_name = val[name].name  # field name
-                value = val.get(name)  # value ni
+        if layer:
+            for val in layer:
+                values = dict()
+                for name in range(0, len(layer.fields)):
+                    field_name = val[name].name  # field name
+                    value = val.get(name)  # value ni
 
-                if name == 0:
+                    if name == 0:
 
-                    geo_id = _make_geo_id(feature_id, field_name, value)
-                    geo_json = val.geom.json  # goemetry json
+                        geo_id = _make_geo_id(feature_id, field_name, value)
+                        geo_json = val.geom.json  # goemetry json
 
-                    if geo_json:
-                        success, info, request_kind = _check_perm(
-                            geo_id,
-                            employee,
-                            feature_id,
-                            geo_json
-                        )
+                        if geo_json:
+                            success, info, request_kind = _check_perm(
+                                geo_id,
+                                employee,
+                                feature_id,
+                                geo_json
+                            )
 
-                        if not success:
+                            if not success:
+                                _delete_file(for_delete_items)
+                                rsp = {
+                                    'success': success,
+                                    'info': info,
+                                }
+                                return JsonResponse(rsp)
+
+                        else:
                             _delete_file(for_delete_items)
                             rsp = {
-                                'success': success,
-                                'info': info,
+                                'success': False,
+                                'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
                             }
                             return JsonResponse(rsp)
 
-                    else:
-                        _delete_file(for_delete_items)
-                        rsp = {
-                            'success': False,
-                            'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
-                        }
-                        return JsonResponse(rsp)
+                    values[field_name] = value
 
-                values[field_name] = value
+                request_values = {
+                    'geo_id': geo_id,
+                    'theme_id': tid,
+                    'package_id': pid,
+                    'feature_id': fid,
+                    'employee': employee,
+                    'geo_json': geo_json,
+                    'kind': request_kind,
+                    'order_at': order_at,
+                    'order_no': order_no,
+                }
+                success, info = _make_request(values, request_values)
 
-            request_values = {
-                'geo_id': geo_id,
-                'theme_id': tid,
-                'package_id': pid,
-                'feature_id': fid,
-                'employee': employee,
-                'geo_json': geo_json,
-                'kind': request_kind,
-                'order_at': order_at,
-                'order_no': order_no,
+                if not success:
+                    _delete_file(for_delete_items)
+                    break
+
+            rsp = {
+                'success': success,
+                'info': info
             }
-            success, info = _make_request(values, request_values)
+        else:
+            rsp = {
+                'success': success,
+                'info': 'Файл хоосон байна'
+            }
 
-            if not success:
-                _delete_file(for_delete_items)
-                break
-        rsp = {
-            'success': success,
-            'info': info
-        }
     else:
         rsp = {
             'success': False,

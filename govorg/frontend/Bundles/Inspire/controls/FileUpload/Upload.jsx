@@ -109,7 +109,7 @@ export class Upload extends Component {
         return check
     }
 
-    handleSubmit(values, setErrors) {
+    handleSubmit(values, setErrors, setSubmitting) {
         const { files, name, is_upload_button } = this.state
         if (is_upload_button){
             this.setState({ is_upload_button: false })
@@ -117,7 +117,7 @@ export class Upload extends Component {
         else{
             const { fid, tid, pid } = this.props
             const formData = new FormData();
-            this.setState({ btn_upload_is_laod: true, not_cancel: true, is_upload_button: true })
+            this.setState({ btn_upload_is_laod: true, not_cancel: true })
             for(var i = 0; i < files.length; i ++) {
                 formData.append("data", files[i], files[i].name);
             }
@@ -129,21 +129,23 @@ export class Upload extends Component {
                     if (success) {
                         alert(info)
                         this.props.refreshRequestCount()
+                        this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
                         this.cancel()
-                        this.setState({ is_upload_button: false, files: [], not_cancel: false })
                         this.props.func()
                     }
                     else {
                         if (info) alert(info)
                         if(errors) {
                             setErrors(errors)
-                            this.setState({ is_upload_button: false })
+                            this.setState({ is_upload_button: false, btn_upload_is_laod: false })
                         }
                     }
                 })
                 .catch((error) => {
-                    this.setState({ is_upload_button: false, not_cancel: false })
+                    this.setState({ is_upload_button: false, not_cancel: false, btn_upload_is_laod: false })
                 })
+            setSubmitting(false)
+            this.props.setLoading(false)
         }
     }
 
@@ -169,15 +171,7 @@ export class Upload extends Component {
     }
 
     setType(name){
-        if (name == 'gml') {
-            this.setState({ name, files: [] })
-        }
-        if (name == 'shp') {
-            this.setState({ name, files: []})
-        }
-        if (name == 'geojson') {
-            this.setState({ name, files: [] })
-        }
+        this.setState({ name, files: [], is_upload_button: true, btn_upload_is_laod: false })
     }
 
     removeFromList(file_name) {
@@ -194,6 +188,19 @@ export class Upload extends Component {
                     return item.name !== file_name
                 })
                 this.setState({ files: array })
+            }
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.is_closed !== this.props.is_closed) {
+            this.setState({ is_upload_button: true, btn_upload_is_laod: false, not_cancel: false, files: [] })
+            this.props.func()
+        }
+        if (prevState.files !== this.state.files) {
+            this.file_names = []
+            for(var i=0; i < this.state.files.length; i++){
+                this.file_names.push(this.state.files[i].name)
             }
         }
     }
@@ -293,6 +300,16 @@ export class Upload extends Component {
                             </i>
                         </div>
                     </div>
+                    {
+                        !is_upload_button &&
+                        <ul className="mt-2">
+                            {
+                                this.file_names.map((file_name, idx) =>
+                                    <li key={idx}>{file_name}</li>
+                                )
+                            }
+                        </ul>
+                    }
                 </div>
                 <div className="col-lg-8">
                     {
@@ -319,7 +336,7 @@ export class Upload extends Component {
                                 }
                             </div>
                         :
-                            <FormDetail sendSubmit={this.handleSubmit} values={initial_values} />
+                            <FormDetail sendSubmit={this.handleSubmit} values={initial_values} setLoading={this.props.setLoading} />
                     }
                     {
                         is_upload_button
