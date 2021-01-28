@@ -23,7 +23,7 @@ export class TableBody extends Component {
                             {
                                 хувьс.component
                                 ?
-                                <хувьс.component values={values}/>
+                                <хувьс.component values={values} {...хувьс.props}/>
                                 :
                                 хувьс.action_type
                                 ?

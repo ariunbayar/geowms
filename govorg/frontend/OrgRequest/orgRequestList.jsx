@@ -53,6 +53,7 @@ class OpenMapModal extends Component {
                     <RequestModal
                         modalClose={this.closeModalMap}
                         modalAction={() => this.handleRequestApprove(id)}
+                        modalAlertOpen={this.modalAlertOpen}
                         title={title}
                         button_name={button_name}
                         values={this.values}
@@ -105,6 +106,7 @@ class MakeOronZai extends Component {
     render() {
         const { show_group, fields, values, collection_of_value } = this.state
         const { group, theme_name, package_name, feature_name } = values
+        console.log(this.props);
         return (
             <div>
                 <span className={group ? "btn " : ''} onClick={this.showGroup}>
@@ -232,7 +234,7 @@ export default class OrgRequestList extends Component {
             жагсаалтын_холбоос: '/gov/api/org-request/',
             хувьсах_талбарууд: [
                 {"field": "org", "component": make_org_employee},
-                {"field": "theme_name", "component": MakeOronZai},
+                {"field": "theme_name", "component": MakeOronZai, 'props': {'approve': this.handleRequestApprove}},
                 {"field": "state", "action": (values) => this.make_state_color(values) , "action_type": true},
                 {"field": "kind", "action": (values) => this.make_kind_color(values), "action_type": true},
             ],
@@ -293,9 +295,6 @@ export default class OrgRequestList extends Component {
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
         }, 2000)
-    }
-
-    componentDidMount(){
     }
 
     handleRequestApprove(id){

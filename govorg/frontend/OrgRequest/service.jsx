@@ -1,7 +1,7 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../components/helpers/service'
 export const service = {
     getAll,
-    requestDelete,
+    requestReject,
     requestApprove,
     requestSearch,
 }
@@ -13,9 +13,12 @@ function getAll() {
     return fetch(`${prefix}/`, requestOptions).then(handleResponse)
 }
 
-function requestDelete(id) {
-    const requestOptions = {...getGetOptions()}
-    return fetch(`${prefix}/${id}/delete/`, requestOptions).then(handleResponse)
+function requestReject(ids, feature_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ ids, feature_id }),
+    }
+    return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
 
 function requestApprove(id, values) {

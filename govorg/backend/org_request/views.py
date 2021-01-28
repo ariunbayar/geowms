@@ -281,31 +281,35 @@ def getAll(request, payload):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def request_delete(request, pk):
-
+def request_reject(request, payload):
+    ids = payload.get('ids')
+    feature_id = payload.get('feature_id')
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    change_req_obj = get_object_or_404(ChangeRequest, pk=pk)
 
     qs = EmpPermInspire.objects
     qs = qs.filter(emp_perm=emp_perm)
     qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
-    perm_reject = qs.filter(feature_id=change_req_obj.feature_id)
+    perm_reject = qs.filter(feature_id=feature_id)
 
     if perm_reject:
-        change_req_obj.state = ChangeRequest.STATE_REJECT
-        change_req_obj.save()
+        for r_id in ids:
+            change_req_obj = get_object_or_404(ChangeRequest, pk=r_id)
+            change_req_obj.state = ChangeRequest.STATE_REJECT
+            change_req_obj.save()
+
         rsp = {
             'success': True,
-            'info': 'Амжилттай цуцаллаа'
+            'info': 'Амжилттай татгалзлаа'
         }
+
     else:
         rsp = {
             'success': False,
-            'info': 'Цуцлах эрхгүй байна'
+            'info': 'Татгалзах эрхгүй байна'
         }
 
     return JsonResponse(rsp)

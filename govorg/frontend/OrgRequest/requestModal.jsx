@@ -6,7 +6,7 @@ import Modal from "@utils/Modal/Modal"
 
 export const FormJson = ({form_json}) => {
     return (
-        <div className="col-md-4 overflow-auto text-justify">
+        <div className="col-md-4 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
             {
                 form_json
                 ?
@@ -78,43 +78,53 @@ export default class RequestModal extends Component {
     }
 
     handleModalAction(){
-        const { id } = this.props.values
-        if(this.state.action_type == 'approve' && id)
-        {
-            service.requestDelete(id).then(({ success, info }) =>{
-                if(success)
-                {
-                    this.setState({status: "closing"})
-                    setTimeout(() => {
-                        this.setState({status: "closed"})
-                        this.props.modalClose()
-                        this.props.modalAlertOpen(info, "success")
-                        this.props.getAll()
-                    }, 150)
-                }
-                else
-                {
-                    this.setState({status: "closing"})
-                    setTimeout(() => {
-                        this.setState({status: "closed"})
-                        this.props.modalClose()
-                        this.props.modalAlertOpen(info, "warning")
-                    }, 150)
-                }
-
-            }).catch((error) => {
-                if(error == 'Bad Request')
-                {
-                    this.setState({status: "closing"})
-                    setTimeout(() => {
-                        this.setState({status: "closed"})
-                        this.props.modalClose()
-                        this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
-                    }, 150)
-                }
-            })
-        }
+        const { values } = this.props
+        let modal_info
+        let modal_type
+        let ids = []
+        let feature_id
+        values.map((value, idx) => {
+            if (idx == 0) feature_id = value.feature_id
+            ids.push(value.id);
+        })
         if(this.state.action_type == 'reject')
+        {
+            service
+                .requestReject(ids, feature_id)
+                .then(({ success, info }) => {
+                    this.setState({ status: "closing" })
+                    if(success)
+                    {
+                        setTimeout(() => {
+                            this.setState({ status: "closed" })
+                            modal_type = 'success'
+                            this.props.getAll()
+                        }, 150)
+                    }
+                    else {
+                        setTimeout(() => {
+                            this.setState({ status: "closed" })
+                            modal_type = 'warning'
+                        }, 150)
+                    }
+                    modal_info = info
+                    this.props.modalClose()
+
+                })
+                .catch((error) => {
+                    if(error == 'Bad Request')
+                    {
+                        setTimeout(() => {
+                            this.setState({ status: "closed" })
+                            this.props.modalClose()
+                            modal_type = 'danger'
+                            modal_info = 'Алдаа гарлаа. Обьект олдсонгүй'
+                        }, 150)
+                    }
+                })
+            this.props.modalAlertOpen(modal_info, modal_type)
+        }
+        if(this.state.action_type == 'approve')
         {
             this.setState({
                 is_loading: true
@@ -209,7 +219,7 @@ export default class RequestModal extends Component {
                                                             :
                                                                 selected_form_json && <FormJson form_json={selected_form_json} />
                                                         }
-                                                        <div className= {selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
+                                                        <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
                                                             <RequestMap values={values} selectedFeature={this.selectedFeature}/>
                                                         </div>
                                                     </div>
@@ -223,7 +233,7 @@ export default class RequestModal extends Component {
                                     <button
                                         type="button mr-2 ml-2"
                                         onClick={() => this.handleModalOpen(
-                                            'approve',
+                                            'reject',
                                             `Та ${
                                                 values.length == 1
                                                     ?
@@ -250,7 +260,7 @@ export default class RequestModal extends Component {
                                     <button
                                         type="button mr-2 ml-2"
                                         onClick={() => this.handleModalOpen(
-                                            'reject',
+                                            'approve',
                                             `Та ${
                                                 values.length == 1
                                                     ?
