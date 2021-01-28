@@ -335,6 +335,18 @@ def get_legend_url(wms_id, layer_name):
     return legend_url
 
 
+def getlayerStyle(layer_name):
+
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layers/{layer_name}'.format(layer_name=layer_name)
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    features = rsp.json()
+    return features.get('layer').get('defaultStyle').get('name')
+
+
+
 BASE_URL, AUTH = getHeader()
 workspace_name = 'gp_au'
 datastore_name = 'gp_au'
@@ -369,9 +381,11 @@ xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/.../St
 </NamedLayer>
 </StyledLayerDescriptor>
 """
-# url = 'styles'
+url = 'styles/deegi_style.sld'
 # headers = { 'Content-type': 'application/vnd.ogc.sld+xml' }
-# rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8') )
-# print(rsp.status_code, rsp.text)
+rsp = requests.post(BASE_URL + url, auth=AUTH, data=payload.encode('utf-8') )
+print(rsp.status_code, rsp.text)
 
+# http://localhost:8080/geoserver/rest/styles/deegi_style.json
 
+# http://localhost:8080/geoserver/rest/cite/styles
