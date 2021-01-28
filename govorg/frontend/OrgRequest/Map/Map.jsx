@@ -8,7 +8,6 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { Vector as VectorSource, OSM } from 'ol/source';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import { Select } from 'ol/interaction';
-// import Маягт from './Маягт'
 import {getRenderPixel} from 'ol/render';
 import {SwipeButton} from './Swipe'
 
@@ -27,7 +26,6 @@ export default class RequestMap extends Component {
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
-        this.selectedFeature = this.selectedFeature.bind(this)
         this.toggleForm = this.toggleForm.bind(this)
         this.swipeButton = this.swipeButton.bind(this)
         this.layerSwipe = this.layerSwipe.bind(this)
@@ -57,23 +55,10 @@ export default class RequestMap extends Component {
         hitTolerance: 20
       });
       map.addInteraction(selectSingleClick);
-      selectSingleClick.on('select', this.selectedFeature)
+      selectSingleClick.on('select', event => this.props.selectedFeature(event))
 
       if (this.props.values.length == 1) {
         map.removeInteraction(selectSingleClick)
-      }
-    }
-
-    selectedFeature(e) {
-      const feature = e.selected[0]
-      if (feature) {
-        const { values } = this.props
-        const id = feature.getProperties()['id']
-        values.map((value, idx) => {
-          if (value.id == id) {
-            this.setState({ show_form: true, form_json: value.form_json })
-          }
-        })
       }
     }
 
@@ -292,7 +277,7 @@ export default class RequestMap extends Component {
               <div className="row">
                   <div className="col-md-12 px-0 reaquest">
                       <div id="map"></div>
-                      <input className={!is_layer_swipe ? "invisible" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
+                      <input className={!is_layer_swipe ? "d-none" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
                   </div>
               </div>
           </div>

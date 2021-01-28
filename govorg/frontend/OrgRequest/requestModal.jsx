@@ -58,6 +58,7 @@ export default class RequestModal extends Component {
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalAction = this.handleModalAction.bind(this)
+        this.selectedFeature = this.selectedFeature.bind(this)
     }
 
     handleModalClose(){
@@ -138,22 +139,33 @@ export default class RequestModal extends Component {
     }
 
     handleOpen() {
-        this.setState({status: "initial"})
-        setTimeout(() => {
-            this.setState({status: "open"})
-        }, 0)
+        this.setState({ status: "open" })
     }
 
     handleClose() {
-        this.setState({status: "closing"})
-        setTimeout(() => {
-            this.setState({status: "closed"})
-            this.props.modalClose()
-        }, 150)
+        this.setState({status: "closed"})
+        this.props.modalClose()
+    }
+
+    selectedFeature(e) {
+        const feature = e.selected[0]
+        if (feature) {
+            const { values } = this.props
+            const id = feature.getProperties()['id']
+            values.map((value, idx) => {
+                if (value.id == id) {
+                    this.setState({ show_form: true, form_json: value.form_json })
+                }
+            })
+        }
     }
 
     render () {
-        const { status } = this.state
+
+        const selected_form_json = this.state.form_json
+        const { values } = this.props
+        const { is_loading,  modal_status, text, title, model_type_icon, action_name, status } = this.state
+
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -165,9 +177,7 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        // const { form_json, id, kind, geo_json } = this.props.values
-        const { values } = this.props
-        const { is_loading,  modal_status, text, title, model_type_icon, action_name } = this.state
+
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
@@ -197,10 +207,10 @@ export default class RequestModal extends Component {
                                                             ?
                                                                 form_json && <FormJson form_json={form_json} />
                                                             :
-                                                                null
+                                                                selected_form_json && <FormJson form_json={selected_form_json} />
                                                         }
-                                                        <div className= {values.length == 1 && form_json ? "col-md-8" : "col-md-12"}>
-                                                            <RequestMap values={values}/>
+                                                        <div className= {selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
+                                                            <RequestMap values={values} selectedFeature={this.selectedFeature}/>
                                                         </div>
                                                     </div>
                                                 )
@@ -214,9 +224,20 @@ export default class RequestModal extends Component {
                                         type="button mr-2 ml-2"
                                         onClick={() => this.handleModalOpen(
                                             'approve',
-                                            `Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
-                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        values[0].kind == 'ҮҮССЭН' ? 'шинэ геометр өгөгдөл үүсгэхийг'
+                                                        : values[0].kind == 'ЗАССАН' ? 'засагдсан геометр өгөгдлийг'
+                                                        : values[0].kind == 'УСТГАСАН' ? 'геометр өгөгдлийг устгахыг'
+                                                        : null
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `сонгосон ${values.length} геометр өгөгдлөө`
+                                                    :
+                                                    null
+                                            }
                                             татгалзахдаа итгэлтэй байна уу ?`,
                                             "Тохиргоог татгалзах",
                                             "success",
@@ -230,9 +251,20 @@ export default class RequestModal extends Component {
                                         type="button mr-2 ml-2"
                                         onClick={() => this.handleModalOpen(
                                             'reject',
-                                            `Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
-                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        values[0].kind == 'ҮҮССЭН' ? 'шинэ геометр өгөгдөл үүсгэхийг'
+                                                        : values[0].kind == 'ЗАССАН' ? 'засагдсан геометр өгөгдлийг'
+                                                        : values[0].kind == 'УСТГАСАН' ? 'геометр өгөгдлийг устгахыг'
+                                                        : null
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `сонгосон ${values.length} геометр өгөгдлөө`
+                                                    :
+                                                    null
+                                            }
                                             зөвшөөрөхдөө итгэлтэй байна уу ?`,
                                             "Тохиргоог зөвшөөрөх",
                                             "warning",
