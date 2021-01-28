@@ -510,7 +510,7 @@ export default class BundleMap extends Component {
 
     toggleDrawed(event){
         this.feature_info_list = []
-
+        this.controls.drawModal.showModal(true)
         const view = this.map.getView()
         const projection = view.getProjection()
         const coordinat = event.feature.getGeometry().getCoordinates()
@@ -549,8 +549,8 @@ export default class BundleMap extends Component {
         const extent2 = toLonLat([x2, y2])
         const full_extent = extent.toString() + ',' + extent2.toString()
         var list = []
-        map_wms_list.map(({ name, layers }, l_idx) => {
-            layers.map(({ id, code, tile }, idx) => {
+        map_wms_list.map(({ name, layers }, w_idx) => {
+            layers.map(({ id, code, tile }, l_idx) => {
                 if (tile.getVisible()) {
                     const main_url = tile.getSource().urls[0]
                     if(main_url) {
@@ -590,18 +590,15 @@ export default class BundleMap extends Component {
                                         return obj
                                     })
                                     list.push({[code]: info})
-                                    if(l_idx == map_wms_list.length - 1 && layers.length - 1 == idx) {
-                                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
-                                    }
                                 }
                         })
                     }
                 }
+                if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
+                    this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                }
             })
         })
-
-        const is_loading = true
-        this.controls.drawModal.showModal(is_loading)
     }
 
     formatArea(polygon) {
