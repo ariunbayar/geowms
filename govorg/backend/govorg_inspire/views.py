@@ -3,9 +3,8 @@ import json
 import datetime
 import uuid
 import glob
-import random
 from geojson import Feature, FeatureCollection
-# from .forms import OrderForm
+from .forms import OrderForm
 
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
@@ -889,26 +888,38 @@ def _check_perm(geo_id, employee, feature_id, geo_json):
     return success, info, request_kind
 
 
+def _order_validation(payload, order=None):
+    order_no = payload['name']
+    errors = {}
+
+    if not order_no:
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+    elif order_no.isspace():
+        errors['name'] = 'Хоосон байна утга оруулна уу.'
+
+    return errors
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def file_upload_save_data(request, tid, pid, fid, ext, payload, pk=None):
+def file_upload_save_data(request, tid, pid, fid, ext):
     employee = get_object_or_404(Employee, user=request.user)
-    form = request.FILES.getlist('data')
+    files = request.FILES.getlist('data')
     order_at = request.POST.get('order_at')
     order_no = request.POST.get('order_no')
     feature_id = fid
 
-    if pk:
-        order = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-        form = OrderForm(payload, instance=order)
-        errors = _order_validation(payload, order)
-    else:
-        form = OrderForm(payload)
-        errors = _order_validation(payload)
-
+    # if pk:
+        # order = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    # form = OrderForm(payload, instance=order)
+    # errors = _order_validation(payload, order)
+    # else:
+    form = OrderForm(request.POST)
+    # errors = _order_validation(payload)
+    print(form.errors)
     uniq_name = str(uuid.uuid4())
-    for fo in form:
+    for fo in files:
         uniq_file_name, file_type_name, return_name = _check_file_for_geom(
             fo.name,
             uniq_name,
@@ -1008,15 +1019,3 @@ def get_qgis_url(request):
         'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
     }
     return JsonResponse(rsp)
-
-
-def _order_validation(payload, order=None):
-    order_no = payload['name']
-    errors = {}
-
-    if not order_no:
-        errors['name'] = 'Хоосон байна утга оруулна уу.'
-    elif order_no.isspace():
-        errors['name'] = 'Хоосон байна утга оруулна уу.'
-
-    return errors
