@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('org_request', '0012_auto_20201128_0917'),
+        ('org_request', '0013_fix_kind_update_and_kind_delete'),
     ]
 
     operations = [
