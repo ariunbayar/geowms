@@ -78,16 +78,6 @@ def dictionaryResponse(request):
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
-def _calc_layer_amount(area, area_type, len_object_in_layer):
-    amount = 0
-    if area_type == 'm':
-        amount = Payment.POLYGON_PER_M_AMOUNT
-    if area_type == 'km':
-        amount = Payment.POLYGON_PER_KM_AMOUNT
-    amount = (area * amount) * len_object_in_layer
-    return amount
-
-
 @require_POST
 @ajax_required
 @login_required
