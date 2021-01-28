@@ -29,7 +29,6 @@ export class FormDetail extends Component {
                     setErrors,
                     values,
                 }) => {
-                    console.log(errors);
                     return(
                         <Form className="form-row">
                             <div className="form-group col-lg-12">
