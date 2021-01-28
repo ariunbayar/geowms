@@ -16,7 +16,6 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.core.files.storage import FileSystemStorage
 
-from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
 from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import EmpPerm
@@ -96,20 +95,6 @@ def _get_feature_coll(ob, changeset_list):
         from geojson import MultiPolygon
         point = MultiPolygon((changeset_list[ob]['coordinate']))
         return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
-
-
-@require_GET
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def changeset_all(request):
-
-    changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
-    features = [_get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
-    feature_collection = FeatureCollection(features)
-    rsp = {
-        'GeoJson': feature_collection,
-    }
-    return JsonResponse(rsp)
 
 
 @require_GET

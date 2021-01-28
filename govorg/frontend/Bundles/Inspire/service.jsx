@@ -18,7 +18,6 @@ class Capabilities {
 }
 
 export const service = {
-    geom,
     getWmsLayer,
     remove,
     cancel,
@@ -47,11 +46,6 @@ export const service = {
 
 const prefix = '/gov/api/inspire'
 const meta_prefix = '/gov/api/meta-data'
-
-function geom() {
-    const requestOptions = getGetOptions()
-    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
-}
 
 function getRole(fid) {
     const requestOptions = getGetOptions()
