@@ -1,38 +1,39 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
 import 'ol/ol.css'
-import {Map, View, Feature, Overlay, Observable } from 'ol'
-import {unByKey} from 'ol/Observable'
-import {transform as transformCoordinate} from 'ol/proj'
+import { Map, View, Feature, Overlay } from 'ol'
+import { transform as transformCoordinate } from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
-
+import { getArea } from 'ol/sphere';
+import { toLonLat } from 'ol/proj';
 import Tile from 'ol/layer/Tile'
-import {Vector as VectorLayer} from 'ol/layer'
-import {Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
-import {Point} from 'ol/geom'
+import { Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorSource } from 'ol/source'
+import { Icon, Style, Stroke, Fill } from 'ol/style'
+import { Point } from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
-import OSM from 'ol/source/OSM'
-import {format as coordinateFormat} from 'ol/coordinate';
-import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
+import { format as coordinateFormat } from 'ol/coordinate';
+import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 
-import {СуурьДавхарга} from './controls/СуурьДавхарга'
-import {CoordinateCopy} from './controls/CoordinateCopy'
-import {Modal} from './controls/Modal'
-import {ShopModal} from './ShopControls/Modal'
-import {ShopCart} from './ShopControls/ShopCart'
-import {DrawPayModal} from './controls/DrawPayModal'
+import { СуурьДавхарга } from './controls/СуурьДавхарга'
+import { CoordinateCopy } from './controls/CoordinateCopy'
+import { Modal } from './controls/Modal'
+import { ShopModal } from './ShopControls/Modal'
+import { ShopCart } from './ShopControls/ShopCart'
+import { DrawPayModal } from './controls/DrawPayModal'
 import "./styles.css"
-import {service} from './service'
-import {SidebarButton} from './SidebarButton'
-import {Sidebar} from './Sidebar'
-import {SearchBar} from './searchControl/SearchBar'
-import {SearchBarButton} from './searchControl/SearchBarButton'
-import {DrawButton} from './controls/Draw'
-import {PopUp} from './popUp/PopUp'
-import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
+import { service } from './service'
+import { SidebarButton } from './SidebarButton'
+import { Sidebar } from './Sidebar'
+import { SearchBar } from './searchControl/SearchBar'
+import { SearchBarButton } from './searchControl/SearchBarButton'
+import { DrawButton } from './controls/Draw'
+import { PopUp } from './popUp/PopUp'
+import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export default class BundleMap extends Component {
 
@@ -41,11 +42,13 @@ export default class BundleMap extends Component {
         this.sendFeatureInfo = []
         this.state = {
             projection: 'EPSG:3857',
+            is_authenticated: false,
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
             is_sidebar_open: true,
             is_search_sidebar_open: true,
+            is_modal_info_open: false,
             coordinate_clicked: null,
             vector_layer: null,
             is_draw_open: false,
@@ -65,7 +68,7 @@ export default class BundleMap extends Component {
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
             searchbar: new SearchBar(),
-            alertBox: new AlertRoot(),
+            alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
 
@@ -87,6 +90,8 @@ export default class BundleMap extends Component {
         this.getElement = this.getElement.bind(this)
         this.listToJson = this.listToJson.bind(this)
         this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
+        this.formatArea = this.formatArea.bind(this)
+        this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
     }
 
     initMarker() {
@@ -110,6 +115,10 @@ export default class BundleMap extends Component {
 
     }
 
+    handleModalApproveClose(){
+      this.setState({'is_modal_info_open': false})
+    }
+
     cartButton(is_cart, content,  code){
         if(is_cart == true){
             this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code)
@@ -117,6 +126,10 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
+      service.getUser().then(({is_authenticated}) =>
+        {
+            this.setState({is_authenticated})
+        })
         this.loadMapData(this.state.bundle.id)
     }
 
@@ -142,6 +155,7 @@ export default class BundleMap extends Component {
             service.loadWMSLayers(bundle_id),
         ]).then(([{base_layer_list}, {wms_list}]) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
+
         })
 
     }
@@ -319,20 +333,20 @@ export default class BundleMap extends Component {
     }
 
     handleMapClick(event) {
+        if(!this.state.is_draw_open) {
 
-        const coordinate = event.coordinate
-        this.marker.point.setCoordinates(coordinate)
-        const overlay = this.overlay
+            const coordinate = event.coordinate
+            this.marker.point.setCoordinates(coordinate)
+            const overlay = this.overlay
 
-        const projection = event.map.getView().getProjection()
-        const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
-        const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
+            const projection = event.map.getView().getProjection()
+            const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
+            const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-        this.setState({coordinate_clicked})
-
-        overlay.setPosition(coordinate)
-        this.showFeaturesAt(coordinate)
-
+            this.setState({coordinate_clicked})
+            overlay.setPosition(coordinate)
+            this.showFeaturesAt(coordinate)
+        }
         // Nov-15: commented for UX
         //this.showFeaturesAt(event.coordinate)
 
@@ -431,32 +445,18 @@ export default class BundleMap extends Component {
                                         const object = this.listToJson(feature_info, geodb_table)
                                         this.sendFeatureInfo.push(object)
                                     }
-                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
-                                if(geodb_table == 'mpoint_view'){
-                                    this.state.vector_layer.setSource(null)
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                    if(geodb_table == 'mpoint_view'){
+                                        this.state.vector_layer.setSource(null)
+                                    }
                                 }
-                            }
-                                // if(geodb_table == 'mpoint_view'){
-                                //     if(feature_info.length > 0){
-                                //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
-                                //         this.setState({pay_modal_check: true})
-                                //         this.state.vector_layer.setSource(null)
-                                //     }
-                                //     // else{
-                                //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
-                                //     // }
-                                // }
-                                // else{
-                                //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                //         this.state.vector_layer.setSource(source)
-                                //         // this.controls.modal.showModal(feature_info, true)
-                                //     }
-                                // }
+                                else {
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                }
                             }
                         })
                 } else {
                     /* TODO */
-                    console.log('no feature url', wms_source);
                 }
             })
         })
@@ -509,8 +509,12 @@ export default class BundleMap extends Component {
     }
 
     toggleDrawed(event){
-        const projection = this.map.getView().getProjection()
+        this.feature_info_list = []
+
+        const view = this.map.getView()
+        const projection = view.getProjection()
         const coordinat = event.feature.getGeometry().getCoordinates()
+        const feature_geometry = event.feature.getGeometry()
 
         const coodrinatLeftTop = coordinat[0][3]
         const coodrinatLeftTop_map_coord = transformCoordinate(coodrinatLeftTop, projection, this.state.projection_display)
@@ -521,25 +525,109 @@ export default class BundleMap extends Component {
         const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
         const { bundle, map_wms_list } = this.state
-
         const layer_info = {
             bundle: { id: bundle.id },
             wms_list: map_wms_list.reduce((acc, { name, layers }) => {
                 const wms = {
                     name,
-                    layers: layers.reduce((acc, { id, name, tile }) => {
+                    layers: layers.reduce((acc, { id, code, name, tile }) => {
                         if (tile.getVisible())
-                            acc.push({ id, name })
+                            acc.push({ id, name, code })
                         return acc
                     }, []),
                 }
                 if (wms.layers.length)
                     acc.push(wms)
                 return acc
-            }, [])
+            }, []),
         }
+        const x1 = event.feature.getGeometry().getExtent()[0]
+        const y1 = event.feature.getGeometry().getExtent()[1]
+        const x2 = event.feature.getGeometry().getExtent()[2]
+        const y2 = event.feature.getGeometry().getExtent()[3]
+        const extent = toLonLat([x1, y1])
+        const extent2 = toLonLat([x2, y2])
+        const full_extent = extent.toString() + ',' + extent2.toString()
+        var list = []
+        map_wms_list.map(({ name, layers }, l_idx) => {
+            layers.map(({ id, code, tile }, idx) => {
+                if (tile.getVisible()) {
+                    const main_url = tile.getSource().urls[0]
+                    if(main_url) {
+                        const url =
+                            main_url.slice(0, -1) +
+                            '?service=WFS' +
+                            '&version=1.1.0' +
+                            '&request=GetFeature' +
+                            '&typeName=' + code +
+                            '&bbox=' + full_extent + ',' + this.state.projection_display
+                        fetch(url)
+                            .then((rsp) => rsp.text())
+                            .then((text) => {
+                                const parser = new WMSGetFeatureInfo()
+                                const features = parser.readFeatures(text)
+                                const feature_info = features.map((feature) => {
+                                    const geometry_name = feature.getGeometryName()
+                                    const values =
+                                        feature.getKeys()
+                                            .filter((key) => key != geometry_name)
+                                            .map((key) => [key, feature.get(key)])
+                                    const list_id = feature.getId().split('.')
+                                    const id = list_id[list_id.length - 1]
+                                    return [id, values]
+                                })
+                                if(feature_info.length > 0) {
+                                    const info = feature_info.map((feature, idx) => {
+                                        var obj = new Object()
+                                        obj['geom_id'] = feature[0]
+                                        feature[1].map((info, idx) => {
+                                            if(info[0] == 'feature_id') {
+                                                obj['feature_id'] = info[1]
+                                            }
+                                        })
+                                        obj['layer_code'] = code
+                                        obj['layer_id'] = id
+                                        return obj
+                                    })
+                                    list.push({[code]: info})
+                                    if(l_idx == map_wms_list.length - 1 && layers.length - 1 == idx) {
+                                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                                    }
+                                }
+                        })
+                    }
+                }
+            })
+        })
 
-        this.controls.drawModal.showModal(coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info)
+        const is_loading = true
+        this.controls.drawModal.showModal(is_loading)
+    }
+
+    formatArea(polygon) {
+        const area = getArea(polygon);
+        let output;
+        let type;
+        if (area > 10000) {
+          output = Math.round((area / 1000000) * 100) / 100;
+          type = 'km'
+        } else {
+          output = Math.round(area * 100) / 100;
+          type = 'm'
+        }
+        return {output, type};
+    };
+
+    calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, feature_info_list) {
+        const area = this.formatArea(feature_geometry)
+        var layer_list = []
+        layer_info.wms_list.map((w, idx) => {
+            w.layers.map((layer, idx) => {
+                layer_list.push(layer.code)
+            })
+        })
+        const is_loading = false
+        this.controls.drawModal.showModal(is_loading, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, layer_info, area, feature_info_list, layer_list)
     }
 
     toggleDrawRemove(){
@@ -553,43 +641,62 @@ export default class BundleMap extends Component {
 
     toggleDraw() {
 
-        this.setState(prevState => ({
-            is_draw_open: !prevState.is_draw_open,
-        }))
+        const {is_authenticated} = this.state
 
-        if(this.state.is_draw_open){
-            const source_draw = new VectorSource()
+        if (is_authenticated){
 
-            const draw_layer = new VectorLayer({
-                source: source_draw
-            })
+          this.setState(prevState => ({
+              is_draw_open: !prevState.is_draw_open,
+          }))
 
-            this.setState({source_draw})
+          if(this.state.is_draw_open){
+              const source_draw = new VectorSource()
 
-            const draw = new Draw({
-                source: this.state.source_draw,
-                type: 'Circle',
-                geometryFunction: createBox(),
-            });
-            this.setState({draw, draw_layer})
-            this.map.addLayer(draw_layer);
-            this.map.addInteraction(draw);
-            draw.on('drawend', this.toggleDrawed)
-            draw.on('drawstart', this.toggleDrawRemove)
+              const draw_layer = new VectorLayer({
+                  source: source_draw
+              })
+
+              this.setState({source_draw})
+
+              const draw = new Draw({
+                  source: this.state.source_draw,
+                  type: 'Circle',
+                  geometryFunction: createBox(),
+              });
+              this.setState({draw, draw_layer})
+              this.map.addLayer(draw_layer);
+              this.map.addInteraction(draw);
+              draw.on('drawend', this.toggleDrawed)
+              draw.on('drawstart', this.toggleDrawRemove)
+          }
+          else{
+              this.map.removeInteraction(this.state.draw);
+              this.toggleDrawRemove()
+          }
         }
         else{
-            this.map.removeInteraction(this.state.draw);
-            this.toggleDrawRemove()
+          this.setState({'is_modal_info_open': true})
         }
     }
 
     render() {
+      const is_modal_info_open = this.state.is_modal_info_open
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
+                            {
+                             is_modal_info_open &&
+                                <ModalAlert
+                                    modalAction = {() => this.handleModalApproveClose()}
+                                    text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
+                                    title="Худалдан авалтын мэдээлэл"
+                                    status={this.state.status}
+                                    actionNameDelete="зөвшөөрөх"
+                                />
+                            }
                         </div>
                     </div>
                 </div>

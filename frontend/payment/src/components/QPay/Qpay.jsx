@@ -51,7 +51,7 @@ export class QPay extends Component {
         service.handleCreateQpay(price, purchase_id).then(({qPay_QRimage, success, msg}) => {
             if(success)
             {
-                this.props.history(`/profile/all/api/details/${purchase_id}/`)
+                this.props.history(`/payment/history/api/details/${purchase_id}/`)
             }
             else
             {
@@ -75,7 +75,6 @@ export class QPay extends Component {
                 if(success) //Amjilttai boloh uyd
                 {
                     this.close(this.props.handleClose)
-                    this.props.history(`/profile/all/api/details/${purchase_id}/`)
                 }
                 else{
 

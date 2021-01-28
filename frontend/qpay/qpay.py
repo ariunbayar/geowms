@@ -69,7 +69,7 @@ class Qpay():
             "bill_no": self.purhcase.geo_unique_number,
             "date":"2019-11-22 14:30",
             "description":self.purhcase.description,
-            "amount":1,
+            "amount": self.price,
             "btuk_code":"",
             "vat_flag": "0"
         }

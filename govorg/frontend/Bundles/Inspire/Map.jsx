@@ -325,6 +325,16 @@ export default class BarilgaSuurinGazar extends Component{
     handleMapClick(event) {
       const coordinate = event.coordinate
       if(!this.state.draw_is_active) this.showFeaturesAt(coordinate)
+
+      if(this.drawE.getActive()){
+        var check = this.xyCheckInMongolia(coordinate)
+        if(!check){
+          this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
+          this.drawE.setActive(false);
+          this.onClickCloser()
+          this.drawE.setActive(true);
+        }
+      }
     }
 
     showFeaturesAt(coordinate) {
@@ -507,6 +517,12 @@ export default class BarilgaSuurinGazar extends Component{
         }
       }
       return checkInMGL
+    }
+
+    xyCheckInMongolia(coordinar) {
+      const { Mongolia_feaure } = this.state
+      const check = Mongolia_feaure.getGeometry().containsXY(coordinar[0], coordinar[1])
+      return check
     }
 
     modifiedFeature(event) {

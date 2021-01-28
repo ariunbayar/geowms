@@ -1,7 +1,13 @@
 from zipfile import ZipFile
 import os
+import io
+import PIL.Image as Image
+import urllib.request
 import uuid
-from urllib.parse import urlencode
+import json
+import subprocess
+from fpdf import FPDF
+from datetime import date
 
 from django.conf import settings
 from django.db import transaction
@@ -10,16 +16,26 @@ from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
-
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
+from backend.inspire.models import (
+    LFeatureConfigs,
+    LDataTypeConfigs,
+    LProperties,
+    LValueTypes,
+    LCodeLists,
+    MDatas,
+)
 from geoportal_app.models import User
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
 from main.decorators import ajax_required
+from main.utils import send_email
+
+from django.contrib.gis.gdal import DataSource
 
 
 def index(request):
@@ -67,15 +83,25 @@ def dictionaryResponse(request):
 @login_required
 def purchaseDraw(request, payload):
 
-    price = payload.get('price')
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
     layer_ids = payload.get('layer_ids')
     bundle_id = payload.get('bundle_id')
+    area = payload.get('area')
+    area_type = payload.get('area_type')
+    layer_list = payload.get('layer_list')
+    feature_info_list = payload.get('feature_info_list')
+    selected_type = payload.get('selected_type')
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
+
+    layer_prices = {}
+    for layer in layers:
+        all_len_property = _get_all_property_count(layer_list, feature_info_list)
+        layer_prices[layer.id] = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
+
     with transaction.atomic():
 
         payment = Payment()
@@ -85,7 +111,7 @@ def purchaseDraw(request, payload):
         payment.user = request.user
         payment.bundle = bundle
         payment.kind = Payment.KIND_QPAY
-        payment.total_amount = 0
+        payment.total_amount = sum(layer_prices.values())
         payment.export_kind = Payment.EXPORT_KIND_POLYGON
         payment.is_success = False
         payment.message = 'Хэсэгчлэн худалдаж авах хүсэлт'
@@ -96,7 +122,6 @@ def purchaseDraw(request, payload):
         payment_polygon.payment = payment
         payment_polygon.data_id = ''
         payment_polygon.pdf_id = ''
-        payment_polygon.amount = 1  # TODO
         payment_polygon.coodrinatLeftTopX = coodrinatLeftTop[0]
         payment_polygon.coodrinatLeftTopY = coodrinatLeftTop[1]
         payment_polygon.coodrinatRightBottomX = coodrinatRightBottom[0]
@@ -107,13 +132,206 @@ def purchaseDraw(request, payload):
             payment_layer = PaymentLayer()
             payment_layer.payment = payment
             payment_layer.wms_layer = layer
+            payment_layer.amount = layer_prices[layer.id]
             payment_layer.save()
 
     return JsonResponse({
         'success': True,
         'payment_id': payment.id,
-        'msg': 'Амжилттай боллоо',
     })
+
+
+def _lfeatureconfig(feature_id, table_name, path, saved_fields):
+    feature_configs_name = []
+    f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    for f_config in f_configs:
+        data_type_id = f_config.data_type_id
+        connect_feature_id = f_config.connect_feature_id
+        if data_type_id is not None:
+            feature_configs_name.append({
+                'data_types': _get_property_names(data_type_id, table_name, path, saved_fields)
+            })
+        else:
+            connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
+            for connect_feature in connect_features:
+                connected_feature_id = connect_feature.connect_feature_id
+                fc_data_type_id = connect_feature.data_type_id
+                if fc_data_type_id is not None:
+                    feature_configs_name.append({
+                        'data_types': _get_property_names(fc_data_type_id, table_name, path, saved_fields)
+                    })
+        if data_type_id is None and connect_feature_id is None:
+            feature_configs_name.append({
+                'data_types': _get_property_names(data_type_id, table_name, path, saved_fields)
+            })
+    return feature_configs_name
+
+
+def _get_property_names(data_type_id, table_name, path, saved_fields):
+    property_names = []
+    is_saved_field = True
+    data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id)
+    if data_type_configs:
+        for data_type_config in data_type_configs:
+            property_id = data_type_config.property_id
+            properties = LProperties.objects.filter(property_id=property_id)
+            if properties:
+                for prop in properties:
+                    property_code = prop.property_code
+                    property_names.append({
+                        'property_code': prop.property_code,
+                        'property_name': prop.property_name,
+                        'property_id': prop.property_id,
+                        'value_types': _value_types(prop.value_type_id, property_id),
+                    })
+                    if table_name and saved_fields:
+                        for saved_field in saved_fields:
+                            if saved_field in property_code.lower():
+                                is_saved_field = False
+                        if is_saved_field:
+                            subprocess.run([
+                                'ogrinfo',
+                                path,
+                                '-sql',
+                                "ALTER TABLE " + table_name + " ADD COLUMN " + property_code + " " + 'VARCHAR(100)',
+                            ])
+                    is_saved_field = True
+    return property_names
+
+
+def _value_types(value_type_id, property_id):
+    value_type_names = []
+    codelists = []
+    value_types = LValueTypes.objects.filter(value_type_id=value_type_id)
+    if value_types:
+        for value_type in value_types:
+            value_type_names.append({
+                'value_type_id': value_type.value_type_id,
+            })
+    return value_type_names
+
+
+def _get_code_list_name(code_list_id):
+    code_list_name = None
+    code_list = LCodeLists.objects.filter(code_list_id=code_list_id)
+    if code_list:
+        code_list_name = code_list.first().code_list_name
+    return code_list_name
+
+
+def _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name):
+    att_type = ''
+    for info in feature_infos:
+        for property in info['data_types']:
+            property_code = property['property_code']
+            mdata_value = MDatas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
+            if mdata_value:
+                mdata_value = mdata_value.first()
+            for value_type in property['value_types']:
+                value_type = value_type['value_type_id']
+                if value_type == 'double':
+                    value_type = 'number'
+                if value_type == 'single-select':
+                    value_type = 'code_list_id'
+
+            if 'code' in value_type:
+                filter_value = value_type
+            else:
+                filter_value = "value_" + value_type
+
+            value = getattr(mdata_value, filter_value)
+
+            if filter_value == 'value_date' and value:
+                value = value.strftime('%m/%d/%Y, %H:%M:%S')
+            if filter_value == 'value_number' and value:
+                value = str(value)
+            if 'code_list' in filter_value and value:
+                value = _get_code_list_name(value)
+            if value:
+                subprocess.run([
+                    'ogrinfo',
+                    path,
+                    '-dialect', 'SQLite',
+                    '-sql', "UPDATE '" + table_name + "' SET " + property_code[0:10] + "='" + value + "' WHERE gml_id='" + gml_id + "'"
+                ])
+
+
+def _update_and_add_column_with_value(path, file_name):
+    path = os.path.join(path, file_name)
+    ds = DataSource(str(path))
+
+    lyr = ds[0]
+    before_feature_id = 0
+    feature_id = 0
+    feature_infos = None
+    table_name = file_name.split(".")[0]
+
+    for val in lyr:
+        for field in lyr.fields:
+            if field == 'feature_id':
+                feature_id = val.get(field)
+            if field == 'gml_id':
+                gml_id = val.get(field)
+                if gml_id:
+                    list = gml_id.split(".")
+                    geo_id = list[len(list) - 1]
+        if before_feature_id != feature_id:
+            feature_infos = _lfeatureconfig(feature_id, table_name, path, lyr.fields)
+        if geo_id and feature_id:
+            _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name)
+            geo_id = None
+
+        before_feature_id = feature_id
+
+    return True
+
+
+def _create_folder_payment_id(type, payment_id):
+    path = os.path.join(settings.FILES_ROOT, type, str(payment_id))
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    return path
+
+
+def _create_shp_file(payment, layer, polygon):
+
+    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+
+    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+
+    try:
+        file_type = 'ESRI SHAPEFILE'
+        path = _create_folder_payment_id('shape', payment.id)
+        file_ext = '.shp'
+        filename = os.path.join(path, str(layer.code) + file_ext)
+
+        url = layer.wms.url
+        url_service = 'SERVICE=WFS'
+        url_version = 'VERSION=1.1.0'
+        url_request = 'REQUEST=GetCapabilities'
+        geoserver_layer = layer.code
+
+        spat_srs = 'EPSG:4326'
+        # source_srs = 'EPSG:32648'
+        trans_srs = 'EPSG:4326'
+        meta = 'ENCODING=UTF-8'
+        subprocess.run([
+            'ogr2ogr',
+            '-f', file_type,
+            filename,
+            'WFS:' + url + '?&' + url_service + '&' + url_version + '&' + url_request,
+            geoserver_layer,
+            '-spat_srs', spat_srs,
+            '-spat', str(x1), str(y1), str(x2), str(y2),
+            '-lco', meta,
+            # '-s_srs', source_srs,
+            '-t_srs', trans_srs,
+            '-skipfailures'
+        ])
+        _update_and_add_column_with_value(path, str(layer.code) + file_ext)
+
+    except Exception as e:
+        print(e)
 
 
 def get_all_file_paths(directory):
@@ -130,8 +348,6 @@ def get_all_file_paths(directory):
 
 def get_all_file_remove(directory):
 
-    file_paths = []
-
     for root, directories, files in os.walk(directory):
         for filename in files:
             if filename != 'export.zip':
@@ -139,53 +355,22 @@ def get_all_file_remove(directory):
                 os.remove(filepath)
 
 
-def _create_shp_file(payment, layer, polygon):
-
-    import sys
-    sys.path.append('/usr/lib/python3/dist-packages/')
-    from qgis.core import \
-        QgsVectorLayer, QgsVectorFileWriter, QgsApplication, QgsCoordinateReferenceSystem
-
-    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
-
-    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
-
+def _file_to_zip(payment_id, folder_name):
     try:
-        qgs = QgsApplication([], False)
-        QgsApplication.setPrefixPath("/usr", True)
-        QgsApplication.initQgis()
+        path = os.path.join(settings.FILES_ROOT, folder_name, payment_id)
+        file_paths = get_all_file_paths(path)
+        zip_path = os.path.join(path, 'export.zip')
+        with ZipFile(zip_path, 'w') as zip:
+            for file in file_paths:
+                if folder_name == 'pdf':
+                    if '.jpeg' not in str(file):
+                        zip.write(file, os.path.basename(file))
+                else:
+                    zip.write(file, os.path.basename(file))
 
-        url = layer.wms.url + '/?'
-        wms = url.split('/')[4]
-        geoserver_layer = layer.code
-        bbox = '&bbox=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2)
-
-        params = {
-            'service': 'WFS',
-            'version': '1.3.0',
-            'request': 'GetFeature',
-        }
-        uri = url + urlencode(params) + '&typeName=' + wms + ':' + geoserver_layer + bbox
-
-        print(uri)
-
-        vlayer = QgsVectorLayer(uri, 'test1', 'WFS')
-
-        if vlayer.isValid():
-
-            path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-            if not os.path.isdir(path):
-                os.mkdir(path)
-
-            filename = os.path.join(path, str(layer.pk) + '.shp')
-            # writer = QgsVectorFileWriter(vlayer, filename, 'UTF-8', QgsWkbTypes.Polygon, QgsCoordinateReferenceSystem('EPSG:32648'), 'ESRI Shapefile')
-            writer = QgsVectorFileWriter.writeAsVectorFormat(vlayer, filename, 'UTF-8', QgsCoordinateReferenceSystem('EPSG:3857'), 'ESRI Shapefile')
-            del(writer)
-
-            qgs.exitQgis()
-
+        get_all_file_remove(path)
     except Exception as e:
-        raise e
+        print(e)
 
 
 def _export_shp(payment):
@@ -197,34 +382,287 @@ def _export_shp(payment):
         for layer in layers:
             _create_shp_file(payment, layer.wms_layer, polygon)
 
-        path = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id))
-        file_paths = get_all_file_paths(path)
-
-        zip_path = os.path.join(path, 'export.zip')
-        with ZipFile(zip_path,'w') as zip:
-            for file in file_paths:
-                zip.write(file, os.path.basename(file))
-
-        get_all_file_remove(path)
+        _file_to_zip(str(payment.id), 'shape')
         payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
         payment.save()
 
         return True
 
     except Exception as e:
-        raise e
+        print(e)
         return False
+
+
+def _get_size_from_extent(x1, y1, x2, y2):
+    y = y2 - y1
+    x = x2 - x1
+    if y > x:
+        width = 480
+        height = 720
+        orientation = 'Portrait'
+    if x > y:
+        width = 720
+        height = 480
+        orientation = 'Landscape'
+
+    return {'height': str(height), 'width': str(width), 'orientation': orientation}
+
+
+def _create_image_file(payment, layer, polygon, download_type, folder_name):
+    geoserver_layer = layer.wms_layer.code
+
+    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+
+    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+
+    if x1 > x2:
+        save_x = x1
+        x1 = x2
+        x2 = save_x
+    if y1 > y2:
+        save_y = y1
+        y1 = y2
+        y2 = save_y
+
+    size = _get_size_from_extent(x1, y1, x2, y2)
+
+    path = os.path.join(settings.FILES_ROOT, folder_name, str(payment.id))
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    file_ext = '.' + download_type
+    filename = os.path.join(path, str(geoserver_layer) + file_ext)
+
+    url = layer.wms_layer.wms.url
+    url_service = 'SERVICE=WMS'
+    url_version = 'VERSION=1.1.0'
+    url_request = 'REQUEST=GetMap'
+    url_format = 'FORMAT=image/' + download_type
+    url_transparent = 'TRANSPARENT=true'
+    url_width = 'WIDTH=' + size['width']
+    url_height = 'HEIGHT=' + size['height']
+    url_layers = 'LAYERS=' + geoserver_layer
+    url_bbox = 'BBOX=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',urn:ogc:def:crs:EPSG:4326'
+
+    fullurl = url + '?' + url_service + '&' + url_version + '&' + url_request + '&' + url_format + '&' + url_transparent + '&' + url_width + '&' + url_height + '&' + url_bbox + '&' + url_layers
+
+    with urllib.request.urlopen(fullurl) as response:
+        image_byte = response.read()
+
+    bytes = bytearray(image_byte)
+    image = Image.open(io.BytesIO(bytes))
+    image.save(os.path.join(settings.FILES_ROOT, folder_name, str(payment.id), geoserver_layer + file_ext))
+
+    return {'success': True, 'orientation': size['orientation']}
+
+
+def _export_image(payment, download_type):
+
+    try:
+        layers = PaymentLayer.objects.filter(payment=payment)
+        polygon = PaymentPolygon.objects.filter(payment=payment).first()
+        folder_name = 'image'
+
+        for layer in layers:
+            _create_image_file(payment, layer, polygon, download_type, folder_name)
+
+        _file_to_zip(str(payment.id), folder_name)
+        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+        payment.save()
+        return True
+
+    except Exception as e:
+        print(e)
+        return False
+
+
+def _get_Feature_info_from_url(polygon, layer):
+    info = []
+    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+    if x1 > x2:
+        save_x = x1
+        x1 = x2
+        x2 = save_x
+    if y1 > y2:
+        save_y = y1
+        y1 = y2
+        y2 = save_y
+
+    url = layer.wms_layer.wms.url
+    if not '?' in url:
+        url = url + "?"
+    service = 'WFS'
+    version = '1.1.0'
+    request = 'GetFeature'
+    code = layer.wms_layer.code
+    trans_srs = 'EPSG:4326'
+    property_name = 'feature_id'
+    out_format = 'JSON'
+
+    full_url =  url + 'service=' + service + '&version=' + version + '&request=' +request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1)  + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
+    with urllib.request.urlopen(full_url) as response:
+        get_features = response.read().decode("utf-8")
+        for feature in json.loads(get_features)['features']:
+            geo_id = feature['id']
+            geo_id = geo_id.split('.')[len(geo_id.split('.')) - 1]
+            feature_id = feature['properties']['feature_id']
+            info.append({
+                'geo_id': geo_id,
+                'feature_id': feature_id,
+            })
+
+    return info
+
+
+def _get_pdf_info_from_inspire(payment, layer, polygon):
+    prev_feature_id = 0
+    infos = []
+    feature_infos = _get_Feature_info_from_url(polygon, layer)
+    for feature_info in feature_infos:
+        att_type = ''
+        feature_id = feature_info['feature_id']
+        geo_id = feature_info['geo_id']
+        for_pdf_info = []
+        if feature_id != prev_feature_id:
+            lfeatures = _lfeatureconfig(feature_id, None, None, None)
+        for info in lfeatures:
+            for property in info['data_types']:
+                property_code = property['property_code']
+                property_name = property['property_name']
+                mdata_value = MDatas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
+                if mdata_value:
+                    mdata_value = mdata_value.first()
+                    for value_type in property['value_types']:
+                        value_type = value_type['value_type_id']
+                        if value_type == 'double':
+                            value_type = 'number'
+                        if value_type == 'single-select':
+                            value_type = 'code_list_id'
+                        if value_type == 'link':
+                            value_type = 'text'
+
+                    if 'code' in value_type:
+                        filter_value = value_type
+                    else:
+                        filter_value = "value_" + value_type
+                    if hasattr(mdata_value, filter_value):
+                        value = getattr(mdata_value, filter_value)
+                    else:
+                        value = None
+
+                    if filter_value == 'value_date' and value:
+                        value = value.strftime('%m/%d/%Y, %H:%M:%S')
+                    if filter_value == 'value_number' and value:
+                        value = str(value)
+                    if 'code_list' in filter_value and value:
+                        value = _get_code_list_name(value)
+                    for_pdf_info.append({
+                        'property_name': property_name,
+                        'value': value,
+                    })
+        infos.append({
+            'geo_id': geo_id,
+            'for_pdf_info': for_pdf_info
+        })
+        prev_feature_id = feature_id
+    return infos
+
+
+def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
+    path_with_file_name = os.path.join(settings.FILES_ROOT, download_type, str(payment_id), str(layer_code) + '.' + download_type)
+
+    class PDF(FPDF):
+        def header(self):
+            self.set_font('Arial', '', 8)
+            self.cell(10, 10, date.today().strftime("%Y-%m-%d"))
+            self.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+            self.set_font('DejaVu', '', 15)
+            title = "Хэсэгчлэн худалдан авалт"
+            self.cell(0, 10, title, 0, 2, 'C')
+            self.set_x(-30)
+            self.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'logo-2.png'), y=5, w=25, h=20)
+            self.ln(5)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial', 'I', 8)
+            self.cell(0, 10, 'Page %s' % self.page_no(), 0, 0, 'C')
+
+    pdf = PDF()
+    pdf.add_page()
+    pdf.add_font('DejaVu', '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font('DejaVu', '', 10)
+    for info in infos:
+        pdf.set_font('DejaVu', '', 15)
+        pdf.cell(10, 8, info['geo_id'])
+        pdf.ln(5)
+        for property in info['for_pdf_info']:
+            pdf.set_font('DejaVu', '', 10)
+            pdf.cell(10, 8, property['property_name'])
+            if property['value']:
+                value = property['value']
+            else:
+                value = 'Хоосон'
+            pdf.cell(40)
+            pdf.cell(10, 8, value)
+            pdf.ln(5)
+        pdf.ln(5)
+
+    pdf.add_page(orientation=orientation)
+    pdf.image(os.path.join(settings.FILES_ROOT, folder_name, str(payment_id), image_name), x=20, y=28, w=0, h=0)
+
+    pdf.output(path_with_file_name, 'F')
+    return path_with_file_name
+
+
+def _export_pdf(payment, download_type):
+    layers = PaymentLayer.objects.filter(payment=payment)
+    polygon = PaymentPolygon.objects.filter(payment=payment).first()
+    payment_id = payment.id
+
+    image_ext = 'jpeg'
+    folder_name = download_type
+
+    for layer in layers:
+        infos = _get_pdf_info_from_inspire(payment, layer, polygon)
+        _create_folder_payment_id(download_type, payment_id)
+        is_created_image = _create_image_file(payment, layer, polygon, image_ext, folder_name)
+        if is_created_image['success']:
+            image_name = layer.wms_layer.code + '.' + image_ext
+            path = _create_pdf(download_type, payment_id, layer.wms_layer.code, infos, image_name, folder_name, is_created_image['orientation'])
+
+    _file_to_zip(str(payment.id), download_type)
+    payment.export_file = download_type + '/' + str(payment.id) + '/export.zip'
+    payment.save()
+    return True
 
 
 @require_GET
 @login_required
-def download_purchase(request, pk):
+def download_purchase(request, pk, download_type):
+    is_created = False
+    payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
 
-    payment = get_object_or_404(Payment, pk=pk)
     if payment.export_file:
         is_created = True
     else:
-        is_created = _export_shp(payment)
+        if download_type == 'shp':
+            is_created = _export_shp(payment)
+
+        if download_type == 'jpeg' or download_type == 'png' or download_type == 'tiff':
+            is_created = _export_image(payment, download_type)
+
+        if download_type == 'pdf':
+            is_created = _export_pdf(payment, download_type)
+
+        if is_created:
+
+            subject = 'Худалдан авалт'
+            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу! http://192.168.10.92/payment/history/api/details/{id}/'.format(id=payment.pk)
+            to_email = [payment.user.email]
+
+            send_email(subject, msg, to_email)
 
     rsp = {
         'success': is_created,
@@ -347,6 +785,88 @@ def download_pdf(request, pk):
 def download_zip(request, pk):
     payment = get_object_or_404(Payment, user=request.user, pk=pk)
     # generate the file
-    src_file = os.path.join(settings.FILES_ROOT, 'shape', str(payment.id), 'export.zip')
+    src_file = os.path.join(settings.FILES_ROOT, payment.export_file)
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename="export.zip")
     return response
+
+
+def _lfeature_config_count(feature_id):
+    all_count = 0
+    f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    for f_config in f_configs:
+        data_type_id = f_config.data_type_id
+        connect_feature_id = f_config.connect_feature_id
+        if data_type_id is not None:
+            prop_count = _data_type_configs_count(data_type_id)
+            all_count += prop_count
+        else:
+            connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
+            for connect_feature in connect_features:
+                connected_feature_id = connect_feature.connect_feature_id
+                fc_data_type_id = connect_feature.data_type_id
+                if fc_data_type_id is not None:
+                    prop_count = _data_type_configs_count(fc_data_type_id)
+                    all_count += prop_count
+        if data_type_id is None and connect_feature_id is None:
+            prop_count = _data_type_configs_count(data_type_id)
+            all_count += prop_count
+    return all_count
+
+
+def _data_type_configs_count(data_type_id):
+    property_len = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).count()
+    return property_len
+
+
+def _get_key_and_compare(dict, item):
+    for key in dict.keys():
+        if key == item:
+            return key
+
+
+def _get_all_property_count(layer_list, feature_info_list):
+    count = 0
+    for code in layer_list:
+        for feature in feature_info_list:
+            key = _get_key_and_compare(feature, code)
+            if key:
+                for info in feature[key]:
+                    fconfig_count = _lfeature_config_count(info['feature_id'])
+                    count += fconfig_count
+    return count
+
+
+def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer, selected_type):
+    amount = None
+    price = None
+    if area_type == 'km':
+        amount = Payment.POLYGON_PER_KM_AMOUNT
+    if area_type == 'm':
+        amount = Payment.POLYGON_PER_M_AMOUNT
+    if selected_type == 'shp' or selected_type == 'pdf':
+        price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
+    if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
+        price = ((area * amount) * layer_length) * len_object_in_layer
+    return price
+
+
+@require_POST
+@ajax_required
+def calcPrice(request, payload):
+    area = payload.get('area')
+    layer_list = payload.get("layer_list")
+    feature_info_list = payload.get("feature_info_list")
+    selected_type = payload.get('selected_type')
+
+    area_type = area['type']
+    area = area['output']
+
+    all_len_property = _get_all_property_count(layer_list, feature_info_list)
+    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
+
+    rsp = {
+        'success': True,
+        'total_price': total_price,
+    }
+
+    return JsonResponse(rsp)

@@ -5,6 +5,10 @@ from geoportal_app.models import User
 
 class Payment(models.Model):
 
+    POLYGON_PER_KM_AMOUNT = 1000
+    POLYGON_PER_M_AMOUNT = 1
+    PROPERTY_PER_AMOUNT = 100
+
     KIND_MONGOLBANK = 1
     KIND_QPAY = 2
 
@@ -54,7 +58,6 @@ class PaymentPolygon(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
     data_id = models.CharField(max_length=100)
     pdf_id = models.CharField(max_length=100)
-    amount = models.PositiveIntegerField()
     coodrinatLeftTopX = models.DecimalField(decimal_places=10, max_digits=20)
     coodrinatLeftTopY = models.DecimalField(decimal_places=10, max_digits=20)
     coodrinatRightBottomX = models.DecimalField(decimal_places=10, max_digits=20)
@@ -66,4 +69,5 @@ class PaymentLayer(models.Model):
 
     wms_layer = models.ForeignKey('backend_wmslayer.WMSLayer', on_delete=models.PROTECT)
     payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+    amount = models.PositiveIntegerField(null=True)
     defaultCheck = models.PositiveIntegerField(default=0)

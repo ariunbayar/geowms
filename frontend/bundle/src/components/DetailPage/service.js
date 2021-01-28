@@ -5,10 +5,12 @@ export const service = {
     loadBaseLayers,
     payment,
     paymentDraw,
+    paymentCalcPrice,
     purchaseFromCart,
     searchPoint,
     getAimags,
     getSum,
+    getUser,
 }
 
 function getCookie(name) {
@@ -76,6 +78,13 @@ function loadBaseLayers() {
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }
 
+function getUser() {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch('/get_user/', requestOptions).then(handleResponse)
+}
+
 function payment(price, description, data_id) {
     const requestOptions = {
         ..._getPostOptions(),
@@ -90,6 +99,14 @@ function paymentDraw(values) {
         body: JSON.stringify(values)
     }
     return fetch('/payment/purchase-draw/', requestOptions).then(handleResponse)
+}
+
+function paymentCalcPrice(area, layer_list, feature_info_list, selected_type) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({ area, layer_list, feature_info_list, selected_type })
+    }
+    return fetch('/payment/calc-price/', requestOptions).then(handleResponse)
 }
 
 function purchaseFromCart(data, code){
