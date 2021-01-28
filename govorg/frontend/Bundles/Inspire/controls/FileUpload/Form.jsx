@@ -1,35 +1,39 @@
 import React, { Component } from 'react'
-import { service } from '../../service'
-import {Field, ErrorMessage, Formik} from 'formik'
+import {Field, ErrorMessage, Formik, Form} from 'formik'
 
 export class FormDetail extends Component {
+
+
     constructor(props){
         super(props)
         this.state = {
             btn_is_laod: false,
         }
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    componentDidMount(){
-        const {errors} = this.props
+    handleSubmit(values, {setErrors}) {
+        this.props.sendSubmit(values, setErrors)
     }
 
     render() {
         const { values } = this.props
-        this.list = []
         return (
             <Formik
                 initialValues={ values }
                 enableReinitialize
+                onSubmit={this.handleSubmit}
             >
                 {({
                     errors,
+                    setErrors,
                     values,
                 }) => {
+                    console.log(errors);
                     return(
-                        <div className="form-row">
+                        <Form className="form-row">
                             <div className="form-group col-lg-12">
-                                <label htmlFor="first_name">Тушаалын дугаар:</label>
+                                <label htmlFor="order_no">Тушаалын дугаар:</label>
                                 <Field
                                     className={'form-control ' + (errors.order_no ? 'is-invalid' : '')}
                                     name='order_no'
@@ -37,10 +41,10 @@ export class FormDetail extends Component {
                                     type="text"
                                     placeholder="Тушаалын дугаар"
                                 />
-                                <ErrorMessage name="order_no" component="div" className="text-danger"/>
+                                <ErrorMessage name="order_no" component="div" className="invalid-feedback"/>
                             </div>
                             <div className="form-group col-lg-12">
-                                <label htmlFor="first_name">Тушаал гарсан огноо:</label>
+                                <label htmlFor="order_at">Тушаал гарсан огноо:</label>
                                 <Field
                                     className={'form-control ' + (errors.order_at ? 'is-invalid' : '')}
                                     name='order_at'
@@ -48,14 +52,15 @@ export class FormDetail extends Component {
                                     type="date"
                                     placeholder="Тушаал гарсан огноо"
                                 />
-                                <ErrorMessage name="order_at" component="div" className="text-danger"/>
+                                <ErrorMessage name="order_at" component="div" className="invalid-feedback"/>
                             </div>
                             <button
-                                    className="btn gp-btn-primary"
-                                    onClick={() => this.props.handleSubmit(values)}
-                                >Файл илгээх
+                                className="btn gp-btn-primary"
+                                type="submit"
+                            >
+                                Файл илгээх
                             </button>
-                        </div>
+                        </Form>
                     )
                 }}
             </Formik>

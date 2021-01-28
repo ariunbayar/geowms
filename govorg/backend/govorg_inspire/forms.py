@@ -15,6 +15,9 @@ class OrderForm(forms.ModelForm):
         ]
 
         error_messages = {
-            'order_at': {'required': 'Оруулна уу!'},
-            'order_no': {'required': 'Оруулна уу!'},
+            'order_at': {'required': 'Тушаалын огноог оруулна уу!'},
+            'order_no': {
+                'required': 'Тушаалын дугаарыг оруулна уу!',
+                'max_length': 'Тушаалын дугаарын тэмдэгт %(limit_value)d байх ёстой! (Таных %(show_value)d байна)'
+            },
         }

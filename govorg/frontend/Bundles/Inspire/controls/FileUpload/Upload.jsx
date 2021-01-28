@@ -15,7 +15,6 @@ export class Upload extends Component {
             files: [],
             name: '',
             type: '',
-            errors: {},
             not_cancel: false,
             is_upload_button: true,
             initial_values: {
@@ -110,7 +109,7 @@ export class Upload extends Component {
         return check
     }
 
-    handleSubmit(values) {
+    handleSubmit(values, setErrors) {
         const { files, name, is_upload_button } = this.state
         if (is_upload_button){
             this.setState({ is_upload_button: false })
@@ -127,20 +126,24 @@ export class Upload extends Component {
             service
                 .sendFile(formData, fid, tid, name, pid)
                 .then(({success, info, errors}) => {
-                if (success) {
-                    alert(info)
-                    this.props.refreshRequestCount()
-                }
-                else {
-                    alert(info)
-                    if(errors) {
-                        this.setState({ is_upload_button: false, errors })
+                    if (success) {
+                        alert(info)
+                        this.props.refreshRequestCount()
+                        this.cancel()
+                        this.setState({ is_upload_button: false, files: [], not_cancel: false })
+                        this.props.func()
                     }
-                }
-                this.cancel()
-                this.setState({ btn_is_laod: false, files: [], not_cancel: false })
-                this.props.func()
-            })
+                    else {
+                        if (info) alert(info)
+                        if(errors) {
+                            setErrors(errors)
+                            this.setState({ is_upload_button: false })
+                        }
+                    }
+                })
+                .catch((error) => {
+                    this.setState({ is_upload_button: false, not_cancel: false })
+                })
         }
     }
 
@@ -196,7 +199,7 @@ export class Upload extends Component {
     }
 
     render() {
-        const { files, text, type, name, not_cancel, is_upload_button, initial_values, errors } = this.state
+        const { files, text, type, name, not_cancel, is_upload_button, initial_values } = this.state
         this.list = []
         if (files.length > 0){
             for(var i=0; i < files.length; i++){
@@ -316,7 +319,7 @@ export class Upload extends Component {
                                 }
                             </div>
                         :
-                            <FormDetail handleSubmit={this.handleSubmit} values={ initial_values } errors={errors}></FormDetail>
+                        <FormDetail sendSubmit={this.handleSubmit} values={initial_values} />
                     }
                     {
                         is_upload_button
