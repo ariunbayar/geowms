@@ -319,7 +319,7 @@ export class Upload extends Component {
                                 }
                             </div>
                         :
-                        <FormDetail sendSubmit={this.handleSubmit} values={initial_values} />
+                            <FormDetail sendSubmit={this.handleSubmit} values={initial_values} />
                     }
                     {
                         is_upload_button

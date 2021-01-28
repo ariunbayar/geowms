@@ -888,18 +888,6 @@ def _check_perm(geo_id, employee, feature_id, geo_json):
     return success, info, request_kind
 
 
-def _order_validation(payload, order=None):
-    order_no = payload['name']
-    errors = {}
-
-    if not order_no:
-        errors['name'] = 'Хоосон байна утга оруулна уу.'
-    elif order_no.isspace():
-        errors['name'] = 'Хоосон байна утга оруулна уу.'
-
-    return errors
-
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
