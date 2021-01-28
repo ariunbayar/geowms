@@ -15,8 +15,6 @@ export class PolygonPurchase extends Component {
             polygon: [],
             layers: [],
 
-            purchase: props.purchase,
-            price: 3000,
             purchase_all: [],
             qpay_modal_is: false,
             is_modal_info_open: false,
@@ -85,8 +83,8 @@ export class PolygonPurchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, qpay_modal_is, alert_msg, alert_toggle, is_modal_info_open } = this.state
-        const { items, polygon, layers} = this.state
+        const { alert_msg, is_modal_info_open } = this.state
+        const { items, layers} = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
