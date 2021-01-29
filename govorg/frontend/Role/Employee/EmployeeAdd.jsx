@@ -35,7 +35,8 @@ export class EmployeeAdd extends Component {
             model_type_icon: '',
             title: '',
             prefix: '/gov/perm/employee/',
-            is_inspire_role: false
+            is_inspire_role: false,
+            is_inspire_role_null: true,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -59,15 +60,23 @@ export class EmployeeAdd extends Component {
     }
 
     getRole(emp_role_id) {
-        const emp_role_id_parsed = parseInt(emp_role_id)
-        this.setState({ is_inspire_role: false, emp_role_id: emp_role_id_parsed })
-        if(emp_role_id_parsed) {
-        service
-            .getRole(emp_role_id_parsed)
-            .then(({ success, role_name, role_id, role_description, roles }) => {
-                if (success) {
-                    this.setState({ roles, is_inspire_role: true })
-                }
+        this.setState({emp_role_id, is_inspire_role: false, is_inspire_role_null: false })
+        if(emp_role_id)
+        {
+            service
+                .getRole(emp_role_id)
+                .then(({ success, role_name, role_id, role_description, roles }) => {
+                    if (success) {
+                        this.setState({ roles, is_inspire_role: true })
+                    }
+                })
+        }
+        else
+        {
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    this.setState({roles: {}, is_inspire_role_null: true})
+                }, 300);
             })
         }
     }
@@ -121,7 +130,7 @@ export class EmployeeAdd extends Component {
     }
 
     render() {
-        const {form_values, roles, role_list, emp_role_id, prefix, is_inspire_role } = this.state
+        const {form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -263,7 +272,7 @@ export class EmployeeAdd extends Component {
                                         </div>
                                         <div>
                                             {
-                                                roles !== {} && is_inspire_role
+                                                is_inspire_role || is_inspire_role_null
                                                 ?
                                                     <InsPerms
                                                         action_type="editable"
@@ -272,6 +281,7 @@ export class EmployeeAdd extends Component {
                                                         dontDid={true}
                                                         org_roles={org_roles}
                                                         role={roles}
+                                                        is_inspire_role_null={is_inspire_role_null}
                                                         editable_is_check={this.perms}
                                                     />
                                                 : null

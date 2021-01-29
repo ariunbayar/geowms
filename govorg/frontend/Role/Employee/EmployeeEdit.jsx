@@ -39,6 +39,7 @@ export class EmployeeEdit extends Component {
             role_id: '',
             old_role_id: null,
             is_inspire_role: false,
+            is_inspire_role_null: false,
             prefix: '/gov/perm/employee/',
             id: this.props.match.params.id,
             role_list: [],
@@ -109,8 +110,9 @@ export class EmployeeEdit extends Component {
     getRole(role_id) {
         this.perms = []
         this.emp_perms = []
-        this.setState({role_id, is_inspire_role: false })
-        if(role_id) {
+        this.setState({role_id, is_inspire_role: false, is_inspire_role_null: false })
+        if(role_id)
+        {
             service
                 .getRole(role_id)
                 .then(({ success, roles }) => {
@@ -119,6 +121,14 @@ export class EmployeeEdit extends Component {
                         this.setState({ roles, is_inspire_role: true })
                     }
                 })
+        }
+        else
+        {
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    this.setState({roles: {}, is_inspire_role_null: true})
+                }, 300);
+            })
         }
     }
 
@@ -276,7 +286,7 @@ export class EmployeeEdit extends Component {
     }
 
     render() {
-        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id, id } = this.state
+        const {form_values, roles, role_list, prefix, is_inspire_role, is_inspire_role_null, perms, old_role_id, role_id, id } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -424,7 +434,7 @@ export class EmployeeEdit extends Component {
                                         <br/>
                                         <div>
                                             {
-                                                roles !== {} && is_inspire_role
+                                                is_inspire_role || is_inspire_role_null
                                                 ?
                                                     <InsPerms
                                                         action_type="editable"
@@ -433,6 +443,7 @@ export class EmployeeEdit extends Component {
                                                         dontDid={true}
                                                         org_roles={org_roles}
                                                         role={roles}
+                                                        is_inspire_role_null={is_inspire_role_null}
                                                         emp_perms={old_role_id == role_id ? perms : null}
                                                         editable_is_check={this.perms}
                                                     />

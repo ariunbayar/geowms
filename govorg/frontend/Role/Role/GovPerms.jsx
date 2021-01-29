@@ -265,11 +265,14 @@ export default class InsPerms extends Component {
             const is_send_type = 'role'
             const { role } = this.props
             const key = 'is_role'
-            const t_checked = this.isRoleChecked(role.themes, themes, key, null)
-            if(t_checked){
-                const p_checked = this.isRoleChecked(role.package_features, package_features, key, null)
-                if(p_checked) {
-                    this.isRoleChecked(role.property, property, key, is_send_type)
+            if(!this.props.is_inspire_role_null)
+            {
+                const t_checked = this.isRoleChecked(role.themes, themes, key, null)
+                if(t_checked){
+                    const p_checked = this.isRoleChecked(role.package_features, package_features, key, null)
+                    if(p_checked) {
+                        this.isRoleChecked(role.property, property, key, is_send_type)
+                    }
                 }
             }
             if(this.props.emp_perms) {

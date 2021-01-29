@@ -2,6 +2,9 @@ import React, { Component } from "react"
 import {service} from "./service"
 import ModalAlert from "../../ModalAlert"
 import {TableHeadRole} from './TableHeadRole'
+import Loader from "@utils/Loader"
+
+
 export class Roles extends Component {
 
     constructor(props) {
@@ -18,6 +21,7 @@ export class Roles extends Component {
             properties_perms: [],
             handle_save_is_laod: false,
             modal_alert_status: "closed",
+            role_is_load: false
         }
         this.handleRoles = this.handleRoles.bind(this)
         this.handleFeature = this.handleFeature.bind(this)
@@ -37,8 +41,9 @@ export class Roles extends Component {
 
     handleRoles(){
         const {level, id} = this.props.match.params
+        this.setState({role_is_load: true})
         service.getGovRoles(level, id).then(({success, data, roles}) => {
-            if(success) this.setState({data, properties_perms: roles})
+            if(success) this.setState({data, properties_perms: roles, role_is_load: false})
         })
     }
 
@@ -306,19 +311,20 @@ export class Roles extends Component {
     }
 
     render() {
-        const {data, tid, pid, fid, properties, properties_perms} = this.state
+        const {data, tid, pid, fid, properties, properties_perms, role_is_load, handle_save_is_laod} = this.state
         return (
             <div className="row">
+                <Loader is_loading={role_is_load}/>
                 <div className="col-md-6">
-                    {this.state.handle_save_is_laod ?
-                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white">
+                    {handle_save_is_laod ?
+                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}}>
                             <div className="spinner-border text-light" role="status">
                                 <span className="sr-only">Loading...</span>
                             </div>
                             <a className="text-light"> Шалгаж байна.</a>
                         </a>
                         :
-                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" onClick={this.handleSubmit}>Хадгалах</a>
+                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}} onClick={this.handleSubmit}>Хадгалах</a>
                     }
                     <div className="fixed-height-b">
                     {data.map((theme, theme_index) => (
