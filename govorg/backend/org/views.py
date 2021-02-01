@@ -207,8 +207,9 @@ def emp_role(request):
 def get_approve_and_revoke(request):
     org = get_object_or_404(Org, employee__user=request.user)
     gov_perm = GovPerm.objects.filter(org=org).first()
-    approve = GovPermInspire.objects.filter(perm_kind=5).first()
-    revoke = GovPermInspire.objects.filter(perm_kind=6).first()
+
+    approve = GovPermInspire.objects.filter(gov_perm=gov_perm, perm_kind=5).first()
+    revoke = GovPermInspire.objects.filter(gov_perm=gov_perm, perm_kind=6).first()
 
     if approve:
         approve = True
