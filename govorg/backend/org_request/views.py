@@ -360,7 +360,6 @@ def getAll(request, payload):
         qs = ChangeRequest.objects
         qs = qs.filter(feature_id__in=emp_features)
         qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
-        qs = qs.order_by('-created_at')
 
         if qs:
             qs = qs.filter(group_id__isnull=True)
