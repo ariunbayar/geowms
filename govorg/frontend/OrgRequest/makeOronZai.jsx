@@ -14,15 +14,30 @@ export default class MakeOronZai extends Component {
                 {'mn_name': 'Төлөв', 'eng_name': 'state'},
                 {'mn_name': 'Өөрчлөлт', 'eng_name': 'kind'},
             ],
-            collection_of_value: []
+            collection_of_value: [],
+            is_all_checked: false
         }
         this.showGroup = this.showGroup.bind(this)
+        this.collectAllValue = this.collectAllValue.bind(this)
     }
 
     showGroup() {
         const { values } = this.state
         if (values.group) {
             this.setState({ show_group: !this.state.show_group })
+        }
+    }
+
+    collectAllValue(e, values) {
+        const { collection_of_value } = this.state
+        if (e.target.checked) {
+            values.map((value, idx) => {
+                collection_of_value.push(value)
+            })
+            this.setState({ collection_of_value, is_all_checked: true })
+        }
+        else {
+            this.setState({ collection_of_value: [], is_all_checked: false })
         }
     }
 
@@ -42,7 +57,7 @@ export default class MakeOronZai extends Component {
     }
 
     render() {
-        const { show_group, fields, values, collection_of_value } = this.state
+        const { show_group, fields, values, collection_of_value, is_all_checked } = this.state
         const { group, theme_name, package_name, feature_name } = values
         return (
             <div>
@@ -56,7 +71,12 @@ export default class MakeOronZai extends Component {
                         <table>
                             <thead>
                                 <tr>
-                                    <th></th>
+                                    <th>
+                                        <input
+                                            type="checkbox"
+                                            onChange={(e) => this.collectAllValue(e, group)}
+                                        />
+                                    </th>
                                     <th>№</th>
                                     {fields.map((field, idx) =>
                                         <th key={idx}>
@@ -73,9 +93,11 @@ export default class MakeOronZai extends Component {
                                             value.state === 'ШИНЭ' || value.state === 'ХЯНАХ'
                                             ?
                                                 <td>
-                                                    <input id={g_idx}
-                                                        type="checkbox"
-                                                        onChange={(e) => this.collectValue(e, value)}
+                                                    <CheckBoxInput
+                                                        collectValue={(e, value) => this.collectValue(e, value)}
+                                                        value={value}
+                                                        is_all_checked={is_all_checked}
+                                                        idx={g_idx}
                                                     />
                                                 </td>
                                             :
@@ -143,6 +165,42 @@ export default class MakeOronZai extends Component {
                         null
                 }
             </div>
+        )
+    }
+}
+
+
+class CheckBoxInput extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            is_checked: false
+        }
+        this.isChecked = this.isChecked.bind(this)
+    }
+
+    isChecked(e) {
+        const { value } = this.props
+        this.setState({ is_checked: e.target.checked })
+        this.props.collectValue(e, value)
+    }
+
+    componentDidUpdate(pP) {
+        if(pP.is_all_checked !== this.props.is_all_checked) {
+            this.setState({ is_checked: this.props.is_all_checked })
+        }
+    }
+
+    render() {
+        const { is_checked } = this.state
+        const { idx } = this.props
+        return (
+            <input id={idx}
+                type="checkbox"
+                checked={is_checked}
+                onChange={(e) => this.isChecked(e)}
+            />
         )
     }
 }
