@@ -740,3 +740,14 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
         display.append(obj)
 
     return display
+
+
+def get_fields(Model):
+    fields = []
+    for field in Model._meta.get_fields():
+        name = field.name
+        if field.get_internal_type() == 'ForeignKey':
+            name = name + '_id'
+        fields.append(name)
+
+    return fields
