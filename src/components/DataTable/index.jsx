@@ -23,7 +23,7 @@ export class PortalDataTable extends Component {
             нэмэлт_талбарууд: props.нэмэлт_талбарууд || [],
             нэмэх_товч: props.нэмэх_товч || '',
             хайлт: props.хайлт || "open",
-            sort_name: '',
+            sort_name: props.sort_name || '',
             color: props.color || "dark"
         }
         this.paginate = this.paginate.bind(this)

@@ -1,6 +1,6 @@
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-from main.utils import get_display_items
+from main.utils import get_display_items, get_fields
 
 
 class Datatable():
@@ -19,16 +19,6 @@ class Datatable():
         self.items_page = None
         self.total_page = None
 
-    def get_fields(self):
-        fields = []
-        for field in self.Model._meta.get_fields():
-            name = field.name
-            if field.get_internal_type() == 'ForeignKey':
-                name = name + '_id'
-            fields.append(name)
-
-        return fields
-
     @property
     def хасах_талбарууд(self):
         return self.хасах_талбарууд
@@ -36,7 +26,7 @@ class Datatable():
     @хасах_талбарууд.setter
     def хасах_талбарууд(self, values):
         if values or not self.оруулах_талбарууд:
-            fields = self.get_fields()
+            fields = get_fields(self.Model)
             for value in values:
                 if value in fields:
                     fields.remove(value)

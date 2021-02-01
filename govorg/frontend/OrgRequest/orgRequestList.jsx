@@ -226,6 +226,7 @@ export default class OrgRequestList extends Component {
                         хувьсах_талбарууд={хувьсах_талбарууд}
                         нэмэлт_талбарууд={нэмэлт_талбарууд}
                         хайлт={'closed'}
+                        sort_name={'-created_at'}
                     />
                 </div>
                 <ModalAlert
