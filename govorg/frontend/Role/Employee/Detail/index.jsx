@@ -34,6 +34,7 @@ export class Detail extends Component {
             role_name: '',
             roles: {},
             is_inspire_role: false,
+            is_inspire_role_null: false,
 
             status_token_refresh: 'initial',
             status_delete: 'initial',
@@ -67,14 +68,24 @@ export class Detail extends Component {
             })
     }
 
-    getRole(id) {
-        if (id) {
+    getRole(role_id) {
+        this.setState({role_id, is_inspire_role: false, is_inspire_role_null: false })
+        if(role_id)
+        {
             service
-            .getRole(id)
+            .getRole(role_id)
             .then(({success, roles}) => {
                 if(success) {
-                    this.setState({ roles, is_inspire_role: true })
+                    this.setState({ roles, is_inspire_role: true, is_inspire_role_null: false })
                 }
+            })
+        }
+        else
+        {
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    this.setState({roles: {}, is_inspire_role_null: true})
+                }, 300);
             })
         }
     }
@@ -110,7 +121,7 @@ export class Detail extends Component {
     render() {
 
         const { id } = this.props.match.params
-        const { prefix, roles, is_inspire_role, perms, role_name} = this.state
+        const { prefix, roles, is_inspire_role, is_inspire_role_null, perms, role_name} = this.state
         const {
             username,
             last_name,
@@ -132,6 +143,7 @@ export class Detail extends Component {
             info_token_refresh,
         } = this.state
 
+        const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
@@ -236,14 +248,15 @@ export class Detail extends Component {
                     </div>
                     <div>
                         {
-                            roles !== {} && is_inspire_role
+                            is_inspire_role || is_inspire_role_null
                             ?
                                 <InsPerms
                                     action_type="viewable"
                                     is_employee={true}
                                     dontDid={true}
-                                    org_roles={roles}
+                                    org_roles={is_inspire_role_null ? org_roles : roles}
                                     emp_perms={perms}
+                                    is_inspire_role_null={is_inspire_role_null}
                                 />
                             : null
                         }

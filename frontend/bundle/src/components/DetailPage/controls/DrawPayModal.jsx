@@ -43,10 +43,10 @@ class ModalComponent extends Component{
 
     handlePayment(){
 
-        this.setState({handlePaymentIsLoad:true})
+        this.setState({ handlePaymentIsLoad: true })
 
         const {description, selected_type, total_price} = this.state
-        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, feature_info_list, layer_list} = this.props
+        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle }, area, feature_info_list, layer_list} = this.props
 
         const values = {
             price: total_price,
@@ -54,20 +54,19 @@ class ModalComponent extends Component{
             coodrinatLeftTop,
             coodrinatRightBottom,
             bundle_id: bundle.id,
-            layer_ids: wms_list.reduce((acc, { layers }) => {
-                return [...acc, ...layers.map((layer) => layer.id)]
-            }, []),
             area: area.output,
             area_type: area.type,
             feature_info_list,
             layer_list,
             selected_type,
         }
-
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
                 window.location.href = `/payment/purchase/polygon/${payment_id}/${selected_type}/`;
             }
+        }).catch((error) => {
+            alert("Алдаа гарсан байна")
+            this.setState({handlePaymentIsLoad: false})
         })
 
     }

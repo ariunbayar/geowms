@@ -78,6 +78,17 @@ def dictionaryResponse(request):
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
+def _get_layer_ids(feature_info_list):
+    layer_ids = list()
+    for geoms in feature_info_list:
+        for key, value in geoms.items():
+            for geom in geoms[key]:
+                layer_id = geom['layer_id']
+                if layer_id not in layer_ids:
+                    layer_ids.append(layer_id)
+    return layer_ids
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -86,7 +97,6 @@ def purchaseDraw(request, payload):
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
-    layer_ids = payload.get('layer_ids')
     bundle_id = payload.get('bundle_id')
     area = payload.get('area')
     area_type = payload.get('area_type')
@@ -95,12 +105,13 @@ def purchaseDraw(request, payload):
     selected_type = payload.get('selected_type')
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
+    layer_ids = _get_layer_ids(feature_info_list)
     layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
 
     layer_prices = {}
     for layer in layers:
         all_len_property = _get_all_property_count(layer_list, feature_info_list)
-        layer_prices[layer.id] = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
+        layer_prices[layer.id] = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
 
     with transaction.atomic():
 
@@ -831,12 +842,13 @@ def _get_all_property_count(layer_list, feature_info_list):
             key = _get_key_and_compare(feature, code)
             if key:
                 for info in feature[key]:
-                    fconfig_count = _lfeature_config_count(info['feature_id'])
-                    count += fconfig_count
+                    if 'feature_id' in info:
+                        fconfig_count = _lfeature_config_count(info['feature_id'])
+                        count += fconfig_count
     return count
 
 
-def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer, selected_type):
+def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, selected_type):
     amount = None
     price = None
     if area_type == 'km':
@@ -844,9 +856,9 @@ def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_
     if area_type == 'm':
         amount = Payment.POLYGON_PER_M_AMOUNT
     if selected_type == 'shp' or selected_type == 'pdf':
-        price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
+        price = ((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * len_object_in_layer
     if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
-        price = ((area * amount) * layer_length) * len_object_in_layer
+        price = (area * amount) * len_object_in_layer
     return price
 
 
@@ -862,7 +874,7 @@ def calcPrice(request, payload):
     area = area['output']
 
     all_len_property = _get_all_property_count(layer_list, feature_info_list)
-    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
+    total_price = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
 
     rsp = {
         'success': True,

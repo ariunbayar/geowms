@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, F, Func
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -298,7 +298,7 @@ def org_add(request, payload, level):
     errors = _org_validation(org_name, org_id)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-
+    # Байгууллага засах хэсэг
     if org_id:
         org = get_object_or_404(Org, pk=org_id)
         org.name = org_name
@@ -332,22 +332,20 @@ def org_add(request, payload, level):
                 GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
                 GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
             return JsonResponse({'success': True})
+    # Байгууллага шинээр үүсгэх
     else:
         gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
+
+        gov_perm = GovPerm.objects.create(
+                org=org,
+                created_by=request.user,
+                updated_by=request.user
+            )
         if org_role_filter:
-            gov_perm = GovPerm.objects.create(
-                org=org,
-                gov_role=org_role_filter,
-                created_by=request.user,
-                updated_by=request.user
-            )
-        else:
-            gov_perm = GovPerm.objects.create(
-                org=org,
-                created_by=request.user,
-                updated_by=request.user
-            )
+            gov_perm.gov_role = org_role_filter
+            gov_perm.save()
+
         if gov_role_inspire_all:
             for gov_role_inspire in gov_role_inspire_all:
                 objs.append(GovPermInspire(
@@ -410,8 +408,8 @@ def org_list(request, payload, level):
     qs = qs.annotate(num_systems=Count('govorg', distinct=True))
 
     if query:
-        qs = qs.annotate(search=SearchVector('name'))
-        qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
+        qs = qs.annotate(search=Func(F('name'), function='LOWER'))
+        qs = qs.filter(search__icontains=query.lower())
     qs = qs.order_by(sort_name)
 
     total_items = Paginator(qs, per_page)
