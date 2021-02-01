@@ -15,7 +15,7 @@ class Datatable():
         self.page = payload.get('page') or 1
         self.sort_name = payload.get('sort_name') or 'pk'
         self.хувьсах_талбарууд = хувьсах_талбарууд
-        self.search_qs = initial_qs or model.objects.all()
+        self.search_qs = initial_qs or model.objects
         self.items_page = None
         self.total_page = None
 

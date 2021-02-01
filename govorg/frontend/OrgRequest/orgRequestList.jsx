@@ -221,10 +221,11 @@ export default class OrgRequestList extends Component {
                         color={'primary'}
                         талбарууд={талбарууд}
                         жагсаалтын_холбоос={жагсаалтын_холбоос}
-                        per_page={100}
+                        per_page={20}
                         уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                         хувьсах_талбарууд={хувьсах_талбарууд}
                         нэмэлт_талбарууд={нэмэлт_талбарууд}
+                        max_data={'open'}
                         хайлт={'closed'}
                         sort_name={'-created_at'}
                     />

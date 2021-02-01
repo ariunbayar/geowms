@@ -24,7 +24,8 @@ export class PortalDataTable extends Component {
             нэмэх_товч: props.нэмэх_товч || '',
             хайлт: props.хайлт || "open",
             sort_name: props.sort_name || '',
-            color: props.color || "dark"
+            color: props.color || "dark",
+            max_data: props.max_data || 'open'
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
@@ -36,7 +37,7 @@ export class PortalDataTable extends Component {
             this.setState({[sort_name]: false, sort_name})
             this.paginate(this.state.current_page, this.state.query, sort_name)
         }else{
-            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
+            this.setState({[sort_name]: true, sort_name: '-' + sort_name})
             this.paginate(this.state.current_page, this.state.query, '-'+sort_name)
         }
     }
@@ -87,51 +88,56 @@ export class PortalDataTable extends Component {
         const { items,current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
-            хайлт, color
+            хайлт, color, max_data
         } = this.state
+        console.log('хайлт', хайлт, 'нэмэх_товч',нэмэх_товч, 'max_data', max_data);
         return (
            <div>
-               {хайлт == "closed" && нэмэх_товч == ''
+               {хайлт == "closed" && нэмэх_товч == '' && max_data == 'closed'
                ?
                null
                :
                 <div className="row">
-                    <div className="col-3">
-                        {хайлт == "open" &&
-                        <div className="float-sm-left search-bar">
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="searchQuery small-input"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                value={this.state.searchQuery}
-                            />
-                            <a><i className="icon-magnifier"></i></a>
+                    {хайлт == "open" &&
+                        <div className="col-3">
+                            <div className="float-sm-left search-bar">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="searchQuery small-input"
+                                    placeholder="Хайх"
+                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                    value={this.state.searchQuery}
+                                />
+                                <a><i className="icon-magnifier"></i></a>
+                            </div>
                         </div>
-                        }
-                    </div>
-                    <div className="col">
-                        <div className="float-sm-right input-group">
-                            <strong className={`mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
-                            <select className="form-control form-control-sm col-2" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                    </div>
-                    {нэмэх_товч &&
-                    <div className="col">
-                        <div className="float-sm-right">
-                            <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2" to={нэмэх_товч}>
-                                Нэмэх
-                            </NavLink>
-                        </div>
-                    </div>
+                    }
+                    {
+                        max_data == 'open' &&
+                            <div className="col">
+                                <div className="float-sm-right input-group">
+                                    <strong className={`mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
+                                    <select className="form-control form-control-sm col-2" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                        <option value="30">30</option>
+                                        <option value="40">40</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                            </div>
+                    }
+                    {
+                        нэмэх_товч &&
+                            <div className="col">
+                                <div className="float-sm-right">
+                                    <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2" to={нэмэх_товч}>
+                                        Нэмэх
+                                    </NavLink>
+                                </div>
+                            </div>
                     }
                 </div>
                 }

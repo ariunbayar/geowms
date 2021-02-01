@@ -363,7 +363,6 @@ def getAll(request, payload):
 
         if qs:
             qs = qs.filter(group_id__isnull=True)
-
             datatable = Datatable(
                 model=ChangeRequest,
                 payload=payload,
