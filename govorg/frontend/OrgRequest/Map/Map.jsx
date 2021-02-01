@@ -19,14 +19,11 @@ export default class RequestMap extends Component {
         this.state = {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
-            form_json: [],
-            show_form: false,
             is_layer_swipe: false,
             last_layer: null,
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
-        this.toggleForm = this.toggleForm.bind(this)
         this.swipeButton = this.swipeButton.bind(this)
         this.layerSwipe = this.layerSwipe.bind(this)
     }
@@ -205,21 +202,18 @@ export default class RequestMap extends Component {
                     });
                     check_update = 1
                     this.map.addLayer(vectorLayerOld)
+                    this.setState({ last_layer: vectorLayerOld })
                   }
               }
-            if (check_update !=0) this.map.getView().fit(features_old[0].getGeometry(),{ padding: [300, 300, 300, 300] })
-            else  this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
+            if (check_update != 0) this.map.getView().fit(features_old[0].getGeometry(),{ padding: [300, 300, 300, 300] })
+            else this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
           }
         })
     }
 
-    toggleForm() {
-      this.setState({ show_form: false })
-    }
-
     layerSwipe(is_active){
       if(is_active){
-        const {last_layer} = this.state
+        const { last_layer } = this.state
         var swipe = document.getElementById('swipe');
         swipe.value = 50
         if(last_layer){
@@ -260,7 +254,7 @@ export default class RequestMap extends Component {
     }
 
     swipeButton() {
-      const {is_layer_swipe} = this.state
+      const { is_layer_swipe } = this.state
       if(is_layer_swipe){
         this.setState({is_layer_swipe: false})
         this.layerSwipe(false)
@@ -271,13 +265,13 @@ export default class RequestMap extends Component {
     }
 
     render() {
-        const {is_layer_swipe} = this.state
+        const { is_layer_swipe } = this.state
         return (
           <div className="container-fluid">
               <div className="row">
                   <div className="col-md-12 px-0 reaquest">
                       <div id="map"></div>
-                      <input className={!is_layer_swipe ? "d-none" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
+                      <input className={!is_layer_swipe ? "invisible" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
                   </div>
               </div>
           </div>

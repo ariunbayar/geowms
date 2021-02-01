@@ -46,7 +46,7 @@ export default class OpenMapModal extends Component {
                     state == "ШИНЭ" || button_name
                     ?
                         <a
-                            className="btn btn-primary btn-sm"
+                            className="btn btn-primary btn-sm text-white"
                             onClick={this.openModalMapMap}
                         >
                             {title}

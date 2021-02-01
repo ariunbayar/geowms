@@ -277,13 +277,19 @@ def _get_theme_code(theme_id, item):
 
 
 def _get_employee_name(employee_id, item):
-    employee = Employee.objects.filter(id=employee_id).first()
-    return employee.user.first_name
+    first_name = None
+    if employee_id:
+        employee = Employee.objects.filter(id=employee_id).first()
+        first_name = employee.user.first_name
+    return first_name
 
 
 def _get_org_name(employee_id, item):
-    employee = Employee.objects.filter(id=employee_id).first()
-    return employee.org.name
+    org_name = None
+    if employee_id:
+        employee = Employee.objects.filter(id=employee_id).first()
+        org_name = employee.org.name
+    return org_name
 
 
 def _get_display_text(field, value):
@@ -359,8 +365,8 @@ def getAll(request, payload):
     if emp_features:
         qs = ChangeRequest.objects
         qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.filter(feature_id__in=emp_features)
         qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
-
         if qs:
             qs = qs.filter(group_id__isnull=True)
             datatable = Datatable(
@@ -386,6 +392,7 @@ def getAll(request, payload):
         rsp = {
                 'success': False,
             }
+
     return JsonResponse(rsp)
 
 

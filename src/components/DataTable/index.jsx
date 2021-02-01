@@ -25,7 +25,8 @@ export class PortalDataTable extends Component {
             хайлт: props.хайлт || "open",
             sort_name: props.sort_name || '',
             color: props.color || "dark",
-            max_data: props.max_data || 'open'
+            max_data: props.max_data || 'open',
+            table_head_color: props.table_head_color || 'white',
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
@@ -88,9 +89,8 @@ export class PortalDataTable extends Component {
         const { items,current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
-            хайлт, color, max_data
+            хайлт, color, max_data, table_head_color
         } = this.state
-        console.log('хайлт', хайлт, 'нэмэх_товч',нэмэх_товч, 'max_data', max_data);
         return (
            <div>
                {хайлт == "closed" && нэмэх_товч == '' && max_data == 'closed'
@@ -146,7 +146,7 @@ export class PortalDataTable extends Component {
                     <div className="col-lg-12">
                         <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
-                                <thead className="bg-primary">
+                                <thead className={`bg-primary text-${table_head_color}`}>
                                     <tr>
                                         <th scope="col" className={`bg-${color}`}>№</th>
                                         {талбарууд.map((item, index) =>

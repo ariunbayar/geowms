@@ -75,7 +75,6 @@ export default class MakeOronZai extends Component {
                                                 <td>
                                                     <input id={g_idx}
                                                         type="checkbox"
-                                                        className="form-check-input"
                                                         onChange={(e) => this.collectValue(e, value)}
                                                     />
                                                 </td>
