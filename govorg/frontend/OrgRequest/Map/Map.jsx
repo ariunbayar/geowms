@@ -19,14 +19,17 @@ export default class RequestMap extends Component {
         this.state = {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
+            form_json: [],
+            show_form: false,
             is_layer_swipe: false,
-            last_layer: null
+            last_layer: null,
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
+        this.toggleForm = this.toggleForm.bind(this)
         this.swipeButton = this.swipeButton.bind(this)
         this.layerSwipe = this.layerSwipe.bind(this)
-      }
+    }
 
     componentDidMount() {
         this.loadMap()
@@ -48,11 +51,15 @@ export default class RequestMap extends Component {
       });
       map.addControl(new SwipeButton(({swipeButton: this.swipeButton})))
       this.map = map
-      const selectSingleClick = new Select();
-      map.addInteraction(selectSingleClick);
-      selectSingleClick.on('select', function (e) {
-        console.log("selected");
+      const selectSingleClick = new Select({
+        hitTolerance: 20
       });
+      map.addInteraction(selectSingleClick);
+      selectSingleClick.on('select', event => this.props.selectedFeature(event))
+
+      if (this.props.values.length == 1) {
+        map.removeInteraction(selectSingleClick)
+      }
     }
 
     loadMapData(){
@@ -157,7 +164,7 @@ export default class RequestMap extends Component {
 
         const { values } = this.props
         var check_update = 0
-        values.map(({geo_json}, idx) => {
+        values.map(({id, geo_json}, idx) => {
           if(geo_json['features'])
           {
             if(geo_json['features'][0]){
@@ -167,6 +174,7 @@ export default class RequestMap extends Component {
                   dataProjection: this.state.dataProjection,
                   featureProjection: this.state.featureProjection,
                 });
+                features_new[0].setProperties({ id })
                 const vectorSourceNew = new VectorSource({
                   features: features_new
                 });
@@ -205,6 +213,10 @@ export default class RequestMap extends Component {
         })
     }
 
+    toggleForm() {
+      this.setState({ show_form: false })
+    }
+
     layerSwipe(is_active){
       if(is_active){
         const {last_layer} = this.state
@@ -240,13 +252,14 @@ export default class RequestMap extends Component {
             false
           );
         }
-      }else{
+      }
+      else {
         var swipe = document.getElementById('swipe');
         swipe.value = 0
       }
     }
 
-    swipeButton(){
+    swipeButton() {
       const {is_layer_swipe} = this.state
       if(is_layer_swipe){
         this.setState({is_layer_swipe: false})
@@ -264,7 +277,7 @@ export default class RequestMap extends Component {
               <div className="row">
                   <div className="col-md-12 px-0 reaquest">
                       <div id="map"></div>
-                      <input className={!is_layer_swipe ? "invisible" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
+                      <input className={!is_layer_swipe ? "d-none" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
                   </div>
               </div>
           </div>
