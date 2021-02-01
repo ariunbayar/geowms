@@ -392,7 +392,8 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                     data = code[value_type]
         else:
             if form['value_type'] == 'date':
-                data = date_to_timezone(data)
+                if data:
+                    data = date_to_timezone(data)
             value_type = 'value_' + form['value_type']
 
         value[value_type] = data
@@ -501,6 +502,7 @@ def request_approve(request, payload):
                     if geo_json:
                         request_datas = {
                             'geo_json': geo_json,
+                            'geo_id': old_geo_id,
                             'approve_type': 'update',
                             'feature_id': feature_id,
                             'form_json': form_json,
@@ -513,20 +515,21 @@ def request_approve(request, payload):
                         geo_data_model = MDatas.objects.filter(geo_id=old_geo_id)
                         geo_data_model.delete()
 
-                refreshMaterializedView(feature_id)
                 r_approve.state = ChangeRequest.STATE_APPROVE
                 r_approve.save()
 
             else:
+                transaction.rollback()
                 rsp = {
                     'success': False,
                     'info': 'Танд баталгаажуулах эрх алга байна.'
                 }
 
         changed = _change_state_main_group(requests_qs)
+        refreshMaterializedView(feature_id)
         rsp = {
             'success': changed,
-            'info': 'Амжилттай баталгаажууллаа'
+            'info': 'Амжилттай баталгаажуулж дууслаа'
         }
 
     return JsonResponse(rsp)

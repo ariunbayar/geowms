@@ -12,7 +12,7 @@ export default class Loader extends Component {
                     <div>
                         <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                         <br/>
-                        Түр хүлээнэ үү...
+                        {this.props.text ? this.props.text : 'Түр хүлээнэ үү...'}
                     </div>
                 </div>
             )

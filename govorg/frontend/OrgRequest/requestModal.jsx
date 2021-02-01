@@ -3,6 +3,7 @@ import RequestMap from './Map/Map'
 
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
+import Loader from "@utils/Loader/index"
 
 export const FormJson = ({form_json}) => {
     return (
@@ -43,7 +44,6 @@ export default class RequestModal extends Component {
             status: "initial",
             is_modal_approve_open: false,
             is_modal_reject_open: false,
-            is_loading: this.props.is_loading,
 
             modal_status: "closed",
             action_type: '',
@@ -84,81 +84,64 @@ export default class RequestModal extends Component {
         let modal_type
         let ids = []
         let feature_id
+        const open_modal = true
         values.map((value, idx) => {
             if (idx == 0) feature_id = value.feature_id
             ids.push(value.id);
         })
+        this.setState({ is_loading: true, modal_status: "closed" })
         if(this.state.action_type == 'reject')
         {
             service
                 .requestReject(ids, feature_id)
                 .then(({ success, info }) => {
-                    this.setState({ status: "closing" })
-                    if(success)
-                    {
-                        setTimeout(() => {
-                            this.setState({ status: "closed" })
-                            modal_type = 'success'
-                            this.props.getAll()
-                        }, 150)
+                    if(success) {
+                        modal_type = 'success'
                     }
                     else {
-                        setTimeout(() => {
-                            this.setState({ status: "closed" })
-                            modal_type = 'warning'
-                        }, 150)
+                        modal_type = 'warning'
                     }
                     modal_info = info
-                    this.props.modalClose()
-
+                    this.setState({ is_loading: false })
+                    this.props.refreshData(open_modal, modal_type, modal_info)
                 })
                 .catch((error) => {
-                    if(error == 'Bad Request')
-                    {
-                        setTimeout(() => {
-                            this.setState({ status: "closed" })
-                            this.props.modalClose()
-                            modal_type = 'danger'
-                            modal_info = 'Алдаа гарлаа. Обьект олдсонгүй'
-                        }, 150)
+                    if(error == 'Bad Request') {
+                        modal_type = 'danger'
+                        modal_info = 'Алдаа гарлаа. Обьект олдсонгүй'
+                        this.setState({ is_loading: false })
                     }
-                })
-            this.props.modalAlertOpen(modal_info, modal_type)
+                }).finally(() => this.setState({ status: 'closed' }))
         }
-        if(this.state.action_type == 'approve')
-        {
-            this.setState({
-                is_loading: true
-            })
+        if(this.state.action_type == 'approve') {
             this.handleRequestApprove(ids, feature_id)
         }
     }
 
     handleRequestApprove(ids, feature_id){
+        const open_modal = true
+        let modal_info
+        let modal_type
         service.requestApprove(ids, feature_id).then(({ success, info }) => {
-            alert(success, info)
-            if(success)
-            {
-                this.setState({ is_loading: false })
-                // this.props.getAll()
-                // this.handleRequestClose()
-                // this.props.modalAlertOpen(info, "success")
+            if(success) {
+                modal_info = info
+                modal_type = 'success'
             }
-            else
-            {
-                this.setState({ is_loading: false })
-                // this.handleRequestClose()
-                // this.props.modalAlertOpen(info, "warning")
+            else {
+                modal_info = info
+                modal_type = 'warning'
             }
+            this.setState({ is_loading: false })
+            this.props.refreshData(open_modal, modal_info, modal_type)
         }).catch((error) => {
             if(error == 'Bad Request')
             {
-                alert("aldaa")
                 this.setState({ is_loading: false })
-                // this.handleRequestClose()
-                // this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
+                modal_info = 'Алдаа гарсан байна'
+                modal_type = 'danger'
+                this.props.refreshData(open_modal, modal_info, modal_type)
             }
-        })
+        }).finally(() => this.setState({ status: 'closed' }))
     }
 
     componentDidMount() {
@@ -313,7 +296,7 @@ export default class RequestModal extends Component {
                                         <i className="fa fa-check">Зөвшөөрөх</i>
                                     </button>
                                 </div>
-                             {is_loading && <span className="text-center modal fade show d-block text-sp" style={{position:"fixed", top:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Хүсэлтийг шалгаж байна түр хүлээнэ үү... </span>}
+                             <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                             </div>
                         </div>
                     </div>

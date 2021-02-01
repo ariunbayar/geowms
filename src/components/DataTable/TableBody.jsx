@@ -50,7 +50,7 @@ export class TableBody extends Component {
                     <td key={idx}>
                         {item.component
                         ?
-                        <item.component values={values}/>
+                        <item.component values={values} {...item.props}/>
                         :
                         <a role="button" onClick={() => item.action(values)}>
                             {
