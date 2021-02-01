@@ -58,7 +58,6 @@ export class App extends Component {
         // menu хэрэглэгчийн эрхээр
         service.getEmpRoles().then(({ success, emp_role }) => {
             if (success) {
-                console.log(emp_role);
                 this.setState({ emp_role })
             }
         })
