@@ -65,7 +65,7 @@ urlpatterns = [
             path('', org_request_views.getAll, name="all"),
             path('change-request/', org_request_views.get_change_all, name="change-request"),
             path('reject/', org_request_views.request_reject, name="reject"),
-            path('<int:pk>/approve/', org_request_views.request_approve, name="approve"),
+            path('approve/', org_request_views.request_approve, name="approve"),
             path('getCount/', org_request_views.get_count, name='getCount'),
             path('search/', org_request_views.search, name='request-search'),
         ], 'org-request'))),

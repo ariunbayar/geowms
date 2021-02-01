@@ -21,12 +21,12 @@ function requestReject(ids, feature_id) {
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
 
-function requestApprove(id, values) {
+function requestApprove(ids, feature_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({values}),
+        body: JSON.stringify({ids, feature_id}),
     }
-    return fetch(`${prefix}/${id}/approve/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/approve/`, requestOptions).then(handleResponse)
 }
 
 function requestSearch(state, kind, theme_id, package_id, feature_id) {
