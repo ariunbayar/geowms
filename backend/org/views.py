@@ -18,8 +18,10 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LThemes
 from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
+from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
+from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee
@@ -257,8 +259,16 @@ def employee_add(request, payload, level, pk):
 def employee_remove(request, pk):
 
     user = get_object_or_404(User, id=pk)
-    Employee.objects.filter(user=user).first().delete()
-    return JsonResponse({'success': True})
+    employee = get_object_or_404(Employee, user=user)
+    emp_perm = get_object_or_404(EmpPerm, employee=employee)
+
+    with transaction.atomic():
+        EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+        emp_perm.delete()
+        employee.delete()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False})
 
 
 def _org_validation(org_name, org_id):
