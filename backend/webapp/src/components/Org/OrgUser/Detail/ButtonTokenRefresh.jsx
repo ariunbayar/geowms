@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react"
 
-import Modal from "../../../Modal"
+import Modal from "@utils/Modal/Modal"
 import ModalAlert from "../../../ModalAlert"
 
 
@@ -34,8 +34,8 @@ export class ButtonTokenRefresh extends Component {
                 <Modal
                     text="Токенийг шинэчилсэнээр уг URL-ээр одоо ашиглаж байгаа газрууд ажиллахгүй болохыг анхаарна уу!"
                     title="Токен шинэчлэх"
-                    model_type_icon="success"
-                    actionName="Шинэчлэх"
+                    model_type_icon="warning"
+                    actionNameDelete="Шинэчлэх"
                     status={ this.state.modal_status_confirm }
                     modalAction={ this.props.onClick }
                 />
