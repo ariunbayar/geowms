@@ -507,7 +507,7 @@ def request_approve(request, payload, pk):
         r_approve.save()
         rsp = {
             'success': success,
-            'info': 'Амжилттай баталгаажууллаа'
+            'info': 'Амжилттай баталгаажуулж дууслаа'
         }
 
     else:
