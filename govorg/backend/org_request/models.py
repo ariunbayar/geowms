@@ -39,7 +39,7 @@ class ChangeRequest(models.Model):
     theme_id = models.IntegerField()
     package_id = models.IntegerField()
     feature_id = models.IntegerField()
-    employee_id = models.IntegerField(null=True)
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name='+', null=True)
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)

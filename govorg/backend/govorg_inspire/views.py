@@ -556,7 +556,6 @@ def create(request, payload):
             theme_id = tid,
             package_id = pid,
             feature_id = fid,
-            employee_id = employee.id,
             org = org,
             state = ChangeRequest.STATE_NEW,
             kind = ChangeRequest.KIND_CREATE,
