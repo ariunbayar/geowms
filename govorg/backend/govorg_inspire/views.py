@@ -27,7 +27,7 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
@@ -541,6 +541,8 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -554,7 +556,8 @@ def create(request, payload):
             theme_id = tid,
             package_id = pid,
             feature_id = fid,
-            employee = employee,
+            employee_id = employee.id,
+            org = org,
             state = ChangeRequest.STATE_NEW,
             kind = ChangeRequest.KIND_CREATE,
             form_json = form_json,
