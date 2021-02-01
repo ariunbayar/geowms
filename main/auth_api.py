@@ -1,13 +1,11 @@
-from datetime import timedelta
 from os import urandom
 from urllib.parse import urlencode
 import base64
 import json
 import requests
 
-from django.utils import timezone
 from django.conf import settings
-
+from .utils import get_config
 
 class GeoAuth():
 
@@ -32,15 +30,15 @@ class GeoAuth():
 
         self.scope = base64.b64encode(json.dumps(payload).encode()).decode()
 
-        base_uri = settings.SSO_GOV_MN['ENDPOINTS']['AUTHORIZE']
+        base_uri = get_config('AUTHORIZE')
 
         if not base_uri.endswith('?'):
             base_uri += '?'
 
         params = {
                 'response_type': 'code',
-                'client_id': settings.SSO_GOV_MN['CLIENT_ID'],
-                'redirect_uri': settings.SSO_GOV_MN['CALLBACK_URI'],
+                'client_id': get_config('CLIENT_ID'),
+                'redirect_uri': get_config('CALLBACK_URI'),
                 'scope': self.scope,
                 'state': state,
             }
@@ -63,16 +61,16 @@ class GeoAuth():
             'User-Agent': 'nsdi.gov.mn/oauth2 1.0'
         }
 
-        base_uri = settings.SSO_GOV_MN['ENDPOINTS']['TOKEN']
+        base_uri = get_config('TOKEN')
         if not base_uri.endswith('?'):
             base_uri += '?'
 
         params = {
                 'grant_type': 'authorization_code',
                 'code': self.request.GET.get('code'),
-                'client_id': settings.SSO_GOV_MN['CLIENT_ID'],
-                'client_secret': base64.b64encode(settings.SSO_GOV_MN['CLIENT_SECRET'].encode()),
-                'redirect_uri': settings.SSO_GOV_MN['CALLBACK_URI'],
+                'client_id': get_config('CLIENT_ID'),
+                'client_secret': base64.b64encode(get_config('CLIENT_SECRET').encode()),
+                'redirect_uri': get_config('CALLBACK_URI'),
             }
 
         rsp = requests.post(base_uri,  data=params, headers=self.BASE_HEADERS)
@@ -88,7 +86,7 @@ class GeoAuth():
             'User-Agent': 'nsdi.gov.mn/oauth2 1.0'
         }
 
-        base_uri = settings.SSO_GOV_MN['ENDPOINTS']['SERVICE']
+        base_uri = get_config('SERVICE')
 
         headers = {
                 **self.BASE_HEADERS,
