@@ -673,6 +673,12 @@ def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
 
+def date_to_timezone(input_date):
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
+    output_date = timezone.make_aware(naive_time)
+    return output_date
+
+
 def get_display_items(items, fields, хувьсах_талбарууд=[]):
     display = list()
     for item in items.values():
