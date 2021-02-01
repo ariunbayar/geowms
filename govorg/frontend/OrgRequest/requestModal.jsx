@@ -129,7 +129,7 @@ export default class RequestModal extends Component {
             this.setState({
                 is_loading: true
             })
-            this.props.modalAction()
+            this.props.modalAction(ids, feature_id)
         }
     }
 

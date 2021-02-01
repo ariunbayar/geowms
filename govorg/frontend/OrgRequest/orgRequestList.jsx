@@ -12,10 +12,22 @@ class OpenMapModal extends Component {
         super(props)
         this.state = {
             is_modal_request_open: false,
-            title: props.button_name || 'Шийдвэрлэх'
+            title: props.button_name || 'Шийдвэрлэх',
+            values: props.values,
+            state: props.values.state,
         }
         this.openModalMapMap = this.openModalMapMap.bind(this)
         this.closeModalMap = this.closeModalMap.bind(this)
+        this.handleRequestApprove = this.handleRequestApprove.bind(this)
+    }
+
+    componentDidMount() {
+        const { values } = this.state
+        const { group } = values
+        if (group) {
+            this.values = group
+            this.setState({ title: 'Олноор шийдвэрлэх' })
+        }
     }
 
     openModalMapMap() {
@@ -26,19 +38,44 @@ class OpenMapModal extends Component {
         this.setState({ is_modal_request_open: false })
     }
 
+    handleRequestApprove(values){
+        const {id} = values
+        service.requestApprove(id, values).then(({ success, info })=>{
+            if(success)
+            {
+                this.setState({ is_loading: false })
+                this.props.getAll()
+                this.handleRequestClose()
+                this.props.modalAlertOpen(info, "success")
+            }
+            else
+            {
+                this.setState({ is_loading: false })
+                this.handleRequestClose()
+                this.props.modalAlertOpen(info, "warning")
+            }
+        }).catch((error) => {
+            if(error == 'Bad Request')
+            {
+                this.setState({ is_loading: false })
+                this.handleRequestClose()
+                this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
+            }
+        })
+    }
+
     render() {
-        const { is_modal_request_open, title } = this.state
-        const { values, button_name } = this.props
-        const { state, geo_json } = values
-        if (!button_name) {
+        const { is_modal_request_open, title, values, state } = this.state
+        const { button_name } = this.props
+        if (!button_name && !this.values) {
             this.values = [values]
-        } else {
+        } else if (button_name && !this.values) {
             this.values = values
         }
         return (
             <div>
                 {
-                    state == "ШИНЭ" && geo_json || button_name
+                    state == "ШИНЭ" || button_name
                     ?
                         <a
                             className="btn btn-primary btn-sm"
@@ -52,7 +89,7 @@ class OpenMapModal extends Component {
                 {is_modal_request_open &&
                     <RequestModal
                         modalClose={this.closeModalMap}
-                        modalAction={() => this.handleRequestApprove(id)}
+                        modalAction={() => this.handleRequestApprove()}
                         modalAlertOpen={this.modalAlertOpen}
                         title={title}
                         button_name={button_name}
@@ -106,7 +143,6 @@ class MakeOronZai extends Component {
     render() {
         const { show_group, fields, values, collection_of_value } = this.state
         const { group, theme_name, package_name, feature_name } = values
-        console.log(this.props);
         return (
             <div>
                 <span className={group ? "btn " : ''} onClick={this.showGroup}>
@@ -133,7 +169,7 @@ class MakeOronZai extends Component {
                                 {group.map((value, g_idx) =>
                                     <tr key={g_idx} htmlFor={g_idx}>
                                         {
-                                            value.state != 'Зөвшөөрсөн' || value.state != 'Устгасан'
+                                            value.state === 'ШИНЭ' || value.state === 'ХЯНАХ'
                                             ?
                                                 <td>
                                                     <input id={g_idx}
@@ -143,7 +179,7 @@ class MakeOronZai extends Component {
                                                     />
                                                 </td>
                                             :
-                                                null
+                                                <td></td>
                                         }
                                         <th>{g_idx + 1}</th>
                                         {fields.map((field, idx) =>
@@ -191,7 +227,7 @@ class MakeOronZai extends Component {
                         null
                 }
                 {
-                    collection_of_value.length > 0
+                    collection_of_value.length > 1
                     ?
                         <OpenMapModal values={collection_of_value} button_name={'Олноор шийдвэрлэх'}/>
                     :
@@ -234,7 +270,7 @@ export default class OrgRequestList extends Component {
             жагсаалтын_холбоос: '/gov/api/org-request/',
             хувьсах_талбарууд: [
                 {"field": "org", "component": make_org_employee},
-                {"field": "theme_name", "component": MakeOronZai, 'props': {'approve': this.handleRequestApprove}},
+                {"field": "theme_name", "component": MakeOronZai},
                 {"field": "state", "action": (values) => this.make_state_color(values) , "action_type": true},
                 {"field": "kind", "action": (values) => this.make_kind_color(values), "action_type": true},
             ],
@@ -295,32 +331,6 @@ export default class OrgRequestList extends Component {
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
         }, 2000)
-    }
-
-    handleRequestApprove(id){
-        const values = this.state.values
-        service.requestApprove(id, values).then(({ success, info })=>{
-            if(success)
-            {
-                this.setState({ is_loading: false })
-                this.props.getAll()
-                this.handleRequestClose()
-                this.props.modalAlertOpen(info, "success")
-            }
-            else
-            {
-                this.setState({ is_loading: false })
-                this.handleRequestClose()
-                this.props.modalAlertOpen(info, "warning")
-            }
-        }).catch((error) => {
-            if(error == 'Bad Request')
-            {
-                this.setState({ is_loading: false })
-                this.handleRequestClose()
-                this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
-            }
-        })
     }
 
     getAll(){
