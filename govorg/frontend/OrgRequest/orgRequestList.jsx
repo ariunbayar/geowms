@@ -18,7 +18,6 @@ class OpenMapModal extends Component {
         }
         this.openModalMapMap = this.openModalMapMap.bind(this)
         this.closeModalMap = this.closeModalMap.bind(this)
-        this.handleRequestApprove = this.handleRequestApprove.bind(this)
     }
 
     componentDidMount() {
@@ -36,32 +35,6 @@ class OpenMapModal extends Component {
 
     closeModalMap() {
         this.setState({ is_modal_request_open: false })
-    }
-
-    handleRequestApprove(values){
-        const {id} = values
-        service.requestApprove(id, values).then(({ success, info })=>{
-            if(success)
-            {
-                this.setState({ is_loading: false })
-                this.props.getAll()
-                this.handleRequestClose()
-                this.props.modalAlertOpen(info, "success")
-            }
-            else
-            {
-                this.setState({ is_loading: false })
-                this.handleRequestClose()
-                this.props.modalAlertOpen(info, "warning")
-            }
-        }).catch((error) => {
-            if(error == 'Bad Request')
-            {
-                this.setState({ is_loading: false })
-                this.handleRequestClose()
-                this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
-            }
-        })
     }
 
     render() {
@@ -323,7 +296,7 @@ export default class OrgRequestList extends Component {
     }
 
     modalAlertClose(){
-        this.setState({modal_alert_status: "closed"})
+        this.setState({ modal_alert_status: "closed" })
         clearTimeout(this.state.timer)
     }
 

@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
-from django.db import connections
+from django.db import connections, transaction
 
 from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
@@ -26,6 +26,7 @@ from main.utils import (
     dict_fetchall,
     refreshMaterializedView,
     ModelFilter,
+    date_to_timezone,
 )
 
 
@@ -349,35 +350,6 @@ def _get_ids(fid, pid):
     return rows
 
 
-def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
-    for i in form_json:
-        value = dict()
-        data = i['data'] or None
-        code_list_value_types = ['option', 'single-select', 'boolean']
-        if i['value_type'] in code_list_value_types:
-            value_type = 'code_list_id'
-            for code in i['data_list']:
-                if data == code[value_type]:
-                    data = code[value_type]
-        else:
-            value_type = 'value_' + i['value_type']
-
-        value[value_type] = data
-
-        if approve_type == 'create':
-            ids = _get_ids(feature_id, i['property_id'])
-            value['geo_id'] = geo_id
-            value['feature_config_id'] = ids[0]['feature_config_id']
-            value['data_type_id'] = ids[0]['data_type_id']
-            value['property_id'] = i['property_id']
-            MDatas.objects.create(**value)
-
-        elif approve_type == 'update':
-            MDatas.objects.filter(pk=i['pk']).update(**value)
-
-    return True
-
-
 def _geojson_to_geom(geo_json):
     geom = []
     geo_json = str(geo_json).replace("\'", "\"")
@@ -396,13 +368,6 @@ def _geojson_to_geom(geo_json):
     return geom
 
 
-def _has_data_in_geo_datas(old_geo_id, feature_id):
-    m_geo_datas = MGeoDatas.objects
-    m_geo_datas = m_geo_datas.filter(geo_id=old_geo_id)
-    m_geo_datas = m_geo_datas.filter(feature_id=feature_id)
-    return m_geo_datas
-
-
 def _get_emp_features(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
@@ -414,106 +379,154 @@ def _get_emp_features(employee):
     return emp_feature
 
 
+def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
+    form_json = json.loads(form_json)
+    for form in form_json:
+        value = dict()
+        data = form['data'] if form['data'] else None
+        code_list_value_types = ['option', 'single-select', 'boolean']
+        if form['value_type'] in code_list_value_types:
+            value_type = 'code_list_id'
+            for code in form['data_list']:
+                if data == code[value_type]:
+                    data = code[value_type]
+        else:
+            if form['value_type'] == 'date':
+                data = date_to_timezone(data)
+            value_type = 'value_' + form['value_type']
+
+        value[value_type] = data
+
+        if approve_type == 'create':
+            ids = _get_ids(feature_id, form['property_id'])
+            value['geo_id'] = geo_id
+            value['feature_config_id'] = ids[0]['feature_config_id']
+            value['data_type_id'] = ids[0]['data_type_id']
+            value['property_id'] = form['property_id']
+            MDatas.objects.create(**value)
+
+        elif approve_type == 'update':
+            MDatas.objects.filter(pk=form['pk']).update(**value)
+
+    return True
+
+
+def _request_to_m(request_datas):
+    geom = _geojson_to_geom(request_datas['geo_json'])
+
+    success = _create_mdatas_object(
+        request_datas['form_json'], request_datas['feature_id'],
+        request_datas['geo_id'], request_datas['approve_type']
+    )
+
+    if request_datas['approve_type'] == 'create':
+        if geom:
+            MGeoDatas.objects.create(
+                geo_id=request_datas['geo_id'],
+                feature_id=request_datas['feature_id'],
+                geo_data=geom
+            )
+
+    elif request_datas['approve_type'] == 'update':
+        request_datas['m_geo_datas_qs'].update(geo_data=geom)
+
+    return success
+
+
+def _has_data_in_geo_datas(old_geo_id, feature_id):
+    qs = MGeoDatas.objects
+    qs = qs.filter(geo_id=old_geo_id)
+    qs = qs.filter(feature_id=feature_id)
+    return qs
+
+
+def _change_state_main_group(initial_qs):
+    group_id = initial_qs.first().group_id
+    group_qs = ChangeRequest.objects
+    group_qs = group_qs.filter(pk=group_id)
+    group_qs.update(state=ChangeRequest.STATE_APPROVE)
+    return True
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def request_approve(request, payload, pk):
+def request_approve(request, payload):
 
     employee = get_object_or_404(Employee, user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
-    r_approve = get_object_or_404(ChangeRequest, pk=pk)
-    values = payload.get("values")
-    feature_id = values['feature_id']
-    theme_code = values["theme_code"]
+    request_ids = payload.get("ids")
+    feature_id = payload.get("feature_id")
     success = False
+    new_geo_id = None
+
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
+    requests_qs = ChangeRequest.objects
+    requests_qs = requests_qs.filter(id__in=request_ids)
 
-    perm_approve = EmpPermInspire.objects.filter(
-        emp_perm_id=emp_perm.id,
-        feature_id=feature_id,
-        perm_kind=EmpPermInspire.PERM_APPROVE
-    )
+    with transaction.atomic():
+        for r_approve in requests_qs:
+            feature_id = r_approve.feature_id
+            perm_approve = EmpPermInspire.objects.filter(
+                emp_perm=emp_perm,
+                feature_id=feature_id,
+                perm_kind=EmpPermInspire.PERM_APPROVE
+            )
 
-    def _request_to_m(
-            geo_json, theme_code, feature_id,
-            form_json, approve_type, m_geo_datas,
-            geo_id=None):
-        geom = _geojson_to_geom(geo_json)
+            if perm_approve:
+                old_geo_id = r_approve.old_geo_id
+                geo_json = r_approve.geo_json
+                form_json = r_approve.form_json
 
-        success = _create_mdatas_object(
-            form_json, feature_id,
-            geo_id, approve_type
-        )
+                m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
 
-        if approve_type == 'create':
-            if geom:
-                MGeoDatas.objects.create(
-                    geo_id=geo_id,
-                    feature_id=feature_id,
-                    geo_data=geom
-                )
+                if r_approve.kind == ChangeRequest.KIND_CREATE:
+                    request_datas = dict()
+                    if old_geo_id and not m_geo_datas_qs:
+                        request_datas['geo_id'] = old_geo_id
+                    else:
+                        new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
+                        request_datas['geo_id'] = new_geo_id
 
-        elif approve_type == 'update':
-            m_geo_datas.update(geo_data=geom)
+                    request_datas['geo_json'] = geo_json
+                    request_datas['approve_type'] = 'create'
+                    request_datas['feature_id'] = feature_id
+                    request_datas['form_json'] = form_json
+                    request_datas['m_geo_datas_qs'] = m_geo_datas_qs
+                    success = _request_to_m(request_datas)
+                    if success and new_geo_id:
+                        r_approve.new_geo_id = new_geo_id
 
-        return success
+                if r_approve.kind == ChangeRequest.KIND_UPDATE:
+                    if geo_json:
+                        request_datas = {
+                            'geo_json': geo_json,
+                            'approve_type': 'update',
+                            'feature_id': feature_id,
+                            'form_json': form_json,
+                            'm_geo_datas_qs': m_geo_datas_qs
+                        }
+                        success = _request_to_m(request_datas)
 
-    if perm_approve:
-        old_geo_id = values['old_geo_id']
-        old_geo_json = values["old_geo_json"]
-        new_geo_json = r_approve.geo_json
-        form_json = values['form_json']
+                    else:
+                        m_geo_datas_qs.delete()
+                        geo_data_model = MDatas.objects.filter(geo_id=old_geo_id)
+                        geo_data_model.delete()
 
-        m_geo_datas = _has_data_in_geo_datas(old_geo_id, feature_id)
-
-        if r_approve.kind == ChangeRequest.KIND_CREATE:
-            if old_geo_id and not m_geo_datas:
-                approve_type = 'create'
-                success = _request_to_m(
-                    new_geo_json, theme_code,
-                    feature_id, form_json,
-                    approve_type, m_geo_datas,
-                    old_geo_id,
-                )
-            else:
-                new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
-                approve_type = 'create'
-                success = _request_to_m(
-                    new_geo_json, theme_code,
-                    feature_id, form_json,
-                    approve_type, m_geo_datas,
-                    new_geo_id,
-                )
-
-                if success:
-                    r_approve.new_geo_id = new_geo_id
-
-        if r_approve.kind == ChangeRequest.KIND_UPDATE:
-            if old_geo_json:
-                approve_type = 'update'
-                success = _request_to_m(
-                    new_geo_json, theme_code,
-                    feature_id, form_json,
-                    approve_type, m_geo_datas,
-                )
+                refreshMaterializedView(feature_id)
+                r_approve.state = ChangeRequest.STATE_APPROVE
+                r_approve.save()
 
             else:
-                m_geo_datas.delete()
-                geo_data_model = MDatas.objects.filter(geo_id=old_geo_id)
-                geo_data_model.delete()
+                rsp = {
+                    'success': False,
+                    'info': 'Танд баталгаажуулах эрх алга байна.'
+                }
 
-        refreshMaterializedView(feature_id)
-        r_approve.state = ChangeRequest.STATE_APPROVE
-        r_approve.save()
+        changed = _change_state_main_group(requests_qs)
         rsp = {
-            'success': success,
-            'info': 'Амжилттай баталгаажуулж дууслаа'
-        }
-
-    else:
-        rsp = {
-            'success': False,
-            'info': 'Таньд баталгаажуулах эрх алга байна.'
+            'success': changed,
+            'info': 'Амжилттай баталгаажууллаа'
         }
 
     return JsonResponse(rsp)

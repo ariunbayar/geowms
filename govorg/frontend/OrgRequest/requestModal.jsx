@@ -59,6 +59,7 @@ export default class RequestModal extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalAction = this.handleModalAction.bind(this)
         this.selectedFeature = this.selectedFeature.bind(this)
+        this.handleRequestApprove = this.handleRequestApprove.bind(this)
     }
 
     handleModalClose(){
@@ -129,8 +130,35 @@ export default class RequestModal extends Component {
             this.setState({
                 is_loading: true
             })
-            this.props.modalAction(ids, feature_id)
+            this.handleRequestApprove(ids, feature_id)
         }
+    }
+
+    handleRequestApprove(ids, feature_id){
+        service.requestApprove(ids, feature_id).then(({ success, info }) => {
+            alert(success, info)
+            if(success)
+            {
+                this.setState({ is_loading: false })
+                // this.props.getAll()
+                // this.handleRequestClose()
+                // this.props.modalAlertOpen(info, "success")
+            }
+            else
+            {
+                this.setState({ is_loading: false })
+                // this.handleRequestClose()
+                // this.props.modalAlertOpen(info, "warning")
+            }
+        }).catch((error) => {
+            if(error == 'Bad Request')
+            {
+                alert("aldaa")
+                this.setState({ is_loading: false })
+                // this.handleRequestClose()
+                // this.props.modalAlertOpen("Алдаа гарлаа. Обьект олдсонгүй.", "danger")
+            }
+        })
     }
 
     componentDidMount() {
