@@ -29,16 +29,21 @@ export default class Маягт extends Component {
     onSubmit(values, { setStatus, setSubmitting }) {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list, cancel_button_active } = this.props
             if(null_form_isload){
-                service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
-                    if (success) {
-                        this.setState({is_loading: true})
-                        this.props.requestRefreshCount()
-                        this.addNotif('success', info, 'check')
-                    }
-                    else {
-                        this.addNotif('danger', info, 'warning')
-                    }
-                })
+                if (this.state.geojson != {}) {
+                    service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
+                        if (success) {
+                            this.setState({is_loading: true})
+                            this.props.requestRefreshCount()
+                            this.addNotif('success', info, 'check')
+                        }
+                        else {
+                            this.addNotif('danger', info, 'warning')
+                        }
+                    })
+                }
+                else {
+                    this.addNotif('danger', 'Зурагдсан геом өгөгдөл байхгүй байна', 'warning')
+                }
             }
             else if (modifyend_selected_feature_check || update_geom_from_list) {
                 this.props.SaveBtn(values)
@@ -88,7 +93,6 @@ export default class Маягт extends Component {
         if(pP.togle_islaod !== this.props.togle_islaod)
         {
             const {gid, tid, pid, fid, geojson} = this.props
-
             this.setState({geojson, tid, pid, fid})
             if(!this.props.togle_islaod)
             {
@@ -118,12 +122,6 @@ export default class Маягт extends Component {
                     this.setState({is_loading:true})
                 }
             }
-        }
-        if(pP.null_form_isload !== this.props.null_form_isload)
-        {
-            this.props.SaveBtn()
-            this.handleCreate()
-            this.setState({is_loading:true})
         }
     }
 
@@ -221,7 +219,7 @@ export default class Маягт extends Component {
                                             <div className="col-md-9">
                                                 {friend.value_type_id == 'boolean' ?
                                                 <Field
-                                                    name={`form_values.${index}.data`|| ""}
+                                                    name={`form_values.${index}.data` || ""}
                                                     as="select"
                                                     className='form-control'
                                                     disabled={
@@ -240,7 +238,7 @@ export default class Маягт extends Component {
                                                 </Field>
                                                 :
                                                 <Field
-                                                    name={`form_values.${index}.data`  || ""}
+                                                    name={`form_values.${index}.data` || ""}
                                                     className='form-control'
                                                     disabled={
                                                         modifyend_selected_feature_check ||

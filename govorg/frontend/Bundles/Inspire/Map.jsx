@@ -158,6 +158,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.getTypeFunction = this.getTypeFunction.bind(this)
       this.handleMapClick = this.handleMapClick.bind(this)
       this.showFeaturesAt = this.showFeaturesAt.bind(this)
+      this.resetDrawed = this.resetDrawed.bind(this)
+      this.removeDrawedFeature = this.removeDrawedFeature.bind(this)
     }
 
     componentDidMount(){
@@ -563,12 +565,16 @@ export default class BarilgaSuurinGazar extends Component{
           overlay.setPosition(coordinate)
         })
       } else {
-        const features = this.vector.getSource().getFeatures();
-        if(features.length > 0)
-        {
-            const lastFeature = features[features.length - 1];
-            this.vector.getSource().removeFeature(lastFeature);
-        }
+        this.removeDrawedFeature()
+      }
+    }
+
+    removeDrawedFeature() {
+      const features = this.vector.getSource().getFeatures();
+      if(features.length > 0)
+      {
+          const lastFeature = features[features.length - 1];
+          this.vector.getSource().removeFeature(lastFeature);
       }
     }
 
@@ -852,6 +858,11 @@ export default class BarilgaSuurinGazar extends Component{
       })
     }
 
+    resetDrawed() {
+      this.removeDrawedFeature()
+      this.setState({ is_loading: false, geojson: {}, togle_islaod: true})
+    }
+
     SaveBtn(form_values) {
       this.hideMetaList()
       const {modifyend_selected_feature_ID, modifyend_selected_feature_check, update_geom_from_list, build_name } = this.state
@@ -874,7 +885,7 @@ export default class BarilgaSuurinGazar extends Component{
           }
       }
       else{
-        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, "warning", "Үгүй")
+        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, "warning", "Үгүй", this.resetDrawed)
         else this.addNotif('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
       }
     }
