@@ -36,12 +36,12 @@ export default class OrgRequestList extends Component {
         super(props)
         this.state = {
             org_request: [],
-            search_state: null,
-            search_kind: null,
+            state: null,
+            kind: null,
             search_geom: null,
-            search_theme: null,
-            search_package: null,
-            search_feature: null,
+            theme_id: null,
+            package_id: null,
+            feature_id: null,
             is_loading: false,
             modal_alert_status: "closed",
             title: '',
@@ -77,6 +77,7 @@ export default class OrgRequestList extends Component {
                 },
             }],
             is_modal_request_open: false,
+            custom_query: {}
         }
 
         this.modalAlertOpen = this.modalAlertOpen.bind(this)
@@ -85,6 +86,7 @@ export default class OrgRequestList extends Component {
         this.openModalMap = this.openModalMap.bind(this)
         this.refreshData = this.refreshData.bind(this)
         this.onChangeItems = this.onChangeItems.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
 
     }
 
@@ -133,25 +135,66 @@ export default class OrgRequestList extends Component {
     }
 
     onChangeItems(value, field, main_module) {
-        console.log(field, value, main_module);
+        let module_value
+        let for_search
+        let remove_ids = Object()
         this.state[main_module].map((module, idx) => {
             if (module.id == value) {
-                this.setState({ [field]: module[field]})
+                module_value = module[field]
             }
         })
+        if (main_module == 'modules') {
+            for_search = 'theme_id'
+            remove_ids['package_id'] = null
+            remove_ids['feature_id'] = null
+        }
+        else if (main_module == 'packages') {
+            for_search = 'package_id'
+            remove_ids['feature_id'] = null
+        }
+        this.setState({ [field]: module_value, [for_search]: value, ...remove_ids })
+    }
+
+    handleSearch() {
+        const { state, kind, theme_id, package_id, feature_id } = this.state
+        let custom_query = Object()
+        if (state) custom_query['state'] = state
+        if (kind) custom_query['kind'] = kind
+        if (theme_id) custom_query['theme_id'] = theme_id
+        if (package_id) custom_query['package_id'] = package_id
+        if (feature_id) custom_query['feature_id'] = feature_id
+
+        let remove_query = Object()
+        if (!('theme_id' in custom_query)){
+            if ('package_id' in custom_query) {
+                delete custom_query['package_id']
+                remove_query['package_id'] = null
+            }
+            if ('feature_id' in custom_query) {
+                delete custom_query['feature_id']
+                remove_query['feature_id'] = null
+            }
+        }
+
+        if (!('package_id' in custom_query)){
+            if ('feature_id' in custom_query) {
+                delete custom_query['feature_id']
+                remove_query['feature_id'] = null
+            }
+        }
+        this.setState({ custom_query, ...remove_query })
     }
 
     render() {
         const {choices, packages, features, title, model_type_icon, modal_alert_status, modules} = this.state
         const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
-        console.log(packages, features);
         return (
             <div className="row">
                 <div className="col-md-12 row">
                     <div className="col-md-6">
                         <label htmlFor="">Төлөв</label>
                         <select className="form-control form-control-sm"
-                            onChange={(e) => this.setState({ search_state: e.target.value })}>
+                            onChange={(e) => this.setState({ state: e.target.value })}>
                             <option value="">--- Төлөвөөр хайх ---</option>
                             {
                                 choices && choices.length > 0
@@ -167,7 +210,7 @@ export default class OrgRequestList extends Component {
                     <div className="col-md-6">
                         <label htmlFor="">Өөрчлөлт</label>
                         <select className="form-control form-control-sm"
-                            onChange={(e) => this.setState({ search_kind: e.target.value })}
+                            onChange={(e) => this.setState({ kind: e.target.value })}
                         >
                             <option value="">--- Өөрчлөлтөөр хайх ---</option>
                             {
@@ -219,7 +262,7 @@ export default class OrgRequestList extends Component {
                             </div>
                             <div className="col-md-4">
                                 <select className="form-control form-control-sm"
-                                    onChange={(e) => this.setState({ search_feature: e.target.value })}
+                                    onChange={(e) => this.setState({ feature_id: e.target.value })}
                                 >
                                 <option value="">--- Давхаргаас хайх ---</option>
                                 {
@@ -250,6 +293,7 @@ export default class OrgRequestList extends Component {
                         max_data={'open'}
                         хайлт={'closed'}
                         sort_name={'-created_at'}
+                        custom_query={this.state.custom_query}
                     />
                 </div>
                 <ModalAlert

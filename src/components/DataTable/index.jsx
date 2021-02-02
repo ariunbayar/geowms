@@ -43,12 +43,12 @@ export class PortalDataTable extends Component {
         }
     }
 
-    paginate (page, query, sort_name) {
+    paginate (page, query, sort_name, custom_query) {
         const { жагсаалтын_холбоос } = this.state
         const perpage = this.state.per_page
         this.setState({ current_page: page, уншиж_байгаа_эсэх: true })
         return service
-            .list(жагсаалтын_холбоос, page, perpage, query, sort_name)
+            .list(жагсаалтын_холбоос, page, perpage, query, sort_name, custom_query)
             .then(page => {
                 this.setState({ items: page.items, items_length: page.items.length, уншиж_байгаа_эсэх: false })
                 return page
@@ -75,6 +75,9 @@ export class PortalDataTable extends Component {
         }
         if(ps.per_page !== this.state.per_page){
             this.paginate(current_page, query, sort_name)
+        }
+        if(pp.custom_query !== this.props.custom_query){
+            this.paginate(1, query, sort_name, this.props.custom_query)
         }
     }
 

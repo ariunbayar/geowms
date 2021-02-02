@@ -25,7 +25,6 @@ from django.contrib.auth.decorators import login_required
 from main.utils import (
     dict_fetchall,
     refreshMaterializedView,
-    ModelFilter,
     date_to_timezone,
     get_display_items,
     get_fields,
@@ -367,13 +366,12 @@ def _хувьсах_талбарууд():
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def getAll(request, payload):
+def get_list(request, payload):
 
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
-        qs = qs.filter(feature_id__in=emp_features)
         qs = qs.filter(feature_id__in=emp_features)
         qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
         if qs:
@@ -697,22 +695,3 @@ def get_count(request):
     }
 
     return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def search(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
-    emp_features = _get_emp_features(employee)
-
-    initial_qs = ChangeRequest.objects.filter(feature_id__in=emp_features)
-    datas = ModelFilter(initial_qs, payload, ChangeRequest).filter()
-    data_list = [_get_org_request(data, employee) for data in datas]
-
-    rsp = {
-        'success': True,
-        'org_request': data_list
-    }
-    return JsonResponse(rsp)
-
