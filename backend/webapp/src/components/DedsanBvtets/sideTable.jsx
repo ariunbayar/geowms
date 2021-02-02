@@ -69,7 +69,7 @@ export default class SideBar extends Component {
                             {list_all.map((theme, idx) =>
                                 theme.package.map((packages, idx) =>
                                     packages.features.map((feature, idx) =>
-                                        this.state.feature_ids.indexOf(feature.id) < 0 &&
+                                        this.state.feature_ids.indexOf(feature.id) < 0 && feature_id != feature.id &&
                                         <div
                                             className="row list-card"
                                             onClick={() => this.setOverlapsFeatures(feature_id , feature.id, "create")}
@@ -94,7 +94,7 @@ export default class SideBar extends Component {
                             {list_all.map((theme, idx) =>
                                 theme.package.map((packages, idx) =>
                                     packages.features.map((feature, idx) => (
-                                        this.state.feature_ids.indexOf(feature.id) > -1 &&
+                                        this.state.feature_ids.indexOf(feature.id) > -1 && feature_id != feature.id &&
                                         <div
                                             className="row list-card"
                                             onClick={() => this.setOverlapsFeatures(feature_id , feature.id, "remove")}

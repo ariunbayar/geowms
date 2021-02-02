@@ -620,6 +620,7 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
             info = "Байгууллагын эрх олгогдоогүй байна."
         overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
         overlap_feature_id = [i for i in overlap_feature_id]
+        overlap_feature_id.append(fid)
         is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id)
         if is_contains:
             success = False
