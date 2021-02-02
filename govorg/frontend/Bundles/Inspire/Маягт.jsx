@@ -145,7 +145,7 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        const { modifyend_selected_feature_check, update_geom_from_list, cancel_button_active } = this.props
+        const { modifyend_selected_feature_check, update_geom_from_list, cancel_button_active, null_form_isload, is_selected_feature } = this.props
 
         if (this.state.is_loading) {
             return (
@@ -189,12 +189,25 @@ export default class Маягт extends Component {
                                 values.form_values.map((friend, index) => (
                                     <div key={index} className="row my-3 ">
                                         <div className="col-md-3">
-                                            <label className="col-form-label">{friend.property_code ? friend.property_code : ''}</label>
+                                            <label className="col-form-label">{friend.property_name ? friend.property_name : ''}</label>
                                         </div>
                                         {friend.value_type == 'option' ?
                                             <div className="col-md-9">
                                                 <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""} as="select" className="form-control" disabled={modifyend_selected_feature_check || update_geom_from_list ? false : true}>
+                                                    <Field name={`form_values.${index}.data` || ""}
+                                                        as="select"
+                                                        className="form-control"
+                                                        disabled={
+                                                            modifyend_selected_feature_check ||
+                                                            update_geom_from_list ||
+                                                            null_form_isload ||
+                                                            is_selected_feature
+                                                            ?
+                                                                false
+                                                            :
+                                                                true
+                                                        }
+                                                    >
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
                                                             <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
@@ -208,10 +221,19 @@ export default class Маягт extends Component {
                                             <div className="col-md-9">
                                                 {friend.value_type_id == 'boolean' ?
                                                 <Field
-                                                name={`form_values.${index}.data`|| ""}
-                                                as="select"
-                                                className='form-control'
-                                                disabled={modifyend_selected_feature_check || update_geom_from_list ? false : true}
+                                                    name={`form_values.${index}.data`|| ""}
+                                                    as="select"
+                                                    className='form-control'
+                                                    disabled={
+                                                        modifyend_selected_feature_check ||
+                                                        update_geom_from_list  ||
+                                                        null_form_isload ||
+                                                        is_selected_feature
+                                                        ?
+                                                            false
+                                                        :
+                                                            true
+                                                    }
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -220,10 +242,19 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data`  || ""}
                                                     className='form-control'
-                                                    disabled={modifyend_selected_feature_check || update_geom_from_list ? false : true}
+                                                    disabled={
+                                                        modifyend_selected_feature_check ||
+                                                        update_geom_from_list ||
+                                                        null_form_isload ||
+                                                        is_selected_feature
+                                                        ?
+                                                            false
+                                                        :
+                                                            true
+                                                    }
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
-                                                    />
+                                                />
                                                 }
                                                 <small>{friend.property_definition ? friend.property_definition : ''}</small>
                                             </div>

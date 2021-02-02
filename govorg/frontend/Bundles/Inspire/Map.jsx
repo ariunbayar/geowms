@@ -72,7 +72,7 @@ export default class BarilgaSuurinGazar extends Component{
           selectedFeature_ID: null,
           modifyend_selected_feature_ID: null,
           modifyend_selected_feature_check: false,
-          send: false,
+          is_selected_feature: false,
           changedFeature: '',
           Mongolia: [11461613.630815497, 5878656.0228370065],
           chkbox: true,
@@ -378,7 +378,7 @@ export default class BarilgaSuurinGazar extends Component{
                         {
                           this.state.vector_layer.setSource(source)
                         }
-                        this.setState({selectedFeature_ID: value})
+                        this.setState({selectedFeature_ID: value, is_selected_feature: true})
                       }
                     })
                   })
@@ -437,7 +437,7 @@ export default class BarilgaSuurinGazar extends Component{
           const featureID_list = this.state.featureID_list
           if (this.state.modify_button_active) this.DrawButton()
           const selectedFeature_ID = this.state.selectedFeature_ID
-          this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
+          this.setState({ is_selected_feature: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
           if(this.state.cancel_button_active){
@@ -452,7 +452,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       else
       {
-        this.setState({ send: false })
+        this.setState({ is_selected_feature: false })
       }
     }
 
@@ -1367,6 +1367,7 @@ export default class BarilgaSuurinGazar extends Component{
                           gid={this.state.selectedFeature_ID}
                           togle_islaod={this.state.togle_islaod}
                           null_form_isload={this.state.null_form_isload}
+                          is_selected_feature={this.state.is_selected_feature}
                           addNotif={this.addNotif}
                           SaveBtn={this.SaveBtn}
                           requestRefreshCount={this.props.refreshCount}

@@ -329,7 +329,7 @@ def _geojson_to_featurecollection(geo_json, item):
             old_geo_data = _get_geoJson(old_geo_data)
             geo_json_list.append(old_geo_data)
 
-    elif geo_json and item['old_geo_id']:
+    elif geo_json and not item['old_geo_id']:
         geo_json = _get_geoJson(geo_json)
         geo_json_list.append(geo_json)
 
